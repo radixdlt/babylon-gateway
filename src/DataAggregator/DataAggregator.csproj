@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <!-- NB - Shared PropertyGroup contents live in Directory.Build.props -->
+    <PropertyGroup>
+        <UserSecretsId>dotnet-DataAggregator-1AA9F285-3EA1-43F8-959F-FF4F82A85351</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <!-- NB - PackageReference versions are overridden centrally in Directory.Packages.props -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Shared\Shared.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- NB - Shared PropertyGroup contents live in Directory.Build.props -->
+    <PropertyGroup>
+    </PropertyGroup>
+
+    <!-- NB - PackageReference versions are overridden centrally in Directory.Package.props -->
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    </ItemGroup>
+
+</Project>

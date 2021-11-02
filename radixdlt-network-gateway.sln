@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "src\DataAggregator", "src\DataAggregator\DataAggregator.csproj", "{66911552-ED43-4EEB-BD8E-CFE30552248B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "src\Shared", "src\Shared\Shared.csproj", "{FC26063F-82F1-4FB0-A338-2953FED731B8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66911552-ED43-4EEB-BD8E-CFE30552248B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66911552-ED43-4EEB-BD8E-CFE30552248B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66911552-ED43-4EEB-BD8E-CFE30552248B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66911552-ED43-4EEB-BD8E-CFE30552248B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

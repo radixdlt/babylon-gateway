@@ -1,0 +1,8 @@
+<Project>
+  <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0-rc.2.21480.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0-rc.2.21480.5" />
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.354" />
+  </ItemGroup>
+</Project>

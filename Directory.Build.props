@@ -1,0 +1,18 @@
+<Project>
+    <!-- See https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019 -->
+    <!-- The below settings get inserted into each child csproj -->
+
+    <PropertyGroup Condition="$(MSBuildProjectExtension) == '.csproj'">
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+
+    <ItemGroup Condition="$(MSBuildProjectExtension) == '.csproj'">
+        <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
+    </ItemGroup>
+
+</Project>
