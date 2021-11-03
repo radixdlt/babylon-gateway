@@ -10,14 +10,14 @@ namespace DataAggregator.Workers;
 public class RootWorker : BackgroundService
 {
     private readonly ILogger<RootWorker> _logger;
-    private readonly NodeWorkerService _nodeWorkerService;
+    private readonly NodeWorkerRunnerService _nodeWorkerRunnerService;
     private readonly AggregatorConfiguration _configuration;
 
-    public RootWorker(ILogger<RootWorker> logger, AggregatorConfiguration configuration, NodeWorkerService nodeWorkerService)
+    public RootWorker(ILogger<RootWorker> logger, AggregatorConfiguration configuration, NodeWorkerRunnerService nodeWorkerRunnerService)
     {
         _logger = logger;
         _configuration = configuration;
-        _nodeWorkerService = nodeWorkerService;
+        _nodeWorkerRunnerService = nodeWorkerRunnerService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,7 +33,7 @@ public class RootWorker : BackgroundService
         }
 
         _logger.LogInformation("Received cancellation at: {Time} - instructing all node workers to stop", DateTimeOffset.Now);
-        await _nodeWorkerService.StopAllWorkers(stoppingToken);
+        await _nodeWorkerRunnerService.StopAllWorkers(stoppingToken);
     }
 
     private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
@@ -42,7 +42,7 @@ public class RootWorker : BackgroundService
 
         await Task.WhenAll(
             UpdateNodeConfigurationInDatabaseIfNeeded(),
-            _nodeWorkerService.EnsureCorrectNodeServicesRunning(nodeConfiguration, stoppingToken)
+            _nodeWorkerRunnerService.EnsureCorrectNodeServicesRunning(nodeConfiguration, stoppingToken)
         );
     }
 

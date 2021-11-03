@@ -3,14 +3,13 @@ using DataAggregator.Workers.Factory;
 
 namespace DataAggregator.Services;
 
-// ReSharper disable once ClassNeverInstantiated.Global
-public class NodeWorkerService
+public class NodeWorkerRunnerService
 {
     private readonly NodeWorkerFactory _nodeWorkerFactory;
     private readonly Dictionary<string, NodeWorkers> _servicesMap = new();
     private readonly object _servicesMapLock = new();
 
-    public NodeWorkerService(NodeWorkerFactory nodeWorkerFactory)
+    public NodeWorkerRunnerService(NodeWorkerFactory nodeWorkerFactory)
     {
         _nodeWorkerFactory = nodeWorkerFactory;
     }
