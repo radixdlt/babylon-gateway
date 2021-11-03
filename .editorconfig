@@ -247,10 +247,11 @@ dotnet_diagnostic.CS0618.severity = suggestion
 # [StyleCop.Analyzers]
 
 # > New for this project
-dotnet_diagnostic.SA1600.severity = suggestion # SA1600ElementsMustBeDocumented - Let's make it a suggestion
+dotnet_diagnostic.SA1600.severity = none # SA1600ElementsMustBeDocumented - Duplicates CS1591 - let's just use CS1591 instead
 dotnet_diagnostic.SA1200.severity = none # SA1200UsingDirectivesMustBePlacedCorrectly - Don't care about this now that there are flattened namespaces
 dotnet_diagnostic.SA1111.severity = none # SA1111ClosingParenthesisMustBeOnLineOfLastParameter - I prefer symmetric bracket placement as they're easier to parse in blocks
 dotnet_diagnostic.SA1009.severity = none # SA1009ClosingParenthesisMustBeSpacedCorrectly - Goes hand-in-hand with SA1111
+dotnet_diagnostic.SA1117.severity = none # SA1117ParametersMustBeOnSameLineOrSeparateLines - Structured log messages benefit from being across 2 lines - one for message, one for parameters
 
 # > Inherited from other projects
 dotnet_diagnostic.SA0001.severity = none # SA0001XmlCommentAnalysisDisabled
@@ -262,3 +263,6 @@ dotnet_diagnostic.SA1633.severity = none
 
 dotnet_diagnostic.SX1101.severity = warning
 dotnet_diagnostic.SX1309.severity = warning
+
+# Resharper - see https://www.jetbrains.com/help/rider/EditorConfig_Index.html
+

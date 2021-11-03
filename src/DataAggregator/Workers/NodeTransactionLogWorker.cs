@@ -4,7 +4,7 @@ using Shared.Utilities;
 namespace DataAggregator.Workers;
 
 /// <summary>
-/// Responsible for syncing the transaction stream from a node
+/// Responsible for syncing the transaction stream from a node.
 /// </summary>
 public class NodeTransactionLogWorker : BackgroundService
 {
@@ -20,17 +20,28 @@ public class NodeTransactionLogWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var loopLogLimiter = new LogLimiter(TimeSpan.FromSeconds(10), LogLevel.Information, LogLevel.Debug);
-        _logger.Log(loopLogLimiter.GetLogLevel(), "Node {node}: Starting at: {time}", _nodeAppSettings.GetNodeNiceName(), DateTimeOffset.Now);
+        _logger.Log(
+            loopLogLimiter.GetLogLevel(),
+            "{NodeName} ({NodeAddress}) - Starting at: {Time}",
+            _nodeAppSettings.Name, _nodeAppSettings.Address, DateTimeOffset.Now
+        );
+
         while (!stoppingToken.IsCancellationRequested)
         {
+            var minDelayBetweenLoops = Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             _logger.Log(
                 loopLogLimiter.GetLogLevel(),
-                "Node {node}: still running at {time}",
-                _nodeAppSettings.GetNodeNiceName(),
-                DateTimeOffset.Now
+                "{NodeName} ({NodeAddress}) - still running at {Time}",
+                _nodeAppSettings.Name, _nodeAppSettings.Address, DateTimeOffset.Now
             );
-            await Task.Delay(1000, stoppingToken);
+
+            // Do something
+            await minDelayBetweenLoops;
         }
-        _logger.LogInformation("Node {node}: Stopping at: {time}", _nodeAppSettings.GetNodeNiceName(), DateTimeOffset.Now);
+
+        _logger.LogInformation(
+            "{NodeName} ({NodeAddress}) - Stopping at: {Time}",
+            _nodeAppSettings.Name, _nodeAppSettings.Address, DateTimeOffset.Now
+        );
     }
 }

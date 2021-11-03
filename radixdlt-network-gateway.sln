@@ -19,4 +19,8 @@ Global
 		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(RiderSharedRunConfigurations) = postSolution
+		File = .idea-run-configurations\DataAggregator.run.xml
+		File = .idea-run-configurations\Postgres.run.xml
+	EndGlobalSection
 EndGlobal

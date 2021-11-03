@@ -7,6 +7,9 @@
     <!-- NB - PackageReference versions are overridden centrally in Directory.Package.props -->
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational"  />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     </ItemGroup>
 
 </Project>

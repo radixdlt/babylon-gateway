@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  db:
+    # See https://hub.docker.com/_/postgres for details about configuration
+    image: "postgres:14-alpine"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.postgresdata:/var/lib/postgresql/data
+    # Should match with the appsettings.Development.json file/s
+    environment:
+      - POSTGRES_USER=db_dev_superuser
+      - POSTGRES_PASSWORD=db_dev_password
+      - POSTGRES_DB=radixdlt_ledger
