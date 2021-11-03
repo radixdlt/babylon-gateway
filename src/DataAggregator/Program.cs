@@ -9,7 +9,7 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
         services.AddSingleton<AggregatorConfiguration>();
-        services.AddSingleton<NodeWorkerService>();
+        services.AddSingleton<NodeWorkerRunnerService>();
         services.AddSingleton<NodeWorkerFactory>();
         services.AddHostedService<RootWorker>();
 
