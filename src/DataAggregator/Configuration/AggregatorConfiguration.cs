@@ -3,7 +3,12 @@ using DataAggregator.Exceptions;
 
 namespace DataAggregator.Configuration;
 
-public class AggregatorConfiguration
+public interface IAggregatorConfiguration
+{
+    List<NodeAppSettings> GetNodes();
+}
+
+public class AggregatorConfiguration : IAggregatorConfiguration
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<AggregatorConfiguration> _logger;

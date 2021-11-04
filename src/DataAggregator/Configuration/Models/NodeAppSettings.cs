@@ -5,22 +5,25 @@ namespace DataAggregator.Configuration.Models;
 public record NodeAppSettings
 {
     /// <summary>
-    /// A unique name identifying this node - used as the node's id
+    /// A unique name identifying this node - used as the node's id.
     /// </summary>
     [ConfigurationKeyName("name")]
-    public string Name { get; set; } = "";
+    public string Name { get; set; } = string.Empty;
+
     /// <summary>
-    /// Domain Name or IP Address
+    /// Domain Name or IP Address.
     /// </summary>
     [ConfigurationKeyName("address")]
-    public string Address { get; set; } = "";
+    public string Address { get; set; } = string.Empty;
+
     /// <summary>
-    /// Relative weighting of the node
+    /// Relative weighting of the node.
     /// </summary>
     [ConfigurationKeyName("trust_weighting")]
     public decimal TrustWeighting { get; set; } = 1;
+
     /// <summary>
-    /// If false, the node should not be used for indexing
+    /// If false, the node should not be used for indexing.
     /// </summary>
     [ConfigurationKeyName("enabled_for_indexing")]
     public bool EnabledForIndexing { get; set; } = false;
@@ -36,10 +39,5 @@ public record NodeAppSettings
         {
             throw new InvalidConfigurationException("A node's address cannot be empty");
         }
-    }
-
-    public string GetNodeNiceName()
-    {
-        return $"{Name} ({Address})";
     }
 }
