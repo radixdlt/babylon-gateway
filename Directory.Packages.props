@@ -1,14 +1,32 @@
 <Project>
   <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0-rc.2.21480.5" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0-rc.2.21480.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.0-rc.2.21480.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0-rc.2.21480.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0-rc.2.21480.5" />
-    <PackageVersion Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.354" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
-    <PackageVersion Include="RadixNodeApi.GeneratedApiClient" Version="0.2.0" />
+    <!-- PRODUCTION DEPENDENCIES -->
+   
+      <!-- PUBLIC NUGET: Microsoft -->
+      <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0-rc.2.21480.5" />
+      <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0-rc.2.21480.5" />
+      <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.0-rc.2.21480.5" />
+      <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0-rc.2.21480.5" />
+      <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0-rc.2.21480.5" />
+
+      <!-- PUBLIC NUGET: Non-Microsoft -->
+      <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
+      <PackageVersion Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
+
+      <!-- Generated / Local -->
+      <PackageVersion Include="RadixNodeApi.GeneratedApiClient" Version="0.2.0" />
+      
+    <!-- NON-PRODUCTION DEPENDENCIES -->
+
+      <!-- PUBLIC NUGET: Microsoft -->
+      <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+      <PackageVersion Include="xunit" Version="2.4.1" />
+      <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.3" />
+      <PackageVersion Include="coverlet.collector" Version="3.1.0" />
+
+      <!-- PUBLIC NUGET: Non-Microsoft -->
+      <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.354" />
+
   </ItemGroup>
 </Project>

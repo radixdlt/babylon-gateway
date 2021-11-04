@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAggregator", "src\DataA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "src\Common\Common.csproj", "{FC26063F-82F1-4FB0-A338-2953FED731B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "src\Tests\Tests.csproj", "{61B3A18D-9987-4E05-9ABE-44C8E1119D98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +20,10 @@ Global
 		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC26063F-82F1-4FB0-A338-2953FED731B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61B3A18D-9987-4E05-9ABE-44C8E1119D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61B3A18D-9987-4E05-9ABE-44C8E1119D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61B3A18D-9987-4E05-9ABE-44C8E1119D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61B3A18D-9987-4E05-9ABE-44C8E1119D98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = .idea-run-configurations\DataAggregator.run.xml

@@ -6,24 +6,37 @@
 
 ## Running in development
 
+You can change the configuration in `src/DataAggregator/appsettings.Development.json`. By default, it is set up to point at the localhost from the first docker node of [radixdlt](https://github.com/radixdlt/radixdlt).
+
 ### If in Rider
 
-* Run the `Postgres` task, then the `DataAggregator` task in parallel
+Run the following tasks in parallel:
+
+* `Postgres`
+* `DataAggregator`
 
 ### From the command line
 
-Before running the system, boot-up postgres with:
+All the commands should be run from the repo root.
+
+Run the following in separate terminals:
+
 ```bash
+# Spin up Postgres first
 docker-compose up
 ```
 
-You can then run the codebase in a new terminal:
-
 ```bash
-cd src/DataAggregator
-dotnet run
+# Run the DataAggregator
+dotnet run --project src/DataAggregator
 ```
 
-## Before pushing
+## Testing
 
-Run `dotnet format` to fix whitespace and other formatting issues.
+We use xUnit: https://xunit.net/docs/comparisons
+
+Run `dotnet test` from the repo root.
+
+## Reformatting
+
+Run `dotnet format` to fix whitespace and other formatting issues across all files. Most IDEs should run this on any file you edit, so this might be needed.
