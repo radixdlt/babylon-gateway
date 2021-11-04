@@ -28,11 +28,11 @@ public static class DefaultKernel
     private static void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
     {
         #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
-        services.AddDbContext<SharedDbContext>(options =>
+        services.AddDbContext<CommonDbContext>(options =>
             options
                 // https://www.npgsql.org/efcore/index.html
                 .UseNpgsql(
-                    hostContext.Configuration.GetConnectionString("SharedDbContext"),
+                    hostContext.Configuration.GetConnectionString("CommonDbContext"),
                     b => b.MigrationsAssembly("DataAggregator")
                 )
                 // Whilst we should be explicit about table names, in case we forget any, we use this tool recommended by npgsql

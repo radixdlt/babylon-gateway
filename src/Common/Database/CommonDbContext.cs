@@ -4,9 +4,9 @@ using Shared.Database.Models;
 namespace Shared.Database;
 
 /// <summary>
-/// Shared DB Context for the radixdlt-network-gateway database.
+/// Common DB Context for the radixdlt-network-gateway database.
 /// </summary>
-public class SharedDbContext : DbContext
+public class CommonDbContext : DbContext
 {
 #pragma warning disable CS1591 // Remove need for public docs - instead refer to the Model docs
 
@@ -14,7 +14,7 @@ public class SharedDbContext : DbContext
 
 #pragma warning restore CS1591
 
-    public SharedDbContext(DbContextOptions<SharedDbContext> options)
+    public CommonDbContext(DbContextOptions<CommonDbContext> options)
         : base(options)
     {
     }
