@@ -7,20 +7,21 @@ namespace DataAggregator.GlobalWorkers;
 /// </summary>
 public abstract class LoopedWorkerBase : BackgroundService
 {
-    private readonly LogLimiter _logLimiter;
     private readonly ILogger _logger;
+    private readonly LogLimiter _stillRunningLogLimiter;
     private readonly TimeSpan _minDelayBetweenLoops;
 
+    // ReSharper disable once ContextualLoggerProblem
     public LoopedWorkerBase(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenInfoLogs)
     {
         _logger = logger;
         _minDelayBetweenLoops = minDelayBetweenLoops;
-        _logLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
+        _stillRunningLogLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.Log(_logLimiter.GetLogLevel(), "Starting at: {Time}", DateTimeOffset.Now);
+        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTimeOffset.Now);
         var finished = false;
 
         while (!stoppingToken.IsCancellationRequested && !finished)
@@ -54,7 +55,7 @@ public abstract class LoopedWorkerBase : BackgroundService
     private async Task ExecuteLoopIteration(CancellationToken stoppingToken)
     {
         var minDelayBetweenLoops = Task.Delay(_minDelayBetweenLoops, stoppingToken);
-        _logger.Log(_logLimiter.GetLogLevel(),  "Still running at {Time}", DateTimeOffset.Now);
+        _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", DateTimeOffset.Now);
         await DoWork(stoppingToken);
         await minDelayBetweenLoops;
     }
