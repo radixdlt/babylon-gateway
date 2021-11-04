@@ -1,0 +1,420 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Transactions",
+        "license": {
+            "name": "MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "localhost:3333"
+        }
+    ],
+    "paths": {
+        "/transactions": {
+            "post": {
+                "summary": "Retrieve Committed Transactions",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/CommittedTransactionsRequest" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "List of Committed Transactions",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/CommittedTransactionsResponse" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CommittedTransactionsRequest": {
+                "type": "object",
+                "required": [ "stateVersion" ],
+                "properties": {
+                    "stateVersion": { "$ref": "#/components/schemas/LongNumber" },
+                    "limit": { "$ref": "#/components/schemas/LongNumber" }
+                },
+                "example": {
+                    "stateVersion": 1,
+                    "limit": 1
+                }
+            },
+            "CommittedTransactionsResponse": {
+                "type": "object",
+                "required": [ "transactions" ],
+                "properties": {
+                    "transactions": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/CommittedTransaction" }                        
+                    }
+                }
+            },
+            "CommittedTransaction": {
+                "type": "object",
+                "required": [
+                    "committedStateIdentifier",
+                    "previousCommittedStateIdentifier",
+                    "transactionIdentifier",
+                    "operationGroups",
+                    "metadata"
+                ],
+                "properties": {
+                    "committedStateIdentifier": { "$ref": "#/components/schemas/CommittedStateIdentifier" },
+                    "previousCommittedStateIdentifier": { "$ref": "#/components/schemas/CommittedStateIdentifier" },
+                    "transactionIdentifier": { "$ref": "#/components/schemas/TransactionIdentifier" },
+                    "operationGroups": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/OperationGroup" }
+                    },                
+                    "metadata": { "$ref": "#/components/schemas/CommittedTransactionMetadata" }
+                }
+            },
+            "CommittedStateIdentifier": {
+                "type": "object",
+                "required": [ "stateVersion", "transactionAccumulator" ],
+                "properties": {
+                    "stateVersion": { "$ref": "#/components/schemas/LongNumber" },
+                    "transactionAccumulator": { "type": "string" }
+                }
+            },
+            "CommittedTransactionMetadata": {
+                "type": "object",
+                "required": [ "size", "hex", "fee", "timestamp" ],
+                "properties": {
+                    "size": { "type": "integer" },
+                    "hex": { "type": "string" },
+                    "fee": { "$ref": "#/components/schemas/BigInteger" },
+                    "timestamp": { "$ref": "#/components/schemas/LongNumber" }
+                }
+            },
+            "OperationGroup": {
+                "type": "object",
+                "required": [ "operations" ],
+                "properties": {
+                    "operations": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Operation" }
+                    },
+                    "metadata": { "type": "object" }
+                }
+            },
+            "Operation": {
+                "type": "object",
+                "required": [ "type", "addressIdentifier", "substate" ],
+                "properties": {
+                    "type": { "type": "string" },
+                    "addressIdentifier": { "$ref": "#/components/schemas/AddressIdentifier" },
+                    "substate": { "$ref": "#/components/schemas/Substate" },
+                    "amount": { "$ref": "#/components/schemas/ResourceAmount" },
+                    "data": { "$ref": "#/components/schemas/Data" }
+                }
+            },
+            "Substate": {
+                "type": "object",
+                "required": [ "identifier", "op" ],
+                "properties": {
+                    "identifier": { "type": "string" },
+                    "op": {
+                        "type": "string",
+                        "enum": [ "BOOTUP", "SHUTDOWN" ]
+                    }
+                }
+            },
+            "AddressIdentifier": {
+                "type": "object",
+                "required": [ "address" ],
+                "properties": {
+                    "address": { "type": "string" },
+                    "subAddress": { "$ref": "#/components/schemas/SubAddress" }
+                }
+            },
+            "SubAddress": {
+                "type": "object",
+                "required": [ "address" ],
+                "properties": {
+                    "address": { "type": "string" },
+                    "metadata": { "$ref": "#/components/schemas/SubAddressMetadata" }
+                }
+            },
+            "SubAddressMetadata": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" }
+                }
+            },
+            "ResourceAmount": {
+                "type": "object",
+                "required": [ "value", "resource" ],
+                "properties": {
+                    "value": { "$ref": "#/components/schemas/BigInteger" },
+                    "resource": { "$ref": "#/components/schemas/ResourceIdentifier" }
+                }
+            },
+            "Data": {
+                "type": "object",
+                "required": [ "action", "object" ],
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": [ "create", "delete" ]
+                    },
+                    "object": { "$ref": "#/components/schemas/DataObject" }
+                }
+            },
+            "DataObject": {
+                "type": "object",
+                "required": [ "type" ],
+                "properties": {
+                    "type": { "type": "string" }
+                },
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "token_data": "#/components/schemas/TokenData",
+                        "token_metadata": "#/components/schemas/TokenMetadata",
+                        "epoch_data": "#/components/schemas/EpochData",
+                        "round_data": "#/components/schemas/RoundData",
+                        "prepared_validator_registered": "#/components/schemas/PreparedValidatorRegistered",
+                        "prepared_validator_owner": "#/components/schemas/PreparedValidatorOwner",
+                        "prepared_validator_fee": "#/components/schemas/PreparedValidatorFee",
+                        "validator_metadata": "#/components/schemas/ValidatorMetadata",
+                        "validator_bft_data": "#/components/schemas/ValidatorBFTData",
+                        "validator_allow_delegation": "#/components/schemas/ValidatorAllowDelegation",
+                        "validator_data": "#/components/schemas/ValidatorData",
+                        "validator_system_metadata": "#/components/schemas/ValidatorSystemMetadata"
+                    }
+                }
+            },
+            "TokenData": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "granularity", "isMutable" ],
+                        "properties": {
+                            "granularity": { "$ref": "#/components/schemas/BigInteger" },
+                            "isMutable": { "type": "boolean" },
+                            "owner": { "$ref": "#/components/schemas/AccountAddress" }
+                        }
+                    }
+                ]                
+            },
+            "TokenMetadata": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "granularity", "isMutable" ],
+                        "properties": {
+                            "symbol": { "type": "string" },
+                            "name": { "type": "string" },
+                            "description": { "type": "string" },
+                            "url": { "type": "string" },
+                            "iconUrl": { "type": "string" }
+                        }
+                    }
+                ]                
+            },
+            "EpochData": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "epoch" ],
+                        "properties": {
+                            "epoch": { "$ref": "#/components/schemas/LongNumber" }
+                        }
+                    }
+                ]
+            },
+            "RoundData": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "round" ],
+                        "properties": {
+                            "round": { "$ref": "#/components/schemas/LongNumber" }
+                        }
+                    }
+                ]                
+            },
+            "PreparedValidatorRegistered": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "registered" ],
+                        "properties": {
+                            "registered": { "type": "boolean" }
+                        }
+                    }
+                ]                
+            },
+            "PreparedValidatorOwner": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "owner" ],
+                        "properties": {
+                            "owner": { "$ref": "#/components/schemas/AccountAddress" }
+                        }
+                    }
+                ]                
+            },
+            "PreparedValidatorFee": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "fee" ],
+                        "properties": {
+                            "fee": { "type": "integer" }
+                        }
+                    }
+                ]                
+            },
+            "ValidatorMetadata": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "name", "url" ],
+                        "properties": {
+                            "name": { "type": "string" },
+                            "url": { "type": "string" }
+                        }
+                    }
+                ]                
+            },
+            "ValidatorBFTData": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "proposalsCompleted", "proposalsMissed" ],
+                        "properties": {
+                            "proposalsCompleted": { "$ref": "#/components/schemas/LongNumber" },
+                            "proposalsMissed": { "$ref": "#/components/schemas/LongNumber" }
+                        }
+                    }
+                ]                
+            },
+            "ValidatorAllowDelegation": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "allowDelegation" ],
+                        "properties": {
+                            "allowDelegation": { "type": "boolean" }
+                        }
+                    }
+                ]                
+            },
+            "ValidatorData": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "owner", "registered", "fee" ],
+                        "properties": {
+                            "owner": { "$ref": "#/components/schemas/AccountAddress" },
+                            "registered": { "type": "boolean" },
+                            "fee": { "type": "integer" }
+                        }
+                    }
+                ]                
+            },
+            "ValidatorSystemMetadata": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/DataObject" },
+                    {
+                        "type": "object",
+                        "required": [ "data"],
+                        "properties": {
+                            "data": { "type": "string" }
+                        }
+                    }
+                ]                
+            },
+            "ResourceIdentifier": {
+                "type": "object",
+                "required": [ "type" ],
+                "properties": {
+                    "type": { "type": "string" }
+                },
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "token": "#/components/schemas/TokenResourceIdentifier",
+                        "stake_ownership": "#/components/schemas/StakeOwnershipResourceIdentifier"
+                    }
+                }
+            },
+            "TokenResourceIdentifier": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/ResourceIdentifier" },
+                    {
+                        "type": "object",
+                        "required": [ "rri" ],
+                        "properties": {
+                            "rri": { "$ref": "#/components/schemas/RRI" }
+                        }
+                    }
+                ]                
+            },
+            "StakeOwnershipResourceIdentifier": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/ResourceIdentifier" },
+                    {
+                        "type": "object",
+                        "required": [ "validator" ],
+                        "properties": {
+                            "validator": { "$ref": "#/components/schemas/ValidatorAddress" }
+                        }
+                    }
+                ]
+            },
+            "AccountAddress": {
+                "type": "string",
+                "pattern": "^(r|t|d)dx[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
+            },
+            "ValidatorAddress": {
+                "type": "string",
+                "pattern": "^(r|t|d)v[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
+            },
+            "RRI": {
+                "type": "string",
+                "pattern": "^[!\\\"#$%&'()*+,-.\\/0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\[\\\\\\]\\^_`abcdefghijklmnopqrstuvwxyz{|}~]{1,83}_r[rb]1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$"
+            },
+            "LongNumber": {
+                "type": "integer",
+                "format": "int64"
+            },
+            "BigInteger": {
+                "type": "string",
+                "pattern": "^-?[0-9]+$"
+            },
+            "TransactionIdentifier": {
+                "type": "string",
+                "pattern": "^[0123456789abcdef]{64}$",
+                "maxLength": 64,
+                "minLength": 64
+            }
+        }
+    }
+}

@@ -9,6 +9,6 @@
     <PackageVersion Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.354" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
-    <PackageVersion Include="RadixNodeApi.GeneratedApiClient" Version="1.0.0" />
+    <PackageVersion Include="RadixNodeApi.GeneratedApiClient" Version="0.2.0" />
   </ItemGroup>
 </Project>
