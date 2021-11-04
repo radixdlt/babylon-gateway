@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace DataAggregator.Tests;
+namespace Tests;
 
 public class UnitTest1
 {
