@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shared.Database.Models;
+using Shared.Numerics;
 
 namespace Shared.Database;
 
@@ -17,5 +19,21 @@ public class CommonDbContext : DbContext
     public CommonDbContext(DbContextOptions<CommonDbContext> options)
         : base(options)
     {
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        var tokenAmountConverter = new ValueConverter<TokenAmount, string>(
+            v => v.ToPostgresDecimal(),
+            v => TokenAmount.FromStringOrNaN(v)
+        );
+
+        modelBuilder
+            .Entity<LedgerTransaction>()
+            .HasCheckConstraint(
+                "CK_CompleteStateVersionHistory",
+                "state_version = 1 OR state_version = parent_state_version + 1"
+            )
+            .Property(lt => lt.FeePaid).HasConversion(tokenAmountConverter);
     }
 }
