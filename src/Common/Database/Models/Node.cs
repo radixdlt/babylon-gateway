@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Shared.Database.Models;
+namespace Common.Database.Models;
 
 /// <summary>
 /// A Node definition that the DataAggregator knows (or knew) about.

@@ -1,9 +1,9 @@
+using Common.Database.Models;
+using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Shared.Database.Models;
-using Shared.Numerics;
 
-namespace Shared.Database;
+namespace Common.Database;
 
 /// <summary>
 /// Common DB Context for the radixdlt-network-gateway database.

@@ -1,4 +1,4 @@
-using Shared.Utilities;
+using Common.Utilities;
 
 namespace DataAggregator.GlobalWorkers;
 

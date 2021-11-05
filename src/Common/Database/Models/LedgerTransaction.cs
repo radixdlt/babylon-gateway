@@ -1,9 +1,9 @@
+using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
-using Shared.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Shared.Database.Models;
+namespace Common.Database.Models;
 
 /// <summary>
 /// A transaction committed onto the radix ledger.

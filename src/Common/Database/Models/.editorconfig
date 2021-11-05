@@ -15,3 +15,4 @@ resharper_auto_property_can_be_made_get_only_global_highlighting = none
 
 # Remove documentation hints
 dotnet_diagnostic.CS1591.severity = none # Missing XML comment for publicly visible type or member 'Type_or_Member'
+dotnet_diagnostic.SA1623.severity = none # SA1623PropertySummaryDocumentationMustMatchAccessors

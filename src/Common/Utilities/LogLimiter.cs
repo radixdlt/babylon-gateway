@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Shared.Utilities;
+namespace Common.Utilities;
 
 /// <summary>
 /// Outputs occasionalLogLevel greedily at most once per timespan, otherwise outputs noisyLogLevel. Thread safe.

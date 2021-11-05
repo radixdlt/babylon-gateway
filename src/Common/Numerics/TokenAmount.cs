@@ -1,7 +1,7 @@
-using Shared.Extensions;
+using Common.Extensions;
 using System.Numerics;
 
-namespace Shared.Numerics;
+namespace Common.Numerics;
 
 public readonly record struct TokenAmount
 {

@@ -1,9 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Shared.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Shared.Database.Models;
+namespace Common.Database.Models;
 
 /// <summary>
 /// The raw transaction details and payload.
@@ -32,4 +30,11 @@ public class RawTransaction
     /// </summary>
     [Column("payload")]
     public byte[]? Payload { get; set; }
+
+    public RawTransaction(byte[] transactionIdentifier, DateTime? submittedTimestamp, byte[]? payload)
+    {
+        TransactionIdentifier = transactionIdentifier;
+        SubmittedTimestamp = submittedTimestamp;
+        Payload = payload;
+    }
 }

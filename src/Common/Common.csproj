@@ -2,7 +2,7 @@
 
     <!-- NB - Shared PropertyGroup contents live in Directory.Build.props -->
     <PropertyGroup>
-      <RootNamespace>Shared</RootNamespace>
+      <RootNamespace>Common</RootNamespace>
     </PropertyGroup>
 
     <!-- NB - PackageReference versions are overridden centrally in Directory.Package.props -->

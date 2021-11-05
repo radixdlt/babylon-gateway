@@ -21,8 +21,4 @@
       <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="MiniUnitTests\Common\Numerics\TokenAmount" />
-    </ItemGroup>
-
 </Project>

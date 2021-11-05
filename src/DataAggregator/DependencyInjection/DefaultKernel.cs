@@ -1,10 +1,10 @@
+using Common.Database;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedWorkers;
 using Microsoft.EntityFrameworkCore;
-using Shared.Database;
 
 namespace DataAggregator.DependencyInjection;
 
