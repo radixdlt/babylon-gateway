@@ -1,9 +1,8 @@
 using Common.Database;
 using DataAggregator.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 
 var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(DefaultKernel.ConfigureServices)
+    .ConfigureServices(new DefaultKernel().ConfigureServices)
     .ConfigureLogging(builder =>
     {
         builder.AddSimpleConsole(options =>
@@ -20,7 +19,13 @@ var host = Host.CreateDefaultBuilder(args)
 using (var scope = host.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CommonDbContext>();
-    await db.Database.MigrateAsync();
+
+    // Wipe Database every load!
+    await db.Database.EnsureDeletedAsync();
+    await db.Database.EnsureCreatedAsync();
+
+    // Migrate every load
+    // await db.Database.MigrateAsync();
 }
 
 await host.RunAsync();

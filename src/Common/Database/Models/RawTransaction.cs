@@ -31,7 +31,7 @@ public class RawTransaction
     [Column("payload")]
     public byte[]? Payload { get; set; }
 
-    public RawTransaction(byte[] transactionIdentifier, DateTime? submittedTimestamp, byte[]? payload)
+    public RawTransaction(byte[] transactionIdentifier, DateTime? submittedTimestamp = null, byte[]? payload = null)
     {
         TransactionIdentifier = transactionIdentifier;
         SubmittedTimestamp = submittedTimestamp;

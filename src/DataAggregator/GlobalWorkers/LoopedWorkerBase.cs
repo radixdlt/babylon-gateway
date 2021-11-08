@@ -22,10 +22,10 @@ public abstract class LoopedWorkerBase : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTimeOffset.Now);
-        var finished = false;
 
-        while (!stoppingToken.IsCancellationRequested && !finished)
+        while (!stoppingToken.IsCancellationRequested)
         {
+            var minDelayBetweenLoops = Task.Delay(_minDelayBetweenLoops, stoppingToken);
             try
             {
                 await ExecuteLoopIteration(stoppingToken);
@@ -33,12 +33,14 @@ public abstract class LoopedWorkerBase : BackgroundService
             catch (TaskCanceledException)
             {
                 // We catch the TaskCancelledException so we get the Stopping message :)
-                finished = true;
+                break;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Loop iteration errored at: {Time}", DateTimeOffset.Now);
             }
+
+            await minDelayBetweenLoops;
         }
 
         await OnStop(stoppingToken);
@@ -54,9 +56,7 @@ public abstract class LoopedWorkerBase : BackgroundService
 
     private async Task ExecuteLoopIteration(CancellationToken stoppingToken)
     {
-        var minDelayBetweenLoops = Task.Delay(_minDelayBetweenLoops, stoppingToken);
         _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", DateTimeOffset.Now);
         await DoWork(stoppingToken);
-        await minDelayBetweenLoops;
     }
 }

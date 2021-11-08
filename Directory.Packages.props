@@ -13,6 +13,7 @@
       <!-- PUBLIC NUGET: Non-Microsoft -->
       <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
       <PackageVersion Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
+      <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.0-preview5" />
 
       <!-- Generated / Local -->
       <PackageVersion Include="RadixCoreApi.GeneratedClient" Version="0.3.0" />

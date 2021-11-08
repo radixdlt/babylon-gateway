@@ -11,4 +11,9 @@ public static class StringExtensions
 
         return str.Length <= maxLength ? str : str[..maxLength];
     }
+
+    public static byte[] ConvertFromHex(this string str)
+    {
+        return Convert.FromHexString(str);
+    }
 }

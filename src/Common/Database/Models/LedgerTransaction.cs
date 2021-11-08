@@ -13,28 +13,31 @@ namespace Common.Database.Models;
 public class LedgerTransaction
 {
     [Key]
-    [Column(name: "state_version")]
+    [Column(name: "transaction_index")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public long StateVersion { get; set; }
+    public long TransactionIndex { get; set; }
 
-    // This is provided to enable a constraint to ensure there are no gaps in the StateVersion (see OnModelCreating).
-    [Column(name: "parent_state_version")]
-    public long? ParentStateVersion { get; set; }
+    // This is provided to enable a constraint to ensure there are no gaps in the ledger (see OnModelCreating).
+    [Column(name: "parent_transaction_index")]
+    public long? ParentTransactionIndex { get; set; }
 
-    [ForeignKey("ParentStateVersion")]
-    public LedgerTransaction Parent { get; set; }
+    [ForeignKey("ParentTransactionIndex")]
+    public LedgerTransaction? Parent { get; set; }
 
     [Column(name: "transaction_id")]
     public byte[] TransactionIdentifier { get; set; }
 
-    [ForeignKey("TransactionId")]
-    public RawTransaction RawTransaction { get; set; }
+    [ForeignKey("TransactionIdentifier")]
+    public RawTransaction? RawTransaction { get; set; }
 
     [Column(name: "transaction_accumulator")]
     public byte[] TransactionAccumulator { get; set; }
 
+    [Column(name: "state_version")]
+    public long ResultantStateVersion { get; set; }
+
     [Column(name: "message")]
-    public string? Message { get; set; }
+    public byte[]? Message { get; set; }
 
     [Column(name: "fee_paid")]
     [Precision(1000, 18)]
@@ -52,14 +55,13 @@ public class LedgerTransaction
     [Column(name: "timestamp")]
     public DateTime Timestamp { get; set; }
 
-    public LedgerTransaction(long stateVersion, long? parentStateVersion, LedgerTransaction parent, byte[] transactionIdentifier, RawTransaction rawTransaction, byte[] transactionAccumulator, string? message, TokenAmount feePaid, long epoch, int indexInEpoch, bool isEndOfEpoch, DateTime timestamp)
+    public LedgerTransaction(long transactionIndex, long? parentTransactionIndex, byte[] transactionIdentifier, byte[] transactionAccumulator, long resultantStateVersion, byte[]? message, TokenAmount feePaid, long epoch, int indexInEpoch, bool isEndOfEpoch, DateTime timestamp)
     {
-        StateVersion = stateVersion;
-        ParentStateVersion = parentStateVersion;
-        Parent = parent;
+        TransactionIndex = transactionIndex;
+        ParentTransactionIndex = parentTransactionIndex;
         TransactionIdentifier = transactionIdentifier;
-        RawTransaction = rawTransaction;
         TransactionAccumulator = transactionAccumulator;
+        ResultantStateVersion = resultantStateVersion;
         Message = message;
         FeePaid = feePaid;
         Epoch = epoch;

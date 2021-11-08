@@ -3,32 +3,41 @@ using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
+using DataAggregator.NodeScopedServices.ApiReaders;
 using DataAggregator.NodeScopedWorkers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAggregator.DependencyInjection;
 
-public static class DefaultKernel
+public class DefaultKernel
 {
-    public static void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
+    public void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
     {
         AddGlobalScopedServices(services);
+        AddGlobalHostedServices(services);
         AddDatabaseContext(hostBuilderContext, services);
         AddNodeScopedServices(services);
+        AddNodeWorkers(services);
     }
 
-    private static void AddGlobalScopedServices(IServiceCollection services)
+    private void AddGlobalScopedServices(IServiceCollection services)
     {
         services.AddSingleton<IAggregatorConfiguration, AggregatorConfiguration>();
         services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
+        services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
+        services.AddSingleton<ITransactionCommitter, TransactionCommitter>();
+    }
+
+    private void AddGlobalHostedServices(IServiceCollection services)
+    {
         services.AddHostedService<NodeConfigurationMonitorWorker>();
     }
 
-    private static void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
+    private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
     {
         #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
-        services.AddDbContext<CommonDbContext>(options =>
+        services.AddDbContextFactory<CommonDbContext>(options =>
             options
                 // https://www.npgsql.org/efcore/index.html
                 .UseNpgsql(
@@ -42,11 +51,14 @@ public static class DefaultKernel
         #pragma warning restore SA1515
     }
 
-    private static void AddNodeScopedServices(IServiceCollection services)
+    private void AddNodeScopedServices(IServiceCollection services)
     {
         services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
         services.AddScoped<ITransactionLogReader, TransactionLogReader>();
+    }
 
+    private void AddNodeWorkers(IServiceCollection services)
+    {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
     }

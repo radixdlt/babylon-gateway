@@ -14,6 +14,10 @@ public class CommonDbContext : DbContext
 
     public DbSet<Node> Nodes => Set<Node>();
 
+    public DbSet<RawTransaction> RawTransactions => Set<RawTransaction>();
+
+    public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
+
 #pragma warning restore CS1591
 
     public CommonDbContext(DbContextOptions<CommonDbContext> options)
@@ -31,8 +35,8 @@ public class CommonDbContext : DbContext
         modelBuilder
             .Entity<LedgerTransaction>()
             .HasCheckConstraint(
-                "CK_CompleteStateVersionHistory",
-                "state_version = 1 OR state_version = parent_state_version + 1"
+                "CK_CompleteHistory",
+                "transaction_index = 0 OR transaction_index = parent_transaction_index + 1"
             )
             .Property(lt => lt.FeePaid).HasConversion(tokenAmountConverter);
     }
