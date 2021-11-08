@@ -1,7 +1,7 @@
-using RadixNodeApi.GeneratedApiClient.Api;
-using RadixNodeApi.GeneratedApiClient.Model;
+using RadixCoreApi.GeneratedClient.Api;
+using RadixCoreApi.GeneratedClient.Model;
 
-namespace DataAggregator.NodeScopedServices;
+namespace DataAggregator.NodeScopedServices.ApiReaders;
 
 public interface ITransactionLogReader
 {
@@ -17,12 +17,12 @@ public class TransactionLogReader : ITransactionLogReader
         _nodeConfig = nodeConfig;
     }
 
-    public async Task<List<CommittedTransaction>> GetTransactions(int stateVersion, int count)
+    public async Task<List<CommittedTransaction>> GetTransactions(int transactionIndex, int count)
     {
-        var client = new DefaultApi(_nodeConfig.NodeAppSettings.Address);
+        var client = new ApiApi(_nodeConfig.NodeAppSettings.Address);
         var results = await client.TransactionsPostAsync(new CommittedTransactionsRequest
         {
-            StateVersion = stateVersion,
+            Index = transactionIndex,
             Limit = count,
         });
 

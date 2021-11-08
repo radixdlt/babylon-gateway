@@ -7,7 +7,7 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.2.0' # This needs bumping every time
+packageVersion='0.3.0' # This needs bumping every time
 
 ##########
 # CHECKS #
@@ -42,18 +42,18 @@ rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
 openapi-generator generate \
-    -i ./transactions-api-spec.json \
+    -i ./core-api-spec.json \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=RadixNodeApi.GeneratedApiClient,targetFramework=net5.0,packageVersion=$packageVersion
+    --additional-properties=packageName=RadixCoreApi.GeneratedClient,targetFramework=net5.0,packageVersion=$packageVersion
 
 cd "$dummyApiDirectory"
 dotnet pack
 
 cd "$SCRIPT_DIR"
 mkdir -p ./packed
-find "$dummyApiDirectory/src/RadixNodeApi.GeneratedApiClient/bin/Debug" -name \*.nupkg -exec cp {} ./packed \;
+find "$dummyApiDirectory/src/RadixCoreApi.GeneratedClient/bin/Debug" -name \*.nupkg -exec cp {} ./packed \;
 
 # Clear up generated api so that it doesn't interfere with indexes/lookups
 rm -rf "$dummyApiDirectory"

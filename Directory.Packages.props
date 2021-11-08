@@ -2,7 +2,7 @@
   <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
   <ItemGroup>
     <!-- PRODUCTION DEPENDENCIES -->
-   
+
       <!-- PUBLIC NUGET: Microsoft -->
       <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0-rc.2.21480.5" />
       <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0-rc.2.21480.5" />
@@ -15,8 +15,8 @@
       <PackageVersion Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
 
       <!-- Generated / Local -->
-      <PackageVersion Include="RadixNodeApi.GeneratedApiClient" Version="0.2.0" />
-      
+      <PackageVersion Include="RadixCoreApi.GeneratedClient" Version="0.3.0" />
+
     <!-- NON-PRODUCTION DEPENDENCIES -->
 
       <!-- PUBLIC NUGET: Microsoft -->
