@@ -15,14 +15,13 @@ public readonly record struct TokenAmount
     private static readonly BigInteger _divisor = BigInteger.Pow(10, DecimalPrecision);
 
     private readonly BigInteger _subUnits;
-    private readonly bool _isNaN;
 
-    public static TokenAmount FromSubUnitsOrNaN(BigInteger subUnits)
+    public static TokenAmount FromSubUnits(BigInteger subUnits)
     {
         return subUnits >= 0 ? new TokenAmount(subUnits) : NaN;
     }
 
-    public static TokenAmount FromSubUnitsStringOrNaN(string subUnitsString)
+    public static TokenAmount FromSubUnits(string subUnitsString)
     {
         return (
             BigInteger.TryParse(subUnitsString, out var subUnits) &&
@@ -32,7 +31,7 @@ public readonly record struct TokenAmount
             : NaN;
     }
 
-    public static TokenAmount FromStringPartsOrNaN(string wholePart, string decimalPart)
+    public static TokenAmount FromStringParts(string wholePart, string decimalPart)
     {
         var wholeUnitsString = string.IsNullOrEmpty(wholePart) ? "0" : wholePart;
         var subUnitsString = string.IsNullOrEmpty(decimalPart)
@@ -48,7 +47,7 @@ public readonly record struct TokenAmount
             : NaN;
     }
 
-    public static TokenAmount FromStringOrNaN(string decimalString)
+    public static TokenAmount FromString(string decimalString)
     {
         if (decimalString == "NaN")
         {
@@ -57,11 +56,11 @@ public readonly record struct TokenAmount
 
         if (!decimalString.Contains('.'))
         {
-            return FromStringPartsOrNaN(decimalString, string.Empty);
+            return FromStringParts(decimalString, string.Empty);
         }
 
         return decimalString.Split('.').TryInterpretAsPair(out var wholePart, out var fractionalPart)
-            ? FromStringPartsOrNaN(wholePart, fractionalPart)
+            ? FromStringParts(wholePart, fractionalPart)
             : NaN;
     }
 
@@ -72,7 +71,6 @@ public readonly record struct TokenAmount
             throw new ArgumentOutOfRangeException(nameof(subUnits), "must be positive");
         }
 
-        _isNaN = false;
         _subUnits = subUnits;
     }
 
@@ -88,14 +86,12 @@ public readonly record struct TokenAmount
             throw new ArgumentOutOfRangeException(nameof(subUnits), "must be positive");
         }
 
-        _isNaN = false;
         _subUnits = (wholeUnits * _divisor) + subUnits;
     }
 
     private TokenAmount(bool isNaN)
     {
-        _isNaN = isNaN;
-        _subUnits = BigInteger.Zero;
+        _subUnits = isNaN ? BigInteger.MinusOne : BigInteger.Zero;
     }
 
     /// <summary>
@@ -110,12 +106,12 @@ public readonly record struct TokenAmount
 
     public string ToSubUnitString()
     {
-        return _isNaN ? "NaN" : _subUnits.ToString();
+        return IsNaN() ? "NaN" : _subUnits.ToString();
     }
 
     public override string ToString()
     {
-        if (_isNaN)
+        if (IsNaN())
         {
             return "NaN";
         }
@@ -129,7 +125,7 @@ public readonly record struct TokenAmount
 
     public string ToStringFullPrecision()
     {
-        if (_isNaN)
+        if (IsNaN())
         {
             return "NaN";
         }
@@ -143,6 +139,11 @@ public readonly record struct TokenAmount
         var integerPart = _subUnits / _divisor;
         var fractionalPart = _subUnits - (integerPart * _divisor);
         return (integerPart, fractionalPart);
+    }
+
+    public bool IsNaN()
+    {
+        return _subUnits < 0;
     }
 
     public BigInteger GetSubUnits()

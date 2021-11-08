@@ -34,7 +34,6 @@ namespace DataAggregator.Migrations
 
                     b.Property<string>("FeePaid")
                         .IsRequired()
-                        .HasPrecision(1000, 18)
                         .HasColumnType("text")
                         .HasColumnName("fee_paid");
 

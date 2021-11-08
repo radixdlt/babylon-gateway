@@ -6,7 +6,7 @@ namespace DataAggregator.GlobalServices;
 
 public interface IRawTransactionWriter
 {
-    Task EnsureRawTransactionsWritten(List<RawTransaction> rawTransactions, CancellationToken token);
+    Task EnsureRawTransactionsCreatedOrUpdated(List<RawTransaction> rawTransactions, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
@@ -18,18 +18,20 @@ public class RawTransactionWriter : IRawTransactionWriter
         _contextFactory = contextFactory;
     }
 
-    public async Task EnsureRawTransactionsWritten(List<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task EnsureRawTransactionsCreatedOrUpdated(List<RawTransaction> rawTransactions, CancellationToken token)
     {
         await using var context = await _contextFactory.CreateDbContextAsync(token);
 
         // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        context.RawTransactions
+        await context.RawTransactions
             .UpsertRange(rawTransactions)
-            .WhenMatched((existingTransaction, newTransaction) => new RawTransaction(
-                newTransaction.TransactionIdentifier,
-                newTransaction.SubmittedTimestamp ?? existingTransaction.SubmittedTimestamp,
-                newTransaction.Payload ?? existingTransaction.Payload
-            ));
+            .WhenMatched((existingTransaction, newTransaction) => new RawTransaction
+            {
+                TransactionIdentifier = newTransaction.TransactionIdentifier,
+                SubmittedTimestamp = newTransaction.SubmittedTimestamp ?? existingTransaction.SubmittedTimestamp,
+                Payload = newTransaction.Payload ?? existingTransaction.Payload,
+            })
+            .RunAsync(token);
 
         await context.SaveChangesAsync(token);
     }

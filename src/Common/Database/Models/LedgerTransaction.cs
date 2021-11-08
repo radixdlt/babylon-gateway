@@ -1,5 +1,4 @@
 using Common.Numerics;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -39,8 +38,7 @@ public class LedgerTransaction
     [Column(name: "message")]
     public byte[]? Message { get; set; }
 
-    [Column(name: "fee_paid")]
-    [Precision(1000, 18)]
+    [Column("fee_paid")]
     public TokenAmount FeePaid { get; set; }
 
     [Column(name: "epoch")]

@@ -21,7 +21,7 @@ public class TokenAmountTests
     [InlineData("12", "-3", "NaN")]
     public void Create_TokenAmountFromStringParts_ReadsCorrectly(string wholePart, string fractionalPart, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromStringPartsOrNaN(wholePart, fractionalPart).ToString());
+        Assert.Equal(expected, TokenAmount.FromStringParts(wholePart, fractionalPart).ToString());
     }
 
     [Theory]
@@ -37,7 +37,7 @@ public class TokenAmountTests
     [InlineData("-123", "NaN")]
     public void Create_FromString_ReadsCorrectly(string postgresDecimal, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromStringOrNaN(postgresDecimal).ToString());
+        Assert.Equal(expected, TokenAmount.FromString(postgresDecimal).ToString());
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public class TokenAmountTests
     [InlineData("-123", "NaN")]
     public void Create_FromSubUnits_ReadsCorrectlyAtFullPrecision(string subUnitsStr, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromSubUnitsStringOrNaN(subUnitsStr).ToStringFullPrecision());
+        Assert.Equal(expected, TokenAmount.FromSubUnits(subUnitsStr).ToStringFullPrecision());
     }
 
     [Fact]
@@ -62,31 +62,31 @@ public class TokenAmountTests
     [Fact]
     public void Equate_SameTokenAmount_ReturnsTrue()
     {
-        Assert.Equal(TokenAmount.FromStringOrNaN("123"), TokenAmount.FromStringOrNaN("123"));
+        Assert.Equal(TokenAmount.FromString("123"), TokenAmount.FromString("123"));
     }
 
     [Fact]
     public void Equate_DifferentTokenAmount_ReturnsFalse()
     {
-        Assert.NotEqual(TokenAmount.FromStringOrNaN("123"), TokenAmount.FromStringOrNaN("1234"));
+        Assert.NotEqual(TokenAmount.FromString("123"), TokenAmount.FromString("1234"));
     }
 
     [Fact]
     public void Equate_NaNWithNoneNaN_ReturnsFalse()
     {
-        Assert.NotEqual(TokenAmount.FromStringOrNaN("1"), TokenAmount.NaN);
+        Assert.NotEqual(TokenAmount.FromString("1"), TokenAmount.NaN);
     }
 
     [Fact]
     public void Equate_SameAmountCreatedTwoDifferentWays_ReturnsTrue()
     {
-        Assert.Equal(TokenAmount.FromStringOrNaN("123"), TokenAmount.FromSubUnitsStringOrNaN("123000000000000000000"));
+        Assert.Equal(TokenAmount.FromString("123"), TokenAmount.FromSubUnits("123000000000000000000"));
     }
 
     [Fact]
     public void GivenANumberTooLargeForPostgres_WhenConvertedToPostgresDecimal_ReturnsNaN()
     {
-        var tokenAmount = TokenAmount.FromSubUnitsOrNaN(BigInteger.Pow(10, 1000));
+        var tokenAmount = TokenAmount.FromSubUnits(BigInteger.Pow(10, 1000));
         Assert.Equal("NaN", tokenAmount.ToPostgresDecimal());
     }
 
@@ -94,12 +94,33 @@ public class TokenAmountTests
     public void GivenANumberInsidePostgresLimit_WhenConvertedToPostgresDecimal_ReturnsNumberAsString()
     {
         // 10^(995 - 18) = 10^(977)
-        var tokenAmount = TokenAmount.FromSubUnitsOrNaN(BigInteger.Pow(10, 995));
+        var tokenAmount = TokenAmount.FromSubUnits(BigInteger.Pow(10, 995));
         var postgresDecimal = tokenAmount.ToPostgresDecimal();
         var expected = new StringBuilder()
             .Append('1').Append(Enumerable.Range(0, 977).Select(_ => '0').ToArray()) // 1000000... with 977 digits of 0
             .ToString();
 
         Assert.Equal(expected, postgresDecimal);
+    }
+
+    [Fact]
+    public void GivenNaN_SubunitsIsNegativeOne()
+    {
+        Assert.Equal(BigInteger.MinusOne, TokenAmount.NaN.GetSubUnits());
+    }
+
+    public static IEnumerable<object[]> IsNaN_Data => new List<object[]>
+        {
+            new object[] { TokenAmount.NaN, true },
+            new object[] { TokenAmount.FromSubUnits(BigInteger.Zero), false },
+            new object[] { TokenAmount.FromSubUnits(BigInteger.One), false },
+            new object[] { TokenAmount.FromStringParts("1", "234"), false },
+        };
+
+    [Theory]
+    [MemberData(nameof(IsNaN_Data))]
+    public void GivenTokenAmount_IsNaN_ReturnsCorrectly(TokenAmount tokenAmount, bool expectedIsNaN)
+    {
+        Assert.Equal(expectedIsNaN, tokenAmount.IsNaN());
     }
 }

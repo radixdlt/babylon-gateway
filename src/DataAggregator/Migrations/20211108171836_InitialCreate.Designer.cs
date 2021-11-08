@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(CommonDbContext))]
-    [Migration("20211108131056_InitialCreate")]
+    [Migration("20211108171836_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,6 @@ namespace DataAggregator.Migrations
 
                     b.Property<string>("FeePaid")
                         .IsRequired()
-                        .HasPrecision(1000, 18)
                         .HasColumnType("text")
                         .HasColumnName("fee_paid");
 

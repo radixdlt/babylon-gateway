@@ -37,4 +37,13 @@ public class RawTransaction
         SubmittedTimestamp = submittedTimestamp;
         Payload = payload;
     }
+
+#pragma warning disable CS8618
+
+    // Empty constructor created for use with Upsert library
+    public RawTransaction()
+    {
+    }
+
+#pragma warning restore CS8618
 }

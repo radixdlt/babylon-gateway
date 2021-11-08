@@ -46,7 +46,7 @@ namespace DataAggregator.Migrations
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     state_version = table.Column<long>(type: "bigint", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
-                    fee_paid = table.Column<string>(type: "text", precision: 1000, scale: 18, nullable: false),
+                    fee_paid = table.Column<string>(type: "text", nullable: false),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<int>(type: "integer", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),

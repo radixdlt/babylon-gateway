@@ -1,7 +1,9 @@
 using Common.Database.Models;
+using Common.Extensions;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Numerics;
 
 namespace Common.Database;
 
@@ -27,17 +29,12 @@ public class CommonDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var tokenAmountConverter = new ValueConverter<TokenAmount, string>(
-            v => v.ToPostgresDecimal(),
-            v => TokenAmount.FromStringOrNaN(v)
-        );
-
         modelBuilder
             .Entity<LedgerTransaction>()
             .HasCheckConstraint(
                 "CK_CompleteHistory",
                 "transaction_index = 0 OR transaction_index = parent_transaction_index + 1"
             )
-            .Property(lt => lt.FeePaid).HasConversion(tokenAmountConverter);
+            .Property(lt => lt.FeePaid).AsTokenAmount();
     }
 }

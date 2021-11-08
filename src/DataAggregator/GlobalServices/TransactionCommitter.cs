@@ -4,6 +4,7 @@ using Common.Extensions;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
+using System.Numerics;
 
 namespace DataAggregator.GlobalServices;
 
@@ -28,7 +29,7 @@ public class TransactionCommitter : ITransactionCommitter
     public async Task CommitTransactions(List<CommittedTransaction> committedTransactions, CancellationToken token)
     {
         var rawTransactions = committedTransactions.Select(CreateRawTransaction).ToList();
-        await _rawTransactionWriter.EnsureRawTransactionsWritten(rawTransactions, token);
+        await _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(rawTransactions, token);
 
         // Create own context for this transaction
         await using var context = await _contextFactory.CreateDbContextAsync(token);
@@ -50,10 +51,11 @@ public class TransactionCommitter : ITransactionCommitter
 
     private static RawTransaction CreateRawTransaction(CommittedTransaction transaction)
     {
-        return new RawTransaction(
-            transactionIdentifier: transaction.TransactionIdentifier.ConvertFromHex(),
-            payload: Convert.FromHexString(transaction.Metadata.Hex)
-        );
+        return new RawTransaction
+        {
+            TransactionIdentifier = transaction.TransactionIdentifier.ConvertFromHex(),
+            Payload = transaction.Metadata.Hex.ConvertFromHex(),
+        };
     }
 
     private static LedgerTransaction CreateLedgerTransactionShell(CommittedTransaction transaction)
@@ -67,7 +69,7 @@ public class TransactionCommitter : ITransactionCommitter
             transactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
             resultantStateVersion: transaction.CommittedStateIdentifier.StateVersion,
             message: transaction.Metadata.Message?.ConvertFromHex(),
-            feePaid: TokenAmount.FromSubUnitsStringOrNaN(transaction.Metadata.Fee),
+            feePaid: TokenAmount.FromString(transaction.Metadata.Fee),
             epoch: 0, // TODO - fix!
             indexInEpoch: 0, // TODO - fix!
             isEndOfEpoch: false, // TODO - fix!
