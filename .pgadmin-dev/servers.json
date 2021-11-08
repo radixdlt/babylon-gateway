@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Local Radix Public Gateway",
+            "Group": "Servers",
+            "Port": 5432,
+            "Username": "db_dev_superuser",
+            "Host": "db",
+            "SSLMode": "prefer",
+            "DBRestriction": "radixdlt_ledger",
+            "MaintenanceDB": "postgres"
+        }
+    }
+}

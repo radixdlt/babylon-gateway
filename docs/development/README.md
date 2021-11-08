@@ -24,7 +24,7 @@ All the commands should be run from the repo root.
 Run the following in separate terminals:
 
 ```bash
-# Spin up Postgres first
+# Spin up Postgres and PG Adminfirst
 docker-compose up
 ```
 
@@ -33,9 +33,19 @@ docker-compose up
 dotnet run --project src/DataAggregator
 ```
 
+## Looking at the database
+
+To inspect the database, we have included a pgAdmin docker container.
+
+After doing `docker-compose up`, a pgAdmin container is also booted up.
+
+* Location: http://localhost:5050/
+* Local server is at "Servers / Local Radix Public Gateway"
+* Password is `db_dev_password` (click "save" and you should only need to ass it once)
+
 ## Testing
 
-Run `dotnet test` from the repo root.
+Run `dotnet test` from the repo root. This assumes postgres is running. If you're running for CI, just run `docker-compose up db` to avoid spinning up pgAdmin as well.
 
 For more information, see the [Tests project](../../src/Tests).
 
