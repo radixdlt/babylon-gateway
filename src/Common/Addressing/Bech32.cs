@@ -11,16 +11,17 @@ namespace Common.Addressing;
 ///
 /// <para>
 /// NB: A Bech32 encoded string consists of an ASCII human readable part "HRP", and a data part, and looks like:
-/// "{HRP}1{data as bech32 chars}".
-/// The data part uses charachters from qpzry9x8gf2tvdw0s3jn54khce6mua7l and is therefore 5 bits per character.
+/// "{HRP}1{data encoded 5-bits per byte using the bech32 Charset}".
 /// </para>
 ///
 /// <para>
-/// IMPORTANT:
-/// * Segwit addresses use a data encoding scheme of [1 chat "witness version"][The witness program bytes, converted into 5-bit chunks (padded with 0s if necessary)].
-/// * Radix addresses don't use a witness version, and instead just encode [address bytes, converted into 5-bit chunks (padded with 0s if necessary)]
-///
-/// So instead, we implement this as a base class (to agree with the specs), and let implementers decide how to unpack.
+/// Important note on decoding the 5-bits-per-byte data:
+/// <list type="bullet">
+/// <item><description>Bitcoin/Segwit addresses use a data encoding scheme of [1 chat "witness version"][The witness program bytes, converted into 5-bit chunks (padded with 0s if necessary)]</description></item>
+/// <item><description>Radix addresses don't use a witness version, and instead just encode [address bytes, converted into 5-bit chunks (padded with 0s if necessary)]</description></item>
+/// </list>
+/// Note that these are inconsistent in terms of how they are padded. So instead, we just return the raw data as
+/// 5-bits-per-byte, and let the decoding be done a level up, making use of the ConvertBits method.
 /// </para>
 ///
 /// <para>
