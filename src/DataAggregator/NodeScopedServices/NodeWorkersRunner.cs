@@ -4,7 +4,9 @@ namespace DataAggregator.NodeScopedServices;
 
 public enum NodeWorkersRunnerStatus
 {
-    Unstarted,
+    Uninitialized,
+    Initializing,
+    Initialized,
     Starting,
     Running,
     Stopping,
@@ -17,6 +19,8 @@ public enum NodeWorkersRunnerStatus
 public class NodeWorkersRunner : IDisposable
 {
     public NodeWorkersRunnerStatus Status { get; private set; }
+
+    private readonly List<INodeInitializer> _initializers;
 
     private readonly List<INodeWorker> _workers;
 
@@ -36,8 +40,63 @@ public class NodeWorkersRunner : IDisposable
         _nodeDependencyInjectionScope = nodeDependencyInjectionScope;
         _logScope = logScope;
         _cancellationTokenSource = new CancellationTokenSource();
+        _initializers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeInitializer>().ToList();
         _workers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeWorker>().ToList();
-        Status = NodeWorkersRunnerStatus.Unstarted;
+        Status = NodeWorkersRunnerStatus.Uninitialized;
+    }
+
+    /// <summary>
+    ///  Runs all INodeInitializers and waits for them to complete.
+    ///  Should be awaited before workers are started. Can throw if initialization fails.
+    ///  If this throws, it is the caller's duty to call StopWorkersSafe or Dispose()
+    /// </summary>
+    public async Task Initialize(CancellationToken cancellationToken)
+    {
+        lock (_statusLock)
+        {
+            switch (Status)
+            {
+                case NodeWorkersRunnerStatus.Uninitialized:
+                    break; // The good case
+                case NodeWorkersRunnerStatus.Initializing:
+                case NodeWorkersRunnerStatus.Initialized:
+                case NodeWorkersRunnerStatus.Starting:
+                case NodeWorkersRunnerStatus.Running:
+                case NodeWorkersRunnerStatus.Stopping:
+                case NodeWorkersRunnerStatus.Stopped:
+                    throw new Exception("Node set-up has already been initialized");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            Status = NodeWorkersRunnerStatus.Starting;
+        }
+
+        using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+        // ReSharper disable once AccessToDisposedClosure
+        // Should be safe because Task.WhenAll waits till all tasks have run (even if one faults)
+        // So the Dispose call will happen after all references to the Tokens have been used up
+        await Task.WhenAll(_initializers.Select(i => i.Initialize(combinedCancellationSource.Token)));
+
+        lock (_statusLock)
+        {
+            switch (Status)
+            {
+                case NodeWorkersRunnerStatus.Uninitialized:
+                case NodeWorkersRunnerStatus.Initializing:
+                    Status = NodeWorkersRunnerStatus.Initialized;
+                    return;
+                case NodeWorkersRunnerStatus.Initialized:
+                case NodeWorkersRunnerStatus.Starting:
+                case NodeWorkersRunnerStatus.Running:
+                case NodeWorkersRunnerStatus.Stopping:
+                case NodeWorkersRunnerStatus.Stopped:
+                    return; // Don't change state back
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 
     /// <summary>
@@ -47,21 +106,39 @@ public class NodeWorkersRunner : IDisposable
     {
         lock (_statusLock)
         {
-            if (Status != NodeWorkersRunnerStatus.Unstarted)
+            switch (Status)
             {
-                throw new Exception("Workers have already been started");
+                case NodeWorkersRunnerStatus.Uninitialized:
+                case NodeWorkersRunnerStatus.Initializing:
+                    throw new Exception("Should be initialized first");
+                case NodeWorkersRunnerStatus.Initialized:
+                    break; // The good case
+                case NodeWorkersRunnerStatus.Starting:
+                case NodeWorkersRunnerStatus.Running:
+                case NodeWorkersRunnerStatus.Stopping:
+                case NodeWorkersRunnerStatus.Stopped:
+                    throw new Exception("Workers have already been started");
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             Status = NodeWorkersRunnerStatus.Starting;
         }
 
-        var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+        // ReSharper disable once AccessToDisposedClosure
+        // Should be safe because Task.WhenAll waits till all tasks have run (even if one  faults)
+        // So the Dispose call will happen after all references to the Tokens have been used up
         await Task.WhenAll(_workers.Select(w => w.StartAsync(combinedCancellationSource.Token)));
+
         lock (_statusLock)
         {
             switch (Status)
             {
-                case NodeWorkersRunnerStatus.Unstarted:
+                case NodeWorkersRunnerStatus.Uninitialized:
+                case NodeWorkersRunnerStatus.Initializing:
+                case NodeWorkersRunnerStatus.Initialized:
                 case NodeWorkersRunnerStatus.Starting:
                     Status = NodeWorkersRunnerStatus.Running;
                     return;
@@ -113,9 +190,11 @@ public class NodeWorkersRunner : IDisposable
         {
             switch (Status)
             {
-                case NodeWorkersRunnerStatus.Unstarted:
+                case NodeWorkersRunnerStatus.Uninitialized:
+                case NodeWorkersRunnerStatus.Initialized:
                     Status = NodeWorkersRunnerStatus.Stopped;
                     return true;
+                case NodeWorkersRunnerStatus.Initializing:
                 case NodeWorkersRunnerStatus.Starting:
                 case NodeWorkersRunnerStatus.Running:
                     Status = NodeWorkersRunnerStatus.Stopping;

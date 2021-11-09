@@ -40,9 +40,13 @@ public class NodeConfigurationMonitorWorker : LoopedWorkerBase
     {
         var nodeConfiguration = _configuration.GetNodes();
 
+        var enabledNodes = nodeConfiguration
+            .Where(n => n.EnabledForIndexing)
+            .ToList();
+
         await Task.WhenAll(
             UpdateNodeConfigurationInDatabaseIfNeeded(),
-            _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(nodeConfiguration, stoppingToken)
+            _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken)
         );
     }
 

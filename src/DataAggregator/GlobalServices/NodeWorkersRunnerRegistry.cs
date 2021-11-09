@@ -13,40 +13,62 @@ public interface INodeWorkersRunnerRegistry
 
 public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 {
+    private const int ErrorStartupBlockTimeSeconds = 20;
+
     private readonly ILogger<INodeWorkersRunnerRegistry> _logger;
     private readonly INodeWorkersRunnerFactory _nodeWorkersRunnerFactory;
     private readonly Dictionary<string, NodeWorkersRunner> _servicesMap = new();
+    private readonly Dictionary<string, Task> _startupBlocklist = new();
     private readonly object _servicesMapLock = new();
 
-    public NodeWorkersRunnerRegistry(ILogger<INodeWorkersRunnerRegistry> logger, INodeWorkersRunnerFactory nodeWorkersRunnerFactory)
+    public NodeWorkersRunnerRegistry(ILogger<NodeWorkersRunnerRegistry> logger, INodeWorkersRunnerFactory nodeWorkersRunnerFactory)
     {
         _logger = logger;
         _nodeWorkersRunnerFactory = nodeWorkersRunnerFactory;
     }
 
-    public async Task EnsureCorrectNodeServicesRunning(List<NodeAppSettings> nodes, CancellationToken cancellationToken)
+    public async Task EnsureCorrectNodeServicesRunning(List<NodeAppSettings> enabledNodes, CancellationToken cancellationToken)
     {
-        var enabledNodesSettingsMap = nodes
-            .Where(n => n.EnabledForIndexing)
+        var enabledNodesSettingsMap = enabledNodes
             .ToDictionary(n => n.Name);
 
-        // Find nodes to start
-        var nodeWorkersToStart = enabledNodesSettingsMap
-            .Where(kvp => !_servicesMap.ContainsKey(kvp.Key))
-            .Select(kvp => kvp.Value);
-
-        var startTask = StartNodeWorkersForNodes(nodeWorkersToStart, cancellationToken);
-
-        // Find nodes to shutdown
-        var nodeNamesToStop = _servicesMap.Keys.Except(enabledNodesSettingsMap.Keys);
-        var endTask = StopNodeWorkersForNodes(nodeNamesToStop, cancellationToken);
+        var startTask = StartNodeWorkersForNodes(GetWorkersToStart(enabledNodesSettingsMap), cancellationToken);
+        var endTask = StopNodeWorkersForNodes(GetWorkersToStop(enabledNodesSettingsMap), cancellationToken);
 
         await Task.WhenAll(startTask, endTask);
     }
 
     public async Task StopAllWorkers(CancellationToken cancellationToken)
     {
-        await StopNodeWorkersForNodes(_servicesMap.Keys, cancellationToken);
+        await StopNodeWorkersForNodes(GetAllWorkers(), cancellationToken);
+    }
+
+    private List<NodeAppSettings> GetWorkersToStart(Dictionary<string, NodeAppSettings> enabledNodesSettingsMap)
+    {
+        lock (_servicesMapLock)
+        {
+            return enabledNodesSettingsMap
+                .Where(kvp => !_servicesMap.ContainsKey(kvp.Key))
+                .Where(kvp => !_startupBlocklist.ContainsKey(kvp.Key) || _startupBlocklist[kvp.Key].IsCompleted)
+                .Select(kvp => kvp.Value)
+                .ToList();
+        }
+    }
+
+    private List<string> GetWorkersToStop(Dictionary<string, NodeAppSettings> enabledNodesSettingsMap)
+    {
+        lock (_servicesMapLock)
+        {
+            return _servicesMap.Keys.Except(enabledNodesSettingsMap.Keys).ToList();
+        }
+    }
+
+    private List<string> GetAllWorkers()
+    {
+        lock (_servicesMapLock)
+        {
+            return _servicesMap.Keys.ToList();
+        }
     }
 
     private Task StartNodeWorkersForNodes(IEnumerable<NodeAppSettings> nodes, CancellationToken cancellationToken)
@@ -70,13 +92,26 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 
         try
         {
+            _logger.LogInformation("Initializing for node: {NodeName}", nodeAppSettings.Name);
+            await nodeWorkersRunner.Initialize(cancellationToken);
             _logger.LogInformation("Starting workers for node: {NodeName}", nodeAppSettings.Name);
             await nodeWorkersRunner.StartWorkers(cancellationToken);
             _logger.LogInformation("Workers for node started successfully: {NodeName}", nodeAppSettings.Name);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting up services for node: {NodeName}. Now clearing up", nodeAppSettings.Name);
+            _logger.LogError(
+                ex,
+                "Error initializing or starting up services for node: {NodeName}. We won't try again for {ErrorStartupBlockTimeSeconds} seconds. Now clearing up...",
+                nodeAppSettings.Name,
+                ErrorStartupBlockTimeSeconds
+            );
+
+            lock (_servicesMapLock)
+            {
+                _startupBlocklist[nodeAppSettings.Name] = Task.Delay(TimeSpan.FromSeconds(ErrorStartupBlockTimeSeconds));
+            }
+
             await StopNodeWorkers(nodeAppSettings.Name, cancellationToken);
         }
     }

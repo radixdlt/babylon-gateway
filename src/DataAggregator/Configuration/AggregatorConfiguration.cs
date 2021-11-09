@@ -6,6 +6,8 @@ namespace DataAggregator.Configuration;
 public interface IAggregatorConfiguration
 {
     List<NodeAppSettings> GetNodes();
+
+    int GetNetworkId();
 }
 
 public class AggregatorConfiguration : IAggregatorConfiguration
@@ -37,5 +39,16 @@ public class AggregatorConfiguration : IAggregatorConfiguration
 
         nodesList.ForEach(n => n.AssertValid());
         return nodesList;
+    }
+
+    public int GetNetworkId()
+    {
+        var networkId = _configuration.GetValue<int?>("NetworkId", null);
+        if (networkId == null)
+        {
+            throw new InvalidConfigurationException("appsettings.json requires an integer NetworkId");
+        }
+
+        return (int)networkId;
     }
 }

@@ -10,21 +10,21 @@ public interface ITransactionLogReader
 
 public class TransactionLogReader : ITransactionLogReader
 {
-    private INodeConfigProvider _nodeConfig;
+    private INodeCoreApiProvider _apiProvider;
 
-    public TransactionLogReader(INodeConfigProvider nodeConfig)
+    public TransactionLogReader(INodeCoreApiProvider apiProvider)
     {
-        _nodeConfig = nodeConfig;
+        _apiProvider = apiProvider;
     }
 
     public async Task<List<CommittedTransaction>> GetTransactions(int transactionIndex, int count)
     {
-        var client = new ApiApi(_nodeConfig.NodeAppSettings.Address);
-        var results = await client.TransactionsPostAsync(new CommittedTransactionsRequest
-        {
-            Index = transactionIndex,
-            Limit = count,
-        });
+        var results = await _apiProvider.GetCoreApiClient()
+            .TransactionsPostAsync(new CommittedTransactionsRequest
+            {
+                Index = transactionIndex,
+                Limit = count,
+            });
 
         return results.Transactions;
     }

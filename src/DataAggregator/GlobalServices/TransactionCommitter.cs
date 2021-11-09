@@ -1,3 +1,4 @@
+using Common.Addressing;
 using Common.Database;
 using Common.Database.Models;
 using Common.Extensions;
@@ -17,13 +18,16 @@ public class TransactionCommitter : ITransactionCommitter
 {
     private readonly IDbContextFactory<CommonDbContext> _contextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
+    private readonly IAddressExtractor _addressExtractor;
 
     public TransactionCommitter(
         IDbContextFactory<CommonDbContext> contextFactory,
-        IRawTransactionWriter rawTransactionWriter)
+        IRawTransactionWriter rawTransactionWriter,
+        IAddressExtractor addressExtractor)
     {
         _contextFactory = contextFactory;
         _rawTransactionWriter = rawTransactionWriter;
+        _addressExtractor = addressExtractor;
     }
 
     public async Task CommitTransactions(List<CommittedTransaction> committedTransactions, CancellationToken token)
@@ -56,6 +60,22 @@ public class TransactionCommitter : ITransactionCommitter
             TransactionIdentifier = transaction.TransactionIdentifier.ConvertFromHex(),
             Payload = transaction.Metadata.Hex.ConvertFromHex(),
         };
+    }
+
+    private void HandleOperationGroups(CommittedTransaction transaction)
+    {
+        foreach (var operationGroup in transaction.OperationGroups)
+        {
+            foreach (var operation in operationGroup.Operations)
+            {
+                var mainAddress = _addressExtractor.Extract(operation?.AddressIdentifier?.Address);
+                var subAddress = _addressExtractor.Extract(operation?.AddressIdentifier?.SubAddress?.Address);
+
+                // Substate ValidatorStakeData has both amount and data - the validator's stake and its fee (more efficient / faster to be on one UTXO)
+                var data = operation?.Data;
+                var amount = operation?.Amount;
+            }
+        }
     }
 
     private static LedgerTransaction CreateLedgerTransactionShell(CommittedTransaction transaction)

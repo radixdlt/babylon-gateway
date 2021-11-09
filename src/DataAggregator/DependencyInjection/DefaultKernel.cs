@@ -17,6 +17,7 @@ public class DefaultKernel
         AddGlobalHostedServices(services);
         AddDatabaseContext(hostBuilderContext, services);
         AddNodeScopedServices(services);
+        AddNodeInitializers(services);
         AddNodeWorkers(services);
     }
 
@@ -27,6 +28,8 @@ public class DefaultKernel
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
         services.AddSingleton<ITransactionCommitter, TransactionCommitter>();
+        services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
+        services.AddSingleton<IAddressExtractor, AddressExtractor>();
     }
 
     private void AddGlobalHostedServices(IServiceCollection services)
@@ -54,7 +57,14 @@ public class DefaultKernel
     private void AddNodeScopedServices(IServiceCollection services)
     {
         services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
+        services.AddScoped<INodeCoreApiProvider, NodeCoreApiProvider>();
         services.AddScoped<ITransactionLogReader, TransactionLogReader>();
+    }
+
+    private void AddNodeInitializers(IServiceCollection services)
+    {
+        // Add node initializers - these will be instantiated by the NodeWorkersRunner.cs and run before the workers start
+        services.AddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
     }
 
     private void AddNodeWorkers(IServiceCollection services)

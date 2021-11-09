@@ -1,6 +1,6 @@
 namespace Common.Addressing;
 
-public static class AddressParser
+public static class RadixAddressParser
 {
     public static bool TryParse(AddressHrps hrps, string address, out RadixAddress? radixAddress, out string? errorMessage)
     {
