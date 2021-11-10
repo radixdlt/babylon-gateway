@@ -1,6 +1,5 @@
 # Custom gitignore
 .postgresdata/
-!generated/*.nupkg
 
 # Rider gitignore
 
