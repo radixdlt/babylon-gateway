@@ -33,7 +33,7 @@ public class CommonDbContext : DbContext
             .Entity<LedgerTransaction>()
             .HasCheckConstraint(
                 "CK_CompleteHistory",
-                "transaction_index = 0 OR transaction_index = parent_transaction_index + 1"
+                "state_version = 1 OR state_version = parent_state_version + 1"
             )
             .Property(lt => lt.FeePaid).AsTokenAmount();
     }

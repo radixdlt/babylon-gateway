@@ -18,17 +18,17 @@
       {
         "name": "network",
         "x-displayName": "Network",
-        "description": "Get info regarding the node and network"
+        "description": "Get info about the node and network"
       },
       {
-        "name": "account",
-        "x-displayName": "Account",
-        "description": "Retrieve regarding an account"
+        "name": "address",
+        "x-displayName": "Address",
+        "description": "Get info about an address"
       },
       {
         "name": "transactions",
         "x-displayName": "Transactions",
-        "description": "Retrieve stream of committed transactions"
+        "description": "Get stream of committed transactions"
       },
       {
         "name": "construction",
@@ -38,73 +38,13 @@
       {
         "name": "sign",
         "x-displayName": "Sign Transaction",
-        "description": "Sign a Transaction"
-      },
-      {
-        "name": "objects",
-        "x-displayName": "Objects",
-        "description": "\n## Committed Transaction\n<SchemaDefinition schemaRef=\"#/components/schemas/CommittedTransaction\" />\n\n## Committed Transaction Metadata\n<SchemaDefinition schemaRef=\"#/components/schemas/CommittedTransactionMetadata\" />"
-      },
-      {
-        "name": "identifiers",
-        "x-displayName": "Identifiers",
-        "description": "\n ## Committed State Identifier\n<SchemaDefinition schemaRef=\"#/components/schemas/CommittedStateIdentifier\" />\n\n## Address Identifier\n<SchemaDefinition schemaRef=\"#/components/schemas/AddressIdentifier\" />"
-      },
-      {
-        "name": "operation_group",
-        "x-displayName": "Operation Group",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/OperationGroup\" />"
-      },
-      {
-        "name": "operation",
-        "x-displayName": "Operation",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Operation\" />"
-      },
-      {
-        "name": "amount",
-        "x-displayName": "Amount",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/ResourceAmount\" />"
-      },
-      {
-        "name": "data",
-        "x-displayName": "Data",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Data\" />"
-      },
-      {
-        "name": "substate",
-        "x-displayName": "Substate",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Substate\" />"
-      },
-      {
-        "name": "data_object",
-        "x-displayName": "Object",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/DataObject\" />"
-      },
-      {
-        "name": "public_key",
-        "x-displayName": "Public Key",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/PublicKey\" />"
-      },
-      {
-        "name": "address_identifier",
-        "x-displayName": "Address Identifier",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/AddressIdentifier\" />"
-      },
-      {
-        "name": "sub_address_identifier",
-        "x-displayName": "Subaddress Identifier",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/SubAddress\" />"
-      },
-      {
-        "name": "resource_identifier",
-        "x-displayName": "Resource Identifier",
-        "description": "<SchemaDefinition schemaRef=\"#/components/schemas/ResourceIdentifier\" />"
+        "description": "Sign a Transaction with the node's private key"
       }
     ],
     "x-tagGroups": [
       {
         "name": "Data API",
-        "tags": [ "network", "account", "transactions" ]
+        "tags": [ "network", "address", "transactions" ]
       },
       {
         "name": "Construction API",
@@ -182,25 +122,24 @@
           }
         }
       },
-  
-      "/account/balance": {
+      "/address": {
         "post": {
-          "summary": "Get Account Balances",
-          "tags": [ "account" ],
+          "summary": "Get Address Info",
+          "tags": [ "address" ],
           "requestBody": {
             "required": true,
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AccountBalanceRequest" }
+                "schema": { "$ref": "#/components/schemas/AddressRequest" }
               }
             }
           },
           "responses": {
             "200": {
-              "description": "Account Balances",
+              "description": "Address Balances and Data",
               "content": {
                 "application/json": {
-                  "schema": { "$ref": "#/components/schemas/AccountBalanceResponse" }
+                  "schema": { "$ref": "#/components/schemas/AddressResponse" }
                 }
               }
             },
@@ -467,7 +406,8 @@
             "current_state_identifier",
             "current_state_epoch",
             "current_state_round",
-            "current_state_timestamp"
+            "current_state_timestamp",
+            "node_identifiers"
           ],
           "properties": {
             "genesis_state_identifier": {
@@ -493,10 +433,11 @@
             "node_identifiers": {
               "description": "The address identifiers associated with this node's private key",
               "type": "object",
-              "required": [ "account_address_identifier", "validator_address_identifier" ],
+              "required": [ "account_address_identifier", "validator_address_identifier", "public_key" ],
               "properties": {
                 "account_address_identifier": { "$ref": "#/components/schemas/AddressIdentifier" },
-                "validator_address_identifier": { "$ref": "#/components/schemas/AddressIdentifier" }
+                "validator_address_identifier": { "$ref": "#/components/schemas/AddressIdentifier" },
+                "public_key": { "$ref": "#/components/schemas/PublicKey" }
               }
             }
           },
@@ -524,9 +465,16 @@
         },
         "SignRequest": {
           "type": "object",
-          "required": [ "transaction" ],
+          "required": [ "public_key", "unsigned_transaction" ],
           "properties": {
-            "transaction": { "type": "string" }
+            "public_key": {
+              "description": "The public key which represents the private key to sign with",
+              "$ref": "#/components/schemas/PublicKey"
+            },
+            "unsigned_transaction": {
+              "description": "Hex encoded unsigned transaction to sign",
+              "type": "string"
+            }
           }
         },
         "SignResponse": {
@@ -536,7 +484,7 @@
             "signed_transaction": { "type": "string" }
           }
         },
-        "AccountBalanceRequest": {
+        "AddressRequest": {
           "type": "object",
           "required": [ "address_identifier" ],
           "properties": {
@@ -551,14 +499,19 @@
             }
           }
         },
-        "AccountBalanceResponse": {
+        "AddressResponse": {
           "type": "object",
-          "required": [ "balances" ],
+          "required": [ "balances", "data_objects" ],
           "properties": {
             "balances": {
               "description": "Balances associated with the address",
               "type": "array",
               "items": { "$ref": "#/components/schemas/ResourceAmount" }
+            },
+            "data_objects": {
+              "description": "Data associated with the address",
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/DataObject" }
             }
           },
           "example": {
@@ -584,7 +537,8 @@
                 },
                 "value": "15000000000000000000000"
               }
-            ]
+            ],
+            "data_objects": []
           }
         },
         "ConstructionBuildRequest": {
@@ -592,12 +546,22 @@
           "required": [ "operation_groups", "fee_payer" ],
           "properties": {
             "operation_groups": {
+              "description": "Operation groups which describe the intent of the request",
               "type": "array",
               "items": { "$ref": "#/components/schemas/OperationGroup" }
             },
-            "fee_payer": { "$ref": "#/components/schemas/AccountAddress" },
-            "message": { "type": "string" },
-            "disable_resource_allocation_and_destroy": { "type": "boolean" }
+            "fee_payer": {
+              "description": "The address where fees will be subtracted from",
+              "$ref": "#/components/schemas/AccountAddress"
+            },
+            "message": {
+              "description": "An optional message encoded in hex",
+              "type": "string"
+            },
+            "disable_resource_allocate_and_destroy": {
+              "description": "Disallow minting and burning of tokens (except for fees). Useful for verification of transactions without additional substate data info such as when verifying transactions in an offline environment",
+              "type": "boolean"
+            }
           },
           "example": {
             "fee_payer": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88",
@@ -653,8 +617,14 @@
           "type": "object",
           "required": [ "transaction", "signed" ],
           "properties": {
-            "transaction": { "type": "string" },
-            "signed": { "type": "boolean" }
+            "transaction": {
+              "description": "Hex encoded transaction to parse",
+              "type": "string"
+            },
+            "signed": {
+              "description": "Whether the transaction is signed or not. If not signed, parsing will skip authorization checks.",
+              "type": "boolean"
+            }
           },
           "example": {
             "transaction": "0d000107ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d9933719381184200000002010021000000000000000000000000000000000000000000000000000101ed50bab1800002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329a6148f65d4e80000008000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329a6148f65d4e7f6a02004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000000000000000000000000009600",
@@ -663,24 +633,40 @@
         },
         "ConstructionParseResponse": {
           "type": "object",
+          "required": [ "operation_groups" ],
           "properties": {
             "operation_groups": {
+              "description": "The parsed operation groups",
               "type": "array",
               "items": { "$ref": "#/components/schemas/OperationGroup" }
+            },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "fee": { "$ref": "#/components/schemas/BigInteger" }
+              }
             }
           }
         },
         "ConstructionFinalizeRequest": {
           "type": "object",
-          "required": [ "unsigned_transaction" ],
+          "required": [ "unsigned_transaction", "signature" ],
           "properties": {
-            "unsigned_transaction": { "type": "string" },
-            "signature": { "$ref": "#/components/schemas/Signature" }
+            "unsigned_transaction": {
+              "description": "Hex encoded unsigned transaction",
+              "type": "string"
+            },
+            "signature": {
+              "description": "The signature for the unsigned transaction",
+              "$ref": "#/components/schemas/Signature"
+            }
           },
           "example": {
             "unsigned_transaction": "0d000107ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d9933719381184200000002010021000000000000000000000000000000000000000000000000000101ed50bab1800002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329a6148f65d4e80000008000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329a6148f65d4e7f6a02004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000000000000000000000000009600",
             "signature": {
-              "public_key": "",
+              "public_key": {
+                "hex": ""
+              },
               "bytes": ""
             }
           }
@@ -689,21 +675,46 @@
           "type": "object",
           "required": [ "signed_transaction" ],
           "properties": {
-            "signed_transaction": { "type": "string" }
+            "signed_transaction": {
+              "description": "Hex encoded signed transaction which can be submitted",
+              "type": "string"
+            }
+          },
+          "example": {
+            "signed_transaction": "07030e7094728c8d065c5db696977696bea9094f67bcfd4c021f99ec784e24023b0000000c0100210000000000000000000000000000000000000000000000000000ffcb9e57d4000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007c13bc4b1c16827082c00000008000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007ad6192165e31dff02c000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329b63364718000000000b015584aed8375f30b22a2203b77dbe15e5dc0a3618fb45ea30ee54a6ebe0054b673a471ad2214b7bd06c4228083643b57e095787c9fb01443e1c3d6890d28f60cf"
           }
         },
         "ConstructionSubmitRequest": {
           "type": "object",
           "required": [ "signed_transaction" ],
           "properties": {
-            "signed_transaction": { "type": "string" }
+            "signed_transaction": {
+              "description": "Hex encoded signed transaction to be submitted",
+              "type": "string"
+            }
+          },
+          "example": {
+            "signed_transaction": "07030e7094728c8d065c5db696977696bea9094f67bcfd4c021f99ec784e24023b0000000c0100210000000000000000000000000000000000000000000000000000ffcb9e57d4000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007c13bc4b1c16827082c00000008000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007ad6192165e31dff02c000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329b63364718000000000b015584aed8375f30b22a2203b77dbe15e5dc0a3618fb45ea30ee54a6ebe0054b673a471ad2214b7bd06c4228083643b57e095787c9fb01443e1c3d6890d28f60cf"
           }
         },
         "ConstructionSubmitResponse": {
           "type": "object",
-          "required": [ "transaction_identifier" ],
+          "required": [ "transaction_identifier", "duplicate" ],
           "properties": {
-            "transaction_identifier": { "type": "string" }
+            "transaction_identifier": {
+              "description": "The unique hashed identifier of the transaction submitted",
+              "$ref": "#/components/schemas/TransactionIdentifier"
+            },
+            "duplicate": {
+              "description": "true, if the transaction is a duplicate of an existring transaction in the mempool",
+              "type": "boolean"
+            }
+          },
+          "example": {
+            "transaction_identifier": {
+              "hash": "ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842"
+            },
+            "duplicate": false
           }
         },
         "ConstructionBuildSuccessResponse": {
@@ -711,16 +722,15 @@
             { "$ref": "#/components/schemas/ConstructionBuildResponse" },
             {
               "type": "object",
-              "required": [ "fee", "unsigned_transaction", "payload_to_sign", "notifications" ],
+              "required": [ "fee", "unsigned_transaction", "payload_to_sign" ],
               "properties": {
-                "fee": { "$ref": "#/components/schemas/BigInteger" },
-                "unsigned_transaction": { "type": "string" },
-                "payload_to_sign": { "type": "string" },
-                "notifications": {
-                  "type": "array",
-                  "items": {
-                    "type": "object"
-                  }
+                "unsigned_transaction": {
+                  "description": "Hex encoded unsigned transaction",
+                  "type": "string"
+                },
+                "payload_to_sign": {
+                  "description": "Hex encoded hash payload to sign",
+                  "type": "string"
                 }
               }
             }
@@ -807,52 +817,216 @@
           "description": "A request to retrieve a sublist of committed transactions to the ledger.",
           "type": "object",
           "properties": {
-            "index": {
-              "description": "The index of the committed transaction to start with. Must be >= 0.",
-              "$ref": "#/components/schemas/LongNumber"
+            "committed_state_identifier": {
+              "description": "The state identifier point from which to begin returning transactions from",
+              "type": "object",
+              "properties": {
+                "state_version": {
+                  "description": "Incrementing state version for every committed transaction beginning with 0.",
+                  "$ref": "#/components/schemas/LongNumber"
+                }
+              }
             },
             "limit": {
-              "description": "The maximum number of transactions that will be returned. Must be >= 1.",
+              "description": "The maximum number of transactions that will be returned.",
               "$ref": "#/components/schemas/LongNumber"
             }
           },
           "example": {
-            "index": 0,
+            "committed_state_identifier": {
+              "state_version": 0
+            },
             "limit": 1
           }
         },
         "CommittedTransactionsResponse": {
           "description": "A response of committed transactions which specifies the state updates which have occurred on ledger.",
           "type": "object",
-          "required": [ "transactions" ],
+          "required": [ "committed_state_identifier", "next_committed_state_identifier", "transactions" ],
           "properties": {
+            "committed_state_identifier": {
+              "description": "The committed ledger state identifier from which this transaction list starts from",
+              "$ref": "#/components/schemas/CommittedStateIdentifier"
+            },
             "transactions": {
+              "description": "A committed transactions list starting from the `committed_state_identifier`",
               "type": "array",
               "items": { "$ref": "#/components/schemas/CommittedTransaction" }
+            },
+            "next_committed_state_identifier": {
+              "description": "The next ledger state identifier following the commit of this transaction list",
+              "$ref": "#/components/schemas/CommittedStateIdentifier"
             }
+          },
+          "example": {
+            "committed_state_identifier": {
+              "state_version": 40897,
+              "transaction_accumulator": "dd61e3e2c9cdda8bf8973ea7d6dd4e6482c569fff45f0ca5e2bfd196f5bae4c9"
+            },
+            "next_committed_state_identifier": {
+              "state_version": 40898,
+              "transaction_accumulator": "5ea573f2e31640d177047d14122f1015c262f0d14d522596068784406aa1d88f"
+            },
+            "transactions": [
+              {
+                "metadata": {
+                  "size": 360,
+                  "signed_by": {
+                    "hex": "02aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b6"
+                  },
+                  "fee": "72000000000000000",
+                  "hex": "07030e7094728c8d065c5db696977696bea9094f67bcfd4c021f99ec784e24023b0000000c0100210000000000000000000000000000000000000000000000000000ffcb9e57d4000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007c13bc4b1c16827082c00000008000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007ad6192165e31dff02c000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329b63364718000000000b015584aed8375f30b22a2203b77dbe15e5dc0a3618fb45ea30ee54a6ebe0054b673a471ad2214b7bd06c4228083643b57e095787c9fb01443e1c3d6890d28f60cf",
+                  "timestamp": 1627407310726
+                },
+                "transaction_identifier": {
+                  "hash": "ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842"
+                },
+                "operation_groups": [
+                  {
+                    "metadata": {
+                      "action": {
+                        "amount": "72000000000000000",
+                        "rri": "xrd_rr1qy5wfsfh",
+                        "from": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33",
+                        "type": "BurnTokens"
+                      }
+                    },
+                    "operations": [
+                      {
+                        "amount": {
+                          "resource_identifier": {
+                            "rri": "xrd_rr1qy5wfsfh",
+                            "type": "Token"
+                          },
+                          "value": "-2400000000000000000000000000"
+                        },
+                        "substate": {
+                          "substate_identifier": {
+                            "identifier": "030e7094728c8d065c5db696977696bea9094f67bcfd4c021f99ec784e24023b0000000c"
+                          },
+                          "substate_operation": "SHUTDOWN"
+                        },
+                        "address_identifier": {
+                          "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+                        },
+                        "type": "Resource"
+                      },
+                      {
+                        "metadata": {
+                          "substate_data_hex": "06000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007c13bc4b1c16827082c0000"
+                        },
+                        "amount": {
+                          "resource_identifier": {
+                            "rri": "xrd_rr1qy5wfsfh",
+                            "type": "Token"
+                          },
+                          "value": "2399999999928000000000000000"
+                        },
+                        "substate": {
+                          "substate_identifier": {
+                            "identifier": "ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d9933719381184200000000"
+                          },
+                          "substate_operation": "BOOTUP"
+                        },
+                        "address_identifier": {
+                          "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+                        },
+                        "type": "Resource"
+                      }
+                    ]
+                  },
+                  {
+                    "metadata": {
+                      "action": {
+                        "amount": "24000000000000000000000000",
+                        "rri": "xrd_rr1qy5wfsfh",
+                        "from": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33",
+                        "to": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88",
+                        "type": "TokenTransfer"
+                      }
+                    },
+                    "operations": [
+                      {
+                        "amount": {
+                          "resource_identifier": {
+                            "rri": "xrd_rr1qy5wfsfh",
+                            "type": "Token"
+                          },
+                          "value": "-2399999999928000000000000000"
+                        },
+                        "substate": {
+                          "substate_identifier": {
+                            "identifier": "ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d9933719381184200000000"
+                          },
+                          "substate_operation": "SHUTDOWN"
+                        },
+                        "address_identifier": {
+                          "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+                        },
+                        "type": "Resource"
+                      },
+                      {
+                        "metadata": {
+                          "substate_data_hex": "06000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007ad6192165e31dff02c0000"
+                        },
+                        "amount": {
+                          "resource_identifier": {
+                            "rri": "xrd_rr1qy5wfsfh",
+                            "type": "Token"
+                          },
+                          "value": "2375999999928000000000000000"
+                        },
+                        "substate": {
+                          "substate_identifier": {
+                            "identifier": "ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d9933719381184200000001"
+                          },
+                          "substate_operation": "BOOTUP"
+                        },
+                        "address_identifier": {
+                          "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+                        },
+                        "type": "Resource"
+                      },
+                      {
+                        "metadata": {
+                          "substate_data_hex": "06000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329b63364718000000"
+                        },
+                        "amount": {
+                          "resource_identifier": {
+                            "rri": "xrd_rr1qy5wfsfh",
+                            "type": "Token"
+                          },
+                          "value": "24000000000000000000000000"
+                        },
+                        "substate": {
+                          "substate_identifier": {
+                            "identifier": "ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d9933719381184200000002"
+                          },
+                          "substate_operation": "BOOTUP"
+                        },
+                        "address_identifier": {
+                          "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+                        },
+                        "type": "Resource"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         },
         "CommittedTransaction": {
           "description": "A transaction which has been committed on ledger at some index.",
           "type": "object",
           "required": [
-            "committed_state_identifier",
-            "previous_committed_state_identifier",
             "transaction_identifier",
             "operation_groups",
             "metadata"
           ],
           "properties": {
-            "committed_state_identifier": {
-              "description": "A unique ledger state identifier following the commit of this transaction.",
-              "$ref": "#/components/schemas/CommittedStateIdentifier"
-            },
-            "previous_committed_state_identifier": {
-              "description": "The preceding ledger state identifier. Used for detecting forks.",
-              "$ref": "#/components/schemas/CommittedStateIdentifier"
-            },
             "transaction_identifier": {
-              "description": "The 32-byte unique identifier for the transaction, hex encoded.",
+              "description": "The unique identifier for the transaction",
               "$ref": "#/components/schemas/TransactionIdentifier"
             },
             "operation_groups": {
@@ -914,10 +1088,10 @@
         },
         "Operation": {
           "type": "object",
-          "required": [ "type", "address_identifier" ],
+          "required": [ "type" ],
           "properties": {
             "type": {
-              "description": "The type of substate in this operation",
+              "description": "The type of operation: Resource, Data, or ResourceAndData",
               "type": "string"
             },
             "address_identifier": {
@@ -951,10 +1125,22 @@
               "type": "string",
               "enum": [ "BOOTUP", "SHUTDOWN" ]
             },
-            "substate_identifier": {
-              "description": "Hex encoded unique identifier for the substate",
-              "type": "string"
-            }
+            "substate_identifier": { "$ref": "#/components/schemas/SubstateIdentifier" }
+          }
+        },
+        "TransactionIdentifier": {
+          "type": "object",
+          "required": [ "hash" ],
+          "properties": {
+            "hash": { "$ref": "#/components/schemas/TransactionIdentifierHash" }
+          }
+        },
+        "SubstateIdentifier": {
+          "description": "Hex encoded unique identifier for the substate",
+          "type": "object",
+          "required": [ "identifier" ],
+          "properties": {
+            "identifier": { "type": "string" }
           }
         },
         "OperationMetadata": {
@@ -976,14 +1162,14 @@
         },
         "Data": {
           "type": "object",
-          "required": [ "action", "object" ],
+          "required": [ "action", "data_object" ],
           "properties": {
             "action": {
               "description": "Data action to take on `object`",
               "type": "string",
               "enum": [ "CREATE", "DELETE" ]
             },
-            "object": {
+            "data_object": {
               "description": "The object of the data action",
               "$ref": "#/components/schemas/DataObject"
             }
@@ -1262,6 +1448,7 @@
         },
         "PublicKey": {
           "type": "object",
+          "required": [ "hex" ],
           "properties": {
             "hex": {
               "description": "Compressed ECSDA Public Key hex encoded",
@@ -1374,12 +1561,13 @@
           "type": "object",
           "required": [ "public_key", "bytes" ],
           "properties": {
-            "public_key": { "type": "string" },
+            "public_key": { "$ref": "#/components/schemas/PublicKey" },
             "bytes": { "type": "string" }
           }
         },
         "Bech32HRPs": {
           "type": "object",
+          "required": [ "account_hrp", "validator_hrp", "node_hrp", "resource_hrp_suffix" ],
           "properties": {
             "account_hrp": { "type": "string" },
             "validator_hrp": { "type": "string" },
@@ -1407,7 +1595,7 @@
           "type": "string",
           "pattern": "^-?[0-9]+$"
         },
-        "TransactionIdentifier": {
+        "TransactionIdentifierHash": {
           "type": "string",
           "pattern": "^[0123456789abcdef]{64}$",
           "maxLength": 64,

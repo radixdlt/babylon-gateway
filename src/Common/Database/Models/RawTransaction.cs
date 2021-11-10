@@ -12,7 +12,7 @@ public class RawTransaction
     [Key]
     [Column(name: "transaction_id")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public byte[] TransactionIdentifier { get; set; }
+    public byte[] TransactionIdentifierHash { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was committed through this gateway.
@@ -31,9 +31,9 @@ public class RawTransaction
     [Column("payload")]
     public byte[]? Payload { get; set; }
 
-    public RawTransaction(byte[] transactionIdentifier, DateTime? submittedTimestamp = null, byte[]? payload = null)
+    public RawTransaction(byte[] transactionIdentifierHash, DateTime? submittedTimestamp = null, byte[]? payload = null)
     {
-        TransactionIdentifier = transactionIdentifier;
+        TransactionIdentifierHash = transactionIdentifierHash;
         SubmittedTimestamp = submittedTimestamp;
         Payload = payload;
     }

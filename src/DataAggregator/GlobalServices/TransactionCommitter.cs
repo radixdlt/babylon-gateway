@@ -1,11 +1,9 @@
-using Common.Addressing;
 using Common.Database;
 using Common.Database.Models;
 using Common.Extensions;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
-using System.Numerics;
 
 namespace DataAggregator.GlobalServices;
 
@@ -57,7 +55,7 @@ public class TransactionCommitter : ITransactionCommitter
     {
         return new RawTransaction
         {
-            TransactionIdentifier = transaction.TransactionIdentifier.ConvertFromHex(),
+            TransactionIdentifierHash = transaction.TransactionIdentifier.Hash.ConvertFromHex(),
             Payload = transaction.Metadata.Hex.ConvertFromHex(),
         };
     }
@@ -78,16 +76,18 @@ public class TransactionCommitter : ITransactionCommitter
         }
     }
 
+    private static long stateVersion = 0; // TODO - fix me (!)
+
     private static LedgerTransaction CreateLedgerTransactionShell(CommittedTransaction transaction)
     {
-        var transactionIndex = transaction.CommittedStateIdentifier.StateVersion - 1;
-        long? parentTransactionIndex = transactionIndex > 0 ? transactionIndex - 1 : null;
+        stateVersion++;
+        var resultantStateVersion = stateVersion;
+        long? parentStateVersion = resultantStateVersion > 1 ? resultantStateVersion - 1 : null;
         return new LedgerTransaction(
-            transactionIndex: transactionIndex,
-            parentTransactionIndex: parentTransactionIndex,
-            transactionIdentifier: transaction.TransactionIdentifier.ConvertFromHex(),
-            transactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
-            resultantStateVersion: transaction.CommittedStateIdentifier.StateVersion,
+            resultantStateVersion: resultantStateVersion,
+            parentStateVersion: parentStateVersion,
+            transactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
+            transactionAccumulator: Array.Empty<byte>(), // TODO - fix!
             message: transaction.Metadata.Message?.ConvertFromHex(),
             feePaid: TokenAmount.FromString(transaction.Metadata.Fee),
             epoch: 0, // TODO - fix!

@@ -12,7 +12,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
     private readonly ILogger<NodeTransactionLogWorker> _logger;
     private readonly ITransactionLogReader _transactionLogReader;
     private readonly ITransactionCommitter _transactionCommitter;
-    private int _transactionIndex;
+    private int _stateVersion = 1;
 
     public NodeTransactionLogWorker(
         ILogger<NodeTransactionLogWorker> logger,
@@ -28,14 +28,17 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
     protected override async Task DoWork(CancellationToken stoppingToken)
     {
-        // TODO - do something sensible
-        var transactions = await _transactionLogReader.GetTransactions(_transactionIndex, 10);
+        // TODO - record where we've got up to; implement syncing state machine
+        var transactions = await _transactionLogReader.GetTransactions(_stateVersion, 100, stoppingToken);
         _logger.LogInformation(
             "Transaction {StateVersion} has {Count} operation groups",
-            _transactionIndex,
+            _stateVersion,
             transactions[0].OperationGroups.Count
         );
+
+        // For now - just commit all transactions > this should actually be a global service, not a node-scoped service
+        // But I'm focusing on CommitTransactions for the purposes of the example, and will come back and fix this later
         await _transactionCommitter.CommitTransactions(transactions, stoppingToken);
-        _transactionIndex += 10;
+        _stateVersion += 100;
     }
 }

@@ -48,7 +48,7 @@ public class NodeWorkersRunner : IDisposable
     /// <summary>
     ///  Runs all INodeInitializers and waits for them to complete.
     ///  Should be awaited before workers are started. Can throw if initialization fails.
-    ///  If this throws, it is the caller's duty to call StopWorkersSafe or Dispose()
+    ///  If this throws, it is the caller's duty to call StopWorkersSafe or Dispose().
     /// </summary>
     public async Task Initialize(CancellationToken cancellationToken)
     {

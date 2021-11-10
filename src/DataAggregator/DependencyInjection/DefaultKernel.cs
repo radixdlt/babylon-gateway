@@ -13,10 +13,14 @@ public class DefaultKernel
 {
     public void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
     {
+        // Globally-Scoped services
         AddGlobalScopedServices(services);
         AddGlobalHostedServices(services);
         AddDatabaseContext(hostBuilderContext, services);
+
+        // Node-Scoped services
         AddNodeScopedServices(services);
+        AddNodeApiReaders(services);
         AddNodeInitializers(services);
         AddNodeWorkers(services);
     }
@@ -57,8 +61,16 @@ public class DefaultKernel
     private void AddNodeScopedServices(IServiceCollection services)
     {
         services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
+    }
+
+    private void AddNodeApiReaders(IServiceCollection services)
+    {
+        // This should only be used from the other readers, to ensure encapsulation for testing
         services.AddScoped<INodeCoreApiProvider, NodeCoreApiProvider>();
+
+        // We can mock these out in tests
         services.AddScoped<ITransactionLogReader, TransactionLogReader>();
+        services.AddScoped<INetworkConfigurationReader, NetworkConfigurationReader>();
     }
 
     private void AddNodeInitializers(IServiceCollection services)

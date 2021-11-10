@@ -10,7 +10,7 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.4.3' # This needs bumping every time
+packageVersion='0.4.4' # This needs bumping every time
 outputDirectory="../generated"
 packageVersionLocation="../Directory.Packages.props"
 

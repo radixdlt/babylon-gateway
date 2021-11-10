@@ -12,28 +12,25 @@ namespace Common.Database.Models;
 public class LedgerTransaction
 {
     [Key]
-    [Column(name: "transaction_index")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public long TransactionIndex { get; set; }
+    [Column(name: "state_version")]
+    public long ResultantStateVersion { get; set; }
 
     // This is provided to enable a constraint to ensure there are no gaps in the ledger (see OnModelCreating).
-    [Column(name: "parent_transaction_index")]
-    public long? ParentTransactionIndex { get; set; }
+    [Column(name: "parent_state_version")]
+    public long? ParentStateVersion { get; set; }
 
-    [ForeignKey("ParentTransactionIndex")]
+    [ForeignKey(nameof(ParentStateVersion))]
     public LedgerTransaction? Parent { get; set; }
 
     [Column(name: "transaction_id")]
-    public byte[] TransactionIdentifier { get; set; }
+    public byte[] TransactionIdentifierHash { get; set; }
 
-    [ForeignKey("TransactionIdentifier")]
+    [ForeignKey(nameof(TransactionIdentifierHash))]
     public RawTransaction? RawTransaction { get; set; }
 
     [Column(name: "transaction_accumulator")]
     public byte[] TransactionAccumulator { get; set; }
-
-    [Column(name: "state_version")]
-    public long ResultantStateVersion { get; set; }
 
     [Column(name: "message")]
     public byte[]? Message { get; set; }
@@ -53,13 +50,12 @@ public class LedgerTransaction
     [Column(name: "timestamp")]
     public DateTime Timestamp { get; set; }
 
-    public LedgerTransaction(long transactionIndex, long? parentTransactionIndex, byte[] transactionIdentifier, byte[] transactionAccumulator, long resultantStateVersion, byte[]? message, TokenAmount feePaid, long epoch, int indexInEpoch, bool isEndOfEpoch, DateTime timestamp)
+    public LedgerTransaction(long resultantStateVersion, long? parentStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, int indexInEpoch, bool isEndOfEpoch, DateTime timestamp)
     {
-        TransactionIndex = transactionIndex;
-        ParentTransactionIndex = parentTransactionIndex;
-        TransactionIdentifier = transactionIdentifier;
-        TransactionAccumulator = transactionAccumulator;
         ResultantStateVersion = resultantStateVersion;
+        ParentStateVersion = parentStateVersion;
+        TransactionIdentifierHash = transactionIdentifierHash;
+        TransactionAccumulator = transactionAccumulator;
         Message = message;
         FeePaid = feePaid;
         Epoch = epoch;

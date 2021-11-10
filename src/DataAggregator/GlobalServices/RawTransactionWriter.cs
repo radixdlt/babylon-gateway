@@ -27,7 +27,7 @@ public class RawTransactionWriter : IRawTransactionWriter
             .UpsertRange(rawTransactions)
             .WhenMatched((existingTransaction, newTransaction) => new RawTransaction
             {
-                TransactionIdentifier = newTransaction.TransactionIdentifier,
+                TransactionIdentifierHash = newTransaction.TransactionIdentifierHash,
                 SubmittedTimestamp = newTransaction.SubmittedTimestamp ?? existingTransaction.SubmittedTimestamp,
                 Payload = newTransaction.Payload ?? existingTransaction.Payload,
             })
