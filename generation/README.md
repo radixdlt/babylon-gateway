@@ -12,13 +12,12 @@ Prerequisites:
 
 With all paths relative to the repo root, proceed as follows:
 
-* Update `./generation/transactions-api-spec.json` with the latest spec
+* Update `./generation/core-api-spec.json` with the latest spec
 * Update the target version in `./generation/regenerate-transactions-client.sh`
 * Run `./generation/regenerate-transactions-client.sh`
-* Copy the new version from `./generation/packed` to `./generated`
-* Update the version in `./Directory.Build.props`
 
 ### Docs
+
 * Docs on [general openapi-generator configuration are here](https://openapi-generator.tech/docs/configuration/).
 * Docs on the [csharp-netcore specific configuration are here](https://openapi-generator.tech/docs/generators/csharp-netcore).
 * The PR implementing the [httpclient implementation is here](https://github.com/OpenAPITools/openapi-generator/pull/8821).

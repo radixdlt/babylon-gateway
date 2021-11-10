@@ -40,11 +40,10 @@ namespace DataAggregator.Migrations
                 name: "ledger_transactions",
                 columns: table => new
                 {
-                    transaction_index = table.Column<long>(type: "bigint", nullable: false),
-                    parent_transaction_index = table.Column<long>(type: "bigint", nullable: true),
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    parent_state_version = table.Column<long>(type: "bigint", nullable: true),
                     transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
-                    state_version = table.Column<long>(type: "bigint", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     fee_paid = table.Column<string>(type: "text", nullable: false),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
@@ -54,13 +53,13 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_ledger_transactions", x => x.transaction_index);
-                    table.CheckConstraint("CK_ledger_transactions_CK_CompleteHistory", "transaction_index = 0 OR transaction_index = parent_transaction_index + 1");
+                    table.PrimaryKey("pk_ledger_transactions", x => x.state_version);
+                    table.CheckConstraint("CK_ledger_transactions_CK_CompleteHistory", "state_version = 1 OR state_version = parent_state_version + 1");
                     table.ForeignKey(
-                        name: "fk_ledger_transactions_ledger_transactions_parent_transaction_",
-                        column: x => x.parent_transaction_index,
+                        name: "fk_ledger_transactions_ledger_transactions_parent_state_version",
+                        column: x => x.parent_state_version,
                         principalTable: "ledger_transactions",
-                        principalColumn: "transaction_index");
+                        principalColumn: "state_version");
                     table.ForeignKey(
                         name: "fk_ledger_transactions_raw_transactions_transaction_id",
                         column: x => x.transaction_id,
@@ -70,9 +69,9 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_ledger_transactions_parent_transaction_index",
+                name: "ix_ledger_transactions_parent_state_version",
                 table: "ledger_transactions",
-                column: "parent_transaction_index");
+                column: "parent_state_version");
 
             migrationBuilder.CreateIndex(
                 name: "ix_ledger_transactions_transaction_id",

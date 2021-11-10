@@ -11,7 +11,8 @@ cd "$SCRIPT_DIR"
 #############
 
 packageVersion='0.4.4' # This needs bumping every time
-outputDirectory="../generated"
+packageName='RadixCoreApi.GeneratedClient'
+outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
 
 ##########
@@ -25,7 +26,7 @@ else
 fi
 
 if [ ! -z "$existsCheck" ]; then
-    echo "Package with version $packageVersion has already been built."
+    echo "Package $packageName with version $packageVersion has already been built."
     echo "You should bump the version in regenerate-transactions-client.sh so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
     echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
     exit 1
@@ -51,7 +52,7 @@ openapi-generator generate \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=RadixCoreApi.GeneratedClient,targetFramework=net5.0,packageVersion=$packageVersion
+    --additional-properties=packageName=$packageName,targetFramework=net5.0,packageVersion=$packageVersion
 
 cd "$dummyApiDirectory"
 dotnet pack
@@ -60,14 +61,14 @@ cd "$SCRIPT_DIR"
 mkdir -p "$outputDirectory"
 
 # Tidy up old versions
-find "$outputDirectory" -name RadixCoreApi.GeneratedClient.\*.nupkg -exec rm {} \;
+find "$outputDirectory" -name "$packageName.\*.nupkg" -exec rm {} \;
 
 # Create new versions
-find "$dummyApiDirectory/src/RadixCoreApi.GeneratedClient/bin/Debug" -name \*.nupkg -exec cp {} "$outputDirectory" \;
+find "$dummyApiDirectory/src/$packageName/bin/Debug" -name \*.nupkg -exec cp {} "$outputDirectory" \;
 
 # Clear up generated api so that it doesn't interfere with indexes/lookups
 rm -rf "$dummyApiDirectory"
 
 # Update the version in the packages listing
-sed -i.bu -e "s/Include=\"RadixCoreApi.GeneratedClient\" Version=\"[^\"]*\"/Include=\"RadixCoreApi.GeneratedClient\" Version=\"$packageVersion\"/" "$packageVersionLocation"
+sed -i.bu -e "s/Include=\"$packageName\" Version=\"[^\"]*\"/Include=\"$packageName\" Version=\"$packageVersion\"/" "$packageVersionLocation"
 rm "$packageVersionLocation.bu" # Clear up the back up file from sed if it completes successfully

@@ -1,0 +1,9 @@
+# To learn more about .editorconfig see https://aka.ms/editorconfigdocs
+
+#### This file is to ensure the auto-generated migrations don't trigger warnings
+
+[*.cs]
+
+# Style cop
+dotnet_diagnostic.SA1413.severity = none # SA1413UseTrailingCommasInMultiLineInitializers
+dotnet_diagnostic.SA1210.severity = none # SA1210UsingDirectivesMustBeOrderedAlphabeticallyByNamespace

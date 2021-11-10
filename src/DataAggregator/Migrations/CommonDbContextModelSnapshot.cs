@@ -24,9 +24,9 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.LedgerTransaction", b =>
                 {
-                    b.Property<long>("TransactionIndex")
+                    b.Property<long>("ResultantStateVersion")
                         .HasColumnType("bigint")
-                        .HasColumnName("transaction_index");
+                        .HasColumnName("state_version");
 
                     b.Property<long>("Epoch")
                         .HasColumnType("bigint")
@@ -49,13 +49,9 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
-                    b.Property<long?>("ParentTransactionIndex")
+                    b.Property<long?>("ParentStateVersion")
                         .HasColumnType("bigint")
-                        .HasColumnName("parent_transaction_index");
-
-                    b.Property<long>("ResultantStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("state_version");
+                        .HasColumnName("parent_state_version");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone")
@@ -66,23 +62,23 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_accumulator");
 
-                    b.Property<byte[]>("TransactionIdentifier")
+                    b.Property<byte[]>("TransactionIdentifierHash")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_id");
 
-                    b.HasKey("TransactionIndex")
+                    b.HasKey("ResultantStateVersion")
                         .HasName("pk_ledger_transactions");
 
-                    b.HasIndex("ParentTransactionIndex")
-                        .HasDatabaseName("ix_ledger_transactions_parent_transaction_index");
+                    b.HasIndex("ParentStateVersion")
+                        .HasDatabaseName("ix_ledger_transactions_parent_state_version");
 
-                    b.HasIndex("TransactionIdentifier")
+                    b.HasIndex("TransactionIdentifierHash")
                         .HasDatabaseName("ix_ledger_transactions_transaction_id");
 
                     b.ToTable("ledger_transactions", (string)null);
 
-                    b.HasCheckConstraint("CK_CompleteHistory", "transaction_index = 0 OR transaction_index = parent_transaction_index + 1");
+                    b.HasCheckConstraint("CK_CompleteHistory", "state_version = 1 OR state_version = parent_state_version + 1");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Node", b =>
@@ -112,7 +108,7 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.RawTransaction", b =>
                 {
-                    b.Property<byte[]>("TransactionIdentifier")
+                    b.Property<byte[]>("TransactionIdentifierHash")
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_id");
 
@@ -124,7 +120,7 @@ namespace DataAggregator.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("submitted_timestamp");
 
-                    b.HasKey("TransactionIdentifier")
+                    b.HasKey("TransactionIdentifierHash")
                         .HasName("pk_raw_transactions");
 
                     b.ToTable("raw_transactions", (string)null);
@@ -134,12 +130,12 @@ namespace DataAggregator.Migrations
                 {
                     b.HasOne("Common.Database.Models.LedgerTransaction", "Parent")
                         .WithMany()
-                        .HasForeignKey("ParentTransactionIndex")
-                        .HasConstraintName("fk_ledger_transactions_ledger_transactions_parent_transaction_");
+                        .HasForeignKey("ParentStateVersion")
+                        .HasConstraintName("fk_ledger_transactions_ledger_transactions_parent_state_version");
 
                     b.HasOne("Common.Database.Models.RawTransaction", "RawTransaction")
                         .WithMany()
-                        .HasForeignKey("TransactionIdentifier")
+                        .HasForeignKey("TransactionIdentifierHash")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_ledger_transactions_raw_transactions_transaction_id");
