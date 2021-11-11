@@ -1,5 +1,6 @@
 using Common.Database;
 using Common.Database.Models;
+using Common.Database.Models.Ledger;
 using Common.Extensions;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
@@ -53,11 +54,11 @@ public class TransactionCommitter : ITransactionCommitter
 
     private static RawTransaction CreateRawTransaction(CommittedTransaction transaction)
     {
-        return new RawTransaction
-        {
-            TransactionIdentifierHash = transaction.TransactionIdentifier.Hash.ConvertFromHex(),
-            Payload = transaction.Metadata.Hex.ConvertFromHex(),
-        };
+        return new RawTransaction(
+            transactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
+            submittedTimestamp: null,
+            payload: transaction.Metadata.Hex.ConvertFromHex()
+        );
     }
 
     private void HandleOperationGroups(CommittedTransaction transaction)
@@ -93,7 +94,8 @@ public class TransactionCommitter : ITransactionCommitter
             epoch: 0, // TODO - fix!
             indexInEpoch: 0, // TODO - fix!
             isEndOfEpoch: false, // TODO - fix!
-            timestamp: DateTimeOffset.FromUnixTimeMilliseconds(transaction.Metadata.Timestamp).UtcDateTime
+            timestamp: DateTimeOffset.FromUnixTimeMilliseconds(transaction.Metadata.Timestamp).UtcDateTime,
+            endOfEpochRound: null // TODO - fix!
         );
     }
 }

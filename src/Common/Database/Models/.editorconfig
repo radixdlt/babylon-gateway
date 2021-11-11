@@ -11,9 +11,16 @@ resharper_unused_auto_property_accessor_global_highlighting = none
 resharper_member_can_be_private_global_highlighting = none
 resharper_auto_property_can_be_made_get_only_global_highlighting = none
 resharper_property_can_be_made_init_only_global_highlighting = none
+resharper_unused_member_local_highlighting = none
+resharper_class_never_instantiated_global_highlighting = none
 
 #### OTHER
 
 # Remove documentation hints
 dotnet_diagnostic.CS1591.severity = none # Missing XML comment for publicly visible type or member 'Type_or_Member'
 dotnet_diagnostic.SA1623.severity = none # SA1623PropertySummaryDocumentationMustMatchAccessors
+
+# Allow comments to be added in more places
+dotnet_diagnostic.SA1515.severity = none # SA1515SingleLineCommentMustBePrecededByBlankLine
+
+dotnet_diagnostic.CS8618.severity = none # CS8618 - Failing to set none-nullable properties from constructor. Disabled to support the required empty constructor for some EF Core functionality.

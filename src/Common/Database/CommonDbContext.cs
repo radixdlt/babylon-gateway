@@ -1,9 +1,7 @@
 using Common.Database.Models;
+using Common.Database.Models.Ledger;
 using Common.Extensions;
-using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Numerics;
 
 namespace Common.Database;
 
@@ -29,12 +27,30 @@ public class CommonDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder
-            .Entity<LedgerTransaction>()
+        modelBuilder.Entity<LedgerTransaction>()
             .HasCheckConstraint(
                 "CK_CompleteHistory",
                 "state_version = 1 OR state_version = parent_state_version + 1"
             )
             .Property(lt => lt.FeePaid).AsTokenAmount();
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasAlternateKey(lt => lt.TransactionIdentifierHash);
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasAlternateKey(lt => lt.TransactionAccumulator);
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => new { lt.Epoch, lt.EndOfEpochRound })
+            .IsUnique()
+            .HasFilter("end_of_round IS NOT NULL");
+
+        modelBuilder.Entity<OperationGroup>()
+            .HasKey(og => new { og.ResultantStateVersion, og.OperationGroupIndex });
+
+        modelBuilder.Entity<OperationGroup>()
+            .OwnsOne(og => og.InferredAction, b => b
+                .Property(ia => ia.Amount).AsTokenAmount()
+            );
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Common.Extensions;
 
-public static class PropertBuilderExtensions
+public static class PropertyBuilderExtensions
 {
     public static PropertyBuilder<TProperty> AsTokenAmount<TProperty>(this PropertyBuilder<TProperty> builder)
     {

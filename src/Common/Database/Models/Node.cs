@@ -10,6 +10,18 @@ namespace Common.Database.Models;
 [Table("nodes")]
 public class Node
 {
+    public Node(string name, string address, decimal trustWeighting, bool enabledForIndexing)
+    {
+        Name = name;
+        Address = address;
+        TrustWeighting = trustWeighting;
+        EnabledForIndexing = enabledForIndexing;
+    }
+
+    private Node()
+    {
+    }
+
     [Key]
     [Column(name: "name")]
     public string Name { get; set; }
@@ -22,12 +34,4 @@ public class Node
 
     [Column(name: "enabled_for_indexing")]
     public bool EnabledForIndexing { get; set; }
-
-    public Node(string name, string address, decimal trustWeighting, bool enabledForIndexing)
-    {
-        Name = name;
-        Address = address;
-        TrustWeighting = trustWeighting;
-        EnabledForIndexing = enabledForIndexing;
-    }
 }

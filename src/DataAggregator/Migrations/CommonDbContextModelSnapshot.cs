@@ -22,11 +22,15 @@ namespace DataAggregator.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Common.Database.Models.LedgerTransaction", b =>
+            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
                 {
                     b.Property<long>("ResultantStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
+
+                    b.Property<int?>("EndOfEpochRound")
+                        .HasColumnType("integer")
+                        .HasColumnName("end_of_round");
 
                     b.Property<long>("Epoch")
                         .HasColumnType("bigint")
@@ -70,15 +74,42 @@ namespace DataAggregator.Migrations
                     b.HasKey("ResultantStateVersion")
                         .HasName("pk_ledger_transactions");
 
+                    b.HasAlternateKey("TransactionAccumulator")
+                        .HasName("ak_ledger_transactions_transaction_accumulator");
+
+                    b.HasAlternateKey("TransactionIdentifierHash")
+                        .HasName("ak_ledger_transactions_transaction_id");
+
                     b.HasIndex("ParentStateVersion")
                         .HasDatabaseName("ix_ledger_transactions_parent_state_version");
 
-                    b.HasIndex("TransactionIdentifierHash")
-                        .HasDatabaseName("ix_ledger_transactions_transaction_id");
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("ix_ledger_transactions_timestamp");
+
+                    b.HasIndex("Epoch", "EndOfEpochRound")
+                        .IsUnique()
+                        .HasDatabaseName("ix_ledger_transactions_epoch_end_of_round")
+                        .HasFilter("end_of_round IS NOT NULL");
 
                     b.ToTable("ledger_transactions", (string)null);
 
                     b.HasCheckConstraint("CK_CompleteHistory", "state_version = 1 OR state_version = parent_state_version + 1");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.OperationGroup", b =>
+                {
+                    b.Property<long>("ResultantStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.Property<int>("OperationGroupIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("operation_group_index");
+
+                    b.HasKey("ResultantStateVersion", "OperationGroupIndex")
+                        .HasName("pk_operation_groups");
+
+                    b.ToTable("operation_groups", (string)null);
                 });
 
             modelBuilder.Entity("Common.Database.Models.Node", b =>
@@ -126,9 +157,9 @@ namespace DataAggregator.Migrations
                     b.ToTable("raw_transactions", (string)null);
                 });
 
-            modelBuilder.Entity("Common.Database.Models.LedgerTransaction", b =>
+            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
                 {
-                    b.HasOne("Common.Database.Models.LedgerTransaction", "Parent")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentStateVersion")
                         .HasConstraintName("fk_ledger_transactions_ledger_transactions_parent_state_version");
@@ -143,6 +174,60 @@ namespace DataAggregator.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("RawTransaction");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.OperationGroup", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("ResultantStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_operation_groups_ledger_transactions_state_version");
+
+                    b.OwnsOne("Common.Database.Models.Ledger.InferredAction", "InferredAction", b1 =>
+                        {
+                            b1.Property<long>("OperationGroupResultantStateVersion")
+                                .HasColumnType("bigint")
+                                .HasColumnName("state_version");
+
+                            b1.Property<int>("OperationGroupIndex")
+                                .HasColumnType("integer")
+                                .HasColumnName("operation_group_index");
+
+                            b1.Property<string>("Amount")
+                                .HasColumnType("text")
+                                .HasColumnName("inferred_action_amount");
+
+                            b1.Property<string>("FromAddress")
+                                .HasColumnType("text")
+                                .HasColumnName("inferred_action_from");
+
+                            b1.Property<string>("ResourceIdentifier")
+                                .HasColumnType("text")
+                                .HasColumnName("inferred_action_rri");
+
+                            b1.Property<string>("ToAddress")
+                                .HasColumnType("text")
+                                .HasColumnName("inferred_action_to");
+
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("inferred_action_type");
+
+                            b1.HasKey("OperationGroupResultantStateVersion", "OperationGroupIndex");
+
+                            b1.ToTable("operation_groups");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OperationGroupResultantStateVersion", "OperationGroupIndex")
+                                .HasConstraintName("fk_operation_groups_operation_groups_inferred_action_operation");
+                        });
+
+                    b.Navigation("InferredAction");
+
+                    b.Navigation("LedgerTransaction");
                 });
 #pragma warning restore 612, 618
         }

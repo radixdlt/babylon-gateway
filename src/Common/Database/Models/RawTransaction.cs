@@ -9,6 +9,18 @@ namespace Common.Database.Models;
 [Table("raw_transactions")]
 public class RawTransaction
 {
+    public RawTransaction(byte[] transactionIdentifierHash, DateTime? submittedTimestamp = null, byte[]? payload = null)
+    {
+        TransactionIdentifierHash = transactionIdentifierHash;
+        SubmittedTimestamp = submittedTimestamp;
+        Payload = payload;
+    }
+
+    // Public empty constructor created for use with the Upsert library
+    public RawTransaction()
+    {
+    }
+
     [Key]
     [Column(name: "transaction_id")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -30,20 +42,4 @@ public class RawTransaction
     /// </summary>
     [Column("payload")]
     public byte[]? Payload { get; set; }
-
-    public RawTransaction(byte[] transactionIdentifierHash, DateTime? submittedTimestamp = null, byte[]? payload = null)
-    {
-        TransactionIdentifierHash = transactionIdentifierHash;
-        SubmittedTimestamp = submittedTimestamp;
-        Payload = payload;
-    }
-
-#pragma warning disable CS8618
-
-    // Empty constructor created for use with Upsert library
-    public RawTransaction()
-    {
-    }
-
-#pragma warning restore CS8618
 }
