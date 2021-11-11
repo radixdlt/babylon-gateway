@@ -242,7 +242,7 @@ csharp_preserve_single_line_blocks = true
 # [Microsoft.CodeAnalysis.CSharp]
 
 # > New for this project
-dotnet_diagnostic.CS1591.severity = suggestion # Missing XML comment for publicly visible type or member 'Type_or_Member'
+dotnet_diagnostic.CS1591.severity = none # Missing XML comment for publicly visible type or member 'Type_or_Member'
 
 # > Inherited from other projects
 dotnet_diagnostic.CS0612.severity = suggestion
@@ -276,5 +276,9 @@ dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SX1101.severity = warning
 dotnet_diagnostic.SX1309.severity = warning
 
-# Resharper - see https://www.jetbrains.com/help/rider/EditorConfig_Index.html
+# [Resharper] - see https://www.jetbrains.com/help/rider/EditorConfig_Index.html
 
+# None
+
+# [SonarQube.CSharpSquid]
+dotnet_diagnostic.S3903.severity = none # Types should be defined in named namespaces -- it breaks with C# 10 File scoped namespace declarations
