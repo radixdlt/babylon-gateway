@@ -17,8 +17,8 @@ namespace Common.Addressing;
 /// <para>
 /// Important note on decoding the 5-bits-per-byte data:
 /// <list type="bullet">
-/// <item><description>Bitcoin/Segwit addresses use a data encoding scheme of [1 chat "witness version"][The witness program bytes, converted into 5-bit chunks (padded with 0s if necessary)]</description></item>
-/// <item><description>Radix addresses don't use a witness version, and instead just encode [address bytes, converted into 5-bit chunks (padded with 0s if necessary)]</description></item>
+/// <item><description>Bitcoin/Segwit addresses use a data encoding scheme of [1 char - the 5 bit "witness version"][The witness program bytes, converted into 5-bit chunks (padded with 0s if necessary)]</description></item>
+/// <item><description>Radix addresses don't have a prefix, and instead just encode [address bytes, converted into 5-bit chunks (padded with 0s if necessary)]</description></item>
 /// </list>
 /// Note that these are inconsistent in terms of how they are padded. So instead, we just return the raw data as
 /// 5-bits-per-byte, and let the decoding be done a level up, making use of the ConvertBits method.
@@ -32,7 +32,6 @@ namespace Common.Addressing;
 /// </list>
 /// </para>
 /// </summary>
-/// <typeparam name="TDecoded">The type of the payload that the Bech32 data can converted into.</typeparam>
 public static class Bech32
 {
     public enum Variant
