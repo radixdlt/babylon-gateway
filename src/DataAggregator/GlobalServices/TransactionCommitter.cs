@@ -13,6 +13,8 @@ namespace DataAggregator.GlobalServices;
 public interface ITransactionCommitter
 {
     Task CommitTransactions(CommittedStateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
+
+    Task<long> GetTopOfLedgerStateVersion(CancellationToken token);
 }
 
 public class TransactionCommitter : ITransactionCommitter
@@ -26,6 +28,13 @@ public class TransactionCommitter : ITransactionCommitter
     {
         _contextFactory = contextFactory;
         _rawTransactionWriter = rawTransactionWriter;
+    }
+
+    public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token)
+    {
+        await using var dbContext = await _contextFactory.CreateDbContextAsync(token);
+        var lastTransactionOverview = await GetLastCommittedTransactionOverview(dbContext, token);
+        return lastTransactionOverview.StateVersion;
     }
 
     public async Task CommitTransactions(CommittedStateIdentifier parentStateIdentifier, List<CommittedTransaction> transactionsIn, CancellationToken token)
@@ -49,7 +58,6 @@ public class TransactionCommitter : ITransactionCommitter
             AssertNextTransactionConsistent(lastTransactionOverview, transactionOverview);
             var ledgerTransaction = CreateLedgerTransactionShell(transaction, transactionOverview);
             await dbContext.LedgerTransactions.AddAsync(ledgerTransaction, token);
-            await dbContext.SaveChangesAsync(token); // Attempt to save to avoid violating constraint
             lastTransactionOverview = transactionOverview;
         }
 
