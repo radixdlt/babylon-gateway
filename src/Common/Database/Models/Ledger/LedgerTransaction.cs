@@ -14,7 +14,7 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, long? parentStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, int indexInEpoch, bool isEndOfEpoch, DateTime timestamp, int? endOfEpochRound)
+    public LedgerTransaction(long resultantStateVersion, long? parentStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, bool isEndOfEpoch, DateTime timestamp, long? endOfEpochRound)
     {
         ResultantStateVersion = resultantStateVersion;
         ParentStateVersion = parentStateVersion;
@@ -66,7 +66,7 @@ public class LedgerTransaction
     public long Epoch { get; set; }
 
     [Column(name: "index_in_epoch")]
-    public int IndexInEpoch { get; set; }
+    public long IndexInEpoch { get; set; }
 
     [Column(name: "is_end_of_epoch")]
     public bool IsEndOfEpoch { get; set; }
@@ -75,5 +75,5 @@ public class LedgerTransaction
     public DateTime Timestamp { get; set; }
 
     [Column(name: "end_of_round")]
-    public int? EndOfEpochRound { get; set; }
+    public long? EndOfEpochRound { get; set; }
 }

@@ -63,10 +63,10 @@ namespace DataAggregator.Migrations
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     fee_paid = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
-                    index_in_epoch = table.Column<int>(type: "integer", nullable: false),
+                    index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    end_of_round = table.Column<int>(type: "integer", nullable: true)
+                    end_of_round = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {

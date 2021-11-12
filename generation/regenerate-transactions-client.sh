@@ -10,7 +10,7 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.4.4' # This needs bumping every time
+packageVersion='0.5.0' # This needs bumping every time
 packageName='RadixCoreApi.GeneratedClient'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
@@ -66,7 +66,7 @@ find "$outputDirectory" -name "$packageName.\*.nupkg" -exec rm {} \;
 # Create new versions
 find "$dummyApiDirectory/src/$packageName/bin/Debug" -name \*.nupkg -exec cp {} "$outputDirectory" \;
 
-# Clear up generated api so that it doesn't interfere with indexes/lookups
+# Clear up generated api directory
 rm -rf "$dummyApiDirectory"
 
 # Update the version in the packages listing

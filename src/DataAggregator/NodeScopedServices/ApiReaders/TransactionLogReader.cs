@@ -4,7 +4,7 @@ namespace DataAggregator.NodeScopedServices.ApiReaders;
 
 public interface ITransactionLogReader
 {
-    Task<List<CommittedTransaction>> GetTransactions(long stateVersion, int count, CancellationToken token);
+    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
 }
 
 public class TransactionLogReader : ITransactionLogReader
@@ -16,18 +16,16 @@ public class TransactionLogReader : ITransactionLogReader
         _apiProvider = apiProvider;
     }
 
-    public async Task<List<CommittedTransaction>> GetTransactions(long stateVersion, int count, CancellationToken token)
+    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        var results = await _apiProvider.TransactionsApi
+        return await _apiProvider.TransactionsApi
             .TransactionsPostAsync(
                 new CommittedTransactionsRequest
                 {
-                    CommittedStateIdentifier = new CommittedTransactionsRequestCommittedStateIdentifier(stateVersion),
+                    CommittedStateIdentifier = new PartialCommittedStateIdentifier(stateVersion),
                     Limit = count,
                 },
                 token
             );
-
-        return results.Transactions;
     }
 }

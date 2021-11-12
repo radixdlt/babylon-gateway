@@ -72,8 +72,8 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
-                    b.Property<int?>("EndOfEpochRound")
-                        .HasColumnType("integer")
+                    b.Property<long?>("EndOfEpochRound")
+                        .HasColumnType("bigint")
                         .HasColumnName("end_of_round");
 
                     b.Property<long>("Epoch")
@@ -85,8 +85,8 @@ namespace DataAggregator.Migrations
                         .HasColumnType("numeric(1000)")
                         .HasColumnName("fee_paid");
 
-                    b.Property<int>("IndexInEpoch")
-                        .HasColumnType("integer")
+                    b.Property<long>("IndexInEpoch")
+                        .HasColumnType("bigint")
                         .HasColumnName("index_in_epoch");
 
                     b.Property<bool>("IsEndOfEpoch")
