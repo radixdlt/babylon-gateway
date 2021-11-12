@@ -10,8 +10,8 @@ namespace Common.Database.Models.Ledger;
 /// This table forms a shell, to which other properties are connected.
 /// </summary>
 [Table("ledger_transactions")]
-[IndexAttribute(nameof(Timestamp))]
-// OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null])
+// OnModelCreating: We also define an index on Timestamp.
+// OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
     public LedgerTransaction(long resultantStateVersion, long? parentStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, int indexInEpoch, bool isEndOfEpoch, DateTime timestamp, int? endOfEpochRound)
