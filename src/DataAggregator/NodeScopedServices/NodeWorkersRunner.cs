@@ -69,7 +69,7 @@ public class NodeWorkersRunner : IDisposable
                     throw new ArgumentOutOfRangeException();
             }
 
-            Status = NodeWorkersRunnerStatus.Starting;
+            Status = NodeWorkersRunnerStatus.Initializing;
         }
 
         using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
