@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -45,7 +46,7 @@ namespace DataAggregator.Migrations
                     transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
-                    fee_paid = table.Column<string>(type: "text", nullable: false),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<int>(type: "integer", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
@@ -80,7 +81,7 @@ namespace DataAggregator.Migrations
                     inferred_action_type = table.Column<string>(type: "text", nullable: true),
                     inferred_action_from = table.Column<string>(type: "text", nullable: true),
                     inferred_action_to = table.Column<string>(type: "text", nullable: true),
-                    inferred_action_amount = table.Column<string>(type: "text", nullable: true),
+                    inferred_action_amount = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
                     inferred_action_rri = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>

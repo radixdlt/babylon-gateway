@@ -4,14 +4,14 @@
     <!-- PRODUCTION DEPENDENCIES -->
 
       <!-- PUBLIC NUGET: Microsoft -->
-      <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0-rc.2.21480.5" />
-      <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0-rc.2.21480.5" />
-      <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.0-rc.2.21480.5" />
-      <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0-rc.2.21480.5" />
-      <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0-rc.2.21480.5" />
+      <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+      <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+      <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+      <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" />
+      <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0" />
 
       <!-- PUBLIC NUGET: Non-Microsoft -->
-      <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
+      <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />
       <PackageVersion Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
       <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.0-preview5" />
 

@@ -1,6 +1,8 @@
 using Common.Database.Models;
 using Common.Database.Models.Ledger;
-using Common.Extensions;
+using Common.Database.Models.Ledger.Operations;
+using Common.Database.ValueConverters;
+using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Common.Database;
@@ -31,8 +33,7 @@ public class CommonDbContext : DbContext
             .HasCheckConstraint(
                 "CK_CompleteHistory",
                 "state_version = 1 OR state_version = parent_state_version + 1"
-            )
-            .Property(lt => lt.FeePaid).AsTokenAmount();
+            );
 
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionIdentifierHash);
@@ -49,8 +50,17 @@ public class CommonDbContext : DbContext
             .HasKey(og => new { og.ResultantStateVersion, og.OperationGroupIndex });
 
         modelBuilder.Entity<OperationGroup>()
-            .OwnsOne(og => og.InferredAction, b => b
-                .Property(ia => ia.Amount).AsTokenAmount()
-            );
+            .OwnsOne(og => og.InferredAction);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<TokenAmount>()
+            .HaveConversion<TokenAmountToBigIntegerConverter>()
+            .HaveColumnType("numeric")
+            .HavePrecision(1000);
+
+        configurationBuilder.Properties<SubstateOperationType>()
+            .HaveConversion<SubstateOperationTypeValueConverter>();
     }
 }
