@@ -12,7 +12,7 @@ namespace DataAggregator.GlobalServices;
 
 public interface ITransactionCommitter
 {
-    Task CommitTransactions(CommittedStateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
+    Task CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
 
     Task<long> GetTopOfLedgerStateVersion(CancellationToken token);
 }
@@ -37,7 +37,7 @@ public class TransactionCommitter : ITransactionCommitter
         return lastTransactionOverview.StateVersion;
     }
 
-    public async Task CommitTransactions(CommittedStateIdentifier parentStateIdentifier, List<CommittedTransaction> transactionsIn, CancellationToken token)
+    public async Task CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactionsIn, CancellationToken token)
     {
         // Create own context for this transaction
         await using var dbContext = await _contextFactory.CreateDbContextAsync(token);
@@ -64,7 +64,7 @@ public class TransactionCommitter : ITransactionCommitter
         await dbContext.SaveChangesAsync(token);
     }
 
-    private void AssertParentTransactionsAgree(CommittedStateIdentifier parentStateIdentifierFromApi, TransactionOverview parentTransactionOverviewFromDb)
+    private void AssertParentTransactionsAgree(StateIdentifier parentStateIdentifierFromApi, TransactionOverview parentTransactionOverviewFromDb)
     {
         if (parentStateIdentifierFromApi.StateVersion != parentTransactionOverviewFromDb.StateVersion)
         {
@@ -190,7 +190,7 @@ public class TransactionCommitter : ITransactionCommitter
             transactionIdentifierHash: overview.TransactionIdentifierHash,
             transactionAccumulator: overview.TransactionAccumulator,
             message: transaction.Metadata.Message?.ConvertFromHex(),
-            feePaid: TokenAmount.FromString(transaction.Metadata.Fee),
+            feePaid: TokenAmount.FromString(transaction.Metadata.Fee.Value),
             epoch: overview.Epoch,
             indexInEpoch: overview.IndexInEpoch,
             isEndOfEpoch: overview.IsEndOfEpoch,

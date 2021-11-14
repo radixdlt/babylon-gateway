@@ -65,7 +65,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         // For now - just commit all transactions > this should actually be a global service, not a node-scoped service
         // But I'm focusing on CommitTransactions for the purposes of the example, and will come back and fix this later
         await _transactionCommitter.CommitTransactions(
-            transactionsResponse.CommittedStateIdentifier,
+            transactionsResponse.StateIdentifier,
             transactionsResponse.Transactions,
             stoppingToken
         );

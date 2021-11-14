@@ -12,8 +12,8 @@ Prerequisites:
 
 With all paths relative to the repo root, proceed as follows:
 
-* Update `./generation/core-api-spec.json` with the latest spec
-* Update the target version in `./generation/regenerate-transactions-client.sh`
+* Update `./generation/core-api-spec.yml` with the latest spec. You may need to change the spec version to "3.0.0" so that it works with code gen, until [openapi-generator supports 3.1.0](https://github.com/OpenAPITools/openapi-generator/issues/9083).
+* Update the target client library version in `./generation/regenerate-core-api-client.sh`
 * Run `./generation/regenerate-transactions-client.sh`
 
 ### Docs

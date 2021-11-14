@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # This script should only be used whilst we're in development and completely wiping the database each boot-up
 
 # Check it builds

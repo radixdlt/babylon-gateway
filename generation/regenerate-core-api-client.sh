@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # NB - as currently written, this script has only been tested on Mac OSX
 # In particular, Mac makes use of a variant of sed which might not work on other UNIX variants
 
@@ -10,7 +12,7 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.5.0' # This needs bumping every time
+packageVersion='0.6.2' # This needs bumping every time
 packageName='RadixCoreApi.GeneratedClient'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
@@ -20,7 +22,7 @@ packageVersionLocation="../Directory.Packages.props"
 ##########
 
 if [ -d $outputDirectory ]; then
-  existsCheck=`ls "$outputDirectory" | grep $packageVersion`
+  existsCheck=`ls "$outputDirectory" | grep $packageVersion` || true
 else
   existsCheck=''
 fi
@@ -48,7 +50,7 @@ rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
 openapi-generator generate \
-    -i ./core-api-spec.json \
+    -i ./core-api-spec.yaml \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
@@ -61,10 +63,10 @@ cd "$SCRIPT_DIR"
 mkdir -p "$outputDirectory"
 
 # Tidy up old versions
-find "$outputDirectory" -name "$packageName.\*.nupkg" -exec rm {} \;
+find "$outputDirectory" -name "$packageName.*.nupkg" -exec rm {} \;
 
 # Create new versions
-find "$dummyApiDirectory/src/$packageName/bin/Debug" -name \*.nupkg -exec cp {} "$outputDirectory" \;
+find "$dummyApiDirectory/src/$packageName/bin/Debug" -name "*.nupkg" -exec cp {} "$outputDirectory" \;
 
 # Clear up generated api directory
 rm -rf "$dummyApiDirectory"
