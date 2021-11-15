@@ -1,5 +1,6 @@
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
+using DataAggregator.LedgerExtension;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using System.Diagnostics;
 
@@ -12,34 +13,29 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 {
     private readonly ILogger<NodeTransactionLogWorker> _logger;
     private readonly ITransactionLogReader _transactionLogReader;
-    private readonly ITransactionCommitter _transactionCommitter;
+    private readonly ILedgerExtenderService _ledgerExtenderService;
 
     public NodeTransactionLogWorker(
         ILogger<NodeTransactionLogWorker> logger,
         ITransactionLogReader transactionLogReader,
-        ITransactionCommitter transactionCommitter
+        ILedgerExtenderService ledgerExtenderService
     )
         : base(logger, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10))
     {
         _logger = logger;
         _transactionLogReader = transactionLogReader;
-        _transactionCommitter = transactionCommitter;
+        _ledgerExtenderService = ledgerExtenderService;
     }
 
-    // TODO implement syncing state machine, and separate committing into a global worker...
+    // TODO - Implement node-specific syncing state machine, and separate committing into a global worker...
+    // TODO - Ingestor locking in database. Network lock the ledger too.
     protected override async Task DoWork(CancellationToken stoppingToken)
     {
         const int TransactionsToPull = 1000;
 
-        _logger.LogInformation("Getting top of ledger...");
+        _logger.LogInformation("Starting sync loop by looking up the top of the committed ledger");
 
-        var topOfLedgerStateVersion = await _transactionCommitter.GetTopOfLedgerStateVersion(stoppingToken);
-
-        _logger.LogInformation(
-            "Reading {TransactionCount} transactions from state version {StateVersion} from the node api",
-            TransactionsToPull,
-            topOfLedgerStateVersion
-        );
+        var topOfLedgerStateVersion = await _ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken);
 
         var getTransactionsStopwatch = new Stopwatch();
         getTransactionsStopwatch.Start();
@@ -47,7 +43,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         var transactionsResponse = await _transactionLogReader.GetTransactions(topOfLedgerStateVersion, TransactionsToPull, stoppingToken);
 
         _logger.LogInformation(
-            "Reading {TransactionCount} transactions from state version {StateVersion} from the node api took {MillisecondsElapsed}ms",
+            "Read {TransactionCount} transactions from the core api in {MillisecondsElapsed}ms (starting at state version {StateVersion})",
             TransactionsToPull,
             topOfLedgerStateVersion,
             getTransactionsStopwatch.ElapsedMilliseconds
@@ -56,22 +52,14 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         var commitTransactionsStopwatch = new Stopwatch();
         commitTransactionsStopwatch.Start();
 
-        _logger.LogInformation(
-            "Preparing to commit {TransactionCount} transactions after state version {StateVersion}",
-            TransactionsToPull,
-            topOfLedgerStateVersion
-        );
-
-        // For now - just commit all transactions > this should actually be a global service, not a node-scoped service
-        // But I'm focusing on CommitTransactions for the purposes of the example, and will come back and fix this later
-        await _transactionCommitter.CommitTransactions(
+        await _ledgerExtenderService.CommitTransactions(
             transactionsResponse.StateIdentifier,
             transactionsResponse.Transactions,
             stoppingToken
         );
 
         _logger.LogInformation(
-            "Committing {TransactionCount} transactions after state version {StateVersion} took {MillisecondsElapsed}ms",
+            "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (starting at state version {StateVersion})",
             TransactionsToPull,
             topOfLedgerStateVersion,
             commitTransactionsStopwatch.ElapsedMilliseconds

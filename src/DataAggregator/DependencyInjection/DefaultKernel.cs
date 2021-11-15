@@ -2,6 +2,7 @@ using Common.Database;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
+using DataAggregator.LedgerExtension;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using DataAggregator.NodeScopedWorkers;
@@ -31,7 +32,7 @@ public class DefaultKernel
         services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
-        services.AddSingleton<ITransactionCommitter, TransactionCommitter>();
+        services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
         services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
         services.AddSingleton<IAddressExtractor, AddressExtractor>();
     }

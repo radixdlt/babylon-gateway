@@ -12,7 +12,7 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.6.2' # This needs bumping every time
+packageVersion='0.6.4' # This needs bumping every time
 packageName='RadixCoreApi.GeneratedClient'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"

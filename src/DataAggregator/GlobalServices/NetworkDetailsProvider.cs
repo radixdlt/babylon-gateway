@@ -1,14 +1,17 @@
 using Common.Addressing;
+using RadixCoreApi.GeneratedClient.Model;
 
 namespace DataAggregator.GlobalServices;
 
-public record NetworkDetails(int NetworkId, string NetworkName, AddressHrps AddressHrps);
+public record NetworkDetails(string NetworkName, AddressHrps AddressHrps);
 
 public interface INetworkDetailsProvider
 {
     void SetNetworkDetails(NetworkDetails networkDetails);
 
     NetworkDetails GetNetworkDetails();
+
+    NetworkIdentifier GetNetworkIdentifierForApiRequests();
 }
 
 public class NetworkDetailsProvider : INetworkDetailsProvider
@@ -36,5 +39,10 @@ public class NetworkDetailsProvider : INetworkDetailsProvider
 
             return networkDetails;
         }
+    }
+
+    public NetworkIdentifier GetNetworkIdentifierForApiRequests()
+    {
+        return new NetworkIdentifier(GetNetworkDetails().NetworkName);
     }
 }

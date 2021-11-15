@@ -7,7 +7,7 @@ public interface IAggregatorConfiguration
 {
     List<NodeAppSettings> GetNodes();
 
-    int GetNetworkId();
+    string GetNetworkName();
 }
 
 public class AggregatorConfiguration : IAggregatorConfiguration
@@ -41,14 +41,14 @@ public class AggregatorConfiguration : IAggregatorConfiguration
         return nodesList;
     }
 
-    public int GetNetworkId()
+    public string GetNetworkName()
     {
-        var networkId = _configuration.GetValue<int?>("NetworkId", null);
+        var networkId = _configuration.GetValue<string?>("NetworkName", null);
         if (networkId == null)
         {
-            throw new InvalidConfigurationException("appsettings.json requires an integer NetworkId");
+            throw new InvalidConfigurationException("appsettings.json requires a string NetworkName");
         }
 
-        return (int)networkId;
+        return networkId;
     }
 }

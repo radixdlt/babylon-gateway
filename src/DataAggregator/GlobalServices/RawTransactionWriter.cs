@@ -6,12 +6,12 @@ namespace DataAggregator.GlobalServices;
 
 public interface IRawTransactionWriter
 {
-    Task EnsureRawTransactionsCreatedOrUpdated(CommonDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
+    Task EnsureRawTransactionsCreatedOrUpdated(CommonDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
 {
-    public async Task EnsureRawTransactionsCreatedOrUpdated(CommonDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task EnsureRawTransactionsCreatedOrUpdated(CommonDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token)
     {
         // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
         await context.RawTransactions

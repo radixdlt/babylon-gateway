@@ -28,10 +28,10 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
     {
         var networkConfiguration = await ReadNetworkConfigurationFromNode(token);
 
-        if (_configuration.GetNetworkId() != networkConfiguration.NetworkIdentifier.Id)
+        if (_configuration.GetNetworkName() != networkConfiguration.NetworkIdentifier.Network)
         {
             throw new NodeInitializationException(
-            $"The node's network id is {networkConfiguration.NetworkIdentifier.Id}, not {_configuration.GetNetworkId()}"
+            $"The node's network name is {networkConfiguration.NetworkIdentifier.Network}, not {_configuration.GetNetworkName()}"
             );
         }
 
@@ -44,8 +44,7 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
     {
         var hrps = networkConfiguration.Bech32HumanReadableParts;
         return new NetworkDetails(
-            networkConfiguration.NetworkIdentifier.Id,
-            networkConfiguration.NetworkIdentifier.Name,
+            networkConfiguration.NetworkIdentifier.Network,
             new AddressHrps(hrps.AccountHrp, hrps.ResourceHrpSuffix, hrps.ValidatorHrp, hrps.NodeHrp)
         );
     }
