@@ -21,7 +21,7 @@ public class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<OperationGroup> OperationGroups => Set<OperationGroup>();
+    public DbSet<LedgerOperationGroup> OperationGroups => Set<LedgerOperationGroup>();
 
     public DbSet<AccountResourceBalanceSubstate> AccountResourceBalanceSubstates => Set<AccountResourceBalanceSubstate>();
 
@@ -30,6 +30,8 @@ public class CommonDbContext : DbContext
     public DbSet<AccountStakeOwnershipBalanceSubstate> AccountStakeOwnershipBalanceSubstates => Set<AccountStakeOwnershipBalanceSubstate>();
 
     public DbSet<ValidatorStakeBalanceSubstate> ValidatorStakeBalanceSubstates => Set<ValidatorStakeBalanceSubstate>();
+
+    public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
 #pragma warning restore CS1591
 
@@ -65,10 +67,10 @@ public class CommonDbContext : DbContext
             .IncludeProperties(s => new { s.Timestamp })
             .HasFilter("end_of_round IS NOT NULL");
 
-        modelBuilder.Entity<OperationGroup>()
+        modelBuilder.Entity<LedgerOperationGroup>()
             .HasKey(og => new { og.ResultantStateVersion, og.OperationGroupIndex });
 
-        modelBuilder.Entity<OperationGroup>()
+        modelBuilder.Entity<LedgerOperationGroup>()
             .OwnsOne(og => og.InferredAction);
 
         HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
@@ -91,6 +93,12 @@ public class CommonDbContext : DbContext
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
             .HavePrecision(1000);
+
+        configurationBuilder.Properties<AccountStakeOwnershipBalanceSubstateType>()
+            .HaveConversion<AccountStakeOwnershipBalanceSubstateTypeValueConverter>();
+
+        configurationBuilder.Properties<AccountXrdStakeBalanceSubstateType>()
+            .HaveConversion<AccountXrdStakeBalanceSubstateTypeValueConverter>();
     }
 
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)

@@ -21,8 +21,8 @@ using (var scope = host.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<CommonDbContext>();
 
     // Uncomment to wipe Database every load!
-    // await db.Database.EnsureDeletedAsync();
-    // await db.Database.EnsureCreatedAsync();
+    await db.Database.EnsureDeletedAsync();
+    await db.Database.EnsureCreatedAsync();
 
     // Migrate every load
     // await db.Database.MigrateAsync();

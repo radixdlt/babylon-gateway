@@ -5,6 +5,7 @@ namespace Common.Numerics;
 
 public readonly record struct TokenAmount
 {
+    public static readonly TokenAmount Zero = new(0);
     public static readonly TokenAmount NaN = new(true);
 
     private const int DecimalPrecision = 18;
@@ -15,18 +16,16 @@ public readonly record struct TokenAmount
     private static readonly BigInteger _divisor = BigInteger.Pow(10, DecimalPrecision);
 
     private readonly BigInteger _subUnits;
+    private readonly bool _isNaN;
 
     public static TokenAmount FromSubUnits(BigInteger subUnits)
     {
-        return subUnits >= 0 ? new TokenAmount(subUnits) : NaN;
+        return new TokenAmount(subUnits);
     }
 
     public static TokenAmount FromSubUnits(string subUnitsString)
     {
-        return (
-            BigInteger.TryParse(subUnitsString, out var subUnits) &&
-            subUnits >= 0
-        )
+        return BigInteger.TryParse(subUnitsString, out var subUnits)
             ? new TokenAmount(subUnits)
             : NaN;
     }
@@ -39,7 +38,6 @@ public readonly record struct TokenAmount
             : decimalPart.Truncate(DecimalPrecision).PadRight(DecimalPrecision, '0');
         return (
             BigInteger.TryParse(wholeUnitsString, out var wholeUnits) &&
-            wholeUnits >= 0 &&
             BigInteger.TryParse(subUnitsString, out var subUnits) &&
             subUnits >= 0
         )
@@ -47,7 +45,7 @@ public readonly record struct TokenAmount
             : NaN;
     }
 
-    public static TokenAmount FromString(string decimalString)
+    public static TokenAmount FromDecimalString(string decimalString)
     {
         if (decimalString == "NaN")
         {
@@ -64,34 +62,27 @@ public readonly record struct TokenAmount
             : NaN;
     }
 
+    public static TokenAmount operator +(TokenAmount a) => a;
+    public static TokenAmount operator -(TokenAmount a) => new(-a._subUnits);
+    public static TokenAmount operator +(TokenAmount a, TokenAmount b) => new(a._subUnits + b._subUnits);
+    public static TokenAmount operator -(TokenAmount a, TokenAmount b) => new(a._subUnits - b._subUnits);
+
     private TokenAmount(BigInteger subUnits)
     {
-        if (subUnits < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(subUnits), "must be positive");
-        }
-
         _subUnits = subUnits;
+        _isNaN = false;
     }
 
     private TokenAmount(BigInteger wholeUnits, BigInteger subUnits)
     {
-        if (wholeUnits < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(wholeUnits), "must be positive");
-        }
-
-        if (subUnits < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(subUnits), "must be positive");
-        }
-
         _subUnits = (wholeUnits * _divisor) + subUnits;
+        _isNaN = false;
     }
 
     private TokenAmount(bool isNaN)
     {
-        _subUnits = isNaN ? BigInteger.MinusOne : BigInteger.Zero;
+        _subUnits = BigInteger.Zero;
+        _isNaN = isNaN;
     }
 
     /// <summary>
@@ -143,7 +134,7 @@ public readonly record struct TokenAmount
 
     public bool IsNaN()
     {
-        return _subUnits < 0;
+        return _isNaN;
     }
 
     public BigInteger GetSubUnits()

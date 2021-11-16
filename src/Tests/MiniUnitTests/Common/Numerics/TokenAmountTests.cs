@@ -17,7 +17,7 @@ public class TokenAmountTests
     [InlineData("123.34", "", "NaN")]
     [InlineData("ab", "cd", "NaN")]
     [InlineData("ab", "0", "NaN")]
-    [InlineData("-1", "0", "NaN")]
+    [InlineData("-1", "0", "-1")]
     [InlineData("12", "-3", "NaN")]
     public void Create_TokenAmountFromStringParts_ReadsCorrectly(string wholePart, string fractionalPart, string expected)
     {
@@ -34,10 +34,10 @@ public class TokenAmountTests
     [InlineData("NaN", "NaN")]
     [InlineData("Infinity", "NaN")]
     [InlineData("-Infinity", "NaN")]
-    [InlineData("-123", "NaN")]
+    [InlineData("-123", "-123")]
     public void Create_FromString_ReadsCorrectly(string postgresDecimal, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromString(postgresDecimal).ToString());
+        Assert.Equal(expected, TokenAmount.FromDecimalString(postgresDecimal).ToString());
     }
 
     [Theory]
@@ -45,7 +45,7 @@ public class TokenAmountTests
     [InlineData("1", "0.000000000000000001")]
     [InlineData("123", "0.000000000000000123")]
     [InlineData("12345678900123456789", "12.345678900123456789")]
-    [InlineData("-123", "NaN")]
+    [InlineData("-123", "-123")]
     public void Create_FromSubUnits_ReadsCorrectlyAtFullPrecision(string subUnitsStr, string expected)
     {
         Assert.Equal(expected, TokenAmount.FromSubUnits(subUnitsStr).ToStringFullPrecision());
@@ -62,25 +62,25 @@ public class TokenAmountTests
     [Fact]
     public void Equate_SameTokenAmount_ReturnsTrue()
     {
-        Assert.Equal(TokenAmount.FromString("123"), TokenAmount.FromString("123"));
+        Assert.Equal(TokenAmount.FromDecimalString("123"), TokenAmount.FromDecimalString("123"));
     }
 
     [Fact]
     public void Equate_DifferentTokenAmount_ReturnsFalse()
     {
-        Assert.NotEqual(TokenAmount.FromString("123"), TokenAmount.FromString("1234"));
+        Assert.NotEqual(TokenAmount.FromDecimalString("123"), TokenAmount.FromDecimalString("1234"));
     }
 
     [Fact]
     public void Equate_NaNWithNoneNaN_ReturnsFalse()
     {
-        Assert.NotEqual(TokenAmount.FromString("1"), TokenAmount.NaN);
+        Assert.NotEqual(TokenAmount.FromDecimalString("1"), TokenAmount.NaN);
     }
 
     [Fact]
     public void Equate_SameAmountCreatedTwoDifferentWays_ReturnsTrue()
     {
-        Assert.Equal(TokenAmount.FromString("123"), TokenAmount.FromSubUnits("123000000000000000000"));
+        Assert.Equal(TokenAmount.FromDecimalString("123"), TokenAmount.FromSubUnits("123000000000000000000"));
     }
 
     [Fact]

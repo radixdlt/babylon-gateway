@@ -1,3 +1,4 @@
+using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,6 +19,21 @@ namespace Common.Database.Models.Ledger.Substates;
 [Table("validator_stake_balance_substates")]
 public class ValidatorStakeBalanceSubstate : BalanceSubstateBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidatorStakeBalanceSubstate"/> class.
+    /// The SubstateBase properties should be set separately.
+    /// </summary>
+    public ValidatorStakeBalanceSubstate(string validatorAddress, long endOfEpoch, TokenAmount xrdStakeBalance)
+    {
+        ValidatorAddress = validatorAddress;
+        EndOfEpoch = endOfEpoch;
+        Amount = xrdStakeBalance;
+    }
+
+    private ValidatorStakeBalanceSubstate()
+    {
+    }
+
     [Column(name: "validator_address")]
     public string ValidatorAddress { get; set; }
 

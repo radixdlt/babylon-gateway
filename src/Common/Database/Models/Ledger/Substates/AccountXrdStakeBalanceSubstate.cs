@@ -1,4 +1,5 @@
 using Common.Database.ValueConverters;
+using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,7 +7,7 @@ namespace Common.Database.Models.Ledger.Substates;
 
 public enum AccountXrdStakeBalanceSubstateType
 {
-    PreparingStake,
+    PreparedStake,
     ExitingStake,
 }
 
@@ -14,7 +15,7 @@ public class AccountXrdStakeBalanceSubstateTypeValueConverter : EnumTypeValueCon
 {
     private static Dictionary<AccountXrdStakeBalanceSubstateType, string> _conversion = new()
     {
-        { AccountXrdStakeBalanceSubstateType.PreparingStake, "PREPARING_STAKE" },
+        { AccountXrdStakeBalanceSubstateType.PreparedStake, "PREPARED_STAKE" },
         { AccountXrdStakeBalanceSubstateType.ExitingStake, "EXITING_STAKE" },
     };
 
@@ -34,6 +35,29 @@ public class AccountXrdStakeBalanceSubstateTypeValueConverter : EnumTypeValueCon
 [Table("account_xrd_stake_balance_substates")]
 public class AccountXrdStakeBalanceSubstate : BalanceSubstateBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AccountXrdStakeBalanceSubstate"/> class.
+    /// The SubstateBase properties should be set separately.
+    /// </summary>
+    public AccountXrdStakeBalanceSubstate(
+        string accountAddress,
+        string validatorAddress,
+        AccountXrdStakeBalanceSubstateType type,
+        long? unlockEpoch,
+        TokenAmount xrdAmount
+    )
+    {
+        AccountAddress = accountAddress;
+        ValidatorAddress = validatorAddress;
+        Type = type;
+        UnlockEpoch = unlockEpoch;
+        Amount = xrdAmount;
+    }
+
+    private AccountXrdStakeBalanceSubstate()
+    {
+    }
+
     [Column(name: "account_address")]
     public string AccountAddress { get; set; }
 

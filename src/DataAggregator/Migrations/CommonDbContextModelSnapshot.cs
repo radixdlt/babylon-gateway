@@ -66,6 +66,22 @@ namespace DataAggregator.Migrations
                     b.ToTable("account_resource_balance_history", (string)null);
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
+                {
+                    b.Property<long>("ResultantStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.Property<int>("OperationGroupIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("operation_group_index");
+
+                    b.HasKey("ResultantStateVersion", "OperationGroupIndex")
+                        .HasName("pk_operation_groups");
+
+                    b.ToTable("operation_groups", (string)null);
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
                 {
                     b.Property<long>("ResultantStateVersion")
@@ -140,22 +156,6 @@ namespace DataAggregator.Migrations
                     b.ToTable("ledger_transactions", (string)null);
 
                     b.HasCheckConstraint("CK_CompleteHistory", "state_version = 1 OR state_version = parent_state_version + 1");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.OperationGroup", b =>
-                {
-                    b.Property<long>("ResultantStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("state_version");
-
-                    b.Property<int>("OperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("operation_group_index");
-
-                    b.HasKey("ResultantStateVersion", "OperationGroupIndex")
-                        .HasName("pk_operation_groups");
-
-                    b.ToTable("operation_groups", (string)null);
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
@@ -270,8 +270,9 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("substate_identifier");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("type");
 
                     b.Property<string>("ValidatorAddress")
@@ -339,8 +340,9 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("substate_identifier");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("type");
 
                     b.Property<long?>("UnlockEpoch")
@@ -480,26 +482,7 @@ namespace DataAggregator.Migrations
                     b.ToTable("raw_transactions", (string)null);
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentStateVersion")
-                        .HasConstraintName("fk_ledger_transactions_ledger_transactions_parent_state_version");
-
-                    b.HasOne("Common.Database.Models.RawTransaction", "RawTransaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionIdentifierHash")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_ledger_transactions_raw_transactions_transaction_id");
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("RawTransaction");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.OperationGroup", b =>
+            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
                 {
                     b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LedgerTransaction")
                         .WithMany()
@@ -510,11 +493,11 @@ namespace DataAggregator.Migrations
 
                     b.OwnsOne("Common.Database.Models.Ledger.InferredAction", "InferredAction", b1 =>
                         {
-                            b1.Property<long>("OperationGroupResultantStateVersion")
+                            b1.Property<long>("LedgerOperationGroupResultantStateVersion")
                                 .HasColumnType("bigint")
                                 .HasColumnName("state_version");
 
-                            b1.Property<int>("OperationGroupIndex")
+                            b1.Property<int>("LedgerOperationGroupOperationGroupIndex")
                                 .HasColumnType("integer")
                                 .HasColumnName("operation_group_index");
 
@@ -540,13 +523,13 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("inferred_action_type");
 
-                            b1.HasKey("OperationGroupResultantStateVersion", "OperationGroupIndex");
+                            b1.HasKey("LedgerOperationGroupResultantStateVersion", "LedgerOperationGroupOperationGroupIndex");
 
                             b1.ToTable("operation_groups");
 
                             b1.WithOwner()
-                                .HasForeignKey("OperationGroupResultantStateVersion", "OperationGroupIndex")
-                                .HasConstraintName("fk_operation_groups_operation_groups_inferred_action_operation");
+                                .HasForeignKey("LedgerOperationGroupResultantStateVersion", "LedgerOperationGroupOperationGroupIndex")
+                                .HasConstraintName("fk_operation_groups_operation_groups_inferred_action_ledger_op");
                         });
 
                     b.Navigation("InferredAction");
@@ -554,15 +537,34 @@ namespace DataAggregator.Migrations
                     b.Navigation("LedgerTransaction");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentStateVersion")
+                        .HasConstraintName("fk_ledger_transactions_ledger_transactions_parent_state_version");
+
+                    b.HasOne("Common.Database.Models.RawTransaction", "RawTransaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionIdentifierHash")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_ledger_transactions_raw_transactions_transaction_id");
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("RawTransaction");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
                 {
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "DownOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_TSubstate_DownOperationGroup");
 
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "UpOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -576,13 +578,13 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeOwnershipBalanceSubstate", b =>
                 {
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "DownOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_TSubstate_DownOperationGroup");
 
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "UpOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -596,13 +598,13 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountXrdStakeBalanceSubstate", b =>
                 {
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "DownOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_TSubstate_DownOperationGroup");
 
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "UpOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -616,13 +618,13 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorStakeBalanceSubstate", b =>
                 {
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "DownOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_TSubstate_DownOperationGroup");
 
-                    b.HasOne("Common.Database.Models.Ledger.OperationGroup", "UpOperationGroup")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -34,7 +34,7 @@ public class DefaultKernel
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
         services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
         services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
-        services.AddSingleton<IAddressExtractor, AddressExtractor>();
+        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
     }
 
     private void AddGlobalHostedServices(IServiceCollection services)

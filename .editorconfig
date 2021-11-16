@@ -252,6 +252,10 @@ dotnet_diagnostic.CS0618.severity = suggestion
 
 # > New for this project
 
+# Broken with C#10
+
+dotnet_diagnostic.SA1313.severity = none # SA1313ParameterNamesMustBeginWithLowerCaseLetter - breaks with record structs
+
 # Documentation - the net effect is to recommend public docs with a summary tag (via CS1591 and SA1604), but not be too critical of the rest
 dotnet_diagnostic.SA1600.severity = none # SA1600ElementsMustBeDocumented - Duplicates CS1591 - let's just use CS1591 instead
 dotnet_diagnostic.SA1615.severity = none # SA1615ElementReturnValueMustBeDocumented

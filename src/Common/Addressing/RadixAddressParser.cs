@@ -1,8 +1,15 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Common.Addressing;
 
 public static class RadixAddressParser
 {
-    public static bool TryParse(AddressHrps hrps, string address, out RadixAddress? radixAddress, out string? errorMessage)
+    public static bool TryParse(
+        AddressHrps hrps,
+        string address,
+        [NotNullWhen(true)] out RadixAddress? radixAddress,
+        [NotNullWhen(false)] out string? errorMessage
+    )
     {
         if (!TryDecode(address, out var bech32Data, out var exception))
         {
@@ -46,7 +53,11 @@ public static class RadixAddressParser
         return false;
     }
 
-    private static bool TryDecode(string bechEncoded, out RadixBech32Data? bech32Data, out AddressException? exception)
+    private static bool TryDecode(
+        string bechEncoded,
+        [NotNullWhen(true)] out RadixBech32Data? bech32Data,
+        [NotNullWhen(false)] out AddressException? exception
+    )
     {
         try
         {

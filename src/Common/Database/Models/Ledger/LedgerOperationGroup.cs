@@ -9,16 +9,16 @@ namespace Common.Database.Models.Ledger;
 /// </summary>
 // OnModelCreating: Has composite key (state_version, operation_group_index)
 [Table("operation_groups")]
-public class OperationGroup
+public class LedgerOperationGroup
 {
-    public OperationGroup(long resultantStateVersion, int operationGroupIndex, InferredAction? inferredAction)
+    public LedgerOperationGroup(long resultantStateVersion, int operationGroupIndex, InferredAction? inferredAction)
     {
         ResultantStateVersion = resultantStateVersion;
         OperationGroupIndex = operationGroupIndex;
         InferredAction = inferredAction;
     }
 
-    private OperationGroup()
+    private LedgerOperationGroup()
     {
     }
 

@@ -1,4 +1,5 @@
 using Common.Database.ValueConverters;
+using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,6 +34,27 @@ public class AccountStakeOwnershipBalanceSubstateTypeValueConverter : EnumTypeVa
 [Table("account_stake_ownership_balance_substates")]
 public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AccountStakeOwnershipBalanceSubstate"/> class.
+    /// The SubstateBase properties should be set separately.
+    /// </summary>
+    public AccountStakeOwnershipBalanceSubstate(
+        string accountAddress,
+        string validatorAddress,
+        AccountStakeOwnershipBalanceSubstateType type,
+        TokenAmount stakeOwnershipBalance
+    )
+    {
+        AccountAddress = accountAddress;
+        ValidatorAddress = validatorAddress;
+        Type = type;
+        Amount = stakeOwnershipBalance;
+    }
+
+    private AccountStakeOwnershipBalanceSubstate()
+    {
+    }
+
     [Column(name: "account_address")]
     public string AccountAddress { get; set; }
 

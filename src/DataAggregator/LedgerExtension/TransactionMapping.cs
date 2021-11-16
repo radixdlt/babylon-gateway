@@ -27,7 +27,7 @@ public static class TransactionMapping
             transactionIdentifierHash: summary.TransactionIdentifierHash,
             transactionAccumulator: summary.TransactionAccumulator,
             message: transaction.Metadata.Message?.ConvertFromHex(),
-            feePaid: TokenAmount.FromString(transaction.Metadata.Fee.Value),
+            feePaid: TokenAmount.FromSubUnits(transaction.Metadata.Fee.Value),
             epoch: summary.Epoch,
             indexInEpoch: summary.IndexInEpoch,
             isEndOfEpoch: summary.IsEndOfEpoch,

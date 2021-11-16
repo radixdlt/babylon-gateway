@@ -1,9 +1,11 @@
 using Common.Database;
+using DataAggregator.Extensions;
+using DataAggregator.GlobalServices;
 using RadixCoreApi.GeneratedClient.Model;
 
 namespace DataAggregator.LedgerExtension;
 
-public interface ITransactionCommitter
+public interface IBulkTransactionCommitter
 {
     Task CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
 }
@@ -11,13 +13,19 @@ public interface ITransactionCommitter
 /// <summary>
 /// A short-lived class, used to commit a batch of transactions to the database.
 /// </summary>
-public class TransactionCommitter : ITransactionCommitter
+public class BulkTransactionCommitter : IBulkTransactionCommitter
 {
+    private readonly IEntityDeterminer _entityDeterminer;
     private readonly CommonDbContext _dbContext;
     private readonly CancellationToken _cancellationToken;
 
-    public TransactionCommitter(CommonDbContext dbContext, CancellationToken cancellationToken)
+    public BulkTransactionCommitter(
+        IEntityDeterminer entityDeterminer,
+        CommonDbContext dbContext,
+        CancellationToken cancellationToken
+    )
     {
+        _entityDeterminer = entityDeterminer;
         _dbContext = dbContext;
         _cancellationToken = cancellationToken;
     }
@@ -29,16 +37,24 @@ public class TransactionCommitter : ITransactionCommitter
             var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
             TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
 
-            CommitCheckedTransaction(transaction, summary);
+            await CommitCheckedTransaction(transaction, summary);
             parentSummary = summary;
         }
 
         await _dbContext.SaveChangesAsync(_cancellationToken);
     }
 
-    private async void CommitCheckedTransaction(CommittedTransaction transaction, TransactionSummary summary)
+    private async Task CommitCheckedTransaction(CommittedTransaction transaction, TransactionSummary summary)
     {
         var ledgerTransaction = TransactionMapping.CreateLedgerTransaction(transaction, summary);
-        await _dbContext.LedgerTransactions.AddAsync(ledgerTransaction, _cancellationToken);
+        _dbContext.LedgerTransactions.Add(ledgerTransaction);
+
+        if (!transaction.HasSubstantiveOperations())
+        {
+            return;
+        }
+
+        var transactionOperationExtractor = new TransactionContentCommitter(_dbContext, _entityDeterminer, _cancellationToken);
+        await transactionOperationExtractor.CommitTransactionDetails(transaction, summary);
     }
 }

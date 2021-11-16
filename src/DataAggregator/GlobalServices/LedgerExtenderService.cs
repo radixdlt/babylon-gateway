@@ -1,14 +1,8 @@
 using Common.Database;
-using Common.Database.Models;
-using Common.Database.Models.Ledger;
-using Common.Extensions;
-using Common.Numerics;
-using Common.StaticHelpers;
-using DataAggregator.Exceptions;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
-using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DataAggregator.GlobalServices;
 
@@ -23,14 +17,17 @@ public class LedgerExtenderService : ILedgerExtenderService
 {
     private readonly IDbContextFactory<CommonDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
+    private readonly IEntityDeterminer _entityDeterminer;
 
     public LedgerExtenderService(
         IDbContextFactory<CommonDbContext> dbContextFactory,
-        IRawTransactionWriter rawTransactionWriter
+        IRawTransactionWriter rawTransactionWriter,
+        IEntityDeterminer entityDeterminer
     )
     {
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
+        _entityDeterminer = entityDeterminer;
     }
 
     public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token)
@@ -51,10 +48,11 @@ public class LedgerExtenderService : ILedgerExtenderService
 
         await _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(
             dbContext,
-            transactions.Select(LedgerExtension.TransactionMapping.CreateRawTransaction),
+            transactions.Select(TransactionMapping.CreateRawTransaction),
             token
         );
 
-        await new TransactionCommitter(dbContext, token).CommitTransactions(parentSummary, transactions);
+        await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
+            .CommitTransactions(parentSummary, transactions);
     }
 }
