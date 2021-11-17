@@ -1,6 +1,7 @@
 namespace DataAggregator.Exceptions;
 
 public record struct TransactionOpLocator(
+    long ResultantStateVersion,
     string TransactionIdHash,
     int? OperationGroupIndex,
     int? OperationIndexInGroup
@@ -15,17 +16,18 @@ public class InvalidTransactionException : Exception
         TransactionOpLocator transactionOpLocator,
         string message
     )
-        : this(transactionOpLocator.TransactionIdHash, transactionOpLocator.OperationGroupIndex, transactionOpLocator.OperationIndexInGroup, message)
+        : this(transactionOpLocator.ResultantStateVersion, transactionOpLocator.TransactionIdHash, transactionOpLocator.OperationGroupIndex, transactionOpLocator.OperationIndexInGroup, message)
     {
     }
 
     private InvalidTransactionException(
+        long resultantStateVersion,
         string transactionIdHash,
         int? operationGroupIndex,
         int? operationIndexInGroup,
         string message
     )
-        : base($"[TransactionId={transactionIdHash}, OpGroupIndex={operationGroupIndex}, OpIndex={operationIndexInGroup}] {message}")
+        : base($"[ResultantStateVersion={resultantStateVersion}, TransactionId={transactionIdHash}, OpGroupIndex={operationGroupIndex}, OpIndex={operationIndexInGroup}] {message}")
     {
     }
 }

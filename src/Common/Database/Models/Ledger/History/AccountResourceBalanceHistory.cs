@@ -1,6 +1,7 @@
 using Common.Database.Models.Ledger.Substates;
 using Common.Numerics;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace Common.Database.Models.Ledger.History;
 
@@ -58,10 +59,11 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
     {
     }
 
-    public override bool Matches(AccountResource key)
+    public static Expression<Func<AccountResourceBalanceHistory, bool>> Matches(AccountResource key)
     {
-        return ResourceIdentifier == key.ResourceIdentifier &&
-               AccountAddress == key.AccountAddress;
+        return self =>
+            self.AccountAddress == key.AccountAddress
+            && self.ResourceIdentifier == key.ResourceIdentifier;
     }
 
     public override BalanceEntry GetEntry()

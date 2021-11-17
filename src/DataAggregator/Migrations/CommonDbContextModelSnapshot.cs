@@ -54,7 +54,8 @@ namespace DataAggregator.Migrations
                         .HasDatabaseName("ix_account_resource_balance_history_account_address_from_state");
 
                     b.HasIndex("AccountAddress", "ResourceIdentifier")
-                        .HasDatabaseName("IX_AccountResourceBalanceSubstate_CurrentBalance")
+                        .IsUnique()
+                        .HasDatabaseName("ix_account_resource_balance_history_current_balance")
                         .HasFilter("to_state_version is null");
 
                     b.HasIndex("ResourceIdentifier", "FromStateVersion")
@@ -562,14 +563,14 @@ namespace DataAggregator.Migrations
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_TSubstate_DownOperationGroup");
+                        .HasConstraintName("fk_t_substate_down_operation_group");
 
                     b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_TSubstate_UpOperationGroup");
+                        .HasConstraintName("fk_t_substate_up_operation_group");
 
                     b.Navigation("DownOperationGroup");
 
@@ -582,14 +583,14 @@ namespace DataAggregator.Migrations
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_TSubstate_DownOperationGroup");
+                        .HasConstraintName("fk_t_substate_down_operation_group");
 
                     b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_TSubstate_UpOperationGroup");
+                        .HasConstraintName("fk_t_substate_up_operation_group");
 
                     b.Navigation("DownOperationGroup");
 
@@ -602,14 +603,14 @@ namespace DataAggregator.Migrations
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_TSubstate_DownOperationGroup");
+                        .HasConstraintName("fk_t_substate_down_operation_group");
 
                     b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_TSubstate_UpOperationGroup");
+                        .HasConstraintName("fk_t_substate_up_operation_group");
 
                     b.Navigation("DownOperationGroup");
 
@@ -622,14 +623,14 @@ namespace DataAggregator.Migrations
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_TSubstate_DownOperationGroup");
+                        .HasConstraintName("fk_t_substate_down_operation_group");
 
                     b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_TSubstate_UpOperationGroup");
+                        .HasConstraintName("fk_t_substate_up_operation_group");
 
                     b.Navigation("DownOperationGroup");
 

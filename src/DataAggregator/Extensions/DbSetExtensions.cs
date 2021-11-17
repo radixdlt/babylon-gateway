@@ -1,3 +1,4 @@
+using Common.Database;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
@@ -22,7 +23,12 @@ public static class DbSetExtensions
         where TSubstate : SubstateBase
     {
         // Could rely on the database to check this constraint at commit time, but this gives us a clearer error
-        var existingSubstate = await substates.SingleOrDefaultAsync(s => s.SubstateIdentifier == identifier, cancellationToken);
+        var existingSubstate = substates
+                                   .Local
+                                   .SingleOrDefault(s => s.SubstateIdentifier.BytesAreEqual(identifier))
+                               ?? await substates
+                                   .AsNoTracking()
+                                   .SingleOrDefaultAsync(s => s.SubstateIdentifier == identifier, cancellationToken);
         if (existingSubstate != null)
         {
             throw new InvalidTransactionException(
@@ -42,6 +48,7 @@ public static class DbSetExtensions
         this DbSet<TSubstate> substates,
         TransactionOpLocator transactionOpLocator,
         byte[] identifier,
+        Func<TSubstate> createNewSubstateIfVirtual,
         Func<TSubstate, bool> verifySubstateMatches,
         LedgerOperationGroup downOperationGroup,
         int downOperationIndexInGroup,
@@ -49,23 +56,37 @@ public static class DbSetExtensions
     )
         where TSubstate : SubstateBase
     {
-        var substate = await substates.SingleOrDefaultAsync(s => s.SubstateIdentifier == identifier, cancellationToken);
+        var substate = substates
+                           .Local
+                           .SingleOrDefault(s => s.SubstateIdentifier.BytesAreEqual(identifier))
+                       ?? await substates
+                           .SingleOrDefaultAsync(s => s.SubstateIdentifier == identifier, cancellationToken);
         if (substate == null)
         {
-            // TODO - Handle down of virtual substates which didn't previously exist
-            return;
+            if (!SubstateBase.IsVirtualIdentifier(identifier))
+            {
+                throw new InvalidTransactionException(
+                    transactionOpLocator,
+                    $"Non-virtual {typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as it did not exist in the database"
+                );
+            }
 
-            // throw new InvalidTransactionException(
-            //     transactionOpLocator,
-            //     $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} could not be downed as it did not exist in the database"
-            // );
+            // Virtual substates can be downed without being upped
+            var newSubstate = createNewSubstateIfVirtual();
+            newSubstate.SubstateIdentifier = identifier;
+            newSubstate.UpOperationGroup = downOperationGroup;
+            newSubstate.UpOperationIndexInGroup = downOperationIndexInGroup;
+            newSubstate.DownOperationGroup = downOperationGroup;
+            newSubstate.DownOperationIndexInGroup = downOperationIndexInGroup;
+            substates.Add(newSubstate);
+            return;
         }
 
         if (substate.State == SubstateState.Down)
         {
             throw new InvalidTransactionException(
                 transactionOpLocator,
-                $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} could not be downed as it was already down"
+                $"{typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as it was already down"
             );
         }
 
@@ -73,7 +94,7 @@ public static class DbSetExtensions
         {
             throw new InvalidTransactionException(
                 transactionOpLocator,
-                $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} was downed, but the substate contents appear not to match at downing time"
+                $"{typeof(TSubstate).Name} with identifier {identifier.ToHex()} was downed, but the substate contents appear not to match at downing time"
             );
         }
 
@@ -98,7 +119,11 @@ public static class DbSetExtensions
     )
         where THistory : HistoryBase
     {
-        var existingHistoryItem = await history
+        var existingHistoryItem = history
+            .Local
+            .Where(historySelector.Compile())
+            .FirstOrDefault(h => h.ToStateVersion == null)
+            ?? await history
             .Where(historySelector)
             .FirstOrDefaultAsync(h => h.ToStateVersion == null, cancellationToken);
 

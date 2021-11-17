@@ -3,6 +3,7 @@ using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
 using Common.Database.ValueConverters;
+using Common.Extensions;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 
@@ -109,7 +110,8 @@ public class CommonDbContext : DbContext
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasIndex(h => new { h.AccountAddress, h.ResourceIdentifier })
             .HasFilter("to_state_version is null")
-            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate)}_CurrentBalance");
+            .IsUnique()
+            .HasDatabaseName($"ix_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
 
         // All four of these indices (these three plus the implicit index from the PK) could be useful for different queries
         // TODO: Remove any which aren't important for the APIs we're exposing
@@ -139,7 +141,7 @@ public class CommonDbContext : DbContext
                 OperationGroupIndex = s.UpOperationGroupIndex,
             })
             .OnDelete(DeleteBehavior.Cascade) // Deletes Substate if OperationGroup deleted
-            .HasConstraintName($"FK_{nameof(TSubstate)}_UpOperationGroup");
+            .HasConstraintName($"fk_{nameof(TSubstate).ToSnakeCase()}_up_operation_group");
 
         modelBuilder.Entity<TSubstate>()
             .HasOne(s => s.DownOperationGroup)
@@ -150,6 +152,6 @@ public class CommonDbContext : DbContext
                 OperationGroupIndex = s.DownOperationGroupIndex,
             })
             .OnDelete(DeleteBehavior.Restrict) // Null out FKs if OperationGroup deleted (all such dependents need to be loaded by EF Core at the time of deletion!)
-            .HasConstraintName($"FK_{nameof(TSubstate)}_DownOperationGroup");
+            .HasConstraintName($"fk_{nameof(TSubstate).ToSnakeCase()}_down_operation_group");
     }
 }

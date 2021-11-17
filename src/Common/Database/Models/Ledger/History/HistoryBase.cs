@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace Common.Database.Models.Ledger.History;
 
@@ -12,8 +13,6 @@ namespace Common.Database.Models.Ledger.History;
 /// <typeparam name="TEntry">A record type indicating the history entry - these are the items which change over time.</typeparam>
 public abstract class HistoryBase<TKey, TEntry> : HistoryBase
 {
-    public abstract bool Matches(TKey key);
-
     public abstract TEntry GetEntry();
 }
 
@@ -33,6 +32,6 @@ public abstract class HistoryBase
     /// IE there should be a new History with New.FromStateVersion = Prev.ToStateVersion + 1.
     /// </summary>
     [Column(name: "to_state_version")]
-    [ConcurrencyCheck]
+    [ConcurrencyCheck] // Ensure that the same history can't be updated by two different state versions somehow
     public long? ToStateVersion { get; set; }
 }

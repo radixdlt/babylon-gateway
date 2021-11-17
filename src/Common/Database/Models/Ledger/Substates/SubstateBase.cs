@@ -29,7 +29,7 @@ public abstract class SubstateBase
     public int UpOperationIndexInGroup { get; set; }
 
     [Column(name: "down_state_version")]
-    [ConcurrencyCheck]
+    [ConcurrencyCheck] // Ensure that the same substate can't be downed by two different state versions somehow
     public long? DownStateVersion { get; set; }
 
     [Column(name: "down_operation_group_index")]
@@ -46,4 +46,16 @@ public abstract class SubstateBase
 
     public SubstateState State =>
         (DownOperationGroup != null || DownStateVersion != null) ? SubstateState.Down : SubstateState.Up;
+
+    public bool IsVirtual => IsVirtualIdentifier(SubstateIdentifier);
+
+    /// <summary>
+    /// If the substate identifier is longer than 36, the substate has a virtual parent.
+    /// The virtual parent gives essentially default values to a non-existing child, and this non-existent "virtual"
+    ///  child can be downed without ever formally being upped.
+    /// </summary>
+    public static bool IsVirtualIdentifier(byte[] identifier)
+    {
+        return identifier.Length > 36;
+    }
 }

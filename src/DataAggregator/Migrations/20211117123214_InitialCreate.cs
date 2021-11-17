@@ -130,13 +130,13 @@ namespace DataAggregator.Migrations
                     table.PrimaryKey("pk_account_resource_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
                     table.UniqueConstraint("ak_account_resource_balance_substates_substate_identifier", x => x.substate_identifier);
                     table.ForeignKey(
-                        name: "FK_TSubstate_DownOperationGroup",
+                        name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_TSubstate_UpOperationGroup",
+                        name: "fk_t_substate_up_operation_group",
                         columns: x => new { x.up_state_version, x.up_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
@@ -164,13 +164,13 @@ namespace DataAggregator.Migrations
                     table.PrimaryKey("pk_account_stake_ownership_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
                     table.UniqueConstraint("ak_account_stake_ownership_balance_substates_substate_identifi", x => x.substate_identifier);
                     table.ForeignKey(
-                        name: "FK_TSubstate_DownOperationGroup",
+                        name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_TSubstate_UpOperationGroup",
+                        name: "fk_t_substate_up_operation_group",
                         columns: x => new { x.up_state_version, x.up_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
@@ -199,13 +199,13 @@ namespace DataAggregator.Migrations
                     table.PrimaryKey("pk_account_xrd_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
                     table.UniqueConstraint("ak_account_xrd_stake_balance_substates_substate_identifier", x => x.substate_identifier);
                     table.ForeignKey(
-                        name: "FK_TSubstate_DownOperationGroup",
+                        name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_TSubstate_UpOperationGroup",
+                        name: "fk_t_substate_up_operation_group",
                         columns: x => new { x.up_state_version, x.up_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
@@ -232,13 +232,13 @@ namespace DataAggregator.Migrations
                     table.PrimaryKey("pk_validator_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
                     table.UniqueConstraint("ak_validator_stake_balance_substates_substate_identifier", x => x.substate_identifier);
                     table.ForeignKey(
-                        name: "FK_TSubstate_DownOperationGroup",
+                        name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_TSubstate_UpOperationGroup",
+                        name: "fk_t_substate_up_operation_group",
                         columns: x => new { x.up_state_version, x.up_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
@@ -251,6 +251,13 @@ namespace DataAggregator.Migrations
                 columns: new[] { "account_address", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_account_resource_balance_history_current_balance",
+                table: "account_resource_balance_history",
+                columns: new[] { "account_address", "rri" },
+                unique: true,
+                filter: "to_state_version is null");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_account_resource_balance_history_rri_account_address_from_s",
                 table: "account_resource_balance_history",
                 columns: new[] { "rri", "account_address", "from_state_version" });
@@ -259,12 +266,6 @@ namespace DataAggregator.Migrations
                 name: "ix_account_resource_balance_history_rri_from_state_version",
                 table: "account_resource_balance_history",
                 columns: new[] { "rri", "from_state_version" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AccountResourceBalanceSubstate_CurrentBalance",
-                table: "account_resource_balance_history",
-                columns: new[] { "account_address", "rri" },
-                filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
                 name: "ix_account_resource_balance_substates_account_address_rri",

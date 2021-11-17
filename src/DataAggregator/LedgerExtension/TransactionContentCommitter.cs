@@ -79,6 +79,10 @@ public class TransactionContentCommitter
         }
 
         await HandleHistoryUpdates();
+
+        // To ensure history is correctly read for the next transaction, we save here.
+        // TODO - fix history writing to batch up changes to be committed together
+        await _dbContext.SaveChangesAsync(_cancellationToken);
     }
 
     private async Task HandleOperation()
@@ -296,7 +300,7 @@ public class TransactionContentCommitter
 
             await AddHistoryForCurrentTransaction(
                 _dbContext.AccountResourceBalanceHistoryEntries,
-                h => h.Matches(key),
+                AccountResourceBalanceHistory.Matches(key),
                 oldHistory => AccountResourceBalanceHistory.FromPreviousHistory(key, oldHistory, entry)
             );
         }
@@ -321,7 +325,7 @@ public class TransactionContentCommitter
             case Substate.SubstateOperationEnum.BOOTUP:
                 return HandleSubstateUp(substates, createNewPartialSubstate());
             case Substate.SubstateOperationEnum.SHUTDOWN:
-                return HandleSubstateDown(substates, verifyDownedSubstateMatchesExisting);
+                return HandleSubstateDown(substates, createNewPartialSubstate, verifyDownedSubstateMatchesExisting);
             default:
                 throw GenerateDetailedInvalidTransactionException(
                     $"Unknown substate operation type: {_operation!.Substate.SubstateOperation}"
@@ -349,6 +353,7 @@ public class TransactionContentCommitter
 
     private Task HandleSubstateDown<TSubstate>(
         DbSet<TSubstate> substates,
+        Func<TSubstate> createNewPartialSubstate,
         Func<TSubstate, bool> verifySubstateMatches
     )
         where TSubstate : SubstateBase
@@ -358,6 +363,7 @@ public class TransactionContentCommitter
         return substates.DownSubstate(
             GetCurrentTransactionOpLocator(),
             _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
+            createNewPartialSubstate,
             verifySubstateMatches,
             _dbOperationGroup!,
             _operationIndexInGroup!.Value,
@@ -390,6 +396,7 @@ public class TransactionContentCommitter
     private TransactionOpLocator GetCurrentTransactionOpLocator()
     {
         return new TransactionOpLocator(
+            _transactionSummary!.StateVersion,
             _transaction!.TransactionIdentifier.Hash,
             _operationGroupIndex,
             _operationIndexInGroup

@@ -37,15 +37,19 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         var topOfLedgerStateVersion = await _ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken);
 
+        _logger.LogInformation(
+            "Last commit at top of DB ledger is at resultant state version {StateVersion}",
+            topOfLedgerStateVersion
+        );
+
         var getTransactionsStopwatch = new Stopwatch();
         getTransactionsStopwatch.Start();
 
         var transactionsResponse = await _transactionLogReader.GetTransactions(topOfLedgerStateVersion, TransactionsToPull, stoppingToken);
 
         _logger.LogInformation(
-            "Read {TransactionCount} transactions from the core api in {MillisecondsElapsed}ms (starting at state version {StateVersion})",
+            "Read {TransactionCount} transactions from the core api in {MillisecondsElapsed}ms",
             TransactionsToPull,
-            topOfLedgerStateVersion,
             getTransactionsStopwatch.ElapsedMilliseconds
         );
 
@@ -61,8 +65,8 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (starting at state version {StateVersion})",
             TransactionsToPull,
-            topOfLedgerStateVersion,
-            commitTransactionsStopwatch.ElapsedMilliseconds
+            commitTransactionsStopwatch.ElapsedMilliseconds,
+            topOfLedgerStateVersion
         );
     }
 }
