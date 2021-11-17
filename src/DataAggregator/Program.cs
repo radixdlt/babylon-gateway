@@ -15,13 +15,13 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-// After changing migrations or wanting to wipe the database, change this to "true"
+// Easy switch for development - after changing migrations or wanting to wipe the database, change this to "true"
 static bool ShouldWipeDatabaseInsteadOfStart() => false;
 
 if (ShouldWipeDatabaseInsteadOfStart())
 {
-    // TODO - Change this to work safely in production!
-    // TODO - Tweak logs so that any migration based logs still appear, but that
+    // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
+    // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
     // https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli
     using var scope = host.Services.CreateScope();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<CommonDbContext>>();
@@ -29,15 +29,11 @@ if (ShouldWipeDatabaseInsteadOfStart())
 
     logger.LogInformation("Starting db wipe");
 
-    // Uncomment to wipe Database every load!
     await db.Database.EnsureDeletedAsync();
 
     logger.LogInformation("DB wipe completed");
 
-    // Migrate every load
-    // await db.Database.MigrateAsync();
-
-    // Purposefully do not allow running after wipe - have to change the above to true
+    // Purposefully do not allow running after wipe - have to change the above to true once
 }
 else
 {

@@ -26,8 +26,9 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         _ledgerExtenderService = ledgerExtenderService;
     }
 
-    // TODO - Implement node-specific syncing state machine, and separate committing into a global worker...
-    // TODO - Ingestor locking in database. Network lock the ledger too.
+    // TODO:NG-12 - Implement node-specific syncing state machine, and separate committing into a global worker...
+    // TODO:NG-40 - Do special actions when we start the ledger: Save the network of the ledger, and check this against our configuration before we commit.
+    // TODO:NG-13 - Ensure we still maintain the primary aggregator lock in the database before we commit
     protected override async Task DoWork(CancellationToken stoppingToken)
     {
         const int TransactionsToPull = 1000;
@@ -62,12 +63,13 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         );
 
         _logger.LogInformation(
-            "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (ledger is up to StateVersion={StateVersion}, Epoch={Epoch}, IndexInEpoch={IndexInEpoch})",
+            "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (ledger is up to StateVersion={LedgerStateVersion}, Epoch={LedgerEpoch}, IndexInEpoch={LedgerIndexInEpoch}, Timestamp={LedgerTimestamp})",
             TransactionsToPull,
             commitTransactionsStopwatch.ElapsedMilliseconds,
             commitedTransactionSummary.StateVersion,
             commitedTransactionSummary.Epoch,
-            commitedTransactionSummary.IndexInEpoch
+            commitedTransactionSummary.IndexInEpoch,
+            commitedTransactionSummary.CurrentViewTimestamp
         );
     }
 }

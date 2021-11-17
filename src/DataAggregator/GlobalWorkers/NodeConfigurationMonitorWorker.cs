@@ -42,7 +42,7 @@ public class NodeConfigurationMonitorWorker : LoopedWorkerBase
 
         var enabledNodes = nodeConfiguration
             .Where(n => n.EnabledForIndexing)
-            /* TODO - Enable syncing from more than one node! */
+            /* TODO:NG-12 - Enable syncing from more than one node! */
             .Take(1)
             .ToList();
 
@@ -54,7 +54,7 @@ public class NodeConfigurationMonitorWorker : LoopedWorkerBase
 
     private Task UpdateNodeConfigurationInDatabaseIfNeeded()
     {
-        // TODO
+        // TODO:NG-12 - Ensure we write this if it's needed, or we get rid of this if it's not
         return Task.CompletedTask;
     }
 }

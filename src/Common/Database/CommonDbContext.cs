@@ -114,7 +114,7 @@ public class CommonDbContext : DbContext
             .HasDatabaseName($"ix_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
 
         // All four of these indices (these three plus the implicit index from the PK) could be useful for different queries
-        // TODO: Remove any which aren't important for the APIs we're exposing
+        // TODO:NG-39 Remove any which aren't important for the APIs we're exposing
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasIndex(h => new { h.AccountAddress, h.FromStateVersion });
         modelBuilder.Entity<AccountResourceBalanceHistory>()

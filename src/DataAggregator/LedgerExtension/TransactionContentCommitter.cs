@@ -66,7 +66,7 @@ public class TransactionContentCommitter
             _dbOperationGroup = new LedgerOperationGroup(
                 transaction.CommittedStateIdentifier.StateVersion,
                 operationGroupIndex,
-                null // TODO - fix
+                null // TODO:NG-41 - fix inferred actions
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
 
@@ -281,7 +281,7 @@ public class TransactionContentCommitter
 
     private Task HandleDataOperation()
     {
-        // TODO
+        // TODO:NG-24
         return Task.CompletedTask;
     }
 
