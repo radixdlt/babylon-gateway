@@ -95,6 +95,7 @@ public class NewtonsoftStringUtils
                                 sb.Append(separator);
                             }
                         }
+
                         break;
                     case SeparatedCaseState.Lower:
                     case SeparatedCaseState.NewWord:
