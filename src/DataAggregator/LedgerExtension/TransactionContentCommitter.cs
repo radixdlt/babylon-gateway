@@ -46,7 +46,15 @@ public class TransactionContentCommitter
         _cancellationToken = cancellationToken;
     }
 
-    // TODO - Consider parallelising by using DBContextFactory instead of awaiting each separate update(!) - but we'll still want to tie them all into the same transaction
+    // TODO - Consider parallelising by using DBContextFactory instead of awaiting each separate update(!)
+    // BUT:
+    //  * We'll still want to tie them all into the same transaction, but will likely need to run SaveChanges in series
+    //    as I doubt SaveChangesAsync is threadsafe on a transaction
+    //  * We'll need any local history lookups to work across all different db contexts (or ensure they end up with the
+    //    same dbcontext, by, eg, having a map from Substate Identifier / History Type and Key to used db context, so
+    //    that we can streamline any such updates across that context)
+    //  * We could also consider batching look-ups against a given table to speed these requests up, or even just
+    //    make the thing lazy, and do the batched-lookups, updates and writes all at the end of a transaction batch.
     public async Task CommitTransactionDetails(CommittedTransaction transaction, TransactionSummary transactionSummary)
     {
         _transaction = transaction;
@@ -79,10 +87,6 @@ public class TransactionContentCommitter
         }
 
         await HandleHistoryUpdates();
-
-        // To ensure history is correctly read for the next transaction, we save here.
-        // TODO - fix history writing to batch up changes to be committed together
-        await _dbContext.SaveChangesAsync(_cancellationToken);
     }
 
     private async Task HandleOperation()
