@@ -8,7 +8,7 @@ namespace DataAggregator.GlobalServices;
 
 public interface ILedgerExtenderService
 {
-    Task CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
+    Task<TransactionSummary> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
 
     Task<long> GetTopOfLedgerStateVersion(CancellationToken token);
 }
@@ -37,7 +37,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         return lastTransactionOverview.StateVersion;
     }
 
-    public async Task CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
+    public async Task<TransactionSummary> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
     {
         // Create own context for this unit of work.
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
@@ -52,7 +52,7 @@ public class LedgerExtenderService : ILedgerExtenderService
             token
         );
 
-        await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
+        return await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
             .CommitTransactions(parentSummary, transactions);
     }
 }

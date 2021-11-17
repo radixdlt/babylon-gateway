@@ -7,7 +7,7 @@ namespace DataAggregator.LedgerExtension;
 
 public interface IBulkTransactionCommitter
 {
-    Task CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
+    Task<TransactionSummary> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
 }
 
 /// <summary>
@@ -30,7 +30,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         _cancellationToken = cancellationToken;
     }
 
-    public async Task CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    public async Task<TransactionSummary> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
     {
         foreach (var transaction in transactions)
         {
@@ -42,6 +42,9 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         }
 
         await _dbContext.SaveChangesAsync(_cancellationToken);
+
+        var lastCommittedTransactionSummary = parentSummary;
+        return lastCommittedTransactionSummary;
     }
 
     private async Task CommitCheckedTransaction(CommittedTransaction transaction, TransactionSummary summary)

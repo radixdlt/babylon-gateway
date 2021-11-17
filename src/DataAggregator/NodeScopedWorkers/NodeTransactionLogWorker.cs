@@ -1,6 +1,5 @@
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
-using DataAggregator.LedgerExtension;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using System.Diagnostics;
 
@@ -56,17 +55,19 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         var commitTransactionsStopwatch = new Stopwatch();
         commitTransactionsStopwatch.Start();
 
-        await _ledgerExtenderService.CommitTransactions(
+        var commitedTransactionSummary = await _ledgerExtenderService.CommitTransactions(
             transactionsResponse.StateIdentifier,
             transactionsResponse.Transactions,
             stoppingToken
         );
 
         _logger.LogInformation(
-            "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (starting at state version {StateVersion})",
+            "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (ledger is up to StateVersion={StateVersion}, Epoch={Epoch}, IndexInEpoch={IndexInEpoch})",
             TransactionsToPull,
             commitTransactionsStopwatch.ElapsedMilliseconds,
-            topOfLedgerStateVersion
+            commitedTransactionSummary.StateVersion,
+            commitedTransactionSummary.Epoch,
+            commitedTransactionSummary.IndexInEpoch
         );
     }
 }

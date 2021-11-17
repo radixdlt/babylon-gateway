@@ -130,12 +130,13 @@ public static class DbSetExtensions
         if (existingHistoryItem == null)
         {
             var newHistoryItem = createNewHistory(null);
+            newHistoryItem.FromStateVersion = transactionStateVersion;
             history.Add(newHistoryItem);
         }
         else
         {
             var newHistoryItem = createNewHistory(existingHistoryItem);
-            existingHistoryItem.ToStateVersion = transactionStateVersion;
+            existingHistoryItem.ToStateVersion = transactionStateVersion - 1;
             newHistoryItem.FromStateVersion = transactionStateVersion;
             history.Add(newHistoryItem);
         }
