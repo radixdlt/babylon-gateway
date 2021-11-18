@@ -121,15 +121,21 @@ public readonly record struct TokenAmount
             return "NaN";
         }
 
-        var (integerPart, fractionalPart) = GetIntegerAndFractionalParts();
-        return $@"{integerPart}.{fractionalPart.ToString().PadLeft(DecimalPrecision, '0')}";
+        var (isNegative, integerPart, fractionalPart) = GetIntegerAndFractionalParts();
+        return $@"{(isNegative ? "-" : string.Empty)}{integerPart}.{fractionalPart.ToString().PadLeft(DecimalPrecision, '0')}";
     }
 
-    public (BigInteger IntegerPart, BigInteger FractionalPart) GetIntegerAndFractionalParts()
+    public (bool IsNegative, BigInteger IntegerPart, BigInteger FractionalPart) GetIntegerAndFractionalParts()
     {
-        var integerPart = _subUnits / _divisor;
-        var fractionalPart = _subUnits - (integerPart * _divisor);
-        return (integerPart, fractionalPart);
+        // This rounds towards 0 and can outputs a negative fractional part
+        var integerPart = BigInteger.DivRem(_subUnits, _divisor, out var fractionalPart);
+
+        if (integerPart < 0 || fractionalPart < 0)
+        {
+            return (true, -integerPart, -fractionalPart);
+        }
+
+        return (false, integerPart, fractionalPart);
     }
 
     public bool IsNaN()

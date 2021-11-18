@@ -30,6 +30,7 @@ public class TokenAmountTests
     [InlineData("000.13444", "0.13444")]
     [InlineData("0.0", "0")]
     [InlineData("11.000000000000000009", "11.000000000000000009")] // Does hold 18 dp
+    [InlineData("11.0000000000000000019", "11.000000000000000001")] // Does not hold 19 dp, truncates
     [InlineData("123.34", "123.34")]
     [InlineData("NaN", "NaN")]
     [InlineData("Infinity", "NaN")]
@@ -45,8 +46,10 @@ public class TokenAmountTests
     [InlineData("1", "0.000000000000000001")]
     [InlineData("123", "0.000000000000000123")]
     [InlineData("12345678900123456789", "12.345678900123456789")]
-    [InlineData("-123", "-123")]
-    public void Create_FromSubUnits_ReadsCorrectlyAtFullPrecision(string subUnitsStr, string expected)
+    [InlineData("-123", "-0.000000000000000123")]
+    [InlineData("-123456789001234567", "-0.123456789001234567")]
+    [InlineData("-1234567890012345678", "-1.234567890012345678")]
+    public void Create_FromSubUnitsString_ReadsCorrectlyAtFullPrecision(string subUnitsStr, string expected)
     {
         Assert.Equal(expected, TokenAmount.FromSubUnits(subUnitsStr).ToStringFullPrecision());
     }
@@ -104,9 +107,9 @@ public class TokenAmountTests
     }
 
     [Fact]
-    public void GivenNaN_SubunitsIsNegativeOne()
+    public void GivenNaN_SubunitsIsZero()
     {
-        Assert.Equal(BigInteger.MinusOne, TokenAmount.NaN.GetSubUnits());
+        Assert.Equal(BigInteger.Zero, TokenAmount.NaN.GetSubUnits());
     }
 
     public static IEnumerable<object[]> IsNaN_Data => new List<object[]>
@@ -114,7 +117,10 @@ public class TokenAmountTests
             new object[] { TokenAmount.NaN, true },
             new object[] { TokenAmount.FromSubUnits(BigInteger.Zero), false },
             new object[] { TokenAmount.FromSubUnits(BigInteger.One), false },
+            new object[] { TokenAmount.FromSubUnits(BigInteger.MinusOne), false },
             new object[] { TokenAmount.FromStringParts("1", "234"), false },
+            new object[] { TokenAmount.FromStringParts("-1", "234"), false },
+            new object[] { TokenAmount.FromStringParts("1", "-234"), true },
         };
 
     [Theory]
