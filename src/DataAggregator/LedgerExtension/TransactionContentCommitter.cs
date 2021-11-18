@@ -33,9 +33,9 @@ public class TransactionContentCommitter
     private CommittedTransaction? _transaction;
     private LedgerOperationGroup? _dbOperationGroup;
     private OperationGroup? _transactionOperationGroup;
-    private int? _operationGroupIndex;
+    private int _operationGroupIndex = -1;
     private Operation? _operation;
-    private int? _operationIndexInGroup;
+    private int _operationIndexInGroup = -1;
     private Entity? _entity;
     private TokenAmount? _amount;
 
@@ -46,34 +46,39 @@ public class TransactionContentCommitter
         _cancellationToken = cancellationToken;
     }
 
-    // TODO:NG-49 - Consider parallelising by using DBContextFactory instead of awaiting each separate update(!)
-    // BUT:
-    //  * We'll still want to tie them all into the same transaction, but will likely need to run SaveChanges in series
-    //    as I doubt SaveChangesAsync is threadsafe on a transaction
-    //  * We'll need any local history lookups to work across all different db contexts (or ensure they end up with the
-    //    same dbcontext, by, eg, having a map from Substate Identifier / History Type and Key to used db context, so
-    //    that we can streamline any such updates across that context)
-    //  * We could also consider batching look-ups against a given table to speed these requests up, or even just
-    //    make the thing lazy, and do the batched-lookups, updates and writes all at the end of a transaction batch.
+    // TODO:NG-49 - Consider parallelising the dependent substates/histories in batched fetches in advance instead of
+    //              awaiting in series to fetch each in turn
     public async Task CommitTransactionDetails(CommittedTransaction transaction, TransactionSummary transactionSummary)
     {
         _transaction = transaction;
         _transactionSummary = transactionSummary;
-        foreach (var (operationGroup, operationGroupIndex) in transaction.SubstantiveOperationGroups())
+        _operationGroupIndex = -1;
+        foreach (var operationGroup in transaction.OperationGroups)
         {
+            _operationGroupIndex++;
+            if (!operationGroup.HasSubstantiveOperations())
+            {
+                continue;
+            }
+
+            _operationIndexInGroup = -1;
             _transactionOperationGroup = operationGroup;
-            _operationGroupIndex = operationGroupIndex;
             _dbOperationGroup = new LedgerOperationGroup(
                 transaction.CommittedStateIdentifier.StateVersion,
-                operationGroupIndex,
+                _operationGroupIndex,
                 null // TODO:NG-41 - fix inferred actions
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
 
-            foreach (var (operation, operationIndexInGroup) in _transactionOperationGroup.SubstantiveOperations())
+            foreach (var operation in _transactionOperationGroup.Operations)
             {
+                _operationIndexInGroup += 1;
+                if (!operation.IsNotRoundDataOrValidatorBftData())
+                {
+                    continue;
+                }
+
                 _operation = operation;
-                _operationIndexInGroup = operationIndexInGroup;
                 _entity = _entityDeterminer.DetermineEntity(_operation.EntityIdentifier);
                 if (_entity == null)
                 {
@@ -83,8 +88,17 @@ public class TransactionContentCommitter
                 }
 
                 await HandleOperation();
+
+                _entity = null;
+                _amount = null;
+                _operation = null;
             }
         }
+
+        _dbOperationGroup = null;
+        _transactionOperationGroup = null;
+        _operationGroupIndex = -1;
+        _operationIndexInGroup = -1;
 
         await HandleHistoryUpdates();
     }
@@ -254,8 +268,8 @@ public class TransactionContentCommitter
     {
         var type = entityType switch
         {
-            EntityType.Account => AccountStakeOwnershipBalanceSubstateType.Staked,
-            EntityType.Account_PreparedUnstake => AccountStakeOwnershipBalanceSubstateType.PreparingUnstake,
+            EntityType.Account => AccountStakeOwnershipBalanceSubstateType.Stake,
+            EntityType.Account_PreparedUnstake => AccountStakeOwnershipBalanceSubstateType.PreparedUnstake,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -358,7 +372,7 @@ public class TransactionContentCommitter
             _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
             newSubstate,
             _dbOperationGroup!,
-            _operationIndexInGroup!.Value,
+            _operationIndexInGroup,
             _cancellationToken
         );
     }
@@ -378,7 +392,7 @@ public class TransactionContentCommitter
             createNewPartialSubstate,
             verifySubstateMatches,
             _dbOperationGroup!,
-            _operationIndexInGroup!.Value,
+            _operationIndexInGroup,
             _cancellationToken
         );
     }

@@ -52,7 +52,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         var ledgerTransaction = TransactionMapping.CreateLedgerTransaction(transaction, summary);
         _dbContext.LedgerTransactions.Add(ledgerTransaction);
 
-        if (!transaction.HasSubstantiveOperations())
+        if (summary.IsOnlyRoundChange)
         {
             return;
         }

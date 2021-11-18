@@ -16,7 +16,7 @@
       <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.0-preview5" />
 
       <!-- Generated / Local -->
-      <PackageVersion Include="RadixCoreApi.GeneratedClient" Version="0.6.4" />
+      <PackageVersion Include="RadixCoreApi.GeneratedClient" Version="0.9.0" />
 
     <!-- NON-PRODUCTION DEPENDENCIES -->
 

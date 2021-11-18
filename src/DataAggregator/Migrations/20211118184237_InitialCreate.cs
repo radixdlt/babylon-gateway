@@ -62,8 +62,10 @@ namespace DataAggregator.Migrations
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     fee_paid = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    signed_by = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
+                    is_only_round_change = table.Column<bool>(type: "boolean", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_of_round = table.Column<long>(type: "bigint", nullable: true)

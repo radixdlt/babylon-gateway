@@ -110,6 +110,10 @@ namespace DataAggregator.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_end_of_epoch");
 
+                    b.Property<bool>("IsOnlyRoundChange")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_only_round_change");
+
                     b.Property<byte[]>("Message")
                         .HasColumnType("bytea")
                         .HasColumnName("message");
@@ -117,6 +121,10 @@ namespace DataAggregator.Migrations
                     b.Property<long?>("ParentStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("parent_state_version");
+
+                    b.Property<byte[]>("SignedBy")
+                        .HasColumnType("bytea")
+                        .HasColumnName("signed_by");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone")

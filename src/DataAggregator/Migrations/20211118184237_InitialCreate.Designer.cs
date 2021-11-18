@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(CommonDbContext))]
-    [Migration("20211117123214_InitialCreate")]
+    [Migration("20211118184237_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -112,6 +112,10 @@ namespace DataAggregator.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_end_of_epoch");
 
+                    b.Property<bool>("IsOnlyRoundChange")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_only_round_change");
+
                     b.Property<byte[]>("Message")
                         .HasColumnType("bytea")
                         .HasColumnName("message");
@@ -119,6 +123,10 @@ namespace DataAggregator.Migrations
                     b.Property<long?>("ParentStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("parent_state_version");
+
+                    b.Property<byte[]>("SignedBy")
+                        .HasColumnType("bytea")
+                        .HasColumnName("signed_by");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone")

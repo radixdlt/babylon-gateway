@@ -7,16 +7,16 @@ namespace Common.Database.Models.Ledger.Substates;
 
 public enum AccountStakeOwnershipBalanceSubstateType
 {
-    Staked,
-    PreparingUnstake,
+    Stake,
+    PreparedUnstake,
 }
 
 public class AccountStakeOwnershipBalanceSubstateTypeValueConverter : EnumTypeValueConverterBase<AccountStakeOwnershipBalanceSubstateType>
 {
     private static Dictionary<AccountStakeOwnershipBalanceSubstateType, string> _conversion = new()
     {
-        { AccountStakeOwnershipBalanceSubstateType.Staked, "STAKED" },
-        { AccountStakeOwnershipBalanceSubstateType.PreparingUnstake, "PREPARING_UNSTAKE" },
+        { AccountStakeOwnershipBalanceSubstateType.Stake, "STAKE" },
+        { AccountStakeOwnershipBalanceSubstateType.PreparedUnstake, "PREPARED_UNSTAKE" },
     };
 
     public AccountStakeOwnershipBalanceSubstateTypeValueConverter()

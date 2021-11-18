@@ -3,36 +3,46 @@ info:
   version: 0.9.0
   title: Radix Core API
   description: |
-    This API provides endpoints for node management and integrations.
+    This API provides endpoints for Radix network integrators.
 
-    # Introduction
-
-    Welcome to the Radix Core API Preview. This Preview API is intended for
-    integrators to be able to begin integrating with the Radix network. In
-    particular, the following endpoints will maintain backwards compatibility
-    once version 1.0.0 is released:
-
-    * `/network/configuration`
-    * `/network/status`
-    * `/transactions`
-    * `/construction/derive`
-    * `/construction/build`
-    * `/construction/parse`
-    * `/construction/finalize`
-    * `/construction/hash`
-    * `/construction/submit`
-
-    All other endpoints may change by the 1.0.0 release, and further endpoints
-    (such as mempool contents) will likely be added.
+    # Overview
 
     > WARNING
     >
     > The Core API is __NOT__ intended to be available on the public web. It is
-    > mainly designed to be accessed in a private network.
-    > In particular, endpoints in the Signing API if accessed by the public can
-    > result in loss of funds.
+    > mainly designed to be accessed in a private network for integration use.
 
-    # Rosetta
+    Welcome to the Radix Core API version 0.9.0 for Integrators. Version 0.9.0
+    is intended for integrators who wish to begin the process of developing an
+    integration between the Radix ledger and their own systems.
+
+    The Core API is separated into two:
+    * The **Data API** is a read-only api which allows integrators to view and
+    sync to the state of the ledger.
+    * The **Construction API** allows integrators to construct and submit a
+    transaction to the network on behalf of a key holder.
+
+    The Core API is primarily designed for network integrations such as exchanges,
+    ledger analytics providers, or hosted ledger data dashboards where detailed
+    ledger data is required and the integrator can be expected to run their node
+    to provide the Core API for their own consumption.
+
+    The Core API is not a full replacement for the current Node and Archive
+    [APIs](https://docs.radixdlt.com). We are also working on a public-facing
+    Gateway API that will be part of a full "new API", but is yet to be finalised.
+
+    We should stress that this API is in preview, and should __not__ be deployed
+    into production until version 1.0.0 has been finalised in an official Radix node
+    release.
+
+    ## Backwards Compatibility
+
+    The OpenAPI specification of all endpoints in Version 0.9.0 is intended to be
+    backwards compatible with version 1.0.0 once released, so that there is little
+    risk that clients working with this spec will break after the release of 1.0.0.
+    Additional endpoints (such as retrieving mempool contents) are planned to be added.
+
+    ## Rosetta
 
     The Data API and Construction API is inspired from [Rosetta API](https://www.rosetta-api.org/)
     most notably:
@@ -53,6 +63,19 @@ info:
 
     Future versions of the api will aim towards a fully-compliant Rosetta API.
 
+    ## Client Reference Implementation
+
+    We are currently working on a client reference implementation to the Core API
+    and hope to have this available to share with you soon.
+
+    ## Client Code Generation
+
+    We have found success with generating clients against the [api.yaml specification](https://raw.githubusercontent.com/radixdlt/radixdlt/feature/open-api/radixdlt-core/radixdlt/src/main/java/com/radixdlt/api/core/api.yaml)
+    in the core folder. See https://openapi-generator.tech/ for more details.
+
+    The OpenAPI generator only supports openapi version 3.0.0 at present, but you can
+    change 3.1.0 to 3.0.0 in the first line of the spec without affecting generation.
+
     # Data API Flow
 
     Integrators can make use of the Data API to synchronize a full or partial view of
@@ -71,9 +94,10 @@ info:
     this Construction API selects UTXOs on behalf of the caller. This has the unfortunate
     side effect of not being able to support high frequency transactions from a single
     account due to UTXO conflicts. This will be addressed in a future release.
+
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: The Radix License, Version 1.0
+    url: https://www.radixfoundation.org/licenses/LICENSE-v1
 servers:
   - url: localhost:3333
 tags:
@@ -96,7 +120,7 @@ tags:
     x-displayName: Objects
     description: |
       ## State Identifiers
-      The Radix Olympia network has no concept of blocks. Instead transactions are
+      The Radix network has no concept of blocks. Instead transactions are
       managed in a flat ordered list. A hash chain is formed from these transactions
       called a Transaction Accumulator. A Transaction Accumulator represents a point
       in time of the ledger with a valid state.
@@ -150,6 +174,8 @@ tags:
       objects. An Entity Identifier may further specify a Sub Address which should be treated as a separate
       unique entity.
 
+      The interpretation of Entity Identifiers is discussed in detail in the Structure section.
+
       <SchemaDefinition schemaRef="#/components/schemas/EntityIdentifier" exampleRef="#/components/examples/EntityIdentifier" showReadOnly={true} showWriteOnly={true} />
 
       ## Amounts
@@ -192,6 +218,10 @@ tags:
       * **Token** is an entity representing a Token Definition, represented by its Radix Resource Identifier ("RRI").
       * **System** is an entity representing system level data such as current epoch and round, represented by the string "system".
 
+      If an entity identifier references a sub-entity, it should be considered a separate entity to the primary entity.
+      For example, for tracking the balance of an Account entity, any operations against an entity identifier
+      with a non-empty `entity_identifier.sub_entity` should be ignored, even if the `entity_identifier.address` matches.
+
 
 
   - name: addressing
@@ -211,6 +241,9 @@ tags:
         The suffix is fixed for a given Radix network, and is `_rr` on mainnet.
         As an example, the mainnet address of the native token, XRD, is `xrd_rr1qy5wfsfh`.
         The data part of the Bech32 encoding encodes the token's unique radix engine address on ledger.
+        This radix engine address is hex `01` for XRD,
+        and presently, hex `03 | SHA256(SHA256(signer_public_key_compressed_33_bytes | symbol_in_utf8_bytes)`
+        for user-created tokens, where | denotes the byte concatenation operator.
 
       The Account and Validator HRPs and the Token HRP suffix for the current network should be fetched from the
       `/network/configuration` endpoint.
@@ -250,6 +283,735 @@ tags:
       data object with the same type.
       5. **New Token Definitions** may be created by destroying an `UnclaimedREAddr` and creating a
       `TokenData` and `TokenMetadata` data object.
+  - name: xrd_transfer_example
+    x-displayName: Send XRD
+    description: |
+      Given the described model let us go through an example of how an XRD transfer transaction may look like.
+
+      For the purpose of our example, let's say we want to:
+      > TRANSFER
+      > 10.5 XRD
+      > FROM
+      > rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
+      > TO
+      > rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33
+
+
+      ## Entity Identifiers
+
+      First we need to specify the entities identifiers to be used. In our case,
+      we have two entity identifiers, one for the sender and one for the receiver.
+
+      Sender Entity Identifier:
+      ```
+      {
+        "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+      }
+      ```
+
+      Receiver Entity Identifier:
+      ```
+      {
+        "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+      }
+      ```
+
+      ## Resource Identifiers
+
+      Next we will need the Resource Identifier for the XRD Token which will be transferred.
+      XRD is Radix ledger's native token, used for staking and to pay fees. It is the only
+      token allowed with the symbol `xrd`, and has a reserved radix engine address of `1`
+      (`01` in hex).
+
+      On mainnet, its RRI is xrd_rr1qy5wfsfh and it's resource identifier is:
+      ```
+      {
+        "type": "Token",
+        "rri": "xrd_rr1qy5wfsfh"
+      }
+      ```
+
+      ## Amounts
+
+      Given our resource identifier we can now create resource balance changes. This will
+      be expressed as a Resource Amount. All amounts are expressed as `10^-18` subunits.
+      Thus, since we are transferring `1.5 XRD` this translates to a value of
+      `1500000000000000000` or the following amounts:
+
+      Sender Amount:
+      ```
+      {
+        "resource_identifier": {
+          "type": "Token",
+          "rri": "xrd_rr1qy5wfsfh"
+        },
+        "value": "-1500000000000000000"
+      }
+      ```
+
+      Receiver Amount:
+      ```
+      {
+        "resource_identifier": {
+          "type": "Token",
+          "rri": "xrd_rr1qy5wfsfh"
+        },
+        "value": "1500000000000000000"
+      }
+      ```
+
+      ## Operations
+
+      We now combine our amounts with our Entity Identifiers to create Operations.
+      `"Resource"` is the type of our Operation since we are manipulating resource balances.
+
+      Sender Operation:
+      ```
+      {
+        "type": "Resource",
+        "entity_identifier": {
+          "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+        },
+        "amount": {
+          "resource_identifier": {
+            "type": "Token",
+            "rri": "xrd_rr1qy5wfsfh"
+          },
+          "value": "-1500000000000000000"
+        }
+      }
+      ```
+
+      Receiver Operation:
+      ```
+      {
+        "type": "Resource",
+        "entity_identifier": {
+          "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+        },
+        "amount": {
+          "resource_identifier": {
+            "type": "Token",
+            "rri": "xrd_rr1qy5wfsfh"
+          },
+          "value": "1500000000000000000"
+        }
+      }
+      ```
+
+      ## Operation Group
+
+      We then combine operations into a group. Note that the sender operation must be first.
+
+      ```
+      {
+        "operations": [
+          {
+            "type": "Resource",
+            "entity_identifier": {
+              "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+            },
+            "amount": {
+              "resource_identifier": {
+                "type": "Token",
+                "rri": "xrd_rr1qy5wfsfh"
+              },
+              "value": "-1500000000000000000"
+            }
+          },
+          {
+            "type": "Resource",
+            "entity_identifier": {
+              "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+            },
+            "amount": {
+              "resource_identifier": {
+                "type": "Token",
+                "rri": "xrd_rr1qy5wfsfh"
+              },
+              "value": "1500000000000000000"
+            }
+          }
+        ]
+      }
+      ```
+
+      ## Fee Payer
+
+      The last thing we need to add is to specify the fee payer account entity identifier.
+      In this case it will be the same account as the sender.
+
+      We can now also add the `network_identifier` and with this structure we can submit this
+      to `/construction/build`. This `network_identifier` needs to match the network identifier
+      of the node.
+
+      ```
+        {
+          "network_identifier": {
+            "network": "mainnet"
+          },
+          "fee_payer": {
+            "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+          },
+          "operation_groups": [
+            {
+              "operations": [
+                {
+                  "type": "Resource",
+                  "entity_identifier": {
+                    "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+                  },
+                  "amount": {
+                    "resource_identifier": {
+                      "type": "Token",
+                      "rri": "xrd_rr1qy5wfsfh"
+                    },
+                    "value": "-1500000000000000000"
+                  }
+                },
+                {
+                  "type": "Resource",
+                  "entity_identifier": {
+                    "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+                  },
+                  "amount": {
+                    "resource_identifier": {
+                      "type": "Token",
+                      "rri": "xrd_rr1qy5wfsfh"
+                    },
+                    "value": "1500000000000000000"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ```
+
+      ## Unsigned Transaction
+
+      After submitting to `/construction/build`, the output will look something like:
+
+      ```
+      {
+        "unsigned_transaction": "074db58b950fcf446140dd945c6adfd06daa0b520f7eddf0467583d96babff579d000000020100210000000000000000000000000000000000000000000000000000ffcb9e57d4000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab010000000000000000000000000000000000000000004f68ca6c8d0d7e082c00000008000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab010000000000000000000000000000000000000000004f68ca57bbfb708d16000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b60100000000000000000000000000000000000000000000000014d1120d7b16000000",
+        "payload_to_sign": "e2d702dde0c7731229e96be53faef0b74c34e2e68ebaefa5e4ae6a63d400c449"
+      }
+      ```
+
+      We can pass in `unsigned_transaction` to `/construction/parse` in order to see what the transaction looks like:
+      ```
+      {
+        "metadata": {
+          "fee": {
+            "resource_identifier": {
+              "rri": "xrd_rr1qy5wfsfh",
+              "type": "Token"
+            },
+            "value": "72000000000000000"
+          }
+        },
+        "operation_groups": [
+          {
+            "operations": [
+              {
+                "amount": {
+                  "resource_identifier": {
+                    "rri": "xrd_rr1qy5wfsfh",
+                    "type": "Token"
+                  },
+                  "value": "-96000000000000000000000000"
+                },
+                "substate": {
+                  "substate_identifier": {
+                    "identifier": "4db58b950fcf446140dd945c6adfd06daa0b520f7eddf0467583d96babff579d00000002"
+                  },
+                  "substate_operation": "SHUTDOWN"
+                },
+                "entity_identifier": {
+                  "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+                },
+                "type": "Resource"
+              },
+              {
+                "metadata": {
+                  "substate_data_hex": "06000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab010000000000000000000000000000000000000000004f68ca6c8d0d7e082c0000"
+                },
+                "amount": {
+                  "resource_identifier": {
+                    "rri": "xrd_rr1qy5wfsfh",
+                    "type": "Token"
+                  },
+                  "value": "95999999928000000000000000"
+                },
+                "substate": {
+                  "substate_identifier": {
+                    "identifier": "65f61dba3ed40a438c4694e8947f73530c1c6ca6b8115371c05c6565f9fb6a4900000000"
+                  },
+                  "substate_operation": "BOOTUP"
+                },
+                "entity_identifier": {
+                  "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+                },
+                "type": "Resource"
+              }
+            ]
+          },
+          {
+            "operations": [
+              {
+                "amount": {
+                  "resource_identifier": {
+                    "rri": "xrd_rr1qy5wfsfh",
+                    "type": "Token"
+                  },
+                  "value": "-95999999928000000000000000"
+                },
+                "substate": {
+                  "substate_identifier": {
+                    "identifier": "65f61dba3ed40a438c4694e8947f73530c1c6ca6b8115371c05c6565f9fb6a4900000000"
+                  },
+                  "substate_operation": "SHUTDOWN"
+                },
+                "entity_identifier": {
+                  "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+                },
+                "type": "Resource"
+              },
+              {
+                "metadata": {
+                  "substate_data_hex": "06000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab010000000000000000000000000000000000000000004f68ca57bbfb708d160000"
+                },
+                "amount": {
+                  "resource_identifier": {
+                    "rri": "xrd_rr1qy5wfsfh",
+                    "type": "Token"
+                  },
+                  "value": "95999998428000000000000000"
+                },
+                "substate": {
+                  "substate_identifier": {
+                    "identifier": "65f61dba3ed40a438c4694e8947f73530c1c6ca6b8115371c05c6565f9fb6a4900000001"
+                  },
+                  "substate_operation": "BOOTUP"
+                },
+                "entity_identifier": {
+                  "address": "rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88"
+                },
+                "type": "Resource"
+              },
+              {
+                "metadata": {
+                  "substate_data_hex": "06000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b60100000000000000000000000000000000000000000000000014d1120d7b160000"
+                },
+                "amount": {
+                  "resource_identifier": {
+                    "rri": "xrd_rr1qy5wfsfh",
+                    "type": "Token"
+                  },
+                  "value": "1500000000000000000"
+                },
+                "substate": {
+                  "substate_identifier": {
+                    "identifier": "65f61dba3ed40a438c4694e8947f73530c1c6ca6b8115371c05c6565f9fb6a4900000002"
+                  },
+                  "substate_operation": "BOOTUP"
+                },
+                "entity_identifier": {
+                  "address": "rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33"
+                },
+                "type": "Resource"
+              }
+            ]
+          }
+        ]
+      }
+      ```
+
+      A couple of things to note above:
+      * There are two operation groups now as opposed to one, the first operation group contains the operations for
+      the fee, which should be paid by the `fee_payer` passed into `/construction/build`
+      * The second operation group contains more than the two original operations. What occurred here is the node
+      selected specific UTXOs to destroy and create (specified by the `substate` property) to perform the intent
+      of the operations initially passed in. That is, the balance changes of each entity should still be equivalent
+      to the original operations.
+
+      ## Signed Transaction
+
+      Once `payload_to_sign` has been signed, the original payload along with signature can be sent to
+      `/construction/finalize` in order to get a `signed_transaction`. This can then be submitted to
+      `construction/submit`. You have successfully submitted a XRD transfer transaction!
+
+  - name: track_xrd_example
+    x-displayName: Track XRD Balances
+    description: |
+
+      This example walks through how to track XRD balances across accounts.
+      To simplify things, we've included client code generated in java using openapigenerator.
+
+      ## Get Transactions
+
+      Let's start by performing a call to `/transactions` with `state_version` of `0` and `limit`
+      of `1000`. This will retrieve the first 1000 transactions on ledger, including the genesis
+      transaction.
+
+      Be sure to also match the `network_identifier` with the network the node is using.
+
+      ```
+      {
+        "network_identifier": {
+          "network": "mainnet"
+        },
+        "state_identifier": {
+          "state_version": 0
+        },
+        "limit": 1000
+      }
+      ```
+
+      The corresponding java client code looks like:
+
+      ```java
+      TransactionsApi api = new TransactionsApi();
+      NetworkIdentifier networkIdentifier = new NetworkIdentifier().network("mainnet");
+
+      void request() {
+        PartialStateIdentifier stateIdentifier = new PartialStateIdentifier().stateVersion(0L);
+
+        CommittedTransactionsRequest committedTransactionsRequest = new CommittedTransactionsRequest()
+          .networkIdentifier(networkIdentifier)
+          .limit(1000L)
+          .stateIdentifier(stateIdentifier);
+
+        CommittedTransactionsResponse response = api.transactionsPost(committedTransactionsRequest);
+      }
+      ```
+
+      ## Get XRD Balance changes
+
+      Let's now expand our code to extract all XRD balance changes.
+
+      To extract account token balances from a transaction, we can flatmap to all operations across all operation
+      groups, and filter to operations which concern the XRD token, that is, they have an `amount`, and has an
+      `amount.resource_identifier.type` of `Token`, and further the `rri` of the token is `xrd_rr1qy5wfsfh`
+
+      Then, we group by `entity_identifier` and sum each `balance_change` against that `entity_identifier` from all the
+      operations in that transaction. This gives us the change in XRD balance in that entity due to the transaction,
+      in units of 10^(-18).
+
+      This can form the basis of tracking the account balance over time.
+
+      ```java
+      TransactionsApi api = new TransactionsApi();
+      NetworkIdentifier networkIdentifier = new NetworkIdentifier().network("mainnet");
+
+      boolean isXrd(Operation operation) {
+        if (operation.getAmount() == null) {
+          return false;
+        }
+        ResourceIdentifier identifier = op.getAmount().getResourceIdentifier();
+        if (!(identifier instanceof TokenResourceIdentifier)) {
+          return false;
+        }
+        TokenResourceIdentifier tokenResourceIdentifier = (TokenResourceIdentifier) identifier;
+        return tokenResourceIdentifier.getRri().equals("xrd_rr1qy5wfsfh");
+      }
+
+      Map<EntityIdentifier, BigInteger> operationGroupsToBalanceChanges(Stream<OperationGroup> operationGroups) {
+        return operationGroups
+          .flatMap(group -> group.getOperations().stream())
+          .filter(this::isXrd)
+          .collect(Collectors.groupingBy(
+            Operation::getEntityIdentifier,
+            Collectors.mapping(
+              op -> new BigInteger(op.getAmount().getValue()),
+              Collectors.reducing(BigInteger.ZERO, BigInteger::add)
+            )
+          ));
+      }
+
+      void request() {
+        PartialStateIdentifier stateIdentifier = new PartialStateIdentifier().stateVersion(0L);
+
+        CommittedTransactionsRequest committedTransactionsRequest = new CommittedTransactionsRequest()
+          .networkIdentifier(networkIdentifier)
+          .limit(1000L)
+          .stateIdentifier(stateIdentifier);
+
+        CommittedTransactionsResponse response = api.transactionsPost(committedTransactionsRequest);
+
+        // Extract out operation groups
+        Stream<OperationGroup> operationGroups = response.getTransactions().stream()
+          .flatMap(txn -> txn.getOperationGroups().stream());
+
+        Map<EntityIdentifier, BigInteger> balanceChanges = operationGroupsToBalanceChanges(operationGroups);
+      }
+      ```
+
+      ## Update Balance Store
+
+      We can now start updating some balance store given that we have balance changes.
+
+      In this example we simply use a hash map from entity to balance. In your system you may
+      store these changes in a persistent database.
+
+      ```java
+      TransactionsApi api = new TransactionsApi();
+      NetworkIdentifier networkIdentifier = new NetworkIdentifier().network("mainnet");
+      Map<EntityIdentifier, BigInteger> balances = new HashMap<>();
+
+      boolean isXrd(Operation operation) {
+        if (operation.getAmount() == null) {
+          return false;
+        }
+        ResourceIdentifier identifier = op.getAmount().getResourceIdentifier();
+        if (!(identifier instanceof TokenResourceIdentifier)) {
+          return false;
+        }
+        TokenResourceIdentifier tokenResourceIdentifier = (TokenResourceIdentifier) identifier;
+        return tokenResourceIdentifier.getRri().equals("xrd_rr1qy5wfsfh");
+      }
+
+      Map<EntityIdentifier, BigInteger> operationGroupsToBalanceChanges(Stream<OperationGroup> operationGroups) {
+        return operationGroups
+          .flatMap(group -> group.getOperations().stream())
+          .filter(this::isXrd)
+          .collect(Collectors.groupingBy(
+            Operation::getEntityIdentifier,
+            Collectors.mapping(
+              op -> new BigInteger(op.getAmount().getValue()),
+              Collectors.reducing(BigInteger.ZERO, BigInteger::add)
+            )
+          ));
+      }
+
+      void update() throws ApiException {
+        PartialStateIdentifier stateIdentifier = new PartialStateIdentifier().stateVersion(0L);
+
+        CommittedTransactionsRequest committedTransactionsRequest = new CommittedTransactionsRequest()
+          .networkIdentifier(networkIdentifier)
+          .limit(1000L)
+          .stateIdentifier(stateIdentifier);
+
+        CommittedTransactionsResponse response = api.transactionsPost(committedTransactionsRequest);
+
+        // Extract out operation groups
+        Stream<OperationGroup> operationGroups = response.getTransactions().stream()
+          .flatMap(txn -> txn.getOperationGroups().stream());
+
+        Map<EntityIdentifier, BigInteger> balanceChanges = operationGroupsToBalanceChanges(operationGroups);
+
+        // Update balances in memory
+        balanceChanges.forEach((identifier, value) -> balances.merge(identifier, value, BigInteger::add));
+      }
+      ```
+
+      ## Continual Sync
+
+      So far we've only been requesting for the initial 1000 transactions on ledger. We will now want to
+      continually sync as the ledger progresses.
+
+      To do this, we will keep our own current stateVersion and update it with the latest stateVersion
+      we've seen.
+
+      We can now add continually check for updates on ledger and keep our own state up to date. This can
+      easily look something like a cronjob process which periodically updates a local database.
+
+      ```java
+      TransactionsApi api = new TransactionsApi();
+      NetworkIdentifier networkIdentifier = new NetworkIdentifier().network("mainnet");
+      long currentStateVersion = 0;
+      Map<EntityIdentifier, BigInteger> balances = new HashMap<>();
+
+      boolean isXrd(Operation operation) {
+        if (operation.getAmount() == null) {
+          return false;
+        }
+        ResourceIdentifier identifier = op.getAmount().getResourceIdentifier();
+        if (!(identifier instanceof TokenResourceIdentifier)) {
+          return false;
+        }
+        TokenResourceIdentifier tokenResourceIdentifier = (TokenResourceIdentifier) identifier;
+        return tokenResourceIdentifier.getRri().equals("xrd_rr1qy5wfsfh");
+      }
+
+      Map<EntityIdentifier, BigInteger> operationGroupsToBalanceChanges(Stream<OperationGroup> operationGroups) {
+        return operationGroups
+          .flatMap(group -> group.getOperations().stream())
+          .filter(this::isXrd)
+          .collect(Collectors.groupingBy(
+            Operation::getEntityIdentifier,
+            Collectors.mapping(
+              op -> new BigInteger(op.getAmount().getValue()),
+              Collectors.reducing(BigInteger.ZERO, BigInteger::add)
+            )
+          ));
+      }
+
+      void update() throws ApiException {
+        PartialStateIdentifier stateIdentifier = new PartialStateIdentifier().stateVersion(currentStateVersion);
+
+        CommittedTransactionsRequest committedTransactionsRequest = new CommittedTransactionsRequest()
+          .networkIdentifier(networkIdentifier)
+          .limit(1000L)
+          .stateIdentifier(stateIdentifier);
+
+        CommittedTransactionsResponse response = api.transactionsPost(committedTransactionsRequest);
+
+        // Extract out operation groups
+        Stream<OperationGroup> operationGroups = response.getTransactions().stream()
+          .flatMap(txn -> txn.getOperationGroups().stream());
+
+        Map<EntityIdentifier, BigInteger> balanceChanges = operationGroupsToBalanceChanges(operationGroups);
+
+        // Update stateVersion and balances, on a database these must be updated atomically together
+        if (!txns.isEmpty()) {
+          currentStateVersion = txns.get(txns.size() - 1).getCommittedStateIdentifier().getStateVersion();
+        }
+        balanceChanges.forEach((identifier, value) -> balances.merge(identifier, value, BigInteger::add));
+      }
+
+      void main() throws Exception {
+        while (true) {
+          update();
+          Thread.sleep(1000L);
+        }
+      }
+      ```
+
+  - name: track_all_balances_example
+    x-displayName: Track All Balances
+    description: |
+      Building off of the Track XRD Balances example, we can simply remove the filter on only tracking XRD
+      and build a complete mapping of assets owned by every entity `Entity -> Resource -> Amount`.
+
+      ```java
+      TransactionsApi api = new TransactionsApi();
+      NetworkIdentifier networkIdentifier = new NetworkIdentifier().network("mainnet");
+      long currentStateVersion = 0;
+      Map<EntityIdentifier, Map<ResourceIdentifier, BigInteger>> balances = new HashMap<>();
+
+      Map<EntityIdentifier, Map<ResourceIdentifier, BigInteger>> operationGroupsToBalanceChanges(Stream<OperationGroup> operationGroups) {
+        return operationGroups
+          .flatMap(group -> group.getOperations().stream())
+          .filter(operation -> operation.getAmount() != null)
+          .collect(Collectors.groupingBy(
+            Operation::getEntityIdentifier,
+            Collectors.groupingBy(
+              op -> op.getAmount().getResourceIdentifier(),
+              Collectors.mapping(
+                op -> new BigInteger(op.getAmount().getValue()),
+                Collectors.reducing(BigInteger.ZERO, BigInteger::add)
+              )
+            )
+          )
+        );
+      }
+
+      void update() throws ApiException {
+        PartialStateIdentifier stateIdentifier = new PartialStateIdentifier().stateVersion(currentStateVersion);
+
+        CommittedTransactionsRequest committedTransactionsRequest = new CommittedTransactionsRequest()
+          .networkIdentifier(networkIdentifier)
+          .limit(1000L)
+          .stateIdentifier(stateIdentifier);
+
+        CommittedTransactionsResponse response = api.transactionsPost(committedTransactionsRequest);
+
+        // Extract out operation groups
+        Stream<OperationGroup> operationGroups = response.getTransactions().stream()
+          .flatMap(txn -> txn.getOperationGroups().stream());
+
+        Map<EntityIdentifier, Map<ResourceIdentifier, BigInteger>> balanceChanges = operationGroupsToBalanceChanges(operationGroups);
+
+        // Update stateVersion and balances, on a database these must be updated atomically together
+        if (!txns.isEmpty()) {
+          currentStateVersion = txns.get(txns.size() - 1).getCommittedStateIdentifier().getStateVersion();
+        }
+        balanceChanges.forEach((identifier, balanceMap) -> {
+          balanceMap.forEach((resource, value) ->
+            balances.merge(identifier, Map.of(resource, value), (b0, b1) ->
+              Stream.concat(b0.entrySet().stream(), b1.entrySet().stream()).collect(
+                Collectors.groupingBy(
+                  Map.Entry::getKey,
+                  Collectors.mapping(Map.Entry::getValue, Collectors.reducing(BigInteger.ZERO, BigInteger::add))
+                )
+              )
+            )
+          );
+        });
+      }
+
+      void main() throws Exception {
+        while (true) {
+          update();
+          Thread.sleep(1000L);
+        }
+      }
+      ```
+
+      ## Advanced
+
+      ### Filtering to just account balances
+
+      The above examples pull through the balances for any Entity, but typically you'll just want to pull down
+      usable balances in an account - that is, balances against an account entity.
+
+      To do this, we can check filter `entity_identifier` to those which have an `address` starting `rdx1`,
+      and no `sub_entity`. We filter out sub-entities because these are separate entities/balances to the
+      core account, used by the system for staking.
+
+      For more information, and to support non-mainnet addresses, see the Structure and Addressing sections.
+
+      ### Tracking multiple tokens
+
+      If you relax the filter on `amount.resource_identifier.rri` to no longer just match to XRD, you can track these
+      changes in parallel.
+
+      Letting `token_rri = operation.amount.resource_identifier.rri`, you can group by `(account_address, token_rri)`
+      during the sum, and get balance changes for each account/token combination.
+
+      ### Supporting networks other than mainnet
+
+      See the Addressing section for details on determining non-mainnet addresses.
+
+      ### Tracking UTXOs
+
+      The `operation.substate.substate_identifier.identifier` gives a hex-encoded identifier for the UTXO used in that
+      transaction. If `operation.substate.substate_operation` is `BOOTUP`, the UTXO was created, and if `SHUTDOWN`, it
+      was spent.
+
+      This can be used to track live UTXOs.
+
+      ### Consistency checks
+
+      Before saving a copy of a transaction to an index, you should check that the parent accumulator matches the
+      accumulator you have on record. Whilst we don't anticipate a need to rollback the ledger, this accumulator
+      check could be used to detect this (and can be used to rollback an index to the point where the accumulators
+      agree).
+
+      If you wish to also check the consistency of this accumulator, the following should be true:
+
+      `post_transaction_state_accumulator = SHA256(SHA256(pre_transaction_state_accumulator | transaction_identifier_hash)`
+
+      Where `|` is the byte concatenation operator. Note that this uses two rounds of SHA256. The first maps from
+      64 bytes to 32 bytes, the second from 32 bytes to 32 bytes.
+
+      ### Timestamps
+
+      If you care about the timestamps that various transactions were committed, you can filter for operations which
+      have a `data` part, with a `data.action` of `CREATE`, and a `data.data_object.type` of `RoundData`.
+
+      Then, `data.data_object.timestamp` gives a UNIX timestamp in milliseconds, which captures a timestamp of when
+      this transaction was committed to ledger. This timestamp is derived as an average of the timestamp of all
+      the validators performing consensus. As a consequence of this, it is _not_ guaranteed to be increasing, and it
+      may be affected by Byzantine nodes.
+
+      Not every transaction will have such a `RoundData` operation, for example, due to multiple transactions being
+      committed in the same consensus round, so the current timestamp should be kept track of as you iterate forward
+      through the transactions on the ledger, until you see another new created `RoundData` operation,
+      which replaces the timestamp.
+
   - name: network
     x-displayName: Network
     description: Get info about the node and network.
@@ -262,9 +1024,6 @@ tags:
   - name: construction
     x-displayName: Construction
     description: Construct a transaction for submission.
-  - name: sign
-    x-displayName: Sign Transaction
-    description: Sign a Transaction with the node's private key.
 x-tagGroups:
   - name: Model
     tags:
@@ -273,6 +1032,11 @@ x-tagGroups:
       - addressing
       - actions
       - objects
+  - name: Examples
+    tags:
+      - track_xrd_example
+      - track_all_balances_example
+      - xrd_transfer_example
   - name: Data API
     tags:
       - network
@@ -281,9 +1045,6 @@ x-tagGroups:
   - name: Construction API
     tags:
       - construction
-  - name: Signing API
-    tags:
-      - sign
 paths:
   "/network/configuration":
     post:
@@ -365,8 +1126,14 @@ paths:
   "/transactions":
     post:
       summary: Get Committed Transactions
-      description: Returns an ordered sublist of committed transactions. This endpoint
+      description: |
+        Returns an ordered sublist of committed transactions. This endpoint
         is designed for lite clients to sync with the state of the ledger.
+
+        The example response demonstrates a transfer transaction.
+
+        There is a more detailed worked example of reading this endpoint in the
+        examples section.
       tags:
         - transactions
       requestBody:
@@ -529,30 +1296,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/UnexpectedError"
-  "/sign":
-    post:
-      summary: Sign Transaction
-      tags:
-        - sign
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/SignRequest"
-      responses:
-        '200':
-          description: Signed Transaction
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/SignResponse"
-        '500':
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/UnexpectedError"
 components:
   schemas:
     NetworkConfigurationRequest:
@@ -652,7 +1395,7 @@ components:
           state_version: 322001
           transaction_accumulator: e31f8314a67236076ad6d46391e93a93d7b9d34de2062acc620541c09dd69f95
         current_state_epoch: 1
-        current_state_view: 321991
+        current_state_round: 321991
         genesis_state_identifier:
           state_version: 1
           transaction_accumulator: 1e62415e5fd95c63aff69142f1359cc6a981ff7169c128d266f45adf614d09b0
@@ -661,28 +1404,6 @@ components:
             address: rdx1qspmwn5n0qyz685f20aevh4wglxxzg9k5t5vql20s4jqa7kj8hz0njclnh0mf
           validator_entity_identifier:
             address: rv1qwm5aymcpqk3az2nlwt9atj8e3sjpd4zarq86nu9vs80453acnuuklp5yl2
-    SignRequest:
-      type: object
-      required:
-        - network_identifier
-        - public_key
-        - unsigned_transaction
-      properties:
-        network_identifier:
-          "$ref": "#/components/schemas/NetworkIdentifier"
-        public_key:
-          description: The public key corresponding to the private key which should be used to sign.
-          "$ref": "#/components/schemas/PublicKey"
-        unsigned_transaction:
-          description: Hex encoded unsigned transaction to sign.
-          type: string
-    SignResponse:
-      type: object
-      required:
-        - signed_transaction
-      properties:
-        signed_transaction:
-          type: string
     EntityRequest:
       type: object
       required:
@@ -1434,6 +2155,13 @@ components:
     VirtualParentData:
       allOf:
         - "$ref": "#/components/schemas/DataObject"
+        - type: object
+          required:
+            - child_type
+          properties:
+            child_type:
+              description: The type of the children under this parent
+              type: string
     UnclaimedRadixEngineAddressData:
       allOf:
         - "$ref": "#/components/schemas/DataObject"
@@ -1446,10 +2174,10 @@ components:
             - timestamp
           properties:
             round:
-              description: The round of the system.
+              description: The round of the system in the current epoch (ie resets to 0 at the start of the next epoch).
               "$ref": "#/components/schemas/LongNumber"
             timestamp:
-              description: Timestamp
+              description: A unix timestamp in milliseconds.
               "$ref": "#/components/schemas/LongNumber"
     EpochData:
       allOf:
@@ -1459,7 +2187,7 @@ components:
             - epoch
           properties:
             epoch:
-              description: The epoch of the system.
+              description: The epoch number of the system.
               "$ref": "#/components/schemas/LongNumber"
     PreparedValidatorRegistered:
       allOf:
