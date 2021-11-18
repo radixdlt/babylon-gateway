@@ -75,11 +75,11 @@ public class EntityDeterminer : IEntityDeterminer
         {
             case RadixAddressType.Account when subEntity == null:
                 return new Entity(EntityType.Account, AccountAddress: primaryEntityAddress);
-            case RadixAddressType.Account when subEntity.Address == "prepared_stake":
+            case RadixAddressType.Account when subEntity.Address == "prepared_stakes":
                 return new Entity(EntityType.Account_PreparedStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata.Validator);
-            case RadixAddressType.Account when subEntity.Address == "prepared_unstake":
+            case RadixAddressType.Account when subEntity.Address == "prepared_unstakes":
                 return new Entity(EntityType.Account_PreparedUnstake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata.Validator);
-            case RadixAddressType.Account when subEntity.Address == "exiting_stake":
+            case RadixAddressType.Account when subEntity.Address == "exiting_unstakes":
                 return new Entity(EntityType.Account_ExitingStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata.Validator, EpochUnlock: subEntity.Metadata.EpochUnlock);
             case RadixAddressType.Account:
                 _logger.LogWarning("Unknown account sub-entity address: {SubEntityAddress}", subEntity.Address);
