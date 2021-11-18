@@ -7,6 +7,7 @@ public record OperationWithIndex(Operation Operation, int Index);
 
 public static class CoreApiModelExtensions
 {
+    // TODO:NG-52: Fix all this
     public static bool HasSubstantiveOperations(this CommittedTransaction transaction)
     {
         return transaction.OperationGroups.Any(HasSubstantiveOperations);
@@ -33,7 +34,7 @@ public static class CoreApiModelExtensions
 
     private static bool IsSubstantive(this Operation operation)
     {
-        return operation.Data?.DataObject == null
-            || operation.Data.DataObject is RoundData or EpochData;
+        // TODO:NG-25 - ensure that ValidatorBFTData is captured at end of epoch
+        return operation.Data?.DataObject is not (RoundData or ValidatorBFTData);
     }
 }
