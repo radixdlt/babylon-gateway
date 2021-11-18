@@ -7,7 +7,7 @@ namespace Common.Database.ValueConverters;
 public class TokenAmountToBigIntegerConverter : ValueConverter<TokenAmount, BigInteger>
 {
     public TokenAmountToBigIntegerConverter()
-        : base(v => v.GetSubUnits(), v => TokenAmount.FromSubUnits(v))
+        : base(v => v.GetSubUnitsSafeForPostgres(), v => TokenAmount.FromSubUnits(v))
     {
     }
 }

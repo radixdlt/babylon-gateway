@@ -7,6 +7,7 @@ public readonly record struct TokenAmount
 {
     public static readonly TokenAmount Zero = new(0);
     public static readonly TokenAmount NaN = new(true);
+    public static readonly string StringForNan = "NaN";
 
     private const int DecimalPrecision = 18;
     private const int MaxPostgresPrecision = 1000;
@@ -23,25 +24,27 @@ public readonly record struct TokenAmount
         return new TokenAmount(subUnits);
     }
 
-    public static TokenAmount FromSubUnits(string subUnitsString)
+    public static TokenAmount FromSubUnitsString(string subUnitsString)
     {
         return BigInteger.TryParse(subUnitsString, out var subUnits)
             ? new TokenAmount(subUnits)
             : NaN;
     }
 
-    public static TokenAmount FromStringParts(string wholePart, string decimalPart)
+    public static TokenAmount FromStringParts(bool isNegative, string wholePart, string decimalPart)
     {
         var wholeUnitsString = string.IsNullOrEmpty(wholePart) ? "0" : wholePart;
         var subUnitsString = string.IsNullOrEmpty(decimalPart)
             ? "0"
             : decimalPart.Truncate(DecimalPrecision).PadRight(DecimalPrecision, '0');
+        var multiplier = isNegative ? BigInteger.MinusOne : BigInteger.One;
         return (
             BigInteger.TryParse(wholeUnitsString, out var wholeUnits) &&
+            wholeUnits >= 0 &&
             BigInteger.TryParse(subUnitsString, out var subUnits) &&
             subUnits >= 0
         )
-            ? new TokenAmount(wholeUnits, subUnits)
+            ? new TokenAmount(multiplier * wholeUnits, multiplier * subUnits)
             : NaN;
     }
 
@@ -52,13 +55,21 @@ public readonly record struct TokenAmount
             return NaN;
         }
 
-        if (!decimalString.Contains('.'))
+        if (string.IsNullOrEmpty(decimalString))
         {
-            return FromStringParts(decimalString, string.Empty);
+            return NaN;
         }
 
-        return decimalString.Split('.').TryInterpretAsPair(out var wholePart, out var fractionalPart)
-            ? FromStringParts(wholePart, fractionalPart)
+        var isNegative = decimalString.StartsWith("-");
+        var nonNegativeDecimalString = isNegative ? decimalString[1..] : decimalString;
+
+        if (!decimalString.Contains('.'))
+        {
+            return FromStringParts(isNegative, nonNegativeDecimalString, string.Empty);
+        }
+
+        return nonNegativeDecimalString.Split('.').TryInterpretAsPair(out var wholePart, out var fractionalPart)
+            ? FromStringParts(isNegative, wholePart, fractionalPart)
             : NaN;
     }
 
@@ -89,29 +100,30 @@ public readonly record struct TokenAmount
     /// Calculates the corresponding string for postgres handling, assuming decimal(1000, 18).
     /// If the number is too large, we return NaN so that we can still ingest the transaction.
     /// See <a href="https://www.postgresql.org/docs/14/datatype-numeric.html">the Postgres Numeric docs</a>.
+    ///
+    /// Unfortunately, NPGSQL is yet to support NaN in their BigInteger numeric fields.
     /// </summary>
     public string ToPostgresDecimal()
     {
-        return _subUnits.GetByteCount(isUnsigned: true) >= _safeByteLengthLimitBeforePostgresError ? "NaN" : ToString();
+        return _isNaN || IsUnsafeSizeForPostgres() ? StringForNan : ToString();
     }
 
     public string ToSubUnitString()
     {
-        return IsNaN() ? "NaN" : _subUnits.ToString();
+        return _isNaN ? StringForNan : _subUnits.ToString();
     }
 
     public override string ToString()
     {
-        if (IsNaN())
+        if (_isNaN)
         {
-            return "NaN";
+            return StringForNan;
         }
 
-        var integerPart = _subUnits / _divisor;
-        var fractionalPart = _subUnits - (integerPart * _divisor);
+        var (isNegative, integerPart, fractionalPart) = GetIntegerAndFractionalParts();
         return fractionalPart == 0
-            ? integerPart.ToString()
-            : $@"{integerPart}.{fractionalPart.ToString().PadLeft(DecimalPrecision, '0').TrimEnd('0')}";
+            ? $"{(isNegative ? "-" : string.Empty)}{integerPart}"
+            : $"{(isNegative ? "-" : string.Empty)}{integerPart}.{fractionalPart.ToString().PadLeft(DecimalPrecision, '0').TrimEnd('0')}";
     }
 
     public string ToStringFullPrecision()
@@ -122,7 +134,7 @@ public readonly record struct TokenAmount
         }
 
         var (isNegative, integerPart, fractionalPart) = GetIntegerAndFractionalParts();
-        return $@"{(isNegative ? "-" : string.Empty)}{integerPart}.{fractionalPart.ToString().PadLeft(DecimalPrecision, '0')}";
+        return $"{(isNegative ? "-" : string.Empty)}{integerPart}.{fractionalPart.ToString().PadLeft(DecimalPrecision, '0')}";
     }
 
     public (bool IsNegative, BigInteger IntegerPart, BigInteger FractionalPart) GetIntegerAndFractionalParts()
@@ -138,6 +150,21 @@ public readonly record struct TokenAmount
         return (false, integerPart, fractionalPart);
     }
 
+    public bool IsPositive()
+    {
+        return GetSubUnits() > 0;
+    }
+
+    public bool IsZero()
+    {
+        return GetSubUnits() == 0;
+    }
+
+    public bool IsNegative()
+    {
+        return GetSubUnits() < 0;
+    }
+
     public bool IsNaN()
     {
         return _isNaN;
@@ -145,6 +172,34 @@ public readonly record struct TokenAmount
 
     public BigInteger GetSubUnits()
     {
+        if (_isNaN)
+        {
+            throw new ArithmeticException("TokenAmount is NaN, cannot get SubUnits.");
+        }
+
         return _subUnits;
+    }
+
+    public BigInteger GetSubUnitsSafeForPostgres()
+    {
+        if (_isNaN)
+        {
+            throw new ArithmeticException("TokenAmount is NaN, cannot get SubUnits.");
+        }
+
+        if (IsUnsafeSizeForPostgres())
+        {
+            throw new ArithmeticException("TokenAmount is too large to persist to PostGres.");
+        }
+
+        return _subUnits;
+    }
+
+    /// <summary>
+    /// Calculates whether the string is certainly safe for postgres handling, assuming decimal(1000, 18).
+    /// </summary>
+    private bool IsUnsafeSizeForPostgres()
+    {
+        return _subUnits.GetByteCount(isUnsigned: false) >= _safeByteLengthLimitBeforePostgresError;
     }
 }

@@ -104,7 +104,7 @@ public class TransactionContentCommitter
 
     private Task HandleAmountOperation()
     {
-        _amount = TokenAmount.FromSubUnits(_operation!.Amount.Value);
+        _amount = TokenAmount.FromSubUnitsString(_operation!.Amount.Value);
         if (_amount.Value.IsNaN())
         {
             throw GenerateDetailedInvalidTransactionException(
@@ -183,7 +183,7 @@ public class TransactionContentCommitter
         );
 
         // Part 2) Handle history
-        _accountResourceNetBalanceChanges.TrackBalanceDelta(accountResource, TokenAmount.FromSubUnits(_operation!.Amount.Value));
+        _accountResourceNetBalanceChanges.TrackBalanceDelta(accountResource, TokenAmount.FromSubUnitsString(_operation!.Amount.Value));
     }
 
     private async Task HandleAccountXrdStakeResourceAmountOperation(Entity entity, string resourceIdentifier)
@@ -305,8 +305,16 @@ public class TransactionContentCommitter
             await AddHistoryForCurrentTransaction(
                 _dbContext.AccountResourceBalanceHistoryEntries,
                 AccountResourceBalanceHistory.Matches(key),
-                oldHistory => AccountResourceBalanceHistory.FromPreviousHistory(key, oldHistory, entry)
-            );
+                oldHistory =>
+                {
+                    var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousHistory(key, oldHistory, entry);
+                    if (newHistoryEntry.Balance.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} balance ended up negative: {newHistoryEntry.Balance}");
+                    }
+
+                    return newHistoryEntry;
+                });
         }
     }
 
