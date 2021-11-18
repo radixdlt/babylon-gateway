@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DataAggregator" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+  <configuration default="false" name="Data Aggregator" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
     <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/src/DataAggregator/DataAggregator.csproj" />
     <option name="LAUNCH_PROFILE_TFM" value="net6.0" />
     <option name="LAUNCH_PROFILE_NAME" value="DataAggregator" />

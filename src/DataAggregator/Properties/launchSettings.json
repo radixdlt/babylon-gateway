@@ -1,11 +1,19 @@
 ﻿{
-  "profiles": {
-    "DataAggregator": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
+    "profiles": {
+        "DataAggregator": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "environmentVariables": {
+                    "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        "WipeDatabase": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development",
+                "RADIX_NETWORK_GATEWAY__WIPE_DATABASE": "true"
+            }
+        }
     }
-  }
 }
