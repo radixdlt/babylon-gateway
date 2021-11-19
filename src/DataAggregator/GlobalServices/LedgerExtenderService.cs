@@ -62,11 +62,10 @@
  * permissions under this License.
  */
 
-using Common.Database;
+using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
-using System.Diagnostics.CodeAnalysis;
 
 namespace DataAggregator.GlobalServices;
 
@@ -79,12 +78,12 @@ public interface ILedgerExtenderService
 
 public class LedgerExtenderService : ILedgerExtenderService
 {
-    private readonly IDbContextFactory<CommonDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
 
     public LedgerExtenderService(
-        IDbContextFactory<CommonDbContext> dbContextFactory,
+        IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer
     )

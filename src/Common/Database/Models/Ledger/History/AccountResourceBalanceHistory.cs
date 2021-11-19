@@ -123,6 +123,8 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
     {
     }
 
+    public static Expression<Func<AccountResourceBalanceHistory, bool>> IsCurrent => h => h.ToStateVersion == null;
+
     public static Expression<Func<AccountResourceBalanceHistory, bool>> Matches(AccountResource key)
     {
         return self =>

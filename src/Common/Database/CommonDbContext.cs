@@ -100,7 +100,7 @@ public class CommonDbContext : DbContext
 
 #pragma warning restore CS1591
 
-    public CommonDbContext(DbContextOptions<CommonDbContext> options)
+    public CommonDbContext(DbContextOptions options)
         : base(options)
     {
     }

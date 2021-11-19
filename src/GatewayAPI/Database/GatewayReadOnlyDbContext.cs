@@ -63,85 +63,19 @@
  */
 
 using Common.Database;
-using DataAggregator.Configuration;
-using DataAggregator.GlobalServices;
-using DataAggregator.GlobalWorkers;
-using DataAggregator.NodeScopedServices;
-using DataAggregator.NodeScopedServices.ApiReaders;
-using DataAggregator.NodeScopedWorkers;
+using Common.Database.Models.Ledger.History;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAggregator.DependencyInjection;
+namespace GatewayAPI.Database;
 
-public class DefaultKernel
+public class GatewayReadOnlyDbContext : CommonDbContext
 {
-    public void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
+    public IQueryable<AccountResourceBalanceHistory> CurrentAccountResourceHistory =>
+        AccountResourceBalanceHistoryEntries
+            .Where(AccountResourceBalanceHistory.IsCurrent);
+
+    public GatewayReadOnlyDbContext(DbContextOptions<GatewayReadOnlyDbContext> options)
+        : base(options)
     {
-        // Globally-Scoped services
-        AddGlobalScopedServices(services);
-        AddGlobalHostedServices(services);
-        AddDatabaseContext(hostBuilderContext, services);
-
-        // Node-Scoped services
-        AddNodeScopedServices(services);
-        AddNodeApiReaders(services);
-        AddNodeInitializers(services);
-        AddNodeWorkers(services);
-    }
-
-    private void AddGlobalScopedServices(IServiceCollection services)
-    {
-        services.AddSingleton<IAggregatorConfiguration, AggregatorConfiguration>();
-        services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
-        services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
-        services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
-        services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
-        services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
-        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-    }
-
-    private void AddGlobalHostedServices(IServiceCollection services)
-    {
-        services.AddHostedService<NodeConfigurationMonitorWorker>();
-    }
-
-    private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
-    {
-        #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
-        services.AddDbContextFactory<AggregatorDbContext>(options =>
-            options
-                // https://www.npgsql.org/efcore/index.html
-                .UseNpgsql(
-                    hostContext.Configuration.GetConnectionString("AggregatorDbContext")
-                )
-        );
-        #pragma warning restore SA1515
-    }
-
-    private void AddNodeScopedServices(IServiceCollection services)
-    {
-        services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
-    }
-
-    private void AddNodeApiReaders(IServiceCollection services)
-    {
-        // This should only be used from the other readers, to ensure encapsulation for testing
-        services.AddScoped<INodeCoreApiProvider, NodeCoreApiProvider>();
-
-        // We can mock these out in tests
-        services.AddScoped<ITransactionLogReader, TransactionLogReader>();
-        services.AddScoped<INetworkConfigurationReader, NetworkConfigurationReader>();
-    }
-
-    private void AddNodeInitializers(IServiceCollection services)
-    {
-        // Add node initializers - these will be instantiated by the NodeWorkersRunner.cs and run before the workers start
-        services.AddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
-    }
-
-    private void AddNodeWorkers(IServiceCollection services)
-    {
-        // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
-        services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
     }
 }

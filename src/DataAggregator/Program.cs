@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Database;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
@@ -101,8 +100,8 @@ var shouldWipeDatabaseInsteadOfStart =
 if (shouldWipeDatabaseInsteadOfStart)
 {
     using var scope = host.Services.CreateScope();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<CommonDbContext>>();
-    var db = scope.ServiceProvider.GetRequiredService<CommonDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<AggregatorDbContext>>();
+    var db = scope.ServiceProvider.GetRequiredService<AggregatorDbContext>();
 
     logger.LogInformation("Starting db wipe");
 
@@ -118,8 +117,8 @@ else
     // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
     using (var scope = host.Services.CreateScope())
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<CommonDbContext>>();
-        var db = scope.ServiceProvider.GetRequiredService<CommonDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<AggregatorDbContext>>();
+        var db = scope.ServiceProvider.GetRequiredService<AggregatorDbContext>();
 
         logger.LogInformation("Starting db migrations if required");
 

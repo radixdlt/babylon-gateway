@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using Common.Database;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Common.Numerics;
+using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using DataAggregator.Extensions;
 using DataAggregator.GlobalServices;
@@ -83,7 +83,7 @@ namespace DataAggregator.LedgerExtension;
 public class TransactionContentCommitter
 {
     /* Dependencies */
-    private readonly CommonDbContext _dbContext;
+    private readonly AggregatorDbContext _dbContext;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly CancellationToken _cancellationToken;
 
@@ -103,7 +103,7 @@ public class TransactionContentCommitter
     private Entity? _entity;
     private TokenAmount? _amount;
 
-    public TransactionContentCommitter(CommonDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
+    public TransactionContentCommitter(AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
     {
         _dbContext = dbContext;
         _entityDeterminer = entityDeterminer;

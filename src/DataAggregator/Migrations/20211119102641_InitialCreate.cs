@@ -86,7 +86,7 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_account_resource_balance_history", x => new { x.account_address, x.rri, x.from_state_version });
+                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_address, x.rri, x.from_state_version });
                 });
 
             migrationBuilder.CreateTable(
@@ -100,7 +100,7 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_nodes", x => x.name);
+                    table.PrimaryKey("PK_nodes", x => x.name);
                 });
 
             migrationBuilder.CreateTable(
@@ -113,7 +113,7 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_raw_transactions", x => x.transaction_id);
+                    table.PrimaryKey("PK_raw_transactions", x => x.transaction_id);
                 });
 
             migrationBuilder.CreateTable(
@@ -136,17 +136,17 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_ledger_transactions", x => x.state_version);
-                    table.UniqueConstraint("ak_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
-                    table.UniqueConstraint("ak_ledger_transactions_transaction_id", x => x.transaction_id);
+                    table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
+                    table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
+                    table.UniqueConstraint("AK_ledger_transactions_transaction_id", x => x.transaction_id);
                     table.CheckConstraint("CK_ledger_transactions_CK_CompleteHistory", "state_version = 1 OR state_version = parent_state_version + 1");
                     table.ForeignKey(
-                        name: "fk_ledger_transactions_ledger_transactions_parent_state_version",
+                        name: "FK_ledger_transactions_ledger_transactions_parent_state_version",
                         column: x => x.parent_state_version,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version");
                     table.ForeignKey(
-                        name: "fk_ledger_transactions_raw_transactions_transaction_id",
+                        name: "FK_ledger_transactions_raw_transactions_transaction_id",
                         column: x => x.transaction_id,
                         principalTable: "raw_transactions",
                         principalColumn: "transaction_id",
@@ -167,9 +167,9 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_operation_groups", x => new { x.state_version, x.operation_group_index });
+                    table.PrimaryKey("PK_operation_groups", x => new { x.state_version, x.operation_group_index });
                     table.ForeignKey(
-                        name: "fk_operation_groups_ledger_transactions_state_version",
+                        name: "FK_operation_groups_ledger_transactions_state_version",
                         column: x => x.state_version,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version",
@@ -193,8 +193,8 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_account_resource_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("ak_account_resource_balance_substates_substate_identifier", x => x.substate_identifier);
+                    table.PrimaryKey("PK_account_resource_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_account_resource_balance_substates_substate_identifier", x => x.substate_identifier);
                     table.ForeignKey(
                         name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
@@ -227,8 +227,8 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_account_stake_ownership_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("ak_account_stake_ownership_balance_substates_substate_identifi", x => x.substate_identifier);
+                    table.PrimaryKey("PK_account_stake_ownership_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_account_stake_ownership_balance_substates_substate_identifi~", x => x.substate_identifier);
                     table.ForeignKey(
                         name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
@@ -262,8 +262,8 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_account_xrd_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("ak_account_xrd_stake_balance_substates_substate_identifier", x => x.substate_identifier);
+                    table.PrimaryKey("PK_account_xrd_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_account_xrd_stake_balance_substates_substate_identifier", x => x.substate_identifier);
                     table.ForeignKey(
                         name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
@@ -295,8 +295,8 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_validator_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("ak_validator_stake_balance_substates_substate_identifier", x => x.substate_identifier);
+                    table.PrimaryKey("PK_validator_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_validator_stake_balance_substates_substate_identifier", x => x.substate_identifier);
                     table.ForeignKey(
                         name: "fk_t_substate_down_operation_group",
                         columns: x => new { x.down_state_version, x.down_operation_group_index },
@@ -312,7 +312,7 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_resource_balance_history_account_address_from_state",
+                name: "IX_account_resource_balance_history_account_address_from_state~",
                 table: "account_resource_balance_history",
                 columns: new[] { "account_address", "from_state_version" });
 
@@ -324,27 +324,27 @@ namespace DataAggregator.Migrations
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_resource_balance_history_rri_account_address_from_s",
+                name: "IX_account_resource_balance_history_rri_account_address_from_s~",
                 table: "account_resource_balance_history",
                 columns: new[] { "rri", "account_address", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_resource_balance_history_rri_from_state_version",
+                name: "IX_account_resource_balance_history_rri_from_state_version",
                 table: "account_resource_balance_history",
                 columns: new[] { "rri", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_resource_balance_substates_account_address_rri",
+                name: "IX_account_resource_balance_substates_account_address_rri",
                 table: "account_resource_balance_substates",
                 columns: new[] { "account_address", "rri" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_resource_balance_substates_down_state_version_down_",
+                name: "IX_account_resource_balance_substates_down_state_version_down_~",
                 table: "account_resource_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_resource_balance_substates_rri_account_address",
+                name: "IX_account_resource_balance_substates_rri_account_address",
                 table: "account_resource_balance_substates",
                 columns: new[] { "rri", "account_address" });
 
@@ -356,37 +356,37 @@ namespace DataAggregator.Migrations
                 .Annotation("Npgsql:IndexInclude", new[] { "substate_identifier" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_stake_ownership_balance_substates_account_address_v",
+                name: "IX_account_stake_ownership_balance_substates_account_address_v~",
                 table: "account_stake_ownership_balance_substates",
                 columns: new[] { "account_address", "validator_address" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_stake_ownership_balance_substates_down_state_versio",
+                name: "IX_account_stake_ownership_balance_substates_down_state_versio~",
                 table: "account_stake_ownership_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_stake_ownership_balance_substates_validator_address",
+                name: "IX_account_stake_ownership_balance_substates_validator_address~",
                 table: "account_stake_ownership_balance_substates",
                 columns: new[] { "validator_address", "account_address" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_xrd_stake_balance_substates_account_address_validat",
+                name: "IX_account_xrd_stake_balance_substates_account_address_validat~",
                 table: "account_xrd_stake_balance_substates",
                 columns: new[] { "account_address", "validator_address" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_xrd_stake_balance_substates_down_state_version_down",
+                name: "IX_account_xrd_stake_balance_substates_down_state_version_down~",
                 table: "account_xrd_stake_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_account_xrd_stake_balance_substates_validator_address_accou",
+                name: "IX_account_xrd_stake_balance_substates_validator_address_accou~",
                 table: "account_xrd_stake_balance_substates",
                 columns: new[] { "validator_address", "account_address" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_ledger_transactions_epoch_end_of_round",
+                name: "IX_ledger_transactions_epoch_end_of_round",
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "end_of_round" },
                 unique: true,
@@ -394,28 +394,28 @@ namespace DataAggregator.Migrations
                 .Annotation("Npgsql:IndexInclude", new[] { "timestamp" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_ledger_transactions_parent_state_version",
+                name: "IX_ledger_transactions_parent_state_version",
                 table: "ledger_transactions",
                 column: "parent_state_version");
 
             migrationBuilder.CreateIndex(
-                name: "ix_ledger_transactions_timestamp",
+                name: "IX_ledger_transactions_timestamp",
                 table: "ledger_transactions",
                 column: "timestamp");
 
             migrationBuilder.CreateIndex(
-                name: "ix_validator_stake_balance_substates_down_state_version_down_o",
+                name: "IX_validator_stake_balance_substates_down_state_version_down_o~",
                 table: "validator_stake_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_validator_stake_balance_substates_epoch_validator_address",
+                name: "IX_validator_stake_balance_substates_epoch_validator_address",
                 table: "validator_stake_balance_substates",
                 columns: new[] { "epoch", "validator_address" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_validator_stake_balance_substates_validator_address",
+                name: "IX_validator_stake_balance_substates_validator_address",
                 table: "validator_stake_balance_substates",
                 column: "validator_address");
         }

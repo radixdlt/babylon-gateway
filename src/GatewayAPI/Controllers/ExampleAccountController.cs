@@ -62,86 +62,42 @@
  * permissions under this License.
  */
 
-using Common.Database;
-using DataAggregator.Configuration;
-using DataAggregator.GlobalServices;
-using DataAggregator.GlobalWorkers;
-using DataAggregator.NodeScopedServices;
-using DataAggregator.NodeScopedServices.ApiReaders;
-using DataAggregator.NodeScopedWorkers;
-using Microsoft.EntityFrameworkCore;
+using GatewayAPI.Database;
+using Microsoft.AspNetCore.Mvc;
 
-namespace DataAggregator.DependencyInjection;
+namespace GatewayAPI.Controllers;
 
-public class DefaultKernel
+// ReSharper disable once InconsistentNaming
+#pragma warning disable SA1300
+public record AccountBalancesRequest(string accountAddress);
+#pragma warning restore SA1300
+
+[ApiController]
+[Route("account")]
+public class ExampleAccountController : ControllerBase
 {
-    public void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
-    {
-        // Globally-Scoped services
-        AddGlobalScopedServices(services);
-        AddGlobalHostedServices(services);
-        AddDatabaseContext(hostBuilderContext, services);
+    private readonly ILogger<ExampleAccountController> _logger;
+    private readonly GatewayReadOnlyDbContext _dbContext;
 
-        // Node-Scoped services
-        AddNodeScopedServices(services);
-        AddNodeApiReaders(services);
-        AddNodeInitializers(services);
-        AddNodeWorkers(services);
+    public ExampleAccountController(ILogger<ExampleAccountController> logger, GatewayReadOnlyDbContext dbContext)
+    {
+        _logger = logger;
+        _dbContext = dbContext;
     }
 
-    private void AddGlobalScopedServices(IServiceCollection services)
+    // TODO - This needs to be fixed in many ways:
+    // * Create a response model (or use the one from Open API gen)
+    // * Map outside the controller
+    [HttpPost("balances")]
+    public IEnumerable<object> GetBalances(AccountBalancesRequest request)
     {
-        services.AddSingleton<IAggregatorConfiguration, AggregatorConfiguration>();
-        services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
-        services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
-        services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
-        services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
-        services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
-        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-    }
-
-    private void AddGlobalHostedServices(IServiceCollection services)
-    {
-        services.AddHostedService<NodeConfigurationMonitorWorker>();
-    }
-
-    private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
-    {
-        #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
-        services.AddDbContextFactory<AggregatorDbContext>(options =>
-            options
-                // https://www.npgsql.org/efcore/index.html
-                .UseNpgsql(
-                    hostContext.Configuration.GetConnectionString("AggregatorDbContext")
-                )
-        );
-        #pragma warning restore SA1515
-    }
-
-    private void AddNodeScopedServices(IServiceCollection services)
-    {
-        services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
-    }
-
-    private void AddNodeApiReaders(IServiceCollection services)
-    {
-        // This should only be used from the other readers, to ensure encapsulation for testing
-        services.AddScoped<INodeCoreApiProvider, NodeCoreApiProvider>();
-
-        // We can mock these out in tests
-        services.AddScoped<ITransactionLogReader, TransactionLogReader>();
-        services.AddScoped<INetworkConfigurationReader, NetworkConfigurationReader>();
-    }
-
-    private void AddNodeInitializers(IServiceCollection services)
-    {
-        // Add node initializers - these will be instantiated by the NodeWorkersRunner.cs and run before the workers start
-        services.AddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
-    }
-
-    private void AddNodeWorkers(IServiceCollection services)
-    {
-        // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
-        services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
+        return _dbContext
+            .CurrentAccountResourceHistory
+            .Where(arb => arb.AccountAddress == request.accountAddress)
+            .Select(x => new
+            {
+                rri = x.ResourceIdentifier,
+                amount = x.Balance.ToSubUnitString(),
+            });
     }
 }

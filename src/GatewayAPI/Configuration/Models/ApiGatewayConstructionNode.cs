@@ -62,86 +62,40 @@
  * permissions under this License.
  */
 
-using Common.Database;
-using DataAggregator.Configuration;
-using DataAggregator.GlobalServices;
-using DataAggregator.GlobalWorkers;
-using DataAggregator.NodeScopedServices;
-using DataAggregator.NodeScopedServices.ApiReaders;
-using DataAggregator.NodeScopedWorkers;
-using Microsoft.EntityFrameworkCore;
+using Common.Exceptions;
 
-namespace DataAggregator.DependencyInjection;
+namespace GatewayAPI.Configuration.Models;
 
-public class DefaultKernel
+public record ApiGatewayConstructionNode
 {
-    public void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
+    /// <summary>
+    /// A unique name identifying this node - used as the node's id.
+    /// </summary>
+    [ConfigurationKeyName("Name")]
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Domain Name or IP Address.
+    /// </summary>
+    [ConfigurationKeyName("Address")]
+    public string Address { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Relative weighting of the node.
+    /// </summary>
+    [ConfigurationKeyName("RequestWeighting")]
+    public decimal RequestWeighting { get; set; } = 1;
+
+    public void AssertValid()
     {
-        // Globally-Scoped services
-        AddGlobalScopedServices(services);
-        AddGlobalHostedServices(services);
-        AddDatabaseContext(hostBuilderContext, services);
+        if (string.IsNullOrEmpty(Name))
+        {
+            throw new InvalidConfigurationException("A node's name cannot be empty");
+        }
 
-        // Node-Scoped services
-        AddNodeScopedServices(services);
-        AddNodeApiReaders(services);
-        AddNodeInitializers(services);
-        AddNodeWorkers(services);
-    }
-
-    private void AddGlobalScopedServices(IServiceCollection services)
-    {
-        services.AddSingleton<IAggregatorConfiguration, AggregatorConfiguration>();
-        services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
-        services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
-        services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
-        services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
-        services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
-        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-    }
-
-    private void AddGlobalHostedServices(IServiceCollection services)
-    {
-        services.AddHostedService<NodeConfigurationMonitorWorker>();
-    }
-
-    private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
-    {
-        #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
-        services.AddDbContextFactory<AggregatorDbContext>(options =>
-            options
-                // https://www.npgsql.org/efcore/index.html
-                .UseNpgsql(
-                    hostContext.Configuration.GetConnectionString("AggregatorDbContext")
-                )
-        );
-        #pragma warning restore SA1515
-    }
-
-    private void AddNodeScopedServices(IServiceCollection services)
-    {
-        services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
-    }
-
-    private void AddNodeApiReaders(IServiceCollection services)
-    {
-        // This should only be used from the other readers, to ensure encapsulation for testing
-        services.AddScoped<INodeCoreApiProvider, NodeCoreApiProvider>();
-
-        // We can mock these out in tests
-        services.AddScoped<ITransactionLogReader, TransactionLogReader>();
-        services.AddScoped<INetworkConfigurationReader, NetworkConfigurationReader>();
-    }
-
-    private void AddNodeInitializers(IServiceCollection services)
-    {
-        // Add node initializers - these will be instantiated by the NodeWorkersRunner.cs and run before the workers start
-        services.AddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
-    }
-
-    private void AddNodeWorkers(IServiceCollection services)
-    {
-        // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
-        services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
+        if (string.IsNullOrEmpty(Address))
+        {
+            throw new InvalidConfigurationException("A node's address cannot be empty");
+        }
     }
 }

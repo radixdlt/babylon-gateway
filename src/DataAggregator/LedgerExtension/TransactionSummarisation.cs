@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using Common.Database;
 using Common.Extensions;
+using DataAggregator.DependencyInjection;
 using DataAggregator.Extensions;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
@@ -84,7 +84,7 @@ public record TransactionSummary(
 
 public static class TransactionSummarisation
 {
-    public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(CommonDbContext dbContext, CancellationToken token)
+    public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(AggregatorDbContext dbContext, CancellationToken token)
     {
         var lastTransaction = await dbContext.LedgerTransactions
             .AsNoTracking()

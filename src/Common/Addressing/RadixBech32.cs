@@ -65,7 +65,7 @@
 // ReSharper disable CommentTypo
 // ReSharper disable StringLiteralTypo
 // ReSharper disable IdentifierTypo
-
+// Fix for ReShaper not liking the work "Bech"
 namespace Common.Addressing;
 
 public record RadixBech32Data(string Hrp, byte[] AddressData, Bech32.Variant Variant);

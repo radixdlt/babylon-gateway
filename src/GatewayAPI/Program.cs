@@ -62,15 +62,35 @@
  * permissions under this License.
  */
 
-namespace DataAggregator.Exceptions;
+// StyleCop getting confused with flat Program.cs
+#pragma warning disable SA1516
 
-/// <summary>
-/// An Exception thrown when the configuration provided to the service is incorrect.
-/// </summary>
-public class InvalidConfigurationException : Exception
+using GatewayAPI.DependencyInjection;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Host.ConfigureServices(new DefaultKernel().ConfigureServices);
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    public InvalidConfigurationException(string message)
-        : base(message)
-    {
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+await app.RunAsync();

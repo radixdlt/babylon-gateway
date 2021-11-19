@@ -7,3 +7,4 @@
 # Style cop
 dotnet_diagnostic.SA1413.severity = none # SA1413UseTrailingCommasInMultiLineInitializers
 dotnet_diagnostic.SA1210.severity = none # SA1210UsingDirectivesMustBeOrderedAlphabeticallyByNamespace
+dotnet_diagnostic.SA1137.severity = none # SA1137ElementsShouldHaveTheSameIndentation

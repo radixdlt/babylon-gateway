@@ -62,20 +62,20 @@
  * permissions under this License.
  */
 
-using Common.Database;
 using Common.Database.Models;
+using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAggregator.GlobalServices;
 
 public interface IRawTransactionWriter
 {
-    Task EnsureRawTransactionsCreatedOrUpdated(CommonDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token);
+    Task EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
 {
-    public async Task EnsureRawTransactionsCreatedOrUpdated(CommonDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token)
     {
         // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
         await context.RawTransactions

@@ -62,8 +62,7 @@
  * permissions under this License.
  */
 
-using Common.Database;
-using DataAggregator.Extensions;
+using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
 using RadixCoreApi.GeneratedClient.Model;
 
@@ -80,12 +79,12 @@ public interface IBulkTransactionCommitter
 public class BulkTransactionCommitter : IBulkTransactionCommitter
 {
     private readonly IEntityDeterminer _entityDeterminer;
-    private readonly CommonDbContext _dbContext;
+    private readonly AggregatorDbContext _dbContext;
     private readonly CancellationToken _cancellationToken;
 
     public BulkTransactionCommitter(
         IEntityDeterminer entityDeterminer,
-        CommonDbContext dbContext,
+        AggregatorDbContext dbContext,
         CancellationToken cancellationToken
     )
     {

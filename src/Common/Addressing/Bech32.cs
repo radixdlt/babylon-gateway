@@ -65,7 +65,7 @@
 // ReSharper disable CommentTypo
 // ReSharper disable StringLiteralTypo
 // ReSharper disable IdentifierTypo
-
+// Fix for ReShaper not liking the work "Bech"
 using System.Text;
 
 namespace Common.Addressing;

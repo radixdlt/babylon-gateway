@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
+using Common.Exceptions;
 using DataAggregator.Configuration.Models;
-using DataAggregator.Exceptions;
 
 namespace DataAggregator.Configuration;
 
