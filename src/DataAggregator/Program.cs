@@ -62,6 +62,9 @@
  * permissions under this License.
  */
 
+// StyleCop getting confused with flat Program.cs
+#pragma warning disable SA1516
+
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,7 +73,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         IHostEnvironment env = hostingContext.HostingEnvironment;
 
-        config.AddEnvironmentVariables("RADIX_NETWORK_GATEWAY__");
+        config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
         if (args is { Length: > 0 })
         {
             config.AddCommandLine(args);
@@ -89,13 +92,18 @@ var host = Host.CreateDefaultBuilder(args)
     .Build();
 
 var isDevelopment = host.Services.GetRequiredService<IHostEnvironment>().IsDevelopment();
-
 var configuration = host.Services.GetRequiredService<IConfiguration>();
 
 // In production, provide both RADIX_NETWORK_GATEWAY__WIPE_DATABASE and RADIX_NETWORK_GATEWAY__WIPE_DATABASE_CONFIRM to wipe the ledger
 var shouldWipeDatabaseInsteadOfStart =
     configuration.GetValue<bool>("WIPE_DATABASE")
     && (isDevelopment || configuration.GetValue<bool>("WIPE_DATABASE_CONFIRM"));
+
+var msDelayAtStart = configuration.GetValue("WaitMsOnStartUp", 0);
+if (msDelayAtStart > 0)
+{
+    await Task.Delay(TimeSpan.FromMilliseconds(msDelayAtStart));
+}
 
 if (shouldWipeDatabaseInsteadOfStart)
 {

@@ -5,7 +5,7 @@
             "Group": "Servers",
             "Port": 5432,
             "Username": "db_dev_superuser",
-            "Host": "db",
+            "Host": "dev_postgres_db",
             "SSLMode": "prefer",
             "DBRestriction": "radixdlt_ledger",
             "MaintenanceDB": "postgres"

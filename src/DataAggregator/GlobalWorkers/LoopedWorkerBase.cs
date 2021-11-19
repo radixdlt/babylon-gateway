@@ -101,7 +101,7 @@ public abstract class LoopedWorkerBase : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Loop iteration errored at: {Time}", DateTimeOffset.Now);
+                _logger.LogError(ex, "An error occurred. Will restart work within {Delay}", _minDelayBetweenLoops);
             }
 
             await minDelayBetweenLoops;

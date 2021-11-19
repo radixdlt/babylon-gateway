@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  db:
+  dev_postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
     image: "postgres:14-alpine"
     ports:
@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=db_dev_superuser
       - POSTGRES_PASSWORD=db_dev_password
       - POSTGRES_DB=radixdlt_ledger
-  pgadmin:
+  dev_pgadmin:
     # See https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html
     image: "dpage/pgadmin4"
     ports:

@@ -1,0 +1,73 @@
+version: "3.8"
+services:
+  postgres_db:
+    # See https://hub.docker.com/_/postgres for details about configuration
+    image: "postgres:14-alpine"
+    ports:
+      - "5532:5432" # This allows you to connect to the database locally on port localhost:5532
+    volumes:
+      - ./.postgresdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "${POSTGRES_SUPERUSER}"
+      POSTGRES_PASSWORD: "${POSTGRES_SUPERUSER_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB_NAME}"
+  data_aggregator:
+    depends_on:
+      - postgres_db
+    build:
+      context: "../"
+      dockerfile: "./src/DataAggregator/Dockerfile"
+    environment:
+      RADIX_NG_AGGREGATOR__WaitMsOnStartUp: "${DELAY_MS_ON_START}" # Wait for PostGres to boot up
+      RADIX_NG_AGGREGATOR__NetworkName: "${NETWORK_NAME}"
+      RADIX_NG_AGGREGATOR__ConnectionStrings__AggregatorDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      RADIX_NG_AGGREGATOR__Nodes__0__Name: "${NODE_0_NAME}"
+      RADIX_NG_AGGREGATOR__Nodes__0__Address: "${NODE_0_ADDRESS}"
+      RADIX_NG_AGGREGATOR__Nodes__0__TrustWeighting: "1"
+      RADIX_NG_AGGREGATOR__Nodes__0__EnabledForIndexing: "${NODE_0_ENABLED_FOR_INDEXING}"
+      RADIX_NG_AGGREGATOR__Nodes__1__Name: "${NODE_1_NAME}"
+      RADIX_NG_AGGREGATOR__Nodes__1__Address: "${NODE_1_ADDRESS}"
+      RADIX_NG_AGGREGATOR__Nodes__1__TrustWeighting: "1"
+      RADIX_NG_AGGREGATOR__Nodes__1__EnabledForIndexing: "${NODE_1_ENABLED_FOR_INDEXING}"
+      RADIX_NG_AGGREGATOR__Nodes__2__Name: "${NODE_2_NAME}"
+      RADIX_NG_AGGREGATOR__Nodes__2__Address: "${NODE_2_ADDRESS}"
+      RADIX_NG_AGGREGATOR__Nodes__2__TrustWeighting: "1"
+      RADIX_NG_AGGREGATOR__Nodes__2__EnabledForIndexing: "${NODE_2_ENABLED_FOR_INDEXING}"
+      RADIX_NG_AGGREGATOR__Nodes__3__Name: "${NODE_3_NAME}"
+      RADIX_NG_AGGREGATOR__Nodes__3__Address: "${NODE_3_ADDRESS}"
+      RADIX_NG_AGGREGATOR__Nodes__3__TrustWeighting: "1"
+      RADIX_NG_AGGREGATOR__Nodes__3__EnabledForIndexing: "${NODE_3_ENABLED_FOR_INDEXING}"
+      RADIX_NG_AGGREGATOR__Nodes__4__Name: "${NODE_4_NAME}"
+      RADIX_NG_AGGREGATOR__Nodes__4__Address: "${NODE_4_ADDRESS}"
+      RADIX_NG_AGGREGATOR__Nodes__4__TrustWeighting: "1"
+      RADIX_NG_AGGREGATOR__Nodes__4__EnabledForIndexing: "${NODE_4_ENABLED_FOR_INDEXING}"
+  gateway_api:
+    depends_on:
+      - postgres_db
+      - data_aggregator
+    build:
+      context: "../"
+      dockerfile: "./src/GatewayAPI/Dockerfile"
+    ports:
+      - "5308:5208" # This allows you to connect to the API at http://localhost:5308
+    environment:
+      ASPNETCORE_URLS: "http://localhost:5208"
+      RADIX_NG_API__WaitMsOnStartUp: "${DELAY_MS_ON_START}" # Wait for PostGres to boot up
+      RADIX_NG_API__NetworkName: "${NETWORK_NAME}"
+      RADIX_NG_API__ConnectionStrings__ReadOnlyDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      RADIX_NG_API__ConnectionStrings__ReadWriteDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      RADIX_NG_API__ConstructionNodes__0__Name: "${NODE_0_NAME}"
+      RADIX_NG_API__ConstructionNodes__0__Address: "${NODE_0_ADDRESS}"
+      RADIX_NG_API__ConstructionNodes__0__RequestWeighting: "1"
+      RADIX_NG_API__ConstructionNodes__1__Name: "${NODE_1_NAME}"
+      RADIX_NG_API__ConstructionNodes__1__Address: "${NODE_1_ADDRESS}"
+      RADIX_NG_API__ConstructionNodes__1__RequestWeighting: "1"
+      RADIX_NG_API__ConstructionNodes__2__Name: "${NODE_2_NAME}"
+      RADIX_NG_API__ConstructionNodes__2__Address: "${NODE_2_ADDRESS}"
+      RADIX_NG_API__ConstructionNodes__2__RequestWeighting: "1"
+      RADIX_NG_API__ConstructionNodes__3__Name: "${NODE_3_NAME}"
+      RADIX_NG_API__ConstructionNodes__3__Address: "${NODE_3_ADDRESS}"
+      RADIX_NG_API__ConstructionNodes__3__RequestWeighting: "1"
+      RADIX_NG_API__ConstructionNodes__4__Name: "${NODE_4_NAME}"
+      RADIX_NG_API__ConstructionNodes__4__Address: "${NODE_4_ADDRESS}"
+      RADIX_NG_API__ConstructionNodes__4__RequestWeighting: "1"

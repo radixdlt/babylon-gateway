@@ -69,14 +69,35 @@ using GatewayAPI.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+/* Configure services / dependency injection */
+
 builder.Services.AddControllers();
 builder.Host.ConfigureServices(new DefaultKernel().ConfigureServices);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
+
+/* Other configuration */
+
+builder.Host.ConfigureAppConfiguration((_, config) =>
+{
+    config.AddEnvironmentVariables("RADIX_NG_API__");
+    if (args is { Length: > 0 })
+    {
+        config.AddCommandLine(args);
+    }
+});
+
+builder.Host.ConfigureLogging(logConfigBuilder =>
+{
+    logConfigBuilder.AddSimpleConsole(options =>
+    {
+        options.IncludeScopes = true;
+        options.SingleLine = true;
+        options.TimestampFormat = "hh:mm:ss ";
+    });
+});
 
 var app = builder.Build();
 
@@ -88,9 +109,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
+
+var msDelayAtStart = app.Configuration.GetValue("WaitMsOnStartUp", 0);
+if (msDelayAtStart > 0)
+{
+    await Task.Delay(TimeSpan.FromMilliseconds(msDelayAtStart));
+}
 
 await app.RunAsync();
