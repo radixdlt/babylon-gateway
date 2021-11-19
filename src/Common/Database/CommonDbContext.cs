@@ -109,7 +109,7 @@ public class CommonDbContext : DbContext
     {
         modelBuilder.Entity<LedgerTransaction>()
             .HasCheckConstraint(
-                "CK_CompleteHistory",
+                "complete_history",
                 "state_version = 1 OR state_version = parent_state_version + 1"
             );
 
@@ -175,7 +175,7 @@ public class CommonDbContext : DbContext
             .HasIndex(h => new { h.AccountAddress, h.ResourceIdentifier })
             .HasFilter("to_state_version is null")
             .IsUnique()
-            .HasDatabaseName($"ix_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
+            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
 
         // All four of these indices (these three plus the implicit index from the PK) could be useful for different queries
         // TODO:NG-39 Remove any which aren't important for the APIs we're exposing
@@ -190,6 +190,8 @@ public class CommonDbContext : DbContext
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)
         where TSubstate : SubstateBase
     {
+        var substateNameSnakeCase = typeof(TSubstate).Name.ToSnakeCase();
+
         modelBuilder.Entity<TSubstate>()
             .HasKey(s => new { s.UpStateVersion, s.UpOperationGroupIndex, s.UpOperationIndexInGroup });
 
@@ -205,7 +207,7 @@ public class CommonDbContext : DbContext
                 OperationGroupIndex = s.UpOperationGroupIndex,
             })
             .OnDelete(DeleteBehavior.Cascade) // Deletes Substate if OperationGroup deleted
-            .HasConstraintName($"fk_{nameof(TSubstate).ToSnakeCase()}_up_operation_group");
+            .HasConstraintName($"FK_{substateNameSnakeCase}_up_operation_group");
 
         modelBuilder.Entity<TSubstate>()
             .HasOne(s => s.DownOperationGroup)
@@ -216,6 +218,6 @@ public class CommonDbContext : DbContext
                 OperationGroupIndex = s.DownOperationGroupIndex,
             })
             .OnDelete(DeleteBehavior.Restrict) // Null out FKs if OperationGroup deleted (all such dependents need to be loaded by EF Core at the time of deletion!)
-            .HasConstraintName($"fk_{nameof(TSubstate).ToSnakeCase()}_down_operation_group");
+            .HasConstraintName($"FK_{substateNameSnakeCase}_down_operation_group");
     }
 }
