@@ -13,11 +13,15 @@ indent_style = space
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
 insert_final_newline = true
 trim_trailing_whitespace = true
-end_of_line = crlf
+end_of_line = lf
 
 # Unix scripts
 [*.sh]
 end_of_line = lf
+
+# BAT scripts
+[*.bat]
+end_of_line = crlf
 
 # Markdown files
 [*.md]
