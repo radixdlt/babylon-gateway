@@ -4,7 +4,7 @@
             "commandName": "Project",
             "dotnetRunMessages": true,
             "environmentVariables": {
-                    "DOTNET_ENVIRONMENT": "Development"
+                "DOTNET_ENVIRONMENT": "Development"
             }
         },
         "Wipe Database": {
@@ -12,7 +12,7 @@
             "dotnetRunMessages": true,
             "environmentVariables": {
                 "DOTNET_ENVIRONMENT": "Development",
-                "RADIX_NETWORK_GATEWAY__WIPE_DATABASE": "true"
+                "RADIX_NG_AGGREGATOR__WIPE_DATABASE": "true"
             }
         }
     }

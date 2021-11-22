@@ -81,6 +81,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly AggregatorDbContext _dbContext;
     private readonly CancellationToken _cancellationToken;
+    private readonly DbActionsPlanner _dbActionsPlanner;
 
     public BulkTransactionCommitter(
         IEntityDeterminer entityDeterminer,
@@ -91,6 +92,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         _entityDeterminer = entityDeterminer;
         _dbContext = dbContext;
         _cancellationToken = cancellationToken;
+        _dbActionsPlanner = new DbActionsPlanner(_dbContext, _cancellationToken);
     }
 
     public async Task<TransactionSummary> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
@@ -100,17 +102,18 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
             var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
             TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
 
-            await CommitCheckedTransaction(transaction, summary);
+            HandleTransaction(transaction, summary);
             parentSummary = summary;
         }
 
+        await _dbActionsPlanner.ProcessAllChanges();
         await _dbContext.SaveChangesAsync(_cancellationToken);
 
         var lastCommittedTransactionSummary = parentSummary;
         return lastCommittedTransactionSummary;
     }
 
-    private async Task CommitCheckedTransaction(CommittedTransaction transaction, TransactionSummary summary)
+    private void HandleTransaction(CommittedTransaction transaction, TransactionSummary summary)
     {
         var ledgerTransaction = TransactionMapping.CreateLedgerTransaction(transaction, summary);
         _dbContext.LedgerTransactions.Add(ledgerTransaction);
@@ -120,7 +123,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
             return;
         }
 
-        var transactionOperationExtractor = new TransactionContentCommitter(_dbContext, _entityDeterminer, _cancellationToken);
-        await transactionOperationExtractor.CommitTransactionDetails(transaction, summary);
+        var transactionContentProcessor = new TransactionContentProcessor(_dbContext, _dbActionsPlanner, _entityDeterminer);
+        transactionContentProcessor.ProcessTransactionContents(transaction, summary);
     }
 }

@@ -100,7 +100,6 @@ var shouldWipeDatabaseInsteadOfStart =
     configuration.GetValue<bool>("WIPE_DATABASE")
     && (isDevelopment || configuration.GetValue<bool>("WIPE_DATABASE_CONFIRM"));
 
-
 var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
 await ConnectionHelpers.TryWaitForDb<AggregatorDbContext>(host.Services, maxWaitForDbMs);
 

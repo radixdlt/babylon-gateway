@@ -71,21 +71,19 @@ using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using DataAggregator.Extensions;
 using DataAggregator.GlobalServices;
-using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
-using System.Linq.Expressions;
 
 namespace DataAggregator.LedgerExtension;
 
 /// <summary>
 /// A short-lived stateful class for extracting the content of a transaction.
 /// </summary>
-public class TransactionContentCommitter
+public class TransactionContentProcessor
 {
     /* Dependencies */
     private readonly AggregatorDbContext _dbContext;
+    private readonly DbActionsPlanner _dbActionsPlanner;
     private readonly IEntityDeterminer _entityDeterminer;
-    private readonly CancellationToken _cancellationToken;
 
     /* History */
     private readonly Dictionary<AccountResource, TokenAmount> _accountResourceNetBalanceChanges = new();
@@ -103,16 +101,14 @@ public class TransactionContentCommitter
     private Entity? _entity;
     private TokenAmount? _amount;
 
-    public TransactionContentCommitter(AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
+    public TransactionContentProcessor(AggregatorDbContext dbContext, DbActionsPlanner dbActionsPlanner, IEntityDeterminer entityDeterminer)
     {
         _dbContext = dbContext;
+        _dbActionsPlanner = dbActionsPlanner;
         _entityDeterminer = entityDeterminer;
-        _cancellationToken = cancellationToken;
     }
 
-    // TODO:NG-49 - Consider parallelising the dependent substates/histories in batched fetches in advance instead of
-    //              awaiting in series to fetch each in turn
-    public async Task CommitTransactionDetails(CommittedTransaction transaction, TransactionSummary transactionSummary)
+    public void ProcessTransactionContents(CommittedTransaction transaction, TransactionSummary transactionSummary)
     {
         _transaction = transaction;
         _transactionSummary = transactionSummary;
@@ -151,7 +147,7 @@ public class TransactionContentCommitter
                     );
                 }
 
-                await HandleOperation();
+                HandleOperation();
 
                 _entity = null;
                 _amount = null;
@@ -164,23 +160,23 @@ public class TransactionContentCommitter
         _operationGroupIndex = -1;
         _operationIndexInGroup = -1;
 
-        await HandleHistoryUpdates();
+        HandleHistoryUpdates();
     }
 
-    private async Task HandleOperation()
+    private void HandleOperation()
     {
         if (_operation!.Amount != null)
         {
-            await HandleAmountOperation();
+            HandleAmountOperation();
         }
 
         if (_operation!.Data != null)
         {
-            await HandleDataOperation();
+            HandleDataOperation();
         }
     }
 
-    private Task HandleAmountOperation()
+    private void HandleAmountOperation()
     {
         _amount = TokenAmount.FromSubUnitsString(_operation!.Amount.Value);
         if (_amount.Value.IsNaN())
@@ -193,9 +189,11 @@ public class TransactionContentCommitter
         switch (_operation!.Amount.ResourceIdentifier)
         {
             case TokenResourceIdentifier resourceIdentifier:
-                return HandleResourceAmountOperation(resourceIdentifier);
+                HandleResourceAmountOperation(resourceIdentifier);
+                return;
             case StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier:
-                return HandleStakeOwnershipAmountOperation(stakeOwnershipResourceIdentifier);
+                HandleStakeOwnershipAmountOperation(stakeOwnershipResourceIdentifier);
+                return;
             default:
                 throw GenerateDetailedInvalidTransactionException(
                     $"Unknown resource identifier type: {_operation!.Amount.ResourceIdentifier.Type}"
@@ -203,17 +201,20 @@ public class TransactionContentCommitter
         }
     }
 
-    private Task HandleResourceAmountOperation(TokenResourceIdentifier resourceIdentifier)
+    private void HandleResourceAmountOperation(TokenResourceIdentifier resourceIdentifier)
     {
         switch (_entity!.EntityType)
         {
             case EntityType.Account:
-                return HandleAccountResourceAmountOperation(_entity!.AccountAddress!, resourceIdentifier.Rri);
+                HandleAccountResourceAmountOperation(_entity!.AccountAddress!, resourceIdentifier.Rri);
+                return;
             case EntityType.Account_ExitingStake:
             case EntityType.Account_PreparedStake:
-                return HandleAccountXrdStakeResourceAmountOperation(_entity!, resourceIdentifier.Rri);
+                HandleAccountXrdStakeResourceAmountOperation(_entity!, resourceIdentifier.Rri);
+                return;
             case EntityType.Validator_System:
-                return HandleValidatorResourceAmountOperation(_entity!.ValidatorAddress!, resourceIdentifier.Rri);
+                HandleValidatorResourceAmountOperation(_entity!.ValidatorAddress!, resourceIdentifier.Rri);
+                return;
             case EntityType.Account_PreparedUnstake:
             case EntityType.System:
             case EntityType.Validator:
@@ -225,13 +226,14 @@ public class TransactionContentCommitter
         }
     }
 
-    private Task HandleStakeOwnershipAmountOperation(StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier)
+    private void HandleStakeOwnershipAmountOperation(StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier)
     {
         switch (_entity!.EntityType)
         {
             case EntityType.Account:
             case EntityType.Account_PreparedUnstake:
-                return HandleAccountStakeOwnershipAmountOperation(_entity!.EntityType, _entity!.AccountAddress!, stakeOwnershipResourceIdentifier.Validator);
+                HandleAccountStakeOwnershipAmountOperation(_entity!.EntityType, _entity!.AccountAddress!, stakeOwnershipResourceIdentifier.Validator);
+                return;
             case EntityType.Account_ExitingStake:
             case EntityType.Account_PreparedStake:
             case EntityType.Validator_System:
@@ -245,18 +247,18 @@ public class TransactionContentCommitter
         }
     }
 
-    private async Task HandleAccountResourceAmountOperation(string accountAddress, string resourceIdentifier)
+    private void HandleAccountResourceAmountOperation(string accountAddress, string resourceIdentifier)
     {
         var accountResource = new AccountResource(accountAddress, resourceIdentifier);
+        var tokenAmount = _amount!.Value;
 
         // Part 1) Handle substates
-        await HandleSubstateUpOrDown(
-            _dbContext.AccountResourceBalanceSubstates,
-            () => new AccountResourceBalanceSubstate(accountResource, _amount!.Value),
+        HandleSubstateUpOrDown(
+            () => new AccountResourceBalanceSubstate(accountResource, tokenAmount),
             existingSubstate => (
                 existingSubstate.AccountAddress == accountAddress
                 && existingSubstate.ResourceIdentifier == resourceIdentifier
-                && existingSubstate.Amount == -_amount!.Value // Negative because downed has the opposite amount as upped
+                && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
         );
 
@@ -264,8 +266,10 @@ public class TransactionContentCommitter
         _accountResourceNetBalanceChanges.TrackBalanceDelta(accountResource, TokenAmount.FromSubUnitsString(_operation!.Amount.Value));
     }
 
-    private async Task HandleAccountXrdStakeResourceAmountOperation(Entity entity, string resourceIdentifier)
+    private void HandleAccountXrdStakeResourceAmountOperation(Entity entity, string resourceIdentifier)
     {
+        var tokenAmount = _amount!.Value;
+
         if (!_entityDeterminer.IsXrd(resourceIdentifier))
         {
             throw GenerateDetailedInvalidTransactionException(
@@ -281,29 +285,30 @@ public class TransactionContentCommitter
         };
 
         // Part 1) Handle substates
-        await HandleSubstateUpOrDown(
-            _dbContext.AccountXrdStakeBalanceSubstates,
+        HandleSubstateUpOrDown(
             () => new AccountXrdStakeBalanceSubstate(
                 entity.AccountAddress!,
                 entity.ValidatorAddress!,
                 type,
                 entity.EpochUnlock,
-                _amount!.Value
+                tokenAmount
             ),
             existingSubstate => (
                 existingSubstate.AccountAddress == entity.AccountAddress!
                 && existingSubstate.ValidatorAddress == entity.ValidatorAddress!
                 && existingSubstate.Type == type
                 && existingSubstate.UnlockEpoch == entity.EpochUnlock
-                && existingSubstate.Amount == -_amount!.Value // Negative because downed has the opposite amount as upped
+                && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
         );
 
         // No history in this case
     }
 
-    private async Task HandleValidatorResourceAmountOperation(string validatorAddress, string resourceIdentifier)
+    private void HandleValidatorResourceAmountOperation(string validatorAddress, string resourceIdentifier)
     {
+        var tokenAmount = _amount!.Value;
+
         if (!_entityDeterminer.IsXrd(resourceIdentifier))
         {
             throw GenerateDetailedInvalidTransactionException(
@@ -312,24 +317,25 @@ public class TransactionContentCommitter
         }
 
         // Part 1) Handle substates
-        await HandleSubstateUpOrDown(
-            _dbContext.ValidatorStakeBalanceSubstates,
+        HandleSubstateUpOrDown(
             () => new ValidatorStakeBalanceSubstate(
                 validatorAddress,
                 _transactionSummary!.Epoch, // Put in for history's sake, but not part of the substate, so shouldn't be verified against
-                _amount!.Value
+                tokenAmount
             ),
             existingSubstate => (
                 existingSubstate.ValidatorAddress == validatorAddress
-                && existingSubstate.Amount == -_amount!.Value // Negative because downed has the opposite amount as upped
+                && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
         );
 
         // No history in this case
     }
 
-    private async Task HandleAccountStakeOwnershipAmountOperation(EntityType entityType, string accountAddress, string validatorAddress)
+    private void HandleAccountStakeOwnershipAmountOperation(EntityType entityType, string accountAddress, string validatorAddress)
     {
+        var tokenAmount = _amount!.Value;
+
         var type = entityType switch
         {
             EntityType.Account => AccountStakeOwnershipBalanceSubstateType.Stake,
@@ -338,37 +344,36 @@ public class TransactionContentCommitter
         };
 
         // Part 1) Handle substates
-        await HandleSubstateUpOrDown(
-            _dbContext.AccountStakeOwnershipBalanceSubstates,
+        HandleSubstateUpOrDown(
             () => new AccountStakeOwnershipBalanceSubstate(
                 accountAddress,
                 validatorAddress,
                 type,
-                _amount!.Value
+                tokenAmount
             ),
             existingSubstate => (
                 existingSubstate.AccountAddress == accountAddress
                 && existingSubstate.ValidatorAddress == validatorAddress
                 && existingSubstate.Type == type
-                && existingSubstate.Amount == -_amount!.Value // Negative because downed has the opposite amount as upped
+                && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
         );
 
         // No history yet...
     }
 
-    private Task HandleDataOperation()
+    private void HandleDataOperation()
     {
         // TODO:NG-24
-        return Task.CompletedTask;
+        return;
     }
 
-    private async Task HandleHistoryUpdates()
+    private void HandleHistoryUpdates()
     {
-        await HandleAccountResourceBalanceHistoryUpdates();
+        HandleAccountResourceBalanceHistoryUpdates();
     }
 
-    private async Task HandleAccountResourceBalanceHistoryUpdates()
+    private void HandleAccountResourceBalanceHistoryUpdates()
     {
         var accountResourceHistoryChanges = _accountResourceNetBalanceChanges
             .Where(arnb => arnb.Value != TokenAmount.Zero);
@@ -380,9 +385,8 @@ public class TransactionContentCommitter
                 throw GenerateDetailedInvalidTransactionException($"Balance delta calculated for account resource {key} is NaN");
             }
 
-            await AddHistoryForCurrentTransaction(
-                _dbContext.AccountResourceBalanceHistoryEntries,
-                AccountResourceBalanceHistory.Matches(key),
+            _dbActionsPlanner.AddNewAccountResourceBalanceHistoryEntry(
+                key,
                 oldHistory =>
                 {
                     var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousHistory(key, oldHistory, entry);
@@ -392,19 +396,19 @@ public class TransactionContentCommitter
                     }
 
                     return newHistoryEntry;
-                });
+                },
+                _transactionSummary!.StateVersion
+            );
         }
     }
 
     /// <summary>
     /// Handles Substates being booted up or shut down.
     /// </summary>
-    /// <param name="substates">The DbSet of substates.</param>
     /// <param name="createNewPartialSubstate">Creates a new partial substate if it were booted up. Does not need to set the operation group reference.</param>
     /// <param name="verifyDownedSubstateMatchesExisting">Verifies if an existing substate matches, to perform sanity checking when downing a substate.</param>
     /// <typeparam name="TSubstate">The substate type.</typeparam>
-    private Task HandleSubstateUpOrDown<TSubstate>(
-        DbSet<TSubstate> substates,
+    private void HandleSubstateUpOrDown<TSubstate>(
         Func<TSubstate> createNewPartialSubstate,
         Func<TSubstate, bool> verifyDownedSubstateMatchesExisting
     )
@@ -413,9 +417,11 @@ public class TransactionContentCommitter
         switch (_operation!.Substate.SubstateOperation)
         {
             case Substate.SubstateOperationEnum.BOOTUP:
-                return HandleSubstateUp(substates, createNewPartialSubstate());
+                HandleSubstateUp(createNewPartialSubstate());
+                return;
             case Substate.SubstateOperationEnum.SHUTDOWN:
-                return HandleSubstateDown(substates, createNewPartialSubstate, verifyDownedSubstateMatchesExisting);
+                HandleSubstateDown(createNewPartialSubstate, verifyDownedSubstateMatchesExisting);
+                return;
             default:
                 throw GenerateDetailedInvalidTransactionException(
                     $"Unknown substate operation type: {_operation!.Substate.SubstateOperation}"
@@ -423,58 +429,33 @@ public class TransactionContentCommitter
         }
     }
 
-    private Task HandleSubstateUp<TSubstate>(
-        DbSet<TSubstate> substates,
+    private void HandleSubstateUp<TSubstate>(
         TSubstate newSubstate
     )
         where TSubstate : SubstateBase
     {
-        // We capture the closure of the current transactionOpLocator
-        //  as the action is async / will complete later, so we can't rely on the state of this class
-        return substates.UpSubstate(
+        _dbActionsPlanner.UpSubstate(
             GetCurrentTransactionOpLocator(),
             _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
             newSubstate,
             _dbOperationGroup!,
-            _operationIndexInGroup,
-            _cancellationToken
+            _operationIndexInGroup
         );
     }
 
-    private Task HandleSubstateDown<TSubstate>(
-        DbSet<TSubstate> substates,
+    private void HandleSubstateDown<TSubstate>(
         Func<TSubstate> createNewPartialSubstate,
         Func<TSubstate, bool> verifySubstateMatches
     )
         where TSubstate : SubstateBase
     {
-        // We capture the closure of the current transactionOpLocator
-        //  as the action is async / will complete later, so we can't rely on the state of this class
-        return substates.DownSubstate(
+        _dbActionsPlanner.DownSubstate(
             GetCurrentTransactionOpLocator(),
             _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
             createNewPartialSubstate,
             verifySubstateMatches,
             _dbOperationGroup!,
-            _operationIndexInGroup,
-            _cancellationToken
-        );
-    }
-
-    private Task AddHistoryForCurrentTransaction<THistory>(
-        DbSet<THistory> history,
-        Expression<Func<THistory, bool>> historySelector,
-        Func<THistory?, THistory> createNewHistory
-    )
-        where THistory : HistoryBase
-    {
-        // We capture the closure of the current transactionOpLocator
-        //  as the action is async / will complete later, so we can't rely on the state of this class
-        return history.AddNewHistoryEntry(
-            historySelector,
-            createNewHistory,
-            _transaction!.CommittedStateIdentifier.StateVersion,
-            _cancellationToken
+            _operationIndexInGroup
         );
     }
 
