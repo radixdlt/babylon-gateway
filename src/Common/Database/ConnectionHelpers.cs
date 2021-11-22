@@ -53,6 +53,9 @@ public static class ConnectionHelpers
             }
         }
 
-        logger.LogWarning("Could not connect to database after max wait of {MaxWaitForDbMs}ms", timer.ElapsedMilliseconds);
+        logger.LogWarning("Could not connect to database after waiting {MaxWaitForDbMs}ms", timer.ElapsedMilliseconds);
+
+        // Try to throw a useful exception explaining that it can't connect
+        await dbContext.Database.OpenConnectionAsync();
     }
 }
