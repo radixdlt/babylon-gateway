@@ -65,6 +65,7 @@
 ﻿using System;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -74,21 +75,6 @@ namespace DataAggregator.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "account_resource_balance_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    account_address = table.Column<string>(type: "text", nullable: false),
-                    rri = table.Column<string>(type: "text", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_address, x.rri, x.from_state_version });
-                });
-
             migrationBuilder.CreateTable(
                 name: "nodes",
                 columns: table => new
@@ -114,6 +100,20 @@ namespace DataAggregator.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_raw_transactions", x => x.transaction_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "resources",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    rri = table.Column<string>(type: "text", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resources", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -154,6 +154,27 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "account_resource_balance_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_address = table.Column<string>(type: "text", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_address, x.resource_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_history_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "operation_groups",
                 columns: table => new
                 {
@@ -184,7 +205,7 @@ namespace DataAggregator.Migrations
                     up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
                     up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
                     account_address = table.Column<string>(type: "text", nullable: false),
-                    rri = table.Column<string>(type: "text", nullable: true),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
                     down_state_version = table.Column<long>(type: "bigint", nullable: true),
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
                     down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
@@ -206,6 +227,12 @@ namespace DataAggregator.Migrations
                         columns: x => new { x.up_state_version, x.up_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_substates_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -319,24 +346,24 @@ namespace DataAggregator.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_history_current_balance",
                 table: "account_resource_balance_history",
-                columns: new[] { "account_address", "rri" },
+                columns: new[] { "account_address", "resource_id" },
                 unique: true,
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_history_rri_account_address_from_s~",
+                name: "IX_account_resource_balance_history_resource_id_account_addres~",
                 table: "account_resource_balance_history",
-                columns: new[] { "rri", "account_address", "from_state_version" });
+                columns: new[] { "resource_id", "account_address", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_history_rri_from_state_version",
+                name: "IX_account_resource_balance_history_resource_id_from_state_ver~",
                 table: "account_resource_balance_history",
-                columns: new[] { "rri", "from_state_version" });
+                columns: new[] { "resource_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_substates_account_address_rri",
+                name: "IX_account_resource_balance_substates_account_address_resource~",
                 table: "account_resource_balance_substates",
-                columns: new[] { "account_address", "rri" });
+                columns: new[] { "account_address", "resource_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_substates_down_state_version_down_~",
@@ -344,14 +371,14 @@ namespace DataAggregator.Migrations
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_substates_rri_account_address",
+                name: "IX_account_resource_balance_substates_resource_id_account_addr~",
                 table: "account_resource_balance_substates",
-                columns: new[] { "rri", "account_address" });
+                columns: new[] { "resource_id", "account_address" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AccountResourceBalanceSubstate_CurrentUnspentUTXOs",
                 table: "account_resource_balance_substates",
-                columns: new[] { "account_address", "rri", "amount" },
+                columns: new[] { "account_address", "resource_id", "amount" },
                 filter: "down_state_version is null")
                 .Annotation("Npgsql:IndexInclude", new[] { "substate_identifier" });
 
@@ -404,6 +431,11 @@ namespace DataAggregator.Migrations
                 column: "timestamp");
 
             migrationBuilder.CreateIndex(
+                name: "IX_resources_rri",
+                table: "resources",
+                column: "rri");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_stake_balance_substates_down_state_version_down_o~",
                 table: "validator_stake_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
@@ -439,6 +471,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_stake_balance_substates");
+
+            migrationBuilder.DropTable(
+                name: "resources");
 
             migrationBuilder.DropTable(
                 name: "operation_groups");

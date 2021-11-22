@@ -62,37 +62,41 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Normalization;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Common.Database.Models.Ledger.Substates;
 
-public record struct AccountResource(string AccountAddress, string ResourceIdentifier);
+public record struct AccountResourceDenormalized(string AccountAddress, string Rri);
+public record struct AccountResource(string AccountAddress, Resource Resource);
 
 /// <summary>
 /// UTXOs related to Account Resource Balances.
 /// </summary>
-[Index(nameof(AccountAddress), nameof(ResourceIdentifier))]
-[Index(nameof(ResourceIdentifier), nameof(AccountAddress))]
+[Index(nameof(AccountAddress), nameof(ResourceId))]
+[Index(nameof(ResourceId), nameof(AccountAddress))]
 [Table("account_resource_balance_substates")]
 public class AccountResourceBalanceSubstate : BalanceSubstateBase
 {
     [Column(name: "account_address")]
     public string AccountAddress { get; set; }
 
-    [Column(name: "rri")]
-    public string? ResourceIdentifier { get; set; }
+    [Column(name: "resource_id")]
+    public long ResourceId { get; set; }
+
+    [ForeignKey(nameof(ResourceId))]
+    public Resource Resource { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AccountResourceBalanceSubstate"/> class.
     /// The SubstateBase properties should be set separately.
     /// </summary>
-    public AccountResourceBalanceSubstate(AccountResource key, TokenAmount amount)
+    public AccountResourceBalanceSubstate(string accountAddress, Resource resource, TokenAmount amount)
     {
-        AccountAddress = key.AccountAddress;
-        ResourceIdentifier = key.ResourceIdentifier;
+        AccountAddress = accountAddress;
+        Resource = resource;
         Amount = amount;
     }
 

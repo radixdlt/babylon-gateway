@@ -64,6 +64,7 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using DataAggregator.DependencyInjection;
@@ -94,8 +95,9 @@ public class DbActionsPlanner
     private readonly AggregatorDbContext _dbContext;
     private readonly CancellationToken _cancellationToken;
 
+    private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new(); // The long is the first state version at which it appears
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
-    private readonly HashSet<AccountResource> _accountResourceHistoryToLoad = new();
+    private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
     private readonly List<Action> _dbActions = new();
 
     public DbActionsPlanner(AggregatorDbContext dbContext, CancellationToken cancellationToken)
@@ -107,14 +109,14 @@ public class DbActionsPlanner
     public void UpSubstate<TSubstate>(
         TransactionOpLocator transactionOpLocator,
         byte[] identifier,
-        TSubstate newSubstate,
+        Func<TSubstate> createNewSubstate,
         LedgerOperationGroup upOperationGroup,
         int upOperationIndexInGroup
     )
         where TSubstate : SubstateBase
     {
         MarkSubstateToLoadIfExists<TSubstate>(identifier);
-        _dbActions.Add(() => UpSubstateFutureAction(transactionOpLocator, identifier, newSubstate, upOperationGroup, upOperationIndexInGroup));
+        _dbActions.Add(() => UpSubstateFutureAction(transactionOpLocator, identifier, createNewSubstate, upOperationGroup, upOperationIndexInGroup));
     }
 
     public void DownSubstate<TSubstate>(
@@ -137,17 +139,29 @@ public class DbActionsPlanner
     /// * createNewHistory does not need to care about the StateVersion.
     /// </summary>
     public void AddNewAccountResourceBalanceHistoryEntry(
-        AccountResource historyKey,
+        AccountResourceDenormalized historyKey,
         Func<AccountResourceBalanceHistory?, AccountResourceBalanceHistory> createNewHistoryFromPrevious,
         long transactionStateVersion
     )
     {
         _accountResourceHistoryToLoad.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            AccountResourceBalanceHistory.Matches(historyKey).Compile(),
+            h =>
+                h.AccountAddress == historyKey.AccountAddress
+                && h.Resource == GetResource(historyKey.Rri),
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
+    }
+
+    /// <summary>
+    /// This registers the the resource needs to be loaded as a dependency, and returns a resource
+    /// lookup which can be used in the action phase to resolve a resourceIdentifier into a Resource.
+    /// </summary>
+    public Func<Resource> ResolveResource(string resourceIdentifier, long seenAtStateVersion)
+    {
+        EnsureResourceLoaded(resourceIdentifier, seenAtStateVersion);
+        return () => GetResource(resourceIdentifier);
     }
 
     public async Task ProcessAllChanges()
@@ -156,8 +170,30 @@ public class DbActionsPlanner
         RunActions();
     }
 
+    /// <summary>
+    /// This can only be called from the action phase.
+    /// A call to this must have been pre-empted by a call to EnsureResourceLoaded in the dependencies phase.
+    /// If this method throws, this is because the EnsureResourceLoaded call was forgotten.
+    ///
+    /// NB - The resource's id can be as 0, as the resource may not have actually been created yet.
+    ///      So be sure to use the resource itself so EF Core can resolve the entity graph correctly upon save.
+    /// </summary>
+    private Resource GetResource(string resourceIdentifier)
+    {
+        return _dbContext.Set<Resource>().Local.Single(r => r.ResourceIdentifier == resourceIdentifier);
+    }
+
+    private void EnsureResourceLoaded(string resourceIdentifier, long seenAtStateVersion)
+    {
+        if (!_resourcesToLoadOrCreate.ContainsKey(resourceIdentifier))
+        {
+            _resourcesToLoadOrCreate[resourceIdentifier] = seenAtStateVersion;
+        }
+    }
+
     private async Task LoadDependencies()
     {
+        await LoadOrCreateResources();
         await LoadSubstatesOfType<AccountResourceBalanceSubstate>();
         await LoadSubstatesOfType<AccountStakeOwnershipBalanceSubstate>();
         await LoadSubstatesOfType<AccountXrdStakeBalanceSubstate>();
@@ -180,7 +216,7 @@ public class DbActionsPlanner
     private void UpSubstateFutureAction<TSubstate>(
         TransactionOpLocator transactionOpLocator,
         byte[] identifier,
-        TSubstate newSubstate,
+        Func<TSubstate> createNewSubstate,
         LedgerOperationGroup upOperationGroup,
         int upOperationIndexInGroup
     )
@@ -198,6 +234,8 @@ public class DbActionsPlanner
                 $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} can't be upped, as a substate with that identifier already already exists in the database"
             );
         }
+
+        var newSubstate = createNewSubstate();
 
         newSubstate.SubstateIdentifier = identifier;
         newSubstate.UpOperationGroup = upOperationGroup;
@@ -287,6 +325,35 @@ public class DbActionsPlanner
         }
     }
 
+    private async Task LoadOrCreateResources()
+    {
+        if (_resourcesToLoadOrCreate.Count == 0)
+        {
+            return;
+        }
+
+        var rrisToLoadOrCreate = _resourcesToLoadOrCreate.Keys.ToHashSet();
+
+        var existingResources = await _dbContext.Set<Resource>()
+            .Where(r => rrisToLoadOrCreate.Contains(r.ResourceIdentifier))
+            .ToListAsync(_cancellationToken);
+
+        rrisToLoadOrCreate.ExceptWith(existingResources
+            .Select(r => r.ResourceIdentifier)
+        );
+
+        _dbContext.Set<Resource>()
+            .AddRange(
+                rrisToLoadOrCreate
+                .Select(rri => new Resource
+                    {
+                        ResourceIdentifier = rri,
+                        FromStateVersion = _resourcesToLoadOrCreate[rri],
+                    }
+                )
+            );
+    }
+
     private async Task LoadSubstatesOfType<TSubstate>()
         where TSubstate : SubstateBase
     {
@@ -310,9 +377,9 @@ public class DbActionsPlanner
 
         await _dbContext.Set<AccountResourceBalanceHistory>()
             .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM account_resource_balance_history WHERE to_state_version IS NULL AND (account_address, rri)",
+                "SELECT * FROM account_resource_balance_history WHERE to_state_version IS NULL AND (account_address, resource_id)",
                 _accountResourceHistoryToLoad,
-                ar => new object[] { ar.AccountAddress, ar.ResourceIdentifier }
+                ar => new object[] { ar.AccountAddress, GetResource(ar.Rri).Id }
             )
             .LoadAsync(_cancellationToken);
     }

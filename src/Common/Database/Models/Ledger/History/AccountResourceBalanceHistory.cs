@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
 using Common.Numerics;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -82,8 +83,11 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
     [Column(name: "account_address")]
     public string AccountAddress { get; set; }
 
-    [Column(name: "rri")]
-    public string ResourceIdentifier { get; set; }
+    [Column(name: "resource_id")]
+    public long ResourceId { get; set; }
+
+    [ForeignKey(nameof(ResourceId))]
+    public Resource Resource { get; set; }
 
     [Column(name: "balance")]
     public TokenAmount Balance { get; set; }
@@ -95,7 +99,7 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
     public AccountResourceBalanceHistory(AccountResource key, TokenAmount startingBalance)
     {
         AccountAddress = key.AccountAddress;
-        ResourceIdentifier = key.ResourceIdentifier;
+        Resource = key.Resource;
         Balance = startingBalance;
     }
 
@@ -124,13 +128,6 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
     }
 
     public static Expression<Func<AccountResourceBalanceHistory, bool>> IsCurrent => h => h.ToStateVersion == null;
-
-    public static Expression<Func<AccountResourceBalanceHistory, bool>> Matches(AccountResource key)
-    {
-        return self =>
-            self.AccountAddress == key.AccountAddress
-            && self.ResourceIdentifier == key.ResourceIdentifier;
-    }
 
     public override BalanceEntry GetEntry()
     {

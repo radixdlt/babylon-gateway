@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211119120758_InitialCreate")]
+    [Migration("20211122190144_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,9 +95,9 @@ namespace DataAggregator.Migrations
                         .HasColumnType("text")
                         .HasColumnName("account_address");
 
-                    b.Property<string>("ResourceIdentifier")
-                        .HasColumnType("text")
-                        .HasColumnName("rri");
+                    b.Property<long>("ResourceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_id");
 
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
@@ -113,18 +113,18 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("to_state_version");
 
-                    b.HasKey("AccountAddress", "ResourceIdentifier", "FromStateVersion");
+                    b.HasKey("AccountAddress", "ResourceId", "FromStateVersion");
 
                     b.HasIndex("AccountAddress", "FromStateVersion");
 
-                    b.HasIndex("AccountAddress", "ResourceIdentifier")
+                    b.HasIndex("AccountAddress", "ResourceId")
                         .IsUnique()
                         .HasDatabaseName("IX_account_resource_balance_history_current_balance")
                         .HasFilter("to_state_version is null");
 
-                    b.HasIndex("ResourceIdentifier", "FromStateVersion");
+                    b.HasIndex("ResourceId", "FromStateVersion");
 
-                    b.HasIndex("ResourceIdentifier", "AccountAddress", "FromStateVersion");
+                    b.HasIndex("ResourceId", "AccountAddress", "FromStateVersion");
 
                     b.ToTable("account_resource_balance_history");
                 });
@@ -222,6 +222,31 @@ namespace DataAggregator.Migrations
                     b.HasCheckConstraint("complete_history", "state_version = 1 OR state_version = parent_state_version + 1");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.Normalization.Resource", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<string>("ResourceIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rri");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceIdentifier");
+
+                    b.ToTable("resources");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
                 {
                     b.Property<long>("UpStateVersion")
@@ -259,9 +284,9 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("down_state_version");
 
-                    b.Property<string>("ResourceIdentifier")
-                        .HasColumnType("text")
-                        .HasColumnName("rri");
+                    b.Property<long>("ResourceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_id");
 
                     b.Property<byte[]>("SubstateIdentifier")
                         .IsRequired()
@@ -272,17 +297,17 @@ namespace DataAggregator.Migrations
 
                     b.HasAlternateKey("SubstateIdentifier");
 
-                    b.HasIndex("AccountAddress", "ResourceIdentifier");
+                    b.HasIndex("AccountAddress", "ResourceId");
 
                     b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
 
-                    b.HasIndex("ResourceIdentifier", "AccountAddress");
+                    b.HasIndex("ResourceId", "AccountAddress");
 
-                    b.HasIndex("AccountAddress", "ResourceIdentifier", "Amount")
+                    b.HasIndex("AccountAddress", "ResourceId", "Amount")
                         .HasDatabaseName("IX_AccountResourceBalanceSubstate_CurrentUnspentUTXOs")
                         .HasFilter("down_state_version is null");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("AccountAddress", "ResourceIdentifier", "Amount"), new[] { "SubstateIdentifier" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("AccountAddress", "ResourceId", "Amount"), new[] { "SubstateIdentifier" });
 
                     b.ToTable("account_resource_balance_substates");
                 });
@@ -524,6 +549,17 @@ namespace DataAggregator.Migrations
                     b.ToTable("raw_transactions");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.AccountResourceBalanceHistory", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
                 {
                     b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LedgerTransaction")
@@ -594,6 +630,12 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
                 {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
@@ -608,6 +650,8 @@ namespace DataAggregator.Migrations
                         .HasConstraintName("FK_account_resource_balance_substate_up_operation_group");
 
                     b.Navigation("DownOperationGroup");
+
+                    b.Navigation("Resource");
 
                     b.Navigation("UpOperationGroup");
                 });

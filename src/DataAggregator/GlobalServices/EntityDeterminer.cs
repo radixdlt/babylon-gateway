@@ -95,6 +95,8 @@ public interface IEntityDeterminer
     Entity? DetermineEntity(EntityIdentifier entityIdentifier);
 
     bool IsXrd(string rri);
+
+    string GetXrdAddress();
 }
 
 public class EntityDeterminer : IEntityDeterminer
@@ -188,5 +190,11 @@ public class EntityDeterminer : IEntityDeterminer
         return
             primaryEntityRadixAddress.Type == RadixAddressType.Resource
             && primaryEntityRadixAddress.AddressData.BytesAreEqual(_xrdRadixEngineAddress);
+    }
+
+    public string GetXrdAddress()
+    {
+        var hrp = $"xrd{_networkDetailsProvider.GetNetworkDetails().AddressHrps.ResourceHrpSuffix}";
+        return RadixBech32.Encode(hrp, _xrdRadixEngineAddress, Bech32.Variant.Bech32);
     }
 }

@@ -140,7 +140,7 @@ public class CommonDbContext : DbContext
 
         HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
         modelBuilder.Entity<AccountResourceBalanceSubstate>()
-            .HasIndex(s => new { s.AccountAddress, s.ResourceIdentifier, s.Amount })
+            .HasIndex(s => new { s.AccountAddress, TokenId = s.ResourceId, s.Amount })
             .IncludeProperties(s => new { s.SubstateIdentifier })
             .HasFilter("down_state_version is null")
             .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate)}_CurrentUnspentUTXOs");
@@ -169,10 +169,10 @@ public class CommonDbContext : DbContext
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasKey(h => new { h.AccountAddress, h.ResourceIdentifier, h.FromStateVersion });
+            .HasKey(h => new { h.AccountAddress, h.ResourceId, h.FromStateVersion });
 
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.AccountAddress, h.ResourceIdentifier })
+            .HasIndex(h => new { h.AccountAddress, h.ResourceId })
             .HasFilter("to_state_version is null")
             .IsUnique()
             .HasDatabaseName($"IX_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
@@ -182,9 +182,9 @@ public class CommonDbContext : DbContext
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasIndex(h => new { h.AccountAddress, h.FromStateVersion });
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.ResourceIdentifier, h.AccountAddress, h.FromStateVersion });
+            .HasIndex(h => new { h.ResourceId, h.AccountAddress, h.FromStateVersion });
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.ResourceIdentifier, h.FromStateVersion });
+            .HasIndex(h => new { h.ResourceId, h.FromStateVersion });
     }
 
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)

@@ -62,10 +62,12 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
+using System.Linq;
 
 namespace DataAggregator.GlobalServices;
 
@@ -78,16 +80,19 @@ public interface ILedgerExtenderService
 
 public class LedgerExtenderService : ILedgerExtenderService
 {
+    private readonly ILogger<LedgerExtenderService> _logger;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
 
     public LedgerExtenderService(
+        ILogger<LedgerExtenderService> logger,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer
     )
     {
+        _logger = logger;
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
         _entityDeterminer = entityDeterminer;
@@ -109,6 +114,11 @@ public class LedgerExtenderService : ILedgerExtenderService
         var parentSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
         TransactionConsistency.AssertEqualParentIdentifiers(parentStateIdentifier, parentSummary);
 
+        if (parentSummary.StateVersion == 0)
+        {
+            await EnsureDbLedgerIsInitialized(dbContext, token);
+        }
+
         await _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(
             dbContext,
             transactions.Select(TransactionMapping.CreateRawTransaction),
@@ -117,5 +127,32 @@ public class LedgerExtenderService : ILedgerExtenderService
 
         return await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
             .CommitTransactions(parentSummary, transactions);
+    }
+
+    private async Task EnsureDbLedgerIsInitialized(AggregatorDbContext dbContext, CancellationToken token)
+    {
+        _logger.LogInformation("Ledger appears new - so we will ensure it's initialized");
+        await EnsureXrdExists(dbContext, token);
+
+        // TODO:NG-40 - Add ledger network creation here
+    }
+
+    private async Task EnsureXrdExists(AggregatorDbContext dbContext, CancellationToken token)
+    {
+        var xrdResourceIdentifier = _entityDeterminer.GetXrdAddress();
+        var existingXrd = await dbContext.Set<Resource>()
+            .Where(r => r.ResourceIdentifier == xrdResourceIdentifier)
+            .SingleOrDefaultAsync(token);
+
+        if (existingXrd != null)
+        {
+            return;
+        }
+
+        dbContext.Set<Resource>()
+            .Add(new Resource { ResourceIdentifier = xrdResourceIdentifier, FromStateVersion = 0 });
+        await dbContext.SaveChangesAsync(token);
+
+        _logger.LogInformation("Created XRD as resource with id 1");
     }
 }

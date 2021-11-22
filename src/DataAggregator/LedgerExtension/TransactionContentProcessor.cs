@@ -86,7 +86,7 @@ public class TransactionContentProcessor
     private readonly IEntityDeterminer _entityDeterminer;
 
     /* History */
-    private readonly Dictionary<AccountResource, TokenAmount> _accountResourceNetBalanceChanges = new();
+    private readonly Dictionary<AccountResourceDenormalized, TokenAmount> _accountResourceNetBalanceChanges = new();
 
     /* Mutable Class State */
     /* > These simply help us avoid passing tons of references down the call stack.
@@ -249,21 +249,21 @@ public class TransactionContentProcessor
 
     private void HandleAccountResourceAmountOperation(string accountAddress, string resourceIdentifier)
     {
-        var accountResource = new AccountResource(accountAddress, resourceIdentifier);
         var tokenAmount = _amount!.Value;
+        var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
 
         // Part 1) Handle substates
         HandleSubstateUpOrDown(
-            () => new AccountResourceBalanceSubstate(accountResource, tokenAmount),
+            () => new AccountResourceBalanceSubstate(accountAddress, resourceLookup(), tokenAmount),
             existingSubstate => (
                 existingSubstate.AccountAddress == accountAddress
-                && existingSubstate.ResourceIdentifier == resourceIdentifier
+                && existingSubstate.Resource == resourceLookup()
                 && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
         );
 
         // Part 2) Handle history
-        _accountResourceNetBalanceChanges.TrackBalanceDelta(accountResource, TokenAmount.FromSubUnitsString(_operation!.Amount.Value));
+        _accountResourceNetBalanceChanges.TrackBalanceDelta(new AccountResourceDenormalized(accountAddress, resourceIdentifier), TokenAmount.FromSubUnitsString(_operation!.Amount.Value));
     }
 
     private void HandleAccountXrdStakeResourceAmountOperation(Entity entity, string resourceIdentifier)
@@ -385,11 +385,13 @@ public class TransactionContentProcessor
                 throw GenerateDetailedInvalidTransactionException($"Balance delta calculated for account resource {key} is NaN");
             }
 
+            var resourceLookup = _dbActionsPlanner.ResolveResource(key.Rri, _transactionSummary!.StateVersion);
             _dbActionsPlanner.AddNewAccountResourceBalanceHistoryEntry(
                 key,
                 oldHistory =>
                 {
-                    var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousHistory(key, oldHistory, entry);
+                    var normalizedKey = new AccountResource(key.AccountAddress, resourceLookup());
+                    var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousHistory(normalizedKey, oldHistory, entry);
                     if (newHistoryEntry.Balance.IsNegative())
                     {
                         throw GenerateDetailedInvalidTransactionException($"{key} balance ended up negative: {newHistoryEntry.Balance}");
@@ -417,46 +419,29 @@ public class TransactionContentProcessor
         switch (_operation!.Substate.SubstateOperation)
         {
             case Substate.SubstateOperationEnum.BOOTUP:
-                HandleSubstateUp(createNewPartialSubstate());
+                _dbActionsPlanner.UpSubstate(
+                    GetCurrentTransactionOpLocator(),
+                    _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
+                    createNewPartialSubstate,
+                    _dbOperationGroup!,
+                    _operationIndexInGroup
+                );
                 return;
             case Substate.SubstateOperationEnum.SHUTDOWN:
-                HandleSubstateDown(createNewPartialSubstate, verifyDownedSubstateMatchesExisting);
+                _dbActionsPlanner.DownSubstate(
+                    GetCurrentTransactionOpLocator(),
+                    _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
+                    createNewPartialSubstate,
+                    verifyDownedSubstateMatchesExisting,
+                    _dbOperationGroup!,
+                    _operationIndexInGroup
+                );
                 return;
             default:
                 throw GenerateDetailedInvalidTransactionException(
                     $"Unknown substate operation type: {_operation!.Substate.SubstateOperation}"
                 );
         }
-    }
-
-    private void HandleSubstateUp<TSubstate>(
-        TSubstate newSubstate
-    )
-        where TSubstate : SubstateBase
-    {
-        _dbActionsPlanner.UpSubstate(
-            GetCurrentTransactionOpLocator(),
-            _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
-            newSubstate,
-            _dbOperationGroup!,
-            _operationIndexInGroup
-        );
-    }
-
-    private void HandleSubstateDown<TSubstate>(
-        Func<TSubstate> createNewPartialSubstate,
-        Func<TSubstate, bool> verifySubstateMatches
-    )
-        where TSubstate : SubstateBase
-    {
-        _dbActionsPlanner.DownSubstate(
-            GetCurrentTransactionOpLocator(),
-            _operation!.Substate.SubstateIdentifier.Identifier.ConvertFromHex(),
-            createNewPartialSubstate,
-            verifySubstateMatches,
-            _dbOperationGroup!,
-            _operationIndexInGroup
-        );
     }
 
     private InvalidTransactionException GenerateDetailedInvalidTransactionException(string message)

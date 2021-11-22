@@ -62,44 +62,23 @@
  * permissions under this License.
  */
 
-using GatewayAPI.Database;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GatewayAPI.Controllers;
+namespace Common.Database.Models.Ledger.Normalization;
 
-// ReSharper disable once InconsistentNaming
-#pragma warning disable SA1300
-public record AccountBalancesRequest(string accountAddress);
-#pragma warning restore SA1300
-
-[ApiController]
-[Route("account")]
-public class ExampleAccountController : ControllerBase
+[Table("resources")]
+[Index(nameof(ResourceIdentifier))]
+public class Resource
 {
-    private readonly ILogger<ExampleAccountController> _logger;
-    private readonly GatewayReadOnlyDbContext _dbContext;
+    [Key]
+    [Column(name: "id")]
+    public long Id { get; set; }
 
-    public ExampleAccountController(ILogger<ExampleAccountController> logger, GatewayReadOnlyDbContext dbContext)
-    {
-        _logger = logger;
-        _dbContext = dbContext;
-    }
+    [Column(name: "rri")]
+    public string ResourceIdentifier { get; set; }
 
-    // TODO - This needs to be fixed in many ways:
-    // * Create a response model (or use the one from Open API gen)
-    // * Map outside the controller
-    [HttpPost("balances")]
-    public IEnumerable<object> GetBalances(AccountBalancesRequest request)
-    {
-        return _dbContext
-            .CurrentAccountResourceHistory
-            .Where(arb => arb.AccountAddress == request.accountAddress)
-            .Include(arb => arb.Resource)
-            .Select(x => new
-            {
-                rri = x.Resource.ResourceIdentifier,
-                amount = x.Balance.ToSubUnitString(),
-            });
-    }
+    [Column(name: "from_state_version")]
+    public long FromStateVersion { get; set; }
 }
