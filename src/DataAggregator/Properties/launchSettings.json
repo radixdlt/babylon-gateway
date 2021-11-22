@@ -1,13 +1,13 @@
 ﻿{
     "profiles": {
-        "DataAggregator": {
+        "Data Aggregator": {
             "commandName": "Project",
             "dotnetRunMessages": true,
             "environmentVariables": {
                     "DOTNET_ENVIRONMENT": "Development"
             }
         },
-        "WipeDatabase": {
+        "Wipe Database": {
             "commandName": "Project",
             "dotnetRunMessages": true,
             "environmentVariables": {
