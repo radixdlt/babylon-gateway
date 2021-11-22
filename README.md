@@ -11,3 +11,5 @@ This codebase is under development, and any part of it - including any Gateway A
 ## Technical Docs
 
 For technical docs, including developer set-up, see the [docs folder](./docs).
+
+For docs on the recommended deployment set-up, see the [deployment folder](./deployment).

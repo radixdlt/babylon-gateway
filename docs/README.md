@@ -7,3 +7,4 @@ For general documentation, please visit https://docs.radixdlt.com/.
 ## Contents
 
 * [Development Environment Setup](./development)
+* [Recommended Deployment Setup](../deployment)
