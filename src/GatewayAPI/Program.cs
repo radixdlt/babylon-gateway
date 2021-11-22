@@ -65,6 +65,8 @@
 // StyleCop getting confused with flat Program.cs
 #pragma warning disable SA1516
 
+using Common.Database;
+using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -112,10 +114,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-var msDelayAtStart = app.Configuration.GetValue("WaitMsOnStartUp", 0);
-if (msDelayAtStart > 0)
-{
-    await Task.Delay(TimeSpan.FromMilliseconds(msDelayAtStart));
-}
+
+var maxWaitForDbMs = app.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
+await ConnectionHelpers.TryWaitForDb<GatewayReadOnlyDbContext>(app.Services, maxWaitForDbMs);
 
 await app.RunAsync();

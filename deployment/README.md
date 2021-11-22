@@ -10,11 +10,8 @@ Whilst the system can be run with one of each component, a resilient deployment 
 
 * Multiple Gateway APIs.
 * A managed database cluster, with read replicas.
-
-After v1, we are planning to support:
-
-* A Data Aggregator primary and inactive secondary (which will take over should the primary fail to write to the database for a pre-determined time)
-* The Data Aggregator reading from one or more full nodes.
+* [Support coming after v1] A Data Aggregator primary and inactive secondary (which will take over should the primary fail to write to the database for a pre-determined time)
+* [Support coming after v1] The Data Aggregator reading from one or more full nodes.
 
 ## Example toy set-up with docker compose
 
@@ -26,7 +23,6 @@ Standard caveat: it is recommended not to run stateful services such as database
 
 ### Preparing the toy set-up
 
-
 Install docker compose if you don't already have it. Then, ensure your temimal has this `/deployment` folder as its working directory.
 
 First, we need to set up the environment variables:
@@ -37,22 +33,11 @@ cp .template.env .env
 
 Now, make changes to any of the values you wish in `.env` (to eg point it at your locally running node's cope API)
 
-Then you can run the following
-
-```
-docker-compose up postgres_db
-```
-
-Wait for the database to boot up, and create itself - the first boot-up takes quite a while, so we let it do it first. You can then cancel that with `CTRL-C`.
-
-
 ### Running the toy set-up
 
 Finally, you can bring up the whole stack with:
 
 ```sh
-docker-compose build # Only necessary if you've made code changes since last build
-docker-compose up
+./build-and-start-network-gateway.sh
 ```
 
-If the data aggregator crashes because PostGres isn't accepting connections yet, you can increase the delay time by changing `DELAY_MS_ON_START` in the `.env` file.

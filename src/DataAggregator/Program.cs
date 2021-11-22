@@ -65,6 +65,7 @@
 // StyleCop getting confused with flat Program.cs
 #pragma warning disable SA1516
 
+using Common.Database;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
@@ -99,41 +100,33 @@ var shouldWipeDatabaseInsteadOfStart =
     configuration.GetValue<bool>("WIPE_DATABASE")
     && (isDevelopment || configuration.GetValue<bool>("WIPE_DATABASE_CONFIRM"));
 
-var msDelayAtStart = configuration.GetValue("WaitMsOnStartUp", 0);
-if (msDelayAtStart > 0)
-{
-    await Task.Delay(TimeSpan.FromMilliseconds(msDelayAtStart));
-}
+
+var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
+await ConnectionHelpers.TryWaitForDb<AggregatorDbContext>(host.Services, maxWaitForDbMs);
 
 if (shouldWipeDatabaseInsteadOfStart)
 {
-    using var scope = host.Services.CreateScope();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<AggregatorDbContext>>();
-    var db = scope.ServiceProvider.GetRequiredService<AggregatorDbContext>();
+    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(host.Services, async (logger, dbContext) =>
+    {
+        logger.LogInformation("Starting database wipe");
 
-    logger.LogInformation("Starting db wipe");
+        await dbContext.Database.EnsureDeletedAsync();
 
-    await db.Database.EnsureDeletedAsync();
-
-    logger.LogInformation("DB wipe completed. Now stopping...");
-
-    // Purposefully do not allow running after wipe - have to change the above to true once
+        logger.LogInformation("Database wipe completed. Now stopping...");
+    });
 }
 else
 {
     // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
     // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-    using (var scope = host.Services.CreateScope())
+    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(host.Services, async (logger, dbContext) =>
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<AggregatorDbContext>>();
-        var db = scope.ServiceProvider.GetRequiredService<AggregatorDbContext>();
+        logger.LogInformation("Starting database migrations if required");
 
-        logger.LogInformation("Starting db migrations if required");
+        await dbContext.Database.MigrateAsync();
 
-        await db.Database.MigrateAsync();
-
-        logger.LogInformation("DB migrations performed");
-    }
+        logger.LogInformation("Database migrations (if required) were completed");
+    });
 
     await host.RunAsync();
 }

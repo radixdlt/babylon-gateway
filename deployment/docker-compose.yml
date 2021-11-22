@@ -18,7 +18,7 @@ services:
       context: "../"
       dockerfile: "./src/DataAggregator/Dockerfile"
     environment:
-      RADIX_NG_AGGREGATOR__WaitMsOnStartUp: "${DELAY_MS_ON_START}" # Wait for PostGres to boot up
+      RADIX_NG_AGGREGATOR__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
       RADIX_NG_AGGREGATOR__NetworkName: "${NETWORK_NAME}"
       RADIX_NG_AGGREGATOR__ConnectionStrings__AggregatorDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
       RADIX_NG_AGGREGATOR__Nodes__0__Name: "${NODE_0_NAME}"
@@ -52,7 +52,7 @@ services:
       - "5308:80" # This allows you to connect to the API at http://localhost:5308
     environment:
       ASPNETCORE_URLS: "http://*:80" # Binds to 80 on all interfaces
-      RADIX_NG_API__WaitMsOnStartUp: "${DELAY_MS_ON_START}" # Wait for PostGres to boot up
+      RADIX_NG_API__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
       RADIX_NG_API__NetworkName: "${NETWORK_NAME}"
       RADIX_NG_API__ConnectionStrings__ReadOnlyDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
       RADIX_NG_API__ConnectionStrings__ReadWriteDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
