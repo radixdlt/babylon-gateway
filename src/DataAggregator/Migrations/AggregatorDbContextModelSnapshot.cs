@@ -240,7 +240,8 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResourceIdentifier");
+                    b.HasIndex("ResourceIdentifier")
+                        .IsUnique();
 
                     b.ToTable("resources");
                 });

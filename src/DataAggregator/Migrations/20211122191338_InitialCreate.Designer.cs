@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211122190144_InitialCreate")]
+    [Migration("20211122191338_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -242,7 +242,8 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResourceIdentifier");
+                    b.HasIndex("ResourceIdentifier")
+                        .IsUnique();
 
                     b.ToTable("resources");
                 });

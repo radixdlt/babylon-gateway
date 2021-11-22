@@ -65,6 +65,7 @@
 using Common.Database.Models;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
 using Common.Database.ValueConverters;
 using Common.Extensions;
@@ -137,6 +138,10 @@ public class CommonDbContext : DbContext
 
         modelBuilder.Entity<LedgerOperationGroup>()
             .OwnsOne(og => og.InferredAction);
+
+        modelBuilder.Entity<Resource>()
+            .HasIndex(r => r.ResourceIdentifier)
+            .IsUnique();
 
         HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
         modelBuilder.Entity<AccountResourceBalanceSubstate>()

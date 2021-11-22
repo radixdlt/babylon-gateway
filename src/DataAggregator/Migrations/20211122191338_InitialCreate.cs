@@ -433,7 +433,8 @@ namespace DataAggregator.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_resources_rri",
                 table: "resources",
-                column: "rri");
+                column: "rri",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_stake_balance_substates_down_state_version_down_o~",
