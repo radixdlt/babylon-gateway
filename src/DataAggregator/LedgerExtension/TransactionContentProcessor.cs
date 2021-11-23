@@ -364,8 +364,63 @@ public class TransactionContentProcessor
 
     private void HandleDataOperation()
     {
-        // TODO:NG-24
-        return;
+        switch (_operation!.Data.DataObject)
+        {
+            case TokenData tokenData:
+                HandleResourceDataOperation(tokenData, null);
+                return;
+            case TokenMetadata tokenMetadata:
+                HandleResourceDataOperation(null, tokenMetadata);
+                return;
+            default:
+                // TODO:NG-24 - handle other cases
+                return;
+        }
+    }
+
+    private void HandleResourceDataOperation(TokenData? tokenData, TokenMetadata? tokenMetadata)
+    {
+        if (_entity!.EntityType != EntityType.Resource)
+        {
+            throw GenerateDetailedInvalidTransactionException("Resource data update not against a resource entity");
+        }
+
+        var type = tokenData != null ? ResourceDataSubstateType.TokenData :
+            tokenMetadata != null ? ResourceDataSubstateType.TokenMetadata :
+            throw GenerateDetailedInvalidTransactionException("Resource Data which isn't of either expected type");
+
+        var resourceIdentifier = _entity.ResourceAddress!;
+        var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
+
+        TokenAmount? granularity = tokenData?.Granularity != null ? TokenAmount.FromSubUnitsString(tokenData.Granularity) : null;
+        HandleSubstateUpOrDown(
+            () => new ResourceDataSubstate(
+                resource: resourceLookup(),
+                type: type,
+                isMutable: tokenData?.IsMutable,
+                granularity: granularity,
+                owner: tokenData?.Owner,
+                symbol: tokenMetadata?.Symbol,
+                name: tokenMetadata?.Name,
+                description: tokenMetadata?.Description,
+                url: tokenMetadata?.Url,
+                iconUrl: tokenMetadata?.IconUrl
+            ),
+            existingSubstate => (
+                existingSubstate.Resource == resourceLookup()
+                && existingSubstate.Type == type
+                && existingSubstate.IsMutable == tokenData?.IsMutable
+                && existingSubstate.Granularity == granularity
+                && existingSubstate.Owner == tokenData?.Owner
+                && existingSubstate.Symbol == tokenMetadata?.Symbol
+                && existingSubstate.Name == tokenMetadata?.Name
+                && existingSubstate.Description == tokenMetadata?.Description
+                && existingSubstate.Url == tokenMetadata?.Url
+                && existingSubstate.IconUrl == tokenMetadata?.IconUrl
+            )
+        );
+
+        // No history yet...
     }
 
     private void HandleHistoryUpdates()

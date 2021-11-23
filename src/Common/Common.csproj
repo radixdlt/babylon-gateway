@@ -2,16 +2,17 @@
 
     <!-- NB - Shared PropertyGroup contents live in Directory.Build.props -->
     <PropertyGroup>
-      <RootNamespace>Common</RootNamespace>
+        <RootNamespace>Common</RootNamespace>
     </PropertyGroup>
 
     <!-- NB - PackageReference versions are overridden centrally in Directory.Package.props -->
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="RadixCoreApi.GeneratedClient" />
     </ItemGroup>
 
 </Project>

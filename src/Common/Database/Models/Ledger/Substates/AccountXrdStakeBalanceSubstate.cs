@@ -77,7 +77,7 @@ public enum AccountXrdStakeBalanceSubstateType
 
 public class AccountXrdStakeBalanceSubstateTypeValueConverter : EnumTypeValueConverterBase<AccountXrdStakeBalanceSubstateType>
 {
-    private static Dictionary<AccountXrdStakeBalanceSubstateType, string> _conversion = new()
+    private static readonly Dictionary<AccountXrdStakeBalanceSubstateType, string> _conversion = new()
     {
         { AccountXrdStakeBalanceSubstateType.PreparedStake, "PREPARED_STAKE" },
         { AccountXrdStakeBalanceSubstateType.ExitingStake, "EXITING_STAKE" },

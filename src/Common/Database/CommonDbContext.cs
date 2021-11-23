@@ -97,6 +97,8 @@ public class CommonDbContext : DbContext
 
     public DbSet<ValidatorStakeBalanceSubstate> ValidatorStakeBalanceSubstates => Set<ValidatorStakeBalanceSubstate>();
 
+    public DbSet<ResourceDataSubstate> ResourceDataSubstates => Set<ResourceDataSubstate>();
+
     public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
 #pragma warning restore CS1591
@@ -154,6 +156,8 @@ public class CommonDbContext : DbContext
         HookUpSubstate<AccountStakeOwnershipBalanceSubstate>(modelBuilder);
         HookUpSubstate<ValidatorStakeBalanceSubstate>(modelBuilder);
 
+        HookUpSubstate<ResourceDataSubstate>(modelBuilder);
+
         HookUpAccountResourceBalanceHistory(modelBuilder);
     }
 
@@ -169,6 +173,9 @@ public class CommonDbContext : DbContext
 
         configurationBuilder.Properties<AccountXrdStakeBalanceSubstateType>()
             .HaveConversion<AccountXrdStakeBalanceSubstateTypeValueConverter>();
+
+        configurationBuilder.Properties<ResourceDataSubstateType>()
+            .HaveConversion<ResourceDataSubstateTypeValueConverter>();
     }
 
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)

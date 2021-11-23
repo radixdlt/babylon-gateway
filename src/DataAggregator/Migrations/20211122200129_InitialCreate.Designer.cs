@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211122191338_InitialCreate")]
+    [Migration("20211122200129_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -447,6 +447,83 @@ namespace DataAggregator.Migrations
                     b.ToTable("account_xrd_stake_balance_substates");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ResourceDataSubstate", b =>
+                {
+                    b.Property<long>("UpStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("up_state_version");
+
+                    b.Property<int>("UpOperationGroupIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("up_operation_group_index");
+
+                    b.Property<int>("UpOperationIndexInGroup")
+                        .HasColumnType("integer")
+                        .HasColumnName("up_operation_index_in_group");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("DownOperationGroupIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("down_operation_group_index");
+
+                    b.Property<int?>("DownOperationIndexInGroup")
+                        .HasColumnType("integer")
+                        .HasColumnName("down_operation_index_in_group");
+
+                    b.Property<long?>("DownStateVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("down_state_version");
+
+                    b.Property<BigInteger?>("Granularity")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000)");
+
+                    b.Property<string>("IconUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsMutable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<long>("ResourceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_id");
+
+                    b.Property<byte[]>("SubstateIdentifier")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("substate_identifier");
+
+                    b.Property<string>("Symbol")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("text");
+
+                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
+
+                    b.HasAlternateKey("SubstateIdentifier");
+
+                    b.HasIndex("ResourceId");
+
+                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
+
+                    b.ToTable("resource_data_substates");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorStakeBalanceSubstate", b =>
                 {
                     b.Property<long>("UpStateVersion")
@@ -693,6 +770,34 @@ namespace DataAggregator.Migrations
                         .HasConstraintName("FK_account_xrd_stake_balance_substate_up_operation_group");
 
                     b.Navigation("DownOperationGroup");
+
+                    b.Navigation("UpOperationGroup");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ResourceDataSubstate", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
+                        .WithMany()
+                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_resource_data_substate_down_operation_group");
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
+                        .WithMany()
+                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_resource_data_substate_up_operation_group");
+
+                    b.Navigation("DownOperationGroup");
+
+                    b.Navigation("Resource");
 
                     b.Navigation("UpOperationGroup");
                 });

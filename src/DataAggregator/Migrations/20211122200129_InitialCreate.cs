@@ -306,6 +306,52 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "resource_data_substates",
+                columns: table => new
+                {
+                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    IsMutable = table.Column<bool>(type: "boolean", nullable: true),
+                    Granularity = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
+                    Owner = table.Column<string>(type: "text", nullable: true),
+                    Symbol = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Url = table.Column<string>(type: "text", nullable: true),
+                    IconUrl = table.Column<string>(type: "text", nullable: true),
+                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
+                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
+                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_data_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_resource_data_substates_substate_identifier", x => x.substate_identifier);
+                    table.ForeignKey(
+                        name: "FK_resource_data_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_resource_data_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_resource_data_substates_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_stake_balance_substates",
                 columns: table => new
                 {
@@ -431,6 +477,16 @@ namespace DataAggregator.Migrations
                 column: "timestamp");
 
             migrationBuilder.CreateIndex(
+                name: "IX_resource_data_substates_down_state_version_down_operation_g~",
+                table: "resource_data_substates",
+                columns: new[] { "down_state_version", "down_operation_group_index" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resource_data_substates_resource_id",
+                table: "resource_data_substates",
+                column: "resource_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_resources_rri",
                 table: "resources",
                 column: "rri",
@@ -469,6 +525,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "nodes");
+
+            migrationBuilder.DropTable(
+                name: "resource_data_substates");
 
             migrationBuilder.DropTable(
                 name: "validator_stake_balance_substates");

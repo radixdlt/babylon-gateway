@@ -62,69 +62,86 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.ValueConverters;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
+using RadixCoreApi.GeneratedClient.Model;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Common.Database.Models.Ledger.Substates;
 
-public enum AccountStakeOwnershipBalanceSubstateType
+public enum ResourceDataSubstateType
 {
-    Stake,
-    PreparedUnstake,
+    TokenData,
+    TokenMetadata,
 }
 
-public class AccountStakeOwnershipBalanceSubstateTypeValueConverter : EnumTypeValueConverterBase<AccountStakeOwnershipBalanceSubstateType>
+public class ResourceDataSubstateTypeValueConverter : EnumTypeValueConverterBase<ResourceDataSubstateType>
 {
-    private static readonly Dictionary<AccountStakeOwnershipBalanceSubstateType, string> _conversion = new()
+    private static readonly Dictionary<ResourceDataSubstateType, string> _conversion = new()
     {
-        { AccountStakeOwnershipBalanceSubstateType.Stake, "STAKE" },
-        { AccountStakeOwnershipBalanceSubstateType.PreparedUnstake, "PREPARED_UNSTAKE" },
+        { ResourceDataSubstateType.TokenData, "TOKEN_DATA" },
+        { ResourceDataSubstateType.TokenMetadata, "TOKEN_METADATA" },
     };
 
-    public AccountStakeOwnershipBalanceSubstateTypeValueConverter()
+    public ResourceDataSubstateTypeValueConverter()
         : base(_conversion, Invert(_conversion))
     {
     }
 }
 
 /// <summary>
-/// UTXOs related to Accounts staking to Validators, where the resource is a share of StakeOwnership in that Validator.
-/// In particular, this is stake which is Staked or PreparingUnstake.
+/// Combines TokenData and TokenMetadata.
 /// </summary>
-[Index(nameof(AccountAddress), nameof(ValidatorAddress))]
-[Index(nameof(ValidatorAddress), nameof(AccountAddress))]
-[Table("account_stake_ownership_balance_substates")]
-public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
+[Index(nameof(ResourceId))]
+[Table("resource_data_substates")]
+public class ResourceDataSubstate : DataSubstateBase
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AccountStakeOwnershipBalanceSubstate"/> class.
-    /// The SubstateBase properties should be set separately.
-    /// </summary>
-    public AccountStakeOwnershipBalanceSubstate(
-        string accountAddress,
-        string validatorAddress,
-        AccountStakeOwnershipBalanceSubstateType type,
-        TokenAmount stakeOwnershipBalance
-    )
-    {
-        AccountAddress = accountAddress;
-        ValidatorAddress = validatorAddress;
-        Type = type;
-        Amount = stakeOwnershipBalance;
-    }
+    [Column(name: "resource_id")]
+    public long ResourceId { get; set; }
 
-    private AccountStakeOwnershipBalanceSubstate()
-    {
-    }
-
-    [Column(name: "account_address")]
-    public string AccountAddress { get; set; }
-
-    [Column(name: "validator_address")]
-    public string ValidatorAddress { get; set; }
+    [ForeignKey(nameof(ResourceId))]
+    public Resource Resource { get; set; }
 
     [Column(name: "type")]
-    public AccountStakeOwnershipBalanceSubstateType Type { get; set; }
+    public ResourceDataSubstateType Type { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ResourceDataSubstate"/> class.
+    /// The SubstateBase properties should be set separately.
+    /// </summary>
+    public ResourceDataSubstate(Resource resource, ResourceDataSubstateType type, bool? isMutable, TokenAmount? granularity, string? owner, string? symbol, string? name, string? description, string? url, string? iconUrl)
+    {
+        Resource = resource;
+        Type = type;
+        IsMutable = isMutable;
+        Granularity = granularity;
+        Owner = owner;
+        Symbol = symbol;
+        Name = name;
+        Description = description;
+        Url = url;
+        IconUrl = iconUrl;
+    }
+
+    public bool? IsMutable { get; set; }
+
+    public TokenAmount? Granularity { get; set; }
+
+    public string? Owner { get; set; }
+
+    public string? Symbol { get; set; }
+
+    public string? Name { get; set; }
+
+    public string? Description { get; set; }
+
+    public string? Url { get; set; }
+
+    public string? IconUrl { get; set; }
+
+    private ResourceDataSubstate()
+    {
+    }
 }

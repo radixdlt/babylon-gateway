@@ -68,6 +68,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Common.Database.Models.Ledger.Normalization;
 
+/// <summary>
+/// Adds normalization to resources, to increase DB performance.
+/// </summary>
 [Table("resources")]
 [Index(nameof(ResourceIdentifier))]
 // OnModelCreating: Create unique index on rri
