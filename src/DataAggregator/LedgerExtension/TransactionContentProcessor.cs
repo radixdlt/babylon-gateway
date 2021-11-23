@@ -89,6 +89,7 @@ public class TransactionContentProcessor
     /* History */
     private readonly Dictionary<AccountResourceDenormalized, TokenAmount> _accountResourceNetBalanceChanges = new();
     private readonly Dictionary<string, ResourceSupplyChange> _nonXrdResourceChangesAcrossOperationGroups = new();
+    private readonly Dictionary<string, StakeSnapshotChange> _validatorStakeChanges = new();
 
     /* Mutable Class State */
     /* > These simply help us avoid passing tons of references down the call stack.
@@ -325,7 +326,19 @@ public class TransactionContentProcessor
             )
         );
 
-        // No history in this case
+        // Part 2) Handle history
+        var preValidatorStake = _validatorStakeChanges.GetOrCreate(entity.ValidatorAddress!, StakeSnapshotChange.Default);
+        switch (entity.EntityType!)
+        {
+            case EntityType.Account_PreparedStake:
+                preValidatorStake.AggregatePreparedXrdStakeChange(tokenAmount);
+                break;
+            case EntityType.Account_ExitingStake:
+                preValidatorStake.AggregateChangeInExitingXrdStakeChange(tokenAmount);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void HandleValidatorResourceAmountOperation(string validatorAddress, string resourceIdentifier)
@@ -352,7 +365,8 @@ public class TransactionContentProcessor
             )
         );
 
-        // No history in this case
+        // Part 2) Handle history
+        _validatorStakeChanges.GetOrCreate(validatorAddress, StakeSnapshotChange.Default).AggregateXrdStakeChange(tokenAmount);
     }
 
     private void HandleAccountStakeOwnershipAmountOperation(EntityType entityType, string accountAddress, string validatorAddress)
@@ -382,7 +396,19 @@ public class TransactionContentProcessor
             )
         );
 
-        // No history yet...
+        // Part 2) Handle history
+        var preValidatorStake = _validatorStakeChanges.GetOrCreate(validatorAddress, StakeSnapshotChange.Default);
+        switch (entityType)
+        {
+            case EntityType.Account:
+                preValidatorStake.AggregateStakeOwnershipChange(tokenAmount);
+                break;
+            case EntityType.Account_PreparedUnstake:
+                preValidatorStake.AggregatePreparedUnstakeOwnershipChange(tokenAmount);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void HandleDataOperation()
@@ -485,8 +511,7 @@ public class TransactionContentProcessor
                 continue;
             }
 
-            var prevOrDefault = _nonXrdResourceChangesAcrossOperationGroups.GetValueOrDefault(rri);
-            _nonXrdResourceChangesAcrossOperationGroups[rri] = prevOrDefault.Aggregate(change);
+            _nonXrdResourceChangesAcrossOperationGroups.GetOrCreate(rri, ResourceSupplyChange.Default).Aggregate(change);
         }
 
         // Prepare for next operation group
@@ -497,6 +522,7 @@ public class TransactionContentProcessor
     {
         HandleAccountResourceBalanceHistoryUpdates();
         HandleResourceSupplyHistoryUpdates();
+        HandleValidatorStakeHistoryUpdates();
     }
 
     private void HandleAccountResourceBalanceHistoryUpdates()
@@ -517,10 +543,10 @@ public class TransactionContentProcessor
                 oldHistory =>
                 {
                     var normalizedKey = new AccountResource(key.AccountAddress, resourceLookup());
-                    var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousHistory(normalizedKey, oldHistory, entry);
-                    if (newHistoryEntry.Balance.IsNegative())
+                    var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousEntry(normalizedKey, oldHistory?.BalanceEntry, entry);
+                    if (newHistoryEntry.BalanceEntry.Balance.IsNegative())
                     {
-                        throw GenerateDetailedInvalidTransactionException($"{key} balance ended up negative: {newHistoryEntry.Balance}");
+                        throw GenerateDetailedInvalidTransactionException($"{key} balance ended up negative: {newHistoryEntry.BalanceEntry}");
                     }
 
                     return newHistoryEntry;
@@ -561,6 +587,55 @@ public class TransactionContentProcessor
                     if (newHistoryEntry.ResourceSupply.TotalSupply.IsNegative())
                     {
                         throw GenerateDetailedInvalidTransactionException($"{key} TotalSupply ended up negative: {newHistoryEntry.ResourceSupply.TotalSupply}");
+                    }
+
+                    return newHistoryEntry;
+                },
+                _transactionSummary!.StateVersion
+            );
+        }
+    }
+
+    private void HandleValidatorStakeHistoryUpdates()
+    {
+        var validatorStakeChanges = _validatorStakeChanges
+            .Where(kvp => kvp.Value.IsMeaningfulChange());
+
+        foreach (var (key, stakeSnapshotChange) in validatorStakeChanges)
+        {
+            if (stakeSnapshotChange.IsNaN())
+            {
+                throw GenerateDetailedInvalidTransactionException($"Validator stake snapshot change for validator {key} had a NaN value");
+            }
+
+            _dbActionsPlanner.AddNewValidatorStakeHistoryEntry(
+                key,
+                oldHistory =>
+                {
+                    var newHistoryEntry = ValidatorStakeHistory.FromPreviousEntry(key, oldHistory?.StakeSnapshot, stakeSnapshotChange);
+                    if (newHistoryEntry.StakeSnapshot.TotalXrdStake.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalXrdStake}");
+                    }
+
+                    if (newHistoryEntry.StakeSnapshot.TotalStakeOwnership.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalStakeOwnership ended up negative: {newHistoryEntry.StakeSnapshot.TotalStakeOwnership}");
+                    }
+
+                    if (newHistoryEntry.StakeSnapshot.TotalPreparedXrdStake.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedXrdStake}");
+                    }
+
+                    if (newHistoryEntry.StakeSnapshot.TotalPreparedUnstakeOwnership.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedUnstakeOwnership ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedUnstakeOwnership}");
+                    }
+
+                    if (newHistoryEntry.StakeSnapshot.TotalExitingXrdStake.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalExitingXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalExitingXrdStake}");
                     }
 
                     return newHistoryEntry;

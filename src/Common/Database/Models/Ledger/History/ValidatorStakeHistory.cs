@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -71,48 +70,47 @@ using System.Linq.Expressions;
 namespace Common.Database.Models.Ledger.History;
 
 /// <summary>
-/// Tracks total supply of a resource over time.
+/// Tracks validator stake over time.
 /// </summary>
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
-[Table("resource_supply_history")]
-public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, ResourceSupplyChange>
+[Table("validator_stake_history")]
+public class ValidatorStakeHistory : HistoryBase<string, StakeSnapshot, StakeSnapshotChange>
 {
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
+    [Column(name: "validator_address")]
+    public string ValidatorAddress { get; set; }
 
     // [Owned] below
-    public ResourceSupply ResourceSupply { get; set; }
+    public StakeSnapshot StakeSnapshot { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ResourceSupplyHistory"/> class.
+    /// Initializes a new instance of the <see cref="ValidatorStakeHistory"/> class.
     /// The StateVersions should be set separately.
     /// </summary>
-    public ResourceSupplyHistory(Resource key, ResourceSupply resourceSupply)
+    public ValidatorStakeHistory(string key, StakeSnapshot stakeSnapshot)
     {
-        Resource = key;
-        ResourceSupply = resourceSupply;
+        ValidatorAddress = key;
+        StakeSnapshot = stakeSnapshot;
     }
 
-    public static ResourceSupplyHistory FromPreviousEntry(
-        Resource key,
-        ResourceSupply? previousSupply,
-        ResourceSupplyChange change
+    public static ValidatorStakeHistory FromPreviousEntry(
+        string key,
+        StakeSnapshot? previous,
+        StakeSnapshotChange change
     )
     {
-        var prev = previousSupply ?? ResourceSupply.Default();
-        return new ResourceSupplyHistory(key, new ResourceSupply
+        var prev = previous ?? StakeSnapshot.GetDefault();
+        return new ValidatorStakeHistory(key, new StakeSnapshot
         {
-            TotalSupply = prev.TotalSupply + change.Minted - change.Burned,
-            TotalMinted = prev.TotalMinted + change.Minted,
-            TotalBurnt = prev.TotalBurnt + change.Burned,
+            TotalXrdStake = prev.TotalXrdStake + change.ChangeInXrdStake,
+            TotalStakeOwnership = prev.TotalStakeOwnership + change.ChangeInStakeOwnership,
+            TotalPreparedXrdStake = prev.TotalPreparedXrdStake + change.ChangeInPreparedXrdStake,
+            TotalPreparedUnstakeOwnership = prev.TotalPreparedUnstakeOwnership + change.ChangeInPreparedUnstakeOwnership,
+            TotalExitingXrdStake = prev.TotalExitingXrdStake + change.ChangeInExitingXrdStake,
         });
     }
 
-    private ResourceSupplyHistory()
+    private ValidatorStakeHistory()
     {
     }
 
@@ -122,59 +120,96 @@ public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, Resou
 /// <summary>
 /// A mutable class to aggregate changes.
 /// </summary>
-public class ResourceSupplyChange
+public class StakeSnapshotChange
 {
-    public TokenAmount Minted { get; set; }
+    public TokenAmount ChangeInXrdStake { get; set; }
 
-    public TokenAmount Burned { get; set; }
+    public TokenAmount ChangeInStakeOwnership { get; set; }
 
-    public static ResourceSupplyChange From(TokenAmount change)
+    public TokenAmount ChangeInPreparedXrdStake { get; set; }
+
+    public TokenAmount ChangeInPreparedUnstakeOwnership { get; set; }
+
+    public TokenAmount ChangeInExitingXrdStake { get; set; }
+
+    public static StakeSnapshotChange Default()
     {
-        var newVal = Default();
-        newVal.Aggregate(change);
-        return newVal;
+        return new StakeSnapshotChange();
     }
 
-    public static ResourceSupplyChange Default()
+    public bool IsMeaningfulChange()
     {
-        return new ResourceSupplyChange();
+        return !(
+            ChangeInXrdStake.IsZero() &&
+            ChangeInStakeOwnership.IsZero() &&
+            ChangeInPreparedXrdStake.IsZero() &&
+            ChangeInPreparedUnstakeOwnership.IsZero() &&
+            ChangeInExitingXrdStake.IsZero()
+        );
     }
 
-    public void Aggregate(TokenAmount change)
+    public bool IsNaN()
     {
-        if (change.IsZero())
-        {
-            return;
-        }
+        return ChangeInXrdStake.IsNaN() ||
+               ChangeInStakeOwnership.IsNaN() ||
+               ChangeInPreparedXrdStake.IsNaN() ||
+               ChangeInPreparedUnstakeOwnership.IsNaN() ||
+               ChangeInExitingXrdStake.IsNaN();
+    }
 
-        if (change.IsPositive())
-        {
-            Minted += change;
-        }
-        else
-        {
-            Burned -= change;
-        }
+    public void AggregateXrdStakeChange(TokenAmount change)
+    {
+        ChangeInXrdStake += change;
+    }
+
+    public void AggregateStakeOwnershipChange(TokenAmount change)
+    {
+        ChangeInStakeOwnership += change;
+    }
+
+    public void AggregatePreparedXrdStakeChange(TokenAmount change)
+    {
+        ChangeInPreparedXrdStake += change;
+    }
+
+    public void AggregatePreparedUnstakeOwnershipChange(TokenAmount change)
+    {
+        ChangeInPreparedUnstakeOwnership += change;
+    }
+
+    public void AggregateChangeInExitingXrdStakeChange(TokenAmount change)
+    {
+        ChangeInExitingXrdStake += change;
     }
 }
 
 [Owned]
-public record ResourceSupply
+public record StakeSnapshot
 {
-    [Column("total_supply")]
-    public TokenAmount TotalSupply { get; set; }
+    [Column("total_xrd_staked")]
+    public TokenAmount TotalXrdStake { get; set; }
 
-    [Column("total_minted")]
-    public TokenAmount TotalMinted { get; set; }
+    [Column("total_stake_ownership")]
+    public TokenAmount TotalStakeOwnership { get; set; }
 
-    [Column("total_burnt")]
-    public TokenAmount TotalBurnt { get; set; }
+    [Column("total_prepared_xrd_stake")]
+    public TokenAmount TotalPreparedXrdStake { get; set; }
 
-    public static ResourceSupply Default()
+    [Column("total_prepared_unstake_ownership")]
+    public TokenAmount TotalPreparedUnstakeOwnership { get; set; }
+
+    [Column("total_exiting_stake_ownership")]
+    public TokenAmount TotalExitingXrdStake { get; set; }
+
+    public static StakeSnapshot GetDefault()
     {
-        return new ResourceSupply
+        return new StakeSnapshot
         {
-            TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurnt = TokenAmount.Zero,
+            TotalXrdStake = TokenAmount.Zero,
+            TotalStakeOwnership = TokenAmount.Zero,
+            TotalPreparedXrdStake = TokenAmount.Zero,
+            TotalPreparedUnstakeOwnership = TokenAmount.Zero,
+            TotalExitingXrdStake = TokenAmount.Zero,
         };
     }
 }

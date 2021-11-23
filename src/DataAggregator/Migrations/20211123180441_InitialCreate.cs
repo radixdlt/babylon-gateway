@@ -117,6 +117,24 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    validator_address = table.Column<string>(type: "text", nullable: false),
+                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_exiting_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_address, x.from_state_version });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ledger_transactions",
                 columns: table => new
                 {
@@ -471,6 +489,13 @@ namespace DataAggregator.Migrations
                 columns: new[] { "resource_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_resource_balance_substate_current_unspent_utxos",
+                table: "account_resource_balance_substates",
+                columns: new[] { "account_address", "resource_id", "amount" },
+                filter: "down_state_version is null")
+                .Annotation("Npgsql:IndexInclude", new[] { "substate_identifier" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_substates_account_address_resource~",
                 table: "account_resource_balance_substates",
                 columns: new[] { "account_address", "resource_id" });
@@ -484,13 +509,6 @@ namespace DataAggregator.Migrations
                 name: "IX_account_resource_balance_substates_resource_id_account_addr~",
                 table: "account_resource_balance_substates",
                 columns: new[] { "resource_id", "account_address" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AccountResourceBalanceSubstate_CurrentUnspentUTXOs",
-                table: "account_resource_balance_substates",
-                columns: new[] { "account_address", "resource_id", "amount" },
-                filter: "down_state_version is null")
-                .Annotation("Npgsql:IndexInclude", new[] { "substate_identifier" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_stake_ownership_balance_substates_account_address_v~",
@@ -588,6 +606,13 @@ namespace DataAggregator.Migrations
                 name: "IX_validator_stake_balance_substates_validator_address",
                 table: "validator_stake_balance_substates",
                 column: "validator_address");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_stake_history_current_supply",
+                table: "validator_stake_history",
+                column: "validator_address",
+                unique: true,
+                filter: "to_state_version is null");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -618,6 +643,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_stake_balance_substates");
+
+            migrationBuilder.DropTable(
+                name: "validator_stake_history");
 
             migrationBuilder.DropTable(
                 name: "resources");

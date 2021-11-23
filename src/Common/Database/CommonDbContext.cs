@@ -105,6 +105,8 @@ public class CommonDbContext : DbContext
 
     public DbSet<ResourceSupplyHistory> ResourceSupplyHistoryEntries => Set<ResourceSupplyHistory>();
 
+    public DbSet<ValidatorStakeHistory> ValidatorStakeHistoryEntries => Set<ValidatorStakeHistory>();
+
 #pragma warning restore CS1591
 
     public CommonDbContext(DbContextOptions options)
@@ -154,7 +156,7 @@ public class CommonDbContext : DbContext
             .HasIndex(s => new { s.AccountAddress, TokenId = s.ResourceId, s.Amount })
             .IncludeProperties(s => new { s.SubstateIdentifier })
             .HasFilter("down_state_version is null")
-            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate)}_CurrentUnspentUTXOs");
+            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate).ToSnakeCase()}_current_unspent_utxos");
 
         HookUpSubstate<AccountXrdStakeBalanceSubstate>(modelBuilder);
         HookUpSubstate<AccountStakeOwnershipBalanceSubstate>(modelBuilder);
@@ -165,6 +167,7 @@ public class CommonDbContext : DbContext
 
         HookUpAccountResourceBalanceHistory(modelBuilder);
         HookUpResourceSupplyHistory(modelBuilder);
+        HookUpValidatorStakeHistory(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -218,6 +221,18 @@ public class CommonDbContext : DbContext
             .HasFilter("to_state_version is null")
             .IsUnique()
             .HasDatabaseName($"IX_{nameof(ResourceSupplyHistory).ToSnakeCase()}_current_supply");
+    }
+
+    private static void HookUpValidatorStakeHistory(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ValidatorStakeHistory>()
+            .HasKey(h => new { h.ValidatorAddress, h.FromStateVersion });
+
+        modelBuilder.Entity<ValidatorStakeHistory>()
+            .HasIndex(h => new { h.ValidatorAddress })
+            .HasFilter("to_state_version is null")
+            .IsUnique()
+            .HasDatabaseName($"IX_{nameof(ValidatorStakeHistory).ToSnakeCase()}_current_supply");
     }
 
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)

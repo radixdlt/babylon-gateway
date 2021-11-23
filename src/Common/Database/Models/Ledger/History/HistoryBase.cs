@@ -64,7 +64,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 
 namespace Common.Database.Models.Ledger.History;
 
@@ -78,7 +77,8 @@ namespace Common.Database.Models.Ledger.History;
 /// </summary>
 /// <typeparam name="TKey">A record type indicating the grouping key which is used to aggregate history together.</typeparam>
 /// <typeparam name="TEntry">A record type indicating the history entry - these are the items which change over time.</typeparam>
-public abstract class HistoryBase<TKey, TEntry> : HistoryBase
+/// <typeparam name="TChange">A class which is used to aggregate a diff to the last history entry.</typeparam>
+public abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
 {
 }
 

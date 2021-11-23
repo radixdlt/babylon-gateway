@@ -99,7 +99,7 @@ public class ExampleAccountController : ControllerBase
             .Select(x => new
             {
                 rri = x.Resource.ResourceIdentifier,
-                amount = x.Balance.ToSubUnitString(),
+                amount = x.BalanceEntry.Balance.ToSubUnitString(),
             });
     }
 }

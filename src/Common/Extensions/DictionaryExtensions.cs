@@ -78,4 +78,18 @@ public static class DictionaryExtensions
         dict[key] = newValue;
         return newValue;
     }
+
+    public static TValue GetOrSetDefault<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key)
+        where TKey : notnull
+        where TValue : struct
+    {
+        if (dict.TryGetValue(key, out var value))
+        {
+            return value;
+        }
+
+        var newValue = default(TValue);
+        dict[key] = newValue;
+        return newValue;
+    }
 }

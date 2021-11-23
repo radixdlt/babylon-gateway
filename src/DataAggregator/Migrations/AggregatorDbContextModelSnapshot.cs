@@ -101,11 +101,6 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<BigInteger>("Balance")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)")
-                        .HasColumnName("balance");
-
                     b.Property<long?>("ToStateVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("bigint")
@@ -150,6 +145,31 @@ namespace DataAggregator.Migrations
                         .HasFilter("to_state_version is null");
 
                     b.ToTable("resource_supply_history");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.ValidatorStakeHistory", b =>
+                {
+                    b.Property<string>("ValidatorAddress")
+                        .HasColumnType("text")
+                        .HasColumnName("validator_address");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long?>("ToStateVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("to_state_version");
+
+                    b.HasKey("ValidatorAddress", "FromStateVersion");
+
+                    b.HasIndex("ValidatorAddress")
+                        .IsUnique()
+                        .HasDatabaseName("IX_validator_stake_history_current_supply")
+                        .HasFilter("to_state_version is null");
+
+                    b.ToTable("validator_stake_history");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
@@ -328,7 +348,7 @@ namespace DataAggregator.Migrations
                     b.HasIndex("ResourceId", "AccountAddress");
 
                     b.HasIndex("AccountAddress", "ResourceId", "Amount")
-                        .HasDatabaseName("IX_AccountResourceBalanceSubstate_CurrentUnspentUTXOs")
+                        .HasDatabaseName("IX_account_resource_balance_substate_current_unspent_utxos")
                         .HasFilter("down_state_version is null");
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("AccountAddress", "ResourceId", "Amount"), new[] { "SubstateIdentifier" });
@@ -715,6 +735,33 @@ namespace DataAggregator.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("Common.Database.Models.Ledger.History.BalanceEntry", "BalanceEntry", b1 =>
+                        {
+                            b1.Property<string>("AccountResourceBalanceHistoryAccountAddress")
+                                .HasColumnType("text");
+
+                            b1.Property<long>("AccountResourceBalanceHistoryResourceId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("AccountResourceBalanceHistoryFromStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<BigInteger>("Balance")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("balance");
+
+                            b1.HasKey("AccountResourceBalanceHistoryAccountAddress", "AccountResourceBalanceHistoryResourceId", "AccountResourceBalanceHistoryFromStateVersion");
+
+                            b1.ToTable("account_resource_balance_history");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountResourceBalanceHistoryAccountAddress", "AccountResourceBalanceHistoryResourceId", "AccountResourceBalanceHistoryFromStateVersion");
+                        });
+
+                    b.Navigation("BalanceEntry")
+                        .IsRequired();
+
                     b.Navigation("Resource");
                 });
 
@@ -760,6 +807,53 @@ namespace DataAggregator.Migrations
                     b.Navigation("Resource");
 
                     b.Navigation("ResourceSupply")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.ValidatorStakeHistory", b =>
+                {
+                    b.OwnsOne("Common.Database.Models.Ledger.History.StakeSnapshot", "StakeSnapshot", b1 =>
+                        {
+                            b1.Property<string>("ValidatorStakeHistoryValidatorAddress")
+                                .HasColumnType("text");
+
+                            b1.Property<long>("ValidatorStakeHistoryFromStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<BigInteger>("TotalExitingXrdStake")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_exiting_stake_ownership");
+
+                            b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_prepared_unstake_ownership");
+
+                            b1.Property<BigInteger>("TotalPreparedXrdStake")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_prepared_xrd_stake");
+
+                            b1.Property<BigInteger>("TotalStakeOwnership")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_stake_ownership");
+
+                            b1.Property<BigInteger>("TotalXrdStake")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_xrd_staked");
+
+                            b1.HasKey("ValidatorStakeHistoryValidatorAddress", "ValidatorStakeHistoryFromStateVersion");
+
+                            b1.ToTable("validator_stake_history");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorStakeHistoryValidatorAddress", "ValidatorStakeHistoryFromStateVersion");
+                        });
+
+                    b.Navigation("StakeSnapshot")
                         .IsRequired();
                 });
 
