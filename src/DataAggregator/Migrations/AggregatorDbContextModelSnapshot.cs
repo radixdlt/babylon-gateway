@@ -127,6 +127,31 @@ namespace DataAggregator.Migrations
                     b.ToTable("account_resource_balance_history");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.ResourceSupplyHistory", b =>
+                {
+                    b.Property<long>("ResourceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long?>("ToStateVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("to_state_version");
+
+                    b.HasKey("ResourceId", "FromStateVersion");
+
+                    b.HasIndex("ResourceId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_resource_supply_history_current_supply")
+                        .HasFilter("to_state_version is null");
+
+                    b.ToTable("resource_supply_history");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
                 {
                     b.Property<long>("ResultantStateVersion")
@@ -691,6 +716,51 @@ namespace DataAggregator.Migrations
                         .IsRequired();
 
                     b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.ResourceSupplyHistory", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Common.Database.Models.Ledger.History.ResourceSupply", "ResourceSupply", b1 =>
+                        {
+                            b1.Property<long>("ResourceSupplyHistoryResourceId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("ResourceSupplyHistoryFromStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<BigInteger>("TotalBurnt")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_burnt");
+
+                            b1.Property<BigInteger>("TotalMinted")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_minted");
+
+                            b1.Property<BigInteger>("TotalSupply")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_supply");
+
+                            b1.HasKey("ResourceSupplyHistoryResourceId", "ResourceSupplyHistoryFromStateVersion");
+
+                            b1.ToTable("resource_supply_history");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ResourceSupplyHistoryResourceId", "ResourceSupplyHistoryFromStateVersion");
+                        });
+
+                    b.Navigation("Resource");
+
+                    b.Navigation("ResourceSupply")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>

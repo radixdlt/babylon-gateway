@@ -103,6 +103,8 @@ public class CommonDbContext : DbContext
 
     public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
+    public DbSet<ResourceSupplyHistory> ResourceSupplyHistoryEntries => Set<ResourceSupplyHistory>();
+
 #pragma warning restore CS1591
 
     public CommonDbContext(DbContextOptions options)
@@ -162,6 +164,7 @@ public class CommonDbContext : DbContext
         HookUpSubstate<ValidatorDataSubstate>(modelBuilder);
 
         HookUpAccountResourceBalanceHistory(modelBuilder);
+        HookUpResourceSupplyHistory(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -203,6 +206,18 @@ public class CommonDbContext : DbContext
             .HasIndex(h => new { h.ResourceId, h.AccountAddress, h.FromStateVersion });
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasIndex(h => new { h.ResourceId, h.FromStateVersion });
+    }
+
+    private static void HookUpResourceSupplyHistory(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ResourceSupplyHistory>()
+            .HasKey(h => new { h.ResourceId, h.FromStateVersion });
+
+        modelBuilder.Entity<ResourceSupplyHistory>()
+            .HasIndex(h => new { h.ResourceId })
+            .HasFilter("to_state_version is null")
+            .IsUnique()
+            .HasDatabaseName($"IX_{nameof(ResourceSupplyHistory).ToSnakeCase()}_current_supply");
     }
 
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)

@@ -98,6 +98,7 @@ public class DbActionsPlanner
     private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new(); // The long is the first state version at which it appears
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
     private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
+    private readonly HashSet<string> _resourceSupplyHistoryToLoadByRri = new();
     private readonly List<Action> _dbActions = new();
 
     public DbActionsPlanner(AggregatorDbContext dbContext, CancellationToken cancellationToken)
@@ -155,6 +156,25 @@ public class DbActionsPlanner
     }
 
     /// <summary>
+    /// Note that:
+    /// * historySelector does not need to care about the StateVersion.
+    /// * createNewHistory does not need to care about the StateVersion.
+    /// </summary>
+    public void AddNewResourceSupplyHistoryEntry(
+        string historyKey,
+        Func<ResourceSupplyHistory?, ResourceSupplyHistory> createNewHistoryFromPrevious,
+        long transactionStateVersion
+    )
+    {
+        _resourceSupplyHistoryToLoadByRri.Add(historyKey);
+        _dbActions.Add(() => AddNewHistoryEntryFutureAction(
+            h => h.Resource == GetResource(historyKey),
+            createNewHistoryFromPrevious,
+            transactionStateVersion
+        ));
+    }
+
+    /// <summary>
     /// This registers the the resource needs to be loaded as a dependency, and returns a resource
     /// lookup which can be used in the action phase to resolve a resourceIdentifier into a Resource.
     /// </summary>
@@ -201,6 +221,7 @@ public class DbActionsPlanner
         await LoadSubstatesOfType<ResourceDataSubstate>();
         await LoadSubstatesOfType<ValidatorDataSubstate>();
         await LoadAccountResourceBalanceHistoryEntries();
+        await LoadResourceSupplyHistoryEntries();
     }
 
     private void RunActions()
@@ -383,6 +404,20 @@ public class DbActionsPlanner
                 _accountResourceHistoryToLoad,
                 ar => new object[] { ar.AccountAddress, GetResource(ar.Rri).Id }
             )
+            .LoadAsync(_cancellationToken);
+    }
+
+    private async Task LoadResourceSupplyHistoryEntries()
+    {
+        if (!_resourceSupplyHistoryToLoadByRri.Any())
+        {
+            return;
+        }
+
+        var resourceIds = _resourceSupplyHistoryToLoadByRri.Select(rri => GetResource(rri).Id);
+
+        await _dbContext.Set<ResourceSupplyHistory>()
+            .Where(h => resourceIds.Contains(h.ResourceId) && h.ToStateVersion == null)
             .LoadAsync(_cancellationToken);
     }
 }

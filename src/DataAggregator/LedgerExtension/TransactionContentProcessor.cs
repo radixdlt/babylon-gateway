@@ -88,6 +88,7 @@ public class TransactionContentProcessor
 
     /* History */
     private readonly Dictionary<AccountResourceDenormalized, TokenAmount> _accountResourceNetBalanceChanges = new();
+    private readonly Dictionary<string, ResourceSupplyChange> _resourceChangesAcrossOperationGroup = new();
 
     /* Mutable Class State */
     /* > These simply help us avoid passing tons of references down the call stack.
@@ -96,6 +97,7 @@ public class TransactionContentProcessor
     private CommittedTransaction? _transaction;
     private LedgerOperationGroup? _dbOperationGroup;
     private OperationGroup? _transactionOperationGroup;
+    private Dictionary<string, TokenAmount> _resourceChangeThisOperationGroupByRri = new();
     private int _operationGroupIndex = -1;
     private Operation? _operation;
     private int _operationIndexInGroup = -1;
@@ -154,6 +156,8 @@ public class TransactionContentProcessor
                 _amount = null;
                 _operation = null;
             }
+
+            TrackResourceSupplyChangesAcrossOperationGroup();
         }
 
         _dbOperationGroup = null;
@@ -204,18 +208,20 @@ public class TransactionContentProcessor
 
     private void HandleResourceAmountOperation(TokenResourceIdentifier resourceIdentifier)
     {
+        var rri = resourceIdentifier.Rri!;
+
         switch (_entity!.EntityType)
         {
             case EntityType.Account:
-                HandleAccountResourceAmountOperation(_entity!.AccountAddress!, resourceIdentifier.Rri);
-                return;
+                HandleAccountResourceAmountOperation(_entity!.AccountAddress!, rri);
+                break;
             case EntityType.Account_ExitingStake:
             case EntityType.Account_PreparedStake:
-                HandleAccountXrdStakeResourceAmountOperation(_entity!, resourceIdentifier.Rri);
-                return;
+                HandleAccountXrdStakeResourceAmountOperation(_entity!, rri);
+                break;
             case EntityType.Validator_System:
-                HandleValidatorResourceAmountOperation(_entity!.ValidatorAddress!, resourceIdentifier.Rri);
-                return;
+                HandleValidatorResourceAmountOperation(_entity!.ValidatorAddress!, rri);
+                break;
             case EntityType.Account_PreparedUnstake:
             case EntityType.System:
             case EntityType.Validator:
@@ -225,6 +231,9 @@ public class TransactionContentProcessor
                     $"Resource Amount operation against unsupported entity type: {_entity!.EntityType}"
                 );
         }
+
+        var prevSupplyChange = _resourceChangeThisOperationGroupByRri.GetValueOrDefault(rri);
+        _resourceChangeThisOperationGroupByRri[rri] = prevSupplyChange + _amount!.Value;
     }
 
     private void HandleStakeOwnershipAmountOperation(StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier)
@@ -392,7 +401,7 @@ public class TransactionContentProcessor
                 HandleValidatorDataOperation(new ValidatorDataObjects { PreparedValidatorOwner = preparedValidatorOwner });
                 return;
             default:
-                // TODO:NG-24 - handle other cases
+                // Don't handle other data types for now
                 return;
         }
     }
@@ -454,9 +463,27 @@ public class TransactionContentProcessor
         );
     }
 
+    private void TrackResourceSupplyChangesAcrossOperationGroup()
+    {
+        foreach (var (rri, change) in _resourceChangeThisOperationGroupByRri)
+        {
+            if (change.IsZero())
+            {
+                continue;
+            }
+
+            var prevOrDefault = _resourceChangesAcrossOperationGroup.GetValueOrDefault(rri);
+            _resourceChangesAcrossOperationGroup[rri] = prevOrDefault.Aggregate(change);
+        }
+
+        // Prepare for next operation group
+        _resourceChangeThisOperationGroupByRri = new Dictionary<string, TokenAmount>();
+    }
+
     private void HandleHistoryUpdates()
     {
         HandleAccountResourceBalanceHistoryUpdates();
+        HandleResourceSupplyHistoryUpdates();
     }
 
     private void HandleAccountResourceBalanceHistoryUpdates()
@@ -481,6 +508,38 @@ public class TransactionContentProcessor
                     if (newHistoryEntry.Balance.IsNegative())
                     {
                         throw GenerateDetailedInvalidTransactionException($"{key} balance ended up negative: {newHistoryEntry.Balance}");
+                    }
+
+                    return newHistoryEntry;
+                },
+                _transactionSummary!.StateVersion
+            );
+        }
+    }
+
+    private void HandleResourceSupplyHistoryUpdates()
+    {
+        foreach (var (key, supplyChange) in _resourceChangesAcrossOperationGroup)
+        {
+            if (supplyChange.Minted.IsNaN() || supplyChange.Burned.IsNaN())
+            {
+                throw GenerateDetailedInvalidTransactionException($"Resource supply Minted or Burned delta calculated for resource {key} is NaN");
+            }
+
+            if (supplyChange.Minted.IsZero() && supplyChange.Burned.IsZero())
+            {
+                throw GenerateDetailedInvalidTransactionException($"Calculation gone wrong - resource supply change was tracked, but Minted and Burned delta were both zero for resource {key}");
+            }
+
+            var resourceLookup = _dbActionsPlanner.ResolveResource(key, _transactionSummary!.StateVersion);
+            _dbActionsPlanner.AddNewResourceSupplyHistoryEntry(
+                key,
+                oldHistory =>
+                {
+                    var newHistoryEntry = ResourceSupplyHistory.FromPreviousEntry(resourceLookup(), oldHistory?.ResourceSupply, supplyChange);
+                    if (newHistoryEntry.ResourceSupply.TotalSupply.IsNegative())
+                    {
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalSupply ended up negative: {newHistoryEntry.ResourceSupply.TotalSupply}");
                     }
 
                     return newHistoryEntry;

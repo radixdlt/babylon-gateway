@@ -175,6 +175,28 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "resource_supply_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_supply = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_minted = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_burnt = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_supply_history", x => new { x.resource_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "operation_groups",
                 columns: table => new
                 {
@@ -529,6 +551,13 @@ namespace DataAggregator.Migrations
                 column: "resource_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_resource_supply_history_current_supply",
+                table: "resource_supply_history",
+                column: "resource_id",
+                unique: true,
+                filter: "to_state_version is null");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_resources_rri",
                 table: "resources",
                 column: "rri",
@@ -580,6 +609,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "resource_data_substates");
+
+            migrationBuilder.DropTable(
+                name: "resource_supply_history");
 
             migrationBuilder.DropTable(
                 name: "validator_data_substates");

@@ -73,7 +73,7 @@ namespace Common.Database.Models.Ledger.History;
 public record struct BalanceEntry(TokenAmount Balance);
 
 /// <summary>
-/// UTXOs related to Account Resource Balances.
+/// Tracks Account Resource Balances over time.
 /// </summary>
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
@@ -129,7 +129,7 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
 
     public static Expression<Func<AccountResourceBalanceHistory, bool>> IsCurrent => h => h.ToStateVersion == null;
 
-    public override BalanceEntry GetEntry()
+    public BalanceEntry GetEntry()
     {
         return new BalanceEntry(Balance);
     }

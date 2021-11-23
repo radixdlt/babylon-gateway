@@ -62,42 +62,91 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
+using Common.Database.Models.Ledger.Normalization;
+using Common.Database.Models.Ledger.Substates;
+using Common.Numerics;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 
 namespace Common.Database.Models.Ledger.History;
 
 /// <summary>
-/// A base class for History tracked in the database, with explicit keys and entry types.
-///
-/// The Key and Entry types should together define the type, alongside the FromStateVersion and ToStateVersion fields.
-///
-/// Marking these allows for carefully considering the types to make history creation easier -- and to preempt
-/// static interfaces.
+/// Tracks total supply of a resource over time.
 /// </summary>
-/// <typeparam name="TKey">A record type indicating the grouping key which is used to aggregate history together.</typeparam>
-/// <typeparam name="TEntry">A record type indicating the history entry - these are the items which change over time.</typeparam>
-public abstract class HistoryBase<TKey, TEntry> : HistoryBase
+// OnModelCreating: Indexes defined there.
+// OnModelCreating: Composite primary key is defined there.
+[Table("resource_supply_history")]
+public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply>
 {
+    [Column(name: "resource_id")]
+    public long ResourceId { get; set; }
+
+    [ForeignKey(nameof(ResourceId))]
+    public Resource Resource { get; set; }
+
+    // [Owned] below
+    public ResourceSupply ResourceSupply { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ResourceSupplyHistory"/> class.
+    /// The StateVersions should be set separately.
+    /// </summary>
+    public ResourceSupplyHistory(Resource key, ResourceSupply resourceSupply)
+    {
+        Resource = key;
+        ResourceSupply = resourceSupply;
+    }
+
+    public static ResourceSupplyHistory FromPreviousEntry(
+        Resource key,
+        ResourceSupply? previousSupply,
+        ResourceSupplyChange change
+    )
+    {
+        var prev = previousSupply ?? ResourceSupply.GetDefault();
+        return new ResourceSupplyHistory(key, new ResourceSupply
+        {
+            TotalSupply = prev.TotalSupply + change.Minted - change.Burned,
+            TotalMinted = prev.TotalMinted + change.Minted,
+            TotalBurnt = prev.TotalBurnt + change.Burned,
+        });
+    }
+
+    private ResourceSupplyHistory()
+    {
+    }
+
+    public static Expression<Func<ResourceSupplyHistory, bool>> IsCurrent => h => h.ToStateVersion == null;
 }
 
-/// <summary>
-/// A base class for History tracked in the database. Current state is given by ToStateVersion = null.
-/// </summary>
-public abstract class HistoryBase
+public record struct ResourceSupplyChange(TokenAmount Minted, TokenAmount Burned)
 {
-    /// <summary>
-    /// The first state version where this version of history applied.
-    /// </summary>
-    [Column(name: "from_state_version")]
-    public long FromStateVersion { get; set; }
+    public ResourceSupplyChange Aggregate(TokenAmount change)
+    {
+        return change.IsZero() ? this
+            : change.IsPositive() ? new ResourceSupplyChange(Minted + change, Burned)
+            : new ResourceSupplyChange(Minted, Burned - change);
+    }
+}
 
-    /// <summary>
-    /// The last state version where this version of history applied. This endpoint is inclusive.
-    /// IE there should be a new History with New.FromStateVersion = Prev.ToStateVersion + 1.
-    /// </summary>
-    [Column(name: "to_state_version")]
-    [ConcurrencyCheck] // Ensure that the same history can't be updated by two different state versions somehow
-    public long? ToStateVersion { get; set; }
+[Owned]
+public record ResourceSupply
+{
+    [Column("total_supply")]
+    public TokenAmount TotalSupply { get; set; }
+
+    [Column("total_minted")]
+    public TokenAmount TotalMinted { get; set; }
+
+    [Column("total_burnt")]
+    public TokenAmount TotalBurnt { get; set; }
+
+    public static ResourceSupply GetDefault()
+    {
+        return new ResourceSupply
+        {
+            TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurnt = TokenAmount.Zero,
+        };
+    }
 }
