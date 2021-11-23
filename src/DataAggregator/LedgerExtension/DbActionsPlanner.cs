@@ -199,6 +199,7 @@ public class DbActionsPlanner
         await LoadSubstatesOfType<AccountXrdStakeBalanceSubstate>();
         await LoadSubstatesOfType<ValidatorStakeBalanceSubstate>();
         await LoadSubstatesOfType<ResourceDataSubstate>();
+        await LoadSubstatesOfType<ValidatorDataSubstate>();
         await LoadAccountResourceBalanceHistoryEntries();
     }
 

@@ -352,6 +352,48 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_data_substates",
+                columns: table => new
+                {
+                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
+                    validator_address = table.Column<string>(type: "text", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    effective_epoch = table.Column<long>(type: "bigint", nullable: true),
+                    owner = table.Column<string>(type: "text", nullable: true),
+                    is_registered = table.Column<bool>(type: "boolean", nullable: true),
+                    fee_percentage = table.Column<decimal>(type: "numeric", nullable: true),
+                    name = table.Column<string>(type: "text", nullable: true),
+                    url = table.Column<string>(type: "text", nullable: true),
+                    allow_delegation = table.Column<bool>(type: "boolean", nullable: true),
+                    prepared_is_registered = table.Column<bool>(type: "boolean", nullable: true),
+                    prepared_fee_percentage = table.Column<decimal>(type: "numeric", nullable: true),
+                    prepared_owner = table.Column<string>(type: "text", nullable: true),
+                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
+                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
+                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_data_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_validator_data_substates_substate_identifier", x => x.substate_identifier);
+                    table.ForeignKey(
+                        name: "FK_validator_data_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_validator_data_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_stake_balance_substates",
                 columns: table => new
                 {
@@ -493,6 +535,16 @@ namespace DataAggregator.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_validator_data_substates_down_state_version_down_operation_~",
+                table: "validator_data_substates",
+                columns: new[] { "down_state_version", "down_operation_group_index" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_data_substates_validator_address",
+                table: "validator_data_substates",
+                column: "validator_address");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_stake_balance_substates_down_state_version_down_o~",
                 table: "validator_stake_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
@@ -528,6 +580,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "resource_data_substates");
+
+            migrationBuilder.DropTable(
+                name: "validator_data_substates");
 
             migrationBuilder.DropTable(
                 name: "validator_stake_balance_substates");

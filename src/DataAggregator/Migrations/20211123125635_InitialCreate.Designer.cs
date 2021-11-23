@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211122200129_InitialCreate")]
+    [Migration("20211123125635_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -524,6 +524,63 @@ namespace DataAggregator.Migrations
                     b.ToTable("resource_data_substates");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorDataSubstate", b =>
+                {
+                    b.Property<long>("UpStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("up_state_version");
+
+                    b.Property<int>("UpOperationGroupIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("up_operation_group_index");
+
+                    b.Property<int>("UpOperationIndexInGroup")
+                        .HasColumnType("integer")
+                        .HasColumnName("up_operation_index_in_group");
+
+                    b.Property<int?>("DownOperationGroupIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("down_operation_group_index");
+
+                    b.Property<int?>("DownOperationIndexInGroup")
+                        .HasColumnType("integer")
+                        .HasColumnName("down_operation_index_in_group");
+
+                    b.Property<long?>("DownStateVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("down_state_version");
+
+                    b.Property<long?>("EffectiveEpoch")
+                        .HasColumnType("bigint")
+                        .HasColumnName("effective_epoch");
+
+                    b.Property<byte[]>("SubstateIdentifier")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("substate_identifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.Property<string>("ValidatorAddress")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("validator_address");
+
+                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
+
+                    b.HasAlternateKey("SubstateIdentifier");
+
+                    b.HasIndex("ValidatorAddress");
+
+                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
+
+                    b.ToTable("validator_data_substates");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorStakeBalanceSubstate", b =>
                 {
                     b.Property<long>("UpStateVersion")
@@ -800,6 +857,192 @@ namespace DataAggregator.Migrations
                     b.Navigation("Resource");
 
                     b.Navigation("UpOperationGroup");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorDataSubstate", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
+                        .WithMany()
+                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_validator_data_substate_down_operation_group");
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
+                        .WithMany()
+                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_validator_data_substate_up_operation_group");
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.PreparedValidatorFee", "PreparedValidatorFee", b1 =>
+                        {
+                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<decimal>("PreparedFeePercentage")
+                                .HasColumnType("numeric")
+                                .HasColumnName("prepared_fee_percentage");
+
+                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("validator_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+                        });
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.PreparedValidatorOwner", "PreparedValidatorOwner", b1 =>
+                        {
+                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("PreparedOwner")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("prepared_owner");
+
+                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("validator_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+                        });
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.PreparedValidatorRegistered", "PreparedValidatorRegistered", b1 =>
+                        {
+                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<bool>("PreparedIsRegistered")
+                                .HasColumnType("boolean")
+                                .HasColumnName("prepared_is_registered");
+
+                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("validator_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+                        });
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorAllowDelegation", "ValidatorAllowDelegation", b1 =>
+                        {
+                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<bool>("AllowDelegation")
+                                .HasColumnType("boolean")
+                                .HasColumnName("allow_delegation");
+
+                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("validator_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+                        });
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorData", "ValidatorData", b1 =>
+                        {
+                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<decimal>("FeePercentage")
+                                .HasColumnType("numeric")
+                                .HasColumnName("fee_percentage");
+
+                            b1.Property<bool>("IsRegistered")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_registered");
+
+                            b1.Property<string>("Owner")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("owner");
+
+                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("validator_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+                        });
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorMetadata", "ValidatorMetaData", b1 =>
+                        {
+                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("name");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("url");
+
+                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("validator_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
+                        });
+
+                    b.Navigation("DownOperationGroup");
+
+                    b.Navigation("PreparedValidatorFee");
+
+                    b.Navigation("PreparedValidatorOwner");
+
+                    b.Navigation("PreparedValidatorRegistered");
+
+                    b.Navigation("UpOperationGroup");
+
+                    b.Navigation("ValidatorAllowDelegation");
+
+                    b.Navigation("ValidatorData");
+
+                    b.Navigation("ValidatorMetaData");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorStakeBalanceSubstate", b =>

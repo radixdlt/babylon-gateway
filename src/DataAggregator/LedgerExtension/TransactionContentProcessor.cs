@@ -72,6 +72,7 @@ using DataAggregator.Exceptions;
 using DataAggregator.Extensions;
 using DataAggregator.GlobalServices;
 using RadixCoreApi.GeneratedClient.Model;
+using Api = RadixCoreApi.GeneratedClient.Model;
 
 namespace DataAggregator.LedgerExtension;
 
@@ -372,6 +373,24 @@ public class TransactionContentProcessor
             case TokenMetadata tokenMetadata:
                 HandleResourceDataOperation(null, tokenMetadata);
                 return;
+            case Api.ValidatorData validatorData:
+                HandleValidatorDataOperation(new ValidatorDataObjects { ValidatorData = validatorData });
+                return;
+            case Api.ValidatorMetadata validatorMetadata:
+                HandleValidatorDataOperation(new ValidatorDataObjects { ValidatorMetadata = validatorMetadata });
+                return;
+            case Api.ValidatorAllowDelegation validatorAllowDelegation:
+                HandleValidatorDataOperation(new ValidatorDataObjects { ValidatorAllowDelegation = validatorAllowDelegation });
+                return;
+            case Api.PreparedValidatorRegistered preparedValidatorRegistered:
+                HandleValidatorDataOperation(new ValidatorDataObjects { PreparedValidatorRegistered = preparedValidatorRegistered });
+                return;
+            case Api.PreparedValidatorFee preparedValidatorFee:
+                HandleValidatorDataOperation(new ValidatorDataObjects { PreparedValidatorFee = preparedValidatorFee });
+                return;
+            case Api.PreparedValidatorOwner preparedValidatorOwner:
+                HandleValidatorDataOperation(new ValidatorDataObjects { PreparedValidatorOwner = preparedValidatorOwner });
+                return;
             default:
                 // TODO:NG-24 - handle other cases
                 return;
@@ -419,8 +438,20 @@ public class TransactionContentProcessor
                 && existingSubstate.IconUrl == tokenMetadata?.IconUrl
             )
         );
+    }
 
-        // No history yet...
+    private void HandleValidatorDataOperation(ValidatorDataObjects objects)
+    {
+        if (_entity!.EntityType != EntityType.Validator && _entity!.EntityType != EntityType.Validator_System)
+        {
+            throw GenerateDetailedInvalidTransactionException("Validator data update not against validator or validator__system entity");
+        }
+
+        var validator = _entity.ValidatorAddress!;
+        HandleSubstateUpOrDown(
+            () => objects.ToDbValidatorData(validator),
+            existingSubstate => existingSubstate.SubstateMatches(objects.ToDbValidatorData(validator))
+        );
     }
 
     private void HandleHistoryUpdates()
