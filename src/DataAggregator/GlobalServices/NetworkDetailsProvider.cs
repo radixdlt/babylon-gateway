@@ -67,7 +67,7 @@ using RadixCoreApi.GeneratedClient.Model;
 
 namespace DataAggregator.GlobalServices;
 
-public record NetworkDetails(string NetworkName, AddressHrps AddressHrps);
+public record NetworkDetails(string NetworkName, AddressHrps AddressHrps, string XrdAddress);
 
 public interface INetworkDetailsProvider
 {

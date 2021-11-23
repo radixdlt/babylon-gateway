@@ -88,7 +88,7 @@ public class TransactionContentProcessor
 
     /* History */
     private readonly Dictionary<AccountResourceDenormalized, TokenAmount> _accountResourceNetBalanceChanges = new();
-    private readonly Dictionary<string, ResourceSupplyChange> _resourceChangesAcrossOperationGroup = new();
+    private readonly Dictionary<string, ResourceSupplyChange> _nonXrdResourceChangesAcrossOperationGroups = new();
 
     /* Mutable Class State */
     /* > These simply help us avoid passing tons of references down the call stack.
@@ -97,7 +97,8 @@ public class TransactionContentProcessor
     private CommittedTransaction? _transaction;
     private LedgerOperationGroup? _dbOperationGroup;
     private OperationGroup? _transactionOperationGroup;
-    private Dictionary<string, TokenAmount> _resourceChangeThisOperationGroupByRri = new();
+    private TokenAmount _xrdResourceSupplyChange;
+    private Dictionary<string, TokenAmount> _nonXrdResourceChangeThisOperationGroupByRri = new();
     private int _operationGroupIndex = -1;
     private Operation? _operation;
     private int _operationIndexInGroup = -1;
@@ -157,7 +158,7 @@ public class TransactionContentProcessor
                 _operation = null;
             }
 
-            TrackResourceSupplyChangesAcrossOperationGroup();
+            TrackNonXrdResourceSupplyChangesAcrossOperationGroup();
         }
 
         _dbOperationGroup = null;
@@ -232,8 +233,20 @@ public class TransactionContentProcessor
                 );
         }
 
-        var prevSupplyChange = _resourceChangeThisOperationGroupByRri.GetValueOrDefault(rri);
-        _resourceChangeThisOperationGroupByRri[rri] = prevSupplyChange + _amount!.Value;
+        /* When tracking "totalMinted" and "totalBurned", we have to track slightly differently for XRD and other tokens.
+         * For XRD, we sum up all operationGroups in a transaction, but for other tokens, we sum up per operationGroup.
+         * This is because XRD fees can contain an initial "burn" and then a "mint" at the end of the transaction,
+         * to get back unused gas. But these should be viewed as just a single "burn".
+         * */
+        if (_entityDeterminer.IsXrd(rri))
+        {
+            _xrdResourceSupplyChange += _amount!.Value;
+        }
+        else
+        {
+            var prevSupplyChange = _nonXrdResourceChangeThisOperationGroupByRri.GetValueOrDefault(rri);
+            _nonXrdResourceChangeThisOperationGroupByRri[rri] = prevSupplyChange + _amount!.Value;
+        }
     }
 
     private void HandleStakeOwnershipAmountOperation(StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier)
@@ -463,21 +476,21 @@ public class TransactionContentProcessor
         );
     }
 
-    private void TrackResourceSupplyChangesAcrossOperationGroup()
+    private void TrackNonXrdResourceSupplyChangesAcrossOperationGroup()
     {
-        foreach (var (rri, change) in _resourceChangeThisOperationGroupByRri)
+        foreach (var (rri, change) in _nonXrdResourceChangeThisOperationGroupByRri)
         {
             if (change.IsZero())
             {
                 continue;
             }
 
-            var prevOrDefault = _resourceChangesAcrossOperationGroup.GetValueOrDefault(rri);
-            _resourceChangesAcrossOperationGroup[rri] = prevOrDefault.Aggregate(change);
+            var prevOrDefault = _nonXrdResourceChangesAcrossOperationGroups.GetValueOrDefault(rri);
+            _nonXrdResourceChangesAcrossOperationGroups[rri] = prevOrDefault.Aggregate(change);
         }
 
         // Prepare for next operation group
-        _resourceChangeThisOperationGroupByRri = new Dictionary<string, TokenAmount>();
+        _nonXrdResourceChangeThisOperationGroupByRri = new Dictionary<string, TokenAmount>();
     }
 
     private void HandleHistoryUpdates()
@@ -519,7 +532,15 @@ public class TransactionContentProcessor
 
     private void HandleResourceSupplyHistoryUpdates()
     {
-        foreach (var (key, supplyChange) in _resourceChangesAcrossOperationGroup)
+        var totalResourceChanges = _xrdResourceSupplyChange.IsZero()
+            ? _nonXrdResourceChangesAcrossOperationGroups
+            : _nonXrdResourceChangesAcrossOperationGroups.Concat(new KeyValuePair<string, ResourceSupplyChange>[]
+                {
+                    new(_entityDeterminer.GetXrdAddress(), ResourceSupplyChange.From(_xrdResourceSupplyChange)),
+                }
+            );
+
+        foreach (var (key, supplyChange) in totalResourceChanges)
         {
             if (supplyChange.Minted.IsNaN() || supplyChange.Burned.IsNaN())
             {

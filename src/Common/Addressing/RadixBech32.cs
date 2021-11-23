@@ -72,7 +72,15 @@ public record RadixBech32Data(string Hrp, byte[] AddressData, Bech32.Variant Var
 
 public static class RadixBech32
 {
-    public static string Encode(string hrp, byte[] addressData, Bech32.Variant variant)
+    public const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32;
+    public static readonly byte[] XrdRadixEngineAddress = { 1 };
+
+    public static string GenerateXrdAddress(string resourceHrpSuffix, Bech32.Variant variant = DefaultVariant)
+    {
+        return Encode($"xrd{resourceHrpSuffix}", XrdRadixEngineAddress, variant);
+    }
+
+    public static string Encode(string hrp, byte[] addressData, Bech32.Variant variant = DefaultVariant)
     {
         return Bech32.EncodeFromRawData(hrp, EncodeAddressDataInBase32(addressData), variant);
     }

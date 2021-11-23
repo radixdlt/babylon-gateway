@@ -109,7 +109,8 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
         var hrps = networkConfiguration.Bech32HumanReadableParts;
         return new NetworkDetails(
             networkConfiguration.NetworkIdentifier.Network,
-            new AddressHrps(hrps.AccountHrp, hrps.ResourceHrpSuffix, hrps.ValidatorHrp, hrps.NodeHrp)
+            new AddressHrps(hrps.AccountHrp, hrps.ResourceHrpSuffix, hrps.ValidatorHrp, hrps.NodeHrp),
+            RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix)
         );
     }
 

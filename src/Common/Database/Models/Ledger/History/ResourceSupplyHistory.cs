@@ -128,6 +128,11 @@ public record struct ResourceSupplyChange(TokenAmount Minted, TokenAmount Burned
             : change.IsPositive() ? new ResourceSupplyChange(Minted + change, Burned)
             : new ResourceSupplyChange(Minted, Burned - change);
     }
+
+    public static ResourceSupplyChange From(TokenAmount change)
+    {
+        return default(ResourceSupplyChange).Aggregate(change);
+    }
 }
 
 [Owned]

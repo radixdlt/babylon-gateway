@@ -63,7 +63,6 @@
  */
 
 using Common.Addressing;
-using Common.Extensions;
 using RadixCoreApi.GeneratedClient.Model;
 using System.Diagnostics.CodeAnalysis;
 
@@ -101,8 +100,6 @@ public interface IEntityDeterminer
 
 public class EntityDeterminer : IEntityDeterminer
 {
-    private static readonly byte[] _xrdRadixEngineAddress = { 1 };
-
     private readonly ILogger<EntityDeterminer> _logger;
     private readonly INetworkDetailsProvider _networkDetailsProvider;
 
@@ -171,30 +168,11 @@ public class EntityDeterminer : IEntityDeterminer
 
     public bool IsXrd(string rri)
     {
-        // ReSharper disable once InvertIf - it's clearer to clear out failure cases first
-        if (!RadixAddressParser.TryParse(
-                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
-                rri,
-                out var primaryEntityRadixAddress,
-                out var errorMessage
-            ))
-        {
-            _logger.LogWarning(
-                "Presumed rri [{Address}] didn't parse correctly: {ErrorMessage}",
-                rri,
-                errorMessage
-            );
-            return false;
-        }
-
-        return
-            primaryEntityRadixAddress.Type == RadixAddressType.Resource
-            && primaryEntityRadixAddress.AddressData.BytesAreEqual(_xrdRadixEngineAddress);
+        return rri == GetXrdAddress();
     }
 
     public string GetXrdAddress()
     {
-        var hrp = $"xrd{_networkDetailsProvider.GetNetworkDetails().AddressHrps.ResourceHrpSuffix}";
-        return RadixBech32.Encode(hrp, _xrdRadixEngineAddress, Bech32.Variant.Bech32);
+        return _networkDetailsProvider.GetNetworkDetails().XrdAddress;
     }
 }
