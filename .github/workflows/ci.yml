@@ -64,6 +64,9 @@ jobs:
                     exit 1
                 ;;
             esac
+
+            echo "$TAGS"
+            echo "TAGS=$TAGS" >> $GITHUB_ENV
              
       - name: Docker build and push
         uses: docker/build-push-action@v2
