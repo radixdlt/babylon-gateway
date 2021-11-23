@@ -58,9 +58,11 @@ jobs:
                 pull_request | push)
                     docker_tag_with_branch
                     TAGS="${DOCKER_REPO}:${DOCKER_TAG}"
+                ;;
                 *)
                     echo "${GH_EVENT_NAME} not implemented yet"
                     exit 1
+                ;;
             esac
              
       - name: Docker build and push
