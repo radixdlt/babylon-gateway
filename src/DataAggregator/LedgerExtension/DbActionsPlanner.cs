@@ -102,12 +102,24 @@ public class DbActionsPlanner
     private readonly AggregatorDbContext _dbContext;
     private readonly CancellationToken _cancellationToken;
 
+    /** Things to load in the LoadDependencies step **/
     private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new(); // The long is the first state version at which it appears
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
     private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
     private readonly HashSet<string> _resourceSupplyHistoryToLoadByRri = new();
     private readonly HashSet<string> _validatorSupplyHistoryToLoadByValidatorAddress = new();
+
+    /** Actions which will be performed in order in the ProcessActions step **/
     private readonly List<Action> _dbActions = new();
+
+    /** Local DB Context indexes **/
+    /* Initially I used DbSet<X>.Local, but it's too slow as it's unindexed - so store our own local indexes.
+     * These should be null until they're created in the LoadDependencies step. */
+    private readonly Dictionary<Type, Dictionary<byte[], SubstateBase>?> _localSubstates = new();
+    private Dictionary<string, Resource>? _resourceLookupByRri;
+    private Dictionary<AccountResourceIds, AccountResourceBalanceHistory>? _latestAccountResourceHistory;
+    private Dictionary<long, ResourceSupplyHistory>? _latestResourceSupplyHistoryByResourceId;
+    private Dictionary<string, ValidatorStakeHistory>? _latestValidatorStakeHistoryByValidatorAddress;
 
     public DbActionsPlanner(AggregatorDbContext dbContext, CancellationToken cancellationToken)
     {
@@ -155,9 +167,8 @@ public class DbActionsPlanner
     {
         _accountResourceHistoryToLoad.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            h =>
-                h.AccountAddress == historyKey.AccountAddress
-                && h.Resource == GetResource(historyKey.Rri),
+            new AccountResourceIds(historyKey.AccountAddress, GetResource(historyKey.Rri).Id),
+            _latestAccountResourceHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
@@ -176,7 +187,8 @@ public class DbActionsPlanner
     {
         _resourceSupplyHistoryToLoadByRri.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            h => h.Resource == GetResource(historyKey),
+            GetResource(historyKey).Id,
+            _latestResourceSupplyHistoryByResourceId!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
@@ -195,7 +207,8 @@ public class DbActionsPlanner
     {
         _validatorSupplyHistoryToLoadByValidatorAddress.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            h => h.ValidatorAddress == historyKey,
+            historyKey,
+            _latestValidatorStakeHistoryByValidatorAddress!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
@@ -221,7 +234,7 @@ public class DbActionsPlanner
     }
 
     /// <summary>
-    /// This can only be called from the action phase.
+    /// This can only be called from the action phase (else it throws a null-ref).
     /// A call to this must have been pre-empted by a call to EnsureResourceLoaded in the dependencies phase.
     /// If this method throws, this is because the EnsureResourceLoaded call was forgotten.
     ///
@@ -230,7 +243,7 @@ public class DbActionsPlanner
     /// </summary>
     private Resource GetResource(string resourceIdentifier)
     {
-        return _dbContext.Set<Resource>().Local.Single(r => r.ResourceIdentifier == resourceIdentifier);
+        return _resourceLookupByRri![resourceIdentifier];
     }
 
     private void EnsureResourceLoaded(string resourceIdentifier, long seenAtStateVersion)
@@ -257,7 +270,10 @@ public class DbActionsPlanner
 
     private void RunActions()
     {
-        _dbActions.ForEach(action => action());
+        foreach (var action in _dbActions)
+        {
+            action();
+        }
     }
 
     private void MarkSubstateToLoadIfExists<TSubstate>(byte[] identifier)
@@ -277,15 +293,15 @@ public class DbActionsPlanner
         where TSubstate : SubstateBase
     {
         var substates = _dbContext.Set<TSubstate>();
+        var localSubstatesOfType = _localSubstates[typeof(TSubstate)]!;
 
         // Could rely on the database to check this constraint at commit time, but this gives us a clearer error
-        var existingSubstate = substates.Local
-            .SingleOrDefault(s => s.SubstateIdentifier.BytesAreEqual(identifier));
+        var existingSubstate = localSubstatesOfType.GetValueOrDefault(identifier);
         if (existingSubstate != null)
         {
             throw new InvalidTransactionException(
                 transactionOpLocator,
-                $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} can't be upped, as a substate with that identifier already already exists in the database"
+                $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} can't be upped, as a substate of type {existingSubstate.GetType().Name} with that identifier already already exists in the database"
             );
         }
 
@@ -296,6 +312,7 @@ public class DbActionsPlanner
         newSubstate.UpOperationIndexInGroup = upOperationIndexInGroup;
 
         substates.Add(newSubstate);
+        localSubstatesOfType.Add(identifier, newSubstate);
     }
 
     private void DownSubstateFutureAction<TSubstate>(
@@ -309,9 +326,10 @@ public class DbActionsPlanner
         where TSubstate : SubstateBase
     {
         var substates = _dbContext.Set<TSubstate>();
-        var substate = substates.Local
-            .SingleOrDefault(s => s.SubstateIdentifier.BytesAreEqual(identifier));
-        if (substate == null)
+        var localSubstatesOfType = _localSubstates[typeof(TSubstate)]!;
+
+        var untypedSubstate = localSubstatesOfType.GetValueOrDefault(identifier);
+        if (untypedSubstate == null)
         {
             if (!SubstateBase.IsVirtualIdentifier(identifier))
             {
@@ -329,7 +347,16 @@ public class DbActionsPlanner
             newSubstate.DownOperationGroup = downOperationGroup;
             newSubstate.DownOperationIndexInGroup = downOperationIndexInGroup;
             substates.Add(newSubstate);
+            localSubstatesOfType.Add(identifier, newSubstate);
             return;
+        }
+
+        if (untypedSubstate is not TSubstate substate)
+        {
+            throw new InvalidTransactionException(
+                transactionOpLocator,
+                $"{typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as a substate of type {untypedSubstate.GetType().Name} was found with that identifier."
+            );
         }
 
         if (substate.State == SubstateState.Down)
@@ -352,23 +379,24 @@ public class DbActionsPlanner
         substate.DownOperationIndexInGroup = downOperationIndexInGroup;
     }
 
-    private void AddNewHistoryEntryFutureAction<THistory>(
-        Func<THistory, bool> historySelector,
+    private void AddNewHistoryEntryFutureAction<THistoryKey, THistory>(
+        THistoryKey historyKey,
+        Dictionary<THistoryKey, THistory> latestHistoryLookup,
         Func<THistory?, THistory> createNewHistoryFromPrevious,
         long transactionStateVersion
     )
         where THistory : HistoryBase
+        where THistoryKey : notnull
     {
         var historyEntries = _dbContext.Set<THistory>();
-        var existingHistoryItem = historyEntries.Local
-            .Where(historySelector)
-            .FirstOrDefault(h => h.ToStateVersion == null);
+        var existingHistoryItem = latestHistoryLookup.GetValueOrDefault(historyKey);
 
         if (existingHistoryItem == null)
         {
             var newHistoryItem = createNewHistoryFromPrevious(null);
             newHistoryItem.FromStateVersion = transactionStateVersion;
             historyEntries.Add(newHistoryItem);
+            latestHistoryLookup[historyKey] = newHistoryItem;
         }
         else
         {
@@ -376,6 +404,7 @@ public class DbActionsPlanner
             existingHistoryItem.ToStateVersion = transactionStateVersion - 1;
             newHistoryItem.FromStateVersion = transactionStateVersion;
             historyEntries.Add(newHistoryItem);
+            latestHistoryLookup[historyKey] = newHistoryItem;
         }
     }
 
@@ -386,26 +415,27 @@ public class DbActionsPlanner
             return;
         }
 
-        var rrisToLoadOrCreate = _resourcesToLoadOrCreate.Keys.ToHashSet();
-
-        var existingResources = await _dbContext.Set<Resource>()
-            .Where(r => rrisToLoadOrCreate.Contains(r.ResourceIdentifier))
-            .ToListAsync(_cancellationToken);
-
-        rrisToLoadOrCreate.ExceptWith(existingResources
-            .Select(r => r.ResourceIdentifier)
-        );
-
-        _dbContext.Set<Resource>()
-            .AddRange(
-                rrisToLoadOrCreate
-                .Select(rri => new Resource
-                    {
-                        ResourceIdentifier = rri,
-                        FromStateVersion = _resourcesToLoadOrCreate[rri],
-                    }
-                )
+        _resourceLookupByRri = await _dbContext.Set<Resource>()
+            .Where(r => _resourcesToLoadOrCreate.Keys.Contains(r.ResourceIdentifier))
+            .ToDictionaryAsync(
+                resource => resource.ResourceIdentifier,
+                _cancellationToken
             );
+
+        foreach (var (rri, fromStateVersion) in _resourcesToLoadOrCreate)
+        {
+            if (_resourceLookupByRri.ContainsKey(rri))
+            {
+                continue;
+            }
+
+            var resource = new Resource
+            {
+                ResourceIdentifier = rri, FromStateVersion = fromStateVersion,
+            };
+            _dbContext.Set<Resource>().Add(resource);
+            _resourceLookupByRri.Add(rri, resource);
+        }
     }
 
     private async Task LoadSubstatesOfType<TSubstate>()
@@ -417,9 +447,16 @@ public class DbActionsPlanner
         }
 
         // TODO:NG-49 - If we hit limits - instead of doing a large "IN", we could consider using a Temporary Table for these loads
-        await _dbContext.Set<TSubstate>()
+        var substates = await _dbContext.Set<TSubstate>()
             .Where(s => identifiersToLoad.Contains(s.SubstateIdentifier))
-            .LoadAsync(_cancellationToken);
+            .ToListAsync(_cancellationToken);
+
+        var theseLocalSubstates = new Dictionary<byte[], SubstateBase>(ByteArrayEqualityComparer.Default);
+        _localSubstates.Add(typeof(TSubstate), theseLocalSubstates);
+        foreach (var substate in substates)
+        {
+            theseLocalSubstates.Add(substate.SubstateIdentifier, substate);
+        }
     }
 
     private async Task LoadAccountResourceBalanceHistoryEntries()
@@ -429,13 +466,16 @@ public class DbActionsPlanner
             return;
         }
 
-        await _dbContext.Set<AccountResourceBalanceHistory>()
+        _latestAccountResourceHistory = await _dbContext.Set<AccountResourceBalanceHistory>()
             .FromSqlRawWithDimensionalIn(
                 "SELECT * FROM account_resource_balance_history WHERE to_state_version IS NULL AND (account_address, resource_id)",
                 _accountResourceHistoryToLoad,
                 ar => new object[] { ar.AccountAddress, GetResource(ar.Rri).Id }
             )
-            .LoadAsync(_cancellationToken);
+            .ToDictionaryAsync(
+                ar => new AccountResourceIds(ar.AccountAddress, ar.ResourceId),
+                _cancellationToken
+            );
     }
 
     private async Task LoadResourceSupplyHistoryEntries()
@@ -447,9 +487,12 @@ public class DbActionsPlanner
 
         var resourceIds = _resourceSupplyHistoryToLoadByRri.Select(rri => GetResource(rri).Id);
 
-        await _dbContext.Set<ResourceSupplyHistory>()
+        _latestResourceSupplyHistoryByResourceId = await _dbContext.Set<ResourceSupplyHistory>()
             .Where(h => resourceIds.Contains(h.ResourceId) && h.ToStateVersion == null)
-            .LoadAsync(_cancellationToken);
+            .ToDictionaryAsync(
+                h => h.ResourceId,
+                _cancellationToken
+            );
     }
 
     private async Task LoadValidatorStakeHistoryEntries()
@@ -459,8 +502,11 @@ public class DbActionsPlanner
             return;
         }
 
-        await _dbContext.Set<ValidatorStakeHistory>()
+        _latestValidatorStakeHistoryByValidatorAddress = await _dbContext.Set<ValidatorStakeHistory>()
             .Where(h => _validatorSupplyHistoryToLoadByValidatorAddress.Contains(h.ValidatorAddress) && h.ToStateVersion == null)
-            .LoadAsync(_cancellationToken);
+            .ToDictionaryAsync(
+                h => h.ValidatorAddress,
+                _cancellationToken
+            );
     }
 }

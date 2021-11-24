@@ -79,9 +79,7 @@ public record CommitLedgerTransactionsReport(
     long TransactionContentHandlingMs,
     long DbDependenciesLoadingMs,
     int TransactionContentDbActionsCount,
-    long LocalDbContextActionsMs,
-    long DbPersistanceMs,
-    int DbEntriesWritten
+    long LocalDbContextActionsMs
 );
 
 /// <summary>
@@ -114,18 +112,12 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
 
         var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
 
-        var (entriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
-            () => _dbContext.SaveChangesAsync(_cancellationToken)
-        );
-
         return new CommitLedgerTransactionsReport(
             finalTransactionSummary,
             transactionContentProcessingMs,
             dbActionsReport.DbDependenciesLoadingMs,
             dbActionsReport.ActionsCount,
-            dbActionsReport.LocalDbContextActionsMs,
-            dbPersistenceMs,
-            entriesWritten
+            dbActionsReport.LocalDbContextActionsMs
         );
     }
 

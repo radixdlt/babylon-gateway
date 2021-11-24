@@ -70,6 +70,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Common.Database.Models.Ledger.Substates;
 
 public record struct AccountResourceDenormalized(string AccountAddress, string Rri);
+public record struct AccountResourceIds(string AccountAddress, long ResourceId);
 public record struct AccountResource(string AccountAddress, Resource Resource);
 
 /// <summary>

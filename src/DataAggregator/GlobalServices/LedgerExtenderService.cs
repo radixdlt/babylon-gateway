@@ -78,6 +78,12 @@ public interface ILedgerExtenderService
     Task<long> GetTopOfLedgerStateVersion(CancellationToken token);
 }
 
+public record PreparationForLedgerExtensionReport(
+    TransactionSummary ParentSummary,
+    long RawTxnPersistenceMs,
+    int RawTxnUpsertTouchedRecords
+);
+
 public record CommitTransactionsReport(
     TransactionSummary FinalTransaction,
     long RawTxnPersistenceMs,
@@ -118,10 +124,45 @@ public class LedgerExtenderService : ILedgerExtenderService
 
     public async Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
     {
-        // Create own context for this unit of work.
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        // Create own context for the preparation unit of work.
+        await using var prepartionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        // Check top of ledger
+        var preparationReport = await PrepareForLedgerExtension(prepartionDbContext, parentStateIdentifier, transactions, token);
+
+        var prepartionEntriesTouched = await prepartionDbContext.SaveChangesAsync(token);
+
+        // Create own context for ledger extension unit of work
+        await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
+        var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, ledgerExtensionDbContext, token)
+            .CommitTransactions(preparationReport.ParentSummary, transactions);
+
+        var (ledgerExtensionEntriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
+            () => ledgerExtensionDbContext.SaveChangesAsync(token)
+        );
+
+        return new CommitTransactionsReport(
+            bulkTransactionCommitReport.FinalTransaction,
+            preparationReport.RawTxnPersistenceMs,
+            bulkTransactionCommitReport.TransactionContentHandlingMs,
+            bulkTransactionCommitReport.DbDependenciesLoadingMs,
+            bulkTransactionCommitReport.TransactionContentDbActionsCount,
+            bulkTransactionCommitReport.LocalDbContextActionsMs,
+            dbPersistenceMs,
+            preparationReport.RawTxnUpsertTouchedRecords + prepartionEntriesTouched + ledgerExtensionEntriesWritten
+        );
+    }
+
+    /// <summary>
+    ///  This should be idempotent - ie can be repeated if the main commit task fails.
+    /// </summary>
+    private async Task<PreparationForLedgerExtensionReport> PrepareForLedgerExtension(
+        AggregatorDbContext dbContext,
+        StateIdentifier parentStateIdentifier,
+        List<CommittedTransaction> transactions,
+        CancellationToken token
+    )
+    {
         var parentSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
         TransactionConsistency.AssertEqualParentIdentifiers(parentStateIdentifier, parentSummary);
 
@@ -138,18 +179,10 @@ public class LedgerExtenderService : ILedgerExtenderService
             )
         );
 
-        var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
-            .CommitTransactions(parentSummary, transactions);
-
-        return new CommitTransactionsReport(
-            bulkTransactionCommitReport.FinalTransaction,
+        return new PreparationForLedgerExtensionReport(
+            parentSummary,
             rawTransactionCommitMs,
-            bulkTransactionCommitReport.TransactionContentHandlingMs,
-            bulkTransactionCommitReport.DbDependenciesLoadingMs,
-            bulkTransactionCommitReport.TransactionContentDbActionsCount,
-            bulkTransactionCommitReport.LocalDbContextActionsMs,
-            bulkTransactionCommitReport.DbPersistanceMs,
-            rawTransactionsTouched + bulkTransactionCommitReport.DbEntriesWritten
+            rawTransactionsTouched
         );
     }
 

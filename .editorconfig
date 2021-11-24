@@ -281,6 +281,7 @@ dotnet_diagnostic.SX1101.severity = warning
 dotnet_diagnostic.SX1309.severity = warning
 
 # [Resharper] - see https://www.jetbrains.com/help/rider/EditorConfig_Index.html
+resharper_inconsistent_naming_highlighting = none # Resharper disagrees with IDE1006 for public static fields
 
 # None
 

@@ -62,30 +62,51 @@
  * permissions under this License.
  */
 
-using Common.Database.Models;
-using DataAggregator.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+namespace Common.Utilities;
 
-namespace DataAggregator.GlobalServices;
-
-public interface IRawTransactionWriter
+public sealed class ByteArrayEqualityComparer : IEqualityComparer<byte[]>
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token);
-}
+    public static readonly ByteArrayEqualityComparer Default = new();
 
-public class RawTransactionWriter : IRawTransactionWriter
-{
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token)
+    public bool Equals(byte[]? first, byte[]? second)
     {
-        // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        return await context.RawTransactions
-            .UpsertRange(rawTransactions)
-            .WhenMatched((existingTransaction, newTransaction) => new RawTransaction
+        if (first == second)
+        {
+            return true;
+        }
+
+        if (first == null || second == null)
+        {
+            return false;
+        }
+
+        if (first.Length != second.Length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < first.Length; i++)
+        {
+            if (first[i] != second[i])
             {
-                TransactionIdentifierHash = newTransaction.TransactionIdentifierHash,
-                SubmittedTimestamp = newTransaction.SubmittedTimestamp ?? existingTransaction.SubmittedTimestamp,
-                Payload = newTransaction.Payload ?? existingTransaction.Payload,
-            })
-            .RunAsync(token);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public int GetHashCode(byte[] array)
+    {
+        unchecked
+        {
+            int hash = 17;
+            foreach (byte element in array)
+            {
+                hash = (hash * 31) + element; // byte.GetHashCode() = byte
+            }
+
+            return hash;
+        }
     }
 }
