@@ -94,7 +94,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         ITransactionLogReader transactionLogReader,
         ILedgerExtenderService ledgerExtenderService
     )
-        : base(logger, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10))
+        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _transactionLogReader = transactionLogReader;
@@ -115,7 +115,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         );
 
         _logger.LogInformation(
-            "Last commit at top of DB ledger is at resultant state version {StateVersion} (fetched in {ReadTopOfLedgerMs}ms)",
+            "Top of DB ledger is at state version {StateVersion} (read in {ReadTopOfLedgerMs}ms)",
             topOfLedgerStateVersion,
             readTopOfLedgerMs
         );
@@ -134,7 +134,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         );
 
         _logger.LogInformation(
-            "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms ({DbEntriesWritten} entries touched from raw txns, ledger txns and as a result of {TransactionContentDbActionsCount} txn content actions)",
+            "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
             TransactionsToPull,
             totalCommitTransactionsMs,
             commitedTransactionReport.DbEntriesWritten,
@@ -151,7 +151,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         var commitedTransactionSummary = commitedTransactionReport.FinalTransaction;
         _logger.LogInformation(
-            "Ledger is up to StateVersion={LedgerStateVersion}, Epoch={LedgerEpoch}, IndexInEpoch={LedgerIndexInEpoch}, Timestamp={LedgerTimestamp}",
+            "[NewDbLedgerTip: StateVersion={LedgerStateVersion},Epoch={LedgerEpoch},IndexInEpoch={LedgerIndexInEpoch},Timestamp={LedgerTimestamp}]",
             commitedTransactionSummary.StateVersion,
             commitedTransactionSummary.Epoch,
             commitedTransactionSummary.IndexInEpoch,
@@ -199,6 +199,12 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         CancellationToken stoppingToken
     )
     {
+        _logger.LogInformation(
+            "Fetching {TransactionCount} transactions from version {FromStateVersion} from the core api",
+            transactionsToPull,
+            topOfLedgerStateVersion
+        );
+
         var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
             () => _transactionLogReader.GetTransactions(topOfLedgerStateVersion, transactionsToPull, stoppingToken)
         );

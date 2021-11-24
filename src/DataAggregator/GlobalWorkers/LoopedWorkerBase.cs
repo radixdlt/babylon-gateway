@@ -63,6 +63,7 @@
  */
 
 using Common.Utilities;
+using System.Diagnostics;
 
 namespace DataAggregator.GlobalWorkers;
 
@@ -74,12 +75,14 @@ public abstract class LoopedWorkerBase : BackgroundService
     private readonly ILogger _logger;
     private readonly LogLimiter _stillRunningLogLimiter;
     private readonly TimeSpan _minDelayBetweenLoops;
+    private readonly TimeSpan _minDelayAfterErrorLoop;
 
     // ReSharper disable once ContextualLoggerProblem
-    public LoopedWorkerBase(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenInfoLogs)
+    public LoopedWorkerBase(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayAfterErrorLoop, TimeSpan minDelayBetweenInfoLogs)
     {
         _logger = logger;
         _minDelayBetweenLoops = minDelayBetweenLoops;
+        _minDelayAfterErrorLoop = minDelayAfterErrorLoop;
         _stillRunningLogLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
     }
 
@@ -89,10 +92,15 @@ public abstract class LoopedWorkerBase : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var minDelayBetweenLoops = Task.Delay(_minDelayBetweenLoops, stoppingToken);
+            var loopIterationStopwatch = Stopwatch.StartNew();
             try
             {
                 await ExecuteLoopIteration(stoppingToken);
+                var remainingTime = _minDelayBetweenLoops - loopIterationStopwatch.Elapsed;
+                if (remainingTime > TimeSpan.Zero)
+                {
+                    await Task.Delay(remainingTime, stoppingToken);
+                }
             }
             catch (TaskCanceledException)
             {
@@ -101,10 +109,13 @@ public abstract class LoopedWorkerBase : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred. Will restart work within {Delay}", _minDelayBetweenLoops);
+                var remainingTime = _minDelayAfterErrorLoop - loopIterationStopwatch.Elapsed;
+                _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", Math.Max(0, remainingTime.Milliseconds));
+                if (remainingTime > TimeSpan.Zero)
+                {
+                    await Task.Delay(remainingTime, stoppingToken);
+                }
             }
-
-            await minDelayBetweenLoops;
         }
 
         await OnStop(stoppingToken);

@@ -81,7 +81,7 @@ public class NodeConfigurationMonitorWorker : LoopedWorkerBase
         IAggregatorConfiguration configuration,
         INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry
     )
-        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))
+        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _configuration = configuration;
