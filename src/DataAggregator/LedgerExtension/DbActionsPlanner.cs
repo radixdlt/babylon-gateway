@@ -67,11 +67,18 @@ using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
+using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAggregator.LedgerExtension;
+
+public record ActionsPlannerReport(
+    long DbDependenciesLoadingMs,
+    int ActionsCount,
+    long LocalDbContextActionsMs
+);
 
 /// <summary>
 /// Batches actions to the database.
@@ -204,10 +211,13 @@ public class DbActionsPlanner
         return () => GetResource(resourceIdentifier);
     }
 
-    public async Task ProcessAllChanges()
+    public async Task<ActionsPlannerReport> ProcessAllChanges()
     {
-        await LoadDependencies();
-        RunActions();
+        var dbDependenciesLoadingMs = await CodeStopwatch.TimeInMs(LoadDependencies);
+        var actionsCount = _dbActions.Count;
+        var localDbContextActionsMs = CodeStopwatch.TimeInMs(RunActions);
+
+        return new ActionsPlannerReport(dbDependenciesLoadingMs, actionsCount, localDbContextActionsMs);
     }
 
     /// <summary>

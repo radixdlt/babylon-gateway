@@ -62,36 +62,40 @@
  * permissions under this License.
  */
 
-using Common.Database.Models;
-using DataAggregator.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
-namespace DataAggregator.GlobalServices;
+namespace Common.Utilities;
 
-public interface IRawTransactionWriter
+/// <summary>
+/// Exposes CodeStopwatch.TimeInMs(action) which has sync/async overloads and Func/Action overloads.
+/// </summary>
+public static class CodeStopwatch
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token);
-}
-
-public class RawTransactionWriter : IRawTransactionWriter
-{
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token)
+    public static async Task<long> TimeInMs(Func<Task> action)
     {
-        var entitiesTouched = 0;
+        var stopwatch = Stopwatch.StartNew();
+        await action();
+        return stopwatch.ElapsedMilliseconds;
+    }
 
-        // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        entitiesTouched += await context.RawTransactions
-            .UpsertRange(rawTransactions)
-            .WhenMatched((existingTransaction, newTransaction) => new RawTransaction
-            {
-                TransactionIdentifierHash = newTransaction.TransactionIdentifierHash,
-                SubmittedTimestamp = newTransaction.SubmittedTimestamp ?? existingTransaction.SubmittedTimestamp,
-                Payload = newTransaction.Payload ?? existingTransaction.Payload,
-            })
-            .RunAsync(token);
+    public static async Task<(T Result, long DurationMs)> TimeInMs<T>(Func<Task<T>> action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var output = await action();
+        return (output, stopwatch.ElapsedMilliseconds);
+    }
 
-        entitiesTouched += await context.SaveChangesAsync(token);
+    public static (T Result, long DurationMs) TimeInMs<T>(Func<T> action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var output = action();
+        return (output, stopwatch.ElapsedMilliseconds);
+    }
 
-        return entitiesTouched;
+    public static long TimeInMs(Action action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        action();
+        return stopwatch.ElapsedMilliseconds;
     }
 }

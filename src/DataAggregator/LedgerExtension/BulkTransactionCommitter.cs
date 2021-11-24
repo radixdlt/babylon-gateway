@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
 using RadixCoreApi.GeneratedClient.Model;
@@ -70,8 +71,18 @@ namespace DataAggregator.LedgerExtension;
 
 public interface IBulkTransactionCommitter
 {
-    Task<TransactionSummary> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
+    Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
 }
+
+public record CommitLedgerTransactionsReport(
+    TransactionSummary FinalTransaction,
+    long TransactionContentHandlingMs,
+    long DbDependenciesLoadingMs,
+    int TransactionContentDbActionsCount,
+    long LocalDbContextActionsMs,
+    long DbPersistanceMs,
+    int DbEntriesWritten
+);
 
 /// <summary>
 /// A short-lived class, used to commit a batch of transactions to the database.
@@ -95,7 +106,29 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         _dbActionsPlanner = new DbActionsPlanner(_dbContext, _cancellationToken);
     }
 
-    public async Task<TransactionSummary> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    public async Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    {
+        var (finalTransactionSummary, transactionContentProcessingMs) = CodeStopwatch.TimeInMs(
+            () => HandleTransactions(parentSummary, transactions)
+        );
+
+        var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
+        var (entriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
+            () => _dbContext.SaveChangesAsync(_cancellationToken)
+        );
+
+        return new CommitLedgerTransactionsReport(
+            finalTransactionSummary,
+            transactionContentProcessingMs,
+            dbActionsReport.DbDependenciesLoadingMs,
+            dbActionsReport.ActionsCount,
+            dbActionsReport.LocalDbContextActionsMs,
+            dbPersistenceMs,
+            entriesWritten
+        );
+    }
+
+    private TransactionSummary HandleTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
     {
         foreach (var transaction in transactions)
         {
@@ -106,11 +139,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
             parentSummary = summary;
         }
 
-        await _dbActionsPlanner.ProcessAllChanges();
-        await _dbContext.SaveChangesAsync(_cancellationToken);
-
-        var lastCommittedTransactionSummary = parentSummary;
-        return lastCommittedTransactionSummary;
+        return parentSummary;
     }
 
     private void HandleTransaction(CommittedTransaction transaction, TransactionSummary summary)

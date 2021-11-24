@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
+using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices.ApiReaders;
-using System.Diagnostics;
 
 namespace DataAggregator.NodeScopedWorkers;
 
@@ -99,37 +99,53 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         _logger.LogInformation("Starting sync loop by looking up the top of the committed ledger");
 
-        var topOfLedgerStateVersion = await _ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken);
-
-        _logger.LogInformation(
-            "Last commit at top of DB ledger is at resultant state version {StateVersion}",
-            topOfLedgerStateVersion
+        var (topOfLedgerStateVersion, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
+            () => _ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken)
         );
 
-        var getTransactionsStopwatch = new Stopwatch();
-        getTransactionsStopwatch.Start();
+        _logger.LogInformation(
+            "Last commit at top of DB ledger is at resultant state version {StateVersion} (fetched in {ReadTopOfLedgerMs}ms)",
+            topOfLedgerStateVersion,
+            readTopOfLedgerMs
+        );
 
-        var transactionsResponse = await _transactionLogReader.GetTransactions(topOfLedgerStateVersion, TransactionsToPull, stoppingToken);
+        var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
+            () => _transactionLogReader.GetTransactions(topOfLedgerStateVersion, TransactionsToPull, stoppingToken)
+        );
 
         _logger.LogInformation(
-            "Read {TransactionCount} transactions from the core api in {MillisecondsElapsed}ms",
+            "Fetched {TransactionCount} transactions from the core api in {FetchTransactionsMs}ms",
             TransactionsToPull,
-            getTransactionsStopwatch.ElapsedMilliseconds
+            fetchTransactionsMs
         );
 
-        var commitTransactionsStopwatch = new Stopwatch();
-        commitTransactionsStopwatch.Start();
-
-        var commitedTransactionSummary = await _ledgerExtenderService.CommitTransactions(
-            transactionsResponse.StateIdentifier,
-            transactionsResponse.Transactions,
-            stoppingToken
+        var (commitedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
+            () => _ledgerExtenderService.CommitTransactions(
+                transactionsResponse.StateIdentifier,
+                transactionsResponse.Transactions,
+                stoppingToken
+            )
         );
 
         _logger.LogInformation(
-            "Committed {TransactionCount} transactions to the DB in {MillisecondsElapsed}ms (ledger is up to StateVersion={LedgerStateVersion}, Epoch={LedgerEpoch}, IndexInEpoch={LedgerIndexInEpoch}, Timestamp={LedgerTimestamp})",
+            "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms ({DbEntriesWritten} entries touched from raw txns, ledger txns and as a result of {TransactionContentDbActionsCount} txn content actions)",
             TransactionsToPull,
-            commitTransactionsStopwatch.ElapsedMilliseconds,
+            totalCommitTransactionsMs,
+            commitedTransactionReport.DbEntriesWritten,
+            commitedTransactionReport.TransactionContentDbActionsCount
+        );
+        _logger.LogInformation(
+            "With time split [RawTxnWriting={RawTransactionWritingMs}ms, TxnContentHandling={TxnContentHandlingMs}ms, DpDependencyLoading={DbDependenciesLoadingMs}ms, LocalDbContextActions={LocalDbContextActionsMs}ms, DbPersistence={DbPersistanceMs}ms]",
+            commitedTransactionReport.RawTransactionWritingMs,
+            commitedTransactionReport.TransactionContentHandlingMs,
+            commitedTransactionReport.DbDependenciesLoadingMs,
+            commitedTransactionReport.LocalDbContextActionsMs,
+            commitedTransactionReport.DbPersistanceMs
+        );
+
+        var commitedTransactionSummary = commitedTransactionReport.FinalTransaction;
+        _logger.LogInformation(
+            "Ledger is up to StateVersion={LedgerStateVersion}, Epoch={LedgerEpoch}, IndexInEpoch={LedgerIndexInEpoch}, Timestamp={LedgerTimestamp}",
             commitedTransactionSummary.StateVersion,
             commitedTransactionSummary.Epoch,
             commitedTransactionSummary.IndexInEpoch,

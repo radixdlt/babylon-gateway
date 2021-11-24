@@ -63,20 +63,31 @@
  */
 
 using Common.Database.Models.Ledger.Normalization;
+using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
 using RadixCoreApi.GeneratedClient.Model;
-using System.Linq;
 
 namespace DataAggregator.GlobalServices;
 
 public interface ILedgerExtenderService
 {
-    Task<TransactionSummary> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
+    Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
 
     Task<long> GetTopOfLedgerStateVersion(CancellationToken token);
 }
+
+public record CommitTransactionsReport(
+    TransactionSummary FinalTransaction,
+    long RawTransactionWritingMs,
+    long TransactionContentHandlingMs,
+    long DbDependenciesLoadingMs,
+    int TransactionContentDbActionsCount,
+    long LocalDbContextActionsMs,
+    long DbPersistanceMs,
+    int DbEntriesWritten
+);
 
 public class LedgerExtenderService : ILedgerExtenderService
 {
@@ -105,7 +116,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         return lastTransactionOverview.StateVersion;
     }
 
-    public async Task<TransactionSummary> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
+    public async Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
     {
         // Create own context for this unit of work.
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
@@ -119,14 +130,27 @@ public class LedgerExtenderService : ILedgerExtenderService
             await EnsureDbLedgerIsInitialized(dbContext, token);
         }
 
-        await _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(
-            dbContext,
-            transactions.Select(TransactionMapping.CreateRawTransaction),
-            token
+        var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
+            () => _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(
+                dbContext,
+                transactions.Select(TransactionMapping.CreateRawTransaction),
+                token
+            )
         );
 
-        return await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
+        var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, dbContext, token)
             .CommitTransactions(parentSummary, transactions);
+
+        return new CommitTransactionsReport(
+            bulkTransactionCommitReport.FinalTransaction,
+            rawTransactionCommitMs,
+            bulkTransactionCommitReport.TransactionContentHandlingMs,
+            bulkTransactionCommitReport.DbDependenciesLoadingMs,
+            bulkTransactionCommitReport.TransactionContentDbActionsCount,
+            bulkTransactionCommitReport.LocalDbContextActionsMs,
+            bulkTransactionCommitReport.DbPersistanceMs,
+            rawTransactionsTouched + bulkTransactionCommitReport.DbEntriesWritten
+        );
     }
 
     private async Task EnsureDbLedgerIsInitialized(AggregatorDbContext dbContext, CancellationToken token)
