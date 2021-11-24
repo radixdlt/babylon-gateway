@@ -77,10 +77,9 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, long? parentStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, bool isOnlyRoundChange, bool isEndOfEpoch, DateTime timestamp, long? endOfEpochRound)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, bool isOnlyRoundChange, bool isEndOfEpoch, DateTime timestamp, long? endOfEpochRound)
     {
         ResultantStateVersion = resultantStateVersion;
-        ParentStateVersion = parentStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
         TransactionAccumulator = transactionAccumulator;
         Message = message;
@@ -102,13 +101,6 @@ public class LedgerTransaction
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     [Column(name: "state_version")]
     public long ResultantStateVersion { get; set; }
-
-    [Column(name: "parent_state_version")]
-    // OnModelCreating: This is provided to enable a constraint to ensure there are no gaps in the ledger
-    public long? ParentStateVersion { get; set; }
-
-    [ForeignKey(nameof(ParentStateVersion))]
-    public LedgerTransaction? Parent { get; set; }
 
     [Column(name: "transaction_id")]
     // OnModelCreating: Also defined as an alternate key

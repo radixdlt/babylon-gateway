@@ -80,7 +80,7 @@ public interface ILedgerExtenderService
 
 public record CommitTransactionsReport(
     TransactionSummary FinalTransaction,
-    long RawTransactionWritingMs,
+    long RawTxnPersistenceMs,
     long TransactionContentHandlingMs,
     long DbDependenciesLoadingMs,
     int TransactionContentDbActionsCount,

@@ -91,7 +91,6 @@ public static class TransactionMapping
         var signedBy = transaction.Metadata.SignedBy?.Hex.ConvertFromHex();
         return new LedgerTransaction(
             resultantStateVersion: resultantStateVersion,
-            parentStateVersion: parentStateVersion,
             transactionIdentifierHash: summary.TransactionIdentifierHash,
             transactionAccumulator: summary.TransactionAccumulator,
             message: transaction.Metadata.Message?.ConvertFromHex(),

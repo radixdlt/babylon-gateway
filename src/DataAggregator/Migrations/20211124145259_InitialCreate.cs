@@ -139,7 +139,6 @@ namespace DataAggregator.Migrations
                 columns: table => new
                 {
                     state_version = table.Column<long>(type: "bigint", nullable: false),
-                    parent_state_version = table.Column<long>(type: "bigint", nullable: true),
                     transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
@@ -157,12 +156,6 @@ namespace DataAggregator.Migrations
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
                     table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
                     table.UniqueConstraint("AK_ledger_transactions_transaction_id", x => x.transaction_id);
-                    table.CheckConstraint("CK_ledger_transactions_complete_history", "state_version = 1 OR state_version = parent_state_version + 1");
-                    table.ForeignKey(
-                        name: "FK_ledger_transactions_ledger_transactions_parent_state_version",
-                        column: x => x.parent_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version");
                     table.ForeignKey(
                         name: "FK_ledger_transactions_raw_transactions_transaction_id",
                         column: x => x.transaction_id,
@@ -547,11 +540,6 @@ namespace DataAggregator.Migrations
                 unique: true,
                 filter: "end_of_round IS NOT NULL")
                 .Annotation("Npgsql:IndexInclude", new[] { "timestamp" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_parent_state_version",
-                table: "ledger_transactions",
-                column: "parent_state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_timestamp",

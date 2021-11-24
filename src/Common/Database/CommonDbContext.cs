@@ -117,12 +117,6 @@ public class CommonDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<LedgerTransaction>()
-            .HasCheckConstraint(
-                "complete_history",
-                "state_version = 1 OR state_version = parent_state_version + 1"
-            );
-
-        modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionIdentifierHash);
 
         modelBuilder.Entity<LedgerTransaction>()

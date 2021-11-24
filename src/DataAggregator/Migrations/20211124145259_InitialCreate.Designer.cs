@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211123180441_InitialCreate")]
+    [Migration("20211124145259_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -224,10 +224,6 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
-                    b.Property<long?>("ParentStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("parent_state_version");
-
                     b.Property<byte[]>("SignedBy")
                         .HasColumnType("bytea")
                         .HasColumnName("signed_by");
@@ -252,8 +248,6 @@ namespace DataAggregator.Migrations
 
                     b.HasAlternateKey("TransactionIdentifierHash");
 
-                    b.HasIndex("ParentStateVersion");
-
                     b.HasIndex("Timestamp");
 
                     b.HasIndex("Epoch", "EndOfEpochRound")
@@ -263,8 +257,6 @@ namespace DataAggregator.Migrations
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Epoch", "EndOfEpochRound"), new[] { "Timestamp" });
 
                     b.ToTable("ledger_transactions");
-
-                    b.HasCheckConstraint("complete_history", "state_version = 1 OR state_version = parent_state_version + 1");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Normalization.Resource", b =>
@@ -912,17 +904,11 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
                 {
-                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentStateVersion");
-
                     b.HasOne("Common.Database.Models.RawTransaction", "RawTransaction")
                         .WithMany()
                         .HasForeignKey("TransactionIdentifierHash")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Parent");
 
                     b.Navigation("RawTransaction");
                 });

@@ -66,6 +66,7 @@ using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices.ApiReaders;
+using RadixCoreApi.GeneratedClient.Model;
 
 namespace DataAggregator.NodeScopedWorkers;
 
@@ -74,9 +75,19 @@ namespace DataAggregator.NodeScopedWorkers;
 /// </summary>
 public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 {
+    /* Dependencies */
     private readonly ILogger<NodeTransactionLogWorker> _logger;
     private readonly ITransactionLogReader _transactionLogReader;
     private readonly ILedgerExtenderService _ledgerExtenderService;
+
+    /* Properties for simple fetch pipelining */
+    private record FetchPipeline(
+        long TopOfLedgerStateVersion,
+        int TransactionsToPull,
+        Task<CommittedTransactionsResponse> FetchTask
+    );
+
+    private FetchPipeline? _pipelinedFetch;
 
     public NodeTransactionLogWorker(
         ILogger<NodeTransactionLogWorker> logger,
@@ -109,14 +120,9 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             readTopOfLedgerMs
         );
 
-        var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
-            () => _transactionLogReader.GetTransactions(topOfLedgerStateVersion, TransactionsToPull, stoppingToken)
-        );
-
-        _logger.LogInformation(
-            "Fetched {TransactionCount} transactions from the core api in {FetchTransactionsMs}ms",
-            TransactionsToPull,
-            fetchTransactionsMs
+        // TODO:NG-12 - turn on pipelining if we can speed up the result parsing by the client
+        var transactionsResponse = await FetchTransactionsFromCoreApiAndPipelineNextFetch(
+            topOfLedgerStateVersion, TransactionsToPull, false, stoppingToken
         );
 
         var (commitedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
@@ -135,8 +141,8 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             commitedTransactionReport.TransactionContentDbActionsCount
         );
         _logger.LogInformation(
-            "With time split [RawTxnWriting={RawTransactionWritingMs}ms, TxnContentHandling={TxnContentHandlingMs}ms, DpDependencyLoading={DbDependenciesLoadingMs}ms, LocalDbContextActions={LocalDbContextActionsMs}ms, DbPersistence={DbPersistanceMs}ms]",
-            commitedTransactionReport.RawTransactionWritingMs,
+            "[TimeSplitsInMs: RawTxnPersistence={RawTxnPersistenceMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},LocalDbContextActions={LocalDbContextActionsMs},DbPersistence={DbPersistanceMs}]",
+            commitedTransactionReport.RawTxnPersistenceMs,
             commitedTransactionReport.TransactionContentHandlingMs,
             commitedTransactionReport.DbDependenciesLoadingMs,
             commitedTransactionReport.LocalDbContextActionsMs,
@@ -151,5 +157,58 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             commitedTransactionSummary.IndexInEpoch,
             commitedTransactionSummary.CurrentViewTimestamp
         );
+    }
+
+    private Task<CommittedTransactionsResponse> FetchTransactionsFromCoreApiAndPipelineNextFetch(
+        long topOfLedgerStateVersion,
+        int transactionsToPull,
+        bool shouldPipeline,
+        CancellationToken stoppingToken
+    )
+    {
+        var currentPipelinedFetch = _pipelinedFetch;
+        var currentPipelinedFetchMatches =
+            currentPipelinedFetch != null
+            && currentPipelinedFetch.TopOfLedgerStateVersion == topOfLedgerStateVersion
+            && currentPipelinedFetch.TransactionsToPull == transactionsToPull;
+
+        var currentFetch = currentPipelinedFetchMatches
+            ? currentPipelinedFetch!.FetchTask
+            : FetchTransactionsFromCoreApi(topOfLedgerStateVersion, transactionsToPull, stoppingToken);
+
+        if (shouldPipeline)
+        {
+            var nextFromVersion = topOfLedgerStateVersion + transactionsToPull;
+            _pipelinedFetch = new FetchPipeline(
+                nextFromVersion,
+                transactionsToPull,
+                FetchTransactionsFromCoreApi(nextFromVersion, transactionsToPull, stoppingToken)
+            );
+        }
+        else
+        {
+            _pipelinedFetch = null;
+        }
+
+        return currentFetch;
+    }
+
+    private async Task<CommittedTransactionsResponse> FetchTransactionsFromCoreApi(
+        long topOfLedgerStateVersion,
+        int transactionsToPull,
+        CancellationToken stoppingToken
+    )
+    {
+        var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
+            () => _transactionLogReader.GetTransactions(topOfLedgerStateVersion, transactionsToPull, stoppingToken)
+        );
+
+        _logger.LogInformation(
+            "Fetched {TransactionCount} transactions from version {FromStateVersion} from the core api in {FetchTransactionsMs}ms",
+            transactionsToPull,
+            topOfLedgerStateVersion,
+            fetchTransactionsMs
+        );
+        return transactionsResponse;
     }
 }

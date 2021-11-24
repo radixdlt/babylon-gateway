@@ -113,6 +113,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         );
 
         var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
+
         var (entriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
             () => _dbContext.SaveChangesAsync(_cancellationToken)
         );
@@ -135,6 +136,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
             var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
             TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
 
+            _dbContext.LedgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transaction, summary));
             HandleTransaction(transaction, summary);
             parentSummary = summary;
         }
@@ -144,9 +146,6 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
 
     private void HandleTransaction(CommittedTransaction transaction, TransactionSummary summary)
     {
-        var ledgerTransaction = TransactionMapping.CreateLedgerTransaction(transaction, summary);
-        _dbContext.LedgerTransactions.Add(ledgerTransaction);
-
         if (summary.IsOnlyRoundChange)
         {
             return;
