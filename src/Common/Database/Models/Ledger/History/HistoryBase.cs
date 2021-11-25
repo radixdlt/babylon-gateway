@@ -93,6 +93,9 @@ public abstract class HistoryBase
     [Column(name: "from_state_version")]
     public long FromStateVersion { get; set; }
 
+    [ForeignKey(nameof(FromStateVersion))]
+    public LedgerTransaction FromLedgerTransaction { get; set; }
+
     /// <summary>
     /// The last state version where this version of history applied. This endpoint is inclusive.
     /// IE there should be a new History with New.FromStateVersion = Prev.ToStateVersion + 1.
@@ -100,4 +103,8 @@ public abstract class HistoryBase
     [Column(name: "to_state_version")]
     [ConcurrencyCheck] // Ensure that the same history can't be updated by two different state versions somehow
     public long? ToStateVersion { get; set; }
+
+    // OnModelCreating: Further define relationship to LedgerTransaction (no cascade delete - needs careful clean-up on reversion)
+    [ForeignKey(nameof(ToStateVersion))]
+    public LedgerTransaction? ToLedgerTransaction { get; set; }
 }

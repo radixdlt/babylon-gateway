@@ -96,5 +96,8 @@ public abstract class RecordBase
     /// Stored to help with ledger reversions.
     /// </summary>
     [Column(name: "last_updated_state_version")]
-    public long LastUpdatedStateVersion { get; set; }
+    public long LastUpdatedAtStateVersion { get; set; }
+
+    // OnModelCreating: Define relationship to LedgerTransaction
+    public LedgerTransaction LastUpdatedAtLedgerTransaction { get; set; }
 }

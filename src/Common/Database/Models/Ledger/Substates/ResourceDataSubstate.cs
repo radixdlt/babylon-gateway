@@ -66,8 +66,10 @@ using Common.Database.Models.Ledger.Normalization;
 using Common.Database.ValueConverters;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
-using RadixCoreApi.GeneratedClient.Model;
 using System.ComponentModel.DataAnnotations.Schema;
+
+using Api = RadixCoreApi.GeneratedClient.Model;
+using Db = Common.Database.Models.Ledger.Substates;
 
 namespace Common.Database.Models.Ledger.Substates;
 
@@ -107,41 +109,118 @@ public class ResourceDataSubstate : DataSubstateBase
     [Column(name: "type")]
     public ResourceDataSubstateType Type { get; set; }
 
+    // [Owned] - see below
+    public TokenData? TokenData { get; set; }
+
+    // [Owned] - see below
+    public TokenMetadata? TokenMetadata { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceDataSubstate"/> class.
     /// The SubstateBase properties should be set separately.
     /// </summary>
-    public ResourceDataSubstate(Resource resource, ResourceDataSubstateType type, bool? isMutable, TokenAmount? granularity, string? owner, string? symbol, string? name, string? description, string? url, string? iconUrl)
+    public ResourceDataSubstate(Resource resource, ResourceDataSubstateType type, TokenData? tokenData, TokenMetadata? tokenMetadata)
     {
         Resource = resource;
         Type = type;
-        IsMutable = isMutable;
-        Granularity = granularity;
-        Owner = owner;
-        Symbol = symbol;
-        Name = name;
-        Description = description;
-        Url = url;
-        IconUrl = iconUrl;
+        TokenData = tokenData;
+        TokenMetadata = tokenMetadata;
     }
-
-    public bool? IsMutable { get; set; }
-
-    public TokenAmount? Granularity { get; set; }
-
-    public string? Owner { get; set; }
-
-    public string? Symbol { get; set; }
-
-    public string? Name { get; set; }
-
-    public string? Description { get; set; }
-
-    public string? Url { get; set; }
-
-    public string? IconUrl { get; set; }
 
     private ResourceDataSubstate()
     {
+    }
+
+    public bool SubstateMatches(ResourceDataSubstate otherSubstate)
+    {
+        return Resource == otherSubstate.Resource
+               && Type == otherSubstate.Type
+               && TokenData == otherSubstate.TokenData
+               && TokenMetadata == otherSubstate.TokenMetadata;
+    }
+}
+
+public record ResourceDataObjects(
+    Api.TokenData? TokenData,
+    Api.TokenMetadata? TokenMetadata
+)
+{
+    public ResourceDataObjects()
+        : this(null, null)
+    {
+    }
+
+    public ResourceDataSubstate ToResourceDataSubstate(Resource resource, Account? resourceOwner)
+    {
+        var type = TokenData != null ? ResourceDataSubstateType.TokenData
+            : TokenMetadata != null ? ResourceDataSubstateType.TokenMetadata
+            : throw new ArgumentException("At least one substate type has to be non-null");
+
+        return new ResourceDataSubstate(
+            resource,
+            type,
+            Db.TokenData.From(TokenData, resourceOwner),
+            Db.TokenMetadata.From(TokenMetadata)
+        );
+    }
+}
+
+[Owned]
+public record TokenData
+{
+    [Column("is_mutable")]
+    public bool IsMutable { get; set; }
+
+    [Column("granularity")]
+    public TokenAmount Granularity { get; set; }
+
+    [Column(name: "owner_id")]
+    public long? OwnerId { get; set; }
+
+    [ForeignKey(nameof(OwnerId))]
+    public Account? Owner { get; set; }
+
+    public static TokenData? From(Api.TokenData? apiModel, Account? resourceOwner)
+    {
+        return apiModel == null ? null
+            : new TokenData
+            {
+                IsMutable = apiModel.IsMutable,
+                Granularity = TokenAmount.FromSubUnitsString(apiModel.Granularity),
+                Owner = resourceOwner,
+                OwnerId = resourceOwner?.Id,
+            };
+    }
+}
+
+[Owned]
+public record TokenMetadata
+{
+    [Column("symbol")]
+    public string Symbol { get; set; }
+
+    [Column("name")]
+    public string Name { get; set; }
+
+    [Column("description")]
+    public string Description { get; set; }
+
+    [Column("url")]
+    public string Url { get; set; }
+
+    [Column("icon_url")]
+    public string IconUrl { get; set; }
+
+    public static TokenMetadata? From(Api.TokenMetadata? apiModel)
+    {
+        return apiModel == null ? null
+            : new TokenMetadata
+            {
+                Symbol = apiModel.Symbol,
+                Name = apiModel.Name,
+                Description = apiModel.Description,
+                Url = apiModel.Url,
+                IconUrl = apiModel.IconUrl,
+            };
     }
 }

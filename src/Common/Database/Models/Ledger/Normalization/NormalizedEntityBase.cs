@@ -62,46 +62,23 @@
  * permissions under this License.
  */
 
-using Common.Database.Models;
-using Common.Database.Models.Ledger;
-using Common.Extensions;
-using Common.Numerics;
-using RadixCoreApi.GeneratedClient.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAggregator.LedgerExtension;
+namespace Common.Database.Models.Ledger.Normalization;
 
-public static class TransactionMapping
+/// <summary>
+/// Entity normalization means we can have FKs on longs instead of on long strings, to hopefully improve performance.
+/// </summary>
+public class NormalizedEntityBase
 {
-    public static RawTransaction CreateRawTransaction(CommittedTransaction transaction)
-    {
-        return new RawTransaction(
-            transactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
-            submittedTimestamp: null,
-            payload: transaction.Metadata.Hex.ConvertFromHex()
-        );
-    }
+    [Key]
+    [Column(name: "id")]
+    public long Id { get; set; }
 
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransaction transaction, TransactionSummary summary)
-    {
-        var fee = transaction.Metadata.Fee == null
-            ? TokenAmount.Zero
-            : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-        var signedBy = transaction.Metadata.SignedBy?.Hex.ConvertFromHex();
-        return new LedgerTransaction(
-            resultantStateVersion: summary.StateVersion,
-            transactionIdentifierHash: summary.TransactionIdentifierHash,
-            transactionAccumulator: summary.TransactionAccumulator,
-            message: transaction.Metadata.Message?.ConvertFromHex(),
-            feePaid: fee,
-            signedBy: signedBy,
-            epoch: summary.Epoch,
-            indexInEpoch: summary.IndexInEpoch,
-            isOnlyRoundChange: summary.IsOnlyRoundChange,
-            isEndOfEpoch: summary.IsEndOfEpoch,
-            roundTimestamp: summary.CurrentRoundTimestamp,
-            createdTimestamp: summary.CreatedTimestamp,
-            normalizedTimestamp: summary.NormalizedTimestamp,
-            endOfEpochRound: summary.EndOfEpochRound
-        );
-    }
+    [Column(name: "from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    // OnModelCreating: Define relationship to LedgerTransaction - to enable cascade deletes if the ledger rolls back
+    public LedgerTransaction FromLedgerTransaction { get; set; }
 }

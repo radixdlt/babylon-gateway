@@ -486,11 +486,11 @@ public class TransactionContentProcessor
     {
         switch (_operation!.Data.DataObject)
         {
-            case TokenData tokenData:
-                HandleResourceDataOperation(tokenData, null);
+            case Api.TokenData tokenData:
+                HandleResourceDataOperation(new ResourceDataObjects { TokenData = tokenData });
                 return;
-            case TokenMetadata tokenMetadata:
-                HandleResourceDataOperation(null, tokenMetadata);
+            case Api.TokenMetadata tokenMetadata:
+                HandleResourceDataOperation(new ResourceDataObjects { TokenMetadata = tokenMetadata });
                 return;
             case Api.ValidatorData validatorData:
                 HandleValidatorDataOperation(new ValidatorDataObjects { ValidatorData = validatorData });
@@ -516,45 +516,22 @@ public class TransactionContentProcessor
         }
     }
 
-    private void HandleResourceDataOperation(TokenData? tokenData, TokenMetadata? tokenMetadata)
+    private void HandleResourceDataOperation(ResourceDataObjects objects)
     {
         if (_entity!.EntityType != EntityType.Resource)
         {
             throw GenerateDetailedInvalidTransactionException("Resource data update not against a resource entity");
         }
 
-        var type = tokenData != null ? ResourceDataSubstateType.TokenData :
-            tokenMetadata != null ? ResourceDataSubstateType.TokenMetadata :
-            throw GenerateDetailedInvalidTransactionException("Resource Data which isn't of either expected type");
-
         var resourceIdentifier = _entity.ResourceAddress!;
         var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
+        var resourceOwner = objects.TokenData?.Owner;
+        var resourceOwnerLookup = resourceOwner == null ? null : _dbActionsPlanner.ResolveAccount(resourceOwner, _transactionSummary!.StateVersion);
 
-        TokenAmount? granularity = tokenData?.Granularity != null ? TokenAmount.FromSubUnitsString(tokenData.Granularity) : null;
         HandleSubstateUpOrDown(
-            () => new ResourceDataSubstate(
-                resource: resourceLookup(),
-                type: type,
-                isMutable: tokenData?.IsMutable,
-                granularity: granularity,
-                owner: tokenData?.Owner,
-                symbol: tokenMetadata?.Symbol,
-                name: tokenMetadata?.Name,
-                description: tokenMetadata?.Description,
-                url: tokenMetadata?.Url,
-                iconUrl: tokenMetadata?.IconUrl
-            ),
-            existingSubstate => (
-                existingSubstate.Resource == resourceLookup()
-                && existingSubstate.Type == type
-                && existingSubstate.IsMutable == tokenData?.IsMutable
-                && existingSubstate.Granularity == granularity
-                && existingSubstate.Owner == tokenData?.Owner
-                && existingSubstate.Symbol == tokenMetadata?.Symbol
-                && existingSubstate.Name == tokenMetadata?.Name
-                && existingSubstate.Description == tokenMetadata?.Description
-                && existingSubstate.Url == tokenMetadata?.Url
-                && existingSubstate.IconUrl == tokenMetadata?.IconUrl
+            () => objects.ToResourceDataSubstate(resourceLookup(), resourceOwnerLookup?.Invoke()),
+            existingSubstate => existingSubstate.SubstateMatches(
+                objects.ToResourceDataSubstate(resourceLookup(), resourceOwnerLookup?.Invoke())
             )
         );
     }

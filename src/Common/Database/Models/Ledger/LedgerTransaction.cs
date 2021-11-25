@@ -77,7 +77,7 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, bool isOnlyRoundChange, bool isEndOfEpoch, DateTime timestamp, long? endOfEpochRound)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, bool isOnlyRoundChange, bool isEndOfEpoch, DateTime roundTimestamp, DateTime createdTimestamp, DateTime normalizedTimestamp, long? endOfEpochRound)
     {
         ResultantStateVersion = resultantStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
@@ -89,7 +89,9 @@ public class LedgerTransaction
         IndexInEpoch = indexInEpoch;
         IsOnlyRoundChange = isOnlyRoundChange;
         IsEndOfEpoch = isEndOfEpoch;
-        Timestamp = timestamp;
+        RoundTimestamp = roundTimestamp;
+        CreatedTimestamp = createdTimestamp;
+        NormalizedTimestamp = normalizedTimestamp;
         EndOfEpochRound = endOfEpochRound;
     }
 
@@ -141,8 +143,27 @@ public class LedgerTransaction
     [Column(name: "is_end_of_epoch")]
     public bool IsEndOfEpoch { get; set; }
 
+    /// <summary>
+    /// The round timestamp is derived as an average of the timestamp of all the validators performing consensus.
+    /// As a consequence of this, it is not guaranteed to be increasing, and it may be affected by Byzantine nodes.
+    /// </summary>
+    [Column(name: "round_timestamp")]
+    public DateTime RoundTimestamp { get; set; }
+
+    /// <summary>
+    /// The time of the DataAggregator server when the LedgerTransaction was added to the service.
+    /// </summary>
+    [Column(name: "created_timestamp")]
+    public DateTime CreatedTimestamp { get; set; }
+
+    /// <summary>
+    /// This timestamp attempts to be "sensible" - ie increasing and semi-resistant to byzantine attacks.
+    /// If calculates itself by clamping RoundTimestamp between the previous NormalizedTimestamp and CreatedTimestamp.
+    /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
+    /// </summary>
+    // TODO:NG-51 - Further improvements
     [Column(name: "timestamp")]
-    public DateTime Timestamp { get; set; }
+    public DateTime NormalizedTimestamp { get; set; }
 
     [Column(name: "end_of_round")]
     public long? EndOfEpochRound { get; set; }

@@ -76,21 +76,6 @@ namespace DataAggregator.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "accounts",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    address = table.Column<string>(type: "text", nullable: false),
-                    public_key = table.Column<byte[]>(type: "bytea", nullable: false),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_accounts", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "nodes",
                 columns: table => new
                 {
@@ -118,36 +103,6 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "resources",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    engine_address = table.Column<byte[]>(type: "bytea", nullable: false),
-                    rri = table.Column<string>(type: "text", nullable: false),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_resources", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validators",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    address = table.Column<string>(type: "text", nullable: false),
-                    public_key = table.Column<byte[]>(type: "bytea", nullable: false),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validators", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ledger_transactions",
                 columns: table => new
                 {
@@ -161,6 +116,8 @@ namespace DataAggregator.Migrations
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     is_only_round_change = table.Column<bool>(type: "boolean", nullable: false),
                     is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
+                    round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_of_round = table.Column<long>(type: "bigint", nullable: true)
                 },
@@ -178,126 +135,23 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "account_resource_balance_history",
+                name: "accounts",
                 columns: table => new
                 {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    account_id = table.Column<long>(type: "bigint", nullable: false),
-                    resource_id = table.Column<long>(type: "bigint", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    public_key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_id, x.resource_id, x.from_state_version });
+                    table.PrimaryKey("PK_accounts", x => x.id);
                     table.ForeignKey(
-                        name: "FK_account_resource_balance_history_accounts_account_id",
-                        column: x => x.account_id,
-                        principalTable: "accounts",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_resource_balance_history_resources_resource_id",
-                        column: x => x.resource_id,
-                        principalTable: "resources",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "resource_supply_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    resource_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_supply = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_minted = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_burnt = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_resource_supply_history", x => new { x.resource_id, x.from_state_version });
-                    table.ForeignKey(
-                        name: "FK_resource_supply_history_resources_resource_id",
-                        column: x => x.resource_id,
-                        principalTable: "resources",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "account_validator_stake_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    account_id = table.Column<long>(type: "bigint", nullable: false),
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_account_validator_stake_history", x => new { x.account_id, x.validator_id, x.from_state_version });
-                    table.ForeignKey(
-                        name: "FK_account_validator_stake_history_accounts_account_id",
-                        column: x => x.account_id,
-                        principalTable: "accounts",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_validator_stake_history_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validator_proposal_records",
-                columns: table => new
-                {
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    epoch = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_completed = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
-                    last_updated_state_version = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_proposal_records", x => new { x.epoch, x.validator_id });
-                    table.ForeignKey(
-                        name: "FK_validator_proposal_records_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validator_stake_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_id, x.from_state_version });
-                    table.ForeignKey(
-                        name: "FK_validator_stake_history_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
+                        name: "FK_account_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -321,6 +175,86 @@ namespace DataAggregator.Migrations
                         column: x => x.state_version,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "resources",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    engine_address = table.Column<byte[]>(type: "bytea", nullable: false),
+                    rri = table.Column<string>(type: "text", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resources", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_resource_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "validators",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    public_key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validators", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_validator_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_resource_balance_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_id, x.resource_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_history_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_history_ledger_transactions_from_s~",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_history_ledger_transactions_to_sta~",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version");
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_history_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -370,6 +304,91 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "resource_data_substates",
+                columns: table => new
+                {
+                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    is_mutable = table.Column<bool>(type: "boolean", nullable: true),
+                    granularity = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
+                    owner_id = table.Column<long>(type: "bigint", nullable: true),
+                    symbol = table.Column<string>(type: "text", nullable: true),
+                    name = table.Column<string>(type: "text", nullable: true),
+                    description = table.Column<string>(type: "text", nullable: true),
+                    url = table.Column<string>(type: "text", nullable: true),
+                    icon_url = table.Column<string>(type: "text", nullable: true),
+                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
+                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
+                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_data_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_resource_data_substates_substate_identifier", x => x.substate_identifier);
+                    table.ForeignKey(
+                        name: "FK_resource_data_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_resource_data_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_resource_data_substates_accounts_owner_id",
+                        column: x => x.owner_id,
+                        principalTable: "accounts",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_resource_data_substates_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "resource_supply_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_supply = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_minted = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_burnt = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_supply_history", x => new { x.resource_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_to_transaction",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "account_stake_ownership_balance_substates",
                 columns: table => new
                 {
@@ -409,6 +428,48 @@ namespace DataAggregator.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_account_stake_ownership_balance_substates_validators_valida~",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_validator_stake_history", x => new { x.account_id, x.validator_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_to_transaction",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_validators_validator_id",
                         column: x => x.validator_id,
                         principalTable: "validators",
                         principalColumn: "id",
@@ -458,52 +519,6 @@ namespace DataAggregator.Migrations
                         name: "FK_account_xrd_stake_balance_substates_validators_validator_id",
                         column: x => x.validator_id,
                         principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "resource_data_substates",
-                columns: table => new
-                {
-                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
-                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    resource_id = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    IsMutable = table.Column<bool>(type: "boolean", nullable: true),
-                    Granularity = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
-                    Owner = table.Column<string>(type: "text", nullable: true),
-                    Symbol = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Url = table.Column<string>(type: "text", nullable: true),
-                    IconUrl = table.Column<string>(type: "text", nullable: true),
-                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
-                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
-                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
-                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_resource_data_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("AK_resource_data_substates_substate_identifier", x => x.substate_identifier);
-                    table.ForeignKey(
-                        name: "FK_resource_data_substate_down_operation_group",
-                        columns: x => new { x.down_state_version, x.down_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_resource_data_substate_up_operation_group",
-                        columns: x => new { x.up_state_version, x.up_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_resource_data_substates_resources_resource_id",
-                        column: x => x.resource_id,
-                        principalTable: "resources",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -569,6 +584,32 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_proposal_records",
+                columns: table => new
+                {
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_completed = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
+                    last_updated_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_proposal_records", x => new { x.epoch, x.validator_id });
+                    table.ForeignKey(
+                        name: "FK_validator_proposal_record_last_updated_transaction",
+                        column: x => x.last_updated_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version");
+                    table.ForeignKey(
+                        name: "FK_validator_proposal_records_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_stake_balance_substates",
                 columns: table => new
                 {
@@ -607,6 +648,42 @@ namespace DataAggregator.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_to_transaction",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_history_account_id_from_state_vers~",
                 table: "account_resource_balance_history",
@@ -620,6 +697,11 @@ namespace DataAggregator.Migrations
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_resource_balance_history_from_state_version",
+                table: "account_resource_balance_history",
+                column: "from_state_version");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_history_resource_id_account_id_fro~",
                 table: "account_resource_balance_history",
                 columns: new[] { "resource_id", "account_id", "from_state_version" });
@@ -628,6 +710,11 @@ namespace DataAggregator.Migrations
                 name: "IX_account_resource_balance_history_resource_id_from_state_ver~",
                 table: "account_resource_balance_history",
                 columns: new[] { "resource_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_resource_balance_history_to_state_version",
+                table: "account_resource_balance_history",
+                column: "to_state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_substate_current_unspent_utxos",
@@ -679,6 +766,16 @@ namespace DataAggregator.Migrations
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_validator_stake_history_from_state_version",
+                table: "account_validator_stake_history",
+                column: "from_state_version");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_validator_stake_history_to_state_version",
+                table: "account_validator_stake_history",
+                column: "to_state_version");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_validator_stake_history_validator_id_account_id_fro~",
                 table: "account_validator_stake_history",
                 columns: new[] { "validator_id", "account_id", "from_state_version" });
@@ -707,15 +804,20 @@ namespace DataAggregator.Migrations
                 name: "IX_accounts_address",
                 table: "accounts",
                 column: "address",
-                unique: true);
+                unique: true)
+                .Annotation("Npgsql:IndexInclude", new[] { "id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_accounts_from_state_version",
+                table: "accounts",
+                column: "from_state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_end_of_round",
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "end_of_round" },
                 unique: true,
-                filter: "end_of_round IS NOT NULL")
-                .Annotation("Npgsql:IndexInclude", new[] { "timestamp" });
+                filter: "end_of_round IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_timestamp",
@@ -726,6 +828,11 @@ namespace DataAggregator.Migrations
                 name: "IX_resource_data_substates_down_state_version_down_operation_g~",
                 table: "resource_data_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resource_data_substates_owner_id",
+                table: "resource_data_substates",
+                column: "owner_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_resource_data_substates_resource_id",
@@ -740,10 +847,26 @@ namespace DataAggregator.Migrations
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
+                name: "IX_resource_supply_history_from_state_version",
+                table: "resource_supply_history",
+                column: "from_state_version");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resource_supply_history_to_state_version",
+                table: "resource_supply_history",
+                column: "to_state_version");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resources_from_state_version",
+                table: "resources",
+                column: "from_state_version");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_resources_rri",
                 table: "resources",
                 column: "rri",
-                unique: true);
+                unique: true)
+                .Annotation("Npgsql:IndexInclude", new[] { "id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_data_substates_down_state_version_down_operation_~",
@@ -764,6 +887,11 @@ namespace DataAggregator.Migrations
                 name: "IX_validator_data_substates_validator_id",
                 table: "validator_data_substates",
                 column: "validator_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_proposal_records_last_updated_state_version",
+                table: "validator_proposal_records",
+                column: "last_updated_state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_proposal_records_validator_id_epoch",
@@ -794,10 +922,26 @@ namespace DataAggregator.Migrations
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
+                name: "IX_validator_stake_history_from_state_version",
+                table: "validator_stake_history",
+                column: "from_state_version");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_stake_history_to_state_version",
+                table: "validator_stake_history",
+                column: "to_state_version");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validators_address",
                 table: "validators",
                 column: "address",
-                unique: true);
+                unique: true)
+                .Annotation("Npgsql:IndexInclude", new[] { "id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validators_from_state_version",
+                table: "validators",
+                column: "from_state_version");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

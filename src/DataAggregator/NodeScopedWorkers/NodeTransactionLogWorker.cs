@@ -151,11 +151,11 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         var commitedTransactionSummary = commitedTransactionReport.FinalTransaction;
         _logger.LogInformation(
-            "[NewDbLedgerTip: StateVersion={LedgerStateVersion},Epoch={LedgerEpoch},IndexInEpoch={LedgerIndexInEpoch},Timestamp={LedgerTimestamp}]",
+            "[NewDbLedgerTip: StateVersion={LedgerStateVersion},Epoch={LedgerEpoch},IndexInEpoch={LedgerIndexInEpoch},NormalizedTimestamp={NormalizedTimestamp}]",
             commitedTransactionSummary.StateVersion,
             commitedTransactionSummary.Epoch,
             commitedTransactionSummary.IndexInEpoch,
-            commitedTransactionSummary.CurrentViewTimestamp
+            commitedTransactionSummary.NormalizedTimestamp
         );
     }
 

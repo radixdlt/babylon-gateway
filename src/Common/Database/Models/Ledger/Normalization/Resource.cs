@@ -72,20 +72,11 @@ namespace Common.Database.Models.Ledger.Normalization;
 /// </summary>
 [Table("resources")]
 // OnModelCreating: Create unique index on rri
-public class Resource
+public class Resource : NormalizedEntityBase
 {
-    [Key]
-    [Column(name: "id")]
-    public long Id { get; set; }
-
     [Column(name: "engine_address")]
     public byte[] RadixEngineAddress { get; set; }
 
     [Column(name: "rri")]
     public string ResourceIdentifier { get; set; }
-
-    [Column(name: "from_state_version")]
-    // TODO:NG-15 This is to enable the Resources to be removed if the ledger rolls back
-    // NB - this isn't an FK because XRD is created before the ledger is created
-    public long FromStateVersion { get; set; }
 }

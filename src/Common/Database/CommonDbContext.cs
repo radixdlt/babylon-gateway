@@ -119,65 +119,16 @@ public class CommonDbContext : DbContext
     {
     }
 
+    // Note that PostGres doesn't have clustered indexes: all indexes are non-clustered, and operate against the heap
+    // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.TransactionIdentifierHash);
-
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.TransactionAccumulator);
-
-        // Because Timestamp and (Epoch, EndOfEpochRound) are correlated with the linear history of the table,
-        // we could consider defining them as a BRIN index, using .HasMethod("brin")
-        // This is a lighter (lossy) index where the indexed data is correlated with the linear order of the table
-        // See also https://www.postgresql.org/docs/current/indexes-types.html
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.Timestamp);
-
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.Epoch, lt.EndOfEpochRound })
-            .IsUnique()
-            .IncludeProperties(s => new { s.Timestamp })
-            .HasFilter("end_of_round IS NOT NULL");
-
-        modelBuilder.Entity<LedgerOperationGroup>()
-            .HasKey(og => new { og.ResultantStateVersion, og.OperationGroupIndex });
-
-        modelBuilder.Entity<LedgerOperationGroup>()
-            .OwnsOne(og => og.InferredAction);
-
-        modelBuilder.Entity<Resource>()
-            .HasIndex(r => r.ResourceIdentifier)
-            .IsUnique();
-
-        modelBuilder.Entity<Account>()
-            .HasIndex(r => r.Address)
-            .IsUnique();
-
-        modelBuilder.Entity<Validator>()
-            .HasIndex(r => r.Address)
-            .IsUnique();
-
-        HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
-        modelBuilder.Entity<AccountResourceBalanceSubstate>()
-            .HasIndex(s => new { s.AccountId, s.ResourceId, s.Amount })
-            .IncludeProperties(s => new { s.SubstateIdentifier })
-            .HasFilter("down_state_version is null")
-            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate).ToSnakeCase()}_current_unspent_utxos");
-
-        HookUpSubstate<AccountXrdStakeBalanceSubstate>(modelBuilder);
-        HookUpSubstate<AccountStakeOwnershipBalanceSubstate>(modelBuilder);
-        HookUpSubstate<ValidatorStakeBalanceSubstate>(modelBuilder);
-
-        HookUpSubstate<ResourceDataSubstate>(modelBuilder);
-        HookUpSubstate<ValidatorDataSubstate>(modelBuilder);
-
-        HookUpAccountResourceBalanceHistory(modelBuilder);
-        HookUpResourceSupplyHistory(modelBuilder);
-        HookUpValidatorStakeHistory(modelBuilder);
-        HookUpAccountValidatorStakeHistory(modelBuilder);
-
-        HookUpValidatorProposalRecords(modelBuilder);
+        HookupLedgerTransactions(modelBuilder);
+        HookupLedgerOperationGroups(modelBuilder);
+        HookupNormalizedEntities(modelBuilder);
+        HookupSubstates(modelBuilder);
+        HookupHistory(modelBuilder);
+        HookupRecords(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -200,8 +151,93 @@ public class CommonDbContext : DbContext
             .HaveConversion<ValidatorDataSubstateTypeValueConverter>();
     }
 
+    private static void HookupLedgerTransactions(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasAlternateKey(lt => lt.TransactionIdentifierHash);
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasAlternateKey(lt => lt.TransactionAccumulator);
+
+        // Because NormalizedTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear history of the table,
+        // we could consider defining them as a BRIN index, using .HasMethod("brin")
+        // This is a lighter (lossy) index where the indexed data is correlated with the linear order of the table
+        // See also https://www.postgresql.org/docs/current/indexes-types.html
+
+        // This index lets you quickly translate Time => StateVersion
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.NormalizedTimestamp);
+
+        // This index lets you quickly translate Epoch/Round => StateVersion
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => new { lt.Epoch, lt.EndOfEpochRound })
+            .IsUnique()
+            .HasFilter("end_of_round IS NOT NULL");
+    }
+
+    private static void HookupLedgerOperationGroups(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<LedgerOperationGroup>()
+            .HasKey(og => new { og.ResultantStateVersion, og.OperationGroupIndex });
+    }
+
+    private static void HookupNormalizedEntities(ModelBuilder modelBuilder)
+    {
+        HookupNormalizedEntity<Resource>(modelBuilder);
+        modelBuilder.Entity<Resource>()
+            .HasIndex(r => r.ResourceIdentifier)
+            .IncludeProperties(r => r.Id)
+            .IsUnique();
+
+        HookupNormalizedEntity<Account>(modelBuilder);
+        modelBuilder.Entity<Account>()
+            .HasIndex(r => r.Address)
+            .IncludeProperties(r => r.Id)
+            .IsUnique();
+
+        HookupNormalizedEntity<Validator>(modelBuilder);
+        modelBuilder.Entity<Validator>()
+            .HasIndex(r => r.Address)
+            .IncludeProperties(r => r.Id)
+            .IsUnique();
+    }
+
+    private static void HookupSubstates(ModelBuilder modelBuilder)
+    {
+        // Balance substates
+        HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
+        modelBuilder.Entity<AccountResourceBalanceSubstate>()
+            .HasIndex(s => new { s.AccountId, s.ResourceId, s.Amount })
+            .IncludeProperties(s => new { s.SubstateIdentifier })
+            .HasFilter("down_state_version is null")
+            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate).ToSnakeCase()}_current_unspent_utxos");
+
+        HookUpSubstate<AccountXrdStakeBalanceSubstate>(modelBuilder);
+        HookUpSubstate<AccountStakeOwnershipBalanceSubstate>(modelBuilder);
+        HookUpSubstate<ValidatorStakeBalanceSubstate>(modelBuilder);
+
+        // Data substates
+        HookUpSubstate<ResourceDataSubstate>(modelBuilder);
+        HookUpSubstate<ValidatorDataSubstate>(modelBuilder);
+    }
+
+    private static void HookupHistory(ModelBuilder modelBuilder)
+    {
+        HookUpAccountResourceBalanceHistory(modelBuilder);
+        HookUpResourceSupplyHistory(modelBuilder);
+        HookUpValidatorStakeHistory(modelBuilder);
+        HookUpAccountValidatorStakeHistory(modelBuilder);
+    }
+
+    private static void HookupRecords(ModelBuilder modelBuilder)
+    {
+        HookUpValidatorProposalRecords(modelBuilder);
+    }
+
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)
     {
+        HookupHistory<ResourceSupplyHistory>(modelBuilder);
+
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasKey(h => new { h.AccountId, h.ResourceId, h.FromStateVersion });
 
@@ -223,6 +259,8 @@ public class CommonDbContext : DbContext
 
     private static void HookUpResourceSupplyHistory(ModelBuilder modelBuilder)
     {
+        HookupHistory<ResourceSupplyHistory>(modelBuilder);
+
         modelBuilder.Entity<ResourceSupplyHistory>()
             .HasKey(h => new { h.ResourceId, h.FromStateVersion });
 
@@ -235,6 +273,8 @@ public class CommonDbContext : DbContext
 
     private static void HookUpValidatorStakeHistory(ModelBuilder modelBuilder)
     {
+        HookupHistory<ValidatorStakeHistory>(modelBuilder);
+
         modelBuilder.Entity<ValidatorStakeHistory>()
             .HasKey(h => new { h.ValidatorId, h.FromStateVersion });
 
@@ -247,6 +287,8 @@ public class CommonDbContext : DbContext
 
     private static void HookUpAccountValidatorStakeHistory(ModelBuilder modelBuilder)
     {
+        HookupHistory<AccountValidatorStakeHistory>(modelBuilder);
+
         modelBuilder.Entity<AccountValidatorStakeHistory>()
             .HasKey(h => new { h.AccountId, h.ValidatorId, h.FromStateVersion });
 
@@ -268,6 +310,8 @@ public class CommonDbContext : DbContext
 
     private static void HookUpValidatorProposalRecords(ModelBuilder modelBuilder)
     {
+        HookupRecord<ValidatorProposalRecord>(modelBuilder);
+
         modelBuilder.Entity<ValidatorProposalRecord>()
             .HasKey(h => new { h.Epoch, h.ValidatorId });
 
@@ -307,5 +351,54 @@ public class CommonDbContext : DbContext
             })
             .OnDelete(DeleteBehavior.Restrict) // Null out FKs if OperationGroup deleted (all such dependents need to be loaded by EF Core at the time of deletion!)
             .HasConstraintName($"FK_{substateNameSnakeCase}_down_operation_group");
+    }
+
+    private static void HookupHistory<THistory>(ModelBuilder modelBuilder)
+        where THistory : HistoryBase
+    {
+        var substateNameSnakeCase = typeof(THistory).Name.ToSnakeCase();
+
+        modelBuilder.Entity<THistory>()
+            .HasOne(h => h.FromLedgerTransaction)
+            .WithMany()
+            .HasForeignKey(h => h.FromStateVersion)
+            .OnDelete(DeleteBehavior.Cascade) // Deletes History if LedgerTransaction deleted
+            .HasConstraintName($"FK_{substateNameSnakeCase}_from_transaction");
+
+        // Note - if the Ledger is rolled back then ToStateVersions need to be manually nulled out where
+        //  ToStateVersion >= (FirstRevertedStateVersion - 1) to ensure we have the tip of the history with null
+        //  ToStateVersion.
+        modelBuilder.Entity<THistory>()
+            .HasOne(h => h.ToLedgerTransaction)
+            .WithMany()
+            .HasForeignKey(h => h.ToStateVersion)
+            .OnDelete(DeleteBehavior.Restrict) // Null out FKs if LedgerTransaction deleted (all such dependents need to be loaded by EF Core at the time of deletion!)
+            .HasConstraintName($"FK_{substateNameSnakeCase}_to_transaction");
+    }
+
+    private static void HookupRecord<TRecord>(ModelBuilder modelBuilder)
+        where TRecord : RecordBase
+    {
+        var substateNameSnakeCase = typeof(TRecord).Name.ToSnakeCase();
+
+        modelBuilder.Entity<TRecord>()
+            .HasOne(h => h.LastUpdatedAtLedgerTransaction)
+            .WithMany()
+            .HasForeignKey(h => h.LastUpdatedAtStateVersion)
+            .OnDelete(DeleteBehavior.NoAction) // Reversions need to be handled manually for records in general
+            .HasConstraintName($"FK_{substateNameSnakeCase}_last_updated_transaction");
+    }
+
+    private static void HookupNormalizedEntity<TNormalizedEntity>(ModelBuilder modelBuilder)
+        where TNormalizedEntity : NormalizedEntityBase
+    {
+        var substateNameSnakeCase = typeof(TNormalizedEntity).Name.ToSnakeCase();
+
+        modelBuilder.Entity<TNormalizedEntity>()
+            .HasOne(ne => ne.FromLedgerTransaction)
+            .WithMany()
+            .HasForeignKey(ne => ne.FromStateVersion)
+            .OnDelete(DeleteBehavior.Cascade) // Deletes if ledger is rolled back
+            .HasConstraintName($"FK_{substateNameSnakeCase}_from_transaction");
     }
 }

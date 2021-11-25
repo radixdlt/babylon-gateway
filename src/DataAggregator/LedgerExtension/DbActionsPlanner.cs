@@ -544,7 +544,7 @@ public class DbActionsPlanner
     )
         where TRecord : RecordBase
     {
-        newRecord.LastUpdatedStateVersion = lastTransactionStateVersion;
+        newRecord.LastUpdatedAtStateVersion = lastTransactionStateVersion;
         _dbContext.Set<TRecord>().Add(newRecord);
     }
 
@@ -844,7 +844,7 @@ public class DbActionsPlanner
             else
             {
                 previousRecord.UpdateData(latestData);
-                previousRecord.LastUpdatedStateVersion = latestStateVersion;
+                previousRecord.LastUpdatedAtStateVersion = latestStateVersion;
             }
         }
     }

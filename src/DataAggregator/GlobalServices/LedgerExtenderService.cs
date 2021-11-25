@@ -187,37 +187,11 @@ public class LedgerExtenderService : ILedgerExtenderService
         );
     }
 
-    private async Task EnsureDbLedgerIsInitialized(AggregatorDbContext dbContext, CancellationToken token)
+    private Task EnsureDbLedgerIsInitialized(AggregatorDbContext _, CancellationToken _2)
     {
         _logger.LogInformation("Ledger appears new - so we will ensure it's initialized");
-        await EnsureXrdExists(dbContext, token);
 
         // TODO:NG-40 - Add ledger network creation here
-    }
-
-    private async Task EnsureXrdExists(AggregatorDbContext dbContext, CancellationToken token)
-    {
-        var xrdResourceIdentifier = _entityDeterminer.GetXrdAddress();
-        var existingXrd = await dbContext.Set<Resource>()
-            .Where(r => r.ResourceIdentifier == xrdResourceIdentifier)
-            .SingleOrDefaultAsync(token);
-
-        if (existingXrd != null)
-        {
-            return;
-        }
-
-        // NB - specifying an explicit id of 1 here breaks the table on the next insert:
-        // https://stackoverflow.com/questions/9108833/postgres-autoincrement-not-updated-on-explicit-id-inserts
-        dbContext.Set<Resource>()
-            .Add(new Resource
-            {
-                ResourceIdentifier = xrdResourceIdentifier,
-                RadixEngineAddress = RadixBech32.XrdRadixEngineAddress,
-                FromStateVersion = 0,
-            });
-        await dbContext.SaveChangesAsync(token);
-
-        _logger.LogInformation("Created XRD as first resource (likely but not necessarily with id 1)");
+        return Task.CompletedTask;
     }
 }

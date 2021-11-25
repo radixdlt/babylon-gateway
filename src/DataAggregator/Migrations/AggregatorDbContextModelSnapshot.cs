@@ -108,6 +108,10 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("AccountId", "ResourceId", "FromStateVersion");
 
+                    b.HasIndex("FromStateVersion");
+
+                    b.HasIndex("ToStateVersion");
+
                     b.HasIndex("AccountId", "FromStateVersion");
 
                     b.HasIndex("AccountId", "ResourceId")
@@ -143,6 +147,10 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("AccountId", "ValidatorId", "FromStateVersion");
 
+                    b.HasIndex("FromStateVersion");
+
+                    b.HasIndex("ToStateVersion");
+
                     b.HasIndex("AccountId", "FromStateVersion");
 
                     b.HasIndex("AccountId", "ValidatorId")
@@ -174,10 +182,14 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("ResourceId", "FromStateVersion");
 
+                    b.HasIndex("FromStateVersion");
+
                     b.HasIndex("ResourceId")
                         .IsUnique()
                         .HasDatabaseName("IX_resource_supply_history_current_supply")
                         .HasFilter("to_state_version is null");
+
+                    b.HasIndex("ToStateVersion");
 
                     b.ToTable("resource_supply_history");
                 });
@@ -198,6 +210,10 @@ namespace DataAggregator.Migrations
                         .HasColumnName("to_state_version");
 
                     b.HasKey("ValidatorId", "FromStateVersion");
+
+                    b.HasIndex("FromStateVersion");
+
+                    b.HasIndex("ToStateVersion");
 
                     b.HasIndex("ValidatorId")
                         .IsUnique()
@@ -228,6 +244,10 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
+                    b.Property<DateTime>("CreatedTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_timestamp");
+
                     b.Property<long?>("EndOfEpochRound")
                         .HasColumnType("bigint")
                         .HasColumnName("end_of_round");
@@ -257,13 +277,17 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
+                    b.Property<DateTime>("NormalizedTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
+
+                    b.Property<DateTime>("RoundTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("round_timestamp");
+
                     b.Property<byte[]>("SignedBy")
                         .HasColumnType("bytea")
                         .HasColumnName("signed_by");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("timestamp");
 
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
@@ -281,13 +305,11 @@ namespace DataAggregator.Migrations
 
                     b.HasAlternateKey("TransactionIdentifierHash");
 
-                    b.HasIndex("Timestamp");
+                    b.HasIndex("NormalizedTimestamp");
 
                     b.HasIndex("Epoch", "EndOfEpochRound")
                         .IsUnique()
                         .HasFilter("end_of_round IS NOT NULL");
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Epoch", "EndOfEpochRound"), new[] { "Timestamp" });
 
                     b.ToTable("ledger_transactions");
                 });
@@ -320,6 +342,10 @@ namespace DataAggregator.Migrations
                     b.HasIndex("Address")
                         .IsUnique();
 
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Address"), new[] { "Id" });
+
+                    b.HasIndex("FromStateVersion");
+
                     b.ToTable("accounts");
                 });
 
@@ -348,8 +374,12 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FromStateVersion");
+
                     b.HasIndex("ResourceIdentifier")
                         .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ResourceIdentifier"), new[] { "Id" });
 
                     b.ToTable("resources");
                 });
@@ -382,6 +412,10 @@ namespace DataAggregator.Migrations
                     b.HasIndex("Address")
                         .IsUnique();
 
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Address"), new[] { "Id" });
+
+                    b.HasIndex("FromStateVersion");
+
                     b.ToTable("validators");
                 });
 
@@ -395,11 +429,13 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("validator_id");
 
-                    b.Property<long>("LastUpdatedStateVersion")
+                    b.Property<long>("LastUpdatedAtStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("last_updated_state_version");
 
                     b.HasKey("Epoch", "ValidatorId");
+
+                    b.HasIndex("LastUpdatedAtStateVersion");
 
                     b.HasIndex("ValidatorId", "Epoch");
 
@@ -614,9 +650,6 @@ namespace DataAggregator.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("up_operation_index_in_group");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
                     b.Property<int?>("DownOperationGroupIndex")
                         .HasColumnType("integer")
                         .HasColumnName("down_operation_group_index");
@@ -630,22 +663,6 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("down_state_version");
 
-                    b.Property<BigInteger?>("Granularity")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)");
-
-                    b.Property<string>("IconUrl")
-                        .HasColumnType("text");
-
-                    b.Property<bool?>("IsMutable")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Owner")
-                        .HasColumnType("text");
-
                     b.Property<long>("ResourceId")
                         .HasColumnType("bigint")
                         .HasColumnName("resource_id");
@@ -655,16 +672,10 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("substate_identifier");
 
-                    b.Property<string>("Symbol")
-                        .HasColumnType("text");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("type");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("text");
 
                     b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
 
@@ -843,11 +854,21 @@ namespace DataAggregator.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
                         .WithMany()
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "ToLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("ToStateVersion");
 
                     b.OwnsOne("Common.Database.Models.Ledger.History.BalanceEntry", "BalanceEntry", b1 =>
                         {
@@ -878,7 +899,11 @@ namespace DataAggregator.Migrations
                     b.Navigation("BalanceEntry")
                         .IsRequired();
 
+                    b.Navigation("FromLedgerTransaction");
+
                     b.Navigation("Resource");
+
+                    b.Navigation("ToLedgerTransaction");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.History.AccountValidatorStakeHistory", b =>
@@ -888,6 +913,19 @@ namespace DataAggregator.Migrations
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_account_validator_stake_history_from_transaction");
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "ToLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("ToStateVersion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_account_validator_stake_history_to_transaction");
 
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
                         .WithMany()
@@ -936,19 +974,36 @@ namespace DataAggregator.Migrations
 
                     b.Navigation("Account");
 
+                    b.Navigation("FromLedgerTransaction");
+
                     b.Navigation("StakeSnapshot")
                         .IsRequired();
+
+                    b.Navigation("ToLedgerTransaction");
 
                     b.Navigation("Validator");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.History.ResourceSupplyHistory", b =>
                 {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_resource_supply_history_from_transaction");
+
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
                         .WithMany()
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "ToLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("ToStateVersion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_resource_supply_history_to_transaction");
 
                     b.OwnsOne("Common.Database.Models.Ledger.History.ResourceSupply", "ResourceSupply", b1 =>
                         {
@@ -981,14 +1036,31 @@ namespace DataAggregator.Migrations
                                 .HasForeignKey("ResourceSupplyHistoryResourceId", "ResourceSupplyHistoryFromStateVersion");
                         });
 
+                    b.Navigation("FromLedgerTransaction");
+
                     b.Navigation("Resource");
 
                     b.Navigation("ResourceSupply")
                         .IsRequired();
+
+                    b.Navigation("ToLedgerTransaction");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.History.ValidatorStakeHistory", b =>
                 {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_validator_stake_history_from_transaction");
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "ToLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("ToStateVersion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_validator_stake_history_to_transaction");
+
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
                         .WithMany()
                         .HasForeignKey("ValidatorId")
@@ -1036,8 +1108,12 @@ namespace DataAggregator.Migrations
                                 .HasForeignKey("ValidatorStakeHistoryValidatorId", "ValidatorStakeHistoryFromStateVersion");
                         });
 
+                    b.Navigation("FromLedgerTransaction");
+
                     b.Navigation("StakeSnapshot")
                         .IsRequired();
+
+                    b.Navigation("ToLedgerTransaction");
 
                     b.Navigation("Validator");
                 });
@@ -1104,8 +1180,51 @@ namespace DataAggregator.Migrations
                     b.Navigation("RawTransaction");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.Normalization.Account", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_account_from_transaction");
+
+                    b.Navigation("FromLedgerTransaction");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.Normalization.Resource", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_resource_from_transaction");
+
+                    b.Navigation("FromLedgerTransaction");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.Normalization.Validator", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "FromLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("FromStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_validator_from_transaction");
+
+                    b.Navigation("FromLedgerTransaction");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.Records.ValidatorProposalRecord", b =>
                 {
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LastUpdatedAtLedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("LastUpdatedAtStateVersion")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_validator_proposal_record_last_updated_transaction");
+
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
                         .WithMany()
                         .HasForeignKey("ValidatorId")
@@ -1135,6 +1254,8 @@ namespace DataAggregator.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("ValidatorProposalRecordEpoch", "ValidatorProposalRecordValidatorId");
                         });
+
+                    b.Navigation("LastUpdatedAtLedgerTransaction");
 
                     b.Navigation("ProposalRecord")
                         .IsRequired();
@@ -1271,9 +1392,97 @@ namespace DataAggregator.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_resource_data_substate_up_operation_group");
 
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.TokenData", "TokenData", b1 =>
+                        {
+                            b1.Property<long>("ResourceDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ResourceDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ResourceDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<BigInteger>("Granularity")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("granularity");
+
+                            b1.Property<bool>("IsMutable")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_mutable");
+
+                            b1.Property<long?>("OwnerId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("owner_id");
+
+                            b1.HasKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
+
+                            b1.HasIndex("OwnerId");
+
+                            b1.ToTable("resource_data_substates");
+
+                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Owner")
+                                .WithMany()
+                                .HasForeignKey("OwnerId");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
+
+                            b1.Navigation("Owner");
+                        });
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.TokenMetadata", "TokenMetadata", b1 =>
+                        {
+                            b1.Property<long>("ResourceDataSubstateUpStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("ResourceDataSubstateUpOperationGroupIndex")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("ResourceDataSubstateUpOperationIndexInGroup")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("description");
+
+                            b1.Property<string>("IconUrl")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("icon_url");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("name");
+
+                            b1.Property<string>("Symbol")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("symbol");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("url");
+
+                            b1.HasKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
+
+                            b1.ToTable("resource_data_substates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
+                        });
+
                     b.Navigation("DownOperationGroup");
 
                     b.Navigation("Resource");
+
+                    b.Navigation("TokenData");
+
+                    b.Navigation("TokenMetadata");
 
                     b.Navigation("UpOperationGroup");
                 });

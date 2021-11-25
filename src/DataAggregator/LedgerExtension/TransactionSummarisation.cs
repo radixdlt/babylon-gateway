@@ -78,7 +78,9 @@ public record TransactionSummary(
     bool IsEndOfEpoch,
     byte[] TransactionIdentifierHash,
     byte[] TransactionAccumulator,
-    DateTime CurrentViewTimestamp,
+    DateTime CurrentRoundTimestamp,
+    DateTime CreatedTimestamp,
+    DateTime NormalizedTimestamp,
     long? EndOfEpochRound
 );
 
@@ -99,7 +101,9 @@ public static class TransactionSummarisation
             lastTransaction.IsEndOfEpoch,
             lastTransaction.TransactionIdentifierHash,
             lastTransaction.TransactionAccumulator,
-            lastTransaction.Timestamp,
+            lastTransaction.RoundTimestamp,
+            lastTransaction.CreatedTimestamp,
+            lastTransaction.NormalizedTimestamp,
             lastTransaction.EndOfEpochRound
         );
 
@@ -110,7 +114,7 @@ public static class TransactionSummarisation
     {
         long? newEpochForNextTransaction = null;
         long? endOfEpochRound = null;
-        DateTime? newViewTimestamp = null;
+        DateTime? newRoundTimestamp = null;
         var isOnlyRoundChange = true;
         foreach (var operationGroup in transaction.OperationGroups)
         {
@@ -134,10 +138,17 @@ public static class TransactionSummarisation
                 // NB - the first view of the ledger has Timestamp 0 for some reason. Let's filter it out.
                 if (operation.IsCreateOf<RoundData>(out var newRoundData) && newRoundData.Timestamp != 0)
                 {
-                    newViewTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp).UtcDateTime;
+                    newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp).UtcDateTime;
                 }
             }
         }
+
+        var roundTimestamp = newRoundTimestamp ?? lastTransaction.CurrentRoundTimestamp;
+        var createdTimestamp = DateTime.UtcNow;
+        var normalizedTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
+            roundTimestamp < lastTransaction.NormalizedTimestamp ? lastTransaction.NormalizedTimestamp
+            : roundTimestamp > createdTimestamp ? createdTimestamp
+            : roundTimestamp;
 
         return new TransactionSummary(
             StateVersion: transaction.CommittedStateIdentifier.StateVersion,
@@ -147,7 +158,9 @@ public static class TransactionSummarisation
             IsEndOfEpoch: newEpochForNextTransaction != null,
             TransactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
             TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
-            CurrentViewTimestamp: newViewTimestamp ?? lastTransaction.CurrentViewTimestamp,
+            CurrentRoundTimestamp: roundTimestamp,
+            CreatedTimestamp: createdTimestamp,
+            NormalizedTimestamp: normalizedTimestamp,
             EndOfEpochRound: endOfEpochRound
         );
     }
@@ -162,7 +175,9 @@ public static class TransactionSummarisation
             IsOnlyRoundChange: false,
             TransactionIdentifierHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
-            CurrentViewTimestamp: DateTime.UnixEpoch,
+            CurrentRoundTimestamp: DateTime.UnixEpoch,
+            CreatedTimestamp: DateTime.UtcNow,
+            NormalizedTimestamp: DateTime.UnixEpoch,
             EndOfEpochRound: null
         );
     }

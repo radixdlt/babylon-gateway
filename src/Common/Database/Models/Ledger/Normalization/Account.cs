@@ -72,19 +72,11 @@ namespace Common.Database.Models.Ledger.Normalization;
 /// </summary>
 [Table("accounts")]
 // OnModelCreating: Create unique index on account address
-public class Account
+public class Account : NormalizedEntityBase
 {
-    [Key]
-    [Column(name: "id")]
-    public long Id { get; set; }
-
     [Column(name: "address")]
     public string Address { get; set; }
 
     [Column(name: "public_key")]
     public byte[] PublicKey { get; set; }
-
-    [Column(name: "from_state_version")]
-    // TODO:NG-15 This is to enable the Accounts to be removed if the ledger rolls back
-    public long FromStateVersion { get; set; }
 }
