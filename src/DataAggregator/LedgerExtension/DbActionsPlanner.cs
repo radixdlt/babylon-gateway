@@ -111,7 +111,8 @@ public class DbActionsPlanner
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
     private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
     private readonly HashSet<string> _resourceSupplyHistoryToLoadByRri = new();
-    private readonly HashSet<string> _validatorSupplyHistoryToLoadByValidatorAddress = new();
+    private readonly HashSet<string> _validatorStakeHistoryToLoadByValidatorAddress = new();
+    private readonly HashSet<AccountValidatorDenormalized> _accountValidatorStakeHistoryToLoad = new();
 
     /** Actions which will be performed in order in the ProcessActions step **/
     private readonly List<Action> _dbActions = new();
@@ -126,6 +127,7 @@ public class DbActionsPlanner
     private Dictionary<AccountResource, AccountResourceBalanceHistory>? _latestAccountResourceHistory;
     private Dictionary<Resource, ResourceSupplyHistory>? _latestResourceSupplyHistory;
     private Dictionary<Validator, ValidatorStakeHistory>? _latestValidatorStakeHistory;
+    private Dictionary<AccountValidator, AccountValidatorStakeHistory>? _latestAccountValidatorStakeHistory;
 
     public DbActionsPlanner(AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
     {
@@ -212,10 +214,30 @@ public class DbActionsPlanner
         long transactionStateVersion
     )
     {
-        _validatorSupplyHistoryToLoadByValidatorAddress.Add(historyKey);
+        _validatorStakeHistoryToLoadByValidatorAddress.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
             GetValidator(historyKey),
             _latestValidatorStakeHistory!,
+            createNewHistoryFromPrevious,
+            transactionStateVersion
+        ));
+    }
+
+    /// <summary>
+    /// Note that:
+    /// * historySelector does not need to care about the StateVersion.
+    /// * createNewHistory does not need to care about the StateVersion.
+    /// </summary>
+    public void AddNewAccountValidatorStakeHistoryEntry(
+        AccountValidatorDenormalized historyKey,
+        Func<AccountValidatorStakeHistory?, AccountValidatorStakeHistory> createNewHistoryFromPrevious,
+        long transactionStateVersion
+    )
+    {
+        _accountValidatorStakeHistoryToLoad.Add(historyKey);
+        _dbActions.Add(() => AddNewHistoryEntryFutureAction(
+            new AccountValidator(GetAccount(historyKey.AccountAddress), GetValidator(historyKey.ValidatorAddress)),
+            _latestAccountValidatorStakeHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
@@ -361,6 +383,7 @@ public class DbActionsPlanner
         await LoadAccountResourceBalanceHistoryEntries();
         await LoadResourceSupplyHistoryEntries();
         await LoadValidatorStakeHistoryEntries();
+        await LoadAccountValidatorStakeHistoryEntries();
     }
 
     private void RunActions()
@@ -688,12 +711,12 @@ public class DbActionsPlanner
 
     private async Task LoadValidatorStakeHistoryEntries()
     {
-        if (!_validatorSupplyHistoryToLoadByValidatorAddress.Any())
+        if (!_validatorStakeHistoryToLoadByValidatorAddress.Any())
         {
             return;
         }
 
-        var validatorIds = _validatorSupplyHistoryToLoadByValidatorAddress
+        var validatorIds = _validatorStakeHistoryToLoadByValidatorAddress
             .Select(rri => GetValidator(rri).Id)
             .Where(id => id > 0)
             .ToList();
@@ -708,6 +731,46 @@ public class DbActionsPlanner
             .Where(h => validatorIds.Contains(h.ValidatorId) && h.ToStateVersion == null)
             .ToDictionaryAsync(
                 h => GetValidatorById(h.ValidatorId),
+                _cancellationToken
+            );
+    }
+
+    private async Task LoadAccountValidatorStakeHistoryEntries()
+    {
+        if (!_accountValidatorStakeHistoryToLoad.Any())
+        {
+            return;
+        }
+
+        var dbKeys = new List<long>();
+        foreach (var av in _accountValidatorStakeHistoryToLoad)
+        {
+            var accountId = GetAccount(av.AccountAddress).Id;
+            var validatorId = GetValidator(av.ValidatorAddress).Id;
+            if (accountId == 0 || validatorId == 0)
+            {
+                // Account or Resource isn't yet in the database, so there can't be any history about them!
+                continue;
+            }
+
+            dbKeys.Add(accountId);
+            dbKeys.Add(validatorId);
+        }
+
+        if (!dbKeys.Any())
+        {
+            _latestAccountValidatorStakeHistory = new Dictionary<AccountValidator, AccountValidatorStakeHistory>();
+            return;
+        }
+
+        _latestAccountValidatorStakeHistory = await _dbContext.Set<AccountValidatorStakeHistory>()
+            .FromSqlRawWithDimensionalIn(
+                "SELECT * FROM account_validator_stake_history WHERE to_state_version IS NULL AND (account_id, validator_id)",
+                dbKeys.Cast<object>().ToArray(),
+                2
+            )
+            .ToDictionaryAsync(
+                av => new AccountValidator(GetAccountById(av.AccountId), GetValidatorById(av.ValidatorId)),
                 _cancellationToken
             );
     }

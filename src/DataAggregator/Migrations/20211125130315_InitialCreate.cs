@@ -227,6 +227,36 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "account_validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_validator_stake_history", x => new { x.account_id, x.validator_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_stake_history",
                 columns: table => new
                 {
@@ -236,7 +266,7 @@ namespace DataAggregator.Migrations
                     total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
                     total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
                     total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_exiting_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -616,6 +646,28 @@ namespace DataAggregator.Migrations
                 columns: new[] { "validator_id", "account_id" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_account_validator_stake_history_account_id_from_state_versi~",
+                table: "account_validator_stake_history",
+                columns: new[] { "account_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_validator_stake_history_current_stake",
+                table: "account_validator_stake_history",
+                columns: new[] { "account_id", "validator_id" },
+                unique: true,
+                filter: "to_state_version is null");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_validator_stake_history_validator_id_account_id_fro~",
+                table: "account_validator_stake_history",
+                columns: new[] { "validator_id", "account_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_validator_stake_history_validator_id_from_state_ver~",
+                table: "account_validator_stake_history",
+                columns: new[] { "validator_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_account_xrd_stake_balance_substates_account_id_validator_id",
                 table: "account_xrd_stake_balance_substates",
                 columns: new[] { "account_id", "validator_id" });
@@ -709,7 +761,7 @@ namespace DataAggregator.Migrations
                 column: "validator_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_stake_history_current_supply",
+                name: "IX_validator_stake_history_current_stake",
                 table: "validator_stake_history",
                 column: "validator_id",
                 unique: true,
@@ -732,6 +784,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "account_stake_ownership_balance_substates");
+
+            migrationBuilder.DropTable(
+                name: "account_validator_stake_history");
 
             migrationBuilder.DropTable(
                 name: "account_xrd_stake_balance_substates");

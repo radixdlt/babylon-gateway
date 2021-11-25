@@ -107,6 +107,8 @@ public class CommonDbContext : DbContext
 
     public DbSet<ValidatorStakeHistory> ValidatorStakeHistoryEntries => Set<ValidatorStakeHistory>();
 
+    public DbSet<AccountValidatorStakeHistory> AccountValidatorStakeHistoryEntries => Set<AccountValidatorStakeHistory>();
+
 #pragma warning restore CS1591
 
     public CommonDbContext(DbContextOptions options)
@@ -170,6 +172,7 @@ public class CommonDbContext : DbContext
         HookUpAccountResourceBalanceHistory(modelBuilder);
         HookUpResourceSupplyHistory(modelBuilder);
         HookUpValidatorStakeHistory(modelBuilder);
+        HookUpAccountValidatorStakeHistory(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -234,7 +237,28 @@ public class CommonDbContext : DbContext
             .HasIndex(h => new { h.ValidatorId })
             .HasFilter("to_state_version is null")
             .IsUnique()
-            .HasDatabaseName($"IX_{nameof(ValidatorStakeHistory).ToSnakeCase()}_current_supply");
+            .HasDatabaseName($"IX_{nameof(ValidatorStakeHistory).ToSnakeCase()}_current_stake");
+    }
+
+    private static void HookUpAccountValidatorStakeHistory(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AccountValidatorStakeHistory>()
+            .HasKey(h => new { h.AccountId, h.ValidatorId, h.FromStateVersion });
+
+        modelBuilder.Entity<AccountValidatorStakeHistory>()
+            .HasIndex(h => new { h.AccountId, h.ValidatorId })
+            .HasFilter("to_state_version is null")
+            .IsUnique()
+            .HasDatabaseName($"IX_{nameof(AccountValidatorStakeHistory).ToSnakeCase()}_current_stake");
+
+        // All four of these indices (these three plus the implicit index from the PK) could be useful for different queries
+        // TODO:NG-39 Remove any which aren't important for the APIs we're exposing
+        modelBuilder.Entity<AccountValidatorStakeHistory>()
+            .HasIndex(h => new { h.AccountId, h.FromStateVersion });
+        modelBuilder.Entity<AccountValidatorStakeHistory>()
+            .HasIndex(h => new { h.ValidatorId, h.AccountId, h.FromStateVersion });
+        modelBuilder.Entity<AccountValidatorStakeHistory>()
+            .HasIndex(h => new { h.ValidatorId, h.FromStateVersion });
     }
 
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)

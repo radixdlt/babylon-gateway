@@ -66,48 +66,57 @@ using Common.Database.Models.Ledger.Normalization;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 
 namespace Common.Database.Models.Ledger.History;
 
+public record struct AccountValidator(Account Account, Validator Validator);
+public record struct AccountValidatorDenormalized(string AccountAddress, string ValidatorAddress);
+
 /// <summary>
-/// Tracks validator stake over time.
+/// Tracks an account's stake to a validator stake over time.
 /// </summary>
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
-[Table("validator_stake_history")]
-public class ValidatorStakeHistory : HistoryBase<Validator, ValidatorStakeSnapshot, ValidatorStakeSnapshotChange>
+[Table("account_validator_stake_history")]
+public class AccountValidatorStakeHistory : HistoryBase<AccountValidator, AccountValidatorStakeSnapshot, AccountValidatorStakeSnapshotChange>
 {
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
+
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
+
     [Column(name: "validator_id")]
     public long ValidatorId { get; set; }
 
     [ForeignKey(nameof(ValidatorId))]
     public Validator Validator { get; set; }
 
-    // [Owned] below
-    public ValidatorStakeSnapshot StakeSnapshot { get; set; }
+    // [Owned] - see below
+    public AccountValidatorStakeSnapshot StakeSnapshot { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ValidatorStakeHistory"/> class.
+    /// Initializes a new instance of the <see cref="AccountValidatorStakeHistory"/> class.
     /// The StateVersions should be set separately.
     /// </summary>
-    public ValidatorStakeHistory(Validator key, ValidatorStakeSnapshot stakeSnapshot)
+    public AccountValidatorStakeHistory(AccountValidator key, AccountValidatorStakeSnapshot stakeSnapshot)
     {
-        Validator = key;
+        Account = key.Account;
+        Validator = key.Validator;
         StakeSnapshot = stakeSnapshot;
     }
 
-    public static ValidatorStakeHistory FromPreviousEntry(
-        Validator key,
-        ValidatorStakeSnapshot? previous,
-        ValidatorStakeSnapshotChange change
+    public static AccountValidatorStakeHistory FromPreviousEntry(
+        AccountValidator key,
+        AccountValidatorStakeSnapshot? previous,
+        AccountValidatorStakeSnapshotChange change
     )
     {
-        var prev = previous ?? ValidatorStakeSnapshot.GetDefault();
-        return new ValidatorStakeHistory(key, prev.CreateNewFromChange(change));
+        var prev = previous ?? AccountValidatorStakeSnapshot.GetDefault();
+        return new AccountValidatorStakeHistory(key, prev.CreateNewFromChange(change));
     }
 
-    private ValidatorStakeHistory()
+    private AccountValidatorStakeHistory()
     {
     }
 }
@@ -115,10 +124,8 @@ public class ValidatorStakeHistory : HistoryBase<Validator, ValidatorStakeSnapsh
 /// <summary>
 /// A mutable class to aggregate changes.
 /// </summary>
-public class ValidatorStakeSnapshotChange
+public class AccountValidatorStakeSnapshotChange
 {
-    public TokenAmount ChangeInXrdStake { get; set; }
-
     public TokenAmount ChangeInStakeOwnership { get; set; }
 
     public TokenAmount ChangeInPreparedXrdStake { get; set; }
@@ -127,15 +134,14 @@ public class ValidatorStakeSnapshotChange
 
     public TokenAmount ChangeInExitingXrdStake { get; set; }
 
-    public static ValidatorStakeSnapshotChange Default()
+    public static AccountValidatorStakeSnapshotChange Default()
     {
-        return new ValidatorStakeSnapshotChange();
+        return new AccountValidatorStakeSnapshotChange();
     }
 
     public bool IsMeaningfulChange()
     {
         return !(
-            ChangeInXrdStake.IsZero() &&
             ChangeInStakeOwnership.IsZero() &&
             ChangeInPreparedXrdStake.IsZero() &&
             ChangeInPreparedUnstakeOwnership.IsZero() &&
@@ -145,16 +151,10 @@ public class ValidatorStakeSnapshotChange
 
     public bool IsNaN()
     {
-        return ChangeInXrdStake.IsNaN() ||
-               ChangeInStakeOwnership.IsNaN() ||
+        return ChangeInStakeOwnership.IsNaN() ||
                ChangeInPreparedXrdStake.IsNaN() ||
                ChangeInPreparedUnstakeOwnership.IsNaN() ||
                ChangeInExitingXrdStake.IsNaN();
-    }
-
-    public void AggregateXrdStakeChange(TokenAmount change)
-    {
-        ChangeInXrdStake += change;
     }
 
     public void AggregateStakeOwnershipChange(TokenAmount change)
@@ -178,12 +178,15 @@ public class ValidatorStakeSnapshotChange
     }
 }
 
+/// <summary>
+/// Like ValidatorStakeSnapshot, except it doesn't track the XRD in the validator's stake pool
+/// (as that changes over time, and is captured by the ValidatorStakeSnapshot).
+/// To calculate the effective XRD staked by this account to the validator at a given state version, perform:
+/// Validator_XrdStaked * (AccountValidator_TotalStakeOwnership / Validator_TotalStakeOwnership).
+/// </summary>
 [Owned]
-public record ValidatorStakeSnapshot
+public record AccountValidatorStakeSnapshot
 {
-    [Column("total_xrd_staked")]
-    public TokenAmount TotalXrdStake { get; set; }
-
     [Column("total_stake_ownership")]
     public TokenAmount TotalStakeOwnership { get; set; }
 
@@ -196,11 +199,10 @@ public record ValidatorStakeSnapshot
     [Column("total_exiting_xrd_stake")]
     public TokenAmount TotalExitingXrdStake { get; set; }
 
-    public static ValidatorStakeSnapshot GetDefault()
+    public static AccountValidatorStakeSnapshot GetDefault()
     {
-        return new ValidatorStakeSnapshot
+        return new AccountValidatorStakeSnapshot
         {
-            TotalXrdStake = TokenAmount.Zero,
             TotalStakeOwnership = TokenAmount.Zero,
             TotalPreparedXrdStake = TokenAmount.Zero,
             TotalPreparedUnstakeOwnership = TokenAmount.Zero,
@@ -208,11 +210,10 @@ public record ValidatorStakeSnapshot
         };
     }
 
-    public ValidatorStakeSnapshot CreateNewFromChange(ValidatorStakeSnapshotChange change)
+    public AccountValidatorStakeSnapshot CreateNewFromChange(AccountValidatorStakeSnapshotChange change)
     {
-        return new ValidatorStakeSnapshot
+        return new AccountValidatorStakeSnapshot
         {
-            TotalXrdStake = TotalXrdStake + change.ChangeInXrdStake,
             TotalStakeOwnership = TotalStakeOwnership + change.ChangeInStakeOwnership,
             TotalPreparedXrdStake = TotalPreparedXrdStake + change.ChangeInPreparedXrdStake,
             TotalPreparedUnstakeOwnership = TotalPreparedUnstakeOwnership + change.ChangeInPreparedUnstakeOwnership,

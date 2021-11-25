@@ -122,6 +122,41 @@ namespace DataAggregator.Migrations
                     b.ToTable("account_resource_balance_history");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.AccountValidatorStakeHistory", b =>
+                {
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<long>("ValidatorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long?>("ToStateVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("to_state_version");
+
+                    b.HasKey("AccountId", "ValidatorId", "FromStateVersion");
+
+                    b.HasIndex("AccountId", "FromStateVersion");
+
+                    b.HasIndex("AccountId", "ValidatorId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_account_validator_stake_history_current_stake")
+                        .HasFilter("to_state_version is null");
+
+                    b.HasIndex("ValidatorId", "FromStateVersion");
+
+                    b.HasIndex("ValidatorId", "AccountId", "FromStateVersion");
+
+                    b.ToTable("account_validator_stake_history");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.History.ResourceSupplyHistory", b =>
                 {
                     b.Property<long>("ResourceId")
@@ -166,7 +201,7 @@ namespace DataAggregator.Migrations
 
                     b.HasIndex("ValidatorId")
                         .IsUnique()
-                        .HasDatabaseName("IX_validator_stake_history_current_supply")
+                        .HasDatabaseName("IX_validator_stake_history_current_stake")
                         .HasFilter("to_state_version is null");
 
                     b.ToTable("validator_stake_history");
@@ -825,6 +860,67 @@ namespace DataAggregator.Migrations
                     b.Navigation("Resource");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.History.AccountValidatorStakeHistory", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
+                        .WithMany()
+                        .HasForeignKey("ValidatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Common.Database.Models.Ledger.History.AccountValidatorStakeSnapshot", "StakeSnapshot", b1 =>
+                        {
+                            b1.Property<long>("AccountValidatorStakeHistoryAccountId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("AccountValidatorStakeHistoryValidatorId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("AccountValidatorStakeHistoryFromStateVersion")
+                                .HasColumnType("bigint");
+
+                            b1.Property<BigInteger>("TotalExitingXrdStake")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_exiting_xrd_stake");
+
+                            b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_prepared_unstake_ownership");
+
+                            b1.Property<BigInteger>("TotalPreparedXrdStake")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_prepared_xrd_stake");
+
+                            b1.Property<BigInteger>("TotalStakeOwnership")
+                                .HasPrecision(1000)
+                                .HasColumnType("numeric(1000)")
+                                .HasColumnName("total_stake_ownership");
+
+                            b1.HasKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
+
+                            b1.ToTable("account_validator_stake_history");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
+                        });
+
+                    b.Navigation("Account");
+
+                    b.Navigation("StakeSnapshot")
+                        .IsRequired();
+
+                    b.Navigation("Validator");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.History.ResourceSupplyHistory", b =>
                 {
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
@@ -878,7 +974,7 @@ namespace DataAggregator.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Common.Database.Models.Ledger.History.StakeSnapshot", "StakeSnapshot", b1 =>
+                    b.OwnsOne("Common.Database.Models.Ledger.History.ValidatorStakeSnapshot", "StakeSnapshot", b1 =>
                         {
                             b1.Property<long>("ValidatorStakeHistoryValidatorId")
                                 .HasColumnType("bigint");
@@ -889,7 +985,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalExitingXrdStake")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000)")
-                                .HasColumnName("total_exiting_stake_ownership");
+                                .HasColumnName("total_exiting_xrd_stake");
 
                             b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
                                 .HasPrecision(1000)

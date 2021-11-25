@@ -115,8 +115,6 @@ public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, Resou
     private ResourceSupplyHistory()
     {
     }
-
-    public static Expression<Func<ResourceSupplyHistory, bool>> IsCurrent => h => h.ToStateVersion == null;
 }
 
 /// <summary>
