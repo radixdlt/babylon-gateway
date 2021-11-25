@@ -14,7 +14,7 @@ services:
       - POSTGRES_DB=radixdlt_ledger
   dev_pgadmin:
     # See https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html
-    image: "dpage/pgadmin4"
+    image: "dpage/pgadmin4:6.2"
     ports:
       - "5050:80"
     volumes:
