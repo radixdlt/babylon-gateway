@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -103,12 +104,15 @@ public class ValidatorDataSubstateTypeValueConverter : EnumTypeValueConverterBas
 /// Combines ValidatorStakeData, ValidatorMetaData, ValidatorAllowDelegation,
 /// PreparedValidatorRegistered, PreparedValidatorFee, PreparedValidatorOwner.
 /// </summary>
-[Index(nameof(ValidatorAddress))]
+[Index(nameof(ValidatorId))]
 [Table("validator_data_substates")]
 public class ValidatorDataSubstate : DataSubstateBase
 {
-    [Column(name: "validator_address")]
-    public string ValidatorAddress { get; set; }
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
 
     [Column(name: "type")]
     public ValidatorDataSubstateType Type { get; set; }
@@ -133,9 +137,9 @@ public class ValidatorDataSubstate : DataSubstateBase
     /// Initializes a new instance of the <see cref="ValidatorDataSubstate"/> class.
     /// The SubstateBase properties should be set separately.
     /// </summary>
-    public ValidatorDataSubstate(string validatorAddress, ValidatorDataSubstateType type, long? effectiveEpoch, ValidatorData? validatorData, ValidatorMetadata? validatorMetaData, ValidatorAllowDelegation? validatorAllowDelegation, PreparedValidatorRegistered? preparedValidatorRegistered, PreparedValidatorFee? preparedValidatorFee, PreparedValidatorOwner? preparedValidatorOwner)
+    public ValidatorDataSubstate(Validator validator, ValidatorDataSubstateType type, long? effectiveEpoch, ValidatorData? validatorData, ValidatorMetadata? validatorMetaData, ValidatorAllowDelegation? validatorAllowDelegation, PreparedValidatorRegistered? preparedValidatorRegistered, PreparedValidatorFee? preparedValidatorFee, PreparedValidatorOwner? preparedValidatorOwner)
     {
-        ValidatorAddress = validatorAddress;
+        Validator = validator;
         Type = type;
         EffectiveEpoch = effectiveEpoch;
         ValidatorData = validatorData;
@@ -152,7 +156,7 @@ public class ValidatorDataSubstate : DataSubstateBase
 
     public bool SubstateMatches(ValidatorDataSubstate otherSubstate)
     {
-        return ValidatorAddress == otherSubstate.ValidatorAddress
+        return Validator == otherSubstate.Validator
                && Type == otherSubstate.Type
                && EffectiveEpoch == otherSubstate.EffectiveEpoch
                && ValidatorData == otherSubstate.ValidatorData
@@ -178,7 +182,7 @@ public record ValidatorDataObjects(
     {
     }
 
-    public ValidatorDataSubstate ToDbValidatorData(string validatorAddress)
+    public ValidatorDataSubstate ToDbValidatorData(Validator validator, Account? validatorOwner)
     {
         var type = ValidatorData != null ? ValidatorDataSubstateType.ValidatorData
             : ValidatorMetadata != null ? ValidatorDataSubstateType.ValidatorMetaData
@@ -193,15 +197,15 @@ public record ValidatorDataObjects(
                              ?? PreparedValidatorOwner?.Epoch;
 
         return new ValidatorDataSubstate(
-            validatorAddress: validatorAddress,
+            validator: validator,
             type: type,
             effectiveEpoch: effectiveEpoch,
-            validatorData: Db.ValidatorData.From(ValidatorData),
+            validatorData: Db.ValidatorData.From(ValidatorData, validatorOwner),
             validatorMetaData: Db.ValidatorMetadata.From(ValidatorMetadata),
             validatorAllowDelegation: Db.ValidatorAllowDelegation.From(ValidatorAllowDelegation),
             preparedValidatorRegistered: Db.PreparedValidatorRegistered.From(PreparedValidatorRegistered),
             preparedValidatorFee: Db.PreparedValidatorFee.From(PreparedValidatorFee),
-            preparedValidatorOwner: Db.PreparedValidatorOwner.From(PreparedValidatorOwner)
+            preparedValidatorOwner: Db.PreparedValidatorOwner.From(PreparedValidatorOwner, validatorOwner)
         );
     }
 }
@@ -210,8 +214,11 @@ public record ValidatorDataObjects(
 // Aka ValidatorStakeData in the engine
 public record ValidatorData
 {
-    [Column(name: "owner")]
-    public string Owner { get; set; }
+    [Column(name: "owner_id")]
+    public long OwnerId { get; set; }
+
+    [ForeignKey(nameof(OwnerId))]
+    public Account Owner { get; set; }
 
     [Column(name: "is_registered")]
     public bool IsRegistered { get; set; }
@@ -219,12 +226,13 @@ public record ValidatorData
     [Column(name: "fee_percentage")]
     public decimal FeePercentage { get; set; }
 
-    public static ValidatorData? From(Api.ValidatorData? apiModel)
+    public static ValidatorData? From(Api.ValidatorData? apiModel, Account? validatorOwner)
     {
         return apiModel == null ? null
             : new ValidatorData
             {
-                Owner = apiModel.Owner,
+                OwnerId = validatorOwner!.Id,
+                Owner = validatorOwner,
                 IsRegistered = apiModel.Registered,
                 FeePercentage = ((decimal)apiModel.Fee) / 100,
             };
@@ -291,12 +299,19 @@ public record PreparedValidatorFee
 [Owned]
 public record PreparedValidatorOwner
 {
-    [Column(name: "prepared_owner")]
-    public string PreparedOwner { get; set; }
+    [Column(name: "prepared_owner_id")]
+    public long PreparedOwnerId { get; set; }
 
-    public static PreparedValidatorOwner? From(Api.PreparedValidatorOwner? apiModel)
+    [ForeignKey(nameof(PreparedOwnerId))]
+    public Account PreparedOwner { get; set; }
+
+    public static PreparedValidatorOwner? From(Api.PreparedValidatorOwner? apiModel, Account? validatorOwner)
     {
         return apiModel == null ? null
-            : new PreparedValidatorOwner { PreparedOwner = apiModel.Owner };
+            : new PreparedValidatorOwner
+            {
+                PreparedOwnerId = validatorOwner!.Id,
+                PreparedOwner = validatorOwner,
+            };
     }
 }

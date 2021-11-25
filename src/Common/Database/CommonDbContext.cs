@@ -145,9 +145,17 @@ public class CommonDbContext : DbContext
             .HasIndex(r => r.ResourceIdentifier)
             .IsUnique();
 
+        modelBuilder.Entity<Account>()
+            .HasIndex(r => r.Address)
+            .IsUnique();
+
+        modelBuilder.Entity<Validator>()
+            .HasIndex(r => r.Address)
+            .IsUnique();
+
         HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
         modelBuilder.Entity<AccountResourceBalanceSubstate>()
-            .HasIndex(s => new { s.AccountAddress, TokenId = s.ResourceId, s.Amount })
+            .HasIndex(s => new { s.AccountId, s.ResourceId, s.Amount })
             .IncludeProperties(s => new { s.SubstateIdentifier })
             .HasFilter("down_state_version is null")
             .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate).ToSnakeCase()}_current_unspent_utxos");
@@ -187,10 +195,10 @@ public class CommonDbContext : DbContext
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasKey(h => new { h.AccountAddress, h.ResourceId, h.FromStateVersion });
+            .HasKey(h => new { h.AccountId, h.ResourceId, h.FromStateVersion });
 
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.AccountAddress, h.ResourceId })
+            .HasIndex(h => new { h.AccountId, h.ResourceId })
             .HasFilter("to_state_version is null")
             .IsUnique()
             .HasDatabaseName($"IX_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
@@ -198,9 +206,9 @@ public class CommonDbContext : DbContext
         // All four of these indices (these three plus the implicit index from the PK) could be useful for different queries
         // TODO:NG-39 Remove any which aren't important for the APIs we're exposing
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.AccountAddress, h.FromStateVersion });
+            .HasIndex(h => new { h.AccountId, h.FromStateVersion });
         modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.ResourceId, h.AccountAddress, h.FromStateVersion });
+            .HasIndex(h => new { h.ResourceId, h.AccountId, h.FromStateVersion });
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasIndex(h => new { h.ResourceId, h.FromStateVersion });
     }
@@ -220,10 +228,10 @@ public class CommonDbContext : DbContext
     private static void HookUpValidatorStakeHistory(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ValidatorStakeHistory>()
-            .HasKey(h => new { h.ValidatorAddress, h.FromStateVersion });
+            .HasKey(h => new { h.ValidatorId, h.FromStateVersion });
 
         modelBuilder.Entity<ValidatorStakeHistory>()
-            .HasIndex(h => new { h.ValidatorAddress })
+            .HasIndex(h => new { h.ValidatorId })
             .HasFilter("to_state_version is null")
             .IsUnique()
             .HasDatabaseName($"IX_{nameof(ValidatorStakeHistory).ToSnakeCase()}_current_supply");

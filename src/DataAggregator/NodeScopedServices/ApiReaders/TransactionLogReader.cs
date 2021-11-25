@@ -75,7 +75,7 @@ public interface ITransactionLogReader
 public class TransactionLogReader : ITransactionLogReader
 {
     private readonly INetworkDetailsProvider _networkDetailsProvider;
-    private INodeCoreApiProvider _apiProvider;
+    private readonly INodeCoreApiProvider _apiProvider;
 
     public TransactionLogReader(INetworkDetailsProvider networkDetailsProvider, INodeCoreApiProvider apiProvider)
     {

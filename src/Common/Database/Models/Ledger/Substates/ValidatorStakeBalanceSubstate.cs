@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -78,8 +79,8 @@ namespace Common.Database.Models.Ledger.Substates;
 ///       we split it when we store it in the database.
 /// </para>
 /// </summary>
-[Index(nameof(EndOfEpoch), nameof(ValidatorAddress), IsUnique = true)]
-[Index(nameof(ValidatorAddress))]
+[Index(nameof(EndOfEpoch), nameof(ValidatorId), IsUnique = true)]
+[Index(nameof(ValidatorId))]
 [Table("validator_stake_balance_substates")]
 public class ValidatorStakeBalanceSubstate : BalanceSubstateBase
 {
@@ -87,9 +88,9 @@ public class ValidatorStakeBalanceSubstate : BalanceSubstateBase
     /// Initializes a new instance of the <see cref="ValidatorStakeBalanceSubstate"/> class.
     /// The SubstateBase properties should be set separately.
     /// </summary>
-    public ValidatorStakeBalanceSubstate(string validatorAddress, long endOfEpoch, TokenAmount xrdStakeBalance)
+    public ValidatorStakeBalanceSubstate(Validator validator, long endOfEpoch, TokenAmount xrdStakeBalance)
     {
-        ValidatorAddress = validatorAddress;
+        Validator = validator;
         EndOfEpoch = endOfEpoch;
         Amount = xrdStakeBalance;
     }
@@ -98,8 +99,11 @@ public class ValidatorStakeBalanceSubstate : BalanceSubstateBase
     {
     }
 
-    [Column(name: "validator_address")]
-    public string ValidatorAddress { get; set; }
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
 
     [Column(name: "epoch")]
     public long EndOfEpoch { get; set; }

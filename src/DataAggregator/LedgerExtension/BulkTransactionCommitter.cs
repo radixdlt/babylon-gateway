@@ -89,7 +89,6 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
 {
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly AggregatorDbContext _dbContext;
-    private readonly CancellationToken _cancellationToken;
     private readonly DbActionsPlanner _dbActionsPlanner;
 
     public BulkTransactionCommitter(
@@ -100,8 +99,7 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
     {
         _entityDeterminer = entityDeterminer;
         _dbContext = dbContext;
-        _cancellationToken = cancellationToken;
-        _dbActionsPlanner = new DbActionsPlanner(_dbContext, _cancellationToken);
+        _dbActionsPlanner = new DbActionsPlanner(_dbContext, _entityDeterminer, cancellationToken);
     }
 
     public async Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)

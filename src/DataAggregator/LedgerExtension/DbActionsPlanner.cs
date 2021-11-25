@@ -70,6 +70,7 @@ using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
+using DataAggregator.GlobalServices;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAggregator.LedgerExtension;
@@ -100,10 +101,13 @@ public record ActionsPlannerReport(
 public class DbActionsPlanner
 {
     private readonly AggregatorDbContext _dbContext;
+    private readonly IEntityDeterminer _entityDeterminer;
     private readonly CancellationToken _cancellationToken;
 
     /** Things to load in the LoadDependencies step **/
     private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new(); // The long is the first state version at which it appears
+    private readonly Dictionary<string, long> _accountsToLoadOrCreate = new(); // The long is the first state version at which it appears
+    private readonly Dictionary<string, long> _validatorsToLoadOrCreate = new(); // The long is the first state version at which it appears
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
     private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
     private readonly HashSet<string> _resourceSupplyHistoryToLoadByRri = new();
@@ -117,13 +121,16 @@ public class DbActionsPlanner
      * These should be null until they're created in the LoadDependencies step. */
     private readonly Dictionary<Type, Dictionary<byte[], SubstateBase>?> _localSubstates = new();
     private Dictionary<string, Resource>? _resourceLookupByRri;
-    private Dictionary<AccountResourceIds, AccountResourceBalanceHistory>? _latestAccountResourceHistory;
-    private Dictionary<long, ResourceSupplyHistory>? _latestResourceSupplyHistoryByResourceId;
-    private Dictionary<string, ValidatorStakeHistory>? _latestValidatorStakeHistoryByValidatorAddress;
+    private Dictionary<string, Account>? _accountLookupByAddress;
+    private Dictionary<string, Validator>? _validatorLookupByAddress;
+    private Dictionary<AccountResource, AccountResourceBalanceHistory>? _latestAccountResourceHistory;
+    private Dictionary<Resource, ResourceSupplyHistory>? _latestResourceSupplyHistory;
+    private Dictionary<Validator, ValidatorStakeHistory>? _latestValidatorStakeHistory;
 
-    public DbActionsPlanner(AggregatorDbContext dbContext, CancellationToken cancellationToken)
+    public DbActionsPlanner(AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
     {
         _dbContext = dbContext;
+        _entityDeterminer = entityDeterminer;
         _cancellationToken = cancellationToken;
     }
 
@@ -167,7 +174,7 @@ public class DbActionsPlanner
     {
         _accountResourceHistoryToLoad.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            new AccountResourceIds(historyKey.AccountAddress, GetResource(historyKey.Rri).Id),
+            new AccountResource(GetAccount(historyKey.AccountAddress), GetResource(historyKey.Rri)),
             _latestAccountResourceHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
@@ -187,8 +194,8 @@ public class DbActionsPlanner
     {
         _resourceSupplyHistoryToLoadByRri.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            GetResource(historyKey).Id,
-            _latestResourceSupplyHistoryByResourceId!,
+            GetResource(historyKey),
+            _latestResourceSupplyHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
@@ -207,21 +214,41 @@ public class DbActionsPlanner
     {
         _validatorSupplyHistoryToLoadByValidatorAddress.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            historyKey,
-            _latestValidatorStakeHistoryByValidatorAddress!,
+            GetValidator(historyKey),
+            _latestValidatorStakeHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
     }
 
     /// <summary>
-    /// This registers the the resource needs to be loaded as a dependency, and returns a resource
-    /// lookup which can be used in the action phase to resolve a resourceIdentifier into a Resource.
+    /// This registers that the resource needs to be loaded as a dependency, and returns a resource
+    /// lookup which can be used in the action phase to resolve the Resource.
     /// </summary>
     public Func<Resource> ResolveResource(string resourceIdentifier, long seenAtStateVersion)
     {
         EnsureResourceLoaded(resourceIdentifier, seenAtStateVersion);
         return () => GetResource(resourceIdentifier);
+    }
+
+    /// <summary>
+    /// This registers that the account needs to be loaded as a dependency, and returns an account
+    /// lookup which can be used in the action phase to resolve the Account.
+    /// </summary>
+    public Func<Account> ResolveAccount(string accountAddress, long seenAtStateVersion)
+    {
+        EnsureAccountLoaded(accountAddress, seenAtStateVersion);
+        return () => GetAccount(accountAddress);
+    }
+
+    /// <summary>
+    /// This registers that the validator needs to be loaded as a dependency, and returns a validator
+    /// lookup which can be used in the action phase to resolve the Validator.
+    /// </summary>
+    public Func<Validator> ResolveValidator(string validatorAddress, long seenAtStateVersion)
+    {
+        EnsureValidatorLoaded(validatorAddress, seenAtStateVersion);
+        return () => GetValidator(validatorAddress);
     }
 
     public async Task<ActionsPlannerReport> ProcessAllChanges()
@@ -246,6 +273,14 @@ public class DbActionsPlanner
         return _resourceLookupByRri![resourceIdentifier];
     }
 
+    /// <summary>
+    /// Should only be used after Resources have been fetched, so the lookup is local.
+    /// </summary>
+    private Resource GetResourceById(long resourceId)
+    {
+        return _dbContext.Set<Resource>().Find(resourceId)!;
+    }
+
     private void EnsureResourceLoaded(string resourceIdentifier, long seenAtStateVersion)
     {
         if (!_resourcesToLoadOrCreate.ContainsKey(resourceIdentifier))
@@ -254,9 +289,69 @@ public class DbActionsPlanner
         }
     }
 
+    /// <summary>
+    /// This can only be called from the action phase (else it throws a null-ref).
+    /// A call to this must have been pre-empted by a call to EnsureAccountLoaded in the dependencies phase.
+    /// If this method throws, this is because the EnsureAccountLoaded call was forgotten.
+    ///
+    /// NB - The account's id can be as 0, as the account may not have actually been created yet.
+    ///      So be sure to use the account itself so EF Core can resolve the entity graph correctly upon save.
+    /// </summary>
+    private Account GetAccount(string accountAddress)
+    {
+        return _accountLookupByAddress![accountAddress];
+    }
+
+    /// <summary>
+    /// Should only be used after Accounts have been fetched, so the lookup is local.
+    /// </summary>
+    private Account GetAccountById(long accountId)
+    {
+        return _dbContext.Set<Account>().Find(accountId)!;
+    }
+
+    private void EnsureAccountLoaded(string accountAddress, long seenAtStateVersion)
+    {
+        if (!_accountsToLoadOrCreate.ContainsKey(accountAddress))
+        {
+            _accountsToLoadOrCreate[accountAddress] = seenAtStateVersion;
+        }
+    }
+
+    /// <summary>
+    /// This can only be called from the action phase (else it throws a null-ref).
+    /// A call to this must have been pre-empted by a call to EnsureValidatorLoaded in the dependencies phase.
+    /// If this method throws, this is because the EnsureValidatorLoaded call was forgotten.
+    ///
+    /// NB - The validator's id can be as 0, as the validator may not have actually been created yet.
+    ///      So be sure to use the validator itself so EF Core can resolve the entity graph correctly upon save.
+    /// </summary>
+    private Validator GetValidator(string validatorAddress)
+    {
+        return _validatorLookupByAddress![validatorAddress];
+    }
+
+    /// <summary>
+    /// Should only be used after Validators have been fetched, so the lookup is local.
+    /// </summary>
+    private Validator GetValidatorById(long validatorId)
+    {
+        return _dbContext.Set<Validator>().Find(validatorId)!;
+    }
+
+    private void EnsureValidatorLoaded(string validatorAddress, long seenAtStateVersion)
+    {
+        if (!_validatorsToLoadOrCreate.ContainsKey(validatorAddress))
+        {
+            _validatorsToLoadOrCreate[validatorAddress] = seenAtStateVersion;
+        }
+    }
+
     private async Task LoadDependencies()
     {
         await LoadOrCreateResources();
+        await LoadOrCreateAccounts();
+        await LoadOrCreateValidators();
         await LoadSubstatesOfType<AccountResourceBalanceSubstate>();
         await LoadSubstatesOfType<AccountStakeOwnershipBalanceSubstate>();
         await LoadSubstatesOfType<AccountXrdStakeBalanceSubstate>();
@@ -431,10 +526,76 @@ public class DbActionsPlanner
 
             var resource = new Resource
             {
-                ResourceIdentifier = rri, FromStateVersion = fromStateVersion,
+                ResourceIdentifier = rri,
+                RadixEngineAddress = _entityDeterminer.ParseResourceRadixEngineAddress(rri),
+                FromStateVersion = fromStateVersion,
             };
             _dbContext.Set<Resource>().Add(resource);
             _resourceLookupByRri.Add(rri, resource);
+        }
+    }
+
+    private async Task LoadOrCreateAccounts()
+    {
+        if (_accountsToLoadOrCreate.Count == 0)
+        {
+            return;
+        }
+
+        _accountLookupByAddress = await _dbContext.Set<Account>()
+            .Where(a => _accountsToLoadOrCreate.Keys.Contains(a.Address))
+            .ToDictionaryAsync(
+                a => a.Address,
+                _cancellationToken
+            );
+
+        foreach (var (accountAddress, fromStateVersion) in _accountsToLoadOrCreate)
+        {
+            if (_accountLookupByAddress.ContainsKey(accountAddress))
+            {
+                continue;
+            }
+
+            var account = new Account
+            {
+                Address = accountAddress,
+                PublicKey = _entityDeterminer.ParseAccountPublicKey(accountAddress),
+                FromStateVersion = fromStateVersion,
+            };
+            _dbContext.Set<Account>().Add(account);
+            _accountLookupByAddress.Add(accountAddress, account);
+        }
+    }
+
+    private async Task LoadOrCreateValidators()
+    {
+        if (_validatorsToLoadOrCreate.Count == 0)
+        {
+            return;
+        }
+
+        _validatorLookupByAddress = await _dbContext.Set<Validator>()
+            .Where(v => _validatorsToLoadOrCreate.Keys.Contains(v.Address))
+            .ToDictionaryAsync(
+                v => v.Address,
+                _cancellationToken
+            );
+
+        foreach (var (validatorAddress, fromStateVersion) in _validatorsToLoadOrCreate)
+        {
+            if (_validatorLookupByAddress.ContainsKey(validatorAddress))
+            {
+                continue;
+            }
+
+            var validator = new Validator
+            {
+                Address = validatorAddress,
+                PublicKey = _entityDeterminer.ParseValidatorPublicKey(validatorAddress),
+                FromStateVersion = fromStateVersion,
+            };
+            _dbContext.Set<Validator>().Add(validator);
+            _validatorLookupByAddress.Add(validatorAddress, validator);
         }
     }
 
@@ -466,14 +627,35 @@ public class DbActionsPlanner
             return;
         }
 
+        var dbKeys = new List<long>();
+        foreach (var ar in _accountResourceHistoryToLoad)
+        {
+            var accountId = GetAccount(ar.AccountAddress).Id;
+            var resourceId = GetResource(ar.Rri).Id;
+            if (accountId == 0 || resourceId == 0)
+            {
+                // Account or Resource isn't yet in the database, so there can't be any history about them!
+                continue;
+            }
+
+            dbKeys.Add(accountId);
+            dbKeys.Add(resourceId);
+        }
+
+        if (!dbKeys.Any())
+        {
+            _latestAccountResourceHistory = new Dictionary<AccountResource, AccountResourceBalanceHistory>();
+            return;
+        }
+
         _latestAccountResourceHistory = await _dbContext.Set<AccountResourceBalanceHistory>()
             .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM account_resource_balance_history WHERE to_state_version IS NULL AND (account_address, resource_id)",
-                _accountResourceHistoryToLoad,
-                ar => new object[] { ar.AccountAddress, GetResource(ar.Rri).Id }
+                "SELECT * FROM account_resource_balance_history WHERE to_state_version IS NULL AND (account_id, resource_id)",
+                dbKeys.Cast<object>().ToArray(),
+                2
             )
             .ToDictionaryAsync(
-                ar => new AccountResourceIds(ar.AccountAddress, ar.ResourceId),
+                ar => new AccountResource(GetAccountById(ar.AccountId), GetResourceById(ar.ResourceId)),
                 _cancellationToken
             );
     }
@@ -485,12 +667,21 @@ public class DbActionsPlanner
             return;
         }
 
-        var resourceIds = _resourceSupplyHistoryToLoadByRri.Select(rri => GetResource(rri).Id);
+        var resourceIds = _resourceSupplyHistoryToLoadByRri
+            .Select(rri => GetResource(rri).Id)
+            .Where(id => id > 0)
+            .ToList();
 
-        _latestResourceSupplyHistoryByResourceId = await _dbContext.Set<ResourceSupplyHistory>()
+        if (!resourceIds.Any())
+        {
+            _latestResourceSupplyHistory = new Dictionary<Resource, ResourceSupplyHistory>();
+            return;
+        }
+
+        _latestResourceSupplyHistory = await _dbContext.Set<ResourceSupplyHistory>()
             .Where(h => resourceIds.Contains(h.ResourceId) && h.ToStateVersion == null)
             .ToDictionaryAsync(
-                h => h.ResourceId,
+                h => GetResourceById(h.ResourceId),
                 _cancellationToken
             );
     }
@@ -502,10 +693,21 @@ public class DbActionsPlanner
             return;
         }
 
-        _latestValidatorStakeHistoryByValidatorAddress = await _dbContext.Set<ValidatorStakeHistory>()
-            .Where(h => _validatorSupplyHistoryToLoadByValidatorAddress.Contains(h.ValidatorAddress) && h.ToStateVersion == null)
+        var validatorIds = _validatorSupplyHistoryToLoadByValidatorAddress
+            .Select(rri => GetValidator(rri).Id)
+            .Where(id => id > 0)
+            .ToList();
+
+        if (!validatorIds.Any())
+        {
+            _latestValidatorStakeHistory = new Dictionary<Validator, ValidatorStakeHistory>();
+            return;
+        }
+
+        _latestValidatorStakeHistory = await _dbContext.Set<ValidatorStakeHistory>()
+            .Where(h => validatorIds.Contains(h.ValidatorId) && h.ToStateVersion == null)
             .ToDictionaryAsync(
-                h => h.ValidatorAddress,
+                h => GetValidatorById(h.ValidatorId),
                 _cancellationToken
             );
     }

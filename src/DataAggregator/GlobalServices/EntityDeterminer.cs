@@ -96,6 +96,12 @@ public interface IEntityDeterminer
     bool IsXrd(string rri);
 
     string GetXrdAddress();
+
+    byte[] ParseValidatorPublicKey(string validatorAddress);
+
+    byte[] ParseAccountPublicKey(string accountAddress);
+
+    byte[] ParseResourceRadixEngineAddress(string rri);
 }
 
 public class EntityDeterminer : IEntityDeterminer
@@ -139,11 +145,11 @@ public class EntityDeterminer : IEntityDeterminer
             case RadixAddressType.Account when subEntity == null:
                 return new Entity(EntityType.Account, AccountAddress: primaryEntityAddress);
             case RadixAddressType.Account when subEntity.Address == "prepared_stakes":
-                return new Entity(EntityType.Account_PreparedStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata.Validator);
+                return new Entity(EntityType.Account_PreparedStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata!.Validator);
             case RadixAddressType.Account when subEntity.Address == "prepared_unstakes":
                 return new Entity(EntityType.Account_PreparedUnstake, AccountAddress: primaryEntityAddress); // The validator address is part of the StakeOwnership resource
             case RadixAddressType.Account when subEntity.Address == "exiting_unstakes":
-                return new Entity(EntityType.Account_ExitingStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata.Validator, EpochUnlock: subEntity.Metadata.EpochUnlock);
+                return new Entity(EntityType.Account_ExitingStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata!.Validator, EpochUnlock: subEntity.Metadata.EpochUnlock);
             case RadixAddressType.Account:
                 _logger.LogWarning("Unknown account sub-entity address: {SubEntityAddress}", subEntity.Address);
                 return null;
@@ -164,6 +170,66 @@ public class EntityDeterminer : IEntityDeterminer
                 _logger.LogWarning("Unhandled radix address type: {RadixAddressType}", primaryEntityRadixAddress.Type);
                 return null;
         }
+    }
+
+    public byte[] ParseValidatorPublicKey(string validatorAddress)
+    {
+        if (!RadixAddressParser.TryParse(
+                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                validatorAddress,
+                out var radixAddress,
+                out var errorMessage
+            ))
+        {
+            throw new Exception($"Validator address [{validatorAddress}] didn't parse correctly: {errorMessage}");
+        }
+
+        if (radixAddress.Type != RadixAddressType.Validator)
+        {
+            throw new Exception($"Validator address [{validatorAddress}] wasn't a validator address");
+        }
+
+        return radixAddress.AddressData;
+    }
+
+    public byte[] ParseAccountPublicKey(string accountAddress)
+    {
+        if (!RadixAddressParser.TryParse(
+                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                accountAddress,
+                out var radixAddress,
+                out var errorMessage
+            ))
+        {
+            throw new Exception($"Account address [{accountAddress}] didn't parse correctly: {errorMessage}");
+        }
+
+        if (radixAddress.Type != RadixAddressType.Account)
+        {
+            throw new Exception($"Account address [{accountAddress}] wasn't an account address");
+        }
+
+        return radixAddress.AddressData;
+    }
+
+    public byte[] ParseResourceRadixEngineAddress(string rri)
+    {
+        if (!RadixAddressParser.TryParse(
+                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                rri,
+                out var radixAddress,
+                out var errorMessage
+            ))
+        {
+            throw new Exception($"Resource identifier [{rri}] didn't parse correctly: {errorMessage}");
+        }
+
+        if (radixAddress.Type != RadixAddressType.Resource)
+        {
+            throw new Exception($"Resource identifier [{rri}] wasn't an RRI");
+        }
+
+        return radixAddress.AddressData;
     }
 
     public bool IsXrd(string rri)

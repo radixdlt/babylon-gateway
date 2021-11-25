@@ -274,13 +274,14 @@ public class TransactionContentProcessor
     private void HandleAccountResourceAmountOperation(string accountAddress, string resourceIdentifier)
     {
         var tokenAmount = _amount!.Value;
+        var accountLookup = _dbActionsPlanner.ResolveAccount(accountAddress, _transactionSummary!.StateVersion);
         var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
 
         // Part 1) Handle substates
         HandleSubstateUpOrDown(
-            () => new AccountResourceBalanceSubstate(accountAddress, resourceLookup(), tokenAmount),
+            () => new AccountResourceBalanceSubstate(accountLookup(), resourceLookup(), tokenAmount),
             existingSubstate => (
-                existingSubstate.AccountAddress == accountAddress
+                existingSubstate.Account == accountLookup()
                 && existingSubstate.Resource == resourceLookup()
                 && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
@@ -308,18 +309,21 @@ public class TransactionContentProcessor
             _ => throw new ArgumentOutOfRangeException(),
         };
 
+        var accountLookup = _dbActionsPlanner.ResolveAccount(entity.AccountAddress!, _transactionSummary!.StateVersion);
+        var validatorLookup = _dbActionsPlanner.ResolveValidator(entity.ValidatorAddress!, _transactionSummary!.StateVersion);
+
         // Part 1) Handle substates
         HandleSubstateUpOrDown(
             () => new AccountXrdStakeBalanceSubstate(
-                entity.AccountAddress!,
-                entity.ValidatorAddress!,
+                accountLookup(),
+                validatorLookup(),
                 type,
                 entity.EpochUnlock,
                 tokenAmount
             ),
             existingSubstate => (
-                existingSubstate.AccountAddress == entity.AccountAddress!
-                && existingSubstate.ValidatorAddress == entity.ValidatorAddress!
+                existingSubstate.Account == accountLookup()
+                && existingSubstate.Validator == validatorLookup()
                 && existingSubstate.Type == type
                 && existingSubstate.UnlockEpoch == entity.EpochUnlock
                 && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
@@ -352,15 +356,17 @@ public class TransactionContentProcessor
             );
         }
 
+        var validatorLookup = _dbActionsPlanner.ResolveValidator(validatorAddress, _transactionSummary!.StateVersion);
+
         // Part 1) Handle substates
         HandleSubstateUpOrDown(
             () => new ValidatorStakeBalanceSubstate(
-                validatorAddress,
+                validatorLookup(),
                 _transactionSummary!.Epoch, // Put in for history's sake, but not part of the substate, so shouldn't be verified against
                 tokenAmount
             ),
             existingSubstate => (
-                existingSubstate.ValidatorAddress == validatorAddress
+                existingSubstate.Validator == validatorLookup()
                 && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
         );
@@ -380,17 +386,20 @@ public class TransactionContentProcessor
             _ => throw new ArgumentOutOfRangeException(),
         };
 
+        var accountLookup = _dbActionsPlanner.ResolveAccount(accountAddress, _transactionSummary!.StateVersion);
+        var validatorLookup = _dbActionsPlanner.ResolveValidator(validatorAddress, _transactionSummary!.StateVersion);
+
         // Part 1) Handle substates
         HandleSubstateUpOrDown(
             () => new AccountStakeOwnershipBalanceSubstate(
-                accountAddress,
-                validatorAddress,
+                accountLookup(),
+                validatorLookup(),
                 type,
                 tokenAmount
             ),
             existingSubstate => (
-                existingSubstate.AccountAddress == accountAddress
-                && existingSubstate.ValidatorAddress == validatorAddress
+                existingSubstate.Account == accountLookup()
+                && existingSubstate.Validator == validatorLookup()
                 && existingSubstate.Type == type
                 && existingSubstate.Amount == -tokenAmount // Negative because downed has the opposite amount as upped
             )
@@ -495,10 +504,15 @@ public class TransactionContentProcessor
             throw GenerateDetailedInvalidTransactionException("Validator data update not against validator or validator__system entity");
         }
 
-        var validator = _entity.ValidatorAddress!;
+        var validatorLookup = _dbActionsPlanner.ResolveValidator(_entity.ValidatorAddress!, _transactionSummary!.StateVersion);
+        var validatorOwner = objects.PreparedValidatorOwner?.Owner ?? objects.ValidatorData?.Owner;
+        var validatorOwnerLookup = validatorOwner == null ? null : _dbActionsPlanner.ResolveAccount(validatorOwner, _transactionSummary!.StateVersion);
+
         HandleSubstateUpOrDown(
-            () => objects.ToDbValidatorData(validator),
-            existingSubstate => existingSubstate.SubstateMatches(objects.ToDbValidatorData(validator))
+            () => objects.ToDbValidatorData(validatorLookup(), validatorOwnerLookup?.Invoke()),
+            existingSubstate => existingSubstate.SubstateMatches(
+                objects.ToDbValidatorData(validatorLookup(), validatorOwnerLookup?.Invoke())
+            )
         );
     }
 
@@ -537,12 +551,13 @@ public class TransactionContentProcessor
                 throw GenerateDetailedInvalidTransactionException($"Balance delta calculated for account resource {key} is NaN");
             }
 
+            var accountLookup = _dbActionsPlanner.ResolveAccount(key.AccountAddress, _transactionSummary!.StateVersion);
             var resourceLookup = _dbActionsPlanner.ResolveResource(key.Rri, _transactionSummary!.StateVersion);
             _dbActionsPlanner.AddNewAccountResourceBalanceHistoryEntry(
                 key,
                 oldHistory =>
                 {
-                    var normalizedKey = new AccountResource(key.AccountAddress, resourceLookup());
+                    var normalizedKey = new AccountResource(accountLookup(), resourceLookup());
                     var newHistoryEntry = AccountResourceBalanceHistory.FromPreviousEntry(normalizedKey, oldHistory?.BalanceEntry, entry);
                     if (newHistoryEntry.BalanceEntry.Balance.IsNegative())
                     {
@@ -608,11 +623,13 @@ public class TransactionContentProcessor
                 throw GenerateDetailedInvalidTransactionException($"Validator stake snapshot change for validator {key} had a NaN value");
             }
 
+            var validatorLookup = _dbActionsPlanner.ResolveValidator(key, _transactionSummary!.StateVersion);
+
             _dbActionsPlanner.AddNewValidatorStakeHistoryEntry(
                 key,
                 oldHistory =>
                 {
-                    var newHistoryEntry = ValidatorStakeHistory.FromPreviousEntry(key, oldHistory?.StakeSnapshot, stakeSnapshotChange);
+                    var newHistoryEntry = ValidatorStakeHistory.FromPreviousEntry(validatorLookup(), oldHistory?.StakeSnapshot, stakeSnapshotChange);
                     if (newHistoryEntry.StakeSnapshot.TotalXrdStake.IsNegative())
                     {
                         throw GenerateDetailedInvalidTransactionException($"{key} TotalXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalXrdStake}");

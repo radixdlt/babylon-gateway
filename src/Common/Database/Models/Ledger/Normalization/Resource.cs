@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -72,13 +71,15 @@ namespace Common.Database.Models.Ledger.Normalization;
 /// Adds normalization to resources, to increase DB performance.
 /// </summary>
 [Table("resources")]
-[Index(nameof(ResourceIdentifier))]
 // OnModelCreating: Create unique index on rri
 public class Resource
 {
     [Key]
     [Column(name: "id")]
     public long Id { get; set; }
+
+    [Column(name: "engine_address")]
+    public byte[] RadixEngineAddress { get; set; }
 
     [Column(name: "rri")]
     public string ResourceIdentifier { get; set; }

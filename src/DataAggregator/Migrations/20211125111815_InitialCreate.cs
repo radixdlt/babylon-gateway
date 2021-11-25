@@ -76,6 +76,21 @@ namespace DataAggregator.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "accounts",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    public_key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_accounts", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "nodes",
                 columns: table => new
                 {
@@ -108,6 +123,7 @@ namespace DataAggregator.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    engine_address = table.Column<byte[]>(type: "bytea", nullable: false),
                     rri = table.Column<string>(type: "text", nullable: false),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false)
                 },
@@ -117,21 +133,18 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "validator_stake_history",
+                name: "validators",
                 columns: table => new
                 {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    validator_address = table.Column<string>(type: "text", nullable: false),
-                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_exiting_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    public_key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_address, x.from_state_version });
+                    table.PrimaryKey("PK_validators", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -169,14 +182,20 @@ namespace DataAggregator.Migrations
                 columns: table => new
                 {
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    account_address = table.Column<string>(type: "text", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_id = table.Column<long>(type: "bigint", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_address, x.resource_id, x.from_state_version });
+                    table.PrimaryKey("PK_account_resource_balance_history", x => new { x.account_id, x.resource_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_account_resource_balance_history_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_account_resource_balance_history_resources_resource_id",
                         column: x => x.resource_id,
@@ -203,6 +222,30 @@ namespace DataAggregator.Migrations
                         name: "FK_resource_supply_history_resources_resource_id",
                         column: x => x.resource_id,
                         principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_exiting_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -237,7 +280,7 @@ namespace DataAggregator.Migrations
                     up_state_version = table.Column<long>(type: "bigint", nullable: false),
                     up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
                     up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    account_address = table.Column<string>(type: "text", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_id = table.Column<long>(type: "bigint", nullable: false),
                     down_state_version = table.Column<long>(type: "bigint", nullable: true),
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
@@ -262,6 +305,12 @@ namespace DataAggregator.Migrations
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_account_resource_balance_substates_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_account_resource_balance_substates_resources_resource_id",
                         column: x => x.resource_id,
                         principalTable: "resources",
@@ -276,8 +325,8 @@ namespace DataAggregator.Migrations
                     up_state_version = table.Column<long>(type: "bigint", nullable: false),
                     up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
                     up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    account_address = table.Column<string>(type: "text", nullable: false),
-                    validator_address = table.Column<string>(type: "text", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
                     type = table.Column<string>(type: "text", nullable: false),
                     down_state_version = table.Column<long>(type: "bigint", nullable: true),
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
@@ -301,6 +350,18 @@ namespace DataAggregator.Migrations
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_stake_ownership_balance_substates_accounts_account_~",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_stake_ownership_balance_substates_validators_valida~",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -310,8 +371,8 @@ namespace DataAggregator.Migrations
                     up_state_version = table.Column<long>(type: "bigint", nullable: false),
                     up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
                     up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    account_address = table.Column<string>(type: "text", nullable: false),
-                    validator_address = table.Column<string>(type: "text", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
                     type = table.Column<string>(type: "text", nullable: false),
                     unlock_epoch = table.Column<long>(type: "bigint", nullable: true),
                     down_state_version = table.Column<long>(type: "bigint", nullable: true),
@@ -335,6 +396,18 @@ namespace DataAggregator.Migrations
                         columns: x => new { x.up_state_version, x.up_operation_group_index },
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_xrd_stake_balance_substates_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_xrd_stake_balance_substates_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -391,10 +464,10 @@ namespace DataAggregator.Migrations
                     up_state_version = table.Column<long>(type: "bigint", nullable: false),
                     up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
                     up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    validator_address = table.Column<string>(type: "text", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
                     type = table.Column<string>(type: "text", nullable: false),
                     effective_epoch = table.Column<long>(type: "bigint", nullable: true),
-                    owner = table.Column<string>(type: "text", nullable: true),
+                    owner_id = table.Column<long>(type: "bigint", nullable: true),
                     is_registered = table.Column<bool>(type: "boolean", nullable: true),
                     fee_percentage = table.Column<decimal>(type: "numeric", nullable: true),
                     name = table.Column<string>(type: "text", nullable: true),
@@ -402,7 +475,7 @@ namespace DataAggregator.Migrations
                     allow_delegation = table.Column<bool>(type: "boolean", nullable: true),
                     prepared_is_registered = table.Column<bool>(type: "boolean", nullable: true),
                     prepared_fee_percentage = table.Column<decimal>(type: "numeric", nullable: true),
-                    prepared_owner = table.Column<string>(type: "text", nullable: true),
+                    prepared_owner_id = table.Column<long>(type: "bigint", nullable: true),
                     down_state_version = table.Column<long>(type: "bigint", nullable: true),
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
                     down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
@@ -424,6 +497,24 @@ namespace DataAggregator.Migrations
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_data_substates_accounts_owner_id",
+                        column: x => x.owner_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_data_substates_accounts_prepared_owner_id",
+                        column: x => x.prepared_owner_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_data_substates_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -433,7 +524,7 @@ namespace DataAggregator.Migrations
                     up_state_version = table.Column<long>(type: "bigint", nullable: false),
                     up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
                     up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    validator_address = table.Column<string>(type: "text", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     down_state_version = table.Column<long>(type: "bigint", nullable: true),
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
@@ -457,24 +548,30 @@ namespace DataAggregator.Migrations
                         principalTable: "operation_groups",
                         principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_stake_balance_substates_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_history_account_address_from_state~",
+                name: "IX_account_resource_balance_history_account_id_from_state_vers~",
                 table: "account_resource_balance_history",
-                columns: new[] { "account_address", "from_state_version" });
+                columns: new[] { "account_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_history_current_balance",
                 table: "account_resource_balance_history",
-                columns: new[] { "account_address", "resource_id" },
+                columns: new[] { "account_id", "resource_id" },
                 unique: true,
                 filter: "to_state_version is null");
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_history_resource_id_account_addres~",
+                name: "IX_account_resource_balance_history_resource_id_account_id_fro~",
                 table: "account_resource_balance_history",
-                columns: new[] { "resource_id", "account_address", "from_state_version" });
+                columns: new[] { "resource_id", "account_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_history_resource_id_from_state_ver~",
@@ -484,14 +581,14 @@ namespace DataAggregator.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_substate_current_unspent_utxos",
                 table: "account_resource_balance_substates",
-                columns: new[] { "account_address", "resource_id", "amount" },
+                columns: new[] { "account_id", "resource_id", "amount" },
                 filter: "down_state_version is null")
                 .Annotation("Npgsql:IndexInclude", new[] { "substate_identifier" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_substates_account_address_resource~",
+                name: "IX_account_resource_balance_substates_account_id_resource_id",
                 table: "account_resource_balance_substates",
-                columns: new[] { "account_address", "resource_id" });
+                columns: new[] { "account_id", "resource_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_resource_balance_substates_down_state_version_down_~",
@@ -499,14 +596,14 @@ namespace DataAggregator.Migrations
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_resource_balance_substates_resource_id_account_addr~",
+                name: "IX_account_resource_balance_substates_resource_id_account_id",
                 table: "account_resource_balance_substates",
-                columns: new[] { "resource_id", "account_address" });
+                columns: new[] { "resource_id", "account_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_stake_ownership_balance_substates_account_address_v~",
+                name: "IX_account_stake_ownership_balance_substates_account_id_valida~",
                 table: "account_stake_ownership_balance_substates",
-                columns: new[] { "account_address", "validator_address" });
+                columns: new[] { "account_id", "validator_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_stake_ownership_balance_substates_down_state_versio~",
@@ -514,14 +611,14 @@ namespace DataAggregator.Migrations
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_stake_ownership_balance_substates_validator_address~",
+                name: "IX_account_stake_ownership_balance_substates_validator_id_acco~",
                 table: "account_stake_ownership_balance_substates",
-                columns: new[] { "validator_address", "account_address" });
+                columns: new[] { "validator_id", "account_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_xrd_stake_balance_substates_account_address_validat~",
+                name: "IX_account_xrd_stake_balance_substates_account_id_validator_id",
                 table: "account_xrd_stake_balance_substates",
-                columns: new[] { "account_address", "validator_address" });
+                columns: new[] { "account_id", "validator_id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_xrd_stake_balance_substates_down_state_version_down~",
@@ -529,9 +626,15 @@ namespace DataAggregator.Migrations
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_xrd_stake_balance_substates_validator_address_accou~",
+                name: "IX_account_xrd_stake_balance_substates_validator_id_account_id",
                 table: "account_xrd_stake_balance_substates",
-                columns: new[] { "validator_address", "account_address" });
+                columns: new[] { "validator_id", "account_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_accounts_address",
+                table: "accounts",
+                column: "address",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_epoch_end_of_round",
@@ -575,9 +678,19 @@ namespace DataAggregator.Migrations
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_data_substates_validator_address",
+                name: "IX_validator_data_substates_owner_id",
                 table: "validator_data_substates",
-                column: "validator_address");
+                column: "owner_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_data_substates_prepared_owner_id",
+                table: "validator_data_substates",
+                column: "prepared_owner_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_data_substates_validator_id",
+                table: "validator_data_substates",
+                column: "validator_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_stake_balance_substates_down_state_version_down_o~",
@@ -585,22 +698,28 @@ namespace DataAggregator.Migrations
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_stake_balance_substates_epoch_validator_address",
+                name: "IX_validator_stake_balance_substates_epoch_validator_id",
                 table: "validator_stake_balance_substates",
-                columns: new[] { "epoch", "validator_address" },
+                columns: new[] { "epoch", "validator_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_validator_stake_balance_substates_validator_address",
+                name: "IX_validator_stake_balance_substates_validator_id",
                 table: "validator_stake_balance_substates",
-                column: "validator_address");
+                column: "validator_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_validator_stake_history_current_supply",
                 table: "validator_stake_history",
-                column: "validator_address",
+                column: "validator_id",
                 unique: true,
                 filter: "to_state_version is null");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validators_address",
+                table: "validators",
+                column: "address",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -639,7 +758,13 @@ namespace DataAggregator.Migrations
                 name: "resources");
 
             migrationBuilder.DropTable(
+                name: "accounts");
+
+            migrationBuilder.DropTable(
                 name: "operation_groups");
+
+            migrationBuilder.DropTable(
+                name: "validators");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");

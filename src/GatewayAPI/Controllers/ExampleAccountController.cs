@@ -94,7 +94,7 @@ public class ExampleAccountController : ControllerBase
     {
         return _dbContext
             .CurrentAccountResourceHistory
-            .Where(arb => arb.AccountAddress == request.accountAddress)
+            .Where(arb => arb.Account.Address == request.accountAddress)
             .Include(arb => arb.Resource)
             .Select(x => new
             {

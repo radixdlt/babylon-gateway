@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -75,10 +76,13 @@ namespace Common.Database.Models.Ledger.History;
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
 [Table("validator_stake_history")]
-public class ValidatorStakeHistory : HistoryBase<string, StakeSnapshot, StakeSnapshotChange>
+public class ValidatorStakeHistory : HistoryBase<Validator, StakeSnapshot, StakeSnapshotChange>
 {
-    [Column(name: "validator_address")]
-    public string ValidatorAddress { get; set; }
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
 
     // [Owned] below
     public StakeSnapshot StakeSnapshot { get; set; }
@@ -87,14 +91,14 @@ public class ValidatorStakeHistory : HistoryBase<string, StakeSnapshot, StakeSna
     /// Initializes a new instance of the <see cref="ValidatorStakeHistory"/> class.
     /// The StateVersions should be set separately.
     /// </summary>
-    public ValidatorStakeHistory(string key, StakeSnapshot stakeSnapshot)
+    public ValidatorStakeHistory(Validator key, StakeSnapshot stakeSnapshot)
     {
-        ValidatorAddress = key;
+        Validator = key;
         StakeSnapshot = stakeSnapshot;
     }
 
     public static ValidatorStakeHistory FromPreviousEntry(
-        string key,
+        Validator key,
         StakeSnapshot? previous,
         StakeSnapshotChange change
     )

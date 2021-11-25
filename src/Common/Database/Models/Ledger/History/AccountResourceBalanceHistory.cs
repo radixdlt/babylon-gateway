@@ -79,8 +79,11 @@ namespace Common.Database.Models.Ledger.History;
 [Table("account_resource_balance_history")]
 public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
 {
-    [Column(name: "account_address")]
-    public string AccountAddress { get; set; }
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
+
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
 
     [Column(name: "resource_id")]
     public long ResourceId { get; set; }
@@ -96,7 +99,7 @@ public class AccountResourceBalanceHistory : HistoryBase<AccountResource, Balanc
     /// </summary>
     public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
     {
-        AccountAddress = key.AccountAddress;
+        Account = key.Account;
         Resource = key.Resource;
         BalanceEntry = balanceEntry;
     }

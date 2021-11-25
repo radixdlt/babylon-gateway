@@ -70,19 +70,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Common.Database.Models.Ledger.Substates;
 
 public record struct AccountResourceDenormalized(string AccountAddress, string Rri);
-public record struct AccountResourceIds(string AccountAddress, long ResourceId);
-public record struct AccountResource(string AccountAddress, Resource Resource);
+public record struct AccountResource(Account Account, Resource Resource);
 
 /// <summary>
 /// UTXOs related to Account Resource Balances.
 /// </summary>
-[Index(nameof(AccountAddress), nameof(ResourceId))]
-[Index(nameof(ResourceId), nameof(AccountAddress))]
+[Index(nameof(AccountId), nameof(ResourceId))]
+[Index(nameof(ResourceId), nameof(AccountId))]
 [Table("account_resource_balance_substates")]
 public class AccountResourceBalanceSubstate : BalanceSubstateBase
 {
-    [Column(name: "account_address")]
-    public string AccountAddress { get; set; }
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
+
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
 
     [Column(name: "resource_id")]
     public long ResourceId { get; set; }
@@ -94,9 +96,9 @@ public class AccountResourceBalanceSubstate : BalanceSubstateBase
     /// Initializes a new instance of the <see cref="AccountResourceBalanceSubstate"/> class.
     /// The SubstateBase properties should be set separately.
     /// </summary>
-    public AccountResourceBalanceSubstate(string accountAddress, Resource resource, TokenAmount amount)
+    public AccountResourceBalanceSubstate(Account account, Resource resource, TokenAmount amount)
     {
-        AccountAddress = accountAddress;
+        Account = account;
         Resource = resource;
         Amount = amount;
     }

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.ValueConverters;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
@@ -93,8 +94,8 @@ public class AccountStakeOwnershipBalanceSubstateTypeValueConverter : EnumTypeVa
 /// UTXOs related to Accounts staking to Validators, where the resource is a share of StakeOwnership in that Validator.
 /// In particular, this is stake which is Staked or PreparingUnstake.
 /// </summary>
-[Index(nameof(AccountAddress), nameof(ValidatorAddress))]
-[Index(nameof(ValidatorAddress), nameof(AccountAddress))]
+[Index(nameof(AccountId), nameof(ValidatorId))]
+[Index(nameof(ValidatorId), nameof(AccountId))]
 [Table("account_stake_ownership_balance_substates")]
 public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
 {
@@ -103,14 +104,14 @@ public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
     /// The SubstateBase properties should be set separately.
     /// </summary>
     public AccountStakeOwnershipBalanceSubstate(
-        string accountAddress,
-        string validatorAddress,
+        Account account,
+        Validator validator,
         AccountStakeOwnershipBalanceSubstateType type,
         TokenAmount stakeOwnershipBalance
     )
     {
-        AccountAddress = accountAddress;
-        ValidatorAddress = validatorAddress;
+        Account = account;
+        Validator = validator;
         Type = type;
         Amount = stakeOwnershipBalance;
     }
@@ -119,11 +120,17 @@ public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
     {
     }
 
-    [Column(name: "account_address")]
-    public string AccountAddress { get; set; }
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
 
-    [Column(name: "validator_address")]
-    public string ValidatorAddress { get; set; }
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
+
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
 
     [Column(name: "type")]
     public AccountStakeOwnershipBalanceSubstateType Type { get; set; }

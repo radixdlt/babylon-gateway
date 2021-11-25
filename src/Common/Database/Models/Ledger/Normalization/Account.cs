@@ -62,89 +62,29 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using System.Text;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Common.Extensions;
+namespace Common.Database.Models.Ledger.Normalization;
 
-public static class DbSetExtensions
+/// <summary>
+/// Adds normalization to account addresses, to potentially increase DB performance.
+/// </summary>
+[Table("accounts")]
+// OnModelCreating: Create unique index on account address
+public class Account
 {
-    /// <summary>
-    /// This has potential to be faster than the other overload due to fewer allocations.
-    /// </summary>
-    /// <typeparam name="TEntity">The entity of the dbSet.</typeparam>
-    public static IQueryable<TEntity> FromSqlRawWithDimensionalIn<TEntity>(
-        this DbSet<TEntity> dbSet,
-        string sqlBeforeIn,
-        object[] flattenedKeys,
-        int keySize
-    )
-        where TEntity : class
-    {
-        if (flattenedKeys.Length == 0 || keySize < 1 || flattenedKeys.Length % keySize > 0)
-        {
-            throw new ArgumentException(
-                $"Key size ({keySize}) does not divide key flattened key length ({flattenedKeys.Length}) or they're otherwise invalid"
-            );
-        }
+    [Key]
+    [Column(name: "id")]
+    public long Id { get; set; }
 
-        var placeholders = CreateArrayOfTuplesPlaceholder(flattenedKeys.Length / keySize, keySize);
+    [Column(name: "address")]
+    public string Address { get; set; }
 
-        return dbSet.FromSqlRaw($"{sqlBeforeIn} IN ({placeholders})", flattenedKeys);
-    }
+    [Column(name: "public_key")]
+    public byte[] PublicKey { get; set; }
 
-    public static IQueryable<TEntity> FromSqlRawWithDimensionalIn<TEntity, TKey>(
-        this DbSet<TEntity> dbSet,
-        string sqlBeforeIn,
-        IReadOnlyCollection<TKey> keys,
-        Func<TKey, IEnumerable<object>> mapToKey
-    )
-        where TEntity : class
-    {
-        if (!keys.Any())
-        {
-            throw new ArgumentException("Needs to have at least some keys", nameof(keys));
-        }
-
-        var tupleDimension = mapToKey(keys.First()).Count();
-
-        var placeholders = CreateArrayOfTuplesPlaceholder(keys.Count, tupleDimension);
-
-        object[] values = keys.SelectMany(mapToKey).ToArray();
-
-        return dbSet.FromSqlRaw($"{sqlBeforeIn} IN ({placeholders})", values);
-    }
-
-    /// <summary>
-    /// Outputs a string like (({0},{1},{2}),({3},{4},{5})) for arrayLength=2, tupleLength=3.
-    /// </summary>
-    private static string CreateArrayOfTuplesPlaceholder(int arrayLength, int tupleLength)
-    {
-        var placeholders = new StringBuilder();
-        for (int i = 0; i < arrayLength; i++)
-        {
-            if (i > 0)
-            {
-                placeholders.Append(',');
-            }
-
-            placeholders.Append('(');
-
-            for (int j = 0; j < tupleLength; j++)
-            {
-                if (j > 0)
-                {
-                    placeholders.Append(',');
-                }
-
-                placeholders.Append('{');
-                placeholders.Append((2 * i) + j);
-                placeholders.Append('}');
-            }
-
-            placeholders.Append(')');
-        }
-
-        return placeholders.ToString();
-    }
+    [Column(name: "from_state_version")]
+    // TODO:NG-15 This is to enable the Accounts to be removed if the ledger rolls back
+    public long FromStateVersion { get; set; }
 }

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.ValueConverters;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
@@ -94,8 +95,8 @@ public class AccountXrdStakeBalanceSubstateTypeValueConverter : EnumTypeValueCon
 /// In particular, this is PreparingStake and ExitingStake.
 /// Only ExitingStake has an UnlockEpoch - PreparingStake will take effect at the end of the current epoch.
 /// </summary>
-[Index(nameof(AccountAddress), nameof(ValidatorAddress))]
-[Index(nameof(ValidatorAddress), nameof(AccountAddress))]
+[Index(nameof(AccountId), nameof(ValidatorId))]
+[Index(nameof(ValidatorId), nameof(AccountId))]
 [Table("account_xrd_stake_balance_substates")]
 public class AccountXrdStakeBalanceSubstate : BalanceSubstateBase
 {
@@ -104,15 +105,15 @@ public class AccountXrdStakeBalanceSubstate : BalanceSubstateBase
     /// The SubstateBase properties should be set separately.
     /// </summary>
     public AccountXrdStakeBalanceSubstate(
-        string accountAddress,
-        string validatorAddress,
+        Account account,
+        Validator validator,
         AccountXrdStakeBalanceSubstateType type,
         long? unlockEpoch,
         TokenAmount xrdAmount
     )
     {
-        AccountAddress = accountAddress;
-        ValidatorAddress = validatorAddress;
+        Account = account;
+        Validator = validator;
         Type = type;
         UnlockEpoch = unlockEpoch;
         Amount = xrdAmount;
@@ -122,11 +123,17 @@ public class AccountXrdStakeBalanceSubstate : BalanceSubstateBase
     {
     }
 
-    [Column(name: "account_address")]
-    public string AccountAddress { get; set; }
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
 
-    [Column(name: "validator_address")]
-    public string ValidatorAddress { get; set; }
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
+
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
 
     [Column(name: "type")]
     public AccountXrdStakeBalanceSubstateType Type { get; set; }

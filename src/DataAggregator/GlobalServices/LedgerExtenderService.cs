@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
@@ -206,10 +207,17 @@ public class LedgerExtenderService : ILedgerExtenderService
             return;
         }
 
+        // NB - specifying an explicit id of 1 here breaks the table on the next insert:
+        // https://stackoverflow.com/questions/9108833/postgres-autoincrement-not-updated-on-explicit-id-inserts
         dbContext.Set<Resource>()
-            .Add(new Resource { ResourceIdentifier = xrdResourceIdentifier, FromStateVersion = 0 });
+            .Add(new Resource
+            {
+                ResourceIdentifier = xrdResourceIdentifier,
+                RadixEngineAddress = RadixBech32.XrdRadixEngineAddress,
+                FromStateVersion = 0,
+            });
         await dbContext.SaveChangesAsync(token);
 
-        _logger.LogInformation("Created XRD as resource with id 1");
+        _logger.LogInformation("Created XRD as first resource (likely but not necessarily with id 1)");
     }
 }
