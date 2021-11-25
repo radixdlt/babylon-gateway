@@ -136,7 +136,7 @@ public class CommonDbContext : DbContext
         configurationBuilder.Properties<TokenAmount>()
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
-            .HavePrecision(1000);
+            .HavePrecision(1000, 0);
 
         configurationBuilder.Properties<AccountStakeOwnershipBalanceSubstateType>()
             .HaveConversion<AccountStakeOwnershipBalanceSubstateTypeValueConverter>();

@@ -110,7 +110,7 @@ namespace DataAggregator.Migrations
                     transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     signed_by = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
@@ -164,7 +164,7 @@ namespace DataAggregator.Migrations
                     inferred_action_type = table.Column<string>(type: "text", nullable: true),
                     inferred_action_from = table.Column<string>(type: "text", nullable: true),
                     inferred_action_to = table.Column<string>(type: "text", nullable: true),
-                    inferred_action_amount = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
+                    inferred_action_amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     inferred_action_rri = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -227,7 +227,7 @@ namespace DataAggregator.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     account_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_id = table.Column<long>(type: "bigint", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -271,7 +271,7 @@ namespace DataAggregator.Migrations
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
                     down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
                     substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
-                    amount = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -313,7 +313,7 @@ namespace DataAggregator.Migrations
                     resource_id = table.Column<long>(type: "bigint", nullable: false),
                     type = table.Column<string>(type: "text", nullable: false),
                     is_mutable = table.Column<bool>(type: "boolean", nullable: true),
-                    granularity = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: true),
+                    granularity = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     owner_id = table.Column<long>(type: "bigint", nullable: true),
                     symbol = table.Column<string>(type: "text", nullable: true),
                     name = table.Column<string>(type: "text", nullable: true),
@@ -360,9 +360,9 @@ namespace DataAggregator.Migrations
                 {
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     resource_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_supply = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_minted = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_burnt = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -402,7 +402,7 @@ namespace DataAggregator.Migrations
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
                     down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
                     substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
-                    amount = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -441,10 +441,10 @@ namespace DataAggregator.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     account_id = table.Column<long>(type: "bigint", nullable: false),
                     validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -491,7 +491,7 @@ namespace DataAggregator.Migrations
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
                     down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
                     substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
-                    amount = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -622,7 +622,7 @@ namespace DataAggregator.Migrations
                     down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
                     down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
                     substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
-                    amount = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false)
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -654,11 +654,11 @@ namespace DataAggregator.Migrations
                 {
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
-                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000)", precision: 1000, nullable: false),
+                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>

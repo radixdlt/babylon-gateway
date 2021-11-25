@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211125185704_InitialCreate")]
+    [Migration("20211125193309_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -260,7 +260,7 @@ namespace DataAggregator.Migrations
 
                     b.Property<BigInteger>("FeePaid")
                         .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)")
+                        .HasColumnType("numeric(1000,0)")
                         .HasColumnName("fee_paid");
 
                     b.Property<long>("IndexInEpoch")
@@ -464,7 +464,7 @@ namespace DataAggregator.Migrations
 
                     b.Property<BigInteger>("Amount")
                         .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)")
+                        .HasColumnType("numeric(1000,0)")
                         .HasColumnName("amount");
 
                     b.Property<int?>("DownOperationGroupIndex")
@@ -528,7 +528,7 @@ namespace DataAggregator.Migrations
 
                     b.Property<BigInteger>("Amount")
                         .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)")
+                        .HasColumnType("numeric(1000,0)")
                         .HasColumnName("amount");
 
                     b.Property<int?>("DownOperationGroupIndex")
@@ -591,7 +591,7 @@ namespace DataAggregator.Migrations
 
                     b.Property<BigInteger>("Amount")
                         .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)")
+                        .HasColumnType("numeric(1000,0)")
                         .HasColumnName("amount");
 
                     b.Property<int?>("DownOperationGroupIndex")
@@ -762,7 +762,7 @@ namespace DataAggregator.Migrations
 
                     b.Property<BigInteger>("Amount")
                         .HasPrecision(1000)
-                        .HasColumnType("numeric(1000)")
+                        .HasColumnType("numeric(1000,0)")
                         .HasColumnName("amount");
 
                     b.Property<int?>("DownOperationGroupIndex")
@@ -885,7 +885,7 @@ namespace DataAggregator.Migrations
 
                             b1.Property<BigInteger>("Balance")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("balance");
 
                             b1.HasKey("AccountResourceBalanceHistoryAccountId", "AccountResourceBalanceHistoryResourceId", "AccountResourceBalanceHistoryFromStateVersion");
@@ -948,22 +948,22 @@ namespace DataAggregator.Migrations
 
                             b1.Property<BigInteger>("TotalExitingXrdStake")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_exiting_xrd_stake");
 
                             b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_unstake_ownership");
 
                             b1.Property<BigInteger>("TotalPreparedXrdStake")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_xrd_stake");
 
                             b1.Property<BigInteger>("TotalStakeOwnership")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_stake_ownership");
 
                             b1.HasKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
@@ -1017,17 +1017,17 @@ namespace DataAggregator.Migrations
 
                             b1.Property<BigInteger>("TotalBurnt")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_burnt");
 
                             b1.Property<BigInteger>("TotalMinted")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_minted");
 
                             b1.Property<BigInteger>("TotalSupply")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_supply");
 
                             b1.HasKey("ResourceSupplyHistoryResourceId", "ResourceSupplyHistoryFromStateVersion");
@@ -1079,27 +1079,27 @@ namespace DataAggregator.Migrations
 
                             b1.Property<BigInteger>("TotalExitingXrdStake")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_exiting_xrd_stake");
 
                             b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_unstake_ownership");
 
                             b1.Property<BigInteger>("TotalPreparedXrdStake")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_xrd_stake");
 
                             b1.Property<BigInteger>("TotalStakeOwnership")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_stake_ownership");
 
                             b1.Property<BigInteger>("TotalXrdStake")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_xrd_staked");
 
                             b1.HasKey("ValidatorStakeHistoryValidatorId", "ValidatorStakeHistoryFromStateVersion");
@@ -1138,7 +1138,7 @@ namespace DataAggregator.Migrations
 
                             b1.Property<BigInteger?>("Amount")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("inferred_action_amount");
 
                             b1.Property<string>("FromAddress")
@@ -1407,7 +1407,7 @@ namespace DataAggregator.Migrations
 
                             b1.Property<BigInteger>("Granularity")
                                 .HasPrecision(1000)
-                                .HasColumnType("numeric(1000)")
+                                .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("granularity");
 
                             b1.Property<bool>("IsMutable")
