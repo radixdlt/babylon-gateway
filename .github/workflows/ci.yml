@@ -32,13 +32,15 @@ jobs:
   publish-docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Dump context
+        uses: crazy-max/ghaction-dump-context@v1
       - uses: actions/checkout@v2
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: actions/checkout@v2
-        if: github.event_name == 'push' && github.event_name == 'release'
+        if: github.event_name == 'push' || github.event_name == 'release'
         with:
           fetch-depth: 0
       - name: Login to GCR
