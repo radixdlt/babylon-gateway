@@ -62,81 +62,67 @@
  * permissions under this License.
  */
 
-using Common.Utilities;
-using DataAggregator.DependencyInjection;
-using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
+using Common.Database.Models.Ledger.Normalization;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAggregator.LedgerExtension;
+namespace Common.Database.Models.Ledger.Records;
 
-public interface IBulkTransactionCommitter
-{
-    Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
-}
-
-public record CommitLedgerTransactionsReport(
-    TransactionSummary FinalTransaction,
-    long TransactionContentHandlingMs,
-    long DbDependenciesLoadingMs,
-    int TransactionContentDbActionsCount,
-    long LocalDbContextActionsMs
-);
+public record ValidatorEpochDenormalized(string ValidatorAddress, long Epoch);
+public record ValidatorEpoch(Validator Validator, long Epoch);
 
 /// <summary>
-/// A short-lived class, used to commit a batch of transactions to the database.
+/// A record of how many proposals a validator completed/missed in a given epoch.
+///
+/// This is kept up-to-date as transactions are ingested for a given epoch, but then left around for
+/// history in previous epochs.
+///
+/// If this exists for a validator in an epoch, it implies that validator was part of the validator set in that epoch.
 /// </summary>
-public class BulkTransactionCommitter : IBulkTransactionCommitter
+// OnModelCreating: Has composite key (epoch, validator_id)
+// OnModelCreating: Has index on (validator_id, epoch)
+[Table("validator_proposal_records")]
+public class ValidatorProposalRecord : RecordBase<ValidatorEpoch, ProposalRecord>
 {
-    private readonly IEntityDeterminer _entityDeterminer;
-    private readonly AggregatorDbContext _dbContext;
-    private readonly DbActionsPlanner _dbActionsPlanner;
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
 
-    public BulkTransactionCommitter(
-        IEntityDeterminer entityDeterminer,
-        AggregatorDbContext dbContext,
-        CancellationToken cancellationToken
-    )
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
+
+    [Column(name: "epoch")]
+    public long Epoch { get; set; }
+
+    // [Owned] - see below
+    public ProposalRecord ProposalRecord { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidatorProposalRecord"/> class.
+    /// The StateVersions should be set separately.
+    /// </summary>
+    public ValidatorProposalRecord(ValidatorEpoch key, ProposalRecord data)
     {
-        _entityDeterminer = entityDeterminer;
-        _dbContext = dbContext;
-        _dbActionsPlanner = new DbActionsPlanner(_dbContext, _entityDeterminer, cancellationToken);
+        Validator = key.Validator;
+        Epoch = key.Epoch;
+        ProposalRecord = data;
     }
 
-    public async Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    private ValidatorProposalRecord()
     {
-        var (finalTransactionSummary, transactionContentProcessingMs) = CodeStopwatch.TimeInMs(
-            () => HandleTransactions(parentSummary, transactions)
-        );
-
-        var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
-
-        return new CommitLedgerTransactionsReport(
-            finalTransactionSummary,
-            transactionContentProcessingMs,
-            dbActionsReport.DbDependenciesLoadingMs,
-            dbActionsReport.ActionsCount,
-            dbActionsReport.LocalDbContextActionsMs
-        );
     }
 
-    private TransactionSummary HandleTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    public override void UpdateData(ProposalRecord latestData)
     {
-        foreach (var transaction in transactions)
-        {
-            var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
-            TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
-
-            _dbContext.LedgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transaction, summary));
-            HandleTransaction(transaction, summary);
-            parentSummary = summary;
-        }
-
-        return parentSummary;
+        ProposalRecord = latestData;
     }
+}
 
-    private void HandleTransaction(CommittedTransaction transaction, TransactionSummary summary)
-    {
-        var transactionContentProcessor = new TransactionContentProcessor(_dbContext, _dbActionsPlanner, _entityDeterminer);
-        transactionContentProcessor.ProcessTransactionContents(transaction, summary);
-    }
+[Owned]
+public record ProposalRecord
+{
+    [Column(name: "proposals_completed")]
+    public long ProposalsCompleted { get; set; }
+
+    [Column(name: "proposals_missed")]
+    public long ProposalsMissed { get; set; }
 }

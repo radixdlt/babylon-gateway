@@ -69,7 +69,7 @@ namespace DataAggregator.Extensions;
 
 public static class CoreApiModelExtensions
 {
-    public static bool HasSubstantiveOperations(this OperationGroup operationGroup)
+    public static bool HasOperationsOtherThanRoundDataOrValidatorBftData(this OperationGroup operationGroup)
     {
         return operationGroup.Operations.Any(IsNotRoundDataOrValidatorBftData);
     }

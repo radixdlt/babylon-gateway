@@ -62,81 +62,39 @@
  * permissions under this License.
  */
 
-using Common.Utilities;
-using DataAggregator.DependencyInjection;
-using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAggregator.LedgerExtension;
-
-public interface IBulkTransactionCommitter
-{
-    Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
-}
-
-public record CommitLedgerTransactionsReport(
-    TransactionSummary FinalTransaction,
-    long TransactionContentHandlingMs,
-    long DbDependenciesLoadingMs,
-    int TransactionContentDbActionsCount,
-    long LocalDbContextActionsMs
-);
+namespace Common.Database.Models.Ledger.Records;
 
 /// <summary>
-/// A short-lived class, used to commit a batch of transactions to the database.
+/// A base class for Records tracked in the database, with explicit keys and data types.
+///
+/// Records represent the most recent seen version of data against a given key.
+///
+/// The Key and Data types should together define the type, alongside the FromStateVersion and ToStateVersion fields.
+///
+/// Marking these allows for carefully considering the types to make record creation easier -- and to preempt
+/// static interfaces.
 /// </summary>
-public class BulkTransactionCommitter : IBulkTransactionCommitter
+/// <typeparam name="TKey">A record type indicating the key which is used to store the record.</typeparam>
+/// <typeparam name="TData">A record type indicating the data which can be updated against the key.</typeparam>
+public abstract class RecordBase<TKey, TData> : RecordBase
 {
-    private readonly IEntityDeterminer _entityDeterminer;
-    private readonly AggregatorDbContext _dbContext;
-    private readonly DbActionsPlanner _dbActionsPlanner;
+    public abstract void UpdateData(TData latestData);
+}
 
-    public BulkTransactionCommitter(
-        IEntityDeterminer entityDeterminer,
-        AggregatorDbContext dbContext,
-        CancellationToken cancellationToken
-    )
-    {
-        _entityDeterminer = entityDeterminer;
-        _dbContext = dbContext;
-        _dbActionsPlanner = new DbActionsPlanner(_dbContext, _entityDeterminer, cancellationToken);
-    }
-
-    public async Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
-    {
-        var (finalTransactionSummary, transactionContentProcessingMs) = CodeStopwatch.TimeInMs(
-            () => HandleTransactions(parentSummary, transactions)
-        );
-
-        var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
-
-        return new CommitLedgerTransactionsReport(
-            finalTransactionSummary,
-            transactionContentProcessingMs,
-            dbActionsReport.DbDependenciesLoadingMs,
-            dbActionsReport.ActionsCount,
-            dbActionsReport.LocalDbContextActionsMs
-        );
-    }
-
-    private TransactionSummary HandleTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
-    {
-        foreach (var transaction in transactions)
-        {
-            var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
-            TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
-
-            _dbContext.LedgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transaction, summary));
-            HandleTransaction(transaction, summary);
-            parentSummary = summary;
-        }
-
-        return parentSummary;
-    }
-
-    private void HandleTransaction(CommittedTransaction transaction, TransactionSummary summary)
-    {
-        var transactionContentProcessor = new TransactionContentProcessor(_dbContext, _dbActionsPlanner, _entityDeterminer);
-        transactionContentProcessor.ProcessTransactionContents(transaction, summary);
-    }
+/// <summary>
+/// A base class for Records tracked in the database.
+///
+/// Records represent the most recent seen version of data against a given key.
+/// </summary>
+public abstract class RecordBase
+{
+    /// <summary>
+    /// The resultant ledger state version when this record was last updated.
+    ///
+    /// Stored to help with ledger reversions.
+    /// </summary>
+    [Column(name: "last_updated_state_version")]
+    public long LastUpdatedStateVersion { get; set; }
 }

@@ -65,6 +65,7 @@
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
+using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Common.Utilities;
@@ -105,14 +106,19 @@ public class DbActionsPlanner
     private readonly CancellationToken _cancellationToken;
 
     /** Things to load in the LoadDependencies step **/
-    private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new(); // The long is the first state version at which it appears
-    private readonly Dictionary<string, long> _accountsToLoadOrCreate = new(); // The long is the first state version at which it appears
-    private readonly Dictionary<string, long> _validatorsToLoadOrCreate = new(); // The long is the first state version at which it appears
+    /* > Denormalized entities - the long is the first state version at which it appears */
+    private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new();
+    private readonly Dictionary<string, long> _accountsToLoadOrCreate = new();
+    private readonly Dictionary<string, long> _validatorsToLoadOrCreate = new();
+    /* > Substates - let's cheat slightly and store them all in the same dictionary */
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
+    /* > History Keys - to pull the latest history for that key */
     private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
     private readonly HashSet<string> _resourceSupplyHistoryToLoadByRri = new();
     private readonly HashSet<string> _validatorStakeHistoryToLoadByValidatorAddress = new();
     private readonly HashSet<AccountValidatorDenormalized> _accountValidatorStakeHistoryToLoad = new();
+    /* > Records - pull the entry (if it exists) for upsertion */
+    private readonly Dictionary<ValidatorEpochDenormalized, (ProposalRecord LatestData, long LatestStateVersion)> _latestSeenValidatorProposalRecords = new();
 
     /** Actions which will be performed in order in the ProcessActions step **/
     private readonly List<Action> _dbActions = new();
@@ -164,9 +170,7 @@ public class DbActionsPlanner
     }
 
     /// <summary>
-    /// Note that:
-    /// * historySelector does not need to care about the StateVersion.
-    /// * createNewHistory does not need to care about the StateVersion.
+    /// Note that createNewHistoryFromPrevious does not need to care about the StateVersion.
     /// </summary>
     public void AddNewAccountResourceBalanceHistoryEntry(
         AccountResourceDenormalized historyKey,
@@ -184,9 +188,7 @@ public class DbActionsPlanner
     }
 
     /// <summary>
-    /// Note that:
-    /// * historySelector does not need to care about the StateVersion.
-    /// * createNewHistory does not need to care about the StateVersion.
+    /// Note that createNewHistoryFromPrevious does not need to care about the StateVersion.
     /// </summary>
     public void AddNewResourceSupplyHistoryEntry(
         string historyKey,
@@ -204,9 +206,7 @@ public class DbActionsPlanner
     }
 
     /// <summary>
-    /// Note that:
-    /// * historySelector does not need to care about the StateVersion.
-    /// * createNewHistory does not need to care about the StateVersion.
+    /// Note that createNewHistoryFromPrevious does not need to care about the StateVersion.
     /// </summary>
     public void AddNewValidatorStakeHistoryEntry(
         string historyKey,
@@ -224,9 +224,7 @@ public class DbActionsPlanner
     }
 
     /// <summary>
-    /// Note that:
-    /// * historySelector does not need to care about the StateVersion.
-    /// * createNewHistory does not need to care about the StateVersion.
+    /// Note that createNewHistoryFromPrevious does not need to care about the StateVersion.
     /// </summary>
     public void AddNewAccountValidatorStakeHistoryEntry(
         AccountValidatorDenormalized historyKey,
@@ -241,6 +239,19 @@ public class DbActionsPlanner
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
+    }
+
+    /// <summary>
+    /// Note that createNewHistoryFromPrevious does not need to care about the StateVersion.
+    /// </summary>
+    public void UpsertValidatorProposalRecord(
+        ValidatorEpochDenormalized key,
+        ProposalRecord latestData,
+        long transactionStateVersion
+    )
+    {
+        EnsureValidatorLoaded(key.ValidatorAddress, transactionStateVersion);
+        _latestSeenValidatorProposalRecords[key] = (latestData, transactionStateVersion);
     }
 
     /// <summary>
@@ -384,6 +395,7 @@ public class DbActionsPlanner
         await LoadResourceSupplyHistoryEntries();
         await LoadValidatorStakeHistoryEntries();
         await LoadAccountValidatorStakeHistoryEntries();
+        await LoadValidatorProposalRecordsAndCreateActions();
     }
 
     private void RunActions()
@@ -524,6 +536,16 @@ public class DbActionsPlanner
             historyEntries.Add(newHistoryItem);
             latestHistoryLookup[historyKey] = newHistoryItem;
         }
+    }
+
+    private void CreateRecordAction<TRecord>(
+        TRecord newRecord,
+        long lastTransactionStateVersion
+    )
+        where TRecord : RecordBase
+    {
+        newRecord.LastUpdatedStateVersion = lastTransactionStateVersion;
+        _dbContext.Set<TRecord>().Add(newRecord);
     }
 
     private async Task LoadOrCreateResources()
@@ -773,5 +795,57 @@ public class DbActionsPlanner
                 av => new AccountValidator(GetAccountById(av.AccountId), GetValidatorById(av.ValidatorId)),
                 _cancellationToken
             );
+    }
+
+    private async Task LoadValidatorProposalRecordsAndCreateActions()
+    {
+        if (!_latestSeenValidatorProposalRecords.Any())
+        {
+            return;
+        }
+
+        var dbKeys = new List<long>();
+        foreach (var (ve, _) in _latestSeenValidatorProposalRecords)
+        {
+            var validatorId = GetValidator(ve.ValidatorAddress).Id;
+            if (validatorId == 0)
+            {
+                // Validator isn't yet in the database, so there can't be any records about them!
+                continue;
+            }
+
+            dbKeys.Add(ve.Epoch);
+            dbKeys.Add(validatorId);
+        }
+
+        var preExistingValidatorProposalRecords = dbKeys.Count == 0
+        ? new Dictionary<ValidatorEpoch, ValidatorProposalRecord>()
+        : await _dbContext.Set<ValidatorProposalRecord>()
+            .FromSqlRawWithDimensionalIn(
+                "SELECT * FROM validator_proposal_records WHERE (epoch, validator_id)",
+                dbKeys.Cast<object>().ToArray(),
+                2
+            )
+            .ToDictionaryAsync(
+                vpr => new ValidatorEpoch(GetValidatorById(vpr.ValidatorId), vpr.Epoch),
+                _cancellationToken
+            );
+
+        foreach (var (ve, (latestData, latestStateVersion)) in _latestSeenValidatorProposalRecords)
+        {
+            var key = new ValidatorEpoch(GetValidator(ve.ValidatorAddress), ve.Epoch);
+            var previousRecord = preExistingValidatorProposalRecords.GetValueOrDefault(key);
+            if (previousRecord == null)
+            {
+                _dbActions.Add(() => CreateRecordAction(
+                    new ValidatorProposalRecord(key, latestData), latestStateVersion
+                ));
+            }
+            else
+            {
+                previousRecord.UpdateData(latestData);
+                previousRecord.LastUpdatedStateVersion = latestStateVersion;
+            }
+        }
     }
 }

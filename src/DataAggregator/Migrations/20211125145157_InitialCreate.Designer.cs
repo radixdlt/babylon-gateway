@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211125130315_InitialCreate")]
+    [Migration("20211125145157_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -385,6 +385,27 @@ namespace DataAggregator.Migrations
                         .IsUnique();
 
                     b.ToTable("validators");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.Records.ValidatorProposalRecord", b =>
+                {
+                    b.Property<long>("Epoch")
+                        .HasColumnType("bigint")
+                        .HasColumnName("epoch");
+
+                    b.Property<long>("ValidatorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("validator_id");
+
+                    b.Property<long>("LastUpdatedStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_updated_state_version");
+
+                    b.HasKey("Epoch", "ValidatorId");
+
+                    b.HasIndex("ValidatorId", "Epoch");
+
+                    b.ToTable("validator_proposal_records");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
@@ -1083,6 +1104,44 @@ namespace DataAggregator.Migrations
                         .IsRequired();
 
                     b.Navigation("RawTransaction");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.Records.ValidatorProposalRecord", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
+                        .WithMany()
+                        .HasForeignKey("ValidatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Common.Database.Models.Ledger.Records.ProposalRecord", "ProposalRecord", b1 =>
+                        {
+                            b1.Property<long>("ValidatorProposalRecordEpoch")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("ValidatorProposalRecordValidatorId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("ProposalsCompleted")
+                                .HasColumnType("bigint")
+                                .HasColumnName("proposals_completed");
+
+                            b1.Property<long>("ProposalsMissed")
+                                .HasColumnType("bigint")
+                                .HasColumnName("proposals_missed");
+
+                            b1.HasKey("ValidatorProposalRecordEpoch", "ValidatorProposalRecordValidatorId");
+
+                            b1.ToTable("validator_proposal_records");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ValidatorProposalRecordEpoch", "ValidatorProposalRecordValidatorId");
+                        });
+
+                    b.Navigation("ProposalRecord")
+                        .IsRequired();
+
+                    b.Navigation("Validator");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>

@@ -66,6 +66,7 @@ using Common.Database.Models;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
+using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
 using Common.Database.ValueConverters;
 using Common.Extensions;
@@ -108,6 +109,8 @@ public class CommonDbContext : DbContext
     public DbSet<ValidatorStakeHistory> ValidatorStakeHistoryEntries => Set<ValidatorStakeHistory>();
 
     public DbSet<AccountValidatorStakeHistory> AccountValidatorStakeHistoryEntries => Set<AccountValidatorStakeHistory>();
+
+    public DbSet<ValidatorProposalRecord> ValidatorProposalRecords => Set<ValidatorProposalRecord>();
 
 #pragma warning restore CS1591
 
@@ -173,6 +176,8 @@ public class CommonDbContext : DbContext
         HookUpResourceSupplyHistory(modelBuilder);
         HookUpValidatorStakeHistory(modelBuilder);
         HookUpAccountValidatorStakeHistory(modelBuilder);
+
+        HookUpValidatorProposalRecords(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -259,6 +264,15 @@ public class CommonDbContext : DbContext
             .HasIndex(h => new { h.ValidatorId, h.AccountId, h.FromStateVersion });
         modelBuilder.Entity<AccountValidatorStakeHistory>()
             .HasIndex(h => new { h.ValidatorId, h.FromStateVersion });
+    }
+
+    private static void HookUpValidatorProposalRecords(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ValidatorProposalRecord>()
+            .HasKey(h => new { h.Epoch, h.ValidatorId });
+
+        modelBuilder.Entity<ValidatorProposalRecord>()
+            .HasIndex(h => new { h.ValidatorId, h.Epoch });
     }
 
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)

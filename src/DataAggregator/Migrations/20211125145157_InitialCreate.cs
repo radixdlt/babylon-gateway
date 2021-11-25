@@ -257,6 +257,27 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "validator_proposal_records",
+                columns: table => new
+                {
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_completed = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
+                    last_updated_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_proposal_records", x => new { x.epoch, x.validator_id });
+                    table.ForeignKey(
+                        name: "FK_validator_proposal_records_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "validator_stake_history",
                 columns: table => new
                 {
@@ -745,6 +766,11 @@ namespace DataAggregator.Migrations
                 column: "validator_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_validator_proposal_records_validator_id_epoch",
+                table: "validator_proposal_records",
+                columns: new[] { "validator_id", "epoch" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_stake_balance_substates_down_state_version_down_o~",
                 table: "validator_stake_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
@@ -802,6 +828,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "validator_data_substates");
+
+            migrationBuilder.DropTable(
+                name: "validator_proposal_records");
 
             migrationBuilder.DropTable(
                 name: "validator_stake_balance_substates");

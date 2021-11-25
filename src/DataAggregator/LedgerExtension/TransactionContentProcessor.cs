@@ -64,6 +64,7 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Common.Numerics;
@@ -122,20 +123,38 @@ public class TransactionContentProcessor
         foreach (var operationGroup in transaction.OperationGroups)
         {
             _operationGroupIndex++;
-            if (!operationGroup.HasSubstantiveOperations())
+            _operationIndexInGroup = -1;
+            _transactionOperationGroup = operationGroup;
+
+            // Look for Validator Proposal updates -- before filtering out Operation Groups which just contain that or round data
+            foreach (var operation in operationGroup.Operations)
+            {
+                _operationIndexInGroup += 1;
+                if (!operation.IsCreateOf<ValidatorBFTData>(out var validatorBftData))
+                {
+                    continue;
+                }
+
+                _operation = operation;
+                _entity = _entityDeterminer.DetermineEntity(_operation.EntityIdentifier);
+                HandleValidatorBftDataOperation(validatorBftData);
+            }
+
+            // Only continue (to eg add a LedgerOperationGroup) if the content is substantive
+            if (!operationGroup.HasOperationsOtherThanRoundDataOrValidatorBftData())
             {
                 continue;
             }
 
-            _operationIndexInGroup = -1;
-            _transactionOperationGroup = operationGroup;
             _dbOperationGroup = new LedgerOperationGroup(
                 transaction.CommittedStateIdentifier.StateVersion,
                 _operationGroupIndex,
                 null // TODO:NG-41 - fix inferred actions
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
+            _operationIndexInGroup = -1;
 
+            // Loop through again, processing all operations except RoundData and ValidatorBftData
             foreach (var operation in _transactionOperationGroup.Operations)
             {
                 _operationIndexInGroup += 1;
@@ -169,6 +188,34 @@ public class TransactionContentProcessor
         _operationIndexInGroup = -1;
 
         HandleHistoryUpdates();
+    }
+
+    private void HandleValidatorBftDataOperation(ValidatorBFTData validatorBftData)
+    {
+        if (_entity!.EntityType != EntityType.Validator_System)
+        {
+            throw GenerateDetailedInvalidTransactionException(
+                $"ValidatorBftData was against entity {_entity}, but a type of {EntityType.Validator_System} was expected."
+            );
+        }
+
+        var validatorAddress = _entity!.ValidatorAddress!;
+        var isForNextEpoch = _transactionSummary!.IsEndOfEpoch
+                             && validatorBftData.ProposalsCompleted == 0
+                             && validatorBftData.ProposalsMissed == 0;
+
+        _dbActionsPlanner.UpsertValidatorProposalRecord(
+            new ValidatorEpochDenormalized(
+                validatorAddress,
+                isForNextEpoch ? _transactionSummary!.Epoch + 1 : _transactionSummary!.Epoch
+            ),
+            new ProposalRecord
+            {
+                ProposalsCompleted = validatorBftData.ProposalsCompleted,
+                ProposalsMissed = validatorBftData.ProposalsMissed,
+            },
+            _transactionSummary.StateVersion
+        );
     }
 
     private void HandleOperation()
