@@ -62,74 +62,15 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
-using Common.Numerics;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
+using System.Text;
+using System.Text.Json;
 
-namespace Common.Database.Models.Ledger.History;
+namespace Common.Extensions;
 
-/// <summary>
-/// Tracks Account Resource Balances over time.
-/// </summary>
-// OnModelCreating: Indexes defined there.
-// OnModelCreating: Composite primary key is defined there.
-[Table("account_resource_balance_history")]
-public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
+public static class DateTimeExtensions
 {
-    [Column(name: "account_id")]
-    public long AccountId { get; set; }
-
-    [ForeignKey(nameof(AccountId))]
-    public Account Account { get; set; }
-
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
-
-    public BalanceEntry BalanceEntry { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AccountResourceBalanceHistory"/> class.
-    /// The StateVersions should be set separately.
-    /// </summary>
-    public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
+    public static string AsUtcIsoDateWithMillisString(this DateTime dateTime)
     {
-        Account = key.Account;
-        Resource = key.Resource;
-        BalanceEntry = balanceEntry;
-    }
-
-    public static AccountResourceBalanceHistory FromPreviousEntry(
-        AccountResource key,
-        BalanceEntry? previousBalance,
-        TokenAmount balanceChange
-    )
-    {
-        var prev = previousBalance ?? BalanceEntry.GetDefault();
-        return new AccountResourceBalanceHistory(key, new BalanceEntry
-        {
-            Balance = prev.Balance + balanceChange,
-        });
-    }
-
-    private AccountResourceBalanceHistory()
-    {
-    }
-}
-
-[Owned]
-public record BalanceEntry
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-
-    public static BalanceEntry GetDefault()
-    {
-        return new BalanceEntry(); // Balance is default(TokenAmount) = 0
+        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffzzz");
     }
 }

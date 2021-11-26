@@ -62,74 +62,34 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
-using Common.Numerics;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
+using GatewayAPI.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Common.Database.Models.Ledger.History;
+namespace GatewayAPI.Filters;
 
-/// <summary>
-/// Tracks Account Resource Balances over time.
-/// </summary>
-// OnModelCreating: Indexes defined there.
-// OnModelCreating: Composite primary key is defined there.
-[Table("account_resource_balance_history")]
-public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
+public class ExceptionFilter : IActionFilter, IOrderedFilter
 {
-    [Column(name: "account_id")]
-    public long AccountId { get; set; }
+    public int Order => int.MaxValue - 10;
 
-    [ForeignKey(nameof(AccountId))]
-    public Account Account { get; set; }
-
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
-
-    public BalanceEntry BalanceEntry { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AccountResourceBalanceHistory"/> class.
-    /// The StateVersions should be set separately.
-    /// </summary>
-    public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
+    public void OnActionExecuting(ActionExecutingContext context)
     {
-        Account = key.Account;
-        Resource = key.Resource;
-        BalanceEntry = balanceEntry;
     }
 
-    public static AccountResourceBalanceHistory FromPreviousEntry(
-        AccountResource key,
-        BalanceEntry? previousBalance,
-        TokenAmount balanceChange
-    )
+    public void OnActionExecuted(ActionExecutedContext context)
     {
-        var prev = previousBalance ?? BalanceEntry.GetDefault();
-        return new AccountResourceBalanceHistory(key, new BalanceEntry
+        var exception = context.Exception is HttpResponseException httpResponseException
+            ? httpResponseException
+            : new HttpResponseException(); // Hide error codes behind a blanket UNKNOWN_ERROR
+
+        context.Result = new ObjectResult(new
         {
-            Balance = prev.Balance + balanceChange,
-        });
-    }
-
-    private AccountResourceBalanceHistory()
-    {
-    }
-}
-
-[Owned]
-public record BalanceEntry
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
-
-    public static BalanceEntry GetDefault()
-    {
-        return new BalanceEntry(); // Balance is default(TokenAmount) = 0
+            exception = exception.ExceptionNameUpperSnakeCase,
+            cause = exception.Cause,
+        })
+        {
+            StatusCode = exception.Status,
+        };
+        context.ExceptionHandled = true;
     }
 }

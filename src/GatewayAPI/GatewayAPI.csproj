@@ -8,6 +8,7 @@
     <!-- NB - PackageReference versions are overridden centrally in Directory.Packages.props -->
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" />
+        <PackageReference Include="RadixGatewayApi.Generated" />
     </ItemGroup>
 
     <ItemGroup>

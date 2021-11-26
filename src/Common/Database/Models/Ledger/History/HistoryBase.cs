@@ -83,7 +83,13 @@ public abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
 }
 
 /// <summary>
-/// A base class for History tracked in the database. Current state is given by ToStateVersion = null.
+/// A base class for History tracked in the database.
+///
+/// Current state is given by ToStateVersion = null - but generally speaking, you should be reading at a given
+/// already-committed state version, to ensure that the history you read is atomic against that stateVersion.
+/// (Or at least, it is atomic assuming the ledger isn't mid-reversion, but at that point, all bets are off).
+///
+/// DbQueryExtensions.GetHistoryAtVersion should help with this.
 /// </summary>
 public abstract class HistoryBase
 {

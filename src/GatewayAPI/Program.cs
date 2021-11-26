@@ -68,12 +68,16 @@
 using Common.Database;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
+using GatewayAPI.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 /* Configure services / dependency injection */
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new ExceptionFilter());
+});
 builder.Host.ConfigureServices(new DefaultKernel().ConfigureServices);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

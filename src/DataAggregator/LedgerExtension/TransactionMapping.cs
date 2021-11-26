@@ -96,12 +96,13 @@ public static class TransactionMapping
             signedBy: signedBy,
             epoch: summary.Epoch,
             indexInEpoch: summary.IndexInEpoch,
+            roundInEpoch: summary.RoundInEpoch,
             isOnlyRoundChange: summary.IsOnlyRoundChange,
-            isEndOfEpoch: summary.IsEndOfEpoch,
+            isStartOfEpoch: summary.IsStartOfEpoch,
+            isStartOfRound: summary.IsStartOfRound,
             roundTimestamp: summary.CurrentRoundTimestamp,
             createdTimestamp: summary.CreatedTimestamp,
-            normalizedTimestamp: summary.NormalizedTimestamp,
-            endOfEpochRound: summary.EndOfEpochRound
+            normalizedTimestamp: summary.NormalizedTimestamp
         );
     }
 }

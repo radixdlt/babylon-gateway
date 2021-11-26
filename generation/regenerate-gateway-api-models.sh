@@ -12,11 +12,11 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.9.1' # This needs bumping every time
-packageName='RadixCoreApi.GeneratedClient'
+packageVersion='0.1.1' # This needs bumping every time
+packageName='RadixGatewayApi.Generated'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
-specName='./core-api-spec.yaml'
+specName='./gateway-api-spec.yaml'
 
 ##########
 # CHECKS #
@@ -45,7 +45,7 @@ do
     test -d "$TMPDIR" && break
 done
 
-dummyApiDirectory="$TMPDIR/radix-generated-core-api/"
+dummyApiDirectory="$TMPDIR/radix-generated-gateway-api/"
 
 rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"

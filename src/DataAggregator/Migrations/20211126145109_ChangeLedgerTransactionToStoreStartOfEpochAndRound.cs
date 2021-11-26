@@ -62,74 +62,82 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
-using Common.Numerics;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Common.Database.Models.Ledger.History;
+#nullable disable
 
-/// <summary>
-/// Tracks Account Resource Balances over time.
-/// </summary>
-// OnModelCreating: Indexes defined there.
-// OnModelCreating: Composite primary key is defined there.
-[Table("account_resource_balance_history")]
-public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
+namespace DataAggregator.Migrations
 {
-    [Column(name: "account_id")]
-    public long AccountId { get; set; }
-
-    [ForeignKey(nameof(AccountId))]
-    public Account Account { get; set; }
-
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
-
-    public BalanceEntry BalanceEntry { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AccountResourceBalanceHistory"/> class.
-    /// The StateVersions should be set separately.
-    /// </summary>
-    public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
+    public partial class ChangeLedgerTransactionToStoreStartOfEpochAndRound : Migration
     {
-        Account = key.Account;
-        Resource = key.Resource;
-        BalanceEntry = balanceEntry;
-    }
-
-    public static AccountResourceBalanceHistory FromPreviousEntry(
-        AccountResource key,
-        BalanceEntry? previousBalance,
-        TokenAmount balanceChange
-    )
-    {
-        var prev = previousBalance ?? BalanceEntry.GetDefault();
-        return new AccountResourceBalanceHistory(key, new BalanceEntry
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            Balance = prev.Balance + balanceChange,
-        });
-    }
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transactions_epoch_end_of_round",
+                table: "ledger_transactions");
 
-    private AccountResourceBalanceHistory()
-    {
-    }
-}
+            migrationBuilder.DropColumn(
+                name: "end_of_round",
+                table: "ledger_transactions");
 
-[Owned]
-public record BalanceEntry
-{
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
+            migrationBuilder.RenameColumn(
+                name: "is_end_of_epoch",
+                table: "ledger_transactions",
+                newName: "is_start_of_round");
 
-    public static BalanceEntry GetDefault()
-    {
-        return new BalanceEntry(); // Balance is default(TokenAmount) = 0
+            migrationBuilder.AddColumn<bool>(
+                name: "is_start_of_epoch",
+                table: "ledger_transactions",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<long>(
+                name: "round_in_epoch",
+                table: "ledger_transactions",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_epoch_round_in_epoch",
+                table: "ledger_transactions",
+                columns: new[] { "epoch", "round_in_epoch" },
+                unique: true,
+                filter: "is_start_of_round = true");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transactions_epoch_round_in_epoch",
+                table: "ledger_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "is_start_of_epoch",
+                table: "ledger_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "round_in_epoch",
+                table: "ledger_transactions");
+
+            migrationBuilder.RenameColumn(
+                name: "is_start_of_round",
+                table: "ledger_transactions",
+                newName: "is_end_of_epoch");
+
+            migrationBuilder.AddColumn<long>(
+                name: "end_of_round",
+                table: "ledger_transactions",
+                type: "bigint",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_epoch_end_of_round",
+                table: "ledger_transactions",
+                columns: new[] { "epoch", "end_of_round" },
+                unique: true,
+                filter: "end_of_round IS NOT NULL");
+        }
     }
 }

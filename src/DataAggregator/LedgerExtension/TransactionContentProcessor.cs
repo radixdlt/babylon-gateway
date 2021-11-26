@@ -137,7 +137,7 @@ public class TransactionContentProcessor
 
                 _operation = operation;
                 _entity = _entityDeterminer.DetermineEntity(_operation.EntityIdentifier);
-                HandleValidatorBftDataOperation(validatorBftData);
+                HandleValidatorBftDataOperationUp(validatorBftData);
             }
 
             // Only continue (to eg add a LedgerOperationGroup) if the content is substantive
@@ -190,7 +190,7 @@ public class TransactionContentProcessor
         HandleHistoryUpdates();
     }
 
-    private void HandleValidatorBftDataOperation(ValidatorBFTData validatorBftData)
+    private void HandleValidatorBftDataOperationUp(ValidatorBFTData validatorBftData)
     {
         if (_entity!.EntityType != EntityType.Validator_System)
         {
@@ -200,14 +200,11 @@ public class TransactionContentProcessor
         }
 
         var validatorAddress = _entity!.ValidatorAddress!;
-        var isForNextEpoch = _transactionSummary!.IsEndOfEpoch
-                             && validatorBftData.ProposalsCompleted == 0
-                             && validatorBftData.ProposalsMissed == 0;
 
         _dbActionsPlanner.UpsertValidatorProposalRecord(
             new ValidatorEpochDenormalized(
                 validatorAddress,
-                isForNextEpoch ? _transactionSummary!.Epoch + 1 : _transactionSummary!.Epoch
+                _transactionSummary!.Epoch
             ),
             new ProposalRecord
             {

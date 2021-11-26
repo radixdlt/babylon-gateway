@@ -62,74 +62,54 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
-using Common.Numerics;
+using Common.Database;
+using Common.Extensions;
+using GatewayAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
+using RadixGatewayApi.Generated.Model;
 
-namespace Common.Database.Models.Ledger.History;
+namespace GatewayAPI.Database;
 
-/// <summary>
-/// Tracks Account Resource Balances over time.
-/// </summary>
-// OnModelCreating: Indexes defined there.
-// OnModelCreating: Composite primary key is defined there.
-[Table("account_resource_balance_history")]
-public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
+public interface ILedgerStateQuerier
 {
-    [Column(name: "account_id")]
-    public long AccountId { get; set; }
-
-    [ForeignKey(nameof(AccountId))]
-    public Account Account { get; set; }
-
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
-
-    public BalanceEntry BalanceEntry { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AccountResourceBalanceHistory"/> class.
-    /// The StateVersions should be set separately.
-    /// </summary>
-    public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
-    {
-        Account = key.Account;
-        Resource = key.Resource;
-        BalanceEntry = balanceEntry;
-    }
-
-    public static AccountResourceBalanceHistory FromPreviousEntry(
-        AccountResource key,
-        BalanceEntry? previousBalance,
-        TokenAmount balanceChange
-    )
-    {
-        var prev = previousBalance ?? BalanceEntry.GetDefault();
-        return new AccountResourceBalanceHistory(key, new BalanceEntry
-        {
-            Balance = prev.Balance + balanceChange,
-        });
-    }
-
-    private AccountResourceBalanceHistory()
-    {
-    }
+    Task<LedgerState> GetTipOfLedgerState(string networkName);
 }
 
-[Owned]
-public record BalanceEntry
+public class LedgerStateQuerier : ILedgerStateQuerier
 {
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
+    private readonly GatewayReadOnlyDbContext _dbContext;
 
-    public static BalanceEntry GetDefault()
+    public LedgerStateQuerier(GatewayReadOnlyDbContext dbContext)
     {
-        return new BalanceEntry(); // Balance is default(TokenAmount) = 0
+        _dbContext = dbContext;
+    }
+
+    // So that we don't forget to check the network name, add the assertion in here.
+    public async Task<LedgerState> GetTipOfLedgerState(string networkName)
+    {
+        await AssertMatchingNetwork(networkName);
+
+        return await _dbContext.GetTopLedgerTransaction()
+            .Select(lt => new LedgerState(
+                lt.ResultantStateVersion,
+                lt.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
+                lt.Epoch,
+                lt.RoundInEpoch
+            ))
+            .SingleAsync();
+    }
+
+    // TODO - Improve performance to cache this
+    // TODO - Ensure NetworkConfiguration exists at service launch
+    private async Task AssertMatchingNetwork(string networkName)
+    {
+        var ledgerNetworkName = await _dbContext.NetworkConfiguration
+            .Select(c => c.NetworkDefinition.NetworkName)
+            .SingleAsync();
+
+        if (networkName != ledgerNetworkName)
+        {
+            throw new MismatchingNetworkException(ledgerNetworkName);
+        }
     }
 }

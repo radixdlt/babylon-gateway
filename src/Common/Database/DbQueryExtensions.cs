@@ -62,44 +62,34 @@
  * permissions under this License.
  */
 
-using GatewayAPI.Database;
-using Microsoft.AspNetCore.Mvc;
+using Common.Database.Models.Ledger;
+using Common.Database.Models.Ledger.History;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
-namespace GatewayAPI.Controllers;
+namespace Common.Database;
 
-// ReSharper disable once InconsistentNaming
-#pragma warning disable SA1300
-public record AccountBalancesRequest(string accountAddress);
-#pragma warning restore SA1300
-
-[ApiController]
-[Route("account")]
-public class ExampleAccountController : ControllerBase
+public static class DbQueryExtensions
 {
-    private readonly ILogger<ExampleAccountController> _logger;
-    private readonly GatewayReadOnlyDbContext _dbContext;
-
-    public ExampleAccountController(ILogger<ExampleAccountController> logger, GatewayReadOnlyDbContext dbContext)
+    public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
+        where TDbContext : CommonDbContext
     {
-        _logger = logger;
-        _dbContext = dbContext;
+        return dbContext.LedgerTransactions
+            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .Take(1);
     }
 
-    // TODO - This needs to be fixed in many ways:
-    // * Create a response model (or use the one from Open API gen)
-    // * Map outside the controller
-    [HttpPost("balances")]
-    public IEnumerable<object> GetBalances(AccountBalancesRequest request)
+    public static IQueryable<THistory> GetHistoryEntryAtVersion<THistory>(
+        this DbSet<THistory> dbSet,
+        Expression<Func<THistory, bool>> keySelector,
+        long stateVersion
+    )
+        where THistory : HistoryBase
     {
-        return _dbContext
-            .CurrentAccountResourceHistory
-            .Where(arb => arb.Account.Address == request.accountAddress)
-            .Include(arb => arb.Resource)
-            .Select(x => new
-            {
-                rri = x.Resource.ResourceIdentifier,
-                amount = x.BalanceEntry.Balance.ToSubUnitString(),
-            });
+        return dbSet
+            .Where(keySelector)
+            .Where(h => h.FromStateVersion <= stateVersion)
+            .OrderByDescending(h => h.FromStateVersion)
+            .Take(1);
     }
 }

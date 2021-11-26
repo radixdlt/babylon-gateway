@@ -77,7 +77,7 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, bool isOnlyRoundChange, bool isEndOfEpoch, DateTime roundTimestamp, DateTime createdTimestamp, DateTime normalizedTimestamp, long? endOfEpochRound)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, DateTime roundTimestamp, DateTime createdTimestamp, DateTime normalizedTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
@@ -87,12 +87,13 @@ public class LedgerTransaction
         SignedBy = signedBy;
         Epoch = epoch;
         IndexInEpoch = indexInEpoch;
+        RoundInEpoch = roundInEpoch;
         IsOnlyRoundChange = isOnlyRoundChange;
-        IsEndOfEpoch = isEndOfEpoch;
+        IsStartOfEpoch = isStartOfEpoch;
+        IsStartOfRound = isStartOfRound;
         RoundTimestamp = roundTimestamp;
         CreatedTimestamp = createdTimestamp;
         NormalizedTimestamp = normalizedTimestamp;
-        EndOfEpochRound = endOfEpochRound;
     }
 
     private LedgerTransaction()
@@ -130,18 +131,24 @@ public class LedgerTransaction
     [Column(name: "index_in_epoch")]
     public long IndexInEpoch { get; set; }
 
+    [Column(name: "round_in_epoch")]
+    public long RoundInEpoch { get; set; }
+
     /// <summary>
     /// For now, Round/View changes happen in their own transaction (or along with epoch changes).
     /// They are system-generated transactions with just a RoundData and ValidatorBftData update.
-    /// At the moment IsOnlyRoundChange is equivalent to (FeePaid = 0 AND NOT IsEpochChange)
+    /// At the moment IsOnlyRoundChange is equivalent to (FeePaid = 0 AND NOT IsEpochChange) or (IsStartOfRound)
     /// But in case this changes, let's calculate whether a transaction only contains RoundData and ValidatorBftData
     /// and store this in the database.
     /// </summary>
     [Column("is_only_round_change")]
     public bool IsOnlyRoundChange { get; set; }
 
-    [Column(name: "is_end_of_epoch")]
-    public bool IsEndOfEpoch { get; set; }
+    [Column(name: "is_start_of_epoch")]
+    public bool IsStartOfEpoch { get; set; }
+
+    [Column(name: "is_start_of_round")]
+    public bool IsStartOfRound { get; set; }
 
     /// <summary>
     /// The round timestamp is derived as an average of the timestamp of all the validators performing consensus.
@@ -164,9 +171,6 @@ public class LedgerTransaction
     // TODO:NG-51 - Further improvements
     [Column(name: "timestamp")]
     public DateTime NormalizedTimestamp { get; set; }
-
-    [Column(name: "end_of_round")]
-    public long? EndOfEpochRound { get; set; }
 
     public bool IsUserTransaction => FeePaid.IsPositive();
 

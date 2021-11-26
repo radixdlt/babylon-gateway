@@ -74,12 +74,19 @@ public class DefaultKernel
     {
         // Globally-Scoped services
         AddGlobalScopedServices(services);
+        AddRequestScopedServices(services);
         AddDatabaseContext(hostBuilderContext, services);
     }
 
     private void AddGlobalScopedServices(IServiceCollection services)
     {
         services.AddSingleton<INetworkGatewayConfiguration, NetworkGatewayConfiguration>();
+    }
+
+    private void AddRequestScopedServices(IServiceCollection services)
+    {
+        services.AddScoped<ILedgerStateQuerier, LedgerStateQuerier>();
+        services.AddScoped<IAccountQuerier, AccountQuerier>();
     }
 
     private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)

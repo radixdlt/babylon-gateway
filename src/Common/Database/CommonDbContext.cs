@@ -173,9 +173,9 @@ public class CommonDbContext : DbContext
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.Epoch, lt.EndOfEpochRound })
+            .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
-            .HasFilter("end_of_round IS NOT NULL");
+            .HasFilter("is_start_of_round = true");
     }
 
     private static void HookupLedgerOperationGroups(ModelBuilder modelBuilder)

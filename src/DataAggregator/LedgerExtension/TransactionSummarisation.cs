@@ -74,14 +74,15 @@ public record TransactionSummary(
     long StateVersion,
     long Epoch,
     long IndexInEpoch,
+    long RoundInEpoch,
     bool IsOnlyRoundChange,
-    bool IsEndOfEpoch,
+    bool IsStartOfEpoch,
+    bool IsStartOfRound,
     byte[] TransactionIdentifierHash,
     byte[] TransactionAccumulator,
     DateTime CurrentRoundTimestamp,
     DateTime CreatedTimestamp,
-    DateTime NormalizedTimestamp,
-    long? EndOfEpochRound
+    DateTime NormalizedTimestamp
 );
 
 public static class TransactionSummarisation
@@ -97,14 +98,15 @@ public static class TransactionSummarisation
             lastTransaction.ResultantStateVersion,
             lastTransaction.Epoch,
             lastTransaction.IndexInEpoch,
+            lastTransaction.RoundInEpoch,
             lastTransaction.IsOnlyRoundChange,
-            lastTransaction.IsEndOfEpoch,
+            lastTransaction.IsStartOfEpoch,
+            lastTransaction.IsStartOfRound,
             lastTransaction.TransactionIdentifierHash,
             lastTransaction.TransactionAccumulator,
             lastTransaction.RoundTimestamp,
             lastTransaction.CreatedTimestamp,
-            lastTransaction.NormalizedTimestamp,
-            lastTransaction.EndOfEpochRound
+            lastTransaction.NormalizedTimestamp
         );
 
         return lastOverview ?? PreGenesisTransactionSummary();
@@ -112,10 +114,11 @@ public static class TransactionSummarisation
 
     public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction)
     {
-        long? newEpochForNextTransaction = null;
-        long? endOfEpochRound = null;
+        long? newEpoch = null;
+        long? newRoundInEpoch = null;
         DateTime? newRoundTimestamp = null;
         var isOnlyRoundChange = true;
+
         foreach (var operationGroup in transaction.OperationGroups)
         {
             foreach (var operation in operationGroup.Operations)
@@ -127,21 +130,29 @@ public static class TransactionSummarisation
 
                 if (operation.IsCreateOf<EpochData>(out var epochData))
                 {
-                    newEpochForNextTransaction = epochData.Epoch;
+                    newEpoch = epochData.Epoch;
                 }
 
-                if (operation.IsDeleteOf<RoundData>(out var endRoundData))
+                if (operation.IsCreateOf<RoundData>(out var newRoundData))
                 {
-                    endOfEpochRound = endRoundData.Round;
-                }
+                    newRoundInEpoch = newRoundData.Round;
 
-                // NB - the first view of the ledger has Timestamp 0 for some reason. Let's filter it out.
-                if (operation.IsCreateOf<RoundData>(out var newRoundData) && newRoundData.Timestamp != 0)
-                {
-                    newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp).UtcDateTime;
+                    // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
+                    if (newRoundData.Timestamp != 0)
+                    {
+                        newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp).UtcDateTime;
+                    }
                 }
             }
         }
+
+        /* NB:
+           The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
+           as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
+        */
+
+        var isStartOfEpoch = newEpoch != null;
+        var isStartOfRound = newRoundInEpoch != null;
 
         var roundTimestamp = newRoundTimestamp ?? lastTransaction.CurrentRoundTimestamp;
         var createdTimestamp = DateTime.UtcNow;
@@ -152,33 +163,36 @@ public static class TransactionSummarisation
 
         return new TransactionSummary(
             StateVersion: transaction.CommittedStateIdentifier.StateVersion,
-            Epoch: lastTransaction.IsEndOfEpoch ? lastTransaction.Epoch + 1 : lastTransaction.Epoch,
-            IndexInEpoch: lastTransaction.IsEndOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
+            Epoch: newEpoch ?? lastTransaction.Epoch,
+            IndexInEpoch: isStartOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
+            RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
             IsOnlyRoundChange: isOnlyRoundChange,
-            IsEndOfEpoch: newEpochForNextTransaction != null,
+            IsStartOfEpoch: isStartOfEpoch,
+            IsStartOfRound: isStartOfRound,
             TransactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
             TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
             CurrentRoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
-            NormalizedTimestamp: normalizedTimestamp,
-            EndOfEpochRound: endOfEpochRound
+            NormalizedTimestamp: normalizedTimestamp
         );
     }
 
     private static TransactionSummary PreGenesisTransactionSummary()
     {
+        // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
             StateVersion: 0,
             Epoch: 0,
-            IndexInEpoch: -1, // Sight hack to make the first transaction be index 0 in Epoch 0
-            IsEndOfEpoch: false,
+            IndexInEpoch: 0,
+            RoundInEpoch: 0,
             IsOnlyRoundChange: false,
+            IsStartOfEpoch: false,
+            IsStartOfRound: false,
             TransactionIdentifierHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
             CurrentRoundTimestamp: DateTime.UnixEpoch,
             CreatedTimestamp: DateTime.UtcNow,
-            NormalizedTimestamp: DateTime.UnixEpoch,
-            EndOfEpochRound: null
+            NormalizedTimestamp: DateTime.UnixEpoch
         );
     }
 }

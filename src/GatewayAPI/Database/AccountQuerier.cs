@@ -62,74 +62,95 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
-using Common.Numerics;
+using Common.Database;
+using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
+using RadixGatewayApi.Generated.Model;
+using Api = RadixGatewayApi.Generated.Model;
 
-namespace Common.Database.Models.Ledger.History;
+namespace GatewayAPI.Database;
 
-/// <summary>
-/// Tracks Account Resource Balances over time.
-/// </summary>
-// OnModelCreating: Indexes defined there.
-// OnModelCreating: Composite primary key is defined there.
-[Table("account_resource_balance_history")]
-public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
+public interface IAccountQuerier
 {
-    [Column(name: "account_id")]
-    public long AccountId { get; set; }
-
-    [ForeignKey(nameof(AccountId))]
-    public Account Account { get; set; }
-
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
-
-    public BalanceEntry BalanceEntry { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AccountResourceBalanceHistory"/> class.
-    /// The StateVersions should be set separately.
-    /// </summary>
-    public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
-    {
-        Account = key.Account;
-        Resource = key.Resource;
-        BalanceEntry = balanceEntry;
-    }
-
-    public static AccountResourceBalanceHistory FromPreviousEntry(
-        AccountResource key,
-        BalanceEntry? previousBalance,
-        TokenAmount balanceChange
-    )
-    {
-        var prev = previousBalance ?? BalanceEntry.GetDefault();
-        return new AccountResourceBalanceHistory(key, new BalanceEntry
-        {
-            Balance = prev.Balance + balanceChange,
-        });
-    }
-
-    private AccountResourceBalanceHistory()
-    {
-    }
+    Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState);
 }
 
-[Owned]
-public record BalanceEntry
+public class AccountQuerier : IAccountQuerier
 {
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
+    private readonly GatewayReadOnlyDbContext _dbContext;
 
-    public static BalanceEntry GetDefault()
+    public AccountQuerier(GatewayReadOnlyDbContext dbContext)
     {
-        return new BalanceEntry(); // Balance is default(TokenAmount) = 0
+        _dbContext = dbContext;
+    }
+
+    public async Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState)
+    {
+        return new AccountBalances(
+            new TokenAmount("0", new TokenIdentifier("todo")),
+            await GetAccountResourceBalancesAtState(ledgerState, accountAddress)
+        );
+    }
+
+    private async Task<List<TokenAmount>> GetAccountResourceBalancesAtState(LedgerState ledgerState, string accountAddress)
+    {
+        return await _dbContext.AccountResourceBalanceHistoryEntries
+            .GetHistoryEntryAtVersion(arb => arb.Account.Address == accountAddress, ledgerState._Version)
+            .Include(arb => arb.Resource)
+            .Select(x => new TokenAmount(
+                x.BalanceEntry.Balance.ToSubUnitString(),
+                new TokenIdentifier(x.Resource.ResourceIdentifier)
+            ))
+            .ToListAsync();
+    }
+
+    private async Task<TokenAmount> GetAccountTotalStakeBalance(LedgerState ledgerState, string accountAddress)
+    {
+        // TODO - make this much nicer(!)
+        var accountValidatorsLatestVersion = await (
+            from accountValidatorHistory in _dbContext.AccountValidatorStakeHistoryEntries
+            where accountValidatorHistory.Account.Address == accountAddress
+            group accountValidatorHistory by accountValidatorHistory.Validator
+            into g
+            select new
+            {
+                ValidatorId = g.Key.Id,
+                AccountId = g.First().AccountId,
+                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+            }
+        ).ToListAsync();
+
+        var validatorsLatestVersion = await (
+            from validatorStakeHistory in _dbContext.ValidatorStakeHistoryEntries
+            where accountValidatorsLatestVersion.Select(v => v.ValidatorId).Contains(validatorStakeHistory.ValidatorId)
+            group validatorStakeHistory by validatorStakeHistory.ValidatorId
+            into g
+            select new
+            {
+                ValidatorId = g.Key,
+                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+            }
+        ).ToListAsync();
+
+        var validatorStake = await _dbContext.ValidatorStakeHistoryEntries
+            .FromSqlRawWithDimensionalIn(
+                "SELECT * FROM validator_stake_history WHERE (validator_id, from_state_version)",
+                validatorsLatestVersion,
+                v => new object[] { v.ValidatorId, v.LatestUpdateStateVersion }
+            )
+            .ToDictionaryAsync(
+                h => h.ValidatorId
+            );
+
+        var accountValidatorStake = await _dbContext.AccountValidatorStakeHistoryEntries
+            .FromSqlRawWithDimensionalIn(
+                "SELECT * FROM account_validator_stake_history WHERE (account_id, validator_id, from_state_version)",
+                accountValidatorsLatestVersion,
+                v => new object[] { v.AccountId, v.ValidatorId, v.LatestUpdateStateVersion }
+            )
+            .ToListAsync();
+
+        // QQ - do aggregation!
+        return new TokenAmount("0", new TokenIdentifier("todo"));
     }
 }

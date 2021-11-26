@@ -70,10 +70,6 @@ namespace GatewayAPI.Database;
 
 public class GatewayReadOnlyDbContext : CommonDbContext
 {
-    public IQueryable<AccountResourceBalanceHistory> CurrentAccountResourceHistory =>
-        AccountResourceBalanceHistoryEntries
-            .Where(AccountResourceBalanceHistory.IsCurrent);
-
     public GatewayReadOnlyDbContext(DbContextOptions<GatewayReadOnlyDbContext> options)
         : base(options)
     {
