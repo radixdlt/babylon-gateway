@@ -127,11 +127,11 @@ public class LedgerExtenderService : ILedgerExtenderService
     public async Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
     {
         // Create own context for the preparation unit of work.
-        await using var prepartionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var preparationReport = await PrepareForLedgerExtension(prepartionDbContext, parentStateIdentifier, transactions, token);
+        var preparationReport = await PrepareForLedgerExtension(preparationDbContext, parentStateIdentifier, transactions, token);
 
-        var prepartionEntriesTouched = await prepartionDbContext.SaveChangesAsync(token);
+        var preparationEntriesTouched = await preparationDbContext.SaveChangesAsync(token);
 
         // Create own context for ledger extension unit of work
         await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
@@ -151,7 +151,7 @@ public class LedgerExtenderService : ILedgerExtenderService
             bulkTransactionCommitReport.TransactionContentDbActionsCount,
             bulkTransactionCommitReport.LocalDbContextActionsMs,
             dbPersistenceMs,
-            preparationReport.RawTxnUpsertTouchedRecords + prepartionEntriesTouched + ledgerExtensionEntriesWritten
+            preparationReport.RawTxnUpsertTouchedRecords + preparationEntriesTouched + ledgerExtensionEntriesWritten
         );
     }
 
