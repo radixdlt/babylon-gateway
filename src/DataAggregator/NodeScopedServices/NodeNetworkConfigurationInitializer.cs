@@ -63,6 +63,7 @@
  */
 
 using Common.Addressing;
+using Common.Database.Models.SingleEntries;
 using DataAggregator.Configuration;
 using DataAggregator.Exceptions;
 using DataAggregator.GlobalServices;
@@ -75,17 +76,17 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
 {
     private readonly IAggregatorConfiguration _configuration;
     private readonly INetworkConfigurationReader _networkConfigurationReader;
-    private readonly INetworkDetailsProvider _networkDetailsProvider;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
     public NodeNetworkConfigurationInitializer(
         IAggregatorConfiguration configuration,
         INetworkConfigurationReader networkConfigurationReader,
-        INetworkDetailsProvider networkDetailsProvider
+        INetworkConfigurationProvider networkConfigurationProvider
     )
     {
         _configuration = configuration;
         _networkConfigurationReader = networkConfigurationReader;
-        _networkDetailsProvider = networkDetailsProvider;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public async Task Initialize(CancellationToken token)
@@ -99,19 +100,32 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
             );
         }
 
-        _networkDetailsProvider.SetNetworkDetails(MapNetworkConfigurationToNetworkDetails(networkConfiguration));
+        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(
+            MapNetworkConfigurationToNetworkDetails(networkConfiguration),
+            token
+        );
     }
 
-    private static NetworkDetails MapNetworkConfigurationToNetworkDetails(
+    private static NetworkConfiguration MapNetworkConfigurationToNetworkDetails(
         NetworkConfigurationResponse networkConfiguration
     )
     {
         var hrps = networkConfiguration.Bech32HumanReadableParts;
-        return new NetworkDetails(
-            networkConfiguration.NetworkIdentifier.Network,
-            new AddressHrps(hrps.AccountHrp, hrps.ResourceHrpSuffix, hrps.ValidatorHrp, hrps.NodeHrp),
-            RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix)
-        );
+        return new NetworkConfiguration
+        {
+            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
+            NetworkAddressHrps = new NetworkAddressHrps
+            {
+                AccountHrp = hrps.AccountHrp,
+                ResourceHrpSuffix = hrps.ResourceHrpSuffix,
+                ValidatorHrp = hrps.ValidatorHrp,
+                NodeHrp = hrps.NodeHrp,
+            },
+            WellKnownAddresses = new WellKnownAddresses
+            {
+                XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
+            },
+        };
     }
 
     private async Task<NetworkConfigurationResponse> ReadNetworkConfigurationFromNode(CancellationToken token)

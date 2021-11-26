@@ -62,37 +62,38 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+#nullable disable
 
-public interface ITransactionLogReader
+namespace DataAggregator.Migrations
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
-}
-
-public class TransactionLogReader : ITransactionLogReader
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly INodeCoreApiProvider _apiProvider;
-
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, INodeCoreApiProvider apiProvider)
+    public partial class AddNetworkConfiguration : Migration
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _apiProvider = apiProvider;
-    }
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "network_configuration",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false),
+                    network_name = table.Column<string>(type: "text", nullable: false),
+                    account_hrp = table.Column<string>(type: "text", nullable: false),
+                    resource_hrp_suffix = table.Column<string>(type: "text", nullable: false),
+                    validator_hrp = table.Column<string>(type: "text", nullable: false),
+                    node_hrp = table.Column<string>(type: "text", nullable: false),
+                    xrd_address = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_network_configuration", x => x.id);
+                });
+        }
 
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
-    {
-        return await _apiProvider.TransactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
-            );
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "network_configuration");
+        }
     }
 }

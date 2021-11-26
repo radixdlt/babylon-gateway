@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Addressing;
-using Common.Database.Models.Ledger.Normalization;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
@@ -102,18 +100,21 @@ public class LedgerExtenderService : ILedgerExtenderService
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
     public LedgerExtenderService(
         ILogger<LedgerExtenderService> logger,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
-        IEntityDeterminer entityDeterminer
+        IEntityDeterminer entityDeterminer,
+        INetworkConfigurationProvider networkConfigurationProvider
     )
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
         _entityDeterminer = entityDeterminer;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token)
@@ -169,7 +170,7 @@ public class LedgerExtenderService : ILedgerExtenderService
 
         if (parentSummary.StateVersion == 0)
         {
-            await EnsureDbLedgerIsInitialized(dbContext, token);
+            await EnsureDbLedgerIsInitialized(token);
         }
 
         var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
@@ -187,11 +188,15 @@ public class LedgerExtenderService : ILedgerExtenderService
         );
     }
 
-    private Task EnsureDbLedgerIsInitialized(AggregatorDbContext _, CancellationToken _2)
+    private async Task EnsureDbLedgerIsInitialized(CancellationToken token)
     {
-        _logger.LogInformation("Ledger appears new - so we will ensure it's initialized");
-
-        // TODO:NG-40 - Add ledger network creation here
-        return Task.CompletedTask;
+        var created = await _networkConfigurationProvider.SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(token);
+        if (created)
+        {
+            _logger.LogInformation(
+                "Ledger initialized with network: {NetworkName}",
+                _networkConfigurationProvider.GetNetworkName()
+            );
+        }
     }
 }

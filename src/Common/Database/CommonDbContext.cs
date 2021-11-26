@@ -68,6 +68,7 @@ using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
+using Common.Database.Models.SingleEntries;
 using Common.Database.ValueConverters;
 using Common.Extensions;
 using Common.Numerics;
@@ -83,6 +84,8 @@ public class CommonDbContext : DbContext
 #pragma warning disable CS1591 // Remove need for public docs - instead refer to the Model docs
 
     public DbSet<Node> Nodes => Set<Node>();
+
+    public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
     public DbSet<RawTransaction> RawTransactions => Set<RawTransaction>();
 

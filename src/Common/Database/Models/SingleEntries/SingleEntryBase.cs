@@ -62,51 +62,20 @@
  * permissions under this License.
  */
 
-using Common.Addressing;
-using RadixCoreApi.GeneratedClient.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAggregator.GlobalServices;
+namespace Common.Database.Models.SingleEntries;
 
-public record NetworkDetails(string NetworkName, AddressHrps AddressHrps, string XrdAddress);
-
-public interface INetworkDetailsProvider
+public class SingleEntryBase
 {
-    void SetNetworkDetails(NetworkDetails networkDetails);
-
-    NetworkDetails GetNetworkDetails();
-
-    NetworkIdentifier GetNetworkIdentifierForApiRequests();
-}
-
-public class NetworkDetailsProvider : INetworkDetailsProvider
-{
-    private readonly object _lock = new();
-    private NetworkDetails? _networkDetails;
-
-    public void SetNetworkDetails(NetworkDetails networkDetails)
+    [Key]
+    [Column(name: "id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int Id
     {
-        lock (_lock)
-        {
-            _networkDetails = networkDetails;
-        }
-    }
-
-    public NetworkDetails GetNetworkDetails()
-    {
-        lock (_lock)
-        {
-            var networkDetails = _networkDetails;
-            if (networkDetails == null)
-            {
-                throw new Exception("Network Details have been read before they have been written.");
-            }
-
-            return networkDetails;
-        }
-    }
-
-    public NetworkIdentifier GetNetworkIdentifierForApiRequests()
-    {
-        return new NetworkIdentifier(GetNetworkDetails().NetworkName);
+        get { return 1; }
+        // ReSharper disable once ValueParameterNotUsed
+        set { }
     }
 }

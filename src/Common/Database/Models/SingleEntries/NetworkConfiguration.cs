@@ -62,37 +62,57 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace Common.Database.Models.SingleEntries;
 
-public interface ITransactionLogReader
+[Table("network_configuration")]
+public class NetworkConfiguration : SingleEntryBase
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
+    // [Owned] below
+    public NetworkDefinition NetworkDefinition { get; set; }
+
+    // [Owned] below
+    public NetworkAddressHrps NetworkAddressHrps { get; set; }
+
+    // [Owned] below
+    public WellKnownAddresses WellKnownAddresses { get; set; }
+
+    public bool HasEqualConfiguration(NetworkConfiguration other)
+    {
+        return NetworkDefinition == other.NetworkDefinition
+               && NetworkAddressHrps == other.NetworkAddressHrps
+               && WellKnownAddresses == other.WellKnownAddresses;
+    }
 }
 
-public class TransactionLogReader : ITransactionLogReader
+[Owned]
+public record NetworkDefinition
 {
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly INodeCoreApiProvider _apiProvider;
+    [Column("network_name")]
+    public string NetworkName { get; set; }
+}
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, INodeCoreApiProvider apiProvider)
-    {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _apiProvider = apiProvider;
-    }
+[Owned]
+public record NetworkAddressHrps
+{
+    [Column("account_hrp")]
+    public string AccountHrp { get; set; }
 
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
-    {
-        return await _apiProvider.TransactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
-            );
-    }
+    [Column("resource_hrp_suffix")]
+    public string ResourceHrpSuffix { get; set; }
+
+    [Column("validator_hrp")]
+    public string ValidatorHrp { get; set; }
+
+    [Column("node_hrp")]
+    public string NodeHrp { get; set; }
+}
+
+[Owned]
+public record WellKnownAddresses
+{
+    [Column("xrd_address")]
+    public string XrdAddress { get; set; }
 }

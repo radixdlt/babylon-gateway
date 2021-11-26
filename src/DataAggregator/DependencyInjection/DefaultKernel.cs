@@ -96,7 +96,7 @@ public class DefaultKernel
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
         services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
-        services.AddSingleton<INetworkDetailsProvider, NetworkDetailsProvider>();
+        services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
     }
 

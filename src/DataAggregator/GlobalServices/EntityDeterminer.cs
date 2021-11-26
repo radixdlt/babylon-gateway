@@ -107,12 +107,12 @@ public interface IEntityDeterminer
 public class EntityDeterminer : IEntityDeterminer
 {
     private readonly ILogger<EntityDeterminer> _logger;
-    private readonly INetworkDetailsProvider _networkDetailsProvider;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public EntityDeterminer(ILogger<EntityDeterminer> logger, INetworkDetailsProvider networkDetailsProvider)
+    public EntityDeterminer(ILogger<EntityDeterminer> logger, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _logger = logger;
-        _networkDetailsProvider = networkDetailsProvider;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public Entity? DetermineEntity(EntityIdentifier entityIdentifier)
@@ -124,7 +124,7 @@ public class EntityDeterminer : IEntityDeterminer
         }
 
         if (!RadixAddressParser.TryParse(
-                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                _networkConfigurationProvider.GetAddressHrps(),
                 primaryEntityAddress,
                 out var primaryEntityRadixAddress,
                 out var errorMessage
@@ -175,7 +175,7 @@ public class EntityDeterminer : IEntityDeterminer
     public byte[] ParseValidatorPublicKey(string validatorAddress)
     {
         if (!RadixAddressParser.TryParse(
-                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                _networkConfigurationProvider.GetAddressHrps(),
                 validatorAddress,
                 out var radixAddress,
                 out var errorMessage
@@ -195,7 +195,7 @@ public class EntityDeterminer : IEntityDeterminer
     public byte[] ParseAccountPublicKey(string accountAddress)
     {
         if (!RadixAddressParser.TryParse(
-                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                _networkConfigurationProvider.GetAddressHrps(),
                 accountAddress,
                 out var radixAddress,
                 out var errorMessage
@@ -215,7 +215,7 @@ public class EntityDeterminer : IEntityDeterminer
     public byte[] ParseResourceRadixEngineAddress(string rri)
     {
         if (!RadixAddressParser.TryParse(
-                _networkDetailsProvider.GetNetworkDetails().AddressHrps,
+                _networkConfigurationProvider.GetAddressHrps(),
                 rri,
                 out var radixAddress,
                 out var errorMessage
@@ -239,6 +239,6 @@ public class EntityDeterminer : IEntityDeterminer
 
     public string GetXrdAddress()
     {
-        return _networkDetailsProvider.GetNetworkDetails().XrdAddress;
+        return _networkConfigurationProvider.GetXrdAddress();
     }
 }
