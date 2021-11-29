@@ -31,6 +31,7 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
   publish-docker:
     runs-on: ubuntu-latest
+    environment: event_creation
     steps:
       - name: Dump context
         uses: crazy-max/ghaction-dump-context@v1
@@ -76,6 +77,7 @@ jobs:
             esac
 
             echo "$TAGS"
+            echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
             echo "TAGS=$TAGS" >> $GITHUB_ENV
              
       - name: Docker build and push
@@ -86,6 +88,19 @@ jobs:
             ${{ env.TAGS }}
           push: true
           context: ./
+      - name: Trigger pull request deployment event ${{ github.ref }} 
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.RADIXBOT_GITHUB_REPO_PACKAGES_TOKEN }}
+          repository: radixdlt/radixdlt-iac
+          event-type: ng_pr
+          client-payload: |
+            {
+              "data_aggregator_image_tag": "${{ env.DOCKER_TAG }} "
+              "namespace_postfix": "${{ env.DOCKER_TAG }}"
+              "job_url": "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+            }
+        
 
 
 
