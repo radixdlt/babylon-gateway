@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  pull_request_review:
+    types: [submitted]
     branches:
       - main
   release:
@@ -96,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: event_creation
     needs: publish-docker
-    if: github.event_name != 'pull_request' || github.event.review.state == 'approved'
+    if: github.event.review.state == 'approved'
     steps:
       - name: Trigger pull request deployment event ${{ github.ref }} 
         uses: peter-evans/repository-dispatch@v1
