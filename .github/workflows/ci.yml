@@ -100,7 +100,7 @@ jobs:
               "namespace_postfix": "${{ env.DOCKER_TAG }}"
               "job_url": "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
             }
-        
+        if: github.event_name == 'pull_request'
 
 
 
