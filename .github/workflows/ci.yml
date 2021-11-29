@@ -31,7 +31,8 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
   publish-docker:
     runs-on: ubuntu-latest
-    environment: event_creation
+    outputs:  
+      docker-tag: ${{ steps.setup_tags.outputs.docker-tag}}
     steps:
       - name: Dump context
         uses: crazy-max/ghaction-dump-context@v1
@@ -51,6 +52,7 @@ jobs:
           username: _json_key
           password: ${{ secrets.GCR_EU_DEV_JSON_KEY }}
       - name: Setup Tags for docker image
+        id: setup_tags
         run: |
             docker_tag_with_branch(){
                GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
@@ -79,6 +81,7 @@ jobs:
             echo "$TAGS"
             echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
             echo "TAGS=$TAGS" >> $GITHUB_ENV
+            echo "::set-output name=docker-tag::$DOCKER_TAG"
              
       - name: Docker build and push
         uses: docker/build-push-action@v2
@@ -88,6 +91,12 @@ jobs:
             ${{ env.TAGS }}
           push: true
           context: ./
+    
+  dispatch-deployment-events:
+    runs-on: ubuntu-latest
+    environment: event_creation
+    needs: publish-docker
+    steps:
       - name: Trigger pull request deployment event ${{ github.ref }} 
         uses: peter-evans/repository-dispatch@v1
         with:
@@ -96,7 +105,7 @@ jobs:
           event-type: ng_pr
           client-payload: |
             {
-              "data_aggregator_image_tag": "${{ env.DOCKER_TAG }} "
+              "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.docker-tag }} "
               "namespace_postfix": "${{ env.DOCKER_TAG }}"
               "job_url": "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
             }
