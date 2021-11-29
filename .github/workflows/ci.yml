@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - DO-226-dataaggregator
   pull_request:
     branches:
       - main
@@ -59,7 +60,7 @@ jobs:
 
             GH_EVENT_NAME="${{ github.event_name }}"
             GH_ACTION_NAME="${{ github.event.action}}"
-            DOCKER_REPO="eu.gcr.io/lunar-arc-236318/ng-data-aggregator"
+            DOCKER_REPO="eu.gcr.io/dev-container-repo/ng-data-aggregator"
 
             case "${GH_EVENT_NAME}" in
                 release)
