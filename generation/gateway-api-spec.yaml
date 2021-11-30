@@ -492,6 +492,7 @@ components:
           "$ref": "#/components/schemas/TokenAmount"
         epochs_until_unlocked:
           type: integer
+          format: int64
     AccountTransactionsRequest:
       type: object
       required:
@@ -572,6 +573,10 @@ components:
       allOf:
         - "$ref": "#/components/schemas/Action"
         - type: object
+          required:
+            - from
+            - to
+            - amount
           properties:
             from:
               "$ref": "#/components/schemas/AccountIdentifier"
@@ -839,7 +844,7 @@ components:
             - public_key
             - bytes
           properties:
-            publicKey:
+            public_key:
               type: string
             bytes:
               type: string
@@ -854,10 +859,13 @@ components:
     TransactionFinalizeResponse:
       type: object
       required:
+        - transaction_identifier
         - signed_transaction
       properties:
         signed_transaction:
           type: string
+        transaction_identifier:
+          $ref: "#/components/schemas/TransactionIdentifier"
     TransactionSubmitRequest:
       type: object
       required:
@@ -888,6 +896,8 @@ components:
           type: string
         ledger_state:
           $ref: "#/components/schemas/LedgerState"
+        target_ledger_state:
+          $ref: "#/components/schemas/TargetLedgerState"
       example:
         network: mainnet
         ledger_state:
@@ -895,6 +905,8 @@ components:
           round: 1
           version: 1
           timestamp: "2021-08-29T01:19:00.524Z"
+        target_ledger_state:
+          version: 1000
     TokenRequest:
       type: object
       required:
@@ -926,6 +938,14 @@ components:
           type: integer
           format: int64
         round:
+          type: integer
+          format: int64
+    TargetLedgerState:
+      type: object
+      required:
+        - version
+      properties:
+        version:
           type: integer
           format: int64
     TokenResponse:
@@ -991,10 +1011,7 @@ components:
         ledger_state:
           "$ref": "#/components/schemas/LedgerState"
         token:
-          type: array
-          maxItems: 1
-          items:
-            "$ref": "#/components/schemas/Token"
+          "$ref": "#/components/schemas/Token"
       example:
         ledger_state:
           epoch: 1
@@ -1124,38 +1141,26 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Validator"
-    InternalServerError:
-      type: object
-      properties:
-        exception:
-          type: string
-        cause:
-          type: string
-    InvalidJsonError:
-      type: object
-      properties:
-        cause:
-          type: string
-    InvalidRequestError:
-      type: object
-      properties:
-        pointer:
-          type: string
-        cause:
-          type: string
     UnexpectedError:
       type: object
       required:
+        - code
         - message
       properties:
+        code:
+          type: integer
         message:
           type: string
-      discriminator:
-        propertyName: message
-        mapping:
-          INTERNAL_SERVER_ERROR: "#/components/schemas/InternalServerError"
-          INVALID_JSON: "#/components/schemas/InvalidJsonError"
-          INVALID_REQUEST: "#/components/schemas/InvalidRequestError"
+        details:
+          type: object
+          required:
+            - cause
+            - exception
+          properties:
+            cause:
+              type: string
+            exception:
+              type: string
     Validator:
       type: object
       required:
@@ -1245,9 +1250,11 @@ components:
           type: string
         proposals_missed:
           type: integer
+          format: int64
           minimum: 0
         proposals_completed:
           type: integer
+          format: int64
           minimum: 0
     EpochRange:
       type: object
@@ -1319,6 +1326,10 @@ components:
         - symbol
         - is_supply_mutable
         - granularity
+        - name
+        - description
+        - url
+        - icon_url
       properties:
         name:
           type: string
@@ -1428,10 +1439,10 @@ components:
           minLength: 64
     AccountAddress:
       type: string
-      pattern: "^(r|t|d)dx[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
+      pattern: "^[rtd]dx[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
     ValidatorAddress:
       type: string
-      pattern: "^(r|t|d)v[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
+      pattern: "^[rtd]v[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
     ResourceIdentifier:
       type: string
-      pattern: ^[!\"#$%&'()*+,-.\/0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]\^_`abcdefghijklmnopqrstuvwxyz{|}~]{1,83}_r[rb]1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$
+      pattern: "^[a-z0-9]{1,83}_[rtd]r[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$"

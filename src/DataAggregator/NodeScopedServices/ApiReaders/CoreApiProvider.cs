@@ -63,27 +63,31 @@
  */
 
 using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using System.Net.Http.Headers;
 
 namespace DataAggregator.NodeScopedServices.ApiReaders;
 
-public interface INetworkConfigurationReader
+public interface ICoreApiProvider
 {
-    Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
+    TransactionsApi TransactionsApi { get; }
+
+    NetworkApi NetworkApi { get; }
 }
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
+public class CoreApiProvider : ICoreApiProvider
 {
-    private readonly NetworkApi _networkApi;
+    public TransactionsApi TransactionsApi { get; }
 
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider)
-    {
-        _networkApi = coreApiProvider.NetworkApi;
-    }
+    public NetworkApi NetworkApi { get; }
 
-    public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    public CoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
-        return await _networkApi
-            .NetworkConfigurationPostAsync(new object(), token);
+        if (!string.IsNullOrWhiteSpace(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader))
+        {
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader);
+        }
+
+        TransactionsApi = new TransactionsApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
+        NetworkApi = new NetworkApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
     }
 }

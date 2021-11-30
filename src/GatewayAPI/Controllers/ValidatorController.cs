@@ -62,28 +62,32 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using GatewayAPI.Fallback;
+using Microsoft.AspNetCore.Mvc;
+using RadixGatewayApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Controllers;
 
-public interface INetworkConfigurationReader
+[ApiController]
+[Route("")]
+public class ValidatorController : ControllerBase
 {
-    Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
-}
+    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
-{
-    private readonly NetworkApi _networkApi;
-
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider)
+    public ValidatorController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
-        _networkApi = coreApiProvider.NetworkApi;
+        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
-    public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    [HttpPost("validator")]
+    public async Task<ValidatorInfoResponse> GetValidatorInfo(ValidatorInfoRequest request)
     {
-        return await _networkApi
-            .NetworkConfigurationPostAsync(new object(), token);
+        return await _fallbackGatewayApiProvider.Api.ValidatorPostAsync(request);
+    }
+
+    [HttpPost("validators")]
+    public async Task<ValidatorsResponse> GetValidators(ValidatorsRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.ValidatorsPostAsync(request);
     }
 }

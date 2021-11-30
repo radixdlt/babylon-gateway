@@ -62,28 +62,50 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using GatewayAPI.Fallback;
+using Microsoft.AspNetCore.Mvc;
+using RadixGatewayApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Controllers;
 
-public interface INetworkConfigurationReader
+[ApiController]
+[Route("transaction")]
+public class TransactionController : ControllerBase
 {
-    Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
-}
+    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
-{
-    private readonly NetworkApi _networkApi;
-
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider)
+    public TransactionController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
-        _networkApi = coreApiProvider.NetworkApi;
+        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
-    public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    [HttpPost("rules")]
+    public async Task<TransactionRulesResponse> GetTransactionRules(TransactionRulesRequest request)
     {
-        return await _networkApi
-            .NetworkConfigurationPostAsync(new object(), token);
+        return await _fallbackGatewayApiProvider.Api.TransactionRulesPostAsync(request);
+    }
+
+    [HttpPost("status")]
+    public async Task<TransactionStatusResponse> GetTransactionStatus(TransactionStatusRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.TransactionStatusPostAsync(request);
+    }
+
+    [HttpPost("build")]
+    public async Task<TransactionBuildResponse> BuildTransaction(TransactionBuildRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.TransactionBuildPostAsync(request);
+    }
+
+    [HttpPost("finalize")]
+    public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.TransactionFinalizePostAsync(request);
+    }
+
+    [HttpPost("submit")]
+    public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.TransactionSubmitPostAsync(request);
     }
 }

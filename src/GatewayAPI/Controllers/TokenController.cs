@@ -62,28 +62,38 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using GatewayAPI.Fallback;
+using Microsoft.AspNetCore.Mvc;
+using RadixGatewayApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Controllers;
 
-public interface INetworkConfigurationReader
+[ApiController]
+[Route("token")]
+public class TokenController : ControllerBase
 {
-    Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
-}
+    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
-{
-    private readonly NetworkApi _networkApi;
-
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider)
+    public TokenController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
-        _networkApi = coreApiProvider.NetworkApi;
+        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
-    public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    [HttpPost("")]
+    public async Task<TokenResponse> GetTokenInfo(TokenRequest tokenRequest)
     {
-        return await _networkApi
-            .NetworkConfigurationPostAsync(new object(), token);
+        return await _fallbackGatewayApiProvider.Api.TokenPostAsync(tokenRequest);
+    }
+
+    [HttpPost("native")]
+    public async Task<TokenNativeResponse> GetNativeTokenInfo(TokenNativeRequest tokenNativeRequest)
+    {
+        return await _fallbackGatewayApiProvider.Api.TokenNativePostAsync(tokenNativeRequest);
+    }
+
+    [HttpPost("derive")]
+    public async Task<TokenDeriveResponse> DeriveTokenIdentifier(TokenDeriveRequest tokenDeriveRequest)
+    {
+        return await _fallbackGatewayApiProvider.Api.TokenDerivePostAsync(tokenDeriveRequest);
     }
 }

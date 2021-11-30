@@ -63,6 +63,7 @@
  */
 
 using GatewayAPI.Database;
+using GatewayAPI.Fallback;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
 
@@ -74,11 +75,13 @@ public class AccountController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IAccountQuerier _accountQuerier;
+    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-    public AccountController(ILedgerStateQuerier ledgerStateQuerier, IAccountQuerier accountQuerier)
+    public AccountController(ILedgerStateQuerier ledgerStateQuerier, IAccountQuerier accountQuerier, IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _accountQuerier = accountQuerier;
+        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
     [HttpPost("balances")]
@@ -94,5 +97,23 @@ public class AccountController : ControllerBase
             ledgerState: ledgerState,
             accountBalances: accountBalances
         );
+    }
+
+    [HttpPost("stakes")]
+    public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.AccountStakesPostAsync(request);
+    }
+
+    [HttpPost("unstakes")]
+    public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.AccountUnstakesPostAsync(request);
+    }
+
+    [HttpPost("transactions")]
+    public async Task<AccountTransactionsResponse> GetAccountTransactions(AccountTransactionsRequest request)
+    {
+        return await _fallbackGatewayApiProvider.Api.AccountTransactionsPostAsync(request);
     }
 }

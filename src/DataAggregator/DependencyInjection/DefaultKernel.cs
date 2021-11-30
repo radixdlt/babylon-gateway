@@ -127,7 +127,7 @@ public class DefaultKernel
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         // This should only be used from the other readers, to ensure encapsulation for testing
-        services.AddHttpClient<INodeCoreApiProvider, NodeCoreApiProvider>()
+        services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
             .ConfigurePrimaryHttpMessageHandler(s =>
             {
                 var disableCertificateChecks = s.GetRequiredService<IConfiguration>()

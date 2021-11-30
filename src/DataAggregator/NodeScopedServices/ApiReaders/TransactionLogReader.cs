@@ -78,10 +78,10 @@ public class TransactionLogReader : ITransactionLogReader
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly TransactionsApi _transactionsApi;
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, INodeCoreApiProvider nodeCoreApiProvider)
+    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionsApi = nodeCoreApiProvider.TransactionsApi;
+        _transactionsApi = coreApiProvider.TransactionsApi;
     }
 
     public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)

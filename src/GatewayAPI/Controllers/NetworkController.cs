@@ -62,28 +62,27 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using GatewayAPI.Database;
+using GatewayAPI.Fallback;
+using Microsoft.AspNetCore.Mvc;
+using RadixGatewayApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Controllers;
 
-public interface INetworkConfigurationReader
+[ApiController]
+[Route("network")]
+public class NetworkController : ControllerBase
 {
-    Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
-}
+    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
-{
-    private readonly NetworkApi _networkApi;
-
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider)
+    public NetworkController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
-        _networkApi = coreApiProvider.NetworkApi;
+        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
-    public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    [HttpPost("")]
+    public async Task<NetworkResponse> GetNetwork()
     {
-        return await _networkApi
-            .NetworkConfigurationPostAsync(new object(), token);
+        return await _fallbackGatewayApiProvider.Api.NetworkPostAsync(new object());
     }
 }

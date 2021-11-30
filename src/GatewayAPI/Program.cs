@@ -71,25 +71,12 @@ using GatewayAPI.DependencyInjection;
 using GatewayAPI.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+var host = builder.Host;
+var services = builder.Services;
 
-/* Configure services / dependency injection */
+/* Read in other configuration */
 
-builder.Host.ConfigureServices(new DefaultKernel().ConfigureServices);
-builder.Services
-    .AddControllers(options =>
-    {
-        options.Filters.Add<ExceptionFilter>();
-    })
-    /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
-    .AddNewtonsoftJson();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-/* Other configuration */
-
-builder.Host.ConfigureAppConfiguration((_, config) =>
+host.ConfigureAppConfiguration((_, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_API__");
     if (args is { Length: > 0 })
@@ -98,7 +85,24 @@ builder.Host.ConfigureAppConfiguration((_, config) =>
     }
 });
 
-builder.Host.ConfigureLogging(logConfigBuilder =>
+/* Configure services / dependency injection */
+
+host.ConfigureServices(new DefaultKernel().ConfigureServices);
+
+services
+    .AddControllers(options =>
+    {
+        options.Filters.Add<ExceptionFilter>();
+    })
+    /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
+    .AddNewtonsoftJson();
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
+services.AddSwaggerGenNewtonsoftSupport();
+
+host.ConfigureLogging(logConfigBuilder =>
 {
     logConfigBuilder.AddSimpleConsole(options =>
     {

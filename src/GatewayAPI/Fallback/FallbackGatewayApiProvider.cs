@@ -62,32 +62,37 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Api;
+using Common.Extensions;
+using GatewayAPI.Configuration;
+using RadixGatewayApi.Generated.Api;
 using System.Net.Http.Headers;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Fallback;
 
-public interface INodeCoreApiProvider
+public interface IFallbackGatewayApiProvider
 {
-    TransactionsApi TransactionsApi { get; }
-
-    NetworkApi NetworkApi { get; }
+    DefaultApi Api { get; }
 }
 
-public class NodeCoreApiProvider : INodeCoreApiProvider
+// Should be registered in transient or request scope so that the node and http client rotate around
+public class FallbackGatewayApiProvider : IFallbackGatewayApiProvider
 {
-    public TransactionsApi TransactionsApi { get; }
+    public DefaultApi Api { get; }
 
-    public NetworkApi NetworkApi { get; }
-
-    public NodeCoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
+    // ReSharper disable once SuggestBaseTypeForParameterInConstructor
+    public FallbackGatewayApiProvider(ILogger<FallbackGatewayApiProvider> logger, INetworkGatewayConfiguration configuration, HttpClient httpClient)
     {
-        if (!string.IsNullOrWhiteSpace(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader))
+        var chosenNode = configuration.GetFallbackGatewayApiNodes()
+            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.GatewayApiAddress))
+            .GetRandomBy(n => (double)n.RequestWeighting);
+
+        logger.LogDebug("Node chosen for this request: {NodeChosen}", chosenNode.Name);
+
+        if (!string.IsNullOrWhiteSpace(chosenNode.GatewayApiAuthorizationHeader))
         {
-            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader);
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(chosenNode.GatewayApiAuthorizationHeader);
         }
 
-        TransactionsApi = new TransactionsApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
-        NetworkApi = new NetworkApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
+        Api = new DefaultApi(httpClient, chosenNode.GatewayApiAddress);
     }
 }
