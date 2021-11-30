@@ -138,9 +138,11 @@ public readonly record struct TokenAmount
     }
 
     public static TokenAmount operator +(TokenAmount a) => a;
-    public static TokenAmount operator -(TokenAmount a) => new(-a._subUnits);
-    public static TokenAmount operator +(TokenAmount a, TokenAmount b) => new(a._subUnits + b._subUnits);
-    public static TokenAmount operator -(TokenAmount a, TokenAmount b) => new(a._subUnits - b._subUnits);
+    public static TokenAmount operator -(TokenAmount a) => a.IsNaN() ? NaN : new TokenAmount(-a._subUnits);
+    public static TokenAmount operator +(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits + b._subUnits);
+    public static TokenAmount operator -(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits - b._subUnits);
+    public static TokenAmount operator *(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits * b._subUnits);
+    public static TokenAmount operator /(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits / b._subUnits);
 
     private TokenAmount(BigInteger subUnits)
     {

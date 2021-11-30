@@ -73,6 +73,8 @@ namespace GatewayAPI.Database;
 public interface ILedgerStateQuerier
 {
     Task<LedgerState> GetTipOfLedgerState(string networkName);
+
+    Task<string> GetXrdAddress();
 }
 
 public class LedgerStateQuerier : ILedgerStateQuerier
@@ -96,6 +98,15 @@ public class LedgerStateQuerier : ILedgerStateQuerier
                 lt.Epoch,
                 lt.RoundInEpoch
             ))
+            .SingleAsync();
+    }
+
+    // TODO - Improve performance to cache this
+    // TODO - Ensure NetworkConfiguration exists at service launch
+    public async Task<string> GetXrdAddress()
+    {
+        return await _dbContext.NetworkConfiguration
+            .Select(c => c.WellKnownAddresses.XrdAddress)
             .SingleAsync();
     }
 

@@ -63,7 +63,6 @@
  */
 
 using Common.Database;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
 using Api = RadixGatewayApi.Generated.Model;
@@ -78,16 +77,18 @@ public interface IAccountQuerier
 public class AccountQuerier : IAccountQuerier
 {
     private readonly GatewayReadOnlyDbContext _dbContext;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-    public AccountQuerier(GatewayReadOnlyDbContext dbContext)
+    public AccountQuerier(GatewayReadOnlyDbContext dbContext, ILedgerStateQuerier ledgerStateQuerier)
     {
         _dbContext = dbContext;
+        _ledgerStateQuerier = ledgerStateQuerier;
     }
 
     public async Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState)
     {
         return new AccountBalances(
-            new TokenAmount("0", new TokenIdentifier("todo")),
+            await GetAccountTotalStakeBalance(ledgerState, accountAddress),
             await GetAccountResourceBalancesAtState(ledgerState, accountAddress)
         );
     }
@@ -95,8 +96,9 @@ public class AccountQuerier : IAccountQuerier
     private async Task<List<TokenAmount>> GetAccountResourceBalancesAtState(LedgerState ledgerState, string accountAddress)
     {
         return await _dbContext.AccountResourceBalanceHistoryEntries
-            .GetHistoryEntryAtVersion(arb => arb.Account.Address == accountAddress, ledgerState._Version)
+            .GetSingleHistoryEntryAtVersion(arb => arb.Account.Address == accountAddress, ledgerState._Version)
             .Include(arb => arb.Resource)
+            .OrderByDescending(x => x.BalanceEntry.Balance)
             .Select(x => new TokenAmount(
                 x.BalanceEntry.Balance.ToSubUnitString(),
                 new TokenIdentifier(x.Resource.ResourceIdentifier)
@@ -106,51 +108,41 @@ public class AccountQuerier : IAccountQuerier
 
     private async Task<TokenAmount> GetAccountTotalStakeBalance(LedgerState ledgerState, string accountAddress)
     {
-        // TODO - make this much nicer(!)
-        var accountValidatorsLatestVersion = await (
-            from accountValidatorHistory in _dbContext.AccountValidatorStakeHistoryEntries
-            where accountValidatorHistory.Account.Address == accountAddress
-            group accountValidatorHistory by accountValidatorHistory.Validator
-            into g
+        var stateVersion = ledgerState._Version;
+
+        var query =
+            from stakeHistory in _dbContext.AccountValidatorStakeHistoryAtVersionForAccount(stateVersion, accountAddress)
+            join validatorHistory in _dbContext.ValidatorStakeHistoryAtVersion(stateVersion)
+                on stakeHistory.ValidatorId equals validatorHistory.ValidatorId
             select new
             {
-                ValidatorId = g.Key.Id,
-                AccountId = g.First().AccountId,
-                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+                AccountValidatorStakeSnapshot = stakeHistory.StakeSnapshot,
+                ValidatorStakeSnapshot = validatorHistory.StakeSnapshot,
             }
-        ).ToListAsync();
+        ;
 
-        var validatorsLatestVersion = await (
-            from validatorStakeHistory in _dbContext.ValidatorStakeHistoryEntries
-            where accountValidatorsLatestVersion.Select(v => v.ValidatorId).Contains(validatorStakeHistory.ValidatorId)
-            group validatorStakeHistory by validatorStakeHistory.ValidatorId
-            into g
-            select new
-            {
-                ValidatorId = g.Key,
-                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
-            }
-        ).ToListAsync();
+        var allStakes = await query.ToListAsync();
 
-        var validatorStake = await _dbContext.ValidatorStakeHistoryEntries
-            .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM validator_stake_history WHERE (validator_id, from_state_version)",
-                validatorsLatestVersion,
-                v => new object[] { v.ValidatorId, v.LatestUpdateStateVersion }
-            )
-            .ToDictionaryAsync(
-                h => h.ValidatorId
-            );
+        var totalXrd = Common.Numerics.TokenAmount.Zero;
 
-        var accountValidatorStake = await _dbContext.AccountValidatorStakeHistoryEntries
-            .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM account_validator_stake_history WHERE (account_id, validator_id, from_state_version)",
-                accountValidatorsLatestVersion,
-                v => new object[] { v.AccountId, v.ValidatorId, v.LatestUpdateStateVersion }
-            )
-            .ToListAsync();
+        foreach (var s in allStakes)
+        {
+            var accountValidatorStakeSnapshot = s.AccountValidatorStakeSnapshot;
+            var validatorStakeSnapshot = s.ValidatorStakeSnapshot;
 
-        // QQ - do aggregation!
-        return new TokenAmount("0", new TokenIdentifier("todo"));
+            var definiteXrd = accountValidatorStakeSnapshot.TotalPreparedXrdStake
+                              + accountValidatorStakeSnapshot.TotalExitingXrdStake;
+            var stakeOwnership = accountValidatorStakeSnapshot.TotalStakeOwnership
+                                 + accountValidatorStakeSnapshot.TotalPreparedUnstakeOwnership;
+
+            var stakeOwnershipAsEstimatedXrd =
+                (stakeOwnership * validatorStakeSnapshot.TotalXrdStake) /
+                validatorStakeSnapshot.TotalStakeOwnership
+            ;
+
+            totalXrd += definiteXrd + stakeOwnershipAsEstimatedXrd;
+        }
+
+        return new TokenAmount(totalXrd.ToSubUnitString(), new TokenIdentifier(await _ledgerStateQuerier.GetXrdAddress()));
     }
 }

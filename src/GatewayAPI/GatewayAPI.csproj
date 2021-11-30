@@ -9,6 +9,7 @@
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="RadixGatewayApi.Generated" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
     </ItemGroup>
 
     <ItemGroup>

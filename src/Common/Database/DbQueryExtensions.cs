@@ -64,6 +64,7 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Normalization;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -71,6 +72,36 @@ namespace Common.Database;
 
 public static class DbQueryExtensions
 {
+    public static IQueryable<Account> Account<TDbContext>(
+        this TDbContext dbContext,
+        string accountAddress
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<Account>()
+            .Where(a => a.Address == accountAddress);
+    }
+
+    public static IQueryable<Resource> Resource<TDbContext>(
+        this TDbContext dbContext,
+        string resourceIdentifier
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<Resource>()
+            .Where(r => r.ResourceIdentifier == resourceIdentifier);
+    }
+
+    public static IQueryable<Validator> Validator<TDbContext>(
+        this TDbContext dbContext,
+        string validatorAddress
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<Validator>()
+            .Where(v => v.Address == validatorAddress);
+    }
+
     public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
         where TDbContext : CommonDbContext
     {
@@ -79,7 +110,7 @@ public static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<THistory> GetHistoryEntryAtVersion<THistory>(
+    public static IQueryable<THistory> GetSingleHistoryEntryAtVersion<THistory>(
         this DbSet<THistory> dbSet,
         Expression<Func<THistory, bool>> keySelector,
         long stateVersion
@@ -91,5 +122,106 @@ public static class DbQueryExtensions
             .Where(h => h.FromStateVersion <= stateVersion)
             .OrderByDescending(h => h.FromStateVersion)
             .Take(1);
+    }
+
+    public static IQueryable<AccountResourceBalanceHistory> AccountResourceBalanceHistoryAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var dbSet = dbContext.Set<AccountResourceBalanceHistory>();
+        var mostRecentHistoryByKeyQuery =
+            from history in dbSet
+            where history.FromStateVersion <= stateVersion
+            group history by new { history.AccountId, history.ResourceId }
+            into g
+            select new
+            {
+                AccountId = g.Key.AccountId,
+                ResourceId = g.Key.ResourceId,
+                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+            }
+        ;
+
+        return
+            from fullHistory in dbSet
+            join historyKeys in mostRecentHistoryByKeyQuery
+                on new { fullHistory.AccountId, fullHistory.ResourceId, fullHistory.FromStateVersion }
+                equals new { historyKeys.AccountId, historyKeys.ResourceId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
+            select fullHistory
+        ;
+    }
+
+    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var dbSet = dbContext.Set<AccountValidatorStakeHistory>();
+        var mostRecentHistoryByKeyQuery =
+                from history in dbSet
+                where history.FromStateVersion <= stateVersion
+                group history by new { history.AccountId, history.ValidatorId }
+                into g
+                select new
+                {
+                    AccountId = g.Key.AccountId,
+                    ValidatorId = g.Key.ValidatorId,
+                    LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+                }
+            ;
+
+        return
+            from fullHistory in dbSet
+            join historyKeys in mostRecentHistoryByKeyQuery
+                on new { fullHistory.AccountId, fullHistory.ValidatorId, fullHistory.FromStateVersion }
+                equals new { historyKeys.AccountId, historyKeys.ValidatorId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
+            select fullHistory
+            ;
+    }
+
+    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryAtVersionForAccount<TDbContext>(
+        this TDbContext dbContext,
+        long stateVersion,
+        string accountAddress
+    )
+        where TDbContext : CommonDbContext
+    {
+        return
+            from stakeHistory in dbContext.AccountValidatorStakeHistoryAtVersion(stateVersion)
+            join account in dbContext.Account(accountAddress)
+                on stakeHistory.AccountId equals account.Id
+            select stakeHistory
+        ;
+    }
+
+    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var dbSet = dbContext.Set<ValidatorStakeHistory>();
+        var mostRecentHistoryByKeyQuery =
+                from history in dbSet
+                where history.FromStateVersion <= stateVersion
+                group history by history.ValidatorId
+                into g
+                select new
+                {
+                    ValidatorId = g.Key,
+                    LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+                }
+            ;
+
+        return
+            from fullHistory in dbSet
+            join historyKeys in mostRecentHistoryByKeyQuery
+                on new { fullHistory.ValidatorId, fullHistory.FromStateVersion }
+                equals new { historyKeys.ValidatorId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
+            select fullHistory
+            ;
     }
 }

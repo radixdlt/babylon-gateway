@@ -70,6 +70,13 @@ namespace GatewayAPI.Filters;
 
 public class ExceptionFilter : IActionFilter, IOrderedFilter
 {
+    private readonly ILogger<ExceptionFilter> _logger;
+
+    public ExceptionFilter(ILogger<ExceptionFilter> logger)
+    {
+        _logger = logger;
+    }
+
     public int Order => int.MaxValue - 10;
 
     public void OnActionExecuting(ActionExecutingContext context)
@@ -78,17 +85,33 @@ public class ExceptionFilter : IActionFilter, IOrderedFilter
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
-        var exception = context.Exception is HttpResponseException httpResponseException
-            ? httpResponseException
+        if (context.Exception == null)
+        {
+            return;
+        }
+
+        Exception exception = context.Exception!;
+
+        if (exception is HttpResponseException)
+        {
+            _logger.Log(LogLevel.Debug, exception, "Known exception with http response code");
+        }
+        else
+        {
+            _logger.Log(LogLevel.Warning, exception, "Unknown exception");
+        }
+
+        var httpResponseException = context.Exception is HttpResponseException alreadyHttpResponseException
+            ? alreadyHttpResponseException
             : new HttpResponseException(); // Hide error codes behind a blanket UNKNOWN_ERROR
 
         context.Result = new ObjectResult(new
         {
-            exception = exception.ExceptionNameUpperSnakeCase,
-            cause = exception.Cause,
+            exception = httpResponseException.ExceptionNameUpperSnakeCase,
+            cause = httpResponseException.Cause,
         })
         {
-            StatusCode = exception.Status,
+            StatusCode = httpResponseException.Status,
         };
         context.ExceptionHandled = true;
     }

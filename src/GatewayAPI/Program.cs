@@ -74,11 +74,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 /* Configure services / dependency injection */
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(new ExceptionFilter());
-});
 builder.Host.ConfigureServices(new DefaultKernel().ConfigureServices);
+builder.Services
+    .AddControllers(options =>
+    {
+        options.Filters.Add<ExceptionFilter>();
+    })
+    /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
+    .AddNewtonsoftJson();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
