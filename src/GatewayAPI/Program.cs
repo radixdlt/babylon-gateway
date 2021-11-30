@@ -122,6 +122,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 var maxWaitForDbMs = app.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
-await ConnectionHelpers.TryWaitForDb<GatewayReadOnlyDbContext>(app.Services, maxWaitForDbMs);
+await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app.Services, maxWaitForDbMs);
 
 await app.RunAsync();
