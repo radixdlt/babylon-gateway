@@ -82,13 +82,12 @@ public class NodeCoreApiProvider : INodeCoreApiProvider
 
     public NodeCoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
-        httpClient.BaseAddress = new Uri(nodeConfig.NodeAppSettings.CoreApiAddress);
         if (!string.IsNullOrWhiteSpace(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader))
         {
             httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader);
         }
 
-        TransactionsApi = new TransactionsApi(httpClient);
-        NetworkApi = new NetworkApi(httpClient);
+        TransactionsApi = new TransactionsApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
+        NetworkApi = new NetworkApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
     }
 }
