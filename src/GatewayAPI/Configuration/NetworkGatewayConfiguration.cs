@@ -69,7 +69,9 @@ namespace GatewayAPI.Configuration;
 
 public interface INetworkGatewayConfiguration
 {
-    List<ApiGatewayConstructionNode> GetConstructionNodes();
+    List<CoreApiNode> GetCoreNodes();
+
+    List<FallbackGatewayApiNode> GetFallbackGatewayApiNodes();
 
     string GetNetworkName();
 }
@@ -85,20 +87,40 @@ public class NetworkGatewayConfiguration : INetworkGatewayConfiguration
         _logger = logger;
     }
 
-    public List<ApiGatewayConstructionNode> GetConstructionNodes()
+    public List<CoreApiNode> GetCoreNodes()
     {
-        var nodesSection = _configuration.GetSection("ConstructionNodes");
+        var nodesSection = _configuration.GetSection("CoreApiNodes");
         if (!nodesSection.Exists())
         {
-            throw new InvalidConfigurationException("appsettings.json requires a ConstructionNodes section");
+            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
         }
 
-        var nodesList = new List<ApiGatewayConstructionNode>();
+        var nodesList = new List<CoreApiNode>();
         nodesSection.Bind(nodesList);
 
         if (!nodesList.Any())
         {
-            _logger.LogWarning("appsettings.json ConstructionNodes section is empty");
+            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
+        }
+
+        nodesList.ForEach(n => n.AssertValid());
+        return nodesList;
+    }
+
+    public List<FallbackGatewayApiNode> GetFallbackGatewayApiNodes()
+    {
+        var nodesSection = _configuration.GetSection("FallbackGatewayApiNodes");
+        if (!nodesSection.Exists())
+        {
+            throw new InvalidConfigurationException("appsettings.json requires a FallbackGatewayApiNodes section");
+        }
+
+        var nodesList = new List<FallbackGatewayApiNode>();
+        nodesSection.Bind(nodesList);
+
+        if (!nodesList.Any())
+        {
+            _logger.LogWarning("appsettings.json FallbackGatewayApiNodes section is empty");
         }
 
         nodesList.ForEach(n => n.AssertValid());

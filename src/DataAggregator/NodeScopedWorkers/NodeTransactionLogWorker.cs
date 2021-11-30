@@ -77,8 +77,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 {
     /* Dependencies */
     private readonly ILogger<NodeTransactionLogWorker> _logger;
-    private readonly ITransactionLogReader _transactionLogReader;
-    private readonly ILedgerExtenderService _ledgerExtenderService;
+    private readonly IServiceProvider _services;
 
     /* Properties for simple fetch pipelining */
     private record FetchPipeline(
@@ -89,16 +88,16 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
     private FetchPipeline? _pipelinedFetch;
 
+    // NB - So that we can get new transient dependencies each iteration, we create most dependencies
+    //      from the service provider.
     public NodeTransactionLogWorker(
         ILogger<NodeTransactionLogWorker> logger,
-        ITransactionLogReader transactionLogReader,
-        ILedgerExtenderService ledgerExtenderService
+        IServiceProvider services
     )
         : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
-        _transactionLogReader = transactionLogReader;
-        _ledgerExtenderService = ledgerExtenderService;
+        _services = services;
     }
 
     // TODO:NG-12 - Implement node-specific syncing state machine, and separate committing into a global worker...
@@ -107,11 +106,12 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
     protected override async Task DoWork(CancellationToken stoppingToken)
     {
         const int TransactionsToPull = 1000;
+        var ledgerExtenderService = _services.GetRequiredService<ILedgerExtenderService>();
 
         _logger.LogInformation("Starting sync loop by looking up the top of the committed ledger");
 
         var (topOfLedgerStateVersion, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
-            () => _ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken)
+            () => ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken)
         );
 
         _logger.LogInformation(
@@ -126,7 +126,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         );
 
         var (commitedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
-            () => _ledgerExtenderService.CommitTransactions(
+            () => ledgerExtenderService.CommitTransactions(
                 transactionsResponse.StateIdentifier,
                 transactionsResponse.Transactions,
                 stoppingToken
@@ -206,7 +206,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         );
 
         var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
-            () => _transactionLogReader.GetTransactions(topOfLedgerStateVersion, transactionsToPull, stoppingToken)
+            () => _services.GetRequiredService<ITransactionLogReader>().GetTransactions(topOfLedgerStateVersion, transactionsToPull, stoppingToken)
         );
 
         _logger.LogInformation(

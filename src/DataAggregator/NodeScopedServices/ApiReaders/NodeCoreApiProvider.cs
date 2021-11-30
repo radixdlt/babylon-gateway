@@ -63,6 +63,7 @@
  */
 
 using RadixCoreApi.GeneratedClient.Api;
+using System.Net.Http.Headers;
 
 namespace DataAggregator.NodeScopedServices.ApiReaders;
 
@@ -79,12 +80,15 @@ public class NodeCoreApiProvider : INodeCoreApiProvider
 
     public NetworkApi NetworkApi { get; }
 
-    public NodeCoreApiProvider(INodeConfigProvider nodeConfig)
+    public NodeCoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
-        // Due to this creating a HttpClient, which is quite heavy, it suggests caching this.
-        // The NodeCoreApiProvider is bound in the NodeWorker context, so will be renewed if the node is
-        // disabled and re-enabled.
-        TransactionsApi = new TransactionsApi(nodeConfig.NodeAppSettings.Address);
-        NetworkApi = new NetworkApi(nodeConfig.NodeAppSettings.Address);
+        httpClient.BaseAddress = new Uri(nodeConfig.NodeAppSettings.CoreApiAddress);
+        if (!string.IsNullOrWhiteSpace(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader))
+        {
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader);
+        }
+
+        TransactionsApi = new TransactionsApi(httpClient);
+        NetworkApi = new NetworkApi(httpClient);
     }
 }

@@ -74,16 +74,16 @@ public interface INetworkConfigurationReader
 
 public class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private INodeCoreApiProvider _apiProvider;
+    private readonly NetworkApi _networkApi;
 
-    public NetworkConfigurationReader(INodeCoreApiProvider apiProvider)
+    public NetworkConfigurationReader(INodeCoreApiProvider nodeCoreApiProvider)
     {
-        _apiProvider = apiProvider;
+        _networkApi = nodeCoreApiProvider.NetworkApi;
     }
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return await _apiProvider.NetworkApi
+        return await _networkApi
             .NetworkConfigurationPostAsync(new object(), token);
     }
 }

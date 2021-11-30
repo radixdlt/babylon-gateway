@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Database;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
@@ -84,7 +83,7 @@ public class DefaultKernel
 
         // Node-Scoped services
         AddNodeScopedServices(services);
-        AddNodeApiReaders(services);
+        AddTransientApiReaders(services);
         AddNodeInitializers(services);
         AddNodeWorkers(services);
     }
@@ -123,14 +122,29 @@ public class DefaultKernel
         services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
     }
 
-    private void AddNodeApiReaders(IServiceCollection services)
+    private void AddTransientApiReaders(IServiceCollection services)
     {
+        // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
+        // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         // This should only be used from the other readers, to ensure encapsulation for testing
-        services.AddScoped<INodeCoreApiProvider, NodeCoreApiProvider>();
+        services.AddHttpClient<INodeCoreApiProvider, NodeCoreApiProvider>()
+            .ConfigurePrimaryHttpMessageHandler(s =>
+            {
+                var disableCertificateChecks = s.GetRequiredService<IConfiguration>()
+                    .GetValue<bool>("DisableCoreApiHttpsCertificateChecks");
+
+                return disableCertificateChecks
+                    ? new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
+                    }
+                    : new HttpClientHandler();
+            });
 
         // We can mock these out in tests
-        services.AddScoped<ITransactionLogReader, TransactionLogReader>();
-        services.AddScoped<INetworkConfigurationReader, NetworkConfigurationReader>();
+        // These should be transient so that they don't capture a transient
+        services.AddTransient<ITransactionLogReader, TransactionLogReader>();
+        services.AddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
     }
 
     private void AddNodeInitializers(IServiceCollection services)

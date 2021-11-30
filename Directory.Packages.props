@@ -10,6 +10,7 @@
       <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" />
       <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0" />
       <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.0" />
+      <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
 
       <!-- PUBLIC NUGET: Non-Microsoft -->
       <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />

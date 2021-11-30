@@ -62,38 +62,52 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using Common.Exceptions;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Configuration.Models;
 
-public interface ITransactionLogReader
+public record CoreApiNode
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
-}
+    /// <summary>
+    /// A unique name identifying this node - used as the node's id.
+    /// </summary>
+    [ConfigurationKeyName("Name")]
+    public string Name { get; set; } = string.Empty;
 
-public class TransactionLogReader : ITransactionLogReader
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly TransactionsApi _transactionsApi;
+    /// <summary>
+    /// Address of the node's Core API.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAddress")]
+    public string CoreApiAddress { get; set; } = string.Empty;
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, INodeCoreApiProvider nodeCoreApiProvider)
+    /// <summary>
+    /// AuthorizationHeader - if set, can allow for basic auth.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
+    public string? CoreApiAuthorizationHeader { get; set; } = null;
+
+    /// <summary>
+    /// Relative weighting of the node.
+    /// </summary>
+    [ConfigurationKeyName("RequestWeighting")]
+    public decimal RequestWeighting { get; set; } = 1;
+
+    /// <summary>
+    /// Whether the node's core API should be used to read from (defaults to true).
+    /// </summary>
+    [ConfigurationKeyName("Enabled")]
+    public bool IsEnabled { get; set; } = true;
+
+    public void AssertValid()
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionsApi = nodeCoreApiProvider.TransactionsApi;
-    }
+        if (string.IsNullOrEmpty(Name))
+        {
+            throw new InvalidConfigurationException("A node's name cannot be empty");
+        }
 
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
-    {
-        return await _transactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
-            );
+        if (string.IsNullOrEmpty(CoreApiAddress))
+        {
+            throw new InvalidConfigurationException("A node's address cannot be empty");
+        }
     }
 }

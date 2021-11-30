@@ -66,7 +66,7 @@ using Common.Exceptions;
 
 namespace GatewayAPI.Configuration.Models;
 
-public record ApiGatewayConstructionNode
+public record FallbackGatewayApiNode
 {
     /// <summary>
     /// A unique name identifying this node - used as the node's id.
@@ -75,16 +75,28 @@ public record ApiGatewayConstructionNode
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Domain Name or IP Address.
+    /// Address of the node's Core API.
     /// </summary>
-    [ConfigurationKeyName("Address")]
-    public string Address { get; set; } = string.Empty;
+    [ConfigurationKeyName("GatewayApiAddress")]
+    public string GatewayApiAddress { get; set; } = string.Empty;
+
+    /// <summary>
+    /// AuthorizationHeader - if set, can allow for basic auth.
+    /// </summary>
+    [ConfigurationKeyName("GatewayApiAuthorizationHeader")]
+    public string? GatewayApiAuthorizationHeader { get; set; } = null;
 
     /// <summary>
     /// Relative weighting of the node.
     /// </summary>
     [ConfigurationKeyName("RequestWeighting")]
     public decimal RequestWeighting { get; set; } = 1;
+
+    /// <summary>
+    /// Whether the node's gateway API should be used to read from (defaults to true).
+    /// </summary>
+    [ConfigurationKeyName("Enabled")]
+    public bool IsEnabled { get; set; } = true;
 
     public void AssertValid()
     {
@@ -93,7 +105,7 @@ public record ApiGatewayConstructionNode
             throw new InvalidConfigurationException("A node's name cannot be empty");
         }
 
-        if (string.IsNullOrEmpty(Address))
+        if (string.IsNullOrEmpty(GatewayApiAddress))
         {
             throw new InvalidConfigurationException("A node's address cannot be empty");
         }
