@@ -124,6 +124,9 @@ public static class DbQueryExtensions
             .Take(1);
     }
 
+    /* TODO:NG-39 - Check all these history queries (when filtered further to a sub-part of the key)
+     * result in sensible query plans which make use of the indexes we added
+     */
     public static IQueryable<AccountResourceBalanceHistory> AccountResourceBalanceHistoryAtVersion<TDbContext>(
         this TDbContext dbContext,
         long stateVersion
