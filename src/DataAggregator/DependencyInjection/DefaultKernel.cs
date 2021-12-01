@@ -69,6 +69,7 @@ using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using DataAggregator.NodeScopedWorkers;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace DataAggregator.DependencyInjection;
 
@@ -130,15 +131,23 @@ public class DefaultKernel
         services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
             .ConfigurePrimaryHttpMessageHandler(s =>
             {
-                var disableCertificateChecks = s.GetRequiredService<IConfiguration>()
-                    .GetValue<bool>("DisableCoreApiHttpsCertificateChecks");
+                var httpClientHandler = new HttpClientHandler();
 
-                return disableCertificateChecks
-                    ? new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
-                    }
-                    : new HttpClientHandler();
+                var configuration = s.GetRequiredService<IConfiguration>();
+                var disableCertificateChecks = configuration.GetValue<bool>("DisableCoreApiHttpsCertificateChecks");
+                var httpProxyAddress = configuration.GetValue<string?>("CoreApiHttpProxyAddress");
+
+                if (disableCertificateChecks)
+                {
+                    httpClientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+                }
+
+                if (!string.IsNullOrWhiteSpace(httpProxyAddress))
+                {
+                    httpClientHandler.Proxy = new WebProxy(httpProxyAddress);
+                }
+
+                return httpClientHandler;
             });
 
         // We can mock these out in tests
