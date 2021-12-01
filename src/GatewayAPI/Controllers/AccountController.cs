@@ -85,30 +85,39 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("balances")]
-    public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request)
+    public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request, long? atStateVersion)
     {
-        var ledgerState = await _ledgerStateQuerier.GetTipOfLedgerState(request.Network);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
         var accountBalances = await _accountQuerier.GetAccountBalancesAtState(
             request.AccountIdentifier.Address,
             ledgerState
         );
 
-        return new AccountBalancesResponse(
-            ledgerState: ledgerState,
-            accountBalances: accountBalances
-        );
+        return new AccountBalancesResponse(ledgerState, accountBalances);
     }
 
     [HttpPost("stakes")]
-    public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request)
+    public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.AccountStakesPostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var stakePositions = await _accountQuerier.GetStakePositionsAtState(
+            request.AccountIdentifier.Address,
+            ledgerState
+        );
+
+        return new AccountStakesResponse(ledgerState, stakePositions);
     }
 
     [HttpPost("unstakes")]
-    public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request)
+    public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.AccountUnstakesPostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var stakePositions = await _accountQuerier.GetUnstakePositionsAtState(
+            request.AccountIdentifier.Address,
+            ledgerState
+        );
+
+        return new AccountUnstakesResponse(ledgerState, stakePositions);
     }
 
     [HttpPost("transactions")]

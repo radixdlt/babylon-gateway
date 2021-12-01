@@ -65,6 +65,7 @@
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
+using Common.Database.Models.Ledger.Substates;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -108,6 +109,25 @@ public static class DbQueryExtensions
         return dbContext.LedgerTransactions
             .OrderByDescending(lt => lt.ResultantStateVersion)
             .Take(1);
+    }
+
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.LedgerTransactions
+            .Where(lt => lt.ResultantStateVersion <= beforeStateVersion)
+            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .Take(1);
+    }
+
+    public static IQueryable<TSubstate> UpAtVersion<TSubstate>(
+        this DbSet<TSubstate> dbSet,
+        long stateVersion
+    )
+        where TSubstate : SubstateBase
+    {
+        return dbSet.
+            Where(s => s.DownStateVersion == null || s.DownStateVersion > stateVersion);
     }
 
     public static IQueryable<THistory> GetSingleHistoryEntryAtVersion<THistory>(

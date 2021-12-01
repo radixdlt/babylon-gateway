@@ -72,7 +72,7 @@ namespace GatewayAPI.Database;
 
 public interface ILedgerStateQuerier
 {
-    Task<LedgerState> GetTipOfLedgerState(string networkName);
+    Task<LedgerState> GetLedgerState(string networkName, long? atStateVersion = null);
 
     Task<string> GetXrdAddress();
 }
@@ -87,11 +87,15 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     }
 
     // So that we don't forget to check the network name, add the assertion in here.
-    public async Task<LedgerState> GetTipOfLedgerState(string networkName)
+    public async Task<LedgerState> GetLedgerState(string networkName, long? atStateVersion = null)
     {
         await AssertMatchingNetwork(networkName);
 
-        return await _dbContext.GetTopLedgerTransaction()
+        var query = atStateVersion.HasValue
+            ? _dbContext.GetLatestLedgerTransactionBeforeStateVersion(Math.Min(1, atStateVersion.Value))
+            : _dbContext.GetTopLedgerTransaction();
+
+        return await query
             .Select(lt => new LedgerState(
                 lt.ResultantStateVersion,
                 lt.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),

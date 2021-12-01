@@ -115,6 +115,12 @@ public class CommonDbContext : DbContext
 
     public DbSet<ValidatorProposalRecord> ValidatorProposalRecords => Set<ValidatorProposalRecord>();
 
+    public DbSet<Account> Accounts => Set<Account>();
+
+    public DbSet<Resource> Resources => Set<Resource>();
+
+    public DbSet<Validator> Validators => Set<Validator>();
+
 #pragma warning restore CS1591
 
     public CommonDbContext(DbContextOptions options)

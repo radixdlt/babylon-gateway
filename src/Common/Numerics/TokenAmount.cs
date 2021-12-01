@@ -67,11 +67,11 @@ using System.Numerics;
 
 namespace Common.Numerics;
 
-public readonly record struct TokenAmount
+public readonly record struct TokenAmount : IComparable<TokenAmount>
 {
     public static readonly TokenAmount Zero = new(0);
     public static readonly TokenAmount NaN = new(true);
-    public static readonly string StringForNan = "NaN";
+    public const string StringForNaN = "NaN";
 
     private const int DecimalPrecision = 18;
     private const int MaxPostgresPrecision = 1000;
@@ -171,19 +171,19 @@ public readonly record struct TokenAmount
     /// </summary>
     public string ToPostgresDecimal()
     {
-        return _isNaN || IsUnsafeSizeForPostgres() ? StringForNan : ToString();
+        return _isNaN || IsUnsafeSizeForPostgres() ? StringForNaN : ToString();
     }
 
     public string ToSubUnitString()
     {
-        return _isNaN ? StringForNan : _subUnits.ToString();
+        return _isNaN ? StringForNaN : _subUnits.ToString();
     }
 
     public override string ToString()
     {
         if (_isNaN)
         {
-            return StringForNan;
+            return StringForNaN;
         }
 
         var (isNegative, integerPart, fractionalPart) = GetIntegerAndFractionalParts();
@@ -267,5 +267,11 @@ public readonly record struct TokenAmount
     private bool IsUnsafeSizeForPostgres()
     {
         return _subUnits.GetByteCount(isUnsigned: false) >= _safeByteLengthLimitBeforePostgresError;
+    }
+
+    public int CompareTo(TokenAmount other)
+    {
+        var isNaNComparison = _isNaN.CompareTo(other._isNaN);
+        return isNaNComparison != 0 ? isNaNComparison : _subUnits.CompareTo(other._subUnits);
     }
 }
