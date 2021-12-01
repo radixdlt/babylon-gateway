@@ -63,7 +63,6 @@
  */
 
 using GatewayAPI.Database;
-using GatewayAPI.Fallback;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
 
@@ -73,16 +72,16 @@ namespace GatewayAPI.Controllers;
 [Route("gateway")]
 public class GatewayController : ControllerBase
 {
-    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-    public GatewayController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    public GatewayController(ILedgerStateQuerier ledgerStateQuerier)
     {
-        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
+        _ledgerStateQuerier = ledgerStateQuerier;
     }
 
     [HttpPost("")]
     public async Task<GatewayResponse> GetGateway()
     {
-        return await _fallbackGatewayApiProvider.Api.GatewayPostAsync(new object());
+        return await _ledgerStateQuerier.GetGatewayState();
     }
 }

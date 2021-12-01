@@ -72,6 +72,8 @@ namespace GatewayAPI.Database;
 
 public interface ILedgerStateQuerier
 {
+    Task<GatewayResponse> GetGatewayState();
+
     Task<LedgerState> GetLedgerState(string networkName, long? atStateVersion = null);
 
     Task<string> GetXrdAddress();
@@ -86,11 +88,33 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         _dbContext = dbContext;
     }
 
+    public async Task<GatewayResponse> GetGatewayState()
+    {
+        return new GatewayResponse(
+            await GetLedgerNetworkName(),
+            await GetLedgerState(),
+            new TargetLedgerState() // TODO:NG-12 - fix this once we know what the max ledger state seen by nodes is
+        );
+    }
+
     // So that we don't forget to check the network name, add the assertion in here.
     public async Task<LedgerState> GetLedgerState(string networkName, long? atStateVersion = null)
     {
         await AssertMatchingNetwork(networkName);
+        return await GetLedgerState(atStateVersion);
+    }
 
+    // TODO:NG-56 - Improve performance to cache this
+    // TODO:NG-56 - Ensure NetworkConfiguration exists at service launch
+    public async Task<string> GetXrdAddress()
+    {
+        return await _dbContext.NetworkConfiguration
+            .Select(c => c.WellKnownAddresses.XrdAddress)
+            .SingleAsync();
+    }
+
+    private async Task<LedgerState> GetLedgerState(long? atStateVersion = null)
+    {
         var query = atStateVersion.HasValue
             ? _dbContext.GetLatestLedgerTransactionBeforeStateVersion(Math.Min(1, atStateVersion.Value))
             : _dbContext.GetTopLedgerTransaction();
@@ -105,26 +129,22 @@ public class LedgerStateQuerier : ILedgerStateQuerier
             .SingleAsync();
     }
 
-    // TODO - Improve performance to cache this
-    // TODO - Ensure NetworkConfiguration exists at service launch
-    public async Task<string> GetXrdAddress()
-    {
-        return await _dbContext.NetworkConfiguration
-            .Select(c => c.WellKnownAddresses.XrdAddress)
-            .SingleAsync();
-    }
-
-    // TODO - Improve performance to cache this
-    // TODO - Ensure NetworkConfiguration exists at service launch
     private async Task AssertMatchingNetwork(string networkName)
     {
-        var ledgerNetworkName = await _dbContext.NetworkConfiguration
-            .Select(c => c.NetworkDefinition.NetworkName)
-            .SingleAsync();
+        var ledgerNetworkName = await GetLedgerNetworkName();
 
         if (networkName != ledgerNetworkName)
         {
             throw new MismatchingNetworkException(ledgerNetworkName);
         }
+    }
+
+    // TODO:NG-56 - Improve performance to cache this
+    // TODO:NG-56 - Ensure NetworkConfiguration exists at service launch
+    private async Task<string> GetLedgerNetworkName()
+    {
+        return await _dbContext.NetworkConfiguration
+            .Select(c => c.NetworkDefinition.NetworkName)
+            .SingleAsync();
     }
 }
