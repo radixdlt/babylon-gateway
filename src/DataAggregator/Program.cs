@@ -78,11 +78,11 @@ var host = Host.CreateDefaultBuilder(args)
         }
     })
     .ConfigureServices(new DefaultKernel().ConfigureServices)
-    .ConfigureLogging((hostBuilderContext, builder) =>
+    .ConfigureLogging((hostBuilderContext, loggingBuilder) =>
     {
         if (hostBuilderContext.HostingEnvironment.IsDevelopment())
         {
-            builder.AddSimpleConsole(options =>
+            loggingBuilder.AddSimpleConsole(options =>
             {
                 options.IncludeScopes = true;
                 options.SingleLine = true;
@@ -91,10 +91,9 @@ var host = Host.CreateDefaultBuilder(args)
         }
         else
         {
-            builder.AddSimpleConsole(options =>
+            loggingBuilder.AddJsonConsole(options =>
             {
                 options.IncludeScopes = true;
-                options.SingleLine = false;
                 options.TimestampFormat = "hh:mm:ss ";
             });
         }

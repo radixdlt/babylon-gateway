@@ -102,14 +102,25 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 services.AddSwaggerGenNewtonsoftSupport();
 
-host.ConfigureLogging(logConfigBuilder =>
+host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
 {
-    logConfigBuilder.AddSimpleConsole(options =>
+    if (hostBuilderContext.HostingEnvironment.IsDevelopment())
     {
-        options.IncludeScopes = true;
-        options.SingleLine = true;
-        options.TimestampFormat = "hh:mm:ss ";
-    });
+        loggingBuilder.AddSimpleConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.SingleLine = true;
+            options.TimestampFormat = "hh:mm:ss ";
+        });
+    }
+    else
+    {
+        loggingBuilder.AddJsonConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.TimestampFormat = "hh:mm:ss ";
+        });
+    }
 });
 
 var app = builder.Build();
