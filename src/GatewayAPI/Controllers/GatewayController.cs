@@ -70,19 +70,19 @@ using RadixGatewayApi.Generated.Model;
 namespace GatewayAPI.Controllers;
 
 [ApiController]
-[Route("network")]
-public class NetworkController : ControllerBase
+[Route("gateway")]
+public class GatewayController : ControllerBase
 {
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-    public NetworkController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    public GatewayController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
     [HttpPost("")]
-    public async Task<NetworkResponse> GetNetwork()
+    public async Task<GatewayResponse> GetGateway()
     {
-        return await _fallbackGatewayApiProvider.Api.NetworkPostAsync(new object());
+        return await _fallbackGatewayApiProvider.Api.GatewayPostAsync(new object());
     }
 }
