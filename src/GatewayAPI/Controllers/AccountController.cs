@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Fallback;
 using Microsoft.AspNetCore.Mvc;
@@ -73,12 +74,14 @@ namespace GatewayAPI.Controllers;
 [Route("account")]
 public class AccountController : ControllerBase
 {
+    private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IAccountQuerier _accountQuerier;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-    public AccountController(ILedgerStateQuerier ledgerStateQuerier, IAccountQuerier accountQuerier, IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    public AccountController(IValidations validations, ILedgerStateQuerier ledgerStateQuerier, IAccountQuerier accountQuerier, IFallbackGatewayApiProvider fallbackGatewayApiProvider)
     {
+        _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _accountQuerier = accountQuerier;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
@@ -87,6 +90,7 @@ public class AccountController : ControllerBase
     [HttpPost("balances")]
     public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request, long? atStateVersion)
     {
+        _validations.ValidateAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
         var accountBalances = await _accountQuerier.GetAccountBalancesAtState(
             request.AccountIdentifier.Address,
@@ -99,6 +103,7 @@ public class AccountController : ControllerBase
     [HttpPost("stakes")]
     public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request, long? atStateVersion)
     {
+        _validations.ValidateAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
         var stakePositions = await _accountQuerier.GetStakePositionsAtState(
             request.AccountIdentifier.Address,
@@ -111,6 +116,7 @@ public class AccountController : ControllerBase
     [HttpPost("unstakes")]
     public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request, long? atStateVersion)
     {
+        _validations.ValidateAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
         var stakePositions = await _accountQuerier.GetUnstakePositionsAtState(
             request.AccountIdentifier.Address,
@@ -123,6 +129,7 @@ public class AccountController : ControllerBase
     [HttpPost("transactions")]
     public async Task<AccountTransactionsResponse> GetAccountTransactions(AccountTransactionsRequest request)
     {
+        _validations.ValidateAccountAddress(request.AccountIdentifier);
         return await _fallbackGatewayApiProvider.Api.AccountTransactionsPostAsync(request);
     }
 }

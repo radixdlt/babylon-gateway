@@ -66,6 +66,7 @@ using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
+using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -177,6 +178,38 @@ public static class DbQueryExtensions
                 equals new { historyKeys.AccountId, historyKeys.ResourceId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
             select fullHistory
         ;
+    }
+
+    public record AccountValidatorIds(long AccountId, long ValidatorId);
+
+    public static IQueryable<AccountValidatorStakeHistory> BulkAccountValidatorStakeHistoryAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        List<AccountValidatorIds> accountValidatorIds,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var stateVersionPlaceholder = "{0}";
+        var tuplePlaceholder = DbSetExtensions.CreateArrayOfTuplesPlaceholder(accountValidatorIds.Count, 2, 1);
+        var placeholderValues = new object[] { stateVersion }
+            .Concat(accountValidatorIds.SelectMany(av => new object[] { av.AccountId, av.ValidatorId }))
+            .ToArray();
+
+        var query = @$"
+SELECT h.* FROM (
+    SELECT MAX(from_state_version) state_version, account_id, validator_id FROM account_validator_stake_history
+    WHERE from_state_version < {stateVersionPlaceholder}
+    AND (account_id, validator_id) IN ({tuplePlaceholder})
+    GROUP BY (account_id, validator_id)
+) relevantEntries
+JOIN account_validator_stake_history h ON
+    relevantEntries.state_version = h.from_state_version
+    AND relevantEntries.account_id = h.account_id
+    AND relevantEntries.validator_id = h.validator_id
+";
+
+        return dbContext.Set<AccountValidatorStakeHistory>()
+            .FromSqlRaw(query, placeholderValues);
     }
 
     public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryAtVersion<TDbContext>(

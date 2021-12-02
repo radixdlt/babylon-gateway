@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.ValueConverters;
 using Microsoft.EntityFrameworkCore;
@@ -210,6 +211,8 @@ public record ValidatorDataObjects(
     }
 }
 
+public record OutputValidatorData(string OwnerAddress, bool IsRegistered, decimal FeePercentage);
+
 [Owned]
 // Aka ValidatorStakeData in the engine
 public record ValidatorData
@@ -226,6 +229,15 @@ public record ValidatorData
     [Column(name: "fee_percentage")]
     public decimal FeePercentage { get; set; }
 
+    public OutputValidatorData ToOutputData(Func<long, string> ownerAddressMap)
+    {
+        return new OutputValidatorData(
+            OwnerAddress: ownerAddressMap(OwnerId),
+            IsRegistered: IsRegistered,
+            FeePercentage: FeePercentage
+        );
+    }
+
     public static ValidatorData? From(Api.ValidatorData? apiModel, Account? validatorOwner)
     {
         return apiModel == null ? null
@@ -236,6 +248,15 @@ public record ValidatorData
                 IsRegistered = apiModel.Registered,
                 FeePercentage = ((decimal)apiModel.Fee) / 100,
             };
+    }
+
+    public static OutputValidatorData GetDefaultOutputData(AddressHrps addressHrps, byte[] validatorAddressPublicKey)
+    {
+        return new OutputValidatorData(
+            OwnerAddress: RadixBech32.GenerateAccountAddress(addressHrps.AccountHrp, validatorAddressPublicKey),
+            IsRegistered: false,
+            FeePercentage: 0
+        );
     }
 }
 

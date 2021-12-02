@@ -90,9 +90,14 @@ public static class RadixBech32
     public const int CompressedPublicKeyBytesLength = 33;
     private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32;
 
+    public static string GenerateAccountAddress(string accountHrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
+    {
+        return GeneratePublicKeyRadixEngineAddress(accountHrp, compressedPublicKey, variant);
+    }
+
     public static string GenerateResourceAddress(AccountAddress creatorAccountAddress, string symbol, string resourceHrpSuffix, Bech32.Variant variant = DefaultVariant)
     {
-        return GenerateHashedKeyAddress(
+        return GenerateHashedKeyRadixEngineAddress(
             $"{symbol}{resourceHrpSuffix}",
             symbol,
             creatorAccountAddress.CompressedPublicKey,
@@ -100,16 +105,26 @@ public static class RadixBech32
         );
     }
 
-    public static string GenerateHashedKeyAddress(string hrp, string name, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
+    public static string GeneratePublicKeyRadixEngineAddress(string hrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
     {
         if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
         {
-            throw new ArgumentException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}", nameof(compressedPublicKey));
+            throw new AddressException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}");
+        }
+
+        return EncodeRadixEngineAddress(RadixEngineAddressType.PUB_KEY, hrp, compressedPublicKey, variant);
+    }
+
+    public static string GenerateHashedKeyRadixEngineAddress(string hrp, string name, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
+    {
+        if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
+        {
+            throw new AddressException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}");
         }
 
         if (name.Length is < 1 or > 35)
         {
-            throw new ArgumentException("Hashed key name must be must be between 1 and 35 characters", nameof(name));
+            throw new AddressException("Hashed key name must be must be between 1 and 35 characters");
         }
 
         // Create Hash Source which is compressedPublicKey||utf8NameBytes

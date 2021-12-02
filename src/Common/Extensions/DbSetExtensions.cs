@@ -118,9 +118,10 @@ public static class DbSetExtensions
     /// <summary>
     /// Outputs a string like (({0},{1},{2}),({3},{4},{5})) for arrayLength=2, tupleLength=3.
     /// </summary>
-    private static string CreateArrayOfTuplesPlaceholder(int arrayLength, int tupleLength)
+    public static string CreateArrayOfTuplesPlaceholder(int arrayLength, int tupleLength, int startCountingAt = 0)
     {
         var placeholders = new StringBuilder();
+        var placeholderCount = startCountingAt;
         for (int i = 0; i < arrayLength; i++)
         {
             if (i > 0)
@@ -138,7 +139,7 @@ public static class DbSetExtensions
                 }
 
                 placeholders.Append('{');
-                placeholders.Append((2 * i) + j);
+                placeholders.Append(placeholderCount++);
                 placeholders.Append('}');
             }
 

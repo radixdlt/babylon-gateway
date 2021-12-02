@@ -62,28 +62,32 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using Common.Database;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
 using GatewayAPI.ApiSurface;
-using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
 using System.Globalization;
 using Api = RadixGatewayApi.Generated.Model;
+using Db = Common.Database.Models.Ledger.Normalization;
+using TokenAmount = Common.Numerics.TokenAmount;
 
 namespace GatewayAPI.Database;
 
 public interface IValidatorQuerier
 {
-    Task<Validator> GetValidatorAtState(string validatorAddress, LedgerState ledgerState);
+    Task<Validator> GetValidatorAtState(ValidatorAddress validatorAddress, string strValidatorAddress, LedgerState ledgerState);
 
     Task<List<Validator>> GetValidatorsAtState(LedgerState ledgerState);
 }
 
 public class ValidatorQuerier : IValidatorQuerier
 {
+    private const int UptimeDefaultEpochRange = 500; // 500 Epochs is approx 2 weeks
+
     private readonly GatewayReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
@@ -93,104 +97,205 @@ public class ValidatorQuerier : IValidatorQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<Validator> GetValidatorAtState(string validatorAddress, LedgerState ledgerState)
+    public async Task<Validator> GetValidatorAtState(ValidatorAddress validatorAddress, string strValidatorAddress, LedgerState ledgerState)
     {
-        var validatorId = await GetValidatorIdAtState(validatorAddress, ledgerState);
+        var validator = await GetDbValidatorAtState(strValidatorAddress, ledgerState);
 
-        var validatorTotalStake = await GetValidatorStake(validatorId, ledgerState).SingleOrDefaultAsync() ?? ValidatorStakeSnapshot.GetDefault();
+        if (validator == null)
+        {
+            return new Validator(
+                strValidatorAddress.AsValidatorIdentifier(),
+                TokenAmount.Zero.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                new ValidatorInfo(
+                    TokenAmount.Zero.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                    GetDefaultValidatorUptime(ledgerState)
+                ),
+                GetDefaultValidatorProperties(validatorAddress.CompressedPublicKey)
+            );
+        }
 
-        var validatorProperties = await GetValidatorPropertiesAtState(validatorId, ledgerState);
+        return (await CreateApiValidatorsAtState(new List<Db.Validator> { validator }, ledgerState)).Single();
+    }
 
-        var validatorOwnerStake = await GetOwnerStakeAtState(validatorId, validatorProperties.OwnerAccountIdentifier.Address, ledgerState);
+    public async Task<List<Validator>> GetValidatorsAtState(LedgerState ledgerState)
+    {
+        var validators = await GetDbValidatorsAtState(ledgerState);
+        return await CreateApiValidatorsAtState(validators, ledgerState);
+    }
 
-        var validatorOwnerStakeXrd = (validatorOwnerStake.TotalStakeOwnership * validatorTotalStake.TotalXrdStake) /
-                                     validatorTotalStake.TotalStakeOwnership;
+    private async Task<List<Validator>> CreateApiValidatorsAtState(List<Db.Validator> validators, LedgerState ledgerState)
+    {
+        var validatorIds = validators.Select(v => v.Id).ToList();
 
-        return new Validator(
-            validatorAddress.AsValidatorIdentifier(),
-            validatorTotalStake.TotalXrdStake.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-            new ValidatorInfo(
-                validatorOwnerStakeXrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-                await GetUptimeAtState(validatorId, ledgerState)
-            ),
-            validatorProperties
+        var validatorTotalStakes = await GetValidatorStakes(validatorIds, ledgerState);
+        var validatorProperties = await GetValidatorPropertiesByValidatorIdAtState(validators, ledgerState);
+        var validatorUptimes = await GetUptimeByValidatorIdAtState(validatorIds, ledgerState);
+
+        var validatorAndOwnerIds = validatorIds
+            .Where(id => validatorProperties[id].OwnerId.HasValue)
+            .Select(id => new DbQueryExtensions.AccountValidatorIds(validatorProperties[id].OwnerId!.Value, id))
+            .ToList();
+
+        var validatorOwnerStakes = await GetOwnerStakesByValidatorIdAtState(validatorAndOwnerIds, ledgerState);
+
+        return validators.Select(validator =>
+        {
+            var validatorTotalStake = validatorTotalStakes.GetValueOrDefault(validator.Id) ??
+                                      ValidatorStakeSnapshot.GetDefault();
+            var validatorOwnerStake = validatorOwnerStakes.GetValueOrDefault(validator.Id) ??
+                                      AccountValidatorStakeSnapshot.GetDefault();
+            var validatorUptime = validatorUptimes.GetValueOrDefault(validator.Id) ?? GetDefaultValidatorUptime(ledgerState);
+            var properties = validatorProperties.GetValueOrDefault(validator.Id)?.Properties ??
+                             GetDefaultValidatorProperties(validator.PublicKey);
+
+            var validatorOwnerStakeXrd = validatorTotalStake.TotalStakeOwnership.IsZero()
+                ? TokenAmount.Zero
+                : (validatorOwnerStake.TotalStakeOwnership * validatorTotalStake.TotalXrdStake) / validatorTotalStake.TotalStakeOwnership;
+
+            return (validator, validatorTotalStake, validatorOwnerStakeXrd, validatorUptime, properties);
+        })
+        .OrderByDescending(x => x.validatorTotalStake.TotalXrdStake)
+        .ThenBy(x => x.validator.Id) // Oldest validators first if they have equal stake
+        .Select(x =>
+        {
+            var (validator, validatorTotalStake, validatorOwnerStakeXrd, validatorUptime, properties) = x;
+
+            return new Validator(
+                validator.Address.AsValidatorIdentifier(),
+                validatorTotalStake.TotalXrdStake.AsApiTokenAmount(
+                    _networkConfigurationProvider.GetXrdTokenIdentifier()),
+                new ValidatorInfo(
+                    validatorOwnerStakeXrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                    validatorUptime
+                ),
+                properties
+            );
+        })
+        .ToList();
+    }
+
+    private async Task<Db.Validator?> GetDbValidatorAtState(string validatorAddress, LedgerState ledgerState)
+    {
+        var stateVersion = ledgerState._Version;
+        return await _dbContext.Validator(validatorAddress, stateVersion).SingleOrDefaultAsync();
+    }
+
+    private async Task<List<Db.Validator>> GetDbValidatorsAtState(LedgerState ledgerState)
+    {
+        var stateVersion = ledgerState._Version;
+        return await _dbContext.Validators
+            .Where(v => v.FromStateVersion <= stateVersion)
+            .ToListAsync();
+    }
+
+    private async Task<Dictionary<long, ValidatorStakeSnapshot>> GetValidatorStakes(List<long> validatorIds, LedgerState ledgerState)
+    {
+        var stateVersion = ledgerState._Version;
+
+        return await (
+            from validatorStakeHistory in _dbContext.ValidatorStakeHistoryAtVersion(stateVersion)
+            where validatorIds.Contains(validatorStakeHistory.ValidatorId)
+            select validatorStakeHistory
+        ).ToDictionaryAsync(
+            v => v.ValidatorId,
+            v => v.StakeSnapshot
         );
     }
 
-    public Task<List<Validator>> GetValidatorsAtState(LedgerState ledgerState)
-    {
-        throw new NotImplementedException();
-    }
+    private record PropertiesAndOwner(ValidatorProperties Properties, long? OwnerId);
 
-    private async Task<long> GetValidatorIdAtState(string validatorAddress, LedgerState ledgerState)
+    private async Task<Dictionary<long, PropertiesAndOwner>> GetValidatorPropertiesByValidatorIdAtState(List<Db.Validator> validators, LedgerState ledgerState)
     {
-        var stateVersion = ledgerState._Version;
-        var validatorId = await _dbContext.Validator(validatorAddress, stateVersion).Select(v => v.Id).SingleOrDefaultAsync();
-        if (validatorId == 0)
-        {
-            throw new ValidatorNotFoundException($"Validator {validatorAddress} not found at state version: {stateVersion}");
-        }
-
-        return validatorId;
-    }
-
-    private IQueryable<ValidatorStakeSnapshot> GetValidatorStake(long validatorId, LedgerState ledgerState)
-    {
+        var validatorIds = validators.Select(v => v.Id).ToList();
+        var validatorsById = validators.ToDictionary(v => v.Id);
         var stateVersion = ledgerState._Version;
 
-        return
-            from validatorStakeHistory in _dbContext.ValidatorStakeHistoryAtVersion(stateVersion)
-            where validatorStakeHistory.ValidatorId == validatorId
-            select validatorStakeHistory.StakeSnapshot
-        ;
-    }
-
-    private async Task<ValidatorProperties> GetValidatorPropertiesAtState(long validatorId, LedgerState ledgerState)
-    {
-        var stateVersion = ledgerState._Version;
-
-        var validatorDataSubstates = await (
+        var validatorDataSubstatesByValidatorId = (await (
                 from data in _dbContext.ValidatorDataSubstates.UpAtVersion(stateVersion)
-                where data.ValidatorId == validatorId
+                where validatorIds.Contains(data.ValidatorId)
                 orderby data.UpStateVersion descending
-                select data
+                group data by new { data.ValidatorId, data.Type }
+                into g
+                select new
+                    {
+                        ValidatorId = g.Key.ValidatorId,
+                        Type = g.Key.Type,
+                        Data = g.First(),
+                        Count = g.Count(),
+                    }
             )
-            .Include(s => s.ValidatorData!.Owner)
-            .ToListAsync();
+            .ToListAsync())
+            .GroupBy(v => v.ValidatorId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToDictionary(x => x.Type, x => x)
+            );
 
-        var validatorData = validatorDataSubstates.Find(s => s.Type == ValidatorDataSubstateType.ValidatorData)?.ValidatorData;
-        var validatorMetadata = validatorDataSubstates.Find(s => s.Type == ValidatorDataSubstateType.ValidatorMetaData)?.ValidatorMetaData
-            ?? ValidatorMetadata.GetDefault();
-        var validatorAllowDelegation =
-            validatorDataSubstates.Find(s => s.Type == ValidatorDataSubstateType.ValidatorAllowDelegation)
-                ?.ValidatorAllowDelegation
-            ?? ValidatorAllowDelegation.GetDefault();
+        var validatorOwnerIds = validatorDataSubstatesByValidatorId
+            .Where(v => v.Value.ContainsKey(ValidatorDataSubstateType.ValidatorData))
+            .Select(v => v.Value[ValidatorDataSubstateType.ValidatorData].Data.ValidatorData!.OwnerId)
+            .ToHashSet();
 
-        if (validatorData == null)
+        var validatorOwnerAddresses = await _dbContext.Accounts
+            .Where(a => validatorOwnerIds.Contains(a.Id))
+            .ToDictionaryAsync(a => a.Id, a => a.Address);
+
+        var outDictionary = new Dictionary<long, PropertiesAndOwner>();
+
+        foreach (var (validatorId, validatorDataSubstates) in validatorDataSubstatesByValidatorId)
         {
-            throw new ValidatorNotFoundException($"ValidatorData was missing for validator '{validatorId}' at stateVersion {stateVersion}");
+            var validatorOutputData = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorData)?.Data.ValidatorData!.ToOutputData(ownerId => validatorOwnerAddresses[ownerId])
+                ?? ValidatorData.GetDefaultOutputData(_networkConfigurationProvider.GetAddressHrps(), validatorsById[validatorId].PublicKey);
+            var validatorMetadata = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorMetaData)?.Data.ValidatorMetaData
+                                    ?? ValidatorMetadata.GetDefault();
+            var validatorAllowDelegation = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorAllowDelegation)?.Data.ValidatorAllowDelegation
+                                           ?? ValidatorAllowDelegation.GetDefault();
+
+            var validatorProperties = GetValidatorPropertiesFromStates(validatorOutputData, validatorMetadata, validatorAllowDelegation);
+            var ownerId = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorData)?.Data.ValidatorData!.OwnerId;
+
+            outDictionary.Add(validatorId, new PropertiesAndOwner(validatorProperties, ownerId));
         }
 
+        return outDictionary;
+    }
+
+    private ValidatorProperties GetDefaultValidatorProperties(byte[] validatorPublicKey)
+    {
+        return GetValidatorPropertiesFromStates(
+            ValidatorData.GetDefaultOutputData(_networkConfigurationProvider.GetAddressHrps(), validatorPublicKey),
+            ValidatorMetadata.GetDefault(),
+            ValidatorAllowDelegation.GetDefault()
+        );
+    }
+
+    private ValidatorProperties GetValidatorPropertiesFromStates(
+        OutputValidatorData validatorOutputData,
+        ValidatorMetadata validatorMetadata,
+        ValidatorAllowDelegation validatorAllowDelegation
+    )
+    {
         return new ValidatorProperties(
             url: validatorMetadata.Url,
-            validatorFee: validatorData.FeePercentage.ToString(CultureInfo.InvariantCulture),
+            validatorFee: validatorOutputData.FeePercentage.ToString(CultureInfo.InvariantCulture),
             name: validatorMetadata.Name,
-            registered: validatorData.IsRegistered,
-            ownerAccountIdentifier: validatorData.Owner.AsAccountIdentifier(),
+            registered: validatorOutputData.IsRegistered,
+            ownerAccountIdentifier: validatorOutputData.OwnerAddress.AsAccountIdentifier(),
             externalStakeAccepted: validatorAllowDelegation.AllowDelegation
         );
     }
 
-    private async Task<AccountValidatorStakeSnapshot> GetOwnerStakeAtState(long validatorId, string ownerAddress, LedgerState ledgerState)
+    private async Task<Dictionary<long, AccountValidatorStakeSnapshot>> GetOwnerStakesByValidatorIdAtState(
+        List<DbQueryExtensions.AccountValidatorIds> validatorOwnerIds, LedgerState ledgerState
+    )
     {
         var stateVersion = ledgerState._Version;
-        var query =
-            from stakeHistory in _dbContext.AccountValidatorStakeHistoryAtVersionForAccount(stateVersion, ownerAddress)
-            where stakeHistory.ValidatorId == validatorId
-            select stakeHistory.StakeSnapshot
-        ;
 
-        return await query.SingleOrDefaultAsync() ?? AccountValidatorStakeSnapshot.GetDefault();
+        return await _dbContext.BulkAccountValidatorStakeHistoryAtVersion(validatorOwnerIds, stateVersion)
+                .ToDictionaryAsync(
+                    a => a.ValidatorId,
+                    a => a.StakeSnapshot
+                );
     }
 
     /// <summary>
@@ -198,39 +303,63 @@ public class ValidatorQuerier : IValidatorQuerier
     /// to a given epoch.
     /// In particular, if the ledger state points into the current epoch, the uptime will change as the epoch progresses.
     /// </summary>
-    private async Task<ValidatorUptime> GetUptimeAtState(long validatorId, LedgerState ledgerState)
+    private async Task<Dictionary<long, ValidatorUptime>> GetUptimeByValidatorIdAtState(List<long> validatorIds, LedgerState ledgerState)
     {
-        const int UptimeDefaultEpochRange = 500; // 500 Epochs is approx 2 weeks
-
         // These are inclusive endpoints
         var fromEpoch = Math.Max(1, ledgerState.Epoch - UptimeDefaultEpochRange);
         var toEpoch = ledgerState.Epoch;
 
         var proposalCountsQuery =
             from proposalHistory in _dbContext.ValidatorProposalRecords
-            where proposalHistory.ValidatorId == validatorId
+            where validatorIds.Contains(proposalHistory.ValidatorId)
                   && fromEpoch <= proposalHistory.Epoch
                   && proposalHistory.Epoch <= toEpoch
-            group proposalHistory.ProposalRecord by 1
+            group proposalHistory.ProposalRecord by proposalHistory.ValidatorId
             into g
             select new
             {
+                ValidatorId = g.Key,
                 ProposalsCompleted = g.Sum(p => p.ProposalsCompleted),
                 ProposalsMissed = g.Sum(p => p.ProposalsMissed),
             }
         ;
 
-        var results = await proposalCountsQuery.SingleOrDefaultAsync();
-        var proposalsCompleted = results?.ProposalsCompleted ?? 0;
-        var proposalsMissed = results?.ProposalsMissed ?? 0;
+        var proposalCounts = await proposalCountsQuery.ToDictionaryAsync(
+            g => g.ValidatorId,
+            g => g
+        );
 
-        var proportion = 100 * (decimal)proposalsCompleted / Math.Max(1, proposalsCompleted + proposalsMissed);
+        var outDictionary = new Dictionary<long, ValidatorUptime>();
+
+        foreach (var (validatorId, results) in proposalCounts)
+        {
+            var proposalsCompleted = results.ProposalsCompleted;
+            var proposalsMissed = results.ProposalsMissed;
+
+            var proportion = 100 * (decimal)proposalsCompleted / Math.Max(1, proposalsCompleted + proposalsMissed);
+
+            var uptime = new ValidatorUptime(
+                new EpochRange(fromEpoch, toEpoch),
+                Math.Round(proportion, 2).ToString(CultureInfo.InvariantCulture),
+                proposalsMissed: proposalsMissed,
+                proposalsCompleted: proposalsCompleted
+            );
+            outDictionary.Add(validatorId, uptime);
+        }
+
+        return outDictionary;
+    }
+
+    private ValidatorUptime GetDefaultValidatorUptime(LedgerState ledgerState)
+    {
+        var fromEpoch = Math.Max(1, ledgerState.Epoch - UptimeDefaultEpochRange);
+        var toEpoch = ledgerState.Epoch;
 
         return new ValidatorUptime(
             new EpochRange(fromEpoch, toEpoch),
-            Math.Round(proportion, 2).ToString(CultureInfo.InvariantCulture),
-            proposalsMissed: proposalsMissed,
-            proposalsCompleted: proposalsCompleted
+            uptimePercentage: "0.00",
+            proposalsMissed: 0,
+            proposalsCompleted: 0
         );
     }
 }

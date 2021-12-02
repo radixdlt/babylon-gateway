@@ -77,35 +77,36 @@ public class ValidatorController : ControllerBase
     private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IValidatorQuerier _validatorQuerier;
-    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
     public ValidatorController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
-        IValidatorQuerier validatorQuerier,
-        IFallbackGatewayApiProvider fallbackGatewayApiProvider
+        IValidatorQuerier validatorQuerier
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _validatorQuerier = validatorQuerier;
-        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
     [HttpPost("validator")]
     public async Task<ValidatorInfoResponse> GetValidatorInfo(ValidatorInfoRequest request, long? atStateVersion)
     {
-        _validations.ValidateValidatorAddress(request.ValidatorIdentifier);
+        var validatorAddress = _validations.ExtractValidValidatorAddress(request.ValidatorIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
         return new ValidatorInfoResponse(
             ledgerState,
-            await _validatorQuerier.GetValidatorAtState(request.ValidatorIdentifier.Address, ledgerState)
+            await _validatorQuerier.GetValidatorAtState(validatorAddress, request.ValidatorIdentifier.Address, ledgerState)
         );
     }
 
     [HttpPost("validators")]
-    public async Task<ValidatorsResponse> GetValidators(ValidatorsRequest request)
+    public async Task<ValidatorsResponse> GetValidators(ValidatorsRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.ValidatorsPostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        return new ValidatorsResponse(
+            ledgerState,
+            await _validatorQuerier.GetValidatorsAtState(ledgerState)
+        );
     }
 }

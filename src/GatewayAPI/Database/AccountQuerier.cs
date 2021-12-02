@@ -92,6 +92,8 @@ public class AccountQuerier : IAccountQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
+    // TODO:NG-56 - Look up AccountId at ledger version and use that in lookups (like we do in ValidatorQuerier)
+    // This can allow skipping a lot of work for unseen account ids; and slightly more efficient querying
     public async Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState)
     {
         return new AccountBalances(
