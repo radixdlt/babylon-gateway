@@ -70,9 +70,9 @@ public class HttpResponseException : Exception
 
     public virtual string ExceptionNameUpperSnakeCase { get; set; } = "UNKNOWN_ERROR";
 
-    public string? Cause { get; set; } = null;
+    public string? Cause { get; }
 
-    public string? InternalMessage { get; set; } = null;
+    public string? InternalMessage { get; }
 
     public HttpResponseException(string userFacingMessage, string internalMessage)
         : base($"{userFacingMessage} ({internalMessage})")
@@ -81,7 +81,7 @@ public class HttpResponseException : Exception
         InternalMessage = internalMessage;
     }
 
-    public HttpResponseException(string userFacingMessage)
+    public HttpResponseException(string? userFacingMessage)
         : base(userFacingMessage)
     {
         Cause = userFacingMessage;

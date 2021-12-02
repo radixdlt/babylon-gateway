@@ -114,11 +114,10 @@ public class ExceptionFilter : IActionFilter, IOrderedFilter
             // CoreApi.ApiException is returned if we get a 500 from upstream
             _logger.Log(LogLevel.Information, exception, "Error response from upstream server");
             var (exceptionName, causeName) = ExtractExceptionAndCause(coreApiException.ErrorContent.ToString() ?? string.Empty);
-            outException = new HttpResponseException
+            outException = new HttpResponseException(causeName)
             {
                 Status = coreApiException.ErrorCode,
                 ExceptionNameUpperSnakeCase = exceptionName ?? "UNKNOWN_ERROR",
-                Cause = causeName,
             };
         }
         else if (exception is GatewayApi.ApiException gatewayApiException)
@@ -126,11 +125,10 @@ public class ExceptionFilter : IActionFilter, IOrderedFilter
             // GatewayApi.ApiException is returned if we get a 500 from upstream
             _logger.Log(LogLevel.Information, exception, "Error response from upstream server");
             var (exceptionName, causeName) = ExtractExceptionAndCause(gatewayApiException.ErrorContent.ToString() ?? string.Empty);
-            outException = new HttpResponseException
+            outException = new HttpResponseException(causeName)
             {
                 Status = gatewayApiException.ErrorCode,
                 ExceptionNameUpperSnakeCase = exceptionName ?? "UNKNOWN_ERROR",
-                Cause = causeName,
             };
         }
         else
