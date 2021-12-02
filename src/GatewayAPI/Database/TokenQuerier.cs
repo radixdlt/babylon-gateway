@@ -121,7 +121,7 @@ public class TokenQuerier : ITokenQuerier
 
         var tokenDataSubstates = await (
             from data in _dbContext.ResourceDataSubstates.UpAtVersion(stateVersion)
-            join resource in _dbContext.Resource(tokenRri)
+            join resource in _dbContext.Resource(tokenRri, stateVersion)
                 on data.ResourceId equals resource.Id
             orderby data.UpStateVersion descending
             select data

@@ -191,6 +191,7 @@ public class AccountQuerier : IAccountQuerier
 
     private async Task<List<AccountUnstakeEntry>> GetAccountUnstakePositionsByValidator(LedgerState ledgerState, string accountAddress)
     {
+        var stateVersion = ledgerState._Version;
         var allStakes = await GetAccountStakePositions(ledgerState, accountAddress).ToListAsync();
 
         var xrdTokenIdentifier = _networkConfigurationProvider.GetXrdTokenIdentifier();
@@ -209,8 +210,8 @@ public class AccountQuerier : IAccountQuerier
             });
 
         var exitingUnstakes = await (
-            from exitingStakeSubstates in _dbContext.AccountXrdStakeBalanceSubstates.UpAtVersion(ledgerState._Version)
-            join account in _dbContext.Account(accountAddress)
+            from exitingStakeSubstates in _dbContext.AccountXrdStakeBalanceSubstates.UpAtVersion(stateVersion)
+            join account in _dbContext.Account(accountAddress, stateVersion)
                 on exitingStakeSubstates.AccountId equals account.Id
             join validator in _dbContext.Validators
                 on exitingStakeSubstates.ValidatorId equals validator.Id

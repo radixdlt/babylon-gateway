@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
+using GatewayAPI.Database;
 using GatewayAPI.Fallback;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
@@ -72,17 +74,33 @@ namespace GatewayAPI.Controllers;
 [Route("")]
 public class ValidatorController : ControllerBase
 {
+    private readonly IValidations _validations;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IValidatorQuerier _validatorQuerier;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-    public ValidatorController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    public ValidatorController(
+        IValidations validations,
+        ILedgerStateQuerier ledgerStateQuerier,
+        IValidatorQuerier validatorQuerier,
+        IFallbackGatewayApiProvider fallbackGatewayApiProvider
+    )
     {
+        _validations = validations;
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _validatorQuerier = validatorQuerier;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
     [HttpPost("validator")]
-    public async Task<ValidatorInfoResponse> GetValidatorInfo(ValidatorInfoRequest request)
+    public async Task<ValidatorInfoResponse> GetValidatorInfo(ValidatorInfoRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.ValidatorPostAsync(request);
+        _validations.ValidateValidatorAddress(request.ValidatorIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        return new ValidatorInfoResponse(
+            ledgerState,
+            await _validatorQuerier.GetValidatorAtState(request.ValidatorIdentifier.Address, ledgerState)
+        );
     }
 
     [HttpPost("validators")]

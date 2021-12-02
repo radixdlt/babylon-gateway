@@ -64,19 +64,10 @@
 
 namespace GatewayAPI.Exceptions;
 
-public class NotFoundException : HttpResponseException
+public class ValidatorNotFoundException : NotFoundException
 {
-    public override int Status => 404;
-
-    public override string ExceptionNameUpperSnakeCase => "NOT_FOUND";
-
-    public NotFoundException(string userFacingMessage, string internalMessage)
-        : base(userFacingMessage, internalMessage)
-    {
-    }
-
-    public NotFoundException(string userFacingMessage)
-        : base(userFacingMessage)
+    public ValidatorNotFoundException(string internalMessage)
+        : base(@"Validator not found", internalMessage)
     {
     }
 }

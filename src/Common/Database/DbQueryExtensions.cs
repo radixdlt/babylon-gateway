@@ -75,32 +75,35 @@ public static class DbQueryExtensions
 {
     public static IQueryable<Account> Account<TDbContext>(
         this TDbContext dbContext,
-        string accountAddress
+        string accountAddress,
+        long stateVersion
     )
         where TDbContext : CommonDbContext
     {
         return dbContext.Set<Account>()
-            .Where(a => a.Address == accountAddress);
+            .Where(a => a.Address == accountAddress && a.FromStateVersion <= stateVersion);
     }
 
     public static IQueryable<Resource> Resource<TDbContext>(
         this TDbContext dbContext,
-        string resourceIdentifier
+        string resourceIdentifier,
+        long stateVersion
     )
         where TDbContext : CommonDbContext
     {
         return dbContext.Set<Resource>()
-            .Where(r => r.ResourceIdentifier == resourceIdentifier);
+            .Where(r => r.ResourceIdentifier == resourceIdentifier && r.FromStateVersion <= stateVersion);
     }
 
     public static IQueryable<Validator> Validator<TDbContext>(
         this TDbContext dbContext,
-        string validatorAddress
+        string validatorAddress,
+        long stateVersion
     )
         where TDbContext : CommonDbContext
     {
         return dbContext.Set<Validator>()
-            .Where(v => v.Address == validatorAddress);
+            .Where(v => v.Address == validatorAddress && v.FromStateVersion <= stateVersion);
     }
 
     public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
@@ -214,7 +217,7 @@ public static class DbQueryExtensions
     {
         return
             from stakeHistory in dbContext.AccountValidatorStakeHistoryAtVersion(stateVersion)
-            join account in dbContext.Account(accountAddress)
+            join account in dbContext.Account(accountAddress, stateVersion)
                 on stakeHistory.AccountId equals account.Id
             select stakeHistory
         ;
@@ -257,7 +260,7 @@ public static class DbQueryExtensions
     {
         return
             from resourceApiHistory in dbContext.ResourceSupplyHistoryAtVersion(stateVersion)
-            join resource in dbContext.Resource(rri)
+            join resource in dbContext.Resource(rri, stateVersion)
                 on resourceApiHistory.ResourceId equals resource.Id
             select resourceApiHistory
         ;

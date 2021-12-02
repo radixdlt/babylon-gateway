@@ -96,6 +96,7 @@ public class DefaultKernel
         services.AddScoped<ILedgerStateQuerier, LedgerStateQuerier>();
         services.AddScoped<IAccountQuerier, AccountQuerier>();
         services.AddScoped<ITokenQuerier, TokenQuerier>();
+        services.AddScoped<IValidatorQuerier, ValidatorQuerier>();
     }
 
     private void AddFallbackApiServices(IServiceCollection services)

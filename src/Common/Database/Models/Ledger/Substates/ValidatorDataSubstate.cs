@@ -253,6 +253,11 @@ public record ValidatorMetadata
         return apiModel == null ? null
             : new ValidatorMetadata { Name = apiModel.Name, Url = apiModel.Url };
     }
+
+    public static ValidatorMetadata GetDefault()
+    {
+        return new ValidatorMetadata { Name = string.Empty, Url = string.Empty };
+    }
 }
 
 [Owned]
@@ -265,6 +270,11 @@ public record ValidatorAllowDelegation
     {
         return apiModel == null ? null
             : new ValidatorAllowDelegation { AllowDelegation = apiModel.AllowDelegation };
+    }
+
+    public static ValidatorAllowDelegation GetDefault()
+    {
+        return new ValidatorAllowDelegation { AllowDelegation = false };
     }
 }
 

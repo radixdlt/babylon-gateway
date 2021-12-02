@@ -103,7 +103,7 @@ public class CommonDbContext : DbContext
 
     public DbSet<ResourceDataSubstate> ResourceDataSubstates => Set<ResourceDataSubstate>();
 
-    public DbSet<ValidatorDataSubstate> ValidatorDataSubstate => Set<ValidatorDataSubstate>();
+    public DbSet<ValidatorDataSubstate> ValidatorDataSubstates => Set<ValidatorDataSubstate>();
 
     public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
