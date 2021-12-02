@@ -62,32 +62,105 @@
  * permissions under this License.
  */
 
-namespace GatewayAPI.Exceptions;
+using Common.Database;
+using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Substates;
+using GatewayAPI.ApiSurface;
+using GatewayAPI.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using RadixGatewayApi.Generated.Model;
+using Api = RadixGatewayApi.Generated.Model;
 
-public class HttpResponseException : Exception
+namespace GatewayAPI.Database;
+
+public interface ITokenQuerier
 {
-    public virtual int Status { get; set; } = 500;
+    Task<Token> GetTokenInfoAtState(string tokenRri, LedgerState ledgerState);
+}
 
-    public virtual string ExceptionNameUpperSnakeCase { get; set; } = "UNKNOWN_ERROR";
+public class TokenQuerier : ITokenQuerier
+{
+    private readonly GatewayReadOnlyDbContext _dbContext;
 
-    public string? Cause { get; set; } = null;
-
-    public string? InternalMessage { get; set; } = null;
-
-    public HttpResponseException(string userFacingMessage, string internalMessage)
-        : base($"{userFacingMessage} ({internalMessage})")
+    public TokenQuerier(GatewayReadOnlyDbContext dbContext)
     {
-        Cause = userFacingMessage;
-        InternalMessage = internalMessage;
+        _dbContext = dbContext;
     }
 
-    public HttpResponseException(string userFacingMessage)
-        : base(userFacingMessage)
+    public async Task<Token> GetTokenInfoAtState(string tokenRri, LedgerState ledgerState)
     {
-        Cause = userFacingMessage;
+        var tokenIdentifier = tokenRri.AsTokenIdentifier();
+        var tokenSupply = await GetTokenSupplyAtState(tokenRri, ledgerState);
+        return new Token(
+            tokenIdentifier,
+            tokenSupply.ResourceSupply.TotalSupply.AsApiTokenAmount(tokenIdentifier),
+            new TokenInfo(
+                tokenSupply.ResourceSupply.TotalMinted.AsApiTokenAmount(tokenIdentifier),
+                tokenSupply.ResourceSupply.TotalBurnt.AsApiTokenAmount(tokenIdentifier)
+            ),
+            await GetTokenPropertiesAtState(tokenRri, ledgerState)
+        );
     }
 
-    public HttpResponseException()
+    private async Task<ResourceSupplyHistory> GetTokenSupplyAtState(string tokenRri, LedgerState ledgerState)
     {
+        var resourceSupply = await _dbContext.ResourceSupplyHistoryAtVersionForRri(ledgerState._Version, tokenRri)
+            .SingleOrDefaultAsync();
+
+        if (resourceSupply == null)
+        {
+            throw new TokenNotFoundException();
+        }
+
+        return resourceSupply;
+    }
+
+    private async Task<TokenProperties> GetTokenPropertiesAtState(string tokenRri, LedgerState ledgerState)
+    {
+        var stateVersion = ledgerState._Version;
+
+        var tokenDataSubstates = await (
+            from data in _dbContext.ResourceDataSubstates.UpAtVersion(stateVersion)
+            join resource in _dbContext.Resource(tokenRri)
+                on data.ResourceId equals resource.Id
+            orderby data.UpStateVersion descending
+            select data
+        )
+        .Include(s => s.TokenData!.Owner)
+        .ToListAsync();
+
+        var tokenData = tokenDataSubstates.Find(s => s.Type == ResourceDataSubstateType.TokenData)?.TokenData;
+        var tokenMetadata = tokenDataSubstates.Find(s => s.Type == ResourceDataSubstateType.TokenMetadata)?.TokenMetadata;
+
+        if (tokenData == null && tokenMetadata == null)
+        {
+            throw new TokenNotFoundException();
+        }
+
+        if (tokenData == null)
+        {
+            throw new InvalidStateException($"TokenData was missing but TokenMetadata wasn't missing for rri '{tokenRri}' at stateVersion {stateVersion}");
+        }
+
+        if (tokenMetadata == null)
+        {
+            throw new InvalidStateException($"TokenMetaData was missing but TokenData wasn't missing for rri '{tokenRri}' at stateVersion {stateVersion}");
+        }
+
+        if (tokenDataSubstates.Count > 2)
+        {
+            throw new InvalidStateException($"More than one TokenData or TokenMetaData matched for rri '{tokenRri}' at stateVersion {stateVersion}");
+        }
+
+        return new TokenProperties(
+            name: tokenMetadata.Name,
+            description: tokenMetadata.Description,
+            iconUrl: tokenMetadata.IconUrl,
+            url: tokenMetadata.Url,
+            symbol: tokenMetadata.Symbol,
+            isSupplyMutable: tokenData.IsMutable,
+            granularity: tokenData.Granularity.ToSubUnitString(),
+            owner: tokenData.Owner.AsOptionalAccountIdentifier()
+        );
     }
 }

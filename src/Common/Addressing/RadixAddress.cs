@@ -72,4 +72,27 @@ public enum RadixAddressType
     Node,
 }
 
-public record RadixAddress(RadixAddressType Type, string Hrp, byte[] AddressData);
+public abstract record RadixAddress
+{
+    public abstract RadixAddressType Type { get; }
+}
+
+public record AccountAddress(byte[] CompressedPublicKey) : RadixAddress
+{
+    public override RadixAddressType Type => RadixAddressType.Account;
+}
+
+public record ResourceAddress(byte[] RadixEngineAddress) : RadixAddress
+{
+    public override RadixAddressType Type => RadixAddressType.Resource;
+}
+
+public record ValidatorAddress(byte[] CompressedPublicKey) : RadixAddress
+{
+    public override RadixAddressType Type => RadixAddressType.Validator;
+}
+
+public record NodeAddress(byte[] CompressedPublicKey) : RadixAddress
+{
+    public override RadixAddressType Type => RadixAddressType.Node;
+}

@@ -65,6 +65,7 @@
 using Common.Database;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
+using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
 using Api = RadixGatewayApi.Generated.Model;
@@ -83,12 +84,12 @@ public interface IAccountQuerier
 public class AccountQuerier : IAccountQuerier
 {
     private readonly GatewayReadOnlyDbContext _dbContext;
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public AccountQuerier(GatewayReadOnlyDbContext dbContext, ILedgerStateQuerier ledgerStateQuerier)
+    public AccountQuerier(GatewayReadOnlyDbContext dbContext, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
-        _ledgerStateQuerier = ledgerStateQuerier;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public async Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState)
@@ -145,14 +146,14 @@ public class AccountQuerier : IAccountQuerier
             totalXrd += definiteXrd + stakeOwnershipAsEstimatedXrd;
         }
 
-        return new TokenAmount(totalXrd.ToSubUnitString(), new TokenIdentifier(await _ledgerStateQuerier.GetXrdAddress()));
+        return new TokenAmount(totalXrd.ToSubUnitString(), _networkConfigurationProvider.GetXrdTokenIdentifier());
     }
 
     private async Task<List<AccountStakeEntry>> GetAccountStakedBalanceByValidator(LedgerState ledgerState, string accountAddress)
     {
         var allStakes = await GetAccountStakePositions(ledgerState, accountAddress).ToListAsync();
 
-        var xrdTokenIdentifier = new TokenIdentifier(await _ledgerStateQuerier.GetXrdAddress());
+        var xrdTokenIdentifier = _networkConfigurationProvider.GetXrdTokenIdentifier();
 
         return allStakes.Select(s =>
             {
@@ -192,7 +193,7 @@ public class AccountQuerier : IAccountQuerier
     {
         var allStakes = await GetAccountStakePositions(ledgerState, accountAddress).ToListAsync();
 
-        var xrdTokenIdentifier = new TokenIdentifier(await _ledgerStateQuerier.GetXrdAddress());
+        var xrdTokenIdentifier = _networkConfigurationProvider.GetXrdTokenIdentifier();
 
         var preparedUnstakes = allStakes.Select(s =>
             {

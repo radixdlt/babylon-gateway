@@ -66,9 +66,10 @@
 #pragma warning disable SA1516
 
 using Common.Database;
+using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
-using GatewayAPI.Filters;
+using GatewayAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var host = builder.Host;
@@ -95,7 +96,12 @@ services
         options.Filters.Add<ExceptionFilter>();
     })
     /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
-    .AddNewtonsoftJson();
+    .AddNewtonsoftJson()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // TODO:NG-56 - configure validation errors to return in standard response format - eg https://stackoverflow.com/a/64784861
+        // options.InvalidModelStateResponseFactory = context => { }
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -136,7 +142,27 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-var maxWaitForDbMs = app.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
-await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app.Services, maxWaitForDbMs);
+await EnsureCanConnectToDatabase(app);
+await LoadNetworkConfigurationFromDb(app);
 
 await app.RunAsync();
+
+/* Methods */
+
+async Task EnsureCanConnectToDatabase(WebApplication app1)
+{
+    var maxWaitForDbMs = app1.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
+    await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app1.Services, maxWaitForDbMs);
+}
+
+async Task LoadNetworkConfigurationFromDb(WebApplication webApplication)
+{
+    using (var scope = webApplication.Services.CreateScope())
+    {
+        await scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>()
+            .LoadNetworkConfigurationFromDatabase(
+                scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
+                CancellationToken.None
+            );
+    }
+}

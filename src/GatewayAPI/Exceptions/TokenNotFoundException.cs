@@ -62,106 +62,12 @@
  * permissions under this License.
  */
 
-using GatewayAPI.Exceptions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text.Json;
-using CoreApi = RadixCoreApi.GeneratedClient.Client;
-using GatewayApi = RadixGatewayApi.Generated.Client;
+namespace GatewayAPI.Exceptions;
 
-namespace GatewayAPI.Filters;
-
-public class ExceptionFilter : IActionFilter, IOrderedFilter
+public class TokenNotFoundException : NotFoundException
 {
-    private readonly ILogger<ExceptionFilter> _logger;
-
-    public ExceptionFilter(ILogger<ExceptionFilter> logger)
+    public TokenNotFoundException()
+        : base(@"Token not found")
     {
-        _logger = logger;
-    }
-
-    public int Order => int.MaxValue - 10;
-
-    public void OnActionExecuting(ActionExecutingContext context)
-    {
-    }
-
-    public void OnActionExecuted(ActionExecutedContext context)
-    {
-        if (context.Exception == null)
-        {
-            return;
-        }
-
-        Exception exception = context.Exception!;
-        HttpResponseException outException;
-
-        if (exception is HttpResponseException httpResponseException)
-        {
-            _logger.Log(LogLevel.Debug, exception, "Known exception with http response code");
-            outException = httpResponseException;
-        }
-        else if (exception is HttpRequestException)
-        {
-            // HttpRequestException is returned from the Gateway or Core APIs if we can't connect
-            _logger.Log(LogLevel.Information, exception, "Error relaying request to upstream server");
-            outException = new HttpResponseException { Status = 502, ExceptionNameUpperSnakeCase = "BAD_GATEWAY" };
-        }
-        else if (exception is CoreApi.ApiException coreApiException)
-        {
-            // CoreApi.ApiException is returned if we get a 500 from upstream
-            _logger.Log(LogLevel.Information, exception, "Error response from upstream server");
-            var (exceptionName, causeName) = ExtractExceptionAndCause(coreApiException.ErrorContent.ToString() ?? string.Empty);
-            outException = new HttpResponseException
-            {
-                Status = coreApiException.ErrorCode,
-                ExceptionNameUpperSnakeCase = exceptionName ?? "UNKNOWN_ERROR",
-                Cause = causeName,
-            };
-        }
-        else if (exception is GatewayApi.ApiException gatewayApiException)
-        {
-            // GatewayApi.ApiException is returned if we get a 500 from upstream
-            _logger.Log(LogLevel.Information, exception, "Error response from upstream server");
-            var (exceptionName, causeName) = ExtractExceptionAndCause(gatewayApiException.ErrorContent.ToString() ?? string.Empty);
-            outException = new HttpResponseException
-            {
-                Status = gatewayApiException.ErrorCode,
-                ExceptionNameUpperSnakeCase = exceptionName ?? "UNKNOWN_ERROR",
-                Cause = causeName,
-            };
-        }
-        else
-        {
-            _logger.Log(LogLevel.Warning, exception, "Unknown exception");
-            outException = new HttpResponseException(); // Hide error codes behind a blanket UNKNOWN_ERROR
-        }
-
-        context.Result = new ObjectResult(new
-        {
-            exception = outException.ExceptionNameUpperSnakeCase,
-            cause = outException.Cause,
-        })
-        {
-            StatusCode = outException.Status,
-        };
-        context.ExceptionHandled = true;
-    }
-
-    private static (string? Exception, string? Cause) ExtractExceptionAndCause(string upstreamErrorResponse)
-    {
-        try
-        {
-            using var jsonDocument = JsonDocument.Parse(upstreamErrorResponse);
-            var details = jsonDocument.RootElement.GetProperty("details");
-
-            details.TryGetProperty("cause", out var causeProperty);
-            details.TryGetProperty("exception", out var exceptionProperty);
-            return (exceptionProperty.GetString(), causeProperty.GetString());
-        }
-        catch (Exception)
-        {
-            return (null, null);
-        }
     }
 }

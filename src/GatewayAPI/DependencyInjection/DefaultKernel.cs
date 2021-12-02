@@ -62,9 +62,11 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
 using GatewayAPI.Database;
 using GatewayAPI.Fallback;
+using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace GatewayAPI.DependencyInjection;
@@ -85,12 +87,15 @@ public class DefaultKernel
     private void AddGlobalScopedServices(IServiceCollection services)
     {
         services.AddSingleton<INetworkGatewayConfiguration, NetworkGatewayConfiguration>();
+        services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        services.AddSingleton<IValidations, Validations>();
     }
 
     private void AddRequestScopedServices(IServiceCollection services)
     {
         services.AddScoped<ILedgerStateQuerier, LedgerStateQuerier>();
         services.AddScoped<IAccountQuerier, AccountQuerier>();
+        services.AddScoped<ITokenQuerier, TokenQuerier>();
     }
 
     private void AddFallbackApiServices(IServiceCollection services)

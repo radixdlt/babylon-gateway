@@ -228,16 +228,16 @@ public static class DbQueryExtensions
     {
         var dbSet = dbContext.Set<ValidatorStakeHistory>();
         var mostRecentHistoryByKeyQuery =
-                from history in dbSet
-                where history.FromStateVersion <= stateVersion
-                group history by history.ValidatorId
-                into g
-                select new
-                {
-                    ValidatorId = g.Key,
-                    LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
-                }
-            ;
+            from history in dbSet
+            where history.FromStateVersion <= stateVersion
+            group history by history.ValidatorId
+            into g
+            select new
+            {
+                ValidatorId = g.Key,
+                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+            }
+        ;
 
         return
             from fullHistory in dbSet
@@ -245,6 +245,49 @@ public static class DbQueryExtensions
                 on new { fullHistory.ValidatorId, fullHistory.FromStateVersion }
                 equals new { historyKeys.ValidatorId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
             select fullHistory
-            ;
+        ;
+    }
+
+    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersionForRri<TDbContext>(
+        this TDbContext dbContext,
+        long stateVersion,
+        string rri
+    )
+        where TDbContext : CommonDbContext
+    {
+        return
+            from resourceApiHistory in dbContext.ResourceSupplyHistoryAtVersion(stateVersion)
+            join resource in dbContext.Resource(rri)
+                on resourceApiHistory.ResourceId equals resource.Id
+            select resourceApiHistory
+        ;
+    }
+
+    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var dbSet = dbContext.Set<ResourceSupplyHistory>();
+        var mostRecentHistoryByKeyQuery =
+            from history in dbSet
+            where history.FromStateVersion <= stateVersion
+            group history by history.ResourceId
+            into g
+            select new
+            {
+                ResourceId = g.Key,
+                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
+            }
+        ;
+
+        return
+            from fullHistory in dbSet
+            join historyKeys in mostRecentHistoryByKeyQuery
+                on new { fullHistory.ResourceId, fullHistory.FromStateVersion }
+                equals new { historyKeys.ResourceId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
+            select fullHistory
+        ;
     }
 }

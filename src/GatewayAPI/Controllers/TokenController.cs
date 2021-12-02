@@ -62,9 +62,14 @@
  * permissions under this License.
  */
 
-using GatewayAPI.Fallback;
+using Common.Addressing;
+using GatewayAPI.ApiSurface;
+using GatewayAPI.Database;
+using GatewayAPI.Exceptions;
+using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
+using System.Text.RegularExpressions;
 
 namespace GatewayAPI.Controllers;
 
@@ -72,28 +77,63 @@ namespace GatewayAPI.Controllers;
 [Route("token")]
 public class TokenController : ControllerBase
 {
-    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
+    private static readonly Regex _symbolRegex = new("^[a-z0-9]{1,35}$");
 
-    public TokenController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly ITokenQuerier _tokenQuerier;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IValidations _validations;
+
+    public TokenController(
+        ILedgerStateQuerier ledgerStateQuerier,
+        ITokenQuerier tokenQuerier,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IValidations validations
+    )
     {
-        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _tokenQuerier = tokenQuerier;
+        _networkConfigurationProvider = networkConfigurationProvider;
+        _validations = validations;
     }
 
     [HttpPost("")]
-    public async Task<TokenResponse> GetTokenInfo(TokenRequest tokenRequest)
+    public async Task<TokenResponse> GetTokenInfo(TokenRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.TokenPostAsync(tokenRequest);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        return new TokenResponse(
+            ledgerState,
+            await _tokenQuerier.GetTokenInfoAtState(request.TokenIdentifier.Rri, ledgerState)
+        );
     }
 
     [HttpPost("native")]
-    public async Task<TokenNativeResponse> GetNativeTokenInfo(TokenNativeRequest tokenNativeRequest)
+    public async Task<TokenNativeResponse> GetNativeTokenInfo(TokenNativeRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.TokenNativePostAsync(tokenNativeRequest);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        return new TokenNativeResponse(
+            ledgerState,
+            await _tokenQuerier.GetTokenInfoAtState(_networkConfigurationProvider.GetXrdAddress(), ledgerState)
+        );
     }
 
     [HttpPost("derive")]
-    public async Task<TokenDeriveResponse> DeriveTokenIdentifier(TokenDeriveRequest tokenDeriveRequest)
+    public TokenDeriveResponse DeriveTokenIdentifier(TokenDeriveRequest tokenDeriveRequest)
     {
-        return await _fallbackGatewayApiProvider.Api.TokenDerivePostAsync(tokenDeriveRequest);
+        _ledgerStateQuerier.AssertMatchingNetwork(tokenDeriveRequest.Network);
+        var symbol = tokenDeriveRequest.Symbol;
+
+        if (!_symbolRegex.IsMatch(symbol))
+        {
+            throw new ValidationException("Symbol must be between 1 and 35 lower case alpha-numeric characters");
+        }
+
+        var rri = RadixBech32.GenerateResourceAddress(
+            _validations.ExtractValidAccountAddress(tokenDeriveRequest.CreatorAccountIdentifier),
+            symbol,
+            _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix
+        );
+
+        return new TokenDeriveResponse(rri.AsTokenIdentifier());
     }
 }

@@ -64,30 +64,19 @@
 
 namespace GatewayAPI.Exceptions;
 
-public class HttpResponseException : Exception
+public class ValidationException : HttpResponseException
 {
-    public virtual int Status { get; set; } = 500;
+    public override int Status => 400;
 
-    public virtual string ExceptionNameUpperSnakeCase { get; set; } = "UNKNOWN_ERROR";
+    public override string ExceptionNameUpperSnakeCase => "INVALID_REQUEST";
 
-    public string? Cause { get; set; } = null;
-
-    public string? InternalMessage { get; set; } = null;
-
-    public HttpResponseException(string userFacingMessage, string internalMessage)
-        : base($"{userFacingMessage} ({internalMessage})")
+    public ValidationException(string userFacingMessage, string internalMessage)
+        : base(userFacingMessage, internalMessage)
     {
-        Cause = userFacingMessage;
-        InternalMessage = internalMessage;
     }
 
-    public HttpResponseException(string userFacingMessage)
+    public ValidationException(string userFacingMessage)
         : base(userFacingMessage)
-    {
-        Cause = userFacingMessage;
-    }
-
-    public HttpResponseException()
     {
     }
 }

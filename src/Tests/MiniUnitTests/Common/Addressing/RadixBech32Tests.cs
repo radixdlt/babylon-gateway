@@ -79,7 +79,7 @@ public class RadixBech32Tests
     {
         var decodedData = RadixBech32.Decode(encodedString);
 
-        var reEncodedString = RadixBech32.Encode(decodedData.Hrp, decodedData.AddressData, decodedData.Variant);
+        var reEncodedString = RadixBech32.Bech32EncodeRawAddressData(decodedData.Hrp, decodedData.Data, decodedData.Variant);
         Assert.Equal(encodedString.ToLowerInvariant(), reEncodedString);
     }
 
@@ -92,7 +92,7 @@ public class RadixBech32Tests
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeGivesAddress(string encodedString, string expectedAddress)
     {
         var decodedData = RadixBech32.Decode(encodedString);
-        Assert.Equal(expectedAddress, Convert.ToHexString(decodedData.AddressData));
+        Assert.Equal(expectedAddress, Convert.ToHexString(decodedData.Data));
     }
 
     public static IEnumerable<object[]> Invalid_Bech32Strings => new List<object[]>

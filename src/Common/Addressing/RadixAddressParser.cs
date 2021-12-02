@@ -75,65 +75,191 @@ public static class RadixAddressParser
         [NotNullWhen(false)] out string? errorMessage
     )
     {
-        if (!TryDecode(address, out var bech32Data, out var exception))
+        try
+        {
+            radixAddress = Parse(hrps, address);
+            errorMessage = null;
+            return true;
+        }
+        catch (AddressException exception)
         {
             radixAddress = null;
-            errorMessage = $"Failed to decode address: {exception!.Message}";
+            errorMessage = $"Failed to parse address: {exception.Message}";
             return false;
         }
-
-        var (addressHrp, addressData, _) = bech32Data!;
-
-        if (addressHrp == hrps.AccountHrp)
-        {
-            radixAddress = new RadixAddress(RadixAddressType.Account, addressHrp, addressData);
-            errorMessage = null;
-            return true;
-        }
-
-        if (addressHrp.EndsWith(hrps.ResourceHrpSuffix))
-        {
-            radixAddress = new RadixAddress(RadixAddressType.Resource, addressHrp, addressData);
-            errorMessage = null;
-            return true;
-        }
-
-        if (addressHrp == hrps.NodeHrp)
-        {
-            radixAddress = new RadixAddress(RadixAddressType.Node, addressHrp, addressData);
-            errorMessage = null;
-            return true;
-        }
-
-        if (addressHrp == hrps.ValidatorHrp)
-        {
-            radixAddress = new RadixAddress(RadixAddressType.Validator, addressHrp, addressData);
-            errorMessage = null;
-            return true;
-        }
-
-        radixAddress = null;
-        errorMessage = $"Address HRP was {addressHrp} but didn't match any known types of address";
-        return false;
     }
 
-    private static bool TryDecode(
-        string bechEncoded,
-        [NotNullWhen(true)] out RadixBech32Data? bech32Data,
-        [NotNullWhen(false)] out AddressException? exception
+    public static bool TryParseAccountAddress(
+        AddressHrps hrps,
+        string address,
+        [NotNullWhen(true)] out AccountAddress? accountAddress,
+        [NotNullWhen(false)] out string? errorMessage
     )
     {
         try
         {
-            bech32Data = RadixBech32.Decode(bechEncoded);
-            exception = null;
+            accountAddress = ParseAccountAddress(hrps, address);
+            errorMessage = null;
             return true;
         }
-        catch (AddressException ex)
+        catch (AddressException exception)
         {
-            bech32Data = null;
-            exception = ex;
+            accountAddress = null;
+            errorMessage = $"Failed to parse account address: {exception.Message}";
             return false;
         }
+    }
+
+    public static bool TryParseValidatorAddress(
+        AddressHrps hrps,
+        string address,
+        [NotNullWhen(true)] out ValidatorAddress? validatorAddress,
+        [NotNullWhen(false)] out string? errorMessage
+    )
+    {
+        try
+        {
+            validatorAddress = ParseValidatorAddress(hrps, address);
+            errorMessage = null;
+            return true;
+        }
+        catch (AddressException exception)
+        {
+            validatorAddress = null;
+            errorMessage = $"Failed to parse account address: {exception.Message}";
+            return false;
+        }
+    }
+
+    public static bool TryParseResourceAddress(
+        AddressHrps hrps,
+        string address,
+        [NotNullWhen(true)] out ResourceAddress? resourceAddress,
+        [NotNullWhen(false)] out string? errorMessage
+    )
+    {
+        try
+        {
+            resourceAddress = ParseResourceAddress(hrps, address);
+            errorMessage = null;
+            return true;
+        }
+        catch (AddressException exception)
+        {
+            resourceAddress = null;
+            errorMessage = $"Failed to parse account address: {exception.Message}";
+            return false;
+        }
+    }
+
+    private static AccountAddress ParseAccountAddress(AddressHrps hrps, string address)
+    {
+        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+
+        if (addressHrp != hrps.AccountHrp)
+        {
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match account HRP {hrps.AccountHrp}");
+        }
+
+        return GetAccountAddressFromAddressData(addressData);
+    }
+
+    private static ResourceAddress ParseResourceAddress(AddressHrps hrps, string address)
+    {
+        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+
+        if (!addressHrp.EndsWith(hrps.ResourceHrpSuffix))
+        {
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match end with resource HRP suffix {hrps.ResourceHrpSuffix}");
+        }
+
+        return GetResourceAddressFromAddressData(addressData);
+    }
+
+    private static ValidatorAddress ParseValidatorAddress(AddressHrps hrps, string address)
+    {
+        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+
+        if (addressHrp != hrps.ValidatorHrp)
+        {
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match validator HRP {hrps.ValidatorHrp}");
+        }
+
+        return GetValidatorAddressFromAddressData(addressData);
+    }
+
+    private static NodeAddress ParseNodeAddress(AddressHrps hrps, string address)
+    {
+        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+
+        if (addressHrp != hrps.NodeHrp)
+        {
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match node HRP {hrps.NodeHrp}");
+        }
+
+        return GetNodeAddressFromAddressData(addressData);
+    }
+
+    private static RadixAddress Parse(AddressHrps hrps, string address)
+    {
+        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+
+        if (addressHrp == hrps.AccountHrp)
+        {
+            return GetAccountAddressFromAddressData(addressData);
+        }
+
+        if (addressHrp.EndsWith(hrps.ResourceHrpSuffix))
+        {
+            return GetResourceAddressFromAddressData(addressData);
+        }
+
+        if (addressHrp == hrps.ValidatorHrp)
+        {
+            return GetValidatorAddressFromAddressData(addressData);
+        }
+
+        if (addressHrp == hrps.NodeHrp)
+        {
+            return GetNodeAddressFromAddressData(addressData);
+        }
+
+        throw new AddressException($"Address HRP was {addressHrp} but didn't match any known types of address");
+    }
+
+    private static AccountAddress GetAccountAddressFromAddressData(byte[] addressData)
+    {
+        var (reAddressType, publicKey) = RadixBech32.ExtractRadixEngineAddressData(addressData);
+        if (reAddressType != RadixEngineAddressType.PUB_KEY)
+        {
+            throw new AddressException("Address with account hrp is not of type PUB_KEY");
+        }
+
+        return new AccountAddress(publicKey);
+    }
+
+    private static ResourceAddress GetResourceAddressFromAddressData(byte[] addressData)
+    {
+        var (reAddressType, _) = RadixBech32.ExtractRadixEngineAddressData(addressData);
+        if (reAddressType is not RadixEngineAddressType.NATIVE_TOKEN or RadixEngineAddressType.HASHED_KEY)
+        {
+            throw new AddressException("Address with resource hrp suffix is not of type NATIVE_TOKEN or HASHED_KEY");
+        }
+
+        return new ResourceAddress(addressData);
+    }
+
+    private static ValidatorAddress GetValidatorAddressFromAddressData(byte[] addressData)
+    {
+        // Validator Addresses aren't Radix Engine Addresses
+        RadixBech32.ValidatePublicKeyLength(addressData);
+        return new ValidatorAddress(addressData);
+    }
+
+    private static NodeAddress GetNodeAddressFromAddressData(byte[] addressData)
+    {
+        // Node Addresses aren't Radix Engine Addresses
+        RadixBech32.ValidatePublicKeyLength(addressData);
+        return new NodeAddress(addressData);
     }
 }
