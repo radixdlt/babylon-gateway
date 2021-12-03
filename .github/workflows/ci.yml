@@ -132,7 +132,7 @@ jobs:
 
       - name: Trigger pull request deployment event ${{ github.ref }}
         run: |
-          curl --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/radixdlt-iac/dispatches' \
+          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/radixdlt-iac/dispatches' \
             --header 'Accept: application/vnd.github.v3+json' \
             --header 'Authorization: Basic ${{secrets.GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
             --header 'Content-Type: application/json' \
