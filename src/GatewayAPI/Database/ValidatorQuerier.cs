@@ -70,7 +70,6 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
-using System.Globalization;
 using Api = RadixGatewayApi.Generated.Model;
 using Db = Common.Database.Models.Ledger.Normalization;
 using TokenAmount = Common.Numerics.TokenAmount;
@@ -148,9 +147,9 @@ public class ValidatorQuerier : IValidatorQuerier
             var properties = validatorProperties.GetValueOrDefault(validator.Id)?.Properties ??
                              GetDefaultValidatorProperties(validator.PublicKey);
 
-            var validatorOwnerStakeXrd = validatorTotalStake.TotalStakeOwnership.IsZero()
+            var validatorOwnerStakeXrd = validatorTotalStake.TotalStakeUnits.IsZero()
                 ? TokenAmount.Zero
-                : (validatorOwnerStake.TotalStakeOwnership * validatorTotalStake.TotalXrdStake) / validatorTotalStake.TotalStakeOwnership;
+                : (validatorOwnerStake.TotalStakeUnits * validatorTotalStake.TotalXrdStake) / validatorTotalStake.TotalStakeUnits;
 
             return (validator, validatorTotalStake, validatorOwnerStakeXrd, validatorUptime, properties);
         })
@@ -277,7 +276,7 @@ public class ValidatorQuerier : IValidatorQuerier
     {
         return new ValidatorProperties(
             url: validatorMetadata.Url,
-            validatorFee: validatorOutputData.FeePercentage.ToString(CultureInfo.InvariantCulture),
+            validatorFeePercentage: validatorOutputData.FeePercentage,
             name: validatorMetadata.Name,
             registered: validatorOutputData.IsRegistered,
             ownerAccountIdentifier: validatorOutputData.OwnerAddress.AsAccountIdentifier(),
@@ -340,7 +339,7 @@ public class ValidatorQuerier : IValidatorQuerier
 
             var uptime = new ValidatorUptime(
                 new EpochRange(fromEpoch, toEpoch),
-                Math.Round(proportion, 2).ToString(CultureInfo.InvariantCulture),
+                Math.Round(proportion, 2),
                 proposalsMissed: proposalsMissed,
                 proposalsCompleted: proposalsCompleted
             );
@@ -357,7 +356,7 @@ public class ValidatorQuerier : IValidatorQuerier
 
         return new ValidatorUptime(
             new EpochRange(fromEpoch, toEpoch),
-            uptimePercentage: "0.00",
+            uptimePercentage: 0,
             proposalsMissed: 0,
             proposalsCompleted: 0
         );

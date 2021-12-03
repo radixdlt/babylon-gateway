@@ -100,7 +100,7 @@ public class TokenController : ControllerBase
     [HttpPost("")]
     public async Task<TokenResponse> GetTokenInfo(TokenRequest request, long? atStateVersion)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
         return new TokenResponse(
             ledgerState,
             await _tokenQuerier.GetTokenInfoAtState(request.TokenIdentifier.Rri, ledgerState)
@@ -110,7 +110,7 @@ public class TokenController : ControllerBase
     [HttpPost("native")]
     public async Task<TokenNativeResponse> GetNativeTokenInfo(TokenNativeRequest request, long? atStateVersion)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
         return new TokenNativeResponse(
             ledgerState,
             await _tokenQuerier.GetTokenInfoAtState(_networkConfigurationProvider.GetXrdAddress(), ledgerState)
@@ -120,7 +120,7 @@ public class TokenController : ControllerBase
     [HttpPost("derive")]
     public TokenDeriveResponse DeriveTokenIdentifier(TokenDeriveRequest tokenDeriveRequest)
     {
-        _ledgerStateQuerier.AssertMatchingNetwork(tokenDeriveRequest.Network);
+        _ledgerStateQuerier.AssertMatchingNetwork(tokenDeriveRequest.NetworkIdentifier.Network);
         var symbol = tokenDeriveRequest.Symbol;
 
         if (!_symbolRegex.IsMatch(symbol))
@@ -129,7 +129,7 @@ public class TokenController : ControllerBase
         }
 
         var rri = RadixBech32.GenerateResourceAddress(
-            _validations.ExtractValidAccountAddress(tokenDeriveRequest.CreatorAccountIdentifier),
+            _validations.ExtractValidPublicKey(tokenDeriveRequest.PublicKey),
             symbol,
             _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix
         );

@@ -126,11 +126,11 @@ public class AccountValidatorStakeHistory : HistoryBase<AccountValidator, Accoun
 /// </summary>
 public class AccountValidatorStakeSnapshotChange
 {
-    public TokenAmount ChangeInStakeOwnership { get; set; }
+    public TokenAmount ChangeInStakeUnits { get; set; }
 
     public TokenAmount ChangeInPreparedXrdStake { get; set; }
 
-    public TokenAmount ChangeInPreparedUnstakeOwnership { get; set; }
+    public TokenAmount ChangeInPreparedUnStakeUnits { get; set; }
 
     public TokenAmount ChangeInExitingXrdStake { get; set; }
 
@@ -142,24 +142,24 @@ public class AccountValidatorStakeSnapshotChange
     public bool IsMeaningfulChange()
     {
         return !(
-            ChangeInStakeOwnership.IsZero() &&
+            ChangeInStakeUnits.IsZero() &&
             ChangeInPreparedXrdStake.IsZero() &&
-            ChangeInPreparedUnstakeOwnership.IsZero() &&
+            ChangeInPreparedUnStakeUnits.IsZero() &&
             ChangeInExitingXrdStake.IsZero()
         );
     }
 
     public bool IsNaN()
     {
-        return ChangeInStakeOwnership.IsNaN() ||
+        return ChangeInStakeUnits.IsNaN() ||
                ChangeInPreparedXrdStake.IsNaN() ||
-               ChangeInPreparedUnstakeOwnership.IsNaN() ||
+               ChangeInPreparedUnStakeUnits.IsNaN() ||
                ChangeInExitingXrdStake.IsNaN();
     }
 
-    public void AggregateStakeOwnershipChange(TokenAmount change)
+    public void AggregateStakeUnitChange(TokenAmount change)
     {
-        ChangeInStakeOwnership += change;
+        ChangeInStakeUnits += change;
     }
 
     public void AggregatePreparedXrdStakeChange(TokenAmount change)
@@ -167,9 +167,9 @@ public class AccountValidatorStakeSnapshotChange
         ChangeInPreparedXrdStake += change;
     }
 
-    public void AggregatePreparedUnstakeOwnershipChange(TokenAmount change)
+    public void AggregatePreparedUnStakeUnitChange(TokenAmount change)
     {
-        ChangeInPreparedUnstakeOwnership += change;
+        ChangeInPreparedUnStakeUnits += change;
     }
 
     public void AggregateChangeInExitingXrdStakeChange(TokenAmount change)
@@ -182,19 +182,19 @@ public class AccountValidatorStakeSnapshotChange
 /// Like ValidatorStakeSnapshot, except it doesn't track the XRD in the validator's stake pool
 /// (as that changes over time, and is captured by the ValidatorStakeSnapshot).
 /// To calculate the effective XRD staked by this account to the validator at a given state version, perform:
-/// Validator_XrdStaked * (AccountValidator_TotalStakeOwnership / Validator_TotalStakeOwnership).
+/// Validator_XrdStaked * (AccountValidator_TotalStakeUnit / Validator_TotalStakeUnit).
 /// </summary>
 [Owned]
 public record AccountValidatorStakeSnapshot
 {
     [Column("total_stake_ownership")]
-    public TokenAmount TotalStakeOwnership { get; set; }
+    public TokenAmount TotalStakeUnits { get; set; }
 
     [Column("total_prepared_xrd_stake")]
     public TokenAmount TotalPreparedXrdStake { get; set; }
 
     [Column("total_prepared_unstake_ownership")]
-    public TokenAmount TotalPreparedUnstakeOwnership { get; set; }
+    public TokenAmount TotalPreparedUnStakeUnits { get; set; }
 
     [Column("total_exiting_xrd_stake")]
     public TokenAmount TotalExitingXrdStake { get; set; }
@@ -203,9 +203,9 @@ public record AccountValidatorStakeSnapshot
     {
         return new AccountValidatorStakeSnapshot
         {
-            TotalStakeOwnership = TokenAmount.Zero,
+            TotalStakeUnits = TokenAmount.Zero,
             TotalPreparedXrdStake = TokenAmount.Zero,
-            TotalPreparedUnstakeOwnership = TokenAmount.Zero,
+            TotalPreparedUnStakeUnits = TokenAmount.Zero,
             TotalExitingXrdStake = TokenAmount.Zero,
         };
     }
@@ -214,9 +214,9 @@ public record AccountValidatorStakeSnapshot
     {
         return new AccountValidatorStakeSnapshot
         {
-            TotalStakeOwnership = TotalStakeOwnership + change.ChangeInStakeOwnership,
+            TotalStakeUnits = TotalStakeUnits + change.ChangeInStakeUnits,
             TotalPreparedXrdStake = TotalPreparedXrdStake + change.ChangeInPreparedXrdStake,
-            TotalPreparedUnstakeOwnership = TotalPreparedUnstakeOwnership + change.ChangeInPreparedUnstakeOwnership,
+            TotalPreparedUnStakeUnits = TotalPreparedUnStakeUnits + change.ChangeInPreparedUnStakeUnits,
             TotalExitingXrdStake = TotalExitingXrdStake + change.ChangeInExitingXrdStake,
         };
     }

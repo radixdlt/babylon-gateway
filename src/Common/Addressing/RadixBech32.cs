@@ -95,12 +95,12 @@ public static class RadixBech32
         return GeneratePublicKeyRadixEngineAddress(accountHrp, compressedPublicKey, variant);
     }
 
-    public static string GenerateResourceAddress(AccountAddress creatorAccountAddress, string symbol, string resourceHrpSuffix, Bech32.Variant variant = DefaultVariant)
+    public static string GenerateResourceAddress(byte[] compressedAccountPublicKey, string symbol, string resourceHrpSuffix, Bech32.Variant variant = DefaultVariant)
     {
         return GenerateHashedKeyRadixEngineAddress(
             $"{symbol}{resourceHrpSuffix}",
             symbol,
-            creatorAccountAddress.CompressedPublicKey,
+            compressedAccountPublicKey,
             variant
         );
     }

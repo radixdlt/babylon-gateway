@@ -77,8 +77,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211126145109_ChangeLedgerTransactionToStoreStartOfEpochAndRound")]
-    partial class ChangeLedgerTransactionToStoreStartOfEpochAndRound
+    [Migration("20211203123741_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -512,7 +512,7 @@ namespace DataAggregator.Migrations
                     b.ToTable("account_resource_balance_substates");
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeOwnershipBalanceSubstate", b =>
+            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeUnitBalanceSubstate", b =>
                 {
                     b.Property<long>("UpStateVersion")
                         .HasColumnType("bigint")
@@ -966,7 +966,7 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_exiting_xrd_stake");
 
-                            b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
+                            b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_unstake_ownership");
@@ -976,7 +976,7 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_xrd_stake");
 
-                            b1.Property<BigInteger>("TotalStakeOwnership")
+                            b1.Property<BigInteger>("TotalStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_stake_ownership");
@@ -1097,7 +1097,7 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_exiting_xrd_stake");
 
-                            b1.Property<BigInteger>("TotalPreparedUnstakeOwnership")
+                            b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_unstake_ownership");
@@ -1107,7 +1107,7 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_prepared_xrd_stake");
 
-                            b1.Property<BigInteger>("TotalStakeOwnership")
+                            b1.Property<BigInteger>("TotalStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("total_stake_ownership");
@@ -1316,7 +1316,7 @@ namespace DataAggregator.Migrations
                     b.Navigation("UpOperationGroup");
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeOwnershipBalanceSubstate", b =>
+            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeUnitBalanceSubstate", b =>
                 {
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Account")
                         .WithMany()
@@ -1334,14 +1334,14 @@ namespace DataAggregator.Migrations
                         .WithMany()
                         .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_account_stake_ownership_balance_substate_down_operation_group");
+                        .HasConstraintName("FK_account_stake_unit_balance_substate_down_operation_group");
 
                     b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
                         .WithMany()
                         .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_account_stake_ownership_balance_substate_up_operation_group");
+                        .HasConstraintName("FK_account_stake_unit_balance_substate_up_operation_group");
 
                     b.Navigation("Account");
 

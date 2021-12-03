@@ -137,15 +137,15 @@ public class AccountQuerier : IAccountQuerier
 
             var definiteXrd = accountValidatorStakeSnapshot.TotalPreparedXrdStake
                               + accountValidatorStakeSnapshot.TotalExitingXrdStake;
-            var stakeOwnership = accountValidatorStakeSnapshot.TotalStakeOwnership
-                                 + accountValidatorStakeSnapshot.TotalPreparedUnstakeOwnership;
+            var stakeUnits = accountValidatorStakeSnapshot.TotalStakeUnits
+                                 + accountValidatorStakeSnapshot.TotalPreparedUnStakeUnits;
 
-            var stakeOwnershipAsEstimatedXrd =
-                (stakeOwnership * validatorStakeSnapshot.TotalXrdStake) /
-                validatorStakeSnapshot.TotalStakeOwnership
+            var stakeUnitsAsEstimatedXrd =
+                (stakeUnits * validatorStakeSnapshot.TotalXrdStake) /
+                validatorStakeSnapshot.TotalStakeUnits
             ;
 
-            totalXrd += definiteXrd + stakeOwnershipAsEstimatedXrd;
+            totalXrd += definiteXrd + stakeUnitsAsEstimatedXrd;
         }
 
         return new TokenAmount(totalXrd.ToSubUnitString(), _networkConfigurationProvider.GetXrdTokenIdentifier());
@@ -162,14 +162,14 @@ public class AccountQuerier : IAccountQuerier
                 var (validatorAddress, accountValidatorStakeSnapshot, validatorStakeSnapshot) = s;
 
                 var definiteXrd = accountValidatorStakeSnapshot.TotalPreparedXrdStake;
-                var stakeOwnership = accountValidatorStakeSnapshot.TotalStakeOwnership;
+                var stakeUnits = accountValidatorStakeSnapshot.TotalStakeUnits;
 
-                var stakeOwnershipAsEstimatedXrd =
-                        (stakeOwnership * validatorStakeSnapshot.TotalXrdStake) /
-                        validatorStakeSnapshot.TotalStakeOwnership
+                var stakeUnitsAsEstimatedXrd =
+                        (stakeUnits * validatorStakeSnapshot.TotalXrdStake) /
+                        validatorStakeSnapshot.TotalStakeUnits
                     ;
 
-                var totalXrd = definiteXrd + stakeOwnershipAsEstimatedXrd;
+                var totalXrd = definiteXrd + stakeUnitsAsEstimatedXrd;
 
                 return (validatorAddress, totalXrd);
             })
@@ -201,14 +201,14 @@ public class AccountQuerier : IAccountQuerier
         var preparedUnstakes = allStakes.Select(s =>
             {
                 var (validatorAddress, accountValidatorStakeSnapshot, validatorStakeSnapshot) = s;
-                var stakeOwnership = accountValidatorStakeSnapshot.TotalPreparedUnstakeOwnership;
+                var stakeUnits = accountValidatorStakeSnapshot.TotalPreparedUnStakeUnits;
 
-                var stakeOwnershipAsEstimatedXrd =
-                        (stakeOwnership * validatorStakeSnapshot.TotalXrdStake) /
-                        validatorStakeSnapshot.TotalStakeOwnership
+                var stakeUnitsAsEstimatedXrd =
+                        (stakeUnits * validatorStakeSnapshot.TotalXrdStake) /
+                        validatorStakeSnapshot.TotalStakeUnits
                     ;
 
-                return new UnstakePosition(validatorAddress, stakeOwnershipAsEstimatedXrd, 1);
+                return new UnstakePosition(validatorAddress, stakeUnitsAsEstimatedXrd, 1);
             });
 
         var exitingUnstakes = await (

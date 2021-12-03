@@ -196,7 +196,7 @@ tags:
 
       ## Resource Identifiers
 
-      A Resource Identifier uniquely describes either some token or stake ownership of a validator.
+      A Resource Identifier uniquely describes either some token or stake units for a validator.
 
       <SchemaDefinition schemaRef="#/components/schemas/ResourceIdentifier" exampleRef="#/components/examples/ResourceIdentifier" showReadOnly={true} showWriteOnly={true} />
 
@@ -220,7 +220,7 @@ tags:
 
       Overall, there are four main types of entities on Radix:
       * **Account** is a regular public key account which can contain token balances and contain
-      StakeOwnership, which represents a delegated amount of stake to a specific validator. Subentities under
+      StakeUnits, which represents a delegated amount of stake to a specific validator. Subentities under
       an account-address contain assets which the account-address owns but is currently locked by the system.
       An account is represented by its Bech32 account address.
       * **Validator** is an entity representing a validating node on the network. The subentity `system` holds XRD
@@ -283,10 +283,10 @@ tags:
       to the receiving account.
       2. **Staking** may be started by transferring XRD from an account to a `prepared_stake` entity
       with a specific validator. Once XRD is in this entity, at some point the system will move this
-      XRD to a Validator entity and mint StakeOwnership into the originating account.
-      3. **Unstaking** may be started by transfering StakeOwnership from an account to a `prepared_unstake`
-      entity. Once StakeOwnership is in this entity, at some point the system will destroy this
-      StakeOwnership and transfer XRD from the Validator entity into your `exiting_stake` entity. Once
+      XRD to a Validator entity and mint StakeUnits into the originating account.
+      3. **Unstaking** may be started by transfering StakeUnits from an account to a `prepared_unstake`
+      entity. Once StakeUnits is in this entity, at some point the system will destroy this
+      StakeUnits and transfer XRD from the Validator entity into your `exiting_stake` entity. Once
       the unlocking period is over the system will move that XRD from the `exiting_stake` entity into your
       account.
       4. **Validator Updates** may be started by destroying the current data object and creating a new
@@ -1601,7 +1601,7 @@ components:
             value: '1000000000000000000'
           - resource_identifier:
               validator: rv1q04u5zwtgffsqkvr08xqm6vpm3gwxh4uqwtjpx5p47ew0m0v8m5zs3m3jed
-              type: stake_ownership
+              type: StakeUnit
             value: '15000000000000000000000'
         data_objects: []
     MempoolRequest:
@@ -2512,7 +2512,7 @@ components:
         propertyName: type
         mapping:
           VirtualParentData: "#/components/schemas/VirtualParentData"
-          UnclaimedRadixEngineAddress: "#/components/schemas/UnclaimedRadixEngineAddressData"
+          UnclaimedRadixEngineAddress: "#/components/schemas/UnclaimedRadixEngineAddress"
           RoundData: "#/components/schemas/RoundData"
           EpochData: "#/components/schemas/EpochData"
           TokenData: "#/components/schemas/TokenData"
@@ -2545,7 +2545,7 @@ components:
             owner:
               description: The owner of the token who can mint/burn.
                 This is only available for mutable tokens.
-              "$ref": "#/components/schemas/AccountAddress"
+              $ref: "#/components/schemas/EntityIdentifier"
     TokenMetadata:
       allOf:
         - "$ref": "#/components/schemas/DataObject"
@@ -2587,7 +2587,7 @@ components:
               $ref: "#/components/schemas/EntitySetIdentifier"
             virtual_data_object:
               $ref: "#/components/schemas/DataObject"
-    UnclaimedRadixEngineAddressData:
+    UnclaimedRadixEngineAddress:
       allOf:
         - "$ref": "#/components/schemas/DataObject"
     RoundData:
@@ -2639,7 +2639,7 @@ components:
             owner:
               description: The owner of the validator which will be updated by the end
                 of `epoch`.
-              "$ref": "#/components/schemas/AccountAddress"
+              $ref: "#/components/schemas/EntityIdentifier"
             epoch:
               description: Optional field, when non-empty describes the epoch the `owner`
                 field will update, otherwise no update is scheduled.
@@ -2712,7 +2712,7 @@ components:
             owner:
               description: The owner of the validator who receives the fees when others
                 stake to the validator.
-              "$ref": "#/components/schemas/AccountAddress"
+              $ref: "#/components/schemas/EntityIdentifier"
             registered:
               description: Flag indicating whether a validator is registered to be part
                 of the validator set.
@@ -2805,8 +2805,8 @@ components:
     SubEntityMetadata:
       type: object
       properties:
-        validator:
-          "$ref": "#/components/schemas/ValidatorAddress"
+        validator_address:
+          type: string
         epoch_unlock:
           "$ref": "#/components/schemas/LongNumber"
     ResourceIdentifier:
@@ -2821,7 +2821,7 @@ components:
         propertyName: type
         mapping:
           Token: "#/components/schemas/TokenResourceIdentifier"
-          StakeOwnership: "#/components/schemas/StakeOwnershipResourceIdentifier"
+          StakeUnit: "#/components/schemas/StakeUnitResourceIdentifier"
     TokenResourceIdentifier:
       allOf:
         - "$ref": "#/components/schemas/ResourceIdentifier"
@@ -2831,17 +2831,17 @@ components:
           properties:
             rri:
               description: The Radix Resource Identifier "RRI" of the token.
-              "$ref": "#/components/schemas/RRI"
-    StakeOwnershipResourceIdentifier:
+              type: string
+    StakeUnitResourceIdentifier:
       allOf:
         - "$ref": "#/components/schemas/ResourceIdentifier"
         - type: object
           required:
-            - validator
+            - validator_address
           properties:
-            validator:
-              description: The validator associated with this stake ownership.
-              "$ref": "#/components/schemas/ValidatorAddress"
+            validator_address:
+              description: The validator associated with this stake unit.
+              type: string
     Signature:
       type: object
       required:
@@ -2890,15 +2890,6 @@ components:
           type: string
         resource_hrp_suffix:
           type: string
-    AccountAddress:
-      type: string
-      pattern: "^(r|t|d)dx[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
-    ValidatorAddress:
-      type: string
-      pattern: "^(r|t|d)v[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
-    RRI:
-      type: string
-      pattern: ^[!\"#$%&'()*+,-.\/0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]\^_`abcdefghijklmnopqrstuvwxyz{|}~]{1,83}_r[rb]1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$
     LongNumber:
       type: integer
       format: int64
@@ -2910,9 +2901,9 @@ components:
       pattern: "^[0123456789abcdef]{64}$"
       maxLength: 64
       minLength: 64
-    NetworkNotSupportedErrorDetails:
+    NetworkNotSupportedError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - supported_networks
@@ -2921,99 +2912,99 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/NetworkIdentifier"
-    PublicKeyNotSupportedErrorDetails:
+    PublicKeyNotSupportedError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - unsupported_public_key
           properties:
             unsupported_public_key:
               $ref: "#/components/schemas/PublicKey"
-    InvalidAddressErrorDetails:
+    InvalidAddressError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_address
           properties:
             invalid_address:
               type: string
-    InvalidPartialStateIdentifierErrorDetails:
+    InvalidPartialStateIdentifierError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_partial_state_identifier
           properties:
             invalid_partial_state_identifier:
               $ref: "#/components/schemas/PartialStateIdentifier"
-    InvalidSubEntityErrorDetails:
+    InvalidSubEntityError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_sub_entity
           properties:
             invalid_sub_entity:
               $ref: "#/components/schemas/SubEntity"
-    InvalidTransactionHashErrorDetails:
+    InvalidTransactionHashError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_transaction_hash
           properties:
             invalid_transaction_hash:
               type: string
-    InvalidPublicKeyErrorDetails:
+    InvalidPublicKeyError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_public_key
           properties:
             invalid_public_key:
               $ref: "#/components/schemas/PublicKey"
-    InvalidFeePayerEntityErrorDetails:
+    InvalidFeePayerEntityError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_fee_payer_entity
           properties:
             invalid_fee_payer_entity:
               $ref: "#/components/schemas/EntityIdentifier"
-    InvalidHexErrorDetails:
+    InvalidHexError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_hex
           properties:
             invalid_hex:
               type: string
-    InvalidSignatureErrorDetails:
+    InvalidSignatureError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_signature
           properties:
             invalid_signature:
               type: string
-    InvalidTransactionErrorDetails:
+    InvalidTransactionError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - message
           properties:
             message:
               type: string
-    NotEnoughResourcesErrorDetails:
+    NotEnoughResourcesError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - available
@@ -3023,9 +3014,9 @@ components:
               $ref: "#/components/schemas/ResourceAmount"
             attempted_to_take:
               $ref: "#/components/schemas/ResourceAmount"
-    BelowMinimumStakeErrorDetails:
+    BelowMinimumStakeError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - minimum_stake
@@ -3035,9 +3026,9 @@ components:
               $ref: "#/components/schemas/ResourceAmount"
             attempted_to_stake:
               $ref: "#/components/schemas/ResourceAmount"
-    AboveMaximumValidatorFeeIncreaseErrorDetails:
+    AboveMaximumValidatorFeeIncreaseError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - maximum_validator_fee_increase
@@ -3047,9 +3038,9 @@ components:
               type: integer
             attempted_validator_fee_increase:
               type: integer
-    DataObjectNotSupportedByEntityErrorDetails:
+    DataObjectNotSupportedByEntityError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - entity_identifier
@@ -3059,9 +3050,9 @@ components:
               $ref: "#/components/schemas/EntityIdentifier"
             data_object_not_supported:
               $ref: "#/components/schemas/DataObject"
-    ResourceDepositOperationNotSupportedByEntityErrorDetails:
+    ResourceDepositOperationNotSupportedByEntityError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - entity_identifier
@@ -3071,9 +3062,9 @@ components:
               $ref: "#/components/schemas/EntityIdentifier"
             resource_deposit_not_supported:
               $ref: "#/components/schemas/ResourceIdentifier"
-    ResourceWithdrawOperationNotSupportedByEntityErrorDetails:
+    ResourceWithdrawOperationNotSupportedByEntityError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - entity_identifier
@@ -3083,9 +3074,9 @@ components:
               $ref: "#/components/schemas/EntityIdentifier"
             resource_withdraw_not_supported:
               $ref: "#/components/schemas/ResourceIdentifier"
-    NotValidatorOwnerErrorDetails:
+    NotValidatorOwnerError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - owner
@@ -3095,9 +3086,9 @@ components:
               $ref: "#/components/schemas/EntityIdentifier"
             user:
               $ref: "#/components/schemas/EntityIdentifier"
-    InvalidDataObjectErrorDetails:
+    InvalidDataObjectError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - invalid_data_object
@@ -3107,9 +3098,9 @@ components:
               $ref: "#/components/schemas/DataObject"
             message:
               type: string
-    MessageTooLongErrorDetails:
+    MessageTooLongError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - maximum_message_length
@@ -3119,59 +3110,59 @@ components:
               type: integer
             attempted_message_length:
               type: integer
-    FeeConstructionErrorDetails:
+    FeeConstructionError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - attempts
           properties:
             attempts:
               type: integer
-    SubstateDependencyNotFoundErrorDetails:
+    SubstateDependencyNotFoundError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - substate_identifier_not_found
           properties:
             substate_identifier_not_found:
               $ref: "#/components/schemas/SubstateIdentifier"
-    TransactionNotFoundErrorDetails:
+    TransactionNotFoundError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - transaction_identifier
           properties:
             transaction_identifier:
               $ref: "#/components/schemas/TransactionIdentifier"
-    StateIdentifierNotFoundErrorDetails:
+    StateIdentifierNotFoundError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           required:
             - state_identifier
           properties:
             state_identifier:
               $ref: "#/components/schemas/PartialStateIdentifier"
-    InternalServerErrorDetails:
+    InternalServerError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           properties:
             exception:
               type: string
             cause:
               type: string
-    InvalidJsonDetails:
+    InvalidJsonError:
       allOf:
-        - $ref: "#/components/schemas/ErrorDetails"
+        - $ref: "#/components/schemas/CoreError"
         - type: object
           properties:
             cause:
               type: string
-    ErrorDetails:
+    CoreError:
       type: object
       required:
         - type
@@ -3181,31 +3172,32 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          NetworkNotSupportedErrorDetails: "#/components/schemas/NetworkNotSupportedErrorDetails"
-          PublicKeyNotSupportedErrorDetails: "#/components/schemas/PublicKeyNotSupportedErrorDetails"
-          InvalidAddressErrorDetails: "#/components/schemas/InvalidAddressErrorDetails"
-          InvalidSubEntityErrorDetails: "#/components/schemas/InvalidSubEntityErrorDetails"
-          InvalidTransactionHashErrorDetails: "#/components/schemas/InvalidTransactionHashErrorDetails"
-          InvalidPartialStateIdentifierErrorDetails: "#/components/schemas/InvalidPartialStateIdentifierErrorDetails"
-          InvalidPublicKeyErrorDetails: "#/components/schemas/InvalidPublicKeyErrorDetails"
-          InvalidFeePayerEntityErrorDetails: "#/components/schemas/InvalidFeePayerEntityErrorDetails"
-          InvalidHexErrorDetails: "#/components/schemas/InvalidHexErrorDetails"
-          InvalidSignatureErrorDetails: "#/components/schemas/InvalidSignatureErrorDetails"
-          InvalidTransactionErrorDetails: "#/components/schemas/InvalidTransactionErrorDetails"
-          NotEnoughResourcesErrorDetails: "#/components/schemas/NotEnoughResourcesErrorDetails"
-          BelowMinimumStakeErrorDetails: "#/components/schemas/BelowMinimumStakeErrorDetails"
-          DataObjectNotSupportedByEntityErrorDetails: "#/components/schemas/DataObjectNotSupportedByEntityErrorDetails"
-          ResourceDepositOperationNotSupportedByEntityErrorDetails: "#/components/schemas/ResourceDepositOperationNotSupportedByEntityErrorDetails"
-          ResourceWithdrawOperationNotSupportedByEntityErrorDetails: "#/components/schemas/ResourceWithdrawOperationNotSupportedByEntityErrorDetails"
-          NotValidatorOwnerErrorDetails: "#/components/schemas/NotValidatorOwnerErrorDetails"
-          InvalidDataObjectErrorDetails: "#/components/schemas/InvalidDataObjectErrorDetails"
-          MessageTooLongErrorDetails: "#/components/schemas/MessageTooLongErrorDetails"
-          FeeConstructionErrorDetails: "#/components/schemas/FeeConstructionErrorDetails"
-          SubstateDependencyNotFoundErrorDetails: "#/components/schemas/SubstateDependencyNotFoundErrorDetails"
-          TransactionNotFoundErrorDetails: "#/components/schemas/TransactionNotFoundErrorDetails"
-          StateIdentifierNotFoundErrorDetails: "#/components/schemas/StateIdentifierNotFoundErrorDetails"
-          InternalServerErrorDetails: "#/components/schemas/InternalServerErrorDetails"
-          InvalidJsonDetails: "#/components/schemas/InvalidJsonDetails"
+          NetworkNotSupportedError: "#/components/schemas/NetworkNotSupportedError"
+          PublicKeyNotSupportedError: "#/components/schemas/PublicKeyNotSupportedError"
+          InvalidAddressError: "#/components/schemas/InvalidAddressError"
+          InvalidSubEntityError: "#/components/schemas/InvalidSubEntityError"
+          InvalidTransactionHashError: "#/components/schemas/InvalidTransactionHashError"
+          InvalidPartialStateIdentifierError: "#/components/schemas/InvalidPartialStateIdentifierError"
+          InvalidPublicKeyError: "#/components/schemas/InvalidPublicKeyError"
+          InvalidFeePayerEntityError: "#/components/schemas/InvalidFeePayerEntityError"
+          InvalidHexError: "#/components/schemas/InvalidHexError"
+          InvalidSignatureError: "#/components/schemas/InvalidSignatureError"
+          InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
+          AboveMaximumValidatorFeeIncreaseError: "#/components/schemas/AboveMaximumValidatorFeeIncreaseError"
+          NotEnoughResourcesError: "#/components/schemas/NotEnoughResourcesError"
+          BelowMinimumStakeError: "#/components/schemas/BelowMinimumStakeError"
+          DataObjectNotSupportedByEntityError: "#/components/schemas/DataObjectNotSupportedByEntityError"
+          ResourceDepositOperationNotSupportedByEntityError: "#/components/schemas/ResourceDepositOperationNotSupportedByEntityError"
+          ResourceWithdrawOperationNotSupportedByEntityError: "#/components/schemas/ResourceWithdrawOperationNotSupportedByEntityError"
+          NotValidatorOwnerError: "#/components/schemas/NotValidatorOwnerError"
+          InvalidDataObjectError: "#/components/schemas/InvalidDataObjectError"
+          MessageTooLongError: "#/components/schemas/MessageTooLongError"
+          FeeConstructionError: "#/components/schemas/FeeConstructionError"
+          SubstateDependencyNotFoundError: "#/components/schemas/SubstateDependencyNotFoundError"
+          TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
+          StateIdentifierNotFoundError: "#/components/schemas/StateIdentifierNotFoundError"
+          InternalServerError: "#/components/schemas/InternalServerError"
+          InvalidJsonError: "#/components/schemas/InvalidJsonError"
     UnexpectedError:
       type: object
       required:
@@ -3217,7 +3209,7 @@ components:
         message:
           type: string
         details:
-          $ref: "#/components/schemas/ErrorDetails"
+          $ref: "#/components/schemas/CoreError"
   examples:
     StateIdentifier:
       value:

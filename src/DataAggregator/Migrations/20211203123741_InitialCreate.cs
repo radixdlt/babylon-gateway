@@ -76,6 +76,23 @@ namespace DataAggregator.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "network_configuration",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false),
+                    network_name = table.Column<string>(type: "text", nullable: false),
+                    account_hrp = table.Column<string>(type: "text", nullable: false),
+                    resource_hrp_suffix = table.Column<string>(type: "text", nullable: false),
+                    validator_hrp = table.Column<string>(type: "text", nullable: false),
+                    node_hrp = table.Column<string>(type: "text", nullable: false),
+                    xrd_address = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_network_configuration", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "nodes",
                 columns: table => new
                 {
@@ -114,12 +131,13 @@ namespace DataAggregator.Migrations
                     signed_by = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
+                    round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     is_only_round_change = table.Column<bool>(type: "boolean", nullable: false),
-                    is_end_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
+                    is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
+                    is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
                     round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    end_of_round = table.Column<long>(type: "bigint", nullable: true)
+                    timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -409,18 +427,6 @@ namespace DataAggregator.Migrations
                     table.PrimaryKey("PK_account_stake_ownership_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
                     table.UniqueConstraint("AK_account_stake_ownership_balance_substates_substate_identifi~", x => x.substate_identifier);
                     table.ForeignKey(
-                        name: "FK_account_stake_ownership_balance_substate_down_operation_group",
-                        columns: x => new { x.down_state_version, x.down_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_account_stake_ownership_balance_substate_up_operation_group",
-                        columns: x => new { x.up_state_version, x.up_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_account_stake_ownership_balance_substates_accounts_account_~",
                         column: x => x.account_id,
                         principalTable: "accounts",
@@ -431,6 +437,18 @@ namespace DataAggregator.Migrations
                         column: x => x.validator_id,
                         principalTable: "validators",
                         principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_stake_unit_balance_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_account_stake_unit_balance_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -813,11 +831,11 @@ namespace DataAggregator.Migrations
                 column: "from_state_version");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_epoch_end_of_round",
+                name: "IX_ledger_transactions_epoch_round_in_epoch",
                 table: "ledger_transactions",
-                columns: new[] { "epoch", "end_of_round" },
+                columns: new[] { "epoch", "round_in_epoch" },
                 unique: true,
-                filter: "end_of_round IS NOT NULL");
+                filter: "is_start_of_round = true");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_timestamp",
@@ -960,6 +978,9 @@ namespace DataAggregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "account_xrd_stake_balance_substates");
+
+            migrationBuilder.DropTable(
+                name: "network_configuration");
 
             migrationBuilder.DropTable(
                 name: "nodes");

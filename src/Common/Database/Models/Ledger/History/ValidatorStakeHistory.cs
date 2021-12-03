@@ -119,11 +119,11 @@ public class ValidatorStakeSnapshotChange
 {
     public TokenAmount ChangeInXrdStake { get; set; }
 
-    public TokenAmount ChangeInStakeOwnership { get; set; }
+    public TokenAmount ChangeInStakeUnits { get; set; }
 
     public TokenAmount ChangeInPreparedXrdStake { get; set; }
 
-    public TokenAmount ChangeInPreparedUnstakeOwnership { get; set; }
+    public TokenAmount ChangeInPreparedUnStakeUnits { get; set; }
 
     public TokenAmount ChangeInExitingXrdStake { get; set; }
 
@@ -136,9 +136,9 @@ public class ValidatorStakeSnapshotChange
     {
         return !(
             ChangeInXrdStake.IsZero() &&
-            ChangeInStakeOwnership.IsZero() &&
+            ChangeInStakeUnits.IsZero() &&
             ChangeInPreparedXrdStake.IsZero() &&
-            ChangeInPreparedUnstakeOwnership.IsZero() &&
+            ChangeInPreparedUnStakeUnits.IsZero() &&
             ChangeInExitingXrdStake.IsZero()
         );
     }
@@ -146,9 +146,9 @@ public class ValidatorStakeSnapshotChange
     public bool IsNaN()
     {
         return ChangeInXrdStake.IsNaN() ||
-               ChangeInStakeOwnership.IsNaN() ||
+               ChangeInStakeUnits.IsNaN() ||
                ChangeInPreparedXrdStake.IsNaN() ||
-               ChangeInPreparedUnstakeOwnership.IsNaN() ||
+               ChangeInPreparedUnStakeUnits.IsNaN() ||
                ChangeInExitingXrdStake.IsNaN();
     }
 
@@ -157,9 +157,9 @@ public class ValidatorStakeSnapshotChange
         ChangeInXrdStake += change;
     }
 
-    public void AggregateStakeOwnershipChange(TokenAmount change)
+    public void AggregateStakeUnitChange(TokenAmount change)
     {
-        ChangeInStakeOwnership += change;
+        ChangeInStakeUnits += change;
     }
 
     public void AggregatePreparedXrdStakeChange(TokenAmount change)
@@ -167,9 +167,9 @@ public class ValidatorStakeSnapshotChange
         ChangeInPreparedXrdStake += change;
     }
 
-    public void AggregatePreparedUnstakeOwnershipChange(TokenAmount change)
+    public void AggregatePreparedUnStakeUnitChange(TokenAmount change)
     {
-        ChangeInPreparedUnstakeOwnership += change;
+        ChangeInPreparedUnStakeUnits += change;
     }
 
     public void AggregateChangeInExitingXrdStakeChange(TokenAmount change)
@@ -185,13 +185,13 @@ public record ValidatorStakeSnapshot
     public TokenAmount TotalXrdStake { get; set; }
 
     [Column("total_stake_ownership")]
-    public TokenAmount TotalStakeOwnership { get; set; }
+    public TokenAmount TotalStakeUnits { get; set; }
 
     [Column("total_prepared_xrd_stake")]
     public TokenAmount TotalPreparedXrdStake { get; set; }
 
     [Column("total_prepared_unstake_ownership")]
-    public TokenAmount TotalPreparedUnstakeOwnership { get; set; }
+    public TokenAmount TotalPreparedUnStakeUnits { get; set; }
 
     [Column("total_exiting_xrd_stake")]
     public TokenAmount TotalExitingXrdStake { get; set; }
@@ -201,9 +201,9 @@ public record ValidatorStakeSnapshot
         return new ValidatorStakeSnapshot
         {
             TotalXrdStake = TokenAmount.Zero,
-            TotalStakeOwnership = TokenAmount.Zero,
+            TotalStakeUnits = TokenAmount.Zero,
             TotalPreparedXrdStake = TokenAmount.Zero,
-            TotalPreparedUnstakeOwnership = TokenAmount.Zero,
+            TotalPreparedUnStakeUnits = TokenAmount.Zero,
             TotalExitingXrdStake = TokenAmount.Zero,
         };
     }
@@ -213,9 +213,9 @@ public record ValidatorStakeSnapshot
         return new ValidatorStakeSnapshot
         {
             TotalXrdStake = TotalXrdStake + change.ChangeInXrdStake,
-            TotalStakeOwnership = TotalStakeOwnership + change.ChangeInStakeOwnership,
+            TotalStakeUnits = TotalStakeUnits + change.ChangeInStakeUnits,
             TotalPreparedXrdStake = TotalPreparedXrdStake + change.ChangeInPreparedXrdStake,
-            TotalPreparedUnstakeOwnership = TotalPreparedUnstakeOwnership + change.ChangeInPreparedUnstakeOwnership,
+            TotalPreparedUnStakeUnits = TotalPreparedUnStakeUnits + change.ChangeInPreparedUnStakeUnits,
             TotalExitingXrdStake = TotalExitingXrdStake + change.ChangeInExitingXrdStake,
         };
     }

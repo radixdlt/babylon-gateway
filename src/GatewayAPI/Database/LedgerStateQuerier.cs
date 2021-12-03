@@ -64,6 +64,7 @@
 
 using Common.Database;
 using Common.Extensions;
+using GatewayAPI.ApiSurface;
 using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -94,7 +95,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     public async Task<GatewayResponse> GetGatewayState()
     {
         return new GatewayResponse(
-            _networkConfigurationProvider.GetNetworkName(),
+            _networkConfigurationProvider.GetNetworkName().AsNetworkIdentifier(),
             await GetLedgerState(),
             new TargetLedgerState() // TODO:NG-12 - fix this once we know what the max ledger state seen by nodes is
         );

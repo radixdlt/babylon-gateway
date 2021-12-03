@@ -97,7 +97,7 @@ public class CommonDbContext : DbContext
 
     public DbSet<AccountXrdStakeBalanceSubstate> AccountXrdStakeBalanceSubstates => Set<AccountXrdStakeBalanceSubstate>();
 
-    public DbSet<AccountStakeOwnershipBalanceSubstate> AccountStakeOwnershipBalanceSubstates => Set<AccountStakeOwnershipBalanceSubstate>();
+    public DbSet<AccountStakeUnitBalanceSubstate> AccountStakeUnitBalanceSubstates => Set<AccountStakeUnitBalanceSubstate>();
 
     public DbSet<ValidatorStakeBalanceSubstate> ValidatorStakeBalanceSubstates => Set<ValidatorStakeBalanceSubstate>();
 
@@ -147,8 +147,8 @@ public class CommonDbContext : DbContext
             .HaveColumnType("numeric")
             .HavePrecision(1000, 0);
 
-        configurationBuilder.Properties<AccountStakeOwnershipBalanceSubstateType>()
-            .HaveConversion<AccountStakeOwnershipBalanceSubstateTypeValueConverter>();
+        configurationBuilder.Properties<AccountStakeUnitBalanceSubstateType>()
+            .HaveConversion<AccountStakeUnitBalanceSubstateTypeValueConverter>();
 
         configurationBuilder.Properties<AccountXrdStakeBalanceSubstateType>()
             .HaveConversion<AccountXrdStakeBalanceSubstateTypeValueConverter>();
@@ -222,7 +222,7 @@ public class CommonDbContext : DbContext
             .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate).ToSnakeCase()}_current_unspent_utxos");
 
         HookUpSubstate<AccountXrdStakeBalanceSubstate>(modelBuilder);
-        HookUpSubstate<AccountStakeOwnershipBalanceSubstate>(modelBuilder);
+        HookUpSubstate<AccountStakeUnitBalanceSubstate>(modelBuilder);
         HookUpSubstate<ValidatorStakeBalanceSubstate>(modelBuilder);
 
         // Data substates

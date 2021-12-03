@@ -70,53 +70,53 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Common.Database.Models.Ledger.Substates;
 
-public enum AccountStakeOwnershipBalanceSubstateType
+public enum AccountStakeUnitBalanceSubstateType
 {
     Stake,
     PreparedUnstake,
 }
 
-public class AccountStakeOwnershipBalanceSubstateTypeValueConverter : EnumTypeValueConverterBase<AccountStakeOwnershipBalanceSubstateType>
+public class AccountStakeUnitBalanceSubstateTypeValueConverter : EnumTypeValueConverterBase<AccountStakeUnitBalanceSubstateType>
 {
-    private static readonly Dictionary<AccountStakeOwnershipBalanceSubstateType, string> _conversion = new()
+    private static readonly Dictionary<AccountStakeUnitBalanceSubstateType, string> _conversion = new()
     {
-        { AccountStakeOwnershipBalanceSubstateType.Stake, "STAKE" },
-        { AccountStakeOwnershipBalanceSubstateType.PreparedUnstake, "PREPARED_UNSTAKE" },
+        { AccountStakeUnitBalanceSubstateType.Stake, "STAKE" },
+        { AccountStakeUnitBalanceSubstateType.PreparedUnstake, "PREPARED_UNSTAKE" },
     };
 
-    public AccountStakeOwnershipBalanceSubstateTypeValueConverter()
+    public AccountStakeUnitBalanceSubstateTypeValueConverter()
         : base(_conversion, Invert(_conversion))
     {
     }
 }
 
 /// <summary>
-/// UTXOs related to Accounts staking to Validators, where the resource is a share of StakeOwnership in that Validator.
+/// UTXOs related to Accounts staking to Validators, where the resource is a share of StakeUnit in that Validator.
 /// In particular, this is stake which is Staked or PreparingUnstake.
 /// </summary>
 [Index(nameof(AccountId), nameof(ValidatorId))]
 [Index(nameof(ValidatorId), nameof(AccountId))]
 [Table("account_stake_ownership_balance_substates")]
-public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
+public class AccountStakeUnitBalanceSubstate : BalanceSubstateBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="AccountStakeOwnershipBalanceSubstate"/> class.
+    /// Initializes a new instance of the <see cref="AccountStakeUnitBalanceSubstate"/> class.
     /// The SubstateBase properties should be set separately.
     /// </summary>
-    public AccountStakeOwnershipBalanceSubstate(
+    public AccountStakeUnitBalanceSubstate(
         Account account,
         Validator validator,
-        AccountStakeOwnershipBalanceSubstateType type,
-        TokenAmount stakeOwnershipBalance
+        AccountStakeUnitBalanceSubstateType type,
+        TokenAmount StakeUnitBalance
     )
     {
         Account = account;
         Validator = validator;
         Type = type;
-        Amount = stakeOwnershipBalance;
+        Amount = StakeUnitBalance;
     }
 
-    private AccountStakeOwnershipBalanceSubstate()
+    private AccountStakeUnitBalanceSubstate()
     {
     }
 
@@ -133,5 +133,5 @@ public class AccountStakeOwnershipBalanceSubstate : BalanceSubstateBase
     public Validator Validator { get; set; }
 
     [Column(name: "type")]
-    public AccountStakeOwnershipBalanceSubstateType Type { get; set; }
+    public AccountStakeUnitBalanceSubstateType Type { get; set; }
 }

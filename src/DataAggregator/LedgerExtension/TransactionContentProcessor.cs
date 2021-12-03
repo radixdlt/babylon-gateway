@@ -64,6 +64,7 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
@@ -137,6 +138,14 @@ public class TransactionContentProcessor
 
                 _operation = operation;
                 _entity = _entityDeterminer.DetermineEntity(_operation.EntityIdentifier);
+
+                if (_entity == null)
+                {
+                    throw GenerateDetailedInvalidTransactionException(
+                        $"Failed to identify the entity"
+                    );
+                }
+
                 HandleValidatorBftDataOperationUp(validatorBftData);
             }
 
@@ -243,8 +252,8 @@ public class TransactionContentProcessor
             case TokenResourceIdentifier resourceIdentifier:
                 HandleResourceAmountOperation(resourceIdentifier);
                 return;
-            case StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier:
-                HandleStakeOwnershipAmountOperation(stakeOwnershipResourceIdentifier);
+            case StakeUnitResourceIdentifier stakeUnitResourceIdentifier:
+                HandleStakeUnitAmountOperation(stakeUnitResourceIdentifier);
                 return;
             default:
                 throw GenerateDetailedInvalidTransactionException(
@@ -295,13 +304,13 @@ public class TransactionContentProcessor
         }
     }
 
-    private void HandleStakeOwnershipAmountOperation(StakeOwnershipResourceIdentifier stakeOwnershipResourceIdentifier)
+    private void HandleStakeUnitAmountOperation(StakeUnitResourceIdentifier stakeUnitResourceIdentifier)
     {
         switch (_entity!.EntityType)
         {
             case EntityType.Account:
             case EntityType.Account_PreparedUnstake:
-                HandleAccountStakeOwnershipAmountOperation(_entity!.EntityType, _entity!.AccountAddress!, stakeOwnershipResourceIdentifier.Validator);
+                HandleAccountStakeUnitAmountOperation(_entity!.EntityType, _entity!.AccountAddress!, stakeUnitResourceIdentifier.ValidatorAddress);
                 return;
             case EntityType.Account_ExitingStake:
             case EntityType.Account_PreparedStake:
@@ -428,14 +437,14 @@ public class TransactionContentProcessor
         _validatorStakeChanges.GetOrCreate(validatorAddress, ValidatorStakeSnapshotChange.Default).AggregateXrdStakeChange(tokenAmount);
     }
 
-    private void HandleAccountStakeOwnershipAmountOperation(EntityType entityType, string accountAddress, string validatorAddress)
+    private void HandleAccountStakeUnitAmountOperation(EntityType entityType, string accountAddress, string validatorAddress)
     {
         var tokenAmount = _amount!.Value;
 
         var type = entityType switch
         {
-            EntityType.Account => AccountStakeOwnershipBalanceSubstateType.Stake,
-            EntityType.Account_PreparedUnstake => AccountStakeOwnershipBalanceSubstateType.PreparedUnstake,
+            EntityType.Account => AccountStakeUnitBalanceSubstateType.Stake,
+            EntityType.Account_PreparedUnstake => AccountStakeUnitBalanceSubstateType.PreparedUnstake,
             _ => throw new ArgumentOutOfRangeException(),
         };
 
@@ -444,7 +453,7 @@ public class TransactionContentProcessor
 
         // Part 1) Handle substates
         HandleSubstateUpOrDown(
-            () => new AccountStakeOwnershipBalanceSubstate(
+            () => new AccountStakeUnitBalanceSubstate(
                 accountLookup(),
                 validatorLookup(),
                 type,
@@ -467,12 +476,12 @@ public class TransactionContentProcessor
         switch (entityType)
         {
             case EntityType.Account:
-                preValidatorStake.AggregateStakeOwnershipChange(tokenAmount);
-                preAccountValidatorStake.AggregateStakeOwnershipChange(tokenAmount);
+                preValidatorStake.AggregateStakeUnitChange(tokenAmount);
+                preAccountValidatorStake.AggregateStakeUnitChange(tokenAmount);
                 break;
             case EntityType.Account_PreparedUnstake:
-                preValidatorStake.AggregatePreparedUnstakeOwnershipChange(tokenAmount);
-                preAccountValidatorStake.AggregatePreparedUnstakeOwnershipChange(tokenAmount);
+                preValidatorStake.AggregatePreparedUnStakeUnitChange(tokenAmount);
+                preAccountValidatorStake.AggregatePreparedUnStakeUnitChange(tokenAmount);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -522,8 +531,7 @@ public class TransactionContentProcessor
 
         var resourceIdentifier = _entity.ResourceAddress!;
         var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
-        var resourceOwner = objects.TokenData?.Owner;
-        var resourceOwnerLookup = resourceOwner == null ? null : _dbActionsPlanner.ResolveAccount(resourceOwner, _transactionSummary!.StateVersion);
+        var resourceOwnerLookup = CreateAccountLookup(objects.TokenData?.Owner);
 
         HandleSubstateUpOrDown(
             () => objects.ToResourceDataSubstate(resourceLookup(), resourceOwnerLookup?.Invoke()),
@@ -541,8 +549,7 @@ public class TransactionContentProcessor
         }
 
         var validatorLookup = _dbActionsPlanner.ResolveValidator(_entity.ValidatorAddress!, _transactionSummary!.StateVersion);
-        var validatorOwner = objects.PreparedValidatorOwner?.Owner ?? objects.ValidatorData?.Owner;
-        var validatorOwnerLookup = validatorOwner == null ? null : _dbActionsPlanner.ResolveAccount(validatorOwner, _transactionSummary!.StateVersion);
+        var validatorOwnerLookup = CreateAccountLookup(objects.PreparedValidatorOwner?.Owner ?? objects.ValidatorData?.Owner);
 
         HandleSubstateUpOrDown(
             () => objects.ToDbValidatorData(validatorLookup(), validatorOwnerLookup?.Invoke()),
@@ -550,6 +557,22 @@ public class TransactionContentProcessor
                 objects.ToDbValidatorData(validatorLookup(), validatorOwnerLookup?.Invoke())
             )
         );
+    }
+
+    private Func<Account>? CreateAccountLookup(EntityIdentifier? identifier)
+    {
+        if (identifier == null)
+        {
+            return null;
+        }
+
+        var entity = _entityDeterminer.DetermineEntity(identifier);
+        if (entity is not { EntityType: EntityType.Account })
+        {
+            throw GenerateDetailedInvalidTransactionException("Resource data update not against a resource entity");
+        }
+
+        return _dbActionsPlanner.ResolveAccount(entity.AccountAddress!, _transactionSummary!.StateVersion);
     }
 
     private void TrackNonXrdResourceSupplyChangesAcrossOperationGroup()
@@ -672,9 +695,9 @@ public class TransactionContentProcessor
                         throw GenerateDetailedInvalidTransactionException($"{key} TotalXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalXrdStake}");
                     }
 
-                    if (newHistoryEntry.StakeSnapshot.TotalStakeOwnership.IsNegative())
+                    if (newHistoryEntry.StakeSnapshot.TotalStakeUnits.IsNegative())
                     {
-                        throw GenerateDetailedInvalidTransactionException($"{key} TotalStakeOwnership ended up negative: {newHistoryEntry.StakeSnapshot.TotalStakeOwnership}");
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalStakeUnit ended up negative: {newHistoryEntry.StakeSnapshot.TotalStakeUnits}");
                     }
 
                     if (newHistoryEntry.StakeSnapshot.TotalPreparedXrdStake.IsNegative())
@@ -682,9 +705,9 @@ public class TransactionContentProcessor
                         throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedXrdStake}");
                     }
 
-                    if (newHistoryEntry.StakeSnapshot.TotalPreparedUnstakeOwnership.IsNegative())
+                    if (newHistoryEntry.StakeSnapshot.TotalPreparedUnStakeUnits.IsNegative())
                     {
-                        throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedUnstakeOwnership ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedUnstakeOwnership}");
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedUnStakeUnit ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedUnStakeUnits}");
                     }
 
                     if (newHistoryEntry.StakeSnapshot.TotalExitingXrdStake.IsNegative())
@@ -724,9 +747,9 @@ public class TransactionContentProcessor
                          stakeSnapshotChange
                     );
 
-                    if (newHistoryEntry.StakeSnapshot.TotalStakeOwnership.IsNegative())
+                    if (newHistoryEntry.StakeSnapshot.TotalStakeUnits.IsNegative())
                     {
-                        throw GenerateDetailedInvalidTransactionException($"{key} TotalStakeOwnership ended up negative: {newHistoryEntry.StakeSnapshot.TotalStakeOwnership}");
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalStakeUnit ended up negative: {newHistoryEntry.StakeSnapshot.TotalStakeUnits}");
                     }
 
                     if (newHistoryEntry.StakeSnapshot.TotalPreparedXrdStake.IsNegative())
@@ -734,9 +757,9 @@ public class TransactionContentProcessor
                         throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedXrdStake ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedXrdStake}");
                     }
 
-                    if (newHistoryEntry.StakeSnapshot.TotalPreparedUnstakeOwnership.IsNegative())
+                    if (newHistoryEntry.StakeSnapshot.TotalPreparedUnStakeUnits.IsNegative())
                     {
-                        throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedUnstakeOwnership ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedUnstakeOwnership}");
+                        throw GenerateDetailedInvalidTransactionException($"{key} TotalPreparedUnStakeUnit ended up negative: {newHistoryEntry.StakeSnapshot.TotalPreparedUnStakeUnits}");
                     }
 
                     if (newHistoryEntry.StakeSnapshot.TotalExitingXrdStake.IsNegative())

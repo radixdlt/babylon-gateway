@@ -62,82 +62,19 @@
  * permissions under this License.
  */
 
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+namespace GatewayAPI.Exceptions;
 
-#nullable disable
-
-namespace DataAggregator.Migrations
+public class InvalidPublicKeyException : ValidationException
 {
-    public partial class ChangeLedgerTransactionToStoreStartOfEpochAndRound : Migration
+    public override string ExceptionNameUpperSnakeCase => "INVALID_PUBLIC_KEY";
+
+    public InvalidPublicKeyException(string userFacingMessage, string internalMessage)
+        : base(userFacingMessage, internalMessage)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_ledger_transactions_epoch_end_of_round",
-                table: "ledger_transactions");
+    }
 
-            migrationBuilder.DropColumn(
-                name: "end_of_round",
-                table: "ledger_transactions");
-
-            migrationBuilder.RenameColumn(
-                name: "is_end_of_epoch",
-                table: "ledger_transactions",
-                newName: "is_start_of_round");
-
-            migrationBuilder.AddColumn<bool>(
-                name: "is_start_of_epoch",
-                table: "ledger_transactions",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<long>(
-                name: "round_in_epoch",
-                table: "ledger_transactions",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_epoch_round_in_epoch",
-                table: "ledger_transactions",
-                columns: new[] { "epoch", "round_in_epoch" },
-                unique: true,
-                filter: "is_start_of_round = true");
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_ledger_transactions_epoch_round_in_epoch",
-                table: "ledger_transactions");
-
-            migrationBuilder.DropColumn(
-                name: "is_start_of_epoch",
-                table: "ledger_transactions");
-
-            migrationBuilder.DropColumn(
-                name: "round_in_epoch",
-                table: "ledger_transactions");
-
-            migrationBuilder.RenameColumn(
-                name: "is_start_of_round",
-                table: "ledger_transactions",
-                newName: "is_end_of_epoch");
-
-            migrationBuilder.AddColumn<long>(
-                name: "end_of_round",
-                table: "ledger_transactions",
-                type: "bigint",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_epoch_end_of_round",
-                table: "ledger_transactions",
-                columns: new[] { "epoch", "end_of_round" },
-                unique: true,
-                filter: "end_of_round IS NOT NULL");
-        }
+    public InvalidPublicKeyException(string userFacingMessage)
+        : base(userFacingMessage)
+    {
     }
 }

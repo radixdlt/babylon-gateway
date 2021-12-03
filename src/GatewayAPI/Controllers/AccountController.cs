@@ -91,7 +91,7 @@ public class AccountController : ControllerBase
     public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request, long? atStateVersion)
     {
         _validations.ValidateAccountAddress(request.AccountIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
         var accountBalances = await _accountQuerier.GetAccountBalancesAtState(
             request.AccountIdentifier.Address,
             ledgerState
@@ -104,7 +104,7 @@ public class AccountController : ControllerBase
     public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request, long? atStateVersion)
     {
         _validations.ValidateAccountAddress(request.AccountIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
         var stakePositions = await _accountQuerier.GetStakePositionsAtState(
             request.AccountIdentifier.Address,
             ledgerState
@@ -117,7 +117,7 @@ public class AccountController : ControllerBase
     public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request, long? atStateVersion)
     {
         _validations.ValidateAccountAddress(request.AccountIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
         var stakePositions = await _accountQuerier.GetUnstakePositionsAtState(
             request.AccountIdentifier.Address,
             ledgerState

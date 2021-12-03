@@ -24,33 +24,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/GatewayResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
-  "/token":
-    post:
-      summary: Get Token Info
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/TokenRequest"
-      responses:
-        '200':
-          description: Token info
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/TokenResponse"
-        '500':
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/token/native":
     post:
       summary: Get Native Token Info
@@ -68,11 +46,33 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TokenNativeResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/token":
+    post:
+      summary: Get Token Info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TokenRequest"
+      responses:
+        '200':
+          description: Token info
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokenResponse"
+        '500':
+          description: Gateway error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/token/derive":
     post:
       summary: Derive Token Identifier
@@ -90,11 +90,33 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TokenDeriveResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/account/derive":
+    post:
+      summary: Derive Account Identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AccountDeriveRequest"
+      responses:
+        '200':
+          description: Token info
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AccountDeriveResponse"
+        '500':
+          description: Gateway error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/account/balances":
     post:
       summary: Get Account Balances
@@ -112,11 +134,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountBalancesResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/account/stakes":
     post:
       summary: Get Stake Positions
@@ -134,11 +156,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountStakesResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/account/unstakes":
     post:
       summary: Get Unstake Positions
@@ -156,11 +178,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountUnstakesResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/account/transactions":
     post:
       summary: Get Account Transactions
@@ -178,11 +200,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountTransactionsResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/validator":
     post:
       summary: Get Validator
@@ -191,20 +213,42 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/ValidatorInfoRequest"
+              "$ref": "#/components/schemas/ValidatorRequest"
       responses:
         '200':
           description: Validator Info
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ValidatorInfoResponse"
+                "$ref": "#/components/schemas/ValidatorResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/validator/derive":
+    post:
+      summary: Get Validator Identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ValidatorDeriveRequest"
+      responses:
+        '200':
+          description: Validator Info
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidatorDeriveResponse"
+        '500':
+          description: Gateway error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/validators":
     post:
       summary: Get Validators
@@ -222,11 +266,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ValidatorsResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/rules":
     post:
       summary: Get Transaction Rules
@@ -244,11 +288,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionRulesResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/build":
     post:
       summary: Build Transaction
@@ -266,11 +310,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionBuildResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/finalize":
     post:
       summary: Finalize Transaction
@@ -288,11 +332,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionFinalizeResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/submit":
     post:
       summary: Submit Transaction
@@ -310,11 +354,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionSubmitResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/status":
     post:
       summary: Get Transaction
@@ -332,25 +376,26 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionStatusResponse"
         '500':
-          description: Unexpected error
+          description: Gateway error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UnexpectedError"
+                "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
     AccountBalancesRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - account_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         account_identifier:
           "$ref": "#/components/schemas/AccountIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         account_identifier:
           address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
     AccountBalancesResponse:
@@ -360,24 +405,9 @@ components:
         - account_balances
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
         account_balances:
-          "$ref": "#/components/schemas/AccountBalances"
-      example:
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        account_balances:
-          staked_and_unstaking_balance:
-            amount: '0'
-            token_identifier:
-              rri: xrd_rr1qy5wfsfh
-          liquid_balances:
-            - amount: '1000000000000000000000'
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
+          $ref: "#/components/schemas/AccountBalances"
     AccountBalances:
       type: object
       required:
@@ -393,42 +423,35 @@ components:
     AccountStakesRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - account_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         account_identifier:
-          "$ref": "#/components/schemas/AccountIdentifier"
+          $ref: "#/components/schemas/AccountIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         account_identifier:
           address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
     AccountStakesResponse:
       type: object
       required:
+        - pending_stakes
         - stakes
         - ledger_state
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
+        pending_stakes:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountStakeEntry"
         stakes:
           type: array
           items:
-            "$ref": "#/components/schemas/AccountStakeEntry"
-      example:
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        stakes:
-          - validator_identifier:
-              address: rv1qg923hl7f725cs06eg5gmdcy4pfvpa8mfnjcw669traquj28c96z5w0rld0
-            delegated_stake:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '1000000000000000000000'
+            $ref: "#/components/schemas/AccountStakeEntry"
     AccountStakeEntry:
       type: object
       required:
@@ -442,43 +465,35 @@ components:
     AccountUnstakesRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - account_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         account_identifier:
-          "$ref": "#/components/schemas/AccountIdentifier"
+          $ref: "#/components/schemas/AccountIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         account_identifier:
           address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
     AccountUnstakesResponse:
       type: object
       required:
         - ledger_state
+        - pending_unstakes
         - unstakes
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
+        pending_unstakes:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountUnstakeEntry"
         unstakes:
           type: array
           items:
-            "$ref": "#/components/schemas/AccountUnstakeEntry"
-      example:
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        unstakes:
-          - validator_identifier:
-              address: rv1qg923hl7f725cs06eg5gmdcy4pfvpa8mfnjcw669traquj28c96z5w0rld0
-            unstaking_amount:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '1000000000000000000000'
-            epochs_until_unlocked: 1
+            $ref: "#/components/schemas/AccountUnstakeEntry"
     AccountUnstakeEntry:
       type: object
       required:
@@ -496,19 +511,20 @@ components:
     AccountTransactionsRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - account_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         account_identifier:
-          "$ref": "#/components/schemas/AccountIdentifier"
+          $ref: "#/components/schemas/AccountIdentifier"
         cursor:
           type: string
         limit:
           type: integer
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         account_identifier:
           address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
         cursor: '0'
@@ -520,7 +536,8 @@ components:
         - transactions
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
+        total_count:
           type: integer
           format: int64
         next_cursor:
@@ -528,32 +545,7 @@ components:
         transactions:
           type: array
           items:
-            "$ref": "#/components/schemas/AccountTransaction"
-      example:
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        next_cursor: 0
-        transactions:
-          - fee_paid:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '72000000000000000'
-            metadata:
-              signed_by:
-                hex: 02aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b6
-              hex: 07030e7094728c8d065c5db696977696bea9094f67bcfd4c021f99ec784e24023b0000000c0100210000000000000000000000000000000000000000000000000000ffcb9e57d4000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007c13bc4b1c16827082c00000008000002004506000402aa1c49af92a39d15257d7dc43f805f18f9f0ea712450c53e75255f5a0d1d93b601000000000000000000000000000000000000000007ad6192165e31dff02c000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329b63364718000000000b015584aed8375f30b22a2203b77dbe15e5dc0a3618fb45ea30ee54a6ebe0054b673a471ad2214b7bd06c4228083643b57e095787c9fb01443e1c3d6890d28f60cf
-              timestamp: 1627407310726
-            actions:
-              - amount:
-                  token_identifier:
-                    rri: xrd_rr1qy5wfsfh
-                  value: '24000000000000000000000000'
-                from: rdx1qsp258zf47f288g4y47hm3plsp03370safcjg5x98e6j2h66p5we8ds8m7g33
-                to: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
-                type: TransferTokens
+            $ref: "#/components/schemas/AccountTransaction"
     TransferTokens:
       allOf:
         - "$ref": "#/components/schemas/Action"
@@ -655,12 +647,13 @@ components:
     TransactionRulesRequest:
       type: object
       required:
-        - network
+        - network_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
     TransactionRulesResponse:
       type: object
       required:
@@ -681,12 +674,12 @@ components:
     TransactionBuildRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - actions
         - fee_payer
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         actions:
           type: array
           items:
@@ -698,7 +691,8 @@ components:
         disable_token_mint_and_burn:
           type: boolean
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         actions:
           - type: TransferTokens
             from_account:
@@ -715,24 +709,10 @@ components:
     TransactionBuildResponse:
       type: object
       required:
-        - type
+        - transaction_build
       properties:
-        type:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          TransactionBuildResponseSuccess: "#/components/schemas/TransactionBuildResponseSuccess"
-          TransactionBuildResponseError: "#/components/schemas/TransactionBuildResponseError"
-    TransactionBuildResponseSuccess:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildResponse"
-        - type: object
-          required:
-            - transaction_build
-          properties:
-            transaction_build:
-              $ref: "#/components/schemas/TransactionBuild"
+        transaction_build:
+          $ref: "#/components/schemas/TransactionBuild"
     TransactionBuild:
       type: object
       required:
@@ -746,87 +726,6 @@ components:
           type: string
         payload_to_sign:
           type: string
-    TransactionBuildResponseError:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildResponse"
-        - type: object
-          required:
-            - error
-          properties:
-            error:
-              $ref: "#/components/schemas/TransactionBuildError"
-    TransactionBuildError:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          NotEnoughResourcesError: "#/components/schemas/NotEnoughResourcesError"
-          BelowMinimumStakeError: "#/components/schemas/BelowMinimumStakeError"
-          NotValidatorOwnerError: "#/components/schemas/NotValidatorOwnerError"
-          MessageTooLongError: "#/components/schemas/MessageTooLongError"
-          CouldNotConstructFeesError: "#/components/schemas/CouldNotConstructFeesError"
-    NotEnoughResourcesError:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildError"
-        - type: object
-          required:
-            - requested_amount
-            - available_amount
-          properties:
-            requested_amount:
-              $ref: "#/components/schemas/BigInteger"
-            available_amount:
-              $ref: "#/components/schemas/BigInteger"
-    BelowMinimumStakeError:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildError"
-        - type: object
-          required:
-            - requested_amount
-            - minimum_amount
-          properties:
-            requested_amount:
-              $ref: "#/components/schemas/BigInteger"
-            minimum_amount:
-              $ref: "#/components/schemas/BigInteger"
-    NotValidatorOwnerError:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildError"
-        - type: object
-          required:
-            - owner
-            - user
-          properties:
-            owner:
-              $ref: "#/components/schemas/AccountIdentifier"
-            user:
-              $ref: "#/components/schemas/AccountIdentifier"
-    MessageTooLongError:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildError"
-        - type: object
-          required:
-            - length_limit
-            - attempted_length
-          properties:
-            length_limit:
-              type: integer
-            attempted_length:
-              type: integer
-    CouldNotConstructFeesError:
-      allOf:
-        - "$ref": "#/components/schemas/TransactionBuildError"
-        - type: object
-          required:
-            - attempts
-          properties:
-            attempts:
-              type: integer
     TransactionFinalizeRequest:
       type: object
       required:
@@ -839,23 +738,26 @@ components:
         unsigned_transaction:
           type: string
         signature:
-          type: object
-          required:
-            - public_key
-            - bytes
-          properties:
-            public_key:
-              type: string
-            bytes:
-              type: string
+          $ref: "#/components/schemas/Signature"
         submit:
           type: boolean
-      example:
-        network: mainnet
-        unsigned_transaction: 07ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842000000020100210000000000000000000000000000000000000000000000000000ffcb9e57d4000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da329a636aa8c02c00000008000002004506000403dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab0100000000000000000000000000000000000000000013da3298ae6ecf94cc8000020045060004038639dc49e14a94448045a3c595996282d8419eb9ae949dfb84b7bc48ba3d4fee0100000000000000000000000000000000000000000000000001b4fbd92b5f800000
-        signature:
-          public_key: 03dc62fa04804f75d009a2fac32c8ceb9dc5eaccd54934fe20ef5b86be40c7a2ab
-          bytes: ''
+    PublicKey:
+      type: object
+      required:
+        - hex
+      properties:
+        hex:
+          type: string
+    Signature:
+      type: object
+      required:
+        - public_key
+        - bytes
+      properties:
+        public_key:
+          $ref: "#/components/schemas/PublicKey"
+        bytes:
+          type: string
     TransactionFinalizeResponse:
       type: object
       required:
@@ -869,11 +771,11 @@ components:
     TransactionSubmitRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - signed_transaction
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         signed_transaction:
           type: string
     TransactionSubmitResponse:
@@ -889,36 +791,28 @@ components:
     GatewayResponse:
       type: object
       required:
-        - network
+        - network_identifier
         - ledger_state
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         ledger_state:
           $ref: "#/components/schemas/LedgerState"
         target_ledger_state:
           $ref: "#/components/schemas/TargetLedgerState"
-      example:
-        network: mainnet
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        target_ledger_state:
-          version: 1000
     TokenRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - token_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         token_identifier:
           "$ref": "#/components/schemas/TokenIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         token_identifier:
           rri: xrd_rr1qy5wfsfh
     LedgerState:
@@ -955,50 +849,19 @@ components:
         - token
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
         token:
-          "$ref": "#/components/schemas/Token"
-      example:
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        token:
-          token_identifier:
-            rri: xrd_rr1qy5wfsfh
-          total_supply:
-            token_identifier:
-              rri: xrd_rr1qy5wfsfh
-            value: '12014560679861300000000000000'
-          info:
-            total_burned:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '11437173800000000000000'
-            total_minted:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '12014572117035100000000000000'
-          properties:
-            icon_url: https://assets.radixdlt.com/icons/icon-xrd-32x32.png
-            is_supply_mutable: true
-            symbol: xrd
-            granularity: '1'
-            name: Radix
-            description: The Radix Public Network's native token, used to pay the
-              network's required transaction fees and to secure the network through
-              staking to its validator nodes.
-            url: https://tokens.radixdlt.com
+          $ref: "#/components/schemas/Token"
     TokenNativeRequest:
       type: object
       required:
-        - network
+        - network_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
     TokenNativeResponse:
       type: object
       required:
@@ -1006,78 +869,76 @@ components:
         - ledger_state
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
         token:
-          "$ref": "#/components/schemas/Token"
-      example:
-        ledger_state:
-          epoch: 1
-          round: 1
-          version: 1
-          timestamp: "2021-08-29T01:19:00.524Z"
-        token:
-          - token_identifier:
-              rri: xrd_rr1qy5wfsfh
-            supply:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '12014560679861300000000000000'
-            info:
-              total_burned:
-                token_identifier:
-                  rri: xrd_rr1qy5wfsfh
-                value: '11437173800000000000000'
-              total_minted:
-                token_identifier:
-                  rri: xrd_rr1qy5wfsfh
-                value: '12014572117035100000000000000'
-            properties:
-              icon_url: https://assets.radixdlt.com/icons/icon-xrd-32x32.png
-              is_supply_mutable: true
-              symbol: xrd
-              granularity: '1'
-              name: Radix
-              description: The Radix Public Network's native token, used to pay the
-                network's required transaction fees and to secure the network through
-                staking to its validator nodes.
-              url: https://tokens.radixdlt.com
+          $ref: "#/components/schemas/Token"
     TokenDeriveRequest:
       type: object
       required:
-        - network
-        - creator_account_identifier
+        - network_identifier
+        - public_key
         - symbol
       properties:
-        network:
-          type: string
-        creator_account_identifier:
-          "$ref": "#/components/schemas/AccountIdentifier"
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        public_key:
+          $ref: "#/components/schemas/PublicKey"
         symbol:
           type: string
-      example:
-        network: mainnet
-        creator_account_identifier:
-          address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
-        symbol: tkn
     TokenDeriveResponse:
       type: object
       required:
         - token_identifier
       properties:
         token_identifier:
-          "$ref": "#/components/schemas/TokenIdentifier"
+          $ref: "#/components/schemas/TokenIdentifier"
+    AccountDeriveRequest:
+      type: object
+      required:
+        - network_identifier
+        - public_key
+      properties:
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        public_key:
+          $ref: "#/components/schemas/PublicKey"
+    AccountDeriveResponse:
+      type: object
+      required:
+        - account_identifier
+      properties:
+        account_identifier:
+          $ref: "#/components/schemas/AccountIdentifier"
+    ValidatorDeriveRequest:
+      type: object
+      required:
+        - network_identifier
+        - public_key
+      properties:
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        public_key:
+          $ref: "#/components/schemas/PublicKey"
+    ValidatorDeriveResponse:
+      type: object
+      required:
+        - account_identifier
+      properties:
+        account_identifier:
+          $ref: "#/components/schemas/ValidatorIdentifier"
     TransactionStatusRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - transaction_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         transaction_identifier:
           $ref: "#/components/schemas/TransactionIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         transaction_identifier:
           hash: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
     TransactionStatusResponse:
@@ -1087,42 +948,44 @@ components:
         - transaction
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
         transaction:
-          "$ref": "#/components/schemas/AccountTransaction"
-    ValidatorInfoRequest:
+          $ref: "#/components/schemas/AccountTransaction"
+    ValidatorRequest:
       type: object
       required:
-        - network
+        - network_identifier
         - validator_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
         validator_identifier:
-          "$ref": "#/components/schemas/ValidatorIdentifier"
+          $ref: "#/components/schemas/ValidatorIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
         validator_identifier:
           address: rv1qf2x63qx4jdaxj83kkw2yytehvvmu6r2xll5gcp6c9rancmrfsgfwttnczx
-    ValidatorInfoResponse:
+    ValidatorResponse:
       type: object
       required:
         - ledger_state
         - validator
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
         validator:
-          "$ref": "#/components/schemas/Validator"
+          $ref: "#/components/schemas/Validator"
     ValidatorsRequest:
       type: object
       required:
-        - network
+        - network_identifier
       properties:
-        network:
-          type: string
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
       example:
-        network: mainnet
+        network_identifier:
+          network: mainnet
     ValidatorsResponse:
       type: object
       required:
@@ -1130,23 +993,11 @@ components:
         - validators
       properties:
         ledger_state:
-          "$ref": "#/components/schemas/LedgerState"
+          $ref: "#/components/schemas/LedgerState"
         validators:
           type: array
           items:
-            "$ref": "#/components/schemas/Validator"
-    UnexpectedError:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-        message:
-          type: string
-        details:
-          type: object
+            $ref: "#/components/schemas/Validator"
     Validator:
       type: object
       required:
@@ -1172,7 +1023,7 @@ components:
           value: '100000000000000000000'
         properties:
           url: https://learn.radixdlt.com/article/will-the-radix-foundation-operate-validator-nodes
-          validator_fee: '100.0'
+          validator_fee_percentage: 100
           name: Radix Foundation eu-west-1 node0 mainnet
           registered: true
           owner_account_identifier:
@@ -1187,14 +1038,14 @@ components:
             epoch_range:
               from: 1
               to: 1
-            uptime_percentage: '100.00'
+            uptime_percentage: 100
             proposals_missed: 0
             proposals_completed: 108320
     ValidatorProperties:
       type: object
       required:
         - url
-        - validator_fee
+        - validator_fee_percentage
         - name
         - registered
         - owner_account_identifier
@@ -1202,8 +1053,8 @@ components:
       properties:
         url:
           type: string
-        validator_fee:
-          type: string
+        validator_fee_percentage:
+          type: number
         name:
           type: string
         registered:
@@ -1233,7 +1084,7 @@ components:
         epoch_range:
           "$ref": "#/components/schemas/EpochRange"
         uptime_percentage:
-          type: string
+          type: number
         proposals_missed:
           type: integer
           format: int64
@@ -1392,27 +1243,34 @@ components:
     BigInteger:
       type: string
       pattern: "^-?[0-9]+$"
+    NetworkIdentifier:
+      type: object
+      required:
+        - network
+      properties:
+        network:
+          type: string
     AccountIdentifier:
       type: object
       required:
         - address
       properties:
         address:
-          $ref: "#/components/schemas/AccountAddress"
+          type: string
     ValidatorIdentifier:
       type: object
       required:
         - address
       properties:
         address:
-          $ref: "#/components/schemas/ValidatorAddress"
+          type: string
     TokenIdentifier:
       type: object
       required:
         - rri
       properties:
         rri:
-          $ref: "#/components/schemas/ResourceIdentifier"
+          type: string
     TransactionIdentifier:
       type: object
       required:
@@ -1423,12 +1281,270 @@ components:
           pattern: "^[0123456789abcdef]{64}$"
           maxLength: 64
           minLength: 64
-    AccountAddress:
-      type: string
-      pattern: "^[rtd]dx[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
-    ValidatorAddress:
-      type: string
-      pattern: "^[rtd]v[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
-    ResourceIdentifier:
-      type: string
-      pattern: "^[a-z0-9]{1,83}_[rtd]r[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$"
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        details:
+          $ref: "#/components/schemas/GatewayError"
+    GatewayError:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          NetworkNotSupportedError: "#/components/schemas/NetworkNotSupportedError"
+          InvalidSignatureError: "#/components/schemas/InvalidSignatureError"
+          InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
+          InvalidTokenRRIError: "#/components/schemas/InvalidTokenRRIError"
+          InvalidAccountAddressError: "#/components/schemas/InvalidAccountAddressError"
+          InvalidValidatorAddressError: "#/components/schemas/InvalidValidatorAddressError"
+          InvalidPublicKeyError: "#/components/schemas/InvalidPublicKeyError"
+          InvalidTokenSymbolError: "#/components/schemas/InvalidTokenSymbolError"
+          InvalidActionError: "#/components/schemas/InvalidActionError"
+          TokenNotFoundError: "#/components/schemas/TokenNotFoundError"
+          TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
+          NotEnoughNativeTokensForFeesError: "#/components/schemas/NotEnoughNativeTokensForFeesError"
+          NotEnoughTokensForTransferError: "#/components/schemas/NotEnoughTokensForTransferError"
+          NotEnoughTokensForStakeError: "#/components/schemas/NotEnoughTokensForStakeError"
+          NotEnoughTokensForUnstakeError: "#/components/schemas/NotEnoughTokensForUnstakeError"
+          BelowMinimumStakeError: "#/components/schemas/BelowMinimumStakeError"
+          CannotStakeError: "#/components/schemas/CannotStakeError"
+          MessageTooLongError: "#/components/schemas/MessageTooLongError"
+          CouldNotConstructFeesError: "#/components/schemas/CouldNotConstructFeesError"
+          InvalidRequestError: "#/components/schemas/InvalidRequestError"
+          InternalServerError: "#/components/schemas/InternalServerError"
+    InternalServerError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - exception
+            - cause
+          properties:
+            exception:
+              type: string
+            cause:
+              type: string
+    InvalidRequestError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - exception
+            - cause
+          properties:
+            exception:
+              type: string
+            cause:
+              type: string
+    NetworkNotSupportedError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - networks_supported
+          properties:
+            networks_supported:
+              type: array
+              items:
+                type: string
+    InvalidActionError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_action
+          properties:
+            invalid_action:
+              $ref: "#/components/schemas/Action"
+    InvalidSignatureError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_signature
+          properties:
+            invalid_signature:
+              $ref: "#/components/schemas/Signature"
+    InvalidTransactionError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_transaction
+            - message
+          properties:
+            invalid_transaction:
+              type: string
+            message:
+              type: string
+    NotEnoughNativeTokensForFeesError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - required_amount
+            - available_amount
+          properties:
+            required_amount:
+              $ref: "#/components/schemas/TokenAmount"
+            available_amount:
+              $ref: "#/components/schemas/TokenAmount"
+    NotEnoughTokensForTransferError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - requested_amount
+            - available_amount
+          properties:
+            requested_amount:
+              $ref: "#/components/schemas/TokenAmount"
+            available_amount:
+              $ref: "#/components/schemas/TokenAmount"
+    NotEnoughTokensForStakeError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - requested_amount
+            - available_amount
+          properties:
+            requested_amount:
+              $ref: "#/components/schemas/TokenAmount"
+            available_amount:
+              $ref: "#/components/schemas/TokenAmount"
+    NotEnoughTokensForUnstakeError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - requested_amount
+            - stake
+            - pending_stake
+          properties:
+            requested_amount:
+              $ref: "#/components/schemas/TokenAmount"
+            stake:
+              $ref: "#/components/schemas/AccountStakeEntry"
+            pending_stake:
+              $ref: "#/components/schemas/AccountStakeEntry"
+    BelowMinimumStakeError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - requested_amount
+            - minimum_amount
+          properties:
+            requested_amount:
+              $ref: "#/components/schemas/TokenAmount"
+            minimum_amount:
+              $ref: "#/components/schemas/TokenAmount"
+    CannotStakeError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - owner
+            - user
+          properties:
+            owner:
+              $ref: "#/components/schemas/AccountIdentifier"
+            user:
+              $ref: "#/components/schemas/AccountIdentifier"
+    MessageTooLongError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - length_limit
+            - attempted_length
+          properties:
+            length_limit:
+              type: integer
+            attempted_length:
+              type: integer
+    CouldNotConstructFeesError:
+      allOf:
+        - "$ref": "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - attempts
+          properties:
+            attempts:
+              type: integer
+    InvalidPublicKeyError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_public_key
+          properties:
+            invalid_public_key:
+              type: string
+    InvalidTokenSymbolError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_token_symbol
+          properties:
+            invalid_token_symbol:
+              type: string
+    InvalidTokenRRIError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_rri
+          properties:
+            invalid_rri:
+              type: string
+    InvalidAccountAddressError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_account_address
+          properties:
+            invalid_account_address:
+              type: string
+    InvalidValidatorAddressError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - invalid_validator_address
+          properties:
+            invalid_account_address:
+              type: string
+    TokenNotFoundError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - token_not_found
+          properties:
+            token_not_found:
+              $ref: "#/components/schemas/TokenIdentifier"
+    TransactionNotFoundError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - transaction_not_found
+          properties:
+            transaction_not_found:
+              $ref: "#/components/schemas/TransactionIdentifier"

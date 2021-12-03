@@ -386,7 +386,7 @@ public class DbActionsPlanner
         await LoadOrCreateAccounts();
         await LoadOrCreateValidators();
         await LoadSubstatesOfType<AccountResourceBalanceSubstate>();
-        await LoadSubstatesOfType<AccountStakeOwnershipBalanceSubstate>();
+        await LoadSubstatesOfType<AccountStakeUnitBalanceSubstate>();
         await LoadSubstatesOfType<AccountXrdStakeBalanceSubstate>();
         await LoadSubstatesOfType<ValidatorStakeBalanceSubstate>();
         await LoadSubstatesOfType<ResourceDataSubstate>();
