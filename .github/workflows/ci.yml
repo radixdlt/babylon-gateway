@@ -110,31 +110,25 @@ jobs:
   dispatch-deployment-events:
     runs-on: ubuntu-latest
     needs: publish-docker
+    if: github.event_name != 'release'
     steps:
       - name: setup "namespace_postfix"
         run: |
           GH_EVENT_NAME="${{ github.event_name }}"
           case "${GH_EVENT_NAME}" in
-                release)
-                    DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${{ github.event.release.tag_name }}"
-                    GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${{ github.event.release.tag_name }}"
-                ;;
                 pull_request)
                     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
                     echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
+                ;;
+                push)
                     
-                    docker_tag_with_branch
-                    DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${DOCKER_TAG}"
-                    GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${DOCKER_TAG}"
+                    echo "NAMESPACE=sandpitnet" >> $GITHUB_ENV
                 ;;
                 *)
                     echo "${GH_EVENT_NAME} not implemented yet"
                     exit 1
                 ;;
             esac
-
-          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
 
       - name: Trigger pull request deployment event ${{ github.ref }}
         run: |
@@ -145,23 +139,10 @@ jobs:
             --data-raw '{
                 "event_type": "ng_dev",
                 "client_payload": {
-                    "namespace_postfix": "sandpitnet",
-                    "data_aggregator_image_tag": "main-e2116cd"
+                    "namespace_postfix": "${{env.NAMESPACE}}"
+                    "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}"
+                    "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}"
                 }
             }'  
-      - name: Trigger pull request deployment event ${{ github.ref }} -old
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.RADIXBOT_GITHUB_REPO_PACKAGES_TOKEN }}
-          repository: radixdlt/radixdlt-iac
-          event-type: ng_pr
-          client-payload: |
-            {
-              "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.docker-tag }} "
-              "namespace_postfix": "${{ env.DOCKER_TAG }}"
-              "job_url": "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-            }
-        if: github.event_name == 'pull_request'
-
 
 
