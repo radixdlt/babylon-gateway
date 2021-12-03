@@ -109,7 +109,6 @@ jobs:
   dispatch-deployment-events:
     runs-on: ubuntu-latest
     needs: publish-docker
-    if: github.event_name != 'release'
     steps:
       - name: setup "namespace_postfix"
         run: |
