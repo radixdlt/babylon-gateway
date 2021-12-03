@@ -135,7 +135,6 @@ jobs:
                     exit 1
                 ;;
             esac
-
       - name: Trigger pull request deployment event ${{ github.ref }}
         run: |
           curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/radixdlt-iac/dispatches' \
