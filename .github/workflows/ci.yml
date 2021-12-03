@@ -118,18 +118,18 @@ jobs:
           case "${GH_EVENT_NAME}" in
                 release)
                     echo "NAMESPACE=stokenet" >> $GITHUB_ENV
-                    echo "EVENT_TYPE=ng-stokenet" >> $GITHUB_ENV
+                    echo "EVENT_TYPE=ng_stokenet" >> $GITHUB_ENV
                 ;;
                 pull_request)
                     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
                     echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
-                    echo "EVENT_TYPE=ng-pr" >> $GITHUB_ENV
+                    echo "EVENT_TYPE=ng_pr" >> $GITHUB_ENV
 
                 ;;
                 push)
                     
                     echo "NAMESPACE=sandpitnet" >> $GITHUB_ENV
-                    echo "EVENT_TYPE=ng-dev" >> $GITHUB_ENV
+                    echo "EVENT_TYPE=ng_dev" >> $GITHUB_ENV
                 ;;
                 *)
                     echo "${GH_EVENT_NAME} not implemented yet"
