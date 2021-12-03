@@ -144,6 +144,14 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     public static TokenAmount operator *(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits * b._subUnits);
     public static TokenAmount operator /(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? NaN : new TokenAmount(a._subUnits / b._subUnits);
 
+    public static bool operator <(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? false : a._subUnits < b._subUnits;
+    public static bool operator >(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? false : a._subUnits > b._subUnits;
+    public static bool operator <=(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? false : a._subUnits <= b._subUnits;
+    public static bool operator >=(TokenAmount a, TokenAmount b) => (a.IsNaN() || b.IsNaN()) ? false : a._subUnits >= b._subUnits;
+
+    public static TokenAmount Min(TokenAmount a, TokenAmount b) => a <= b ? a : b;
+    public static TokenAmount Max(TokenAmount a, TokenAmount b) => a >= b ? a : b;
+
     private TokenAmount(BigInteger subUnits)
     {
         _subUnits = subUnits;

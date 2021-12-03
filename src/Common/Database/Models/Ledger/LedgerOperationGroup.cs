@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.ValueConverters;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -99,10 +100,44 @@ public class LedgerOperationGroup
     public InferredAction? InferredAction { get; set; }
 }
 
+public enum InferredActionType
+{
+    CreateTokenDefinition,
+    SimpleTransfer,
+    StakeTokens,
+    UnstakeTokens,
+    MintTokens,
+    BurnTokens,
+    MintXrd,
+    PayXrd,
+    Complex,
+}
+
+public class InferredActionTypeValueConverter : EnumTypeValueConverterBase<InferredActionType>
+{
+    private static readonly Dictionary<InferredActionType, string> _conversion = new()
+    {
+        { InferredActionType.CreateTokenDefinition, "CREATE_TOKEN_DEFINITION" },
+        { InferredActionType.SimpleTransfer, "SIMPLE_TRANSFER" },
+        { InferredActionType.StakeTokens, "STAKE_TOKENS" },
+        { InferredActionType.UnstakeTokens, "UNSTAKE_TOKENS" },
+        { InferredActionType.MintTokens, "MINT_TOKENS" },
+        { InferredActionType.BurnTokens, "BURN_TOKENS" },
+        { InferredActionType.MintXrd, "MINT_XRD" },
+        { InferredActionType.PayXrd, "BURN_XRD" },
+        { InferredActionType.Complex, "COMPLEX" },
+    };
+
+    public InferredActionTypeValueConverter()
+        : base(_conversion, Invert(_conversion))
+    {
+    }
+}
+
 [Owned]
 public class InferredAction
 {
-    public InferredAction(string type, string? fromAddress, string? toAddress, TokenAmount? amount, string? resourceIdentifier)
+    public InferredAction(InferredActionType type, string? fromAddress, string? toAddress, TokenAmount? amount, string? resourceIdentifier)
     {
         Type = type;
         FromAddress = fromAddress;
@@ -116,7 +151,7 @@ public class InferredAction
     }
 
     [Column(name: "inferred_action_type")]
-    public string Type { get; set; }
+    public InferredActionType Type { get; set; }
 
     [Column(name: "inferred_action_from")]
     public string? FromAddress { get; set; }
@@ -129,4 +164,9 @@ public class InferredAction
 
     [Column(name: "inferred_action_rri")]
     public string? ResourceIdentifier { get; set; }
+
+    public static InferredAction Complex()
+    {
+        return new InferredAction(InferredActionType.Complex, null, null, null, null);
+    }
 }

@@ -241,7 +241,7 @@ public static class RadixAddressParser
     private static ResourceAddress GetResourceAddressFromAddressData(byte[] addressData)
     {
         var (reAddressType, _) = RadixBech32.ExtractRadixEngineAddressData(addressData);
-        if (reAddressType is not RadixEngineAddressType.NATIVE_TOKEN or RadixEngineAddressType.HASHED_KEY)
+        if (reAddressType is not (RadixEngineAddressType.NATIVE_TOKEN or RadixEngineAddressType.HASHED_KEY))
         {
             throw new AddressException("Address with resource hrp suffix is not of type NATIVE_TOKEN or HASHED_KEY");
         }

@@ -147,6 +147,9 @@ public class CommonDbContext : DbContext
             .HaveColumnType("numeric")
             .HavePrecision(1000, 0);
 
+        configurationBuilder.Properties<InferredActionType>()
+            .HaveConversion<InferredActionTypeValueConverter>();
+
         configurationBuilder.Properties<AccountStakeUnitBalanceSubstateType>()
             .HaveConversion<AccountStakeUnitBalanceSubstateTypeValueConverter>();
 

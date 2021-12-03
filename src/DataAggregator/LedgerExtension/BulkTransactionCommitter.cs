@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
@@ -126,17 +127,19 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
             var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
             TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
 
-            _dbContext.LedgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transaction, summary));
-            HandleTransaction(transaction, summary);
+            var dbTransaction = TransactionMapping.CreateLedgerTransaction(transaction, summary);
+            _dbContext.LedgerTransactions.Add(dbTransaction);
+
+            HandleTransaction(transaction, dbTransaction, summary);
             parentSummary = summary;
         }
 
         return parentSummary;
     }
 
-    private void HandleTransaction(CommittedTransaction transaction, TransactionSummary summary)
+    private void HandleTransaction(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary summary)
     {
         var transactionContentProcessor = new TransactionContentProcessor(_dbContext, _dbActionsPlanner, _entityDeterminer);
-        transactionContentProcessor.ProcessTransactionContents(transaction, summary);
+        transactionContentProcessor.ProcessTransactionContents(transaction, dbTransaction, summary);
     }
 }

@@ -147,9 +147,7 @@ public class ValidatorQuerier : IValidatorQuerier
             var properties = validatorProperties.GetValueOrDefault(validator.Id)?.Properties ??
                              GetDefaultValidatorProperties(validator.PublicKey);
 
-            var validatorOwnerStakeXrd = validatorTotalStake.TotalStakeUnits.IsZero()
-                ? TokenAmount.Zero
-                : (validatorOwnerStake.TotalStakeUnits * validatorTotalStake.TotalXrdStake) / validatorTotalStake.TotalStakeUnits;
+            var validatorOwnerStakeXrd = validatorTotalStake.EstimateXrdConversion(validatorOwnerStake.TotalStakeUnits);
 
             return (validator, validatorTotalStake, validatorOwnerStakeXrd, validatorUptime, properties);
         })

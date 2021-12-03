@@ -142,6 +142,11 @@ public class DbActionsPlanner
         _cancellationToken = cancellationToken;
     }
 
+    public void AddDbAction(Action action)
+    {
+        _dbActions.Add(action);
+    }
+
     public void UpSubstate<TSubstate>(
         TransactionOpLocator transactionOpLocator,
         byte[] identifier,
@@ -282,6 +287,19 @@ public class DbActionsPlanner
     {
         EnsureValidatorLoaded(validatorAddress, seenAtStateVersion);
         return () => GetValidator(validatorAddress);
+    }
+
+    // NB - must be preceded by calls to MarkValidatorStakeHistoryToLoad
+    public Func<string, ValidatorStakeSnapshot> CurrentValidatorStakeSnapshotLookup()
+    {
+        return validatorAddress =>
+            _latestValidatorStakeHistory!.GetValueOrDefault(GetValidator(validatorAddress))?.StakeSnapshot
+            ?? ValidatorStakeSnapshot.GetDefault();
+    }
+
+    public void MarkValidatorStakeHistoryToLoad(string validatorAddress)
+    {
+        _validatorStakeHistoryToLoadByValidatorAddress.Add(validatorAddress);
     }
 
     public async Task<ActionsPlannerReport> ProcessAllChanges()

@@ -97,9 +97,11 @@ public class TransactionContentProcessor
     /* Mutable Class State */
     /* > These simply help us avoid passing tons of references down the call stack.
     /* > These will all not be null at the time of use in the Handle methods. */
-    private TransactionSummary? _transactionSummary;
     private CommittedTransaction? _transaction;
+    private LedgerTransaction? _dbTransaction;
+    private TransactionSummary? _transactionSummary;
     private LedgerOperationGroup? _dbOperationGroup;
+    private Accounting? _operationGroupAccounting;
     private OperationGroup? _transactionOperationGroup;
     private TokenAmount _xrdResourceSupplyChange;
     private Dictionary<string, TokenAmount> _nonXrdResourceChangeThisOperationGroupByRri = new();
@@ -116,9 +118,10 @@ public class TransactionContentProcessor
         _entityDeterminer = entityDeterminer;
     }
 
-    public void ProcessTransactionContents(CommittedTransaction transaction, TransactionSummary transactionSummary)
+    public void ProcessTransactionContents(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary transactionSummary)
     {
         _transaction = transaction;
+        _dbTransaction = dbTransaction;
         _transactionSummary = transactionSummary;
         _operationGroupIndex = -1;
         foreach (var operationGroup in transaction.OperationGroups)
@@ -155,13 +158,15 @@ public class TransactionContentProcessor
                 continue;
             }
 
+            _operationGroupAccounting = new Accounting(_entityDeterminer);
             _dbOperationGroup = new LedgerOperationGroup(
                 transaction.CommittedStateIdentifier.StateVersion,
                 _operationGroupIndex,
-                null // TODO:NG-41 - fix inferred actions
+                null // Inferred action calculated/set below in the dbAction after the transaction group has processed
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
             _operationIndexInGroup = -1;
+            CalculateInferredAction(GetCurrentTransactionOpLocator(), _dbOperationGroup, _operationGroupAccounting);
 
             // Loop through again, processing all operations except RoundData and ValidatorBftData
             foreach (var operation in _transactionOperationGroup.Operations)
@@ -246,6 +251,8 @@ public class TransactionContentProcessor
                 $"Unparsable token amount value: {_operation!.Amount.Value}"
             );
         }
+
+        _operationGroupAccounting!.TrackDelta(_entity!, _operation!.Amount.ResourceIdentifier, _amount.Value);
 
         switch (_operation!.Amount.ResourceIdentifier)
         {
@@ -441,6 +448,12 @@ public class TransactionContentProcessor
     {
         var tokenAmount = _amount!.Value;
 
+        if (entityType == EntityType.Account_PreparedUnstake)
+        {
+            // This is to enable the action inference to calculate the XRD
+            _dbActionsPlanner.MarkValidatorStakeHistoryToLoad(validatorAddress);
+        }
+
         var type = entityType switch
         {
             EntityType.Account => AccountStakeUnitBalanceSubstateType.Stake,
@@ -532,6 +545,11 @@ public class TransactionContentProcessor
         var resourceIdentifier = _entity.ResourceAddress!;
         var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
         var resourceOwnerLookup = CreateAccountLookup(objects.TokenData?.Owner);
+
+        if (objects.TokenData != null && _operation!.Substate.SubstateOperation == Substate.SubstateOperationEnum.BOOTUP)
+        {
+            _operationGroupAccounting!.TrackTokenCreation(_entity!, objects.TokenData);
+        }
 
         HandleSubstateUpOrDown(
             () => objects.ToResourceDataSubstate(resourceLookup(), resourceOwnerLookup?.Invoke()),
@@ -772,6 +790,19 @@ public class TransactionContentProcessor
                 _transactionSummary!.StateVersion
             );
         }
+    }
+
+    // We put this in a method to ensure we capture these arguments in a closure
+    private void CalculateInferredAction(TransactionOpLocator transactionOpLocator, LedgerOperationGroup dbOperationGroup, Accounting operationGroupAccounting)
+    {
+        _dbActionsPlanner.AddDbAction(() =>
+        {
+            dbOperationGroup.InferredAction = operationGroupAccounting.InferAction(
+                _dbTransaction!.IsSystemTransaction,
+                transactionOpLocator,
+                _dbActionsPlanner.CurrentValidatorStakeSnapshotLookup() // We ensure relevant snapshots are loaded in the prepared validator unstakes handling section
+            );
+        });
     }
 
     /// <summary>

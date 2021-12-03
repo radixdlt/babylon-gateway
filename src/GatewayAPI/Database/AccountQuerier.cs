@@ -140,12 +140,7 @@ public class AccountQuerier : IAccountQuerier
             var stakeUnits = accountValidatorStakeSnapshot.TotalStakeUnits
                                  + accountValidatorStakeSnapshot.TotalPreparedUnStakeUnits;
 
-            var stakeUnitsAsEstimatedXrd =
-                (stakeUnits * validatorStakeSnapshot.TotalXrdStake) /
-                validatorStakeSnapshot.TotalStakeUnits
-            ;
-
-            totalXrd += definiteXrd + stakeUnitsAsEstimatedXrd;
+            totalXrd += definiteXrd + validatorStakeSnapshot.EstimateXrdConversion(stakeUnits);
         }
 
         return new TokenAmount(totalXrd.ToSubUnitString(), _networkConfigurationProvider.GetXrdTokenIdentifier());
@@ -161,15 +156,9 @@ public class AccountQuerier : IAccountQuerier
             {
                 var (validatorAddress, accountValidatorStakeSnapshot, validatorStakeSnapshot) = s;
 
-                var definiteXrd = accountValidatorStakeSnapshot.TotalPreparedXrdStake;
-                var stakeUnits = accountValidatorStakeSnapshot.TotalStakeUnits;
-
-                var stakeUnitsAsEstimatedXrd =
-                        (stakeUnits * validatorStakeSnapshot.TotalXrdStake) /
-                        validatorStakeSnapshot.TotalStakeUnits
-                    ;
-
-                var totalXrd = definiteXrd + stakeUnitsAsEstimatedXrd;
+                var totalXrd =
+                    accountValidatorStakeSnapshot.TotalPreparedXrdStake
+                    + validatorStakeSnapshot.EstimateXrdConversion(accountValidatorStakeSnapshot.TotalStakeUnits);
 
                 return (validatorAddress, totalXrd);
             })
@@ -201,14 +190,10 @@ public class AccountQuerier : IAccountQuerier
         var preparedUnstakes = allStakes.Select(s =>
             {
                 var (validatorAddress, accountValidatorStakeSnapshot, validatorStakeSnapshot) = s;
-                var stakeUnits = accountValidatorStakeSnapshot.TotalPreparedUnStakeUnits;
 
-                var stakeUnitsAsEstimatedXrd =
-                        (stakeUnits * validatorStakeSnapshot.TotalXrdStake) /
-                        validatorStakeSnapshot.TotalStakeUnits
-                    ;
+                var xrdEstimate = validatorStakeSnapshot.EstimateXrdConversion(accountValidatorStakeSnapshot.TotalPreparedUnStakeUnits);
 
-                return new UnstakePosition(validatorAddress, stakeUnitsAsEstimatedXrd, 1);
+                return new UnstakePosition(validatorAddress, xrdEstimate, 1); // TODO - Fix Epochs Until Unlocked
             });
 
         var exitingUnstakes = await (

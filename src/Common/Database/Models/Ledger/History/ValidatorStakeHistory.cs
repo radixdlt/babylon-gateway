@@ -219,4 +219,19 @@ public record ValidatorStakeSnapshot
             TotalExitingXrdStake = TotalExitingXrdStake + change.ChangeInExitingXrdStake,
         };
     }
+
+    public TokenAmount EstimateXrdConversion(TokenAmount stakeUnits)
+    {
+        if (TotalStakeUnits.IsZero())
+        {
+            return TokenAmount.Zero;
+        }
+
+        if (stakeUnits >= TotalStakeUnits)
+        {
+            return TotalXrdStake;
+        }
+
+        return (stakeUnits * TotalXrdStake) / TotalStakeUnits;
+    }
 }
