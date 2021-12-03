@@ -63,7 +63,6 @@
  */
 
 using Common.Exceptions;
-using DataAggregator.Exceptions;
 
 namespace DataAggregator.Configuration.Models;
 
@@ -76,10 +75,16 @@ public record NodeAppSettings
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Domain Name or IP Address.
+    /// Address of the node's Core API.
     /// </summary>
-    [ConfigurationKeyName("Address")]
-    public string Address { get; set; } = string.Empty;
+    [ConfigurationKeyName("CoreApiAddress")]
+    public string CoreApiAddress { get; set; } = string.Empty;
+
+    /// <summary>
+    /// AuthorizationHeader - if set, can allow for basic auth.
+    /// </summary>
+    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
+    public string? CoreApiAuthorizationHeader { get; set; } = null;
 
     /// <summary>
     /// Relative weighting of the node.
@@ -100,7 +105,7 @@ public record NodeAppSettings
             throw new InvalidConfigurationException("A node's name cannot be empty");
         }
 
-        if (string.IsNullOrEmpty(Address))
+        if (string.IsNullOrEmpty(CoreApiAddress))
         {
             throw new InvalidConfigurationException("A node's address cannot be empty");
         }

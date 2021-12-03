@@ -62,40 +62,12 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
+namespace GatewayAPI.Exceptions;
 
-namespace GatewayAPI.Configuration.Models;
-
-public record ApiGatewayConstructionNode
+public class TokenNotFoundException : NotFoundException
 {
-    /// <summary>
-    /// A unique name identifying this node - used as the node's id.
-    /// </summary>
-    [ConfigurationKeyName("Name")]
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Domain Name or IP Address.
-    /// </summary>
-    [ConfigurationKeyName("Address")]
-    public string Address { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Relative weighting of the node.
-    /// </summary>
-    [ConfigurationKeyName("RequestWeighting")]
-    public decimal RequestWeighting { get; set; } = 1;
-
-    public void AssertValid()
+    public TokenNotFoundException()
+        : base(@"Token not found")
     {
-        if (string.IsNullOrEmpty(Name))
-        {
-            throw new InvalidConfigurationException("A node's name cannot be empty");
-        }
-
-        if (string.IsNullOrEmpty(Address))
-        {
-            throw new InvalidConfigurationException("A node's address cannot be empty");
-        }
     }
 }

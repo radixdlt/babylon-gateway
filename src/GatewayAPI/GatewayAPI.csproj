@@ -8,7 +8,9 @@
     <!-- NB - PackageReference versions are overridden centrally in Directory.Packages.props -->
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
         <PackageReference Include="RadixGatewayApi.Generated" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
     </ItemGroup>
 
     <ItemGroup>

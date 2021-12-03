@@ -80,16 +80,57 @@ public static class ConnectionHelpers
         await dbAction(logger, dbContext);
     }
 
-    public static async Task TryWaitForDb<TContext>(IServiceProvider services, int maxWaitForDbMs)
+    public static async Task MigrateWithRetry<TContext>(IServiceProvider services, int maxWaitForDbMs)
         where TContext : DbContext
     {
         await PerformScopedDbAction<TContext>(services, async (logger, dbContext) =>
         {
-            await TryWaitForDbInternal(logger, dbContext, maxWaitForDbMs);
+            await TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
         });
     }
 
-    private static async Task TryWaitForDbInternal(ILogger logger, DbContext dbContext, int maxWaitForDbMs)
+    public static async Task MigrateWithRetry(ILogger logger, DbContext dbContext, int maxWaitForDbMs)
+    {
+        if (await TryToMigrate(dbContext, maxWaitForDbMs <= 0))
+        {
+            return;
+        }
+
+        logger.LogInformation("Database does not appear to be accepting connections yet. Waiting up to {MaxWaitForDbMs}ms to connect... ", maxWaitForDbMs);
+
+        var timer = new Stopwatch();
+        timer.Start();
+        while (timer.ElapsedMilliseconds <= maxWaitForDbMs)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+
+            if (await TryToMigrate(dbContext))
+            {
+                logger.LogInformation("Successfully executed migrations after {WaitForDbMs}ms", timer.ElapsedMilliseconds);
+                return;
+            }
+        }
+
+        logger.LogWarning("Could not connect to database after waiting {MaxWaitForDbMs}ms. Trying one last time...", timer.ElapsedMilliseconds);
+
+        // Try to throw a useful exception explaining that it can't connect
+        await TryToMigrate(dbContext, true);
+    }
+
+    /// <summary>
+    /// This requires that the Database already exists.
+    /// </summary>
+    /// <typeparam name="TContext">The database context.</typeparam>
+    public static async Task TryWaitForExistingDb<TContext>(IServiceProvider services, int maxWaitForDbMs)
+        where TContext : DbContext
+    {
+        await PerformScopedDbAction<TContext>(services, async (logger, dbContext) =>
+        {
+            await TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
+        });
+    }
+
+    public static async Task TryWaitForExistingDbConnection(ILogger logger, DbContext dbContext, int maxWaitForDbMs)
     {
         if (maxWaitForDbMs <= 0)
         {
@@ -121,5 +162,23 @@ public static class ConnectionHelpers
 
         // Try to throw a useful exception explaining that it can't connect
         await dbContext.Database.OpenConnectionAsync();
+    }
+
+    private static async Task<bool> TryToMigrate(DbContext dbContext, bool propagateErrors = false)
+    {
+        try
+        {
+            await dbContext.Database.MigrateAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            if (propagateErrors)
+            {
+                throw;
+            }
+
+            return false;
+        }
     }
 }

@@ -103,7 +103,7 @@ public class CommonDbContext : DbContext
 
     public DbSet<ResourceDataSubstate> ResourceDataSubstates => Set<ResourceDataSubstate>();
 
-    public DbSet<ValidatorDataSubstate> ValidatorDataSubstate => Set<ValidatorDataSubstate>();
+    public DbSet<ValidatorDataSubstate> ValidatorDataSubstates => Set<ValidatorDataSubstate>();
 
     public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
@@ -114,6 +114,12 @@ public class CommonDbContext : DbContext
     public DbSet<AccountValidatorStakeHistory> AccountValidatorStakeHistoryEntries => Set<AccountValidatorStakeHistory>();
 
     public DbSet<ValidatorProposalRecord> ValidatorProposalRecords => Set<ValidatorProposalRecord>();
+
+    public DbSet<Account> Accounts => Set<Account>();
+
+    public DbSet<Resource> Resources => Set<Resource>();
+
+    public DbSet<Validator> Validators => Set<Validator>();
 
 #pragma warning restore CS1591
 

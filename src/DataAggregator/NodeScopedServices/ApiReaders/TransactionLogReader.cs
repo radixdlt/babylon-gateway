@@ -63,6 +63,7 @@
  */
 
 using DataAggregator.GlobalServices;
+using RadixCoreApi.GeneratedClient.Api;
 using RadixCoreApi.GeneratedClient.Model;
 
 namespace DataAggregator.NodeScopedServices.ApiReaders;
@@ -75,17 +76,17 @@ public interface ITransactionLogReader
 public class TransactionLogReader : ITransactionLogReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly INodeCoreApiProvider _apiProvider;
+    private readonly TransactionsApi _transactionsApi;
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, INodeCoreApiProvider apiProvider)
+    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _apiProvider = apiProvider;
+        _transactionsApi = coreApiProvider.TransactionsApi;
     }
 
     public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        return await _apiProvider.TransactionsApi
+        return await _transactionsApi
             .TransactionsPostAsync(
                 new CommittedTransactionsRequest(
                     networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),

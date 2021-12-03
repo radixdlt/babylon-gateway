@@ -62,8 +62,11 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
 using GatewayAPI.Database;
+using GatewayAPI.Fallback;
+using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace GatewayAPI.DependencyInjection;
@@ -74,19 +77,46 @@ public class DefaultKernel
     {
         // Globally-Scoped services
         AddGlobalScopedServices(services);
-        AddRequestScopedServices(services);
         AddDatabaseContext(hostBuilderContext, services);
+
+        // Request scoped services
+        AddRequestScopedServices(services);
+        AddFallbackApiServices(services);
     }
 
     private void AddGlobalScopedServices(IServiceCollection services)
     {
         services.AddSingleton<INetworkGatewayConfiguration, NetworkGatewayConfiguration>();
+        services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        services.AddSingleton<IValidations, Validations>();
     }
 
     private void AddRequestScopedServices(IServiceCollection services)
     {
         services.AddScoped<ILedgerStateQuerier, LedgerStateQuerier>();
         services.AddScoped<IAccountQuerier, AccountQuerier>();
+        services.AddScoped<ITokenQuerier, TokenQuerier>();
+        services.AddScoped<IValidatorQuerier, ValidatorQuerier>();
+    }
+
+    private void AddFallbackApiServices(IServiceCollection services)
+    {
+        // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
+        // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
+        // This should only be used from the other readers, to ensure encapsulation for testing
+        services.AddHttpClient<IFallbackGatewayApiProvider, FallbackGatewayApiProvider>()
+            .ConfigurePrimaryHttpMessageHandler(s =>
+            {
+                var disableCertificateChecks = s.GetRequiredService<IConfiguration>()
+                    .GetValue<bool>("DisableFallbackGatewayApiHttpsCertificateChecks");
+
+                return disableCertificateChecks
+                    ? new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
+                    }
+                    : new HttpClientHandler();
+            });
     }
 
     private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)

@@ -7,22 +7,22 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  "/network":
+  "/gateway":
     post:
-      summary: Get Network
+      summary: Get Gateway Info
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/NetworkRequest"
+              "$ref": "#/components/schemas/GatewayRequest"
       responses:
         '200':
           description: The Network
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/NetworkResponse"
+                "$ref": "#/components/schemas/GatewayResponse"
         '500':
           description: Unexpected error
           content:
@@ -492,6 +492,7 @@ components:
           "$ref": "#/components/schemas/TokenAmount"
         epochs_until_unlocked:
           type: integer
+          format: int64
     AccountTransactionsRequest:
       type: object
       required:
@@ -558,13 +559,13 @@ components:
         - "$ref": "#/components/schemas/Action"
         - type: object
           required:
-            - from
-            - to
+            - from_account
+            - to_account
             - amount
           properties:
-            from:
+            from_account:
               "$ref": "#/components/schemas/AccountIdentifier"
-            to:
+            to_account:
               "$ref": "#/components/schemas/AccountIdentifier"
             amount:
               "$ref": "#/components/schemas/TokenAmount"
@@ -572,10 +573,14 @@ components:
       allOf:
         - "$ref": "#/components/schemas/Action"
         - type: object
+          required:
+            - from_account
+            - to_validator
+            - amount
           properties:
-            from:
+            from_account:
               "$ref": "#/components/schemas/AccountIdentifier"
-            to:
+            to_validator:
               "$ref": "#/components/schemas/ValidatorIdentifier"
             amount:
               "$ref": "#/components/schemas/TokenAmount"
@@ -584,13 +589,13 @@ components:
         - "$ref": "#/components/schemas/Action"
         - type: object
           required:
-            - from
-            - to
+            - from_validator
+            - to_account
             - amount
           properties:
-            from:
+            from_validator:
               "$ref": "#/components/schemas/ValidatorIdentifier"
-            to:
+            to_account:
               "$ref": "#/components/schemas/AccountIdentifier"
             amount:
               "$ref": "#/components/schemas/TokenAmount"
@@ -606,17 +611,17 @@ components:
               "$ref": "#/components/schemas/TokenProperties"
             token_supply:
               "$ref": "#/components/schemas/TokenAmount"
-            to:
+            to_account:
               "$ref": "#/components/schemas/AccountIdentifier"
     MintTokens:
       allOf:
         - "$ref": "#/components/schemas/Action"
         - type: object
           required:
-            - to
+            - to_account
             - amount
           properties:
-            to:
+            to_account:
               "$ref": "#/components/schemas/AccountIdentifier"
             amount:
               "$ref": "#/components/schemas/TokenAmount"
@@ -625,10 +630,10 @@ components:
         - "$ref": "#/components/schemas/Action"
         - type: object
           required:
-            - from
+            - from_account
             - amount
           properties:
-            from:
+            from_account:
               "$ref": "#/components/schemas/AccountIdentifier"
             amount:
               "$ref": "#/components/schemas/TokenAmount"
@@ -696,9 +701,9 @@ components:
         network: mainnet
         actions:
           - type: TransferTokens
-            from:
+            from_account:
               address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
-            to:
+            to_account:
               address: rdx1qspcvwwuf8s549zyspz683v4n93g9kzpn6u6a9yalwzt00zghg75lmsftwv29
             amount:
               token_identifier:
@@ -839,7 +844,7 @@ components:
             - public_key
             - bytes
           properties:
-            publicKey:
+            public_key:
               type: string
             bytes:
               type: string
@@ -854,10 +859,13 @@ components:
     TransactionFinalizeResponse:
       type: object
       required:
+        - transaction_identifier
         - signed_transaction
       properties:
         signed_transaction:
           type: string
+        transaction_identifier:
+          $ref: "#/components/schemas/TransactionIdentifier"
     TransactionSubmitRequest:
       type: object
       required:
@@ -875,10 +883,10 @@ components:
       properties:
         transaction_identifier:
           $ref: "#/components/schemas/TransactionIdentifier"
-    NetworkRequest:
+    GatewayRequest:
       type: object
       example: {}
-    NetworkResponse:
+    GatewayResponse:
       type: object
       required:
         - network
@@ -888,6 +896,8 @@ components:
           type: string
         ledger_state:
           $ref: "#/components/schemas/LedgerState"
+        target_ledger_state:
+          $ref: "#/components/schemas/TargetLedgerState"
       example:
         network: mainnet
         ledger_state:
@@ -895,6 +905,8 @@ components:
           round: 1
           version: 1
           timestamp: "2021-08-29T01:19:00.524Z"
+        target_ledger_state:
+          version: 1000
     TokenRequest:
       type: object
       required:
@@ -928,6 +940,14 @@ components:
         round:
           type: integer
           format: int64
+    TargetLedgerState:
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: integer
+          format: int64
     TokenResponse:
       type: object
       required:
@@ -937,10 +957,7 @@ components:
         ledger_state:
           "$ref": "#/components/schemas/LedgerState"
         token:
-          type: array
-          maxItems: 1
-          items:
-            "$ref": "#/components/schemas/Token"
+          "$ref": "#/components/schemas/Token"
       example:
         ledger_state:
           epoch: 1
@@ -948,31 +965,31 @@ components:
           version: 1
           timestamp: "2021-08-29T01:19:00.524Z"
         token:
-          - token_identifier:
+          token_identifier:
+            rri: xrd_rr1qy5wfsfh
+          total_supply:
+            token_identifier:
               rri: xrd_rr1qy5wfsfh
-            total_supply:
+            value: '12014560679861300000000000000'
+          info:
+            total_burned:
               token_identifier:
                 rri: xrd_rr1qy5wfsfh
-              value: '12014560679861300000000000000'
-            info:
-              total_burned:
-                token_identifier:
-                  rri: xrd_rr1qy5wfsfh
-                value: '11437173800000000000000'
-              total_minted:
-                token_identifier:
-                  rri: xrd_rr1qy5wfsfh
-                value: '12014572117035100000000000000'
-            properties:
-              icon_url: https://assets.radixdlt.com/icons/icon-xrd-32x32.png
-              is_supply_mutable: true
-              symbol: xrd
-              granularity: '1'
-              name: Radix
-              description: The Radix Public Network's native token, used to pay the
-                network's required transaction fees and to secure the network through
-                staking to its validator nodes.
-              url: https://tokens.radixdlt.com
+              value: '11437173800000000000000'
+            total_minted:
+              token_identifier:
+                rri: xrd_rr1qy5wfsfh
+              value: '12014572117035100000000000000'
+          properties:
+            icon_url: https://assets.radixdlt.com/icons/icon-xrd-32x32.png
+            is_supply_mutable: true
+            symbol: xrd
+            granularity: '1'
+            name: Radix
+            description: The Radix Public Network's native token, used to pay the
+              network's required transaction fees and to secure the network through
+              staking to its validator nodes.
+            url: https://tokens.radixdlt.com
     TokenNativeRequest:
       type: object
       required:
@@ -991,10 +1008,7 @@ components:
         ledger_state:
           "$ref": "#/components/schemas/LedgerState"
         token:
-          type: array
-          maxItems: 1
-          items:
-            "$ref": "#/components/schemas/Token"
+          "$ref": "#/components/schemas/Token"
       example:
         ledger_state:
           epoch: 1
@@ -1075,10 +1089,7 @@ components:
         ledger_state:
           "$ref": "#/components/schemas/LedgerState"
         transaction:
-          type: array
-          maxItems: 1
-          items:
-            "$ref": "#/components/schemas/AccountTransaction"
+          "$ref": "#/components/schemas/AccountTransaction"
     ValidatorInfoRequest:
       type: object
       required:
@@ -1124,38 +1135,18 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Validator"
-    InternalServerError:
-      type: object
-      properties:
-        exception:
-          type: string
-        cause:
-          type: string
-    InvalidJsonError:
-      type: object
-      properties:
-        cause:
-          type: string
-    InvalidRequestError:
-      type: object
-      properties:
-        pointer:
-          type: string
-        cause:
-          type: string
     UnexpectedError:
       type: object
       required:
+        - code
         - message
       properties:
+        code:
+          type: integer
         message:
           type: string
-      discriminator:
-        propertyName: message
-        mapping:
-          INTERNAL_SERVER_ERROR: "#/components/schemas/InternalServerError"
-          INVALID_JSON: "#/components/schemas/InvalidJsonError"
-          INVALID_REQUEST: "#/components/schemas/InvalidRequestError"
+        details:
+          type: object
     Validator:
       type: object
       required:
@@ -1245,9 +1236,11 @@ components:
           type: string
         proposals_missed:
           type: integer
+          format: int64
           minimum: 0
         proposals_completed:
           type: integer
+          format: int64
           minimum: 0
     EpochRange:
       type: object
@@ -1319,6 +1312,10 @@ components:
         - symbol
         - is_supply_mutable
         - granularity
+        - name
+        - description
+        - url
+        - icon_url
       properties:
         name:
           type: string
@@ -1428,10 +1425,10 @@ components:
           minLength: 64
     AccountAddress:
       type: string
-      pattern: "^(r|t|d)dx[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
+      pattern: "^[rtd]dx[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
     ValidatorAddress:
       type: string
-      pattern: "^(r|t|d)v[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
+      pattern: "^[rtd]v[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69}$"
     ResourceIdentifier:
       type: string
-      pattern: ^[!\"#$%&'()*+,-.\/0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\[\\\]\^_`abcdefghijklmnopqrstuvwxyz{|}~]{1,83}_r[rb]1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$
+      pattern: "^[a-z0-9]{1,83}_[rtd]r[2-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,90}$"

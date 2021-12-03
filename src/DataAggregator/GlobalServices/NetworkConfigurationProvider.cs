@@ -189,12 +189,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
 
             _capturedConfig = new CapturedConfig(
                 inputNetworkConfiguration,
-                new AddressHrps(
-                    inputNetworkConfiguration.NetworkAddressHrps.AccountHrp,
-                    inputNetworkConfiguration.NetworkAddressHrps.ResourceHrpSuffix,
-                    inputNetworkConfiguration.NetworkAddressHrps.ValidatorHrp,
-                    inputNetworkConfiguration.NetworkAddressHrps.NodeHrp
-                ),
+                inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
                 new NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName)
             );
         }

@@ -67,13 +67,10 @@
 
 using Common.Database;
 using DataAggregator.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 
 var host = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((hostingContext, config) =>
+    .ConfigureAppConfiguration((_, config) =>
     {
-        IHostEnvironment env = hostingContext.HostingEnvironment;
-
         config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
         if (args is { Length: > 0 })
         {
@@ -81,14 +78,25 @@ var host = Host.CreateDefaultBuilder(args)
         }
     })
     .ConfigureServices(new DefaultKernel().ConfigureServices)
-    .ConfigureLogging(builder =>
+    .ConfigureLogging((hostBuilderContext, loggingBuilder) =>
     {
-        builder.AddSimpleConsole(options =>
+        if (hostBuilderContext.HostingEnvironment.IsDevelopment())
         {
-            options.IncludeScopes = true;
-            options.SingleLine = true;
-            options.TimestampFormat = "hh:mm:ss ";
-        });
+            loggingBuilder.AddSimpleConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.SingleLine = true;
+                options.TimestampFormat = "hh:mm:ss ";
+            });
+        }
+        else
+        {
+            loggingBuilder.AddJsonConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.TimestampFormat = "hh:mm:ss ";
+            });
+        }
     })
     .Build();
 
@@ -100,13 +108,16 @@ var shouldWipeDatabaseInsteadOfStart =
     configuration.GetValue<bool>("WIPE_DATABASE")
     && (isDevelopment || configuration.GetValue<bool>("WIPE_DATABASE_CONFIRM"));
 
-var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
-await ConnectionHelpers.TryWaitForDb<AggregatorDbContext>(host.Services, maxWaitForDbMs);
+var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
 
 if (shouldWipeDatabaseInsteadOfStart)
 {
     await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(host.Services, async (logger, dbContext) =>
     {
+        logger.LogInformation("Connecting to database - if it exists");
+
+        await ConnectionHelpers.TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
+
         logger.LogInformation("Starting database wipe");
 
         await dbContext.Database.EnsureDeletedAsync();
@@ -122,7 +133,7 @@ else
     {
         logger.LogInformation("Starting database migrations if required");
 
-        await dbContext.Database.MigrateAsync();
+        await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
 
         logger.LogInformation("Database migrations (if required) were completed");
     });

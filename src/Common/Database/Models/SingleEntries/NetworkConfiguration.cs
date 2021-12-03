@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -108,6 +109,16 @@ public record NetworkAddressHrps
 
     [Column("node_hrp")]
     public string NodeHrp { get; set; }
+
+    public AddressHrps ToAddressHrps()
+    {
+        return new AddressHrps(
+            AccountHrp,
+            ResourceHrpSuffix,
+            ValidatorHrp,
+            NodeHrp
+        );
+    }
 }
 
 [Owned]

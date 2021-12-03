@@ -193,7 +193,12 @@ public static class Bech32
             stringBuilder.Append(Charset[bit]);
         }
 
-        return stringBuilder.ToString();
+        var address = stringBuilder.ToString();
+
+        // Ensure we have the right length
+        AssertBech32StringValid(address);
+
+        return address;
     }
 
     public static Bech32RawData DecodeToRawData(string encoded)

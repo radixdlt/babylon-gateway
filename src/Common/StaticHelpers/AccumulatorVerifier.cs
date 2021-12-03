@@ -79,14 +79,11 @@ public static class AccumulatorVerifier
         parentAccumulator.CopyTo(aggregate);
         childHash.CopyTo(aggregate[32..]);
 
-        // Create result - Sha256Twice
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(aggregate, hashResult1);
-        Span<byte> hashResult2 = stackalloc byte[32];
-        SHA256.HashData(hashResult1, hashResult2);
+        Span<byte> hashResult = stackalloc byte[32];
+        HashingHelper.Sha256Twice(aggregate, hashResult);
 
         // Compare
-        return hashResult2.SequenceEqual(newAccumulator);
+        return hashResult.SequenceEqual(newAccumulator);
     }
 
     // NB - There is some repetition with the above for performance gains regarding stackalloc.
@@ -100,8 +97,6 @@ public static class AccumulatorVerifier
         childHash.CopyTo(aggregate[parentAccumulator.Length..]);
 
         // Create result - Sha256Twice
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(aggregate, hashResult1);
-        return SHA256.HashData(hashResult1);
+        return HashingHelper.Sha256Twice(aggregate);
     }
 }

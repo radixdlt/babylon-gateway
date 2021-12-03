@@ -63,7 +63,6 @@
  */
 
 using Common.Database;
-using Common.Database.Models.Ledger.History;
 using Microsoft.EntityFrameworkCore;
 
 namespace GatewayAPI.Database;
@@ -73,5 +72,11 @@ public class GatewayReadOnlyDbContext : CommonDbContext
     public GatewayReadOnlyDbContext(DbContextOptions<GatewayReadOnlyDbContext> options)
         : base(options)
     {
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 }

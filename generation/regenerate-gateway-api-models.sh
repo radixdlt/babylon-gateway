@@ -12,7 +12,7 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageVersion='0.1.1' # This needs bumping every time
+packageVersion='0.1.8' # This needs bumping every time
 packageName='RadixGatewayApi.Generated'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
@@ -55,7 +55,7 @@ openapi-generator generate \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net5.0,packageVersion=$packageVersion
+    --additional-properties=packageName=$packageName,targetFramework=net5.0,packageVersion=$packageVersion,optionalEmitDefaultValues=true
 
 cd "$dummyApiDirectory"
 dotnet pack

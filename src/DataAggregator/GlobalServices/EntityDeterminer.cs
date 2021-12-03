@@ -174,7 +174,7 @@ public class EntityDeterminer : IEntityDeterminer
 
     public byte[] ParseValidatorPublicKey(string validatorAddress)
     {
-        if (!RadixAddressParser.TryParse(
+        if (!RadixAddressParser.TryParseValidatorAddress(
                 _networkConfigurationProvider.GetAddressHrps(),
                 validatorAddress,
                 out var radixAddress,
@@ -184,17 +184,12 @@ public class EntityDeterminer : IEntityDeterminer
             throw new Exception($"Validator address [{validatorAddress}] didn't parse correctly: {errorMessage}");
         }
 
-        if (radixAddress.Type != RadixAddressType.Validator)
-        {
-            throw new Exception($"Validator address [{validatorAddress}] wasn't a validator address");
-        }
-
-        return radixAddress.AddressData;
+        return radixAddress.CompressedPublicKey;
     }
 
     public byte[] ParseAccountPublicKey(string accountAddress)
     {
-        if (!RadixAddressParser.TryParse(
+        if (!RadixAddressParser.TryParseAccountAddress(
                 _networkConfigurationProvider.GetAddressHrps(),
                 accountAddress,
                 out var radixAddress,
@@ -204,17 +199,12 @@ public class EntityDeterminer : IEntityDeterminer
             throw new Exception($"Account address [{accountAddress}] didn't parse correctly: {errorMessage}");
         }
 
-        if (radixAddress.Type != RadixAddressType.Account)
-        {
-            throw new Exception($"Account address [{accountAddress}] wasn't an account address");
-        }
-
-        return radixAddress.AddressData;
+        return radixAddress.CompressedPublicKey;
     }
 
     public byte[] ParseResourceRadixEngineAddress(string rri)
     {
-        if (!RadixAddressParser.TryParse(
+        if (!RadixAddressParser.TryParseResourceAddress(
                 _networkConfigurationProvider.GetAddressHrps(),
                 rri,
                 out var radixAddress,
@@ -224,12 +214,7 @@ public class EntityDeterminer : IEntityDeterminer
             throw new Exception($"Resource identifier [{rri}] didn't parse correctly: {errorMessage}");
         }
 
-        if (radixAddress.Type != RadixAddressType.Resource)
-        {
-            throw new Exception($"Resource identifier [{rri}] wasn't an RRI");
-        }
-
-        return radixAddress.AddressData;
+        return radixAddress.RadixEngineAddress;
     }
 
     public bool IsXrd(string rri)

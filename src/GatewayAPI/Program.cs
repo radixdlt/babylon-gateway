@@ -66,27 +66,18 @@
 #pragma warning disable SA1516
 
 using Common.Database;
+using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
-using GatewayAPI.Filters;
+using GatewayAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var host = builder.Host;
+var services = builder.Services;
 
-/* Configure services / dependency injection */
+/* Read in other configuration */
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(new ExceptionFilter());
-});
-builder.Host.ConfigureServices(new DefaultKernel().ConfigureServices);
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-/* Other configuration */
-
-builder.Host.ConfigureAppConfiguration((_, config) =>
+host.ConfigureAppConfiguration((_, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_API__");
     if (args is { Length: > 0 })
@@ -95,14 +86,47 @@ builder.Host.ConfigureAppConfiguration((_, config) =>
     }
 });
 
-builder.Host.ConfigureLogging(logConfigBuilder =>
-{
-    logConfigBuilder.AddSimpleConsole(options =>
+/* Configure services / dependency injection */
+
+host.ConfigureServices(new DefaultKernel().ConfigureServices);
+
+services
+    .AddControllers(options =>
     {
-        options.IncludeScopes = true;
-        options.SingleLine = true;
-        options.TimestampFormat = "hh:mm:ss ";
+        options.Filters.Add<ExceptionFilter>();
+    })
+    /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
+    .AddNewtonsoftJson()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // TODO:NG-56 - configure validation errors to return in standard response format - eg https://stackoverflow.com/a/64784861
+        // options.InvalidModelStateResponseFactory = context => { }
     });
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
+services.AddSwaggerGenNewtonsoftSupport();
+
+host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+{
+    if (hostBuilderContext.HostingEnvironment.IsDevelopment())
+    {
+        loggingBuilder.AddSimpleConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.SingleLine = true;
+            options.TimestampFormat = "hh:mm:ss ";
+        });
+    }
+    else
+    {
+        loggingBuilder.AddJsonConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.TimestampFormat = "hh:mm:ss ";
+        });
+    }
 });
 
 var app = builder.Build();
@@ -118,7 +142,27 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-var maxWaitForDbMs = app.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
-await ConnectionHelpers.TryWaitForDb<GatewayReadOnlyDbContext>(app.Services, maxWaitForDbMs);
+await EnsureCanConnectToDatabase(app);
+await LoadNetworkConfigurationFromDb(app);
 
 await app.RunAsync();
+
+/* Methods */
+
+async Task EnsureCanConnectToDatabase(WebApplication app1)
+{
+    var maxWaitForDbMs = app1.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
+    await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app1.Services, maxWaitForDbMs);
+}
+
+async Task LoadNetworkConfigurationFromDb(WebApplication webApplication)
+{
+    using (var scope = webApplication.Services.CreateScope())
+    {
+        await scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>()
+            .LoadNetworkConfigurationFromDatabase(
+                scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
+                CancellationToken.None
+            );
+    }
+}

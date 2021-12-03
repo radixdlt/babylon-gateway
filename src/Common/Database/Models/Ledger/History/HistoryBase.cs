@@ -89,7 +89,12 @@ public abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
 /// already-committed state version, to ensure that the history you read is atomic against that stateVersion.
 /// (Or at least, it is atomic assuming the ledger isn't mid-reversion, but at that point, all bets are off).
 ///
-/// DbQueryExtensions.GetHistoryAtVersion should help with this.
+/// There should be indexes with to_state_version null (to pull "latest") and against from_state_version
+/// (to easily pull history at a given state version). The former could/should be replaced with the latter with
+/// a little work.
+///
+/// You will likely also want to add a query in DbQueryExtensions to help with querying against a given state version.
+/// It may also be worthwhile to create a TableValuedFunction with this SQL to make direct-SQL-querying easier.
 /// </summary>
 public abstract class HistoryBase
 {

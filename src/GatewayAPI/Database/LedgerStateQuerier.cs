@@ -65,6 +65,7 @@
 using Common.Database;
 using Common.Extensions;
 using GatewayAPI.Exceptions;
+using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
 
@@ -72,24 +73,57 @@ namespace GatewayAPI.Database;
 
 public interface ILedgerStateQuerier
 {
-    Task<LedgerState> GetTipOfLedgerState(string networkName);
+    Task<GatewayResponse> GetGatewayState();
+
+    Task<LedgerState> GetLedgerState(string networkName, long? atStateVersion = null);
+
+    void AssertMatchingNetwork(string networkName);
 }
 
 public class LedgerStateQuerier : ILedgerStateQuerier
 {
     private readonly GatewayReadOnlyDbContext _dbContext;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public LedgerStateQuerier(GatewayReadOnlyDbContext dbContext)
+    public LedgerStateQuerier(GatewayReadOnlyDbContext dbContext, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
+        _networkConfigurationProvider = networkConfigurationProvider;
+    }
+
+    public async Task<GatewayResponse> GetGatewayState()
+    {
+        return new GatewayResponse(
+            _networkConfigurationProvider.GetNetworkName(),
+            await GetLedgerState(),
+            new TargetLedgerState() // TODO:NG-12 - fix this once we know what the max ledger state seen by nodes is
+        );
     }
 
     // So that we don't forget to check the network name, add the assertion in here.
-    public async Task<LedgerState> GetTipOfLedgerState(string networkName)
+    public async Task<LedgerState> GetLedgerState(string networkName, long? atStateVersion = null)
     {
-        await AssertMatchingNetwork(networkName);
+        AssertMatchingNetwork(networkName);
+        return await GetLedgerState(atStateVersion);
+    }
 
-        return await _dbContext.GetTopLedgerTransaction()
+    public void AssertMatchingNetwork(string networkName)
+    {
+        var ledgerNetworkName = _networkConfigurationProvider.GetNetworkName();
+
+        if (networkName != ledgerNetworkName)
+        {
+            throw new MismatchingNetworkException(ledgerNetworkName);
+        }
+    }
+
+    private async Task<LedgerState> GetLedgerState(long? atStateVersion = null)
+    {
+        var query = atStateVersion.HasValue
+            ? _dbContext.GetLatestLedgerTransactionBeforeStateVersion(Math.Min(1, atStateVersion.Value))
+            : _dbContext.GetTopLedgerTransaction();
+
+        return await query
             .Select(lt => new LedgerState(
                 lt.ResultantStateVersion,
                 lt.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
@@ -97,19 +131,5 @@ public class LedgerStateQuerier : ILedgerStateQuerier
                 lt.RoundInEpoch
             ))
             .SingleAsync();
-    }
-
-    // TODO - Improve performance to cache this
-    // TODO - Ensure NetworkConfiguration exists at service launch
-    private async Task AssertMatchingNetwork(string networkName)
-    {
-        var ledgerNetworkName = await _dbContext.NetworkConfiguration
-            .Select(c => c.NetworkDefinition.NetworkName)
-            .SingleAsync();
-
-        if (networkName != ledgerNetworkName)
-        {
-            throw new MismatchingNetworkException(ledgerNetworkName);
-        }
     }
 }
