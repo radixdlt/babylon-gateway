@@ -100,13 +100,9 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-var isDevelopment = host.Services.GetRequiredService<IHostEnvironment>().IsDevelopment();
 var configuration = host.Services.GetRequiredService<IConfiguration>();
 
-// In production, provide both RADIX_NETWORK_GATEWAY__WIPE_DATABASE and RADIX_NETWORK_GATEWAY__WIPE_DATABASE_CONFIRM to wipe the ledger
-var shouldWipeDatabaseInsteadOfStart =
-    configuration.GetValue<bool>("WIPE_DATABASE")
-    && (isDevelopment || configuration.GetValue<bool>("WIPE_DATABASE_CONFIRM"));
+var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
 
 var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
 
