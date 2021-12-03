@@ -31,6 +31,9 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
   publish-docker:
     runs-on: ubuntu-latest
+    outputs:  
+      data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag}}
+      gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag}}
     steps:
       - name: Dump context
         uses: crazy-max/ghaction-dump-context@v1
@@ -50,6 +53,7 @@ jobs:
           username: _json_key
           password: ${{ secrets.GCR_EU_DEV_JSON_KEY }}
       - name: Setup tags for docker image
+        id: setup_tags
         run: |
             docker_tag_with_branch(){
                GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
@@ -82,7 +86,8 @@ jobs:
             echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
             echo "DATA_AGGREGATOR_TAGS=$DATA_AGGREGATOR_TAGS" >> $GITHUB_ENV
             echo "GATEWAY_API_TAGS=$GATEWAY_API_TAGS" >> $GITHUB_ENV
-             
+            echo "::set-output name=data-aggregator-tag::$DOCKER_TAG"
+            echo "::set-output name=gateway-api-tag::$DOCKER_TAG"
       - name: Docker build and push DataAggregator
         uses: docker/build-push-action@v2
         with:
@@ -100,5 +105,48 @@ jobs:
             ${{ env.GATEWAY_API_TAGS }}
           push: true
           context: ./
+    
+  dispatch-deployment-events:
+    runs-on: ubuntu-latest
+    needs: publish-docker
+    steps:
+      - name: setup "namespace_postfix"
+        run: |
+          GH_EVENT_NAME="${{ github.event_name }}"
+          case "${GH_EVENT_NAME}" in
+                release)
+                    echo "NAMESPACE=stokenet" >> $GITHUB_ENV
+                    echo "EVENT_TYPE=ng_stokenet" >> $GITHUB_ENV
+                ;;
+                pull_request)
+                    pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+                    echo "NAMESPACE=pr-$pull_number" >> $GITHUB_ENV
+                    echo "EVENT_TYPE=ng_pr" >> $GITHUB_ENV
+
+                ;;
+                push)
+                    
+                    echo "NAMESPACE=sandpitnet" >> $GITHUB_ENV
+                    echo "EVENT_TYPE=ng_dev" >> $GITHUB_ENV
+                ;;
+                *)
+                    echo "${GH_EVENT_NAME} not implemented yet"
+                    exit 1
+                ;;
+            esac
+      - name: Trigger pull request deployment event ${{ github.ref }}
+        run: |
+          curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/radixdlt-iac/dispatches' \
+            --header 'Accept: application/vnd.github.v3+json' \
+            --header 'Authorization: Basic ${{secrets.CF_GITHUB_WORKER_ENCODED_BASIC_AUTH}}' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "event_type": "${{env.EVENT_TYPE}}",
+                "client_payload": {
+                    "namespace_postfix": "${{env.NAMESPACE}}",
+                    "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
+                    "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}"
+                }
+            }'  
 
 
