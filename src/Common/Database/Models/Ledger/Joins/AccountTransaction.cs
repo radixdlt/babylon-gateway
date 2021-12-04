@@ -63,30 +63,23 @@
  */
 
 using Common.Database.Models.Ledger.Normalization;
-using Common.Database.ValueConverters;
-using Common.Numerics;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Common.Database.Models.Ledger;
+namespace Common.Database.Models.Ledger.Joins;
 
 /// <summary>
-/// A notable operation group under a transaction.
+/// A join table for any transactions which involved an Account entity (or sub-entity).
+/// You can filter out system transactions by joining onto the LedgerTransaction table.
 /// </summary>
-// OnModelCreating: Has composite key (state_version, operation_group_index)
-[Table("operation_groups")]
-public class LedgerOperationGroup
+// OnModelCreating: Define key on (AccountId, ResultantStateVersion)
+[Table("account_transactions")]
+public class AccountTransaction
 {
-    public LedgerOperationGroup(long resultantStateVersion, int operationGroupIndex, InferredAction? inferredAction)
-    {
-        ResultantStateVersion = resultantStateVersion;
-        OperationGroupIndex = operationGroupIndex;
-        InferredAction = inferredAction;
-    }
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
 
-    private LedgerOperationGroup()
-    {
-    }
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
 
     [Column(name: "state_version")]
     public long ResultantStateVersion { get; set; }
@@ -94,96 +87,6 @@ public class LedgerOperationGroup
     [ForeignKey(nameof(ResultantStateVersion))]
     public LedgerTransaction LedgerTransaction { get; set; }
 
-    [Column(name: "operation_group_index")]
-    public int OperationGroupIndex { get; set; }
-
-    // See [Owned] InferredAction below.
-    public InferredAction? InferredAction { get; set; }
-}
-
-public enum InferredActionType
-{
-    CreateTokenDefinition,
-    SimpleTransfer,
-    StakeTokens,
-    UnstakeTokens,
-    MintTokens,
-    BurnTokens,
-    MintXrd,
-    PayXrd,
-    Complex,
-}
-
-public class InferredActionTypeValueConverter : EnumTypeValueConverterBase<InferredActionType>
-{
-    private static readonly Dictionary<InferredActionType, string> _conversion = new()
-    {
-        { InferredActionType.CreateTokenDefinition, "CREATE_TOKEN_DEFINITION" },
-        { InferredActionType.SimpleTransfer, "SIMPLE_TRANSFER" },
-        { InferredActionType.StakeTokens, "STAKE_TOKENS" },
-        { InferredActionType.UnstakeTokens, "UNSTAKE_TOKENS" },
-        { InferredActionType.MintTokens, "MINT_TOKENS" },
-        { InferredActionType.BurnTokens, "BURN_TOKENS" },
-        { InferredActionType.MintXrd, "MINT_XRD" },
-        { InferredActionType.PayXrd, "BURN_XRD" },
-        { InferredActionType.Complex, "COMPLEX" },
-    };
-
-    public InferredActionTypeValueConverter()
-        : base(_conversion, Invert(_conversion))
-    {
-    }
-}
-
-[Owned]
-public class InferredAction
-{
-    public InferredAction(InferredActionType type, Account? fromAccount, Account? toAccount, Validator? validator, TokenAmount? amount, Resource? resource)
-    {
-        Type = type;
-        FromAccount = fromAccount;
-        ToAccount = toAccount;
-        Validator = validator;
-        Amount = amount;
-        Resource = resource;
-    }
-
-    private InferredAction()
-    {
-    }
-
-    [Column(name: "inferred_action_type")]
-    public InferredActionType Type { get; set; }
-
-    [Column(name: "inferred_action_from_account_id")]
-    public long? FromAccountId { get; set; }
-
-    [ForeignKey(nameof(FromAccountId))]
-    public Account? FromAccount { get; set; }
-
-    [Column(name: "inferred_action_to_account_id")]
-    public long? ToAccountId { get; set; }
-
-    [ForeignKey(nameof(ToAccountId))]
-    public Account? ToAccount { get; set; }
-
-    [Column(name: "inferred_action_validator_id")]
-    public long? ValidatorId { get; set; }
-
-    [ForeignKey(nameof(ValidatorId))]
-    public Validator? Validator { get; set; }
-
-    [Column(name: "inferred_action_amount")]
-    public TokenAmount? Amount { get; set; }
-
-    [Column(name: "inferred_action_resource_id")]
-    public long? ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource? Resource { get; set; }
-
-    public static InferredAction Complex()
-    {
-        return new InferredAction(InferredActionType.Complex, null, null, null, null, null);
-    }
+    [Column(name: "is_fee_payer")]
+    public bool IsFeePayer { get; set; }
 }

@@ -64,6 +64,7 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Joins;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
@@ -185,7 +186,7 @@ public class DbActionsPlanner
     {
         _accountResourceHistoryToLoad.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            new AccountResource(GetAccount(historyKey.AccountAddress), GetResource(historyKey.Rri)),
+            new AccountResource(GetLoadedAccount(historyKey.AccountAddress), GetLoadedResource(historyKey.Rri)),
             _latestAccountResourceHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
@@ -203,7 +204,7 @@ public class DbActionsPlanner
     {
         _resourceSupplyHistoryToLoadByRri.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            GetResource(historyKey),
+            GetLoadedResource(historyKey),
             _latestResourceSupplyHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
@@ -221,7 +222,7 @@ public class DbActionsPlanner
     {
         _validatorStakeHistoryToLoadByValidatorAddress.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            GetValidator(historyKey),
+            GetLoadedValidator(historyKey),
             _latestValidatorStakeHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
@@ -239,11 +240,37 @@ public class DbActionsPlanner
     {
         _accountValidatorStakeHistoryToLoad.Add(historyKey);
         _dbActions.Add(() => AddNewHistoryEntryFutureAction(
-            new AccountValidator(GetAccount(historyKey.AccountAddress), GetValidator(historyKey.ValidatorAddress)),
+            new AccountValidator(GetLoadedAccount(historyKey.AccountAddress), GetLoadedValidator(historyKey.ValidatorAddress)),
             _latestAccountValidatorStakeHistory!,
             createNewHistoryFromPrevious,
             transactionStateVersion
         ));
+    }
+
+    public void AddAccountTransactions(
+        HashSet<string> accountAddresses,
+        Func<Account?> resolveFeePayer,
+        long transactionStateVersion
+    )
+    {
+        if (!accountAddresses.Any())
+        {
+            return;
+        }
+
+        accountAddresses.ToList().ForEach(accountAddress => EnsureAccountLoaded(accountAddress, transactionStateVersion));
+        _dbActions.Add(() =>
+        {
+            var feePayer = resolveFeePayer();
+            _dbContext.AccountTransactions.AddRange(accountAddresses.Select(
+                accountAddress => new AccountTransaction
+                {
+                    Account = GetLoadedAccount(accountAddress),
+                    ResultantStateVersion = transactionStateVersion,
+                    IsFeePayer = feePayer == GetLoadedAccount(accountAddress),
+                }
+            ));
+        });
     }
 
     /// <summary>
@@ -266,7 +293,7 @@ public class DbActionsPlanner
     public Func<Resource> ResolveResource(string resourceIdentifier, long seenAtStateVersion)
     {
         EnsureResourceLoaded(resourceIdentifier, seenAtStateVersion);
-        return () => GetResource(resourceIdentifier);
+        return () => GetLoadedResource(resourceIdentifier);
     }
 
     /// <summary>
@@ -276,7 +303,7 @@ public class DbActionsPlanner
     public Func<Account> ResolveAccount(string accountAddress, long seenAtStateVersion)
     {
         EnsureAccountLoaded(accountAddress, seenAtStateVersion);
-        return () => GetAccount(accountAddress);
+        return () => GetLoadedAccount(accountAddress);
     }
 
     /// <summary>
@@ -286,15 +313,7 @@ public class DbActionsPlanner
     public Func<Validator> ResolveValidator(string validatorAddress, long seenAtStateVersion)
     {
         EnsureValidatorLoaded(validatorAddress, seenAtStateVersion);
-        return () => GetValidator(validatorAddress);
-    }
-
-    // NB - must be preceded by calls to MarkValidatorStakeHistoryToLoad
-    public Func<string, ValidatorStakeSnapshot> CurrentValidatorStakeSnapshotLookup()
-    {
-        return validatorAddress =>
-            _latestValidatorStakeHistory!.GetValueOrDefault(GetValidator(validatorAddress))?.StakeSnapshot
-            ?? ValidatorStakeSnapshot.GetDefault();
+        return () => GetLoadedValidator(validatorAddress);
     }
 
     public void MarkValidatorStakeHistoryToLoad(string validatorAddress)
@@ -319,25 +338,9 @@ public class DbActionsPlanner
     /// NB - The resource's id can be as 0, as the resource may not have actually been created yet.
     ///      So be sure to use the resource itself so EF Core can resolve the entity graph correctly upon save.
     /// </summary>
-    private Resource GetResource(string resourceIdentifier)
+    public Resource GetLoadedResource(string resourceIdentifier)
     {
         return _resourceLookupByRri![resourceIdentifier];
-    }
-
-    /// <summary>
-    /// Should only be used after Resources have been fetched, so the lookup is local.
-    /// </summary>
-    private Resource GetResourceById(long resourceId)
-    {
-        return _dbContext.Set<Resource>().Find(resourceId)!;
-    }
-
-    private void EnsureResourceLoaded(string resourceIdentifier, long seenAtStateVersion)
-    {
-        if (!_resourcesToLoadOrCreate.ContainsKey(resourceIdentifier))
-        {
-            _resourcesToLoadOrCreate[resourceIdentifier] = seenAtStateVersion;
-        }
     }
 
     /// <summary>
@@ -348,15 +351,35 @@ public class DbActionsPlanner
     /// NB - The account's id can be as 0, as the account may not have actually been created yet.
     ///      So be sure to use the account itself so EF Core can resolve the entity graph correctly upon save.
     /// </summary>
-    private Account GetAccount(string accountAddress)
+    public Account GetLoadedAccount(string accountAddress)
     {
         return _accountLookupByAddress![accountAddress];
     }
 
     /// <summary>
+    /// This can only be called from the action phase (else it throws a null-ref).
+    /// A call to this must have been pre-empted by a call to EnsureValidatorLoaded in the dependencies phase.
+    /// If this method throws, this is because the EnsureValidatorLoaded call was forgotten.
+    ///
+    /// NB - The validator's id can be as 0, as the validator may not have actually been created yet.
+    ///      So be sure to use the validator itself so EF Core can resolve the entity graph correctly upon save.
+    /// </summary>
+    public Validator GetLoadedValidator(string validatorAddress)
+    {
+        return _validatorLookupByAddress![validatorAddress];
+    }
+
+    // NB - must be preceded by calls to MarkValidatorStakeHistoryToLoad
+    public ValidatorStakeSnapshot GetLoadedLatestValidatorStakeSnapshot(string validatorAddress)
+    {
+        return _latestValidatorStakeHistory!.GetValueOrDefault(GetLoadedValidator(validatorAddress))?.StakeSnapshot
+               ?? ValidatorStakeSnapshot.GetDefault();
+    }
+
+    /// <summary>
     /// Should only be used after Accounts have been fetched, so the lookup is local.
     /// </summary>
-    private Account GetAccountById(long accountId)
+    private Account GetLoadedAccountById(long accountId)
     {
         return _dbContext.Set<Account>().Find(accountId)!;
     }
@@ -370,16 +393,19 @@ public class DbActionsPlanner
     }
 
     /// <summary>
-    /// This can only be called from the action phase (else it throws a null-ref).
-    /// A call to this must have been pre-empted by a call to EnsureValidatorLoaded in the dependencies phase.
-    /// If this method throws, this is because the EnsureValidatorLoaded call was forgotten.
-    ///
-    /// NB - The validator's id can be as 0, as the validator may not have actually been created yet.
-    ///      So be sure to use the validator itself so EF Core can resolve the entity graph correctly upon save.
+    /// Should only be used after Resources have been fetched, so the lookup is local.
     /// </summary>
-    private Validator GetValidator(string validatorAddress)
+    private Resource GetLoadedResourceById(long resourceId)
     {
-        return _validatorLookupByAddress![validatorAddress];
+        return _dbContext.Set<Resource>().Find(resourceId)!;
+    }
+
+    private void EnsureResourceLoaded(string resourceIdentifier, long seenAtStateVersion)
+    {
+        if (!_resourcesToLoadOrCreate.ContainsKey(resourceIdentifier))
+        {
+            _resourcesToLoadOrCreate[resourceIdentifier] = seenAtStateVersion;
+        }
     }
 
     /// <summary>
@@ -693,8 +719,8 @@ public class DbActionsPlanner
         var dbKeys = new List<long>();
         foreach (var ar in _accountResourceHistoryToLoad)
         {
-            var accountId = GetAccount(ar.AccountAddress).Id;
-            var resourceId = GetResource(ar.Rri).Id;
+            var accountId = GetLoadedAccount(ar.AccountAddress).Id;
+            var resourceId = GetLoadedResource(ar.Rri).Id;
             if (accountId == 0 || resourceId == 0)
             {
                 // Account or Resource isn't yet in the database, so there can't be any history about them!
@@ -718,7 +744,7 @@ public class DbActionsPlanner
                 2
             )
             .ToDictionaryAsync(
-                ar => new AccountResource(GetAccountById(ar.AccountId), GetResourceById(ar.ResourceId)),
+                ar => new AccountResource(GetLoadedAccountById(ar.AccountId), GetLoadedResourceById(ar.ResourceId)),
                 _cancellationToken
             );
     }
@@ -731,7 +757,7 @@ public class DbActionsPlanner
         }
 
         var resourceIds = _resourceSupplyHistoryToLoadByRri
-            .Select(rri => GetResource(rri).Id)
+            .Select(rri => GetLoadedResource(rri).Id)
             .Where(id => id > 0)
             .ToList();
 
@@ -744,7 +770,7 @@ public class DbActionsPlanner
         _latestResourceSupplyHistory = await _dbContext.Set<ResourceSupplyHistory>()
             .Where(h => resourceIds.Contains(h.ResourceId) && h.ToStateVersion == null)
             .ToDictionaryAsync(
-                h => GetResourceById(h.ResourceId),
+                h => GetLoadedResourceById(h.ResourceId),
                 _cancellationToken
             );
     }
@@ -757,7 +783,7 @@ public class DbActionsPlanner
         }
 
         var validatorIds = _validatorStakeHistoryToLoadByValidatorAddress
-            .Select(rri => GetValidator(rri).Id)
+            .Select(rri => GetLoadedValidator(rri).Id)
             .Where(id => id > 0)
             .ToList();
 
@@ -785,8 +811,8 @@ public class DbActionsPlanner
         var dbKeys = new List<long>();
         foreach (var av in _accountValidatorStakeHistoryToLoad)
         {
-            var accountId = GetAccount(av.AccountAddress).Id;
-            var validatorId = GetValidator(av.ValidatorAddress).Id;
+            var accountId = GetLoadedAccount(av.AccountAddress).Id;
+            var validatorId = GetLoadedValidator(av.ValidatorAddress).Id;
             if (accountId == 0 || validatorId == 0)
             {
                 // Account or Resource isn't yet in the database, so there can't be any history about them!
@@ -810,7 +836,7 @@ public class DbActionsPlanner
                 2
             )
             .ToDictionaryAsync(
-                av => new AccountValidator(GetAccountById(av.AccountId), GetValidatorById(av.ValidatorId)),
+                av => new AccountValidator(GetLoadedAccountById(av.AccountId), GetValidatorById(av.ValidatorId)),
                 _cancellationToken
             );
     }
@@ -825,7 +851,7 @@ public class DbActionsPlanner
         var dbKeys = new List<long>();
         foreach (var (ve, _) in _latestSeenValidatorProposalRecords)
         {
-            var validatorId = GetValidator(ve.ValidatorAddress).Id;
+            var validatorId = GetLoadedValidator(ve.ValidatorAddress).Id;
             if (validatorId == 0)
             {
                 // Validator isn't yet in the database, so there can't be any records about them!
@@ -851,7 +877,7 @@ public class DbActionsPlanner
 
         foreach (var (ve, (latestData, latestStateVersion)) in _latestSeenValidatorProposalRecords)
         {
-            var key = new ValidatorEpoch(GetValidator(ve.ValidatorAddress), ve.Epoch);
+            var key = new ValidatorEpoch(GetLoadedValidator(ve.ValidatorAddress), ve.Epoch);
             var previousRecord = preExistingValidatorProposalRecords.GetValueOrDefault(key);
             if (previousRecord == null)
             {

@@ -98,8 +98,9 @@ public class TransactionContentProcessor
     /* > These simply help us avoid passing tons of references down the call stack.
     /* > These will all not be null at the time of use in the Handle methods. */
     private CommittedTransaction? _transaction;
-    private LedgerTransaction? _dbTransaction;
+    private Accounting? _wholeTransactionAccounting;
     private TransactionSummary? _transactionSummary;
+    private Account? _feePayer;
     private LedgerOperationGroup? _dbOperationGroup;
     private Accounting? _operationGroupAccounting;
     private OperationGroup? _transactionOperationGroup;
@@ -121,7 +122,7 @@ public class TransactionContentProcessor
     public void ProcessTransactionContents(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary transactionSummary)
     {
         _transaction = transaction;
-        _dbTransaction = dbTransaction;
+        _wholeTransactionAccounting = new Accounting(_entityDeterminer);
         _transactionSummary = transactionSummary;
         _operationGroupIndex = -1;
         foreach (var operationGroup in transaction.OperationGroups)
@@ -166,7 +167,7 @@ public class TransactionContentProcessor
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
             _operationIndexInGroup = -1;
-            CalculateInferredAction(GetCurrentTransactionOpLocator(), _dbOperationGroup, _operationGroupAccounting);
+            CalculateInferredAction(GetCurrentTransactionOpLocator(), dbTransaction, _dbOperationGroup, _operationGroupAccounting);
 
             // Loop through again, processing all operations except RoundData and ValidatorBftData
             foreach (var operation in _transactionOperationGroup.Operations)
@@ -202,6 +203,7 @@ public class TransactionContentProcessor
         _operationIndexInGroup = -1;
 
         HandleHistoryUpdates();
+        HandleAccountTransactions();
     }
 
     private void HandleValidatorBftDataOperationUp(ValidatorBFTData validatorBftData)
@@ -253,6 +255,7 @@ public class TransactionContentProcessor
         }
 
         _operationGroupAccounting!.TrackDelta(_entity!, _operation!.Amount.ResourceIdentifier, _amount.Value);
+        _wholeTransactionAccounting!.TrackDelta(_entity!, _operation!.Amount.ResourceIdentifier, _amount.Value);
 
         switch (_operation!.Amount.ResourceIdentifier)
         {
@@ -793,16 +796,43 @@ public class TransactionContentProcessor
     }
 
     // We put this in a method to ensure we capture these arguments in a closure
-    private void CalculateInferredAction(TransactionOpLocator transactionOpLocator, LedgerOperationGroup dbOperationGroup, Accounting operationGroupAccounting)
+    private void CalculateInferredAction(
+        TransactionOpLocator transactionOpLocator,
+        LedgerTransaction dbTransaction,
+        LedgerOperationGroup dbOperationGroup,
+        Accounting operationGroupAccounting
+    )
     {
         _dbActionsPlanner.AddDbAction(() =>
         {
-            dbOperationGroup.InferredAction = operationGroupAccounting.InferAction(
-                _dbTransaction!.IsSystemTransaction,
+            var inferredAction = operationGroupAccounting.InferAction(
+                dbTransaction.IsSystemTransaction,
                 transactionOpLocator,
-                _dbActionsPlanner.CurrentValidatorStakeSnapshotLookup() // We ensure relevant snapshots are loaded in the prepared validator unstakes handling section
+                _dbActionsPlanner
             );
+            dbOperationGroup.InferredAction = inferredAction;
+
+            if (inferredAction is not { Type: InferredActionType.PayXrd })
+            {
+                return;
+            }
+
+            if (_feePayer != null)
+            {
+                throw new InvalidTransactionException(transactionOpLocator, "Transaction had two pay xrd actions");
+            }
+
+            _feePayer = inferredAction.FromAccount!;
         });
+    }
+
+    private void HandleAccountTransactions()
+    {
+        _dbActionsPlanner.AddAccountTransactions(
+            _wholeTransactionAccounting!.GetReferencedAccountAddresses(),
+            () => _feePayer,
+            _transactionSummary!.StateVersion
+        );
     }
 
     /// <summary>

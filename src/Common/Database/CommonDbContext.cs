@@ -65,6 +65,7 @@
 using Common.Database.Models;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
+using Common.Database.Models.Ledger.Joins;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
@@ -81,8 +82,6 @@ namespace Common.Database;
 /// </summary>
 public class CommonDbContext : DbContext
 {
-#pragma warning disable CS1591 // Remove need for public docs - instead refer to the Model docs
-
     public DbSet<Node> Nodes => Set<Node>();
 
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
@@ -121,7 +120,7 @@ public class CommonDbContext : DbContext
 
     public DbSet<Validator> Validators => Set<Validator>();
 
-#pragma warning restore CS1591
+    public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -138,6 +137,7 @@ public class CommonDbContext : DbContext
         HookupSubstates(modelBuilder);
         HookupHistory(modelBuilder);
         HookupRecords(modelBuilder);
+        HookupJoinTables(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -246,6 +246,11 @@ public class CommonDbContext : DbContext
         HookUpValidatorProposalRecords(modelBuilder);
     }
 
+    private static void HookupJoinTables(ModelBuilder modelBuilder)
+    {
+        HookUpAccountTransactionJoinTable(modelBuilder);
+    }
+
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)
     {
         HookupHistory<ResourceSupplyHistory>(modelBuilder);
@@ -329,6 +334,12 @@ public class CommonDbContext : DbContext
 
         modelBuilder.Entity<ValidatorProposalRecord>()
             .HasIndex(h => new { h.ValidatorId, h.Epoch });
+    }
+
+    private static void HookUpAccountTransactionJoinTable(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AccountTransaction>()
+            .HasKey(at => new { at.AccountId, at.ResultantStateVersion });
     }
 
     private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)
