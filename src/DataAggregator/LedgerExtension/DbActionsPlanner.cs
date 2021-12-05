@@ -250,6 +250,7 @@ public class DbActionsPlanner
     public void AddAccountTransactions(
         HashSet<string> accountAddresses,
         Func<Account?> resolveFeePayer,
+        string? signerAccountAddress,
         long transactionStateVersion
     )
     {
@@ -268,6 +269,7 @@ public class DbActionsPlanner
                     Account = GetLoadedAccount(accountAddress),
                     ResultantStateVersion = transactionStateVersion,
                     IsFeePayer = feePayer == GetLoadedAccount(accountAddress),
+                    IsSigner = signerAccountAddress == accountAddress,
                 }
             ));
         });

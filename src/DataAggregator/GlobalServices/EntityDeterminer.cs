@@ -102,6 +102,8 @@ public interface IEntityDeterminer
     byte[] ParseAccountPublicKey(string accountAddress);
 
     byte[] ParseResourceRadixEngineAddress(string rri);
+
+    string CreateAccountAddress(byte[] publicKey);
 }
 
 public class EntityDeterminer : IEntityDeterminer
@@ -225,5 +227,10 @@ public class EntityDeterminer : IEntityDeterminer
     public string GetXrdAddress()
     {
         return _networkConfigurationProvider.GetXrdAddress();
+    }
+
+    public string CreateAccountAddress(byte[] publicKey)
+    {
+        return RadixBech32.GenerateAccountAddress(_networkConfigurationProvider.GetAddressHrps().AccountHrp, publicKey);
     }
 }

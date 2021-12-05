@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
@@ -828,9 +829,19 @@ public class TransactionContentProcessor
 
     private void HandleAccountTransactions()
     {
+        var accountAddresses = _wholeTransactionAccounting!.GetReferencedAccountAddresses();
+        var signedByPublicKey = _transaction!.Metadata.SignedBy?.Hex.ConvertFromHex();
+        var signerAccountAddress = signedByPublicKey != null ? _entityDeterminer.CreateAccountAddress(signedByPublicKey) : null;
+
+        if (signerAccountAddress != null)
+        {
+            accountAddresses.Add(signerAccountAddress);
+        }
+
         _dbActionsPlanner.AddAccountTransactions(
-            _wholeTransactionAccounting!.GetReferencedAccountAddresses(),
+            accountAddresses,
             () => _feePayer,
+            signerAccountAddress,
             _transactionSummary!.StateVersion
         );
     }

@@ -71,20 +71,20 @@ namespace Common.Database.Models.Ledger;
 /// <summary>
 /// A transaction committed onto the radix ledger.
 /// This table forms a shell, to which other properties are connected.
+/// The signer (where relevant) is stored in the AccountTransaction table.
 /// </summary>
 [Table("ledger_transactions")]
 // OnModelCreating: We also define an index on Timestamp.
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, byte[]? signedBy, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, DateTime roundTimestamp, DateTime createdTimestamp, DateTime normalizedTimestamp)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, DateTime roundTimestamp, DateTime createdTimestamp, DateTime normalizedTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
         TransactionAccumulator = transactionAccumulator;
         Message = message;
         FeePaid = feePaid;
-        SignedBy = signedBy;
         Epoch = epoch;
         IndexInEpoch = indexInEpoch;
         RoundInEpoch = roundInEpoch;
@@ -121,9 +121,6 @@ public class LedgerTransaction
 
     [Column("fee_paid")]
     public TokenAmount FeePaid { get; set; }
-
-    [Column("signed_by")]
-    public byte[]? SignedBy { get; set; }
 
     [Column(name: "epoch")]
     public long Epoch { get; set; }

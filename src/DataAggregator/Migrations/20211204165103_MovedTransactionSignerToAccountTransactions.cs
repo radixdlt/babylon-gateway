@@ -62,34 +62,40 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger.Normalization;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Common.Database.Models.Ledger.Joins;
+#nullable disable
 
-/// <summary>
-/// A join table for any transactions which involved an Account entity (or sub-entity).
-/// You can filter out system transactions by joining onto the LedgerTransaction table.
-/// </summary>
-// OnModelCreating: Define key on (AccountId, ResultantStateVersion)
-[Table("account_transactions")]
-public class AccountTransaction
+namespace DataAggregator.Migrations
 {
-    [Column(name: "account_id")]
-    public long AccountId { get; set; }
+    public partial class MovedTransactionSignerToAccountTransactions : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "signed_by",
+                table: "ledger_transactions");
 
-    [ForeignKey(nameof(AccountId))]
-    public Account Account { get; set; }
+            migrationBuilder.AddColumn<bool>(
+                name: "is_signer",
+                table: "account_transactions",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+        }
 
-    [Column(name: "state_version")]
-    public long ResultantStateVersion { get; set; }
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "is_signer",
+                table: "account_transactions");
 
-    [ForeignKey(nameof(ResultantStateVersion))]
-    public LedgerTransaction LedgerTransaction { get; set; }
-
-    [Column(name: "is_fee_payer")]
-    public bool IsFeePayer { get; set; }
-
-    [Column(name: "is_signer")]
-    public bool IsSigner { get; set; }
+            migrationBuilder.AddColumn<byte[]>(
+                name: "signed_by",
+                table: "ledger_transactions",
+                type: "bytea",
+                nullable: true);
+        }
+    }
 }

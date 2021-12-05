@@ -86,14 +86,12 @@ public static class TransactionMapping
         var fee = transaction.Metadata.Fee == null
             ? TokenAmount.Zero
             : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-        var signedBy = transaction.Metadata.SignedBy?.Hex.ConvertFromHex();
         return new LedgerTransaction(
             resultantStateVersion: summary.StateVersion,
             transactionIdentifierHash: summary.TransactionIdentifierHash,
             transactionAccumulator: summary.TransactionAccumulator,
             message: transaction.Metadata.Message?.ConvertFromHex(),
             feePaid: fee,
-            signedBy: signedBy,
             epoch: summary.Epoch,
             indexInEpoch: summary.IndexInEpoch,
             roundInEpoch: summary.RoundInEpoch,
