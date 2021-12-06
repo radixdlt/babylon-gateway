@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
@@ -125,6 +126,14 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             topOfLedgerStateVersion, TransactionsToPull, false, stoppingToken
         );
 
+        if (transactionsResponse.Transactions.Count == 0)
+        {
+            _logger.LogInformation(
+                "No new transactions found, sleeping for {DelayMs}ms",
+                GetRemainingRestartDelay().Milliseconds
+            );
+        }
+
         var (commitedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
             () => ledgerExtenderService.CommitTransactions(
                 transactionsResponse.StateIdentifier,
@@ -135,7 +144,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
-            TransactionsToPull,
+            transactionsResponse.Transactions.Count,
             totalCommitTransactionsMs,
             commitedTransactionReport.DbEntriesWritten,
             commitedTransactionReport.TransactionContentDbActionsCount
@@ -155,7 +164,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             commitedTransactionSummary.StateVersion,
             commitedTransactionSummary.Epoch,
             commitedTransactionSummary.IndexInEpoch,
-            commitedTransactionSummary.NormalizedTimestamp
+            commitedTransactionSummary.NormalizedTimestamp.AsUtcIsoDateToSecondsForLogs()
         );
     }
 
@@ -200,7 +209,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
     )
     {
         _logger.LogInformation(
-            "Fetching {TransactionCount} transactions from version {FromStateVersion} from the core api",
+            "Fetching up to {TransactionCount} transactions from version {FromStateVersion} from the core api",
             transactionsToPull,
             topOfLedgerStateVersion
         );
@@ -211,7 +220,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         _logger.LogInformation(
             "Fetched {TransactionCount} transactions from version {FromStateVersion} from the core api in {FetchTransactionsMs}ms",
-            transactionsToPull,
+            transactionsResponse.Transactions.Count,
             topOfLedgerStateVersion,
             fetchTransactionsMs
         );

@@ -71,6 +71,11 @@ public static class DateTimeExtensions
 {
     public static string AsUtcIsoDateWithMillisString(this DateTime dateTime)
     {
-        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffzzz");
+        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
+    }
+
+    public static string AsUtcIsoDateToSecondsForLogs(this DateTime dateTime)
+    {
+        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
     }
 }

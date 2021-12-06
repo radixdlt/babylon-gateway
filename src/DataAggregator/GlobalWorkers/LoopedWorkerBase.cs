@@ -76,6 +76,7 @@ public abstract class LoopedWorkerBase : BackgroundService
     private readonly LogLimiter _stillRunningLogLimiter;
     private readonly TimeSpan _minDelayBetweenLoops;
     private readonly TimeSpan _minDelayAfterErrorLoop;
+    private Stopwatch? _loopIterationStopwatch;
 
     // ReSharper disable once ContextualLoggerProblem
     public LoopedWorkerBase(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayAfterErrorLoop, TimeSpan minDelayBetweenInfoLogs)
@@ -92,11 +93,11 @@ public abstract class LoopedWorkerBase : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var loopIterationStopwatch = Stopwatch.StartNew();
+            _loopIterationStopwatch = Stopwatch.StartNew();
             try
             {
                 await ExecuteLoopIteration(stoppingToken);
-                var remainingTime = _minDelayBetweenLoops - loopIterationStopwatch.Elapsed;
+                var remainingTime = GetRemainingRestartDelay();
                 if (remainingTime > TimeSpan.Zero)
                 {
                     await Task.Delay(remainingTime, stoppingToken);
@@ -109,8 +110,8 @@ public abstract class LoopedWorkerBase : BackgroundService
             }
             catch (Exception ex)
             {
-                var remainingTime = _minDelayAfterErrorLoop - loopIterationStopwatch.Elapsed;
-                _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", Math.Max(0, remainingTime.Milliseconds));
+                var remainingTime = GetRemainingRestartAfterErrorDelay();
+                _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", remainingTime.Milliseconds);
                 if (remainingTime > TimeSpan.Zero)
                 {
                     await Task.Delay(remainingTime, stoppingToken);
@@ -119,6 +120,18 @@ public abstract class LoopedWorkerBase : BackgroundService
         }
 
         await OnStop(stoppingToken);
+    }
+
+    protected TimeSpan GetRemainingRestartDelay()
+    {
+        var timespan = _minDelayBetweenLoops - _loopIterationStopwatch!.Elapsed;
+        return timespan < TimeSpan.Zero ? TimeSpan.Zero : timespan;
+    }
+
+    protected TimeSpan GetRemainingRestartAfterErrorDelay()
+    {
+        var timespan = _minDelayAfterErrorLoop - _loopIterationStopwatch!.Elapsed;
+        return timespan < TimeSpan.Zero ? TimeSpan.Zero : timespan;
     }
 
     protected abstract Task DoWork(CancellationToken stoppingToken);
