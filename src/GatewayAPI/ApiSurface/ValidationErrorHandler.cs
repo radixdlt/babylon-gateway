@@ -62,25 +62,48 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
+using GatewayAPI.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
+using System.Diagnostics;
 
-namespace GatewayAPI.Exceptions;
+namespace GatewayAPI.ApiSurface;
 
-public class InvalidPublicKeyException : ValidationException
+public interface IValidationErrorHandler
 {
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage, string internalMessage)
-        : base(GenerateError(publicKey), userFacingMessage, internalMessage)
+    IActionResult GetClientError(ActionContext actionContext);
+}
+
+public class ValidationErrorHandler : IValidationErrorHandler
+{
+    private readonly IExceptionHandler _exceptionHandler;
+
+    public ValidationErrorHandler(IExceptionHandler exceptionHandler)
     {
+        _exceptionHandler = exceptionHandler;
     }
 
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage)
-        : base(GenerateError(publicKey), userFacingMessage)
+    public IActionResult GetClientError(ActionContext actionContext)
     {
-    }
+        var errors = new List<ValidationErrorsAtPath>();
+        foreach (var (path, modelValue) in actionContext.ModelState)
+        {
+            var errorMessagesToShow = modelValue.Errors
+                .Select(e => e.ErrorMessage)
+                .Where(e => e != "The request field is required.")
+                .ToList();
 
-    private static InvalidPublicKeyError GenerateError(PublicKey publicKey)
-    {
-        return new InvalidPublicKeyError(publicKey.Hex.Length <= 200 ? publicKey.Hex : "<public key far too long>");
+            if (errorMessagesToShow.Count > 0)
+            {
+                errors.Add(new ValidationErrorsAtPath(path, errorMessagesToShow));
+            }
+        }
+
+        var invalidRequestError = InvalidRequestException.FromValidationErrors(errors);
+
+        // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
+        var traceId = Activity.Current?.Id ?? actionContext.HttpContext.TraceIdentifier;
+
+        return _exceptionHandler.CreateAndLogApiResultFromException(invalidRequestError, traceId);
     }
 }

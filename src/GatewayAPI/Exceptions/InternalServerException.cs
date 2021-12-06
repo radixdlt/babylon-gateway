@@ -62,12 +62,55 @@
  * permissions under this License.
  */
 
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
-public class ValidatorNotFoundException : NotFoundException
+public class InternalServerException : KnownGatewayErrorException
 {
-    public ValidatorNotFoundException(string internalMessage)
-        : base(@"Validator not found", internalMessage)
+    private InternalServerException(InternalServerError internalServerError, string userFacingMessage, string internalMessage)
+        : base(500, internalServerError, userFacingMessage, internalMessage)
     {
+    }
+
+    private InternalServerException(InternalServerError internalServerError, string userFacingMessage)
+        : base(500, internalServerError, userFacingMessage)
+    {
+    }
+
+    public static InternalServerException OfShareableException(Exception exception)
+    {
+        return new InternalServerException(
+            new InternalServerError(exception.GetType().Name, exception.Message),
+            "An unexpected error occurred handling the request",
+            exception.Message
+        );
+    }
+
+    public static InternalServerException OfHiddenException(Exception exception, string traceId)
+    {
+        return new InternalServerException(
+            new InternalServerError("UnknownException", $"N/A. TraceId={traceId}"),
+            "An unexpected error occurred handling the request",
+            exception.Message
+        );
+    }
+
+    public static InternalServerException OfUnhandledCoreApiException(string coreErrorJsonContent, string traceId)
+    {
+        return new InternalServerException(
+            new InternalServerError("UpstreamCoreApiRequestException", $"N/A. TraceId={traceId}"),
+            "An unexpected error occurred handling the request",
+            coreErrorJsonContent
+        );
+    }
+
+    public static InternalServerException OfInvalidGatewayException(string traceId)
+    {
+        return new InternalServerException(
+            new InternalServerError("BadGateway", $"N/A. TraceId={traceId}"),
+            "An unexpected error occurred handling the request",
+            "Could not receive valid response from upstream server"
+        );
     }
 }

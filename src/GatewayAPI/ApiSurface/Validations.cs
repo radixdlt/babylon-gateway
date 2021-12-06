@@ -100,7 +100,7 @@ public class Validations : IValidations
                 out var errorMessage
             ))
         {
-            throw new InvalidAddressException("Account address is invalid", errorMessage);
+            throw new InvalidAccountAddressException(accountIdentifier.Address, "Account address is invalid", errorMessage);
         }
 
         return accountAddress;
@@ -121,7 +121,7 @@ public class Validations : IValidations
                 out var errorMessage
             ))
         {
-            throw new InvalidAddressException("Validator address is invalid", errorMessage);
+            throw new InvalidValidatorAddressException(validatorIdentifier.Address, "Validator address is invalid", errorMessage);
         }
 
         return validatorAddress;
@@ -140,14 +140,14 @@ public class Validations : IValidations
             var bytes = Convert.FromHexString(publicKey.Hex);
             if (bytes.Length != RadixBech32.CompressedPublicKeyBytesLength)
             {
-                throw new InvalidPublicKeyException($"Public key is not {RadixBech32.CompressedPublicKeyBytesLength} bytes long");
+                throw new InvalidPublicKeyException(publicKey, $"Public key is not {RadixBech32.CompressedPublicKeyBytesLength} bytes long");
             }
 
             return bytes;
         }
         catch (FormatException exception)
         {
-            throw new InvalidPublicKeyException("Public key is not valid hex", exception.Message);
+            throw new InvalidPublicKeyException(publicKey, "Public key is not valid hex", exception.Message);
         }
     }
 }

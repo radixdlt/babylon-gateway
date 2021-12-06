@@ -109,7 +109,7 @@ public class TokenQuerier : ITokenQuerier
 
         if (resourceSupply == null)
         {
-            throw new TokenNotFoundException();
+            throw new TokenNotFoundException(tokenRri);
         }
 
         return resourceSupply;
@@ -134,7 +134,7 @@ public class TokenQuerier : ITokenQuerier
 
         if (tokenData == null && tokenMetadata == null)
         {
-            throw new TokenNotFoundException();
+            throw new TokenNotFoundException(tokenRri);
         }
 
         if (tokenData == null)

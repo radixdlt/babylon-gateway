@@ -62,25 +62,24 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidPublicKeyException : ValidationException
+public class UpstreamGatewayApiException : KnownGatewayErrorException
 {
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage, string internalMessage)
-        : base(GenerateError(publicKey), userFacingMessage, internalMessage)
+    private UpstreamGatewayApiException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base(statusCode, gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage)
-        : base(GenerateError(publicKey), userFacingMessage)
+    public static UpstreamGatewayApiException OfUpstreamGatewayApiError(ErrorResponse errorResponse)
     {
-    }
-
-    private static InvalidPublicKeyError GenerateError(PublicKey publicKey)
-    {
-        return new InvalidPublicKeyError(publicKey.Hex.Length <= 200 ? publicKey.Hex : "<public key far too long>");
+        return new UpstreamGatewayApiException(
+            errorResponse.Code,
+            errorResponse.Details,
+            errorResponse.Message,
+            "Parsed successfully from upstream"
+        );
     }
 }

@@ -62,25 +62,14 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidPublicKeyException : ValidationException
+public class InvalidTokenSymbolException : ValidationException
 {
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage, string internalMessage)
-        : base(GenerateError(publicKey), userFacingMessage, internalMessage)
+    public InvalidTokenSymbolException(string invalidTokenSymbol, string userFacingMessage)
+        : base(new InvalidTokenSymbolError(invalidTokenSymbol), userFacingMessage)
     {
-    }
-
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage)
-        : base(GenerateError(publicKey), userFacingMessage)
-    {
-    }
-
-    private static InvalidPublicKeyError GenerateError(PublicKey publicKey)
-    {
-        return new InvalidPublicKeyError(publicKey.Hex.Length <= 200 ? publicKey.Hex : "<public key far too long>");
     }
 }

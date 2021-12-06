@@ -62,21 +62,21 @@
  * permissions under this License.
  */
 
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
-public class ValidationException : HttpResponseException
+public abstract class ValidationException : KnownGatewayErrorException
 {
-    public override int Status => 400;
+    private const int ValidationErrorStatusCode = 400;
 
-    public override string ExceptionNameUpperSnakeCase => "INVALID_REQUEST";
-
-    public ValidationException(string userFacingMessage, string internalMessage)
-        : base(userFacingMessage, internalMessage)
+    public ValidationException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base(ValidationErrorStatusCode, gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    public ValidationException(string userFacingMessage)
-        : base(userFacingMessage)
+    public ValidationException(GatewayError gatewayError, string userFacingMessage)
+        : base(ValidationErrorStatusCode, gatewayError, userFacingMessage)
     {
     }
 }

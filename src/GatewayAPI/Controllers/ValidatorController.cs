@@ -65,7 +65,6 @@
 using Common.Addressing;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
-using GatewayAPI.Fallback;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;

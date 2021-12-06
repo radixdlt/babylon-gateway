@@ -62,25 +62,93 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
+using GatewayAPI.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using RadixGatewayApi.Generated.Model;
+using CoreApi = RadixCoreApi.GeneratedClient.Client;
+using GatewayApi = RadixGatewayApi.Generated.Client;
 
-namespace GatewayAPI.Exceptions;
+namespace GatewayAPI.ApiSurface;
 
-public class InvalidPublicKeyException : ValidationException
+public interface IExceptionHandler
 {
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage, string internalMessage)
-        : base(GenerateError(publicKey), userFacingMessage, internalMessage)
+    ActionResult CreateAndLogApiResultFromException(Exception exception, string traceId);
+}
+
+public class ExceptionHandler : IExceptionHandler
+{
+    private readonly ILogger<ExceptionHandler> _logger;
+    private LogLevel _knownErrorLogLevel;
+
+    public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env)
     {
+        _logger = logger;
+        _knownErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
-    public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage)
-        : base(GenerateError(publicKey), userFacingMessage)
+    public ActionResult CreateAndLogApiResultFromException(Exception exception, string traceId)
     {
+        KnownGatewayErrorException gatewayErrorException;
+
+        if (exception is KnownGatewayErrorException httpResponseException)
+        {
+            _logger.Log(_knownErrorLogLevel, exception, "Known exception with http response code [RequestTrace={TraceId}]", traceId);
+            gatewayErrorException = httpResponseException;
+        }
+        else if (exception is HttpRequestException)
+        {
+            // HttpRequestException is returned from the Gateway or Core APIs if we can't connect
+            _logger.Log(LogLevel.Information, exception, "Error relaying request to upstream server [RequestTrace={TraceId}]", traceId);
+            gatewayErrorException = InternalServerException.OfInvalidGatewayException(traceId);
+        }
+        else if (exception is CoreApi.ApiException coreApiException)
+        {
+            // CoreApi.ApiException is returned if we get a 500 from upstream
+            _logger.Log(LogLevel.Information, exception, "Unhandled error response from upstream core API [RequestTrace={TraceId}]", traceId);
+            gatewayErrorException = InternalServerException.OfUnhandledCoreApiException(coreApiException.ErrorContent.ToString() ?? string.Empty, traceId);
+        }
+        else if (exception is GatewayApi.ApiException gatewayApiException)
+        {
+            // GatewayApi.ApiException is returned if we get a 500 from upstream
+            var upstreamError = ExtractUpstreamGatewayErrorResponse(gatewayApiException.ErrorContent.ToString() ?? string.Empty);
+            if (upstreamError != null)
+            {
+                _logger.Log(LogLevel.Information, exception, "Error response from upstream gateway API [RequestTrace={TraceId}]", traceId);
+                gatewayErrorException = UpstreamGatewayApiException.OfUpstreamGatewayApiError(upstreamError);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Warning, exception, "Error response from upstream gateway API with unparsable error response [RequestTrace={TraceId}]", traceId);
+                gatewayErrorException = InternalServerException.OfHiddenException(exception, traceId);
+            }
+        }
+        else
+        {
+            _logger.Log(LogLevel.Warning, exception, "Unknown exception [RequestTrace={TraceId}]", traceId);
+            gatewayErrorException = InternalServerException.OfHiddenException(exception, traceId);
+        }
+
+        return new JsonResult(new ErrorResponse(
+            code: gatewayErrorException.StatusCode,
+            message: gatewayErrorException.UserFacingMessage,
+            details: gatewayErrorException.GatewayError,
+            traceId: traceId
+        ))
+        {
+            StatusCode = 500,
+        };
     }
 
-    private static InvalidPublicKeyError GenerateError(PublicKey publicKey)
+    private static ErrorResponse? ExtractUpstreamGatewayErrorResponse(string upstreamErrorResponse)
     {
-        return new InvalidPublicKeyError(publicKey.Hex.Length <= 200 ? publicKey.Hex : "<public key far too long>");
+        try
+        {
+            return JsonConvert.DeserializeObject<ErrorResponse>(upstreamErrorResponse);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

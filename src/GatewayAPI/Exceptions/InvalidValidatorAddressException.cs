@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
-public class InvalidAddressException : ValidationException
+public class InvalidValidatorAddressException : ValidationException
 {
-    public override string ExceptionNameUpperSnakeCase => "INVALID_ADDRESS";
-
-    public InvalidAddressException(string userFacingMessage, string internalMessage)
-        : base(userFacingMessage, internalMessage)
+    public InvalidValidatorAddressException(string accountAddress, string userFacingMessage, string internalMessage)
+        : base(new InvalidAccountAddressError(accountAddress), userFacingMessage, internalMessage)
     {
     }
 }

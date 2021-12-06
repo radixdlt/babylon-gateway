@@ -62,21 +62,21 @@
  * permissions under this License.
  */
 
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
-public class NotFoundException : HttpResponseException
+public abstract class NotFoundException : KnownGatewayErrorException
 {
-    public override int Status => 404;
+    private const int NotFoundStatusCode = 400;
 
-    public override string ExceptionNameUpperSnakeCase => "NOT_FOUND";
-
-    public NotFoundException(string userFacingMessage, string internalMessage)
-        : base(userFacingMessage, internalMessage)
+    public NotFoundException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base(NotFoundStatusCode, gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    public NotFoundException(string userFacingMessage)
-        : base(userFacingMessage)
+    public NotFoundException(GatewayError gatewayError, string userFacingMessage)
+        : base(NotFoundStatusCode, gatewayError, userFacingMessage)
     {
     }
 }

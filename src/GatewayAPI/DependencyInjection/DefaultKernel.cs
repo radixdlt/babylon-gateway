@@ -89,6 +89,8 @@ public class DefaultKernel
         services.AddSingleton<INetworkGatewayConfiguration, NetworkGatewayConfiguration>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<IValidations, Validations>();
+        services.AddSingleton<IExceptionHandler, ExceptionHandler>();
+        services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
     }
 
     private void AddRequestScopedServices(IServiceCollection services)

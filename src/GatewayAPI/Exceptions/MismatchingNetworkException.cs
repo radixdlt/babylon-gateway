@@ -62,16 +62,14 @@
  * permissions under this License.
  */
 
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
-public class MismatchingNetworkException : HttpResponseException
+public class MismatchingNetworkException : ValidationException
 {
-    public override int Status => 400;
-
-    public override string ExceptionNameUpperSnakeCase => "NETWORK_MISMATCH";
-
     public MismatchingNetworkException(string ledgerNetworkName)
-        : base($"The provided network name didn't match the ledger network name {ledgerNetworkName}")
+        : base(new NetworkNotSupportedError(new List<string> { ledgerNetworkName }), $"The provided network name didn't match the ledger network name {ledgerNetworkName}")
     {
     }
 }

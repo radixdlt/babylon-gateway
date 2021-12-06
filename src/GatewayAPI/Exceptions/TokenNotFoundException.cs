@@ -62,12 +62,15 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
 public class TokenNotFoundException : NotFoundException
 {
-    public TokenNotFoundException()
-        : base(@"Token not found")
+    public TokenNotFoundException(string rri)
+        : base(new TokenNotFoundError(rri.AsTokenIdentifier()), "Token not found")
     {
     }
 }

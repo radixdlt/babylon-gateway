@@ -69,6 +69,7 @@ using Common.Database;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
+using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
@@ -100,8 +101,11 @@ services
     .AddNewtonsoftJson()
     .ConfigureApiBehaviorOptions(options =>
     {
-        // TODO:NG-56 - configure validation errors to return in standard response format - eg https://stackoverflow.com/a/64784861
-        // options.InvalidModelStateResponseFactory = context => { }
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var validationErrorHandler = context.HttpContext.RequestServices.GetRequiredService<IValidationErrorHandler>();
+            return validationErrorHandler.GetClientError(context);
+        };
     });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

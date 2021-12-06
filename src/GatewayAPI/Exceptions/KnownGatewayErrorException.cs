@@ -62,32 +62,40 @@
  * permissions under this License.
  */
 
+using RadixGatewayApi.Generated.Model;
+
 namespace GatewayAPI.Exceptions;
 
-public class HttpResponseException : Exception
+public abstract class KnownGatewayErrorException : Exception
 {
-    public virtual int Status { get; set; } = 500;
+    public int StatusCode { get; }
 
-    public virtual string ExceptionNameUpperSnakeCase { get; set; } = "UNKNOWN_ERROR";
+    public GatewayError GatewayError { get; }
 
-    public string? Cause { get; }
+    public string? UserFacingMessage { get; }
 
     public string? InternalMessage { get; }
 
-    public HttpResponseException(string userFacingMessage, string internalMessage)
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base($"{userFacingMessage} ({internalMessage})")
     {
-        Cause = userFacingMessage;
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
+        UserFacingMessage = userFacingMessage;
         InternalMessage = internalMessage;
     }
 
-    public HttpResponseException(string? userFacingMessage)
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string? userFacingMessage)
         : base(userFacingMessage)
     {
-        Cause = userFacingMessage;
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
+        UserFacingMessage = userFacingMessage;
     }
 
-    public HttpResponseException()
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError)
     {
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
     }
 }

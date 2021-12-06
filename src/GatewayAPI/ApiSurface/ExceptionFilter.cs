@@ -62,10 +62,8 @@
  * permissions under this License.
  */
 
-using GatewayAPI.Exceptions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text.Json;
+using System.Diagnostics;
 using CoreApi = RadixCoreApi.GeneratedClient.Client;
 using GatewayApi = RadixGatewayApi.Generated.Client;
 
@@ -73,13 +71,11 @@ namespace GatewayAPI.ApiSurface;
 
 public class ExceptionFilter : IActionFilter, IOrderedFilter
 {
-    private readonly ILogger<ExceptionFilter> _logger;
-    private LogLevel _knownErrorLogLevel;
+    private readonly IExceptionHandler _exceptionHandler;
 
-    public ExceptionFilter(ILogger<ExceptionFilter> logger, IHostEnvironment env)
+    public ExceptionFilter(IExceptionHandler exceptionHandler)
     {
-        _logger = logger;
-        _knownErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
+        _exceptionHandler = exceptionHandler;
     }
 
     public int Order => int.MaxValue - 10;
@@ -95,73 +91,10 @@ public class ExceptionFilter : IActionFilter, IOrderedFilter
             return;
         }
 
-        Exception exception = context.Exception!;
-        HttpResponseException outException;
+        // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
+        var traceId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
 
-        if (exception is HttpResponseException httpResponseException)
-        {
-            _logger.Log(_knownErrorLogLevel, exception, "Known exception with http response code");
-            outException = httpResponseException;
-        }
-        else if (exception is HttpRequestException)
-        {
-            // HttpRequestException is returned from the Gateway or Core APIs if we can't connect
-            _logger.Log(LogLevel.Information, exception, "Error relaying request to upstream server");
-            outException = new HttpResponseException { Status = 502, ExceptionNameUpperSnakeCase = "BAD_GATEWAY" };
-        }
-        else if (exception is CoreApi.ApiException coreApiException)
-        {
-            // CoreApi.ApiException is returned if we get a 500 from upstream
-            _logger.Log(LogLevel.Information, exception, "Error response from upstream server");
-            var (exceptionName, causeName) = ExtractExceptionAndCause(coreApiException.ErrorContent.ToString() ?? string.Empty);
-            outException = new HttpResponseException(causeName)
-            {
-                Status = coreApiException.ErrorCode,
-                ExceptionNameUpperSnakeCase = exceptionName ?? "UNKNOWN_ERROR",
-            };
-        }
-        else if (exception is GatewayApi.ApiException gatewayApiException)
-        {
-            // GatewayApi.ApiException is returned if we get a 500 from upstream
-            _logger.Log(LogLevel.Information, exception, "Error response from upstream server");
-            var (exceptionName, causeName) = ExtractExceptionAndCause(gatewayApiException.ErrorContent.ToString() ?? string.Empty);
-            outException = new HttpResponseException(causeName)
-            {
-                Status = gatewayApiException.ErrorCode,
-                ExceptionNameUpperSnakeCase = exceptionName ?? "UNKNOWN_ERROR",
-            };
-        }
-        else
-        {
-            _logger.Log(LogLevel.Warning, exception, "Unknown exception");
-            outException = new HttpResponseException(); // Hide error codes behind a blanket UNKNOWN_ERROR
-        }
-
-        context.Result = new ObjectResult(new
-        {
-            exception = outException.ExceptionNameUpperSnakeCase,
-            cause = outException.Cause,
-        })
-        {
-            StatusCode = outException.Status,
-        };
+        context.Result = _exceptionHandler.CreateAndLogApiResultFromException(context.Exception!, traceId);
         context.ExceptionHandled = true;
-    }
-
-    private static (string? Exception, string? Cause) ExtractExceptionAndCause(string upstreamErrorResponse)
-    {
-        try
-        {
-            using var jsonDocument = JsonDocument.Parse(upstreamErrorResponse);
-            var details = jsonDocument.RootElement.GetProperty("details");
-
-            details.TryGetProperty("cause", out var causeProperty);
-            details.TryGetProperty("exception", out var exceptionProperty);
-            return (exceptionProperty.GetString(), causeProperty.GetString());
-        }
-        catch (Exception)
-        {
-            return (null, null);
-        }
     }
 }

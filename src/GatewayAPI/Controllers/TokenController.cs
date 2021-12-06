@@ -125,7 +125,7 @@ public class TokenController : ControllerBase
 
         if (!_symbolRegex.IsMatch(symbol))
         {
-            throw new ValidationException("Symbol must be between 1 and 35 lower case alpha-numeric characters");
+            throw new InvalidTokenSymbolException(symbol, "Symbol must be between 1 and 35 lower case alpha-numeric characters");
         }
 
         var rri = RadixBech32.GenerateResourceAddress(
