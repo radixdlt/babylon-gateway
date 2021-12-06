@@ -121,7 +121,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     private async Task<LedgerState> GetLedgerState(long? atStateVersion = null)
     {
         var query = atStateVersion.HasValue
-            ? _dbContext.GetLatestLedgerTransactionBeforeStateVersion(Math.Min(1, atStateVersion.Value))
+            ? _dbContext.GetLatestLedgerTransactionBeforeStateVersion(Math.Max(1, atStateVersion.Value))
             : _dbContext.GetTopLedgerTransaction();
 
         return await query

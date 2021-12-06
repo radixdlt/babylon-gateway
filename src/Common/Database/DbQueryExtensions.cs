@@ -130,8 +130,10 @@ public static class DbQueryExtensions
     )
         where TSubstate : SubstateBase
     {
+        // This could be re-written to take the top upStateVersion based on some key; which might make better use
+        // of the indices
         return dbSet.
-            Where(s => s.DownStateVersion == null || s.DownStateVersion > stateVersion);
+            Where(s => s.UpStateVersion <= stateVersion && (s.DownStateVersion == null || s.DownStateVersion > stateVersion));
     }
 
     public static IQueryable<THistory> GetSingleHistoryEntryAtVersion<THistory>(
@@ -239,21 +241,6 @@ JOIN account_validator_stake_history h ON
                 equals new { historyKeys.AccountId, historyKeys.ValidatorId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
             select fullHistory
             ;
-    }
-
-    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryAtVersionForAccount<TDbContext>(
-        this TDbContext dbContext,
-        long stateVersion,
-        string accountAddress
-    )
-        where TDbContext : CommonDbContext
-    {
-        return
-            from stakeHistory in dbContext.AccountValidatorStakeHistoryAtVersion(stateVersion)
-            join account in dbContext.Account(accountAddress, stateVersion)
-                on stakeHistory.AccountId equals account.Id
-            select stakeHistory
-        ;
     }
 
     public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersion<TDbContext>(

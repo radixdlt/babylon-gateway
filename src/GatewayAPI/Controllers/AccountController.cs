@@ -105,12 +105,11 @@ public class AccountController : ControllerBase
     {
         _validations.ValidateAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
-        var stakePositions = await _accountQuerier.GetStakePositionsAtState(
+
+        return await _accountQuerier.GetStakePositionsAtState(
             request.AccountIdentifier.Address,
             ledgerState
         );
-
-        return new AccountStakesResponse(ledgerState, stakePositions);
     }
 
     [HttpPost("unstakes")]
@@ -118,12 +117,11 @@ public class AccountController : ControllerBase
     {
         _validations.ValidateAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
-        var stakePositions = await _accountQuerier.GetUnstakePositionsAtState(
+
+        return await _accountQuerier.GetUnstakePositionsAtState(
             request.AccountIdentifier.Address,
             ledgerState
         );
-
-        return new AccountUnstakesResponse(ledgerState, stakePositions);
     }
 
     [HttpPost("transactions")]

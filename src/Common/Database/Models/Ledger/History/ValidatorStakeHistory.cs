@@ -222,16 +222,18 @@ public record ValidatorStakeSnapshot
 
     public TokenAmount EstimateXrdConversion(TokenAmount stakeUnits)
     {
-        if (TotalStakeUnits.IsZero())
+        var totalEffectiveStakeUnits = TotalPreparedUnStakeUnits + TotalStakeUnits;
+
+        if (totalEffectiveStakeUnits.IsZero())
         {
             return TokenAmount.Zero;
         }
 
-        if (stakeUnits >= TotalStakeUnits)
+        if (stakeUnits >= totalEffectiveStakeUnits)
         {
             return TotalXrdStake;
         }
 
-        return (stakeUnits * TotalXrdStake) / TotalStakeUnits;
+        return (stakeUnits * TotalXrdStake) / totalEffectiveStakeUnits;
     }
 }
