@@ -90,6 +90,11 @@ public static class RadixBech32
     public const int CompressedPublicKeyBytesLength = 33;
     private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32;
 
+    public static string GenerateValidatorAddress(string validatorHrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
+    {
+        return GeneratePublicKeyNonRadixEngineAddress(validatorHrp, compressedPublicKey, variant);
+    }
+
     public static string GenerateAccountAddress(string accountHrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
     {
         return GeneratePublicKeyRadixEngineAddress(accountHrp, compressedPublicKey, variant);
@@ -103,6 +108,16 @@ public static class RadixBech32
             compressedAccountPublicKey,
             variant
         );
+    }
+
+    public static string GeneratePublicKeyNonRadixEngineAddress(string hrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
+    {
+        if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
+        {
+            throw new AddressException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}");
+        }
+
+        return EncodeNonRadixEngineAddress(hrp, compressedPublicKey, variant);
     }
 
     public static string GeneratePublicKeyRadixEngineAddress(string hrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)

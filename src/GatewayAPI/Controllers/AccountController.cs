@@ -62,9 +62,11 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Fallback;
+using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
 
@@ -78,13 +80,21 @@ public class AccountController : ControllerBase
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IAccountQuerier _accountQuerier;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public AccountController(IValidations validations, ILedgerStateQuerier ledgerStateQuerier, IAccountQuerier accountQuerier, IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    public AccountController(
+        IValidations validations,
+        ILedgerStateQuerier ledgerStateQuerier,
+        IAccountQuerier accountQuerier,
+        IFallbackGatewayApiProvider fallbackGatewayApiProvider,
+        INetworkConfigurationProvider networkConfigurationProvider
+    )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _accountQuerier = accountQuerier;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     [HttpPost("balances")]
@@ -129,5 +139,18 @@ public class AccountController : ControllerBase
     {
         _validations.ValidateAccountAddress(request.AccountIdentifier);
         return await _fallbackGatewayApiProvider.Api.AccountTransactionsPostAsync(request);
+    }
+
+    [HttpPost("derive")]
+    public AccountDeriveResponse DeriveAccountIdentifier(AccountDeriveRequest request)
+    {
+        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier.Network);
+
+        var accountAddress = RadixBech32.GenerateAccountAddress(
+            _networkConfigurationProvider.GetAddressHrps().AccountHrp,
+            _validations.ExtractValidPublicKey(request.PublicKey)
+        );
+
+        return new AccountDeriveResponse(accountAddress.AsAccountIdentifier());
     }
 }

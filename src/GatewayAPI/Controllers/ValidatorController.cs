@@ -62,9 +62,11 @@
  * permissions under this License.
  */
 
+using Common.Addressing;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Fallback;
+using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
 
@@ -77,16 +79,19 @@ public class ValidatorController : ControllerBase
     private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IValidatorQuerier _validatorQuerier;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
     public ValidatorController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
-        IValidatorQuerier validatorQuerier
+        IValidatorQuerier validatorQuerier,
+        INetworkConfigurationProvider networkConfigurationProvider
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _validatorQuerier = validatorQuerier;
+        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     [HttpPost("validator")]
@@ -108,5 +113,18 @@ public class ValidatorController : ControllerBase
             ledgerState,
             await _validatorQuerier.GetValidatorsAtState(ledgerState)
         );
+    }
+
+    [HttpPost("validator/derive")]
+    public ValidatorDeriveResponse DeriveValidatorIdentifier(ValidatorDeriveRequest request)
+    {
+        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier.Network);
+
+        var validatorAddress = RadixBech32.GenerateValidatorAddress(
+            _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
+            _validations.ExtractValidPublicKey(request.PublicKey)
+        );
+
+        return new ValidatorDeriveResponse(validatorAddress.AsValidatorIdentifier());
     }
 }
