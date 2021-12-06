@@ -62,9 +62,13 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
+using GatewayAPI.Database;
 using GatewayAPI.Fallback;
+using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
+using TokenAmount = Common.Numerics.TokenAmount;
 
 namespace GatewayAPI.Controllers;
 
@@ -72,17 +76,37 @@ namespace GatewayAPI.Controllers;
 [Route("transaction")]
 public class TransactionController : ControllerBase
 {
+    private readonly IValidations _validations;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
-    public TransactionController(IFallbackGatewayApiProvider fallbackGatewayApiProvider)
+    public TransactionController(
+        IValidations validations,
+        ILedgerStateQuerier ledgerStateQuerier,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IFallbackGatewayApiProvider fallbackGatewayApiProvider
+    )
     {
+        _validations = validations;
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _networkConfigurationProvider = networkConfigurationProvider;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
     [HttpPost("rules")]
-    public async Task<TransactionRulesResponse> GetTransactionRules(TransactionRulesRequest request)
+    public async Task<TransactionRulesResponse> GetTransactionRules(TransactionRulesRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.TransactionRulesPostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        return new TransactionRulesResponse(
+            ledgerState,
+            /* TODO:NG-57 - Output from Engine Configuration Fork at given state version */
+            new TransactionRules(
+                maximumMessageLength: 255,
+                minimumStake: TokenAmount.FromSubUnitsString("90000000000000000000")
+                    .AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+            )
+        );
     }
 
     [HttpPost("status")]
