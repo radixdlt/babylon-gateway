@@ -129,7 +129,8 @@ host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
         {
             options.IncludeScopes = true;
             options.SingleLine = true;
-            options.TimestampFormat = "hh:mm:ss ";
+            options.TimestampFormat = "HH:mm:ss ";
+            options.UseUtcTimestamp = false;
         });
     }
     else
@@ -137,7 +138,8 @@ host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
         loggingBuilder.AddJsonConsole(options =>
         {
             options.IncludeScopes = true;
-            options.TimestampFormat = "hh:mm:ss ";
+            options.TimestampFormat = "yyyy-MM-ddTHH\\:mm\\:ss.fffK";
+            options.UseUtcTimestamp = true;
         });
     }
 });
