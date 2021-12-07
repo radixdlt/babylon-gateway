@@ -98,10 +98,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("balances")]
-    public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request, long? atStateVersion)
+    public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request)
     {
         var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
 
         var accountBalances = await _accountQuerier.GetAccountBalancesAtState(
             accountAddress.Address,
@@ -112,10 +112,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("stakes")]
-    public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request, long? atStateVersion)
+    public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request)
     {
         var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
 
         return await _accountQuerier.GetStakePositionsAtState(
             accountAddress.Address,
@@ -124,10 +124,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("unstakes")]
-    public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request, long? atStateVersion)
+    public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request)
     {
         var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
 
         return await _accountQuerier.GetUnstakePositionsAtState(
             accountAddress.Address,
@@ -145,7 +145,7 @@ public class AccountController : ControllerBase
     [HttpPost("derive")]
     public AccountDeriveResponse DeriveAccountIdentifier(AccountDeriveRequest request)
     {
-        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier.Network);
+        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
 
         var accountAddress = RadixBech32.GenerateAccountAddress(
             _networkConfigurationProvider.GetAddressHrps().AccountHrp,

@@ -90,6 +90,8 @@ public interface IValidations
     ValidatedTokenAmount ExtractValidPositiveXrdTokenAmount(TokenAmount actionAmount);
 
     ValidatedSymbol ExtractValidTokenSymbol(string symbol);
+
+    DateTimeOffset ExtractValidDateTime(string capitalizedFieldDescriptor, string dateTimeStr);
 }
 
 public record ValidatedTokenAmount(string Rri, Common.Numerics.TokenAmount Amount, ResourceAddress ResourceAddress);
@@ -240,5 +242,15 @@ public class Validations : IValidations
         }
 
         return new ValidatedSymbol(symbol);
+    }
+
+    public DateTimeOffset ExtractValidDateTime(string capitalizedFieldDescriptor, string dateTimeStr)
+    {
+        if (!DateTimeOffset.TryParse(dateTimeStr, out var dateTimeOffset))
+        {
+            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} DateTime could not be parsed");
+        }
+
+        return dateTimeOffset;
     }
 }

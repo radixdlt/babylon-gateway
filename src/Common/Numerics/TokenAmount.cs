@@ -69,16 +69,17 @@ namespace Common.Numerics;
 
 public readonly record struct TokenAmount : IComparable<TokenAmount>
 {
-    public static readonly TokenAmount Zero = new(0);
-    public static readonly TokenAmount NaN = new(true);
-    public const string StringForNaN = "NaN";
-
+    private const string StringForNaN = "NaN";
     private const int DecimalPrecision = 18;
     private const int MaxPostgresPrecision = 1000;
 
     // We under-estimate this so that we're definitely safe!
     private static readonly int _safeByteLengthLimitBeforePostgresError = (int)Math.Floor(MaxPostgresPrecision * Math.Log(10, 256));
     private static readonly BigInteger _divisor = BigInteger.Pow(10, DecimalPrecision);
+
+    public static readonly TokenAmount Zero = new(0);
+    public static readonly TokenAmount NaN = new(true);
+    public static readonly TokenAmount OneFullUnit = new(_divisor);
 
     private readonly BigInteger _subUnits;
     private readonly bool _isNaN;

@@ -94,10 +94,10 @@ public class ValidatorController : ControllerBase
     }
 
     [HttpPost("validator")]
-    public async Task<ValidatorResponse> GetValidatorInfo(ValidatorRequest request, long? atStateVersion)
+    public async Task<ValidatorResponse> GetValidatorInfo(ValidatorRequest request)
     {
         var validatorAddress = _validations.ExtractValidValidatorAddress(request.ValidatorIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new ValidatorResponse(
             ledgerState,
             await _validatorQuerier.GetValidatorAtState(validatorAddress, ledgerState)
@@ -105,9 +105,9 @@ public class ValidatorController : ControllerBase
     }
 
     [HttpPost("validators")]
-    public async Task<ValidatorsResponse> GetValidators(ValidatorsRequest request, long? atStateVersion)
+    public async Task<ValidatorsResponse> GetValidators(ValidatorsRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new ValidatorsResponse(
             ledgerState,
             await _validatorQuerier.GetValidatorsAtState(ledgerState)
@@ -117,7 +117,7 @@ public class ValidatorController : ControllerBase
     [HttpPost("validator/derive")]
     public ValidatorDeriveResponse DeriveValidatorIdentifier(ValidatorDeriveRequest request)
     {
-        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier.Network);
+        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
 
         var validatorAddress = RadixBech32.GenerateValidatorAddress(
             _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,

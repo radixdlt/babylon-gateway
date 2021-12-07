@@ -124,6 +124,25 @@ public static class DbQueryExtensions
             .Take(1);
     }
 
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.LedgerTransactions
+            .Where(lt => lt.NormalizedTimestamp <= timestamp)
+            .OrderByDescending(lt => lt.NormalizedTimestamp)
+            .ThenByDescending(lt => lt.ResultantStateVersion)
+            .Take(1);
+    }
+
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.LedgerTransactions
+            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch <= round && lt.IsStartOfRound)
+            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .Take(1);
+    }
+
     public static IQueryable<TSubstate> UpAtVersion<TSubstate>(
         this DbSet<TSubstate> dbSet,
         long stateVersion

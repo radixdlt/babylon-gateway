@@ -98,9 +98,9 @@ public class TransactionController : ControllerBase
     }
 
     [HttpPost("rules")]
-    public async Task<TransactionRulesResponse> GetTransactionRules(TransactionRulesRequest request, long? atStateVersion)
+    public async Task<TransactionRulesResponse> GetTransactionRules(TransactionRulesRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new TransactionRulesResponse(
             ledgerState,
             /* TODO:NG-57 - Output from Engine Configuration Fork at given state version */
@@ -119,25 +119,25 @@ public class TransactionController : ControllerBase
     }
 
     [HttpPost("build")]
-    public async Task<TransactionBuildResponse> BuildTransaction(TransactionBuildRequest request, long? atStateVersion)
+    public async Task<TransactionBuildResponse> BuildTransaction(TransactionBuildRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new TransactionBuildResponse(
             await _transactionBuildService.HandleBuildRequest(request, ledgerState)
         );
     }
 
     [HttpPost("finalize")]
-    public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request, long? atStateVersion)
+    public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
-        return await _transactionBuildService.HandleFinalizeRequest(request, ledgerState);
+        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
+        return await _transactionBuildService.HandleFinalizeRequest(request);
     }
 
     [HttpPost("submit")]
-    public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request, long? atStateVersion)
+    public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
-        return await _transactionBuildService.HandleSubmitRequest(request, ledgerState);
+        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
+        return await _transactionBuildService.HandleSubmitRequest(request);
     }
 }

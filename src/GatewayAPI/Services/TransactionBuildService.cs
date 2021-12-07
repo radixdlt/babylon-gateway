@@ -67,6 +67,7 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
+using System.Globalization;
 using Core = RadixCoreApi.GeneratedClient.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 using TokenAmount = Common.Numerics.TokenAmount;
@@ -77,9 +78,9 @@ public interface ITransactionBuildService
 {
     Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState);
 
-    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, Gateway.LedgerState ledgerState);
+    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request);
 
-    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, Gateway.LedgerState ledgerState);
+    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request);
 }
 
 public class TransactionBuildService : ITransactionBuildService
@@ -123,7 +124,7 @@ public class TransactionBuildService : ITransactionBuildService
         );
     }
 
-    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, Gateway.LedgerState ledgerState)
+    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request)
     {
         var coreFinalizeResponse = await HandleCoreFinalizeRequest(request, new Core.ConstructionFinalizeRequest(
             _coreApiHandler.GetNetworkIdentifier(),
@@ -154,7 +155,7 @@ public class TransactionBuildService : ITransactionBuildService
         );
     }
 
-    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, Gateway.LedgerState ledgerState)
+    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request)
     {
         var submitResponse = await HandleSubmission(
             _validations.ExtractValidHex("Signed transaction", request.SignedTransaction)
@@ -307,10 +308,31 @@ public class TransactionBuildService : ITransactionBuildService
     {
         var validator = _validations.ExtractValidValidatorAddress(action.FromValidator);
         var account = _validations.ExtractValidAccountAddress(action.ToAccount);
-        var requestedXrdToUnstake = _validations.ExtractValidPositiveXrdTokenAmount(action.Amount);
 
         // We read in the stakeSnapshot at the given ledgerState so that the wallet can make the request against the given ledger state
         var stakeSnapshot = await _accountQuerier.GetStakeSnapshotAtState(account, validator, ledgerState);
+
+        var stakeUnitsToUnstake = action switch
+        {
+            { Amount: { } xrdAmount, UnstakePercentage: 0 } => GetStakeUnitsToUnstakeGivenFixedXrdAmountRequested(validator, stakeSnapshot, xrdAmount),
+            { Amount: null, UnstakePercentage: > 0 and var percentage } => GetStakeUnitsGivenUnstakePercentage(action, stakeSnapshot, percentage),
+            _ => throw new InvalidActionException(action, "Only one of Amount or UnstakePercentage should be provided for an UnstakeTokens action"),
+        };
+
+        return TransactionBuilding.OperationGroupOf(
+            TransactionBuilding.DebitStakeVaultOperation(account, validator, stakeUnitsToUnstake),
+            TransactionBuilding.CreditPendingUnStakeVaultOperation(account, validator, stakeUnitsToUnstake)
+        );
+    }
+
+    private TokenAmount GetStakeUnitsToUnstakeGivenFixedXrdAmountRequested(
+        ValidatedValidatorAddress validator,
+        AccountQuerier.CombinedStakeSnapshot stakeSnapshot,
+        Gateway.TokenAmount xrdTokenAmount
+    )
+    {
+        var requestedXrdToUnstake = _validations.ExtractValidPositiveXrdTokenAmount(xrdTokenAmount);
+
         var estimatedTotalXrdStaked = stakeSnapshot.ValidatorStakeSnapshot.EstimateXrdConversion(
             stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits
         );
@@ -330,14 +352,21 @@ public class TransactionBuildService : ITransactionBuildService
         }
 
         // If the amount to unstake is within 0.001 XRD, unstake everything to try to prevent the "dust" problem
-        var stakeUnitsToUnstake = (estimatedTotalXrdStaked - requestedXrdToUnstake.Amount) < TokenAmount.FromDecimalString("0.001")
-                ? stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits
-                : (stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits * requestedXrdToUnstake.Amount) / estimatedTotalXrdStaked;
+        return (estimatedTotalXrdStaked - requestedXrdToUnstake.Amount) < TokenAmount.FromDecimalString("0.001")
+            ? stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits
+            : (stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits * requestedXrdToUnstake.Amount) / estimatedTotalXrdStaked;
+    }
 
-        return TransactionBuilding.OperationGroupOf(
-            TransactionBuilding.DebitStakeVaultOperation(account, validator, stakeUnitsToUnstake),
-            TransactionBuilding.CreditPendingUnStakeVaultOperation(account, validator, stakeUnitsToUnstake)
-        );
+    private TokenAmount GetStakeUnitsGivenUnstakePercentage(Gateway.Action action, AccountQuerier.CombinedStakeSnapshot stakeSnapshot, decimal percentage)
+    {
+        if (percentage is not (> 0 and <= 100))
+        {
+            throw new InvalidActionException(action, "Percentage unstake must be > 0 and <= 100");
+        }
+
+        var proportionAsTokenAmount = TokenAmount.FromDecimalString((percentage / 100).ToString(CultureInfo.InvariantCulture));
+
+        return (stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits * proportionAsTokenAmount) / TokenAmount.OneFullUnit;
     }
 
     private Core.OperationGroup MapCreateTokenDefinition(Gateway.CreateTokenDefinition action)

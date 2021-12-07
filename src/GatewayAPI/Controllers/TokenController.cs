@@ -98,9 +98,9 @@ public class TokenController : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<TokenResponse> GetTokenInfo(TokenRequest request, long? atStateVersion)
+    public async Task<TokenResponse> GetTokenInfo(TokenRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new TokenResponse(
             ledgerState,
             await _tokenQuerier.GetTokenInfoAtState(request.TokenIdentifier.Rri, ledgerState)
@@ -108,9 +108,9 @@ public class TokenController : ControllerBase
     }
 
     [HttpPost("native")]
-    public async Task<TokenNativeResponse> GetNativeTokenInfo(TokenNativeRequest request, long? atStateVersion)
+    public async Task<TokenNativeResponse> GetNativeTokenInfo(TokenNativeRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new TokenNativeResponse(
             ledgerState,
             await _tokenQuerier.GetTokenInfoAtState(_networkConfigurationProvider.GetXrdAddress(), ledgerState)
@@ -120,7 +120,7 @@ public class TokenController : ControllerBase
     [HttpPost("derive")]
     public TokenDeriveResponse DeriveTokenIdentifier(TokenDeriveRequest tokenDeriveRequest)
     {
-        _ledgerStateQuerier.AssertMatchingNetwork(tokenDeriveRequest.NetworkIdentifier.Network);
+        _ledgerStateQuerier.AssertMatchingNetwork(tokenDeriveRequest.NetworkIdentifier);
 
         var rri = RadixBech32.GenerateResourceAddress(
             _validations.ExtractValidPublicKey(tokenDeriveRequest.PublicKey).Bytes,
