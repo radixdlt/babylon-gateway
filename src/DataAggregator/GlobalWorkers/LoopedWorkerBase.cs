@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Extensions;
 using Common.Utilities;
 using System.Diagnostics;
 
@@ -89,7 +90,7 @@ public abstract class LoopedWorkerBase : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTimeOffset.Now);
+        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTime.UtcNow.AsUtcIsoDateToSecondsForLogs());
 
         while (!stoppingToken.IsCancellationRequested)
         {
