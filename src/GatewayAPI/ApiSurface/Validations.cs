@@ -71,16 +71,34 @@ namespace GatewayAPI.ApiSurface;
 
 public interface IValidations
 {
-    AccountAddress ExtractValidAccountAddress(AccountIdentifier accountIdentifier);
+    ValidatedAccountAddress ExtractValidAccountAddress(AccountIdentifier accountIdentifier);
 
-    void ValidateAccountAddress(AccountIdentifier accountIdentifier);
+    ValidatedValidatorAddress ExtractValidValidatorAddress(ValidatorIdentifier validatorIdentifier);
 
-    ValidatorAddress ExtractValidValidatorAddress(ValidatorIdentifier validatorIdentifier);
+    ValidatedPublicKey ExtractValidPublicKey(PublicKey publicKey);
 
-    void ValidateValidatorAddress(ValidatorIdentifier validatorIdentifier);
+    ValidatedHex ExtractValidHex(string capitalizedErrorMessageFieldName, string hexString);
 
-    byte[] ExtractValidPublicKey(PublicKey publicKey);
+    ValidatedHex? ExtractOptionalValidHexOrNull(string capitalizedErrorMessageFieldName, string hexString);
+
+    ValidatedResourceAddress ExtractValidResourceAddress(TokenIdentifier tokenIdentifier);
+
+    ValidatedTokenAmount ExtractValidTokenAmount(TokenAmount actionAmount);
+
+    ValidatedTokenAmount ExtractValidPositiveTokenAmount(TokenAmount actionAmount);
+
+    ValidatedTokenAmount ExtractValidPositiveXrdTokenAmount(TokenAmount actionAmount);
+
+    ValidatedSymbol ExtractValidTokenSymbol(string symbol);
 }
+
+public record ValidatedTokenAmount(string Rri, Common.Numerics.TokenAmount Amount, ResourceAddress ResourceAddress);
+public record ValidatedResourceAddress(string Rri, ResourceAddress ResourceAddress);
+public record ValidatedAccountAddress(string Address, AccountAddress ByteAccountAddress);
+public record ValidatedValidatorAddress(string Address, ValidatorAddress ByteValidatorAddress);
+public record ValidatedPublicKey(string AsString, byte[] Bytes);
+public record ValidatedHex(string AsString, byte[] Bytes);
+public record ValidatedSymbol(string AsString);
 
 public class Validations : IValidations
 {
@@ -91,7 +109,7 @@ public class Validations : IValidations
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public AccountAddress ExtractValidAccountAddress(AccountIdentifier accountIdentifier)
+    public ValidatedAccountAddress ExtractValidAccountAddress(AccountIdentifier accountIdentifier)
     {
         if (!RadixAddressParser.TryParseAccountAddress(
                 _networkConfigurationProvider.GetAddressHrps(),
@@ -103,16 +121,10 @@ public class Validations : IValidations
             throw new InvalidAccountAddressException(accountIdentifier.Address, "Account address is invalid", errorMessage);
         }
 
-        return accountAddress;
+        return new ValidatedAccountAddress(accountIdentifier.Address, accountAddress);
     }
 
-    // TODO:NG-56 - See if errors can be added as NewtonSoft validation errors against an account identifier, so they have a nicer context
-    public void ValidateAccountAddress(AccountIdentifier accountIdentifier)
-    {
-        ExtractValidAccountAddress(accountIdentifier);
-    }
-
-    public ValidatorAddress ExtractValidValidatorAddress(ValidatorIdentifier validatorIdentifier)
+    public ValidatedValidatorAddress ExtractValidValidatorAddress(ValidatorIdentifier validatorIdentifier)
     {
         if (!RadixAddressParser.TryParseValidatorAddress(
                 _networkConfigurationProvider.GetAddressHrps(),
@@ -124,16 +136,10 @@ public class Validations : IValidations
             throw new InvalidValidatorAddressException(validatorIdentifier.Address, "Validator address is invalid", errorMessage);
         }
 
-        return validatorAddress;
+        return new ValidatedValidatorAddress(validatorIdentifier.Address, validatorAddress);
     }
 
-    // TODO:NG-56 - See if errors can be added as NewtonSoft validation errors against a validator identifier, so they have a nicer context
-    public void ValidateValidatorAddress(ValidatorIdentifier validatorIdentifier)
-    {
-        ExtractValidValidatorAddress(validatorIdentifier);
-    }
-
-    public byte[] ExtractValidPublicKey(PublicKey publicKey)
+    public ValidatedPublicKey ExtractValidPublicKey(PublicKey publicKey)
     {
         try
         {
@@ -143,11 +149,96 @@ public class Validations : IValidations
                 throw new InvalidPublicKeyException(publicKey, $"Public key is not {RadixBech32.CompressedPublicKeyBytesLength} bytes long");
             }
 
-            return bytes;
+            return new ValidatedPublicKey(publicKey.Hex.ToLowerInvariant(), bytes);
         }
         catch (FormatException exception)
         {
             throw new InvalidPublicKeyException(publicKey, "Public key is not valid hex", exception.Message);
         }
+    }
+
+    public ValidatedHex ExtractValidHex(string capitalizedErrorMessageFieldName, string hexString)
+    {
+        try
+        {
+            return new ValidatedHex(hexString.ToLowerInvariant(), Convert.FromHexString(hexString));
+        }
+        catch (FormatException exception)
+        {
+            throw InvalidRequestException.FromOtherError($"{capitalizedErrorMessageFieldName} is not valid hex", exception.Message);
+        }
+    }
+
+    public ValidatedHex? ExtractOptionalValidHexOrNull(string capitalizedErrorMessageFieldName, string? hexString)
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(hexString) ? null : new ValidatedHex(hexString.ToLowerInvariant(), Convert.FromHexString(hexString));
+        }
+        catch (FormatException exception)
+        {
+            throw InvalidRequestException.FromOtherError($"{capitalizedErrorMessageFieldName} is not valid hex", exception.Message);
+        }
+    }
+
+    public ValidatedResourceAddress ExtractValidResourceAddress(TokenIdentifier tokenIdentifier)
+    {
+        if (!RadixAddressParser.TryParseResourceAddress(
+                _networkConfigurationProvider.GetAddressHrps(),
+                tokenIdentifier.Rri,
+                out var resourceAddress,
+                out var errorMessage
+            ))
+        {
+            throw new InvalidTokenRRIException(tokenIdentifier.Rri, "Token rri is invalid", errorMessage);
+        }
+
+        return new ValidatedResourceAddress(tokenIdentifier.Rri, resourceAddress);
+    }
+
+    public ValidatedTokenAmount ExtractValidTokenAmount(TokenAmount actionAmount)
+    {
+        var validatedResourceAddress = ExtractValidResourceAddress(actionAmount.TokenIdentifier);
+        var tokenAmount = Common.Numerics.TokenAmount.FromSubUnitsString(actionAmount.Value);
+        if (tokenAmount.IsNaN())
+        {
+            InvalidRequestException.FromOtherError("Token amount value could not be parsed");
+        }
+
+        return new ValidatedTokenAmount(validatedResourceAddress.Rri, tokenAmount, validatedResourceAddress.ResourceAddress);
+    }
+
+    public ValidatedTokenAmount ExtractValidPositiveTokenAmount(TokenAmount actionAmount)
+    {
+        var tokenAmount = ExtractValidTokenAmount(actionAmount);
+
+        if (!tokenAmount.Amount.IsPositive())
+        {
+            InvalidRequestException.FromOtherError("Token amount value is not positive");
+        }
+
+        return tokenAmount;
+    }
+
+    public ValidatedTokenAmount ExtractValidPositiveXrdTokenAmount(TokenAmount actionAmount)
+    {
+        var tokenAmount = ExtractValidPositiveTokenAmount(actionAmount);
+
+        if (tokenAmount.Rri != _networkConfigurationProvider.GetXrdAddress())
+        {
+            InvalidRequestException.FromOtherError("Token amount is not xrd where it needs to be");
+        }
+
+        return tokenAmount;
+    }
+
+    public ValidatedSymbol ExtractValidTokenSymbol(string symbol)
+    {
+        if (!RadixBech32.ValidResourceSymbolRegex.IsMatch(symbol))
+        {
+            throw new InvalidTokenSymbolException(symbol, "Symbol must be between 1 and 35 lower case alpha-numeric characters");
+        }
+
+        return new ValidatedSymbol(symbol);
     }
 }

@@ -62,50 +62,20 @@
  * permissions under this License.
  */
 
-using RadixGatewayApi.Generated.Model;
+using Common.Numerics;
+using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class CannotStakeException : ValidationException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    public CannotStakeException(Gateway.AccountIdentifier owner, Gateway.AccountIdentifier user)
+        : base(new Gateway.CannotStakeError(owner, user), BuildErrorMessage(owner, user))
     {
     }
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    private static string BuildErrorMessage(Gateway.AccountIdentifier owner, Gateway.AccountIdentifier user)
     {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        return $"You cannot stake to the validator because it has delegation switched off, and you ({owner.Address}) are not the validator's owner ({user.Address})";
     }
 }

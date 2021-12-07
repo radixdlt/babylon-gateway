@@ -64,7 +64,9 @@
 
 using Common.Database.Models.Ledger.Normalization;
 using Common.Numerics;
+using GatewayAPI.Exceptions;
 using Api = RadixGatewayApi.Generated.Model;
+using Core = RadixCoreApi.GeneratedClient.Model;
 
 namespace GatewayAPI.ApiSurface;
 
@@ -75,9 +77,36 @@ public static class ApiIdentifiers
         return new Api.NetworkIdentifier(networkName);
     }
 
+    public static Api.TokenAmount AsApiTokenAmount(this ValidatedTokenAmount tokenAmount)
+    {
+        return new Api.TokenAmount(tokenAmount.Amount.ToSubUnitString(), tokenAmount.Rri.AsTokenIdentifier());
+    }
+
     public static Api.TokenAmount AsApiTokenAmount(this TokenAmount tokenAmount, Api.TokenIdentifier tokenIdentifier)
     {
         return new Api.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
+    }
+
+    public static string AsXrdString(this Api.TokenAmount apiTokenAmount)
+    {
+        return $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} XRD";
+    }
+
+    public static string AsStringWithUnits(this Api.TokenAmount apiTokenAmount)
+    {
+        return $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
+    }
+
+    public static Api.TokenAmount AsApiTokenAmount(this Core.ResourceAmount resourceAmount)
+    {
+        if (resourceAmount.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
+        {
+            throw new InvalidCoreApiResponseException(
+                "Expected a response from the core API to have a tokenResourceIdentifier but it was another kind of resourceIdentifier"
+            );
+        }
+
+        return new Api.TokenAmount(resourceAmount.Value, tokenResourceIdentifier.Rri.AsTokenIdentifier());
     }
 
     public static Api.TokenAmount AsApiTokenAmount(this TokenAmount tokenAmount, string rri)

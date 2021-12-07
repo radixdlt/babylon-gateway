@@ -78,7 +78,7 @@ namespace GatewayAPI.Database;
 
 public interface IValidatorQuerier
 {
-    Task<Validator> GetValidatorAtState(ValidatorAddress validatorAddress, string strValidatorAddress, LedgerState ledgerState);
+    Task<Validator> GetValidatorAtState(ValidatedValidatorAddress validatorAddress, LedgerState ledgerState);
 
     Task<List<Validator>> GetValidatorsAtState(LedgerState ledgerState);
 }
@@ -96,20 +96,20 @@ public class ValidatorQuerier : IValidatorQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<Validator> GetValidatorAtState(ValidatorAddress validatorAddress, string strValidatorAddress, LedgerState ledgerState)
+    public async Task<Validator> GetValidatorAtState(ValidatedValidatorAddress validatorAddress, LedgerState ledgerState)
     {
-        var validator = await GetDbValidatorAtState(strValidatorAddress, ledgerState);
+        var validator = await GetDbValidatorAtState(validatorAddress.Address, ledgerState);
 
         if (validator == null)
         {
             return new Validator(
-                strValidatorAddress.AsValidatorIdentifier(),
+                validatorAddress.Address.AsValidatorIdentifier(),
                 TokenAmount.Zero.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                 new ValidatorInfo(
                     TokenAmount.Zero.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                     GetDefaultValidatorUptime(ledgerState)
                 ),
-                GetDefaultValidatorProperties(validatorAddress.CompressedPublicKey)
+                GetDefaultValidatorProperties(validatorAddress.ByteValidatorAddress.CompressedPublicKey)
             );
         }
 

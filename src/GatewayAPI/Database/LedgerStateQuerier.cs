@@ -114,7 +114,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         if (networkName != ledgerNetworkName)
         {
-            throw new MismatchingNetworkException(ledgerNetworkName);
+            throw new NetworkNotSupportedException(ledgerNetworkName);
         }
     }
 

@@ -121,16 +121,10 @@ public class TokenController : ControllerBase
     public TokenDeriveResponse DeriveTokenIdentifier(TokenDeriveRequest tokenDeriveRequest)
     {
         _ledgerStateQuerier.AssertMatchingNetwork(tokenDeriveRequest.NetworkIdentifier.Network);
-        var symbol = tokenDeriveRequest.Symbol;
-
-        if (!_symbolRegex.IsMatch(symbol))
-        {
-            throw new InvalidTokenSymbolException(symbol, "Symbol must be between 1 and 35 lower case alpha-numeric characters");
-        }
 
         var rri = RadixBech32.GenerateResourceAddress(
-            _validations.ExtractValidPublicKey(tokenDeriveRequest.PublicKey),
-            symbol,
+            _validations.ExtractValidPublicKey(tokenDeriveRequest.PublicKey).Bytes,
+            _validations.ExtractValidTokenSymbol(tokenDeriveRequest.Symbol).AsString,
             _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix
         );
 

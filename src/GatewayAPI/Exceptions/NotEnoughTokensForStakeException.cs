@@ -62,50 +62,20 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class NotEnoughTokensForStakeException : ValidationException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    public NotEnoughTokensForStakeException(TokenAmount requestedAmount, TokenAmount availableAmount)
+        : base(new NotEnoughTokensForStakeError(requestedAmount, availableAmount), GetErrorMessage(requestedAmount, availableAmount))
     {
     }
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    public static string GetErrorMessage(TokenAmount requestedAmount, TokenAmount availableAmount)
     {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        return $"You requested to stake {requestedAmount.AsXrdString()} but only have {availableAmount.AsXrdString()} available";
     }
 }

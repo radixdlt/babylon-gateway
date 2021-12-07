@@ -105,6 +105,15 @@ public class InternalServerException : KnownGatewayErrorException
         );
     }
 
+    public static InternalServerException OfInvalidCoreApiResponseException(InvalidCoreApiResponseException exception, string traceId)
+    {
+        return new InternalServerException(
+            new InternalServerError("InvalidCoreApiResponse", $"N/A. TraceId={traceId}"),
+            "An unexpected error occurred handling the request",
+            exception.Message
+        );
+    }
+
     public static InternalServerException OfInvalidGatewayException(string traceId)
     {
         return new InternalServerException(

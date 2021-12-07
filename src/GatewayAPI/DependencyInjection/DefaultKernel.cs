@@ -64,10 +64,12 @@
 
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
+using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
 using GatewayAPI.Fallback;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace GatewayAPI.DependencyInjection;
 
@@ -77,10 +79,11 @@ public class DefaultKernel
     {
         // Globally-Scoped services
         AddGlobalScopedServices(services);
-        AddDatabaseContext(hostBuilderContext, services);
+        AddReadOnlyDatabaseContext(hostBuilderContext, services);
 
         // Request scoped services
         AddRequestScopedServices(services);
+        AddCoreApiServices(services);
         AddFallbackApiServices(services);
     }
 
@@ -91,6 +94,7 @@ public class DefaultKernel
         services.AddSingleton<IValidations, Validations>();
         services.AddSingleton<IExceptionHandler, ExceptionHandler>();
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
+        services.AddSingleton<ICoreApiHandler, CoreApiHandler>();
     }
 
     private void AddRequestScopedServices(IServiceCollection services)
@@ -99,38 +103,64 @@ public class DefaultKernel
         services.AddScoped<IAccountQuerier, AccountQuerier>();
         services.AddScoped<ITokenQuerier, TokenQuerier>();
         services.AddScoped<IValidatorQuerier, ValidatorQuerier>();
+        services.AddScoped<ITransactionBuildService, TransactionBuildService>();
+    }
+
+    private void AddCoreApiServices(IServiceCollection services)
+    {
+        // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
+        // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
+        services.AddHttpClient<ICoreApiHandler, CoreApiHandler>()
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
+                serviceProvider,
+                "DisableCoreApiHttpsCertificateChecks",
+                "CoreApiHttpProxyAddress"
+            ));
     }
 
     private void AddFallbackApiServices(IServiceCollection services)
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        // This should only be used from the other readers, to ensure encapsulation for testing
         services.AddHttpClient<IFallbackGatewayApiProvider, FallbackGatewayApiProvider>()
-            .ConfigurePrimaryHttpMessageHandler(s =>
-            {
-                var disableCertificateChecks = s.GetRequiredService<IConfiguration>()
-                    .GetValue<bool>("DisableFallbackGatewayApiHttpsCertificateChecks");
-
-                return disableCertificateChecks
-                    ? new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
-                    }
-                    : new HttpClientHandler();
-            });
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
+                serviceProvider,
+                "DisableFallbackGatewayApiHttpsCertificateChecks",
+                "FallbackGatewayApiHttpProxyAddress"
+            ));
     }
 
-    private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
+    private void AddReadOnlyDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
     {
-        #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
         services.AddDbContext<GatewayReadOnlyDbContext>(options =>
-            options
-                // https://www.npgsql.org/efcore/index.html
-                .UseNpgsql(
-                    hostContext.Configuration.GetConnectionString("ReadOnlyDbContext")
-                )
-        );
-        #pragma warning restore SA1515
+        {
+            // https://www.npgsql.org/efcore/index.html
+            options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"));
+        });
+    }
+
+    private HttpClientHandler ConfigureHttpClientHandler(
+        IServiceProvider serviceProvider,
+        string disableApiChecksConfigParameterName,
+        string httpProxyAddressConfigParameterName
+    )
+    {
+        var httpClientHandler = new HttpClientHandler();
+
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var disableCertificateChecks = configuration.GetValue<bool>(disableApiChecksConfigParameterName);
+        var httpProxyAddress = configuration.GetValue<string?>(httpProxyAddressConfigParameterName);
+
+        if (disableCertificateChecks)
+        {
+            httpClientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(httpProxyAddress))
+        {
+            httpClientHandler.Proxy = new WebProxy(httpProxyAddress);
+        }
+
+        return httpClientHandler;
     }
 }

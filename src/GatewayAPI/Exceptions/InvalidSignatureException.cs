@@ -66,10 +66,19 @@ using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class MismatchingNetworkException : ValidationException
+public class InvalidSignatureException : ValidationException
 {
-    public MismatchingNetworkException(string ledgerNetworkName)
-        : base(new NetworkNotSupportedError(new List<string> { ledgerNetworkName }), $"The provided network name didn't match the ledger network name {ledgerNetworkName}")
+    public InvalidSignatureException(Signature invalidSignature, string internalMessage)
+        : base(new InvalidSignatureError(invalidSignature), "Signature was not valid", internalMessage)
+    {
+    }
+}
+
+// A marker exception to be caught where the correct Signature can be handled
+public class InternalInvalidSignatureException : Exception
+{
+    public InternalInvalidSignatureException(string message)
+        : base(message)
     {
     }
 }

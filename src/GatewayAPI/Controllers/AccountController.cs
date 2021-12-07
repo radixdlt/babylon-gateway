@@ -100,10 +100,11 @@ public class AccountController : ControllerBase
     [HttpPost("balances")]
     public async Task<AccountBalancesResponse> GetBalances(AccountBalancesRequest request, long? atStateVersion)
     {
-        _validations.ValidateAccountAddress(request.AccountIdentifier);
+        var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+
         var accountBalances = await _accountQuerier.GetAccountBalancesAtState(
-            request.AccountIdentifier.Address,
+            accountAddress.Address,
             ledgerState
         );
 
@@ -113,11 +114,11 @@ public class AccountController : ControllerBase
     [HttpPost("stakes")]
     public async Task<AccountStakesResponse> GetStakePositions(AccountStakesRequest request, long? atStateVersion)
     {
-        _validations.ValidateAccountAddress(request.AccountIdentifier);
+        var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
 
         return await _accountQuerier.GetStakePositionsAtState(
-            request.AccountIdentifier.Address,
+            accountAddress.Address,
             ledgerState
         );
     }
@@ -125,11 +126,11 @@ public class AccountController : ControllerBase
     [HttpPost("unstakes")]
     public async Task<AccountUnstakesResponse> GetUnstakePositions(AccountUnstakesRequest request, long? atStateVersion)
     {
-        _validations.ValidateAccountAddress(request.AccountIdentifier);
+        var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
 
         return await _accountQuerier.GetUnstakePositionsAtState(
-            request.AccountIdentifier.Address,
+            accountAddress.Address,
             ledgerState
         );
     }
@@ -137,7 +138,7 @@ public class AccountController : ControllerBase
     [HttpPost("transactions")]
     public async Task<AccountTransactionsResponse> GetAccountTransactions(AccountTransactionsRequest request)
     {
-        _validations.ValidateAccountAddress(request.AccountIdentifier);
+        _validations.ExtractValidAccountAddress(request.AccountIdentifier);
         return await _fallbackGatewayApiProvider.Api.AccountTransactionsPostAsync(request);
     }
 
@@ -148,7 +149,7 @@ public class AccountController : ControllerBase
 
         var accountAddress = RadixBech32.GenerateAccountAddress(
             _networkConfigurationProvider.GetAddressHrps().AccountHrp,
-            _validations.ExtractValidPublicKey(request.PublicKey)
+            _validations.ExtractValidPublicKey(request.PublicKey).Bytes
         );
 
         return new AccountDeriveResponse(accountAddress.AsAccountIdentifier());

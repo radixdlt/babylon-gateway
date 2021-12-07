@@ -123,6 +123,11 @@ public class ExceptionHandler : IExceptionHandler
                 gatewayErrorException = InternalServerException.OfHiddenException(exception, traceId);
             }
         }
+        else if (exception is InvalidCoreApiResponseException invalidCoreApiResponseException)
+        {
+            _logger.Log(LogLevel.Warning, exception, "Invalid Core API response [RequestTrace={TraceId}]", traceId);
+            gatewayErrorException = InternalServerException.OfInvalidCoreApiResponseException(invalidCoreApiResponseException, traceId);
+        }
         else
         {
             _logger.Log(LogLevel.Warning, exception, "Unknown exception [RequestTrace={TraceId}]", traceId);

@@ -66,46 +66,38 @@ using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class InvalidTransactionException : ValidationException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage)
+        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
     {
     }
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    public static InvalidTransactionException FromSubstateException(
+        string invalidTransactionHex,
+        InternalTransactionSubstateIsNotUpException exception
+    )
     {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
+        return new InvalidTransactionException(
+            invalidTransactionHex,
+            $"Reference substate does not exist or has already been used: {exception.Message}"
         );
     }
+}
 
-    public static InvalidRequestException FromOtherError(string error)
+// A marker exception to be caught where the correct Signature can be handled
+public class InternalTransactionSubstateIsNotUpException : Exception
+{
+    public string SubstateIdentifierHex { get; }
+
+    public InternalTransactionSubstateIsNotUpException(string substateIdentifierHex)
+        : base("Transaction was submitted with a non-up substate identifier")
     {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
+        SubstateIdentifierHex = substateIdentifierHex;
     }
 
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
+    public InvalidTransactionException ToInvalidTransactionException(string invalidTransactionHex)
     {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        return InvalidTransactionException.FromSubstateException(invalidTransactionHex, this);
     }
 }

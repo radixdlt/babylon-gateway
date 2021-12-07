@@ -62,50 +62,28 @@
  * permissions under this License.
  */
 
-using RadixGatewayApi.Generated.Model;
+using GatewayAPI.Configuration.Models;
+using RadixCoreApi.GeneratedClient.Api;
+using System.Net.Http.Headers;
 
-namespace GatewayAPI.Exceptions;
+namespace GatewayAPI.CoreCommunications;
 
-public class InvalidRequestException : ValidationException
+public interface ICoreApiProvider
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
-    {
-    }
+    ConstructionApi ConstructionApi { get; }
+}
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
-    {
-    }
+public class CoreApiProvider : ICoreApiProvider
+{
+    public ConstructionApi ConstructionApi { get; }
 
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
+    public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
+        if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
+        {
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);
+        }
 
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        ConstructionApi = new ConstructionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

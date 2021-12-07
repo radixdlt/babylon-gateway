@@ -66,46 +66,15 @@ using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class MessageTooLongException : ValidationException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    public MessageTooLongException(int lengthLimit, int attemptedLength)
+        : base(new MessageTooLongError(lengthLimit: lengthLimit, attemptedLength: attemptedLength), GenerateErrorMessage(lengthLimit, attemptedLength))
     {
     }
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    public static string GenerateErrorMessage(int lengthLimit, int attemptedLength)
     {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        return $"Your transaction message was {attemptedLength} bytes long, exceeding the maximum byte length of {lengthLimit}";
     }
 }

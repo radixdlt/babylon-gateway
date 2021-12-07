@@ -62,50 +62,15 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class TransactionNotFoundException : NotFoundException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    public TransactionNotFoundException(TransactionIdentifier transactionIdentifier)
+        : base(new TransactionNotFoundError(transactionIdentifier), "Transaction not found")
     {
-    }
-
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
-    {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
     }
 }

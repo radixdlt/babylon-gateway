@@ -78,18 +78,21 @@ public class TransactionController : ControllerBase
 {
     private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly ITransactionBuildService _transactionBuildService;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
     public TransactionController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
+        ITransactionBuildService transactionBuildService,
         INetworkConfigurationProvider networkConfigurationProvider,
         IFallbackGatewayApiProvider fallbackGatewayApiProvider
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
+        _transactionBuildService = transactionBuildService;
         _networkConfigurationProvider = networkConfigurationProvider;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
@@ -102,8 +105,8 @@ public class TransactionController : ControllerBase
             ledgerState,
             /* TODO:NG-57 - Output from Engine Configuration Fork at given state version */
             new TransactionRules(
-                maximumMessageLength: 255,
-                minimumStake: TokenAmount.FromSubUnitsString("90000000000000000000")
+                maximumMessageLength: TransactionBuilding.MaximumMessageLength,
+                minimumStake: TransactionBuilding.MinimumStake
                     .AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             )
         );
@@ -116,20 +119,25 @@ public class TransactionController : ControllerBase
     }
 
     [HttpPost("build")]
-    public async Task<TransactionBuildResponse> BuildTransaction(TransactionBuildRequest request)
+    public async Task<TransactionBuildResponse> BuildTransaction(TransactionBuildRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.TransactionBuildPostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        return new TransactionBuildResponse(
+            await _transactionBuildService.HandleBuildRequest(request, ledgerState)
+        );
     }
 
     [HttpPost("finalize")]
-    public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request)
+    public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.TransactionFinalizePostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.Network, atStateVersion);
+        return await _transactionBuildService.HandleFinalizeRequest(request, ledgerState);
     }
 
     [HttpPost("submit")]
-    public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request)
+    public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request, long? atStateVersion)
     {
-        return await _fallbackGatewayApiProvider.Api.TransactionSubmitPostAsync(request);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
+        return await _transactionBuildService.HandleSubmitRequest(request, ledgerState);
     }
 }

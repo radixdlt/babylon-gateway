@@ -62,50 +62,20 @@
  * permissions under this License.
  */
 
-using RadixGatewayApi.Generated.Model;
+using GatewayAPI.ApiSurface;
+using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class BelowMinimumStakeException : ValidationException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    public BelowMinimumStakeException(Gateway.TokenAmount requestedAmount, Gateway.TokenAmount minimumAmount)
+        : base(new Gateway.BelowMinimumStakeError(requestedAmount, minimumAmount), BuildErrorMessage(requestedAmount, minimumAmount))
     {
     }
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    private static string BuildErrorMessage(Gateway.TokenAmount requestedAmount, Gateway.TokenAmount minimumAmount)
     {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        return $"You must stake at least {minimumAmount.AsXrdString()} but you requested to stake {requestedAmount.AsXrdString()}";
     }
 }

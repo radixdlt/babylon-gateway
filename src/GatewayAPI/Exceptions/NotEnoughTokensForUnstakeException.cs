@@ -62,50 +62,20 @@
  * permissions under this License.
  */
 
+using GatewayAPI.ApiSurface;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public class NotEnoughTokensForUnstakeException : ValidationException
 {
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
-        : base(gatewayError, userFacingMessage, internalMessage)
+    public NotEnoughTokensForUnstakeException(TokenAmount requestedAmount, AccountStakeEntry stake, AccountStakeEntry pendingStake)
+        : base(new NotEnoughTokensForUnstakeError(requestedAmount, stake, pendingStake), GetErrorMessage(requestedAmount, stake, pendingStake))
     {
     }
 
-    private InvalidRequestException(GatewayError gatewayError, string userFacingMessage)
-        : base(gatewayError, userFacingMessage)
+    public static string GetErrorMessage(TokenAmount requestedAmount, AccountStakeEntry stake, AccountStakeEntry pendingStake)
     {
-    }
-
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                validationErrors
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred"
-        );
-    }
-
-    public static InvalidRequestException FromOtherError(string error, string internalMessage)
-    {
-        return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
-            ),
-            "One or more validation errors occurred",
-            internalMessage
-        );
+        return $"You requested to unstake {requestedAmount.AsXrdString()} but only have estimated {stake.DelegatedStake.AsXrdString()} staked. You also have {pendingStake.DelegatedStake.AsXrdString()} stake pending, which will be available to unstake at the end of the next epoch";
     }
 }

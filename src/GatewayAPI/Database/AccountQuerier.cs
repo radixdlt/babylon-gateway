@@ -80,6 +80,12 @@ public interface IAccountQuerier
     Task<AccountStakesResponse> GetStakePositionsAtState(string accountAddress, LedgerState ledgerState);
 
     Task<AccountUnstakesResponse> GetUnstakePositionsAtState(string accountAddress, LedgerState ledgerState);
+
+    Task<AccountQuerier.CombinedStakeSnapshot> GetStakeSnapshotAtState(
+        ValidatedAccountAddress accountAddress,
+        ValidatedValidatorAddress validatorAddress,
+        LedgerState ledgerState
+    );
 }
 
 public class AccountQuerier : IAccountQuerier
@@ -143,6 +149,21 @@ public class AccountQuerier : IAccountQuerier
                 ))
             )
         );
+    }
+
+    public async Task<CombinedStakeSnapshot> GetStakeSnapshotAtState(
+        ValidatedAccountAddress accountAddress,
+        ValidatedValidatorAddress validatorAddress,
+        LedgerState ledgerState
+    )
+    {
+        return await GetAccountValidatorCombinedStakeSnapshot(accountAddress.Address, validatorAddress.Address, ledgerState)
+            .SingleOrDefaultAsync()
+            ?? new CombinedStakeSnapshot(
+                validatorAddress.Address,
+                AccountValidatorStakeSnapshot.GetDefault(),
+                ValidatorStakeSnapshot.GetDefault()
+            );
     }
 
     public async Task<AccountUnstakesResponse> GetUnstakePositionsAtState(string accountAddress, LedgerState ledgerState)
@@ -269,7 +290,7 @@ public class AccountQuerier : IAccountQuerier
             });
     }
 
-    private record CombinedStakeSnapshot(
+    public record CombinedStakeSnapshot(
         string ValidatorAddress,
         AccountValidatorStakeSnapshot AccountValidatorStakeSnapshot,
         ValidatorStakeSnapshot ValidatorStakeSnapshot
@@ -286,6 +307,24 @@ public class AccountQuerier : IAccountQuerier
             join validator in _dbContext.Validators
                 on stakeHistory.ValidatorId equals validator.Id
             where stakeHistory.AccountId == accountId
+            select new CombinedStakeSnapshot(validator.Address, stakeHistory.StakeSnapshot, validatorHistory.StakeSnapshot)
+        ;
+    }
+
+    private IQueryable<CombinedStakeSnapshot> GetAccountValidatorCombinedStakeSnapshot(string accountAddress, string validatorAddress, LedgerState ledgerState)
+    {
+        var stateVersion = ledgerState._Version;
+
+        return
+            from stakeHistory in _dbContext.AccountValidatorStakeHistoryAtVersion(stateVersion)
+            join validatorHistory in _dbContext.ValidatorStakeHistoryAtVersion(stateVersion)
+                on stakeHistory.ValidatorId equals validatorHistory.ValidatorId
+            join validator in _dbContext.Validators
+                on stakeHistory.ValidatorId equals validator.Id
+            join account in _dbContext.Accounts
+                on stakeHistory.AccountId equals account.Id
+            where account.Address == accountAddress
+                  && validator.Address == validatorAddress
             select new CombinedStakeSnapshot(validator.Address, stakeHistory.StakeSnapshot, validatorHistory.StakeSnapshot)
         ;
     }

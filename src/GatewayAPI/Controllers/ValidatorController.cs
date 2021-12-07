@@ -100,7 +100,7 @@ public class ValidatorController : ControllerBase
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier.Network, atStateVersion);
         return new ValidatorResponse(
             ledgerState,
-            await _validatorQuerier.GetValidatorAtState(validatorAddress, request.ValidatorIdentifier.Address, ledgerState)
+            await _validatorQuerier.GetValidatorAtState(validatorAddress, ledgerState)
         );
     }
 
@@ -121,7 +121,7 @@ public class ValidatorController : ControllerBase
 
         var validatorAddress = RadixBech32.GenerateValidatorAddress(
             _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
-            _validations.ExtractValidPublicKey(request.PublicKey)
+            _validations.ExtractValidPublicKey(request.PublicKey).Bytes
         );
 
         return new ValidatorDeriveResponse(validatorAddress.AsValidatorIdentifier());

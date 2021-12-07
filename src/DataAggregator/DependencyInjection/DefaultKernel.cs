@@ -107,15 +107,11 @@ public class DefaultKernel
 
     private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
     {
-        #pragma warning disable SA1515 // Remove need to proceed comments by free line as it looks weird here
         services.AddDbContextFactory<AggregatorDbContext>(options =>
-            options
-                // https://www.npgsql.org/efcore/index.html
-                .UseNpgsql(
-                    hostContext.Configuration.GetConnectionString("AggregatorDbContext")
-                )
-        );
-        #pragma warning restore SA1515
+        {
+            // https://www.npgsql.org/efcore/index.html
+            options.UseNpgsql(hostContext.Configuration.GetConnectionString("AggregatorDbContext"));
+        });
     }
 
     private void AddNodeScopedServices(IServiceCollection services)
@@ -127,31 +123,15 @@ public class DefaultKernel
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        // This should only be used from the other readers, to ensure encapsulation for testing
         services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
-            .ConfigurePrimaryHttpMessageHandler(s =>
-            {
-                var httpClientHandler = new HttpClientHandler();
-
-                var configuration = s.GetRequiredService<IConfiguration>();
-                var disableCertificateChecks = configuration.GetValue<bool>("DisableCoreApiHttpsCertificateChecks");
-                var httpProxyAddress = configuration.GetValue<string?>("CoreApiHttpProxyAddress");
-
-                if (disableCertificateChecks)
-                {
-                    httpClientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-                }
-
-                if (!string.IsNullOrWhiteSpace(httpProxyAddress))
-                {
-                    httpClientHandler.Proxy = new WebProxy(httpProxyAddress);
-                }
-
-                return httpClientHandler;
-            });
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
+                serviceProvider,
+                "DisableCoreApiHttpsCertificateChecks",
+                "CoreApiHttpProxyAddress"
+            ));
 
         // We can mock these out in tests
-        // These should be transient so that they don't capture a transient
+        // These should be transient so that they don't capture a transient HttpClient
         services.AddTransient<ITransactionLogReader, TransactionLogReader>();
         services.AddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
     }
@@ -166,5 +146,30 @@ public class DefaultKernel
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
+    }
+
+    private HttpClientHandler ConfigureHttpClientHandler(
+        IServiceProvider serviceProvider,
+        string disableApiChecksConfigParameterName,
+        string httpProxyAddressConfigParameterName
+    )
+    {
+        var httpClientHandler = new HttpClientHandler();
+
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var disableCertificateChecks = configuration.GetValue<bool>(disableApiChecksConfigParameterName);
+        var httpProxyAddress = configuration.GetValue<string?>(httpProxyAddressConfigParameterName);
+
+        if (disableCertificateChecks)
+        {
+            httpClientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(httpProxyAddress))
+        {
+            httpClientHandler.Proxy = new WebProxy(httpProxyAddress);
+        }
+
+        return httpClientHandler;
     }
 }
