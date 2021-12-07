@@ -70,12 +70,35 @@ namespace Common.Extensions;
 public static class DbSetExtensions
 {
     /// <summary>
-    /// This has potential to be faster than the other overload due to fewer allocations.
+    /// <para>
+    /// This is designed to replace the use of "IN", improving performance, and allowing for support matching on tuples.
+    /// It does this by using a virtual join, inspired by https://singlebrook.com/2018/05/23/when-to-throw-in-out/.
+    /// </para>
+    /// <para>
+    /// IMPORTANT NOTES:
+    /// <list type="bullet">
+    /// <item><description>This method assumes the flattened keys (as tuples) are distinct.</description></item>
+    /// <item><description>The initial SQL should be to select all columns of the dbSet and not include a where clause.</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Example use:
+    /// <code>
+    /// _dbContext.AccountResourceBalanceHistoryEntries
+    ///   .FromMultiDimensionalVirtualJoin(
+    ///     "SELECT * FROM account_resource_balance_history",
+    ///     "(account_id, resource_id)",
+    ///     new object[] { accountIdOne, resourceIdOne, accountIdTwo, resourceIdTwo },
+    ///     2
+    ///   );
+    /// </code>
+    /// </para>
     /// </summary>
     /// <typeparam name="TEntity">The entity of the dbSet.</typeparam>
-    public static IQueryable<TEntity> FromSqlRawWithDimensionalIn<TEntity>(
+    public static IQueryable<TEntity> FromMultiDimensionalVirtualJoin<TEntity>(
         this DbSet<TEntity> dbSet,
-        string sqlBeforeIn,
+        string initialSql,
+        string keysTuple,
         object[] flattenedKeys,
         int keySize
     )
@@ -90,33 +113,13 @@ public static class DbSetExtensions
 
         var placeholders = CreateArrayOfTuplesPlaceholder(flattenedKeys.Length / keySize, keySize);
 
-        return dbSet.FromSqlRaw($"{sqlBeforeIn} IN ({placeholders})", flattenedKeys);
-    }
-
-    public static IQueryable<TEntity> FromSqlRawWithDimensionalIn<TEntity, TKey>(
-        this DbSet<TEntity> dbSet,
-        string sqlBeforeIn,
-        IReadOnlyCollection<TKey> keys,
-        Func<TKey, IEnumerable<object>> mapToKey
-    )
-        where TEntity : class
-    {
-        if (!keys.Any())
-        {
-            throw new ArgumentException("Needs to have at least some keys", nameof(keys));
-        }
-
-        var tupleDimension = mapToKey(keys.First()).Count();
-
-        var placeholders = CreateArrayOfTuplesPlaceholder(keys.Count, tupleDimension);
-
-        object[] values = keys.SelectMany(mapToKey).ToArray();
-
-        return dbSet.FromSqlRaw($"{sqlBeforeIn} IN ({placeholders})", values);
+        // NB: If we can't assume the flattened keys are distinct as tuples,
+        //     see https://dbfiddle.uk/?rdbms=postgres_9.6&amp;fiddle=2796bdabfda3931e98da8c7c23030e80 for ideas
+        return dbSet.FromSqlRaw($"{initialSql} INNER JOIN ( values {placeholders} ) v{keysTuple} using{keysTuple}", flattenedKeys);
     }
 
     /// <summary>
-    /// Outputs a string like (({0},{1},{2}),({3},{4},{5})) for arrayLength=2, tupleLength=3.
+    /// Outputs a string like ({0},{1},{2}),({3},{4},{5}) for arrayLength=2, tupleLength=3.
     /// </summary>
     public static string CreateArrayOfTuplesPlaceholder(int arrayLength, int tupleLength, int startCountingAt = 0)
     {

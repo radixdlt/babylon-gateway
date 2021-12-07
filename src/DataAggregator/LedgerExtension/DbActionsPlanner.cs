@@ -699,6 +699,7 @@ public class DbActionsPlanner
         }
 
         // TODO:NG-49 - If we hit limits - instead of doing a large "IN", we could consider using a Temporary Table for these loads
+        //              For example - following in the footsteps of FromMultiDimensionalVirtualJoin
         var substates = await _dbContext.Set<TSubstate>()
             .Where(s => identifiersToLoad.Contains(s.SubstateIdentifier))
             .ToListAsync(_cancellationToken);
@@ -740,11 +741,13 @@ public class DbActionsPlanner
         }
 
         _latestAccountResourceHistory = await _dbContext.Set<AccountResourceBalanceHistory>()
-            .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM account_resource_balance_history WHERE to_state_version IS NULL AND (account_id, resource_id)",
+            .FromMultiDimensionalVirtualJoin(
+                "SELECT * FROM account_resource_balance_history",
+                "(account_id, resource_id)",
                 dbKeys.Cast<object>().ToArray(),
                 2
             )
+            .Where(t => t.ToStateVersion == null)
             .ToDictionaryAsync(
                 ar => new AccountResource(GetLoadedAccountById(ar.AccountId), GetLoadedResourceById(ar.ResourceId)),
                 _cancellationToken
@@ -832,11 +835,13 @@ public class DbActionsPlanner
         }
 
         _latestAccountValidatorStakeHistory = await _dbContext.Set<AccountValidatorStakeHistory>()
-            .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM account_validator_stake_history WHERE to_state_version IS NULL AND (account_id, validator_id)",
+            .FromMultiDimensionalVirtualJoin(
+                "SELECT * FROM account_validator_stake_history",
+                "(account_id, validator_id)",
                 dbKeys.Cast<object>().ToArray(),
                 2
             )
+            .Where(t => t.ToStateVersion == null)
             .ToDictionaryAsync(
                 av => new AccountValidator(GetLoadedAccountById(av.AccountId), GetValidatorById(av.ValidatorId)),
                 _cancellationToken
@@ -867,8 +872,9 @@ public class DbActionsPlanner
         var preExistingValidatorProposalRecords = dbKeys.Count == 0
         ? new Dictionary<ValidatorEpoch, ValidatorProposalRecord>()
         : await _dbContext.Set<ValidatorProposalRecord>()
-            .FromSqlRawWithDimensionalIn(
-                "SELECT * FROM validator_proposal_records WHERE (epoch, validator_id)",
+            .FromMultiDimensionalVirtualJoin(
+                "SELECT * FROM validator_proposal_records",
+                "(epoch, validator_id)",
                 dbKeys.Cast<object>().ToArray(),
                 2
             )
