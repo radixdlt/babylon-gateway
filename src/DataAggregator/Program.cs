@@ -67,48 +67,63 @@
 
 using Common.Database;
 using DataAggregator.DependencyInjection;
+using Prometheus;
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((context, config) =>
+var builder = WebApplication.CreateBuilder(args);
+var host = builder.Host;
+
+host.ConfigureAppConfiguration((context, config) =>
+{
+    config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
+    if (args is { Length: > 0 })
     {
-        config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
-        if (args is { Length: > 0 })
-        {
-            config.AddCommandLine(args);
-        }
+        config.AddCommandLine(args);
+    }
 
-        if (context.HostingEnvironment.IsDevelopment())
-        {
-            // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
-            config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
-        }
-    })
-    .ConfigureServices(new DefaultKernel().ConfigureServices)
-    .ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+    if (context.HostingEnvironment.IsDevelopment())
     {
-        if (hostBuilderContext.HostingEnvironment.IsDevelopment())
-        {
-            loggingBuilder.AddSimpleConsole(options =>
-            {
-                options.IncludeScopes = true;
-                options.SingleLine = true;
-                options.TimestampFormat = "HH:mm:ss ";
-                options.UseUtcTimestamp = false;
-            });
-        }
-        else
-        {
-            loggingBuilder.AddJsonConsole(options =>
-            {
-                options.IncludeScopes = true;
-                options.TimestampFormat = "yyyy-MM-ddTHH\\:mm\\:ss.fffK";
-                options.UseUtcTimestamp = true;
-            });
-        }
-    })
-    .Build();
+        // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
+        config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
+    }
+});
 
-var configuration = host.Services.GetRequiredService<IConfiguration>();
+host.ConfigureServices(new DefaultKernel().ConfigureServices);
+host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+{
+    if (hostBuilderContext.HostingEnvironment.IsDevelopment())
+    {
+        loggingBuilder.AddSimpleConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.SingleLine = true;
+            options.TimestampFormat = "HH:mm:ss ";
+            options.UseUtcTimestamp = false;
+        });
+    }
+    else
+    {
+        loggingBuilder.AddJsonConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.TimestampFormat = "yyyy-MM-ddTHH\\:mm\\:ss.fffK";
+            options.UseUtcTimestamp = true;
+        });
+    }
+});
+
+var servicesBuilder = builder.Services;
+
+servicesBuilder.AddControllers();
+
+servicesBuilder.AddHealthChecks()
+    .AddDbContextCheck<AggregatorDbContext>()
+    .ForwardToPrometheus();
+
+var app = builder.Build();
+var services = app.Services;
+
+var configuration = services.GetRequiredService<IConfiguration>();
+var programLogger = services.GetRequiredService<ILogger<Program>>();
 
 var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
 
@@ -116,7 +131,7 @@ var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
 
 if (shouldWipeDatabaseInsteadOfStart)
 {
-    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(host.Services, async (logger, dbContext) =>
+    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (logger, dbContext) =>
     {
         logger.LogInformation("Connecting to database - if it exists");
 
@@ -128,19 +143,39 @@ if (shouldWipeDatabaseInsteadOfStart)
 
         logger.LogInformation("Database wipe completed. Now stopping...");
     });
+
+    // Stop the program
+    return;
 }
-else
+
+// TODO:NG-14 - Change to manage migrations more safely outside service boot-up
+// TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
+await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (logger, dbContext) =>
 {
-    // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
-    // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(host.Services, async (logger, dbContext) =>
+    logger.LogInformation("Starting database migrations if required");
+
+    await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
+
+    logger.LogInformation("Database migrations (if required) were completed");
+});
+
+app.MapControllers(); // HealthCheck controllers - mapped to port 80 by default in prod
+StartMetricServer();
+
+await app.RunAsync();
+
+/* Methods */
+
+void StartMetricServer()
+{
+    var metricPort = configuration.GetValue<int>("PrometheusMetricsPort");
+    if (metricPort != 0)
     {
-        logger.LogInformation("Starting database migrations if required");
-
-        await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
-
-        logger.LogInformation("Database migrations (if required) were completed");
-    });
-
-    await host.RunAsync();
+        programLogger.LogInformation("Starting metrics server on port {MetricPort}", metricPort);
+        new KestrelMetricServer(port: metricPort).Start();
+    }
+    else
+    {
+        programLogger.LogInformation("PrometheusMetricsPort not configured - not starting metric server");
+    }
 }

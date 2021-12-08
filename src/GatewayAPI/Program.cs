@@ -70,14 +70,14 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
 using GatewayAPI.Services;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
-var host = builder.Host;
-var services = builder.Services;
+var hostBuilder = builder.Host;
 
 /* Read in other configuration */
 
-host.ConfigureAppConfiguration((context, config) =>
+hostBuilder.ConfigureAppConfiguration((context, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_API__");
     if (args is { Length: > 0 })
@@ -94,38 +94,9 @@ host.ConfigureAppConfiguration((context, config) =>
 
 /* Configure services / dependency injection */
 
-host.ConfigureServices(new DefaultKernel().ConfigureServices);
+hostBuilder.ConfigureServices(new DefaultKernel().ConfigureServices);
 
-services
-    .AddControllers(options =>
-    {
-        options.Filters.Add<ExceptionFilter>();
-    })
-    /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
-    .AddNewtonsoftJson()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var validationErrorHandler = context.HttpContext.RequestServices.GetRequiredService<IValidationErrorHandler>();
-            return validationErrorHandler.GetClientError(context);
-        };
-    });
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
-services.AddSwaggerGenNewtonsoftSupport();
-
-services.AddCors(options =>
-{
-    options.AddDefaultPolicy(corsPolicyBuilder =>
-    {
-        corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod();
-    });
-});
-
-host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+hostBuilder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
 {
     if (hostBuilderContext.HostingEnvironment.IsDevelopment())
     {
@@ -148,7 +119,51 @@ host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
     }
 });
 
+var servicesBuilder = builder.Services;
+
+servicesBuilder
+    .AddControllers(options =>
+    {
+        options.Filters.Add<ExceptionFilter>();
+    })
+    /* See https://stackoverflow.com/a/58438608 - Ensure the API respects the JSON schema names from the generated spec */
+    .AddNewtonsoftJson()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var validationErrorHandler = context.HttpContext.RequestServices.GetRequiredService<IValidationErrorHandler>();
+            return validationErrorHandler.GetClientError(context);
+        };
+    });
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+servicesBuilder.AddEndpointsApiExplorer();
+servicesBuilder.AddSwaggerGen();
+servicesBuilder.AddSwaggerGenNewtonsoftSupport();
+
+servicesBuilder.AddCors(options =>
+{
+    options.AddDefaultPolicy(corsPolicyBuilder =>
+    {
+        corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod();
+    });
+});
+
+servicesBuilder.AddHealthChecks()
+    .AddDbContextCheck<GatewayReadOnlyDbContext>()
+    .AddDbContextCheck<GatewayReadWriteDbContext>()
+    .ForwardToPrometheus();
+
 var app = builder.Build();
+
+var services = app.Services;
+
+var configuration = services.GetRequiredService<IConfiguration>();
+var programLogger = services.GetRequiredService<ILogger<Program>>();
+
+// https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-6.0
+app.MapHealthChecks("/health");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -160,7 +175,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.UseHttpMetrics();
 app.UseCors();
+
+StartMetricServer();
 
 await EnsureCanConnectToDatabase(app);
 await LoadNetworkConfiguration(app);
@@ -186,5 +204,19 @@ async Task LoadNetworkConfiguration(WebApplication webApplication)
                 scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
                 CancellationToken.None
             );
+    }
+}
+
+void StartMetricServer()
+{
+    var metricPort = configuration.GetValue<int>("PrometheusMetricsPort");
+    if (metricPort != 0)
+    {
+        programLogger.LogInformation("Starting metrics server on port {MetricPort}", metricPort);
+        new KestrelMetricServer(port: metricPort).Start();
+    }
+    else
+    {
+        programLogger.LogInformation("PrometheusMetricsPort not configured - not starting metric server");
     }
 }

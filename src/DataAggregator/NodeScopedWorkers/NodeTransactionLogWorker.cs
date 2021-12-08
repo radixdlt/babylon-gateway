@@ -66,7 +66,10 @@ using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
+using DataAggregator.Monitoring;
+using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
+using Prometheus;
 using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.NodeScopedWorkers;
@@ -76,9 +79,27 @@ namespace DataAggregator.NodeScopedWorkers;
 /// </summary>
 public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 {
+    private static readonly Counter _failedFetchAndCommitLoops = Metrics
+        .CreateCounter("ledger_batch_fetch_commit_loop_error_total", "Number of commit loop errors that failed.");
+
+    private static readonly Histogram _totalFetchTimeSeconds = Metrics
+        .CreateHistogram(
+            "ledger_batch_fetch_time_seconds",
+            "Total time to fetch a batch of transactions.",
+            new HistogramConfiguration { Buckets = Histogram.LinearBuckets(start: 0.1, width: 0.1, count: 50) }
+        );
+
+    private static readonly Histogram _totalCommitTimeSeconds = Metrics
+        .CreateHistogram(
+            "ledger_batch_commit_time_seconds",
+            "Total time to commit a batch of transactions.",
+            new HistogramConfiguration { Buckets = Histogram.LinearBuckets(start: 0.2, width: 0.2, count: 100) }
+        );
+
     /* Dependencies */
     private readonly ILogger<NodeTransactionLogWorker> _logger;
     private readonly IServiceProvider _services;
+    private readonly ISystemStatusService _systemStatusService;
 
     /* Properties for simple fetch pipelining */
     private record FetchPipeline(
@@ -89,41 +110,51 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
     private FetchPipeline? _pipelinedFetch;
 
+
     // NB - So that we can get new transient dependencies each iteration, we create most dependencies
     //      from the service provider.
     public NodeTransactionLogWorker(
         ILogger<NodeTransactionLogWorker> logger,
-        IServiceProvider services
+        IServiceProvider services,
+        ISystemStatusService systemStatusService
     )
         : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;
+        _systemStatusService = systemStatusService;
+    }
+
+    protected override async Task DoWork(CancellationToken stoppingToken)
+    {
+        await _failedFetchAndCommitLoops.CountExceptionsAsync(() => FetchAndCommitTransactions(stoppingToken));
     }
 
     // TODO:NG-12 - Implement node-specific syncing state machine, and separate committing into a global worker...
     // TODO:NG-40 - Do special actions when we start the ledger: Save the network of the ledger, and check this against our configuration before we commit.
     // TODO:NG-13 - Ensure we still maintain the primary aggregator lock in the database before we commit
-    protected override async Task DoWork(CancellationToken stoppingToken)
+    private async Task FetchAndCommitTransactions(CancellationToken stoppingToken)
     {
         const int TransactionsToPull = 1000;
         var ledgerExtenderService = _services.GetRequiredService<ILedgerExtenderService>();
 
         _logger.LogInformation("Starting sync loop by looking up the top of the committed ledger");
 
-        var (topOfLedgerStateVersion, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
-            () => ledgerExtenderService.GetTopOfLedgerStateVersion(stoppingToken)
+        var (topOfLedger, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
+            () => ledgerExtenderService.GetTopOfLedger(stoppingToken)
         );
+
+        _systemStatusService.RecordTopOfLedger(topOfLedger);
 
         _logger.LogInformation(
             "Top of DB ledger is at state version {StateVersion} (read in {ReadTopOfLedgerMs}ms)",
-            topOfLedgerStateVersion,
+            topOfLedger.StateVersion,
             readTopOfLedgerMs
         );
 
         // TODO:NG-12 - turn on pipelining if we can speed up the result parsing by the client
         var transactionsResponse = await FetchTransactionsFromCoreApiAndPipelineNextFetch(
-            topOfLedgerStateVersion, TransactionsToPull, false, stoppingToken
+            topOfLedger.StateVersion, TransactionsToPull, false, stoppingToken
         );
 
         if (transactionsResponse.Transactions.Count == 0)
@@ -134,7 +165,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             );
         }
 
-        var (commitedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
+        var (committedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
             () => ledgerExtenderService.CommitTransactions(
                 transactionsResponse.StateIdentifier,
                 transactionsResponse.Transactions,
@@ -142,29 +173,32 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             )
         );
 
+        _systemStatusService.RecordTransactionsCommitted(committedTransactionReport);
+        _totalCommitTimeSeconds.Observe(totalCommitTransactionsMs / 1000D);
+
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
             transactionsResponse.Transactions.Count,
             totalCommitTransactionsMs,
-            commitedTransactionReport.DbEntriesWritten,
-            commitedTransactionReport.TransactionContentDbActionsCount
+            committedTransactionReport.DbEntriesWritten,
+            committedTransactionReport.TransactionContentDbActionsCount
         );
         _logger.LogInformation(
             "[TimeSplitsInMs: RawTxnPersistence={RawTxnPersistenceMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},LocalDbContextActions={LocalDbContextActionsMs},DbPersistence={DbPersistanceMs}]",
-            commitedTransactionReport.RawTxnPersistenceMs,
-            commitedTransactionReport.TransactionContentHandlingMs,
-            commitedTransactionReport.DbDependenciesLoadingMs,
-            commitedTransactionReport.LocalDbContextActionsMs,
-            commitedTransactionReport.DbPersistanceMs
+            committedTransactionReport.RawTxnPersistenceMs,
+            committedTransactionReport.TransactionContentHandlingMs,
+            committedTransactionReport.DbDependenciesLoadingMs,
+            committedTransactionReport.LocalDbContextActionsMs,
+            committedTransactionReport.DbPersistanceMs
         );
 
-        var commitedTransactionSummary = commitedTransactionReport.FinalTransaction;
+        var committedTransactionSummary = committedTransactionReport.FinalTransaction;
         _logger.LogInformation(
             "[NewDbLedgerTip: StateVersion={LedgerStateVersion},Epoch={LedgerEpoch},IndexInEpoch={LedgerIndexInEpoch},NormalizedTimestamp={NormalizedTimestamp}]",
-            commitedTransactionSummary.StateVersion,
-            commitedTransactionSummary.Epoch,
-            commitedTransactionSummary.IndexInEpoch,
-            commitedTransactionSummary.NormalizedTimestamp.AsUtcIsoDateToSecondsForLogs()
+            committedTransactionSummary.StateVersion,
+            committedTransactionSummary.Epoch,
+            committedTransactionSummary.IndexInEpoch,
+            committedTransactionSummary.NormalizedTimestamp.AsUtcIsoDateToSecondsForLogs()
         );
     }
 
@@ -217,6 +251,8 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
             () => _services.GetRequiredService<ITransactionLogReader>().GetTransactions(topOfLedgerStateVersion, transactionsToPull, stoppingToken)
         );
+
+        _totalFetchTimeSeconds.Observe(fetchTransactionsMs / 1000D);
 
         _logger.LogInformation(
             "Fetched {TransactionCount} transactions from version {FromStateVersion} from the core api in {FetchTransactionsMs}ms",

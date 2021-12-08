@@ -62,50 +62,28 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
-using Prometheus;
-using RadixCoreApi.Generated.Api;
-using RadixCoreApi.Generated.Model;
+using DataAggregator.Monitoring;
+using Microsoft.AspNetCore.Mvc;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace DataAggregator.Controllers;
 
-public interface ITransactionLogReader
+[ApiController]
+[Route("")]
+public class HealthCheckController : ControllerBase
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
-}
+    private readonly ISystemStatusService _systemStatusService;
 
-public class TransactionLogReader : ITransactionLogReader
-{
-    private static readonly Counter _failedTransactionsFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "node_transactions_fetch_error_total",
-            "Number of errors fetching transactions from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly TransactionsApi _transactionsApi;
-    private readonly Counter.Child _failedTransactionsFetchCounter;
-
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    public HealthCheckController(ISystemStatusService systemStatusService)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionsApi = coreApiProvider.TransactionsApi;
-        _failedTransactionsFetchCounter = _failedTransactionsFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
+        _systemStatusService = systemStatusService;
     }
 
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
+    // We use https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-6.0 in API Gateway
+    // We can transition to that too by creating a custom ingestion health check
+    [HttpGet("health")]
+    public JsonResult GetHealthCheckResponse()
     {
-        return await _failedTransactionsFetchCounter.CountExceptionsAsync(async () =>
-             await _transactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
-            )
-        );
+        var healthReport = _systemStatusService.GetHealthReport();
+        return new JsonResult(healthReport) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
     }
 }

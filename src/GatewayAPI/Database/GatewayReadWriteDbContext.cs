@@ -62,50 +62,15 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
-using Prometheus;
-using RadixCoreApi.Generated.Api;
-using RadixCoreApi.Generated.Model;
+using Common.Database;
+using Microsoft.EntityFrameworkCore;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace GatewayAPI.Database;
 
-public interface ITransactionLogReader
+public class GatewayReadWriteDbContext : CommonDbContext
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
-}
-
-public class TransactionLogReader : ITransactionLogReader
-{
-    private static readonly Counter _failedTransactionsFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "node_transactions_fetch_error_total",
-            "Number of errors fetching transactions from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly TransactionsApi _transactionsApi;
-    private readonly Counter.Child _failedTransactionsFetchCounter;
-
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    public GatewayReadWriteDbContext(DbContextOptions<GatewayReadWriteDbContext> options)
+        : base(options)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionsApi = coreApiProvider.TransactionsApi;
-        _failedTransactionsFetchCounter = _failedTransactionsFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
-    }
-
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
-    {
-        return await _failedTransactionsFetchCounter.CountExceptionsAsync(async () =>
-             await _transactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
-            )
-        );
     }
 }

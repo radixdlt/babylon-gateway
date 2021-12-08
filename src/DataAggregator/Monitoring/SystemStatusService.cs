@@ -62,50 +62,103 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Ledger;
+using Common.Extensions;
 using DataAggregator.GlobalServices;
+using DataAggregator.LedgerExtension;
 using Prometheus;
-using RadixCoreApi.Generated.Api;
-using RadixCoreApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedServices.ApiReaders;
+namespace DataAggregator.Monitoring;
 
-public interface ITransactionLogReader
+public interface ISystemStatusService
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
+    void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport);
+
+    void RecordTopOfLedger(TransactionSummary topOfLedger);
+
+    HealthReport GetHealthReport();
 }
 
-public class TransactionLogReader : ITransactionLogReader
+// ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
+public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
+
+public class SystemStatusService : ISystemStatusService
 {
-    private static readonly Counter _failedTransactionsFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "node_transactions_fetch_error_total",
-            "Number of errors fetching transactions from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
+    private static readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
 
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly TransactionsApi _transactionsApi;
-    private readonly Counter.Child _failedTransactionsFetchCounter;
+    private static readonly Counter _committedTransactions = Metrics
+        .CreateCounter("ledger_committed_transactions_total", "Number of committed transactions.");
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    private static readonly Gauge _ledgerStateVersion = Metrics
+        .CreateGauge("ledger_state_version", "The state version of the top of the DB ledger.");
+
+    private static readonly Gauge _ledgerUnixTimestamp = Metrics
+        .CreateGauge("ledger_unix_timestamp_seconds", "Unix timestamp of the top of the committed DB ledger.");
+
+    private static readonly Gauge _ledgerSecondsBehind = Metrics
+        .CreateGauge("ledger_behind_present_seconds", "Number of seconds the DB ledger is behind the present.");
+
+    private readonly IConfiguration _configuration;
+
+    private DateTimeOffset? _lastTransactionCommitment;
+
+    private TimeSpan StartupGracePeriod => TimeSpan.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
+
+    private TimeSpan UnhealthyCommitmentGapSeconds => TimeSpan.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
+
+    public SystemStatusService(IConfiguration configuration)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _transactionsApi = coreApiProvider.TransactionsApi;
-        _failedTransactionsFetchCounter = _failedTransactionsFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
+        _configuration = configuration;
     }
 
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
+    public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport)
     {
-        return await _failedTransactionsFetchCounter.CountExceptionsAsync(async () =>
-             await _transactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
-            )
+        _lastTransactionCommitment = DateTimeOffset.UtcNow;
+        _committedTransactions.Inc(committedTransactionReport.TransactionsCommittedCount);
+        RecordTopOfLedger(committedTransactionReport.FinalTransaction);
+    }
+
+    public void RecordTopOfLedger(TransactionSummary topOfLedger)
+    {
+        _ledgerStateVersion.Set(topOfLedger.StateVersion);
+        _ledgerUnixTimestamp.Set(topOfLedger.NormalizedTimestamp.GetUnixTimestampSeconds());
+        _ledgerSecondsBehind.Set(topOfLedger.NormalizedTimestamp.GetTimeAgo().TotalSeconds);
+    }
+
+    public HealthReport GetHealthReport()
+    {
+        if (InStartupGracePeriod())
+        {
+            return new HealthReport(
+                true,
+                $"Within start up grace period of {StartupGracePeriod}",
+                _startupTime
+            );
+        }
+
+        if (CommittedRecently())
+        {
+            return new HealthReport(
+                true,
+                $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()} within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
+                _startupTime
+            );
+        }
+
+        return new HealthReport(
+            false,
+            $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()}, not within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
+            _startupTime
         );
+    }
+
+    private bool CommittedRecently()
+    {
+        return _lastTransactionCommitment != null && _lastTransactionCommitment.Value.WithinPeriodOfNow(UnhealthyCommitmentGapSeconds);
+    }
+
+    private bool InStartupGracePeriod()
+    {
+        return _startupTime.WithinPeriodOfNow(StartupGracePeriod);
     }
 }

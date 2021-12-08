@@ -65,10 +65,12 @@
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
+using DataAggregator.Monitoring;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using DataAggregator.NodeScopedWorkers;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 using System.Net;
 
 namespace DataAggregator.DependencyInjection;
@@ -98,6 +100,7 @@ public class DefaultKernel
         services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
+        services.AddSingleton<ISystemStatusService, SystemStatusService>();
     }
 
     private void AddGlobalHostedServices(IServiceCollection services)
@@ -124,6 +127,7 @@ public class DefaultKernel
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
+            .UseHttpClientMetrics()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
                 serviceProvider,
                 "DisableCoreApiHttpsCertificateChecks",

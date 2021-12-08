@@ -69,6 +69,7 @@ using GatewayAPI.Database;
 using GatewayAPI.Fallback;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 using System.Net;
 
 namespace GatewayAPI.DependencyInjection;
@@ -80,6 +81,7 @@ public class DefaultKernel
         // Globally-Scoped services
         AddGlobalScopedServices(services);
         AddReadOnlyDatabaseContext(hostBuilderContext, services);
+        AddReadWriteDatabaseContext(hostBuilderContext, services);
 
         // Request scoped services
         AddRequestScopedServices(services);
@@ -112,6 +114,7 @@ public class DefaultKernel
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         services.AddHttpClient<ICoreApiHandler, CoreApiHandler>()
+            .UseHttpClientMetrics()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
                 serviceProvider,
                 "DisableCoreApiHttpsCertificateChecks",
@@ -124,6 +127,7 @@ public class DefaultKernel
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         services.AddHttpClient<IFallbackGatewayApiProvider, FallbackGatewayApiProvider>()
+            .UseHttpClientMetrics()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
                 serviceProvider,
                 "DisableFallbackGatewayApiHttpsCertificateChecks",
@@ -137,6 +141,15 @@ public class DefaultKernel
         {
             // https://www.npgsql.org/efcore/index.html
             options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"));
+        });
+    }
+
+    private void AddReadWriteDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
+    {
+        services.AddDbContext<GatewayReadWriteDbContext>(options =>
+        {
+            // https://www.npgsql.org/efcore/index.html
+            options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadWriteDbContext"));
         });
     }
 

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <!-- NB - Shared PropertyGroup contents live in Directory.Build.props -->
     <PropertyGroup>
@@ -12,9 +12,13 @@
         <PackageReference Include="Microsoft.Extensions.Http" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="RadixCoreApi.Generated" />
         <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
+        <PackageReference Include="prometheus-net" />
+        <PackageReference Include="prometheus-net.AspNetCore" />
+        <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" />
     </ItemGroup>
 
     <ItemGroup>

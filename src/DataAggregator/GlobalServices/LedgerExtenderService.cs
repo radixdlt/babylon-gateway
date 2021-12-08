@@ -74,7 +74,7 @@ public interface ILedgerExtenderService
 {
     Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
 
-    Task<long> GetTopOfLedgerStateVersion(CancellationToken token);
+    Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
 }
 
 public record PreparationForLedgerExtensionReport(
@@ -84,6 +84,7 @@ public record PreparationForLedgerExtensionReport(
 );
 
 public record CommitTransactionsReport(
+    int TransactionsCommittedCount,
     TransactionSummary FinalTransaction,
     long RawTxnPersistenceMs,
     long TransactionContentHandlingMs,
@@ -117,11 +118,10 @@ public class LedgerExtenderService : ILedgerExtenderService
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token)
+    public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        var lastTransactionOverview = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
-        return lastTransactionOverview.StateVersion;
+        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
@@ -144,6 +144,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         );
 
         return new CommitTransactionsReport(
+            transactions.Count,
             bulkTransactionCommitReport.FinalTransaction,
             preparationReport.RawTxnPersistenceMs,
             bulkTransactionCommitReport.TransactionContentHandlingMs,

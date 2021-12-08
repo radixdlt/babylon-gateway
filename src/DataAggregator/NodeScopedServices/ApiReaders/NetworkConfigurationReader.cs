@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Prometheus;
 using RadixCoreApi.Generated.Api;
 using RadixCoreApi.Generated.Model;
 
@@ -74,16 +75,27 @@ public interface INetworkConfigurationReader
 
 public class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private readonly NetworkApi _networkApi;
+    private static readonly Counter _failedNetworkConfigurationFetchCounterUnScoped = Metrics
+        .CreateCounter(
+            "node_network_configuration_fetch_error_total",
+            "Number of errors fetching the node's network configuration.",
+            new CounterConfiguration { LabelNames = new[] { "node" } }
+        );
 
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider)
+    private readonly NetworkApi _networkApi;
+    private readonly Counter.Child _failedNetworkConfigurationFetchCounter;
+
+    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
     {
         _networkApi = coreApiProvider.NetworkApi;
+        _failedNetworkConfigurationFetchCounter = _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
     }
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return await _networkApi
-            .NetworkConfigurationPostAsync(new object(), token);
+        return await _failedNetworkConfigurationFetchCounter.CountExceptionsAsync(async () =>
+            await _networkApi
+                .NetworkConfigurationPostAsync(new object(), token)
+        );
     }
 }

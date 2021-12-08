@@ -78,4 +78,40 @@ public static class DateTimeExtensions
     {
         return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
     }
+
+    public static TimeSpan GetTimeAgo(this DateTime dateTime)
+    {
+        return DateTimeOffset.UtcNow - dateTime;
+    }
+
+    public static TimeSpan GetTimeAgo(this DateTimeOffset dateTime)
+    {
+        return DateTimeOffset.UtcNow - dateTime;
+    }
+
+    public static double GetUnixTimestampSeconds(this DateTime dateTime)
+    {
+        return (dateTime - DateTimeOffset.UnixEpoch).TotalSeconds;
+    }
+
+    public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan period)
+    {
+        return dateTime.GetTimeAgo().Duration() <= period;
+    }
+
+    public static string FormatSecondsHumanReadable(this TimeSpan period)
+    {
+        var duration = period.Duration();
+        return $"{duration.TotalSeconds:F3}s";
+    }
+
+    public static string FormatSecondsAgo(this DateTimeOffset dateTime)
+    {
+        return $"{(DateTimeOffset.UtcNow - dateTime).FormatSecondsHumanReadable()} ago";
+    }
+
+    public static string FormatSecondsAgo(this DateTimeOffset? dateTime)
+    {
+        return dateTime == null ? "never" : $"{(DateTimeOffset.UtcNow - dateTime.Value).FormatSecondsHumanReadable()} ago";
+    }
 }
