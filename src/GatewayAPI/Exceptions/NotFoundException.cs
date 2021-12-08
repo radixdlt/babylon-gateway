@@ -68,7 +68,7 @@ namespace GatewayAPI.Exceptions;
 
 public abstract class NotFoundException : KnownGatewayErrorException
 {
-    private const int NotFoundStatusCode = 400;
+    private const int NotFoundStatusCode = 404;
 
     public NotFoundException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base(NotFoundStatusCode, gatewayError, userFacingMessage, internalMessage)

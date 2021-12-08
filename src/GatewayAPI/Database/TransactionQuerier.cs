@@ -247,6 +247,7 @@ public class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
+        // If necessary, we can improve this to prevent N+1 issues - but we expect CreatedTokenDefinitions to be rare
         async Task<Gateway.CreateTokenDefinition> GenerateCreateTokenDefinitionAction()
         {
             var createdTokenProperties = await _tokenQuerier.GetCreatedTokenProperties(inferredAction.Resource!.ResourceIdentifier, operationGroup);
