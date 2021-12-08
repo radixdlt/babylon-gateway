@@ -203,7 +203,7 @@ public class TokenQuerier : ITokenQuerier
         return CreateTokenProperties(tokenRri, tokenData, tokenMetadata, stateVersion);
     }
 
-    private static Gateway.TokenProperties CreateTokenProperties(
+    private Gateway.TokenProperties CreateTokenProperties(
         string tokenRri,
         TokenData? tokenData,
         TokenMetadata? tokenMetadata,

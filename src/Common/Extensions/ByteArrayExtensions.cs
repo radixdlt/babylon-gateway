@@ -73,6 +73,7 @@ public static class ByteArrayExtensions
 
     public static string ToHex(this byte[] array)
     {
-        return Convert.ToHexString(array);
+        // The Gateway spec assumes lower case
+        return Convert.ToHexString(array).ToLowerInvariant();
     }
 }

@@ -75,6 +75,11 @@ namespace GatewayAPI.Database;
 public interface ITransactionQuerier
 {
     Task<TransactionPage> GetAccountTransactions(TransactionPageRequest request, Gateway.LedgerState ledgerState);
+
+    Task<Gateway.AccountTransaction?> LookupCommittedTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.LedgerState ledgerState
+    );
 }
 
 [DataContract]
@@ -136,6 +141,24 @@ public class TransactionQuerier : ITransactionQuerier
         );
 
         return new TransactionPage(totalCount, nextCursor, transactions);
+    }
+
+    public async Task<Gateway.AccountTransaction?> LookupCommittedTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.LedgerState ledgerState
+    )
+    {
+        var stateVersion = await _dbContext.LedgerTransactions
+            .Where(lt =>
+                lt.ResultantStateVersion <= ledgerState._Version
+                && lt.TransactionIdentifierHash == transactionIdentifier.Bytes
+            )
+            .Select(lt => lt.ResultantStateVersion)
+            .SingleOrDefaultAsync();
+
+        return stateVersion == 0
+            ? null :
+            (await GetTransactions(new List<long> { stateVersion })).First();
     }
 
     private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState)

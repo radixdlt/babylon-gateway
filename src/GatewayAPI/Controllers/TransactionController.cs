@@ -64,6 +64,7 @@
 
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
+using GatewayAPI.Exceptions;
 using GatewayAPI.Fallback;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -78,6 +79,7 @@ public class TransactionController : ControllerBase
 {
     private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly ITransactionQuerier _transactionQuerier;
     private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
@@ -85,6 +87,7 @@ public class TransactionController : ControllerBase
     public TransactionController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
+        ITransactionQuerier transactionQuerier,
         IConstructionAndSubmissionService constructionAndSubmissionService,
         INetworkConfigurationProvider networkConfigurationProvider,
         IFallbackGatewayApiProvider fallbackGatewayApiProvider
@@ -92,6 +95,7 @@ public class TransactionController : ControllerBase
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
+        _transactionQuerier = transactionQuerier;
         _constructionAndSubmissionService = constructionAndSubmissionService;
         _networkConfigurationProvider = networkConfigurationProvider;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
@@ -115,7 +119,18 @@ public class TransactionController : ControllerBase
     [HttpPost("status")]
     public async Task<TransactionStatusResponse> GetTransactionStatus(TransactionStatusRequest request)
     {
-        return await _fallbackGatewayApiProvider.Api.TransactionStatusPostAsync(request);
+        var transactionIdentifier = _validations.ExtractValidTransactionIdentifier(request.TransactionIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
+
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);
+
+        // TODO:NG-35 - Add support for pending/failed transactions
+        if (committedTransaction == null)
+        {
+            throw new TransactionNotFoundException(request.TransactionIdentifier);
+        }
+
+        return new TransactionStatusResponse(ledgerState, committedTransaction);
     }
 
     [HttpPost("build")]

@@ -75,6 +75,8 @@ public interface IValidations
 
     ValidatedValidatorAddress ExtractValidValidatorAddress(ValidatorIdentifier validatorIdentifier);
 
+    ValidatedTransactionIdentifier ExtractValidTransactionIdentifier(TransactionIdentifier requestTransactionIdentifier);
+
     ValidatedPublicKey ExtractValidPublicKey(PublicKey publicKey);
 
     ValidatedHex ExtractValidHex(string capitalizedErrorMessageFieldName, string hexString);
@@ -100,6 +102,7 @@ public record ValidatedTokenAmount(string Rri, Common.Numerics.TokenAmount Amoun
 public record ValidatedResourceAddress(string Rri, ResourceAddress ResourceAddress);
 public record ValidatedAccountAddress(string Address, AccountAddress ByteAccountAddress);
 public record ValidatedValidatorAddress(string Address, ValidatorAddress ByteValidatorAddress);
+public record ValidatedTransactionIdentifier(string AsString, byte[] Bytes);
 public record ValidatedPublicKey(string AsString, byte[] Bytes);
 public record ValidatedHex(string AsString, byte[] Bytes);
 public record ValidatedSymbol(string AsString);
@@ -141,6 +144,25 @@ public class Validations : IValidations
         }
 
         return new ValidatedValidatorAddress(validatorIdentifier.Address, validatorAddress);
+    }
+
+    public ValidatedTransactionIdentifier ExtractValidTransactionIdentifier(TransactionIdentifier transactionIdentifier)
+    {
+        const int TransactionIdentifierByteLength = 32;
+        try
+        {
+            var bytes = Convert.FromHexString(transactionIdentifier.Hash);
+            if (bytes.Length != TransactionIdentifierByteLength)
+            {
+                throw InvalidRequestException.FromOtherError($"Transaction identifier hash is not {TransactionIdentifierByteLength} bytes long");
+            }
+
+            return new ValidatedTransactionIdentifier(transactionIdentifier.Hash.ToLowerInvariant(), bytes);
+        }
+        catch (FormatException exception)
+        {
+            throw InvalidRequestException.FromOtherError("Transaction identifier hash is not valid hex", exception.Message);
+        }
     }
 
     public ValidatedPublicKey ExtractValidPublicKey(PublicKey publicKey)
