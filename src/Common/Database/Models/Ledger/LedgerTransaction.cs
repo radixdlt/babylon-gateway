@@ -169,6 +169,9 @@ public class LedgerTransaction
     [Column(name: "timestamp")]
     public DateTime NormalizedTimestamp { get; set; }
 
+    [InverseProperty(nameof(LedgerOperationGroup.LedgerTransaction))]
+    public ICollection<LedgerOperationGroup> SubstantiveOperationGroups { get; set; }
+
     public bool IsUserTransaction => FeePaid.IsPositive();
 
     public bool IsSystemTransaction => FeePaid.IsZero();

@@ -107,7 +107,7 @@ public class TransactionController : ControllerBase
             new TransactionRules(
                 maximumMessageLength: TransactionBuilding.MaximumMessageLength,
                 minimumStake: TransactionBuilding.MinimumStake
-                    .AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+                    .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             )
         );
     }

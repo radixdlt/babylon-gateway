@@ -63,41 +63,47 @@
  */
 
 using Common.Database.Models.Ledger.Normalization;
+using Common.Extensions;
 using Common.Numerics;
 using GatewayAPI.Exceptions;
-using Api = RadixGatewayApi.Generated.Model;
 using Core = RadixCoreApi.GeneratedClient.Model;
+using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.ApiSurface;
 
 public static class ApiIdentifiers
 {
-    public static Api.NetworkIdentifier AsNetworkIdentifier(this string networkName)
+    public static Gateway.NetworkIdentifier AsNetworkIdentifier(this string networkName)
     {
-        return new Api.NetworkIdentifier(networkName);
+        return new Gateway.NetworkIdentifier(networkName);
     }
 
-    public static Api.TokenAmount AsApiTokenAmount(this ValidatedTokenAmount tokenAmount)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this ValidatedTokenAmount tokenAmount)
     {
-        return new Api.TokenAmount(tokenAmount.Amount.ToSubUnitString(), tokenAmount.Rri.AsTokenIdentifier());
+        return new Gateway.TokenAmount(tokenAmount.Amount.ToSubUnitString(), tokenAmount.Rri.AsGatewayTokenIdentifier());
     }
 
-    public static Api.TokenAmount AsApiTokenAmount(this TokenAmount tokenAmount, Api.TokenIdentifier tokenIdentifier)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Gateway.TokenIdentifier tokenIdentifier)
     {
-        return new Api.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
+        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
     }
 
-    public static string AsXrdString(this Api.TokenAmount apiTokenAmount)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
+    {
+        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), resource.ResourceIdentifier.AsGatewayTokenIdentifier());
+    }
+
+    public static string AsXrdString(this Gateway.TokenAmount apiTokenAmount)
     {
         return $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} XRD";
     }
 
-    public static string AsStringWithUnits(this Api.TokenAmount apiTokenAmount)
+    public static string AsStringWithUnits(this Gateway.TokenAmount apiTokenAmount)
     {
         return $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    public static Api.TokenAmount AsApiTokenAmount(this Core.ResourceAmount resourceAmount)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this Core.ResourceAmount resourceAmount)
     {
         if (resourceAmount.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
         {
@@ -106,51 +112,66 @@ public static class ApiIdentifiers
             );
         }
 
-        return new Api.TokenAmount(resourceAmount.Value, tokenResourceIdentifier.Rri.AsTokenIdentifier());
+        return new Gateway.TokenAmount(resourceAmount.Value, tokenResourceIdentifier.Rri.AsGatewayTokenIdentifier());
     }
 
-    public static Api.TokenAmount AsApiTokenAmount(this TokenAmount tokenAmount, string rri)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, string rri)
     {
-        return new Api.TokenAmount(tokenAmount.ToSubUnitString(), rri.AsTokenIdentifier());
+        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), rri.AsGatewayTokenIdentifier());
     }
 
-    public static Api.ValidatorIdentifier AsValidatorIdentifier(this Validator validator)
+    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this Validator validator)
     {
-        return new Api.ValidatorIdentifier(validator.Address);
+        return new Gateway.ValidatorIdentifier(validator.Address);
     }
 
-    public static Api.ValidatorIdentifier AsValidatorIdentifier(this string validatorAddress)
+    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this string validatorAddress)
     {
-        return new Api.ValidatorIdentifier(validatorAddress);
+        return new Gateway.ValidatorIdentifier(validatorAddress);
     }
 
-    public static Api.TokenIdentifier AsTokenIdentifier(this Resource resource)
+    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this Resource resource)
     {
-        return new Api.TokenIdentifier(resource.ResourceIdentifier);
+        return new Gateway.TokenIdentifier(resource.ResourceIdentifier);
     }
 
-    public static Api.TokenIdentifier AsTokenIdentifier(this string rri)
+    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this string rri)
     {
-        return new Api.TokenIdentifier(rri);
+        return new Gateway.TokenIdentifier(rri);
     }
 
-    public static Api.AccountIdentifier AsAccountIdentifier(this Account account)
+    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this Account account)
     {
-        return new Api.AccountIdentifier(account.Address);
+        return new Gateway.AccountIdentifier(account.Address);
     }
 
-    public static Api.AccountIdentifier AsAccountIdentifier(this string accountAddress)
+    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this string accountAddress)
     {
-        return new Api.AccountIdentifier(accountAddress);
+        return new Gateway.AccountIdentifier(accountAddress);
     }
 
-    public static Api.AccountIdentifier? AsOptionalAccountIdentifier(this Account? account)
+    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this Account? account)
     {
-        return account == null ? null : new Api.AccountIdentifier(account.Address);
+        return account == null ? null : new Gateway.AccountIdentifier(account.Address);
     }
 
-    public static Api.AccountIdentifier? AsOptionalAccountIdentifier(this string? accountAddress)
+    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this string? accountAddress)
     {
-        return accountAddress == null ? null : new Api.AccountIdentifier(accountAddress);
+        return accountAddress == null ? null : new Gateway.AccountIdentifier(accountAddress);
+    }
+
+    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this string hexTransactionId)
+    {
+        return new Gateway.TransactionIdentifier(hexTransactionId);
+    }
+
+    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this Core.TransactionIdentifier transactionIdentifier)
+    {
+        return new Gateway.TransactionIdentifier(transactionIdentifier.Hash);
+    }
+
+    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this byte[] transactionIdentifierHash)
+    {
+        return new Gateway.TransactionIdentifier(transactionIdentifierHash.ToHex());
     }
 }

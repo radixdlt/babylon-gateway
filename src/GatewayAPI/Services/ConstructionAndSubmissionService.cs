@@ -118,7 +118,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         ));
 
         return new Gateway.TransactionBuild(
-            fee: coreParseResponse.Metadata.Fee.AsApiTokenAmount(),
+            fee: coreParseResponse.Metadata.Fee.AsGatewayTokenAmount(),
             unsignedTransaction: coreBuildResponse.UnsignedTransaction,
             payloadToSign: coreBuildResponse.PayloadToSign
         );
@@ -151,7 +151,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         return new Gateway.TransactionFinalizeResponse(
             signedTransaction: coreFinalizeResponse.SignedTransaction,
-            transactionIdentifier: new Gateway.TransactionIdentifier(transactionHashResponse.TransactionIdentifier.Hash)
+            transactionIdentifier: transactionHashResponse.TransactionIdentifier.AsGatewayTransactionIdentifier()
         );
     }
 
@@ -162,7 +162,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         );
 
         return new Gateway.TransactionSubmitResponse(
-            transactionIdentifier: new Gateway.TransactionIdentifier(submitResponse.TransactionIdentifier.Hash)
+            transactionIdentifier: submitResponse.TransactionIdentifier.AsGatewayTransactionIdentifier()
         );
     }
 
@@ -233,8 +233,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             var availableAmount = beforeXrdBalance + xrdFeePayerBalanceChangeInTransaction;
 
             throw new NotEnoughNativeTokensForFeeException(
-                requiredAmount: calculatedFee.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-                availableAmount: availableAmount.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+                requiredAmount: calculatedFee.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                availableAmount: availableAmount.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             );
         }
     }

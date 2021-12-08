@@ -128,6 +128,6 @@ public class TokenController : ControllerBase
             _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix
         );
 
-        return new TokenDeriveResponse(rri.AsTokenIdentifier());
+        return new TokenDeriveResponse(rri.AsGatewayTokenIdentifier());
     }
 }

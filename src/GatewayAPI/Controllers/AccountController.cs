@@ -79,21 +79,21 @@ public class AccountController : ControllerBase
     private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IAccountQuerier _accountQuerier;
-    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
+    private readonly ITransactionQuerier _transactionQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
     public AccountController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         IAccountQuerier accountQuerier,
-        IFallbackGatewayApiProvider fallbackGatewayApiProvider,
+        ITransactionQuerier transactionQuerier,
         INetworkConfigurationProvider networkConfigurationProvider
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _accountQuerier = accountQuerier;
-        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
+        _transactionQuerier = transactionQuerier;
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
@@ -138,8 +138,25 @@ public class AccountController : ControllerBase
     [HttpPost("transactions")]
     public async Task<AccountTransactionsResponse> GetAccountTransactions(AccountTransactionsRequest request)
     {
-        _validations.ExtractValidAccountAddress(request.AccountIdentifier);
-        return await _fallbackGatewayApiProvider.Api.AccountTransactionsPostAsync(request);
+        var accountAddress = _validations.ExtractValidAccountAddress(request.AccountIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
+
+        var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
+
+        var transactionsPageRequest = new TransactionPageRequest(
+            accountAddress,
+            Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
+            PageSize: _validations.ExtractValidIntInBoundInclusive("Page size", unvalidatedLimit, 1, 30)
+        );
+
+        var results = await _transactionQuerier.GetAccountTransactions(transactionsPageRequest, ledgerState);
+
+        return new AccountTransactionsResponse(
+            ledgerState,
+            totalCount: results.TotalRecords,
+            nextCursor: results.NextPageCursor?.ToCursorString(),
+            results.Transactions
+        );
     }
 
     [HttpPost("derive")]
@@ -152,6 +169,6 @@ public class AccountController : ControllerBase
             _validations.ExtractValidPublicKey(request.PublicKey).Bytes
         );
 
-        return new AccountDeriveResponse(accountAddress.AsAccountIdentifier());
+        return new AccountDeriveResponse(accountAddress.AsGatewayAccountIdentifier());
     }
 }

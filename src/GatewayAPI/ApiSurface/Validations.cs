@@ -92,6 +92,8 @@ public interface IValidations
     ValidatedSymbol ExtractValidTokenSymbol(string symbol);
 
     DateTimeOffset ExtractValidDateTime(string capitalizedFieldDescriptor, string dateTimeStr);
+
+    int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound);
 }
 
 public record ValidatedTokenAmount(string Rri, Common.Numerics.TokenAmount Amount, ResourceAddress ResourceAddress);
@@ -252,5 +254,20 @@ public class Validations : IValidations
         }
 
         return dateTimeOffset;
+    }
+
+    public int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound)
+    {
+        if (input < lowerBound)
+        {
+            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} must be >= {lowerBound}");
+        }
+
+        if (input > upperBound)
+        {
+            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} must be >= {upperBound}");
+        }
+
+        return input;
     }
 }

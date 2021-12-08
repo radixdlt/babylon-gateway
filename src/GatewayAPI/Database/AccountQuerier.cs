@@ -221,7 +221,7 @@ public class AccountQuerier : IAccountQuerier
         return balances
             .Where(x => x.BalanceEntry.Balance.IsPositive())
             .OrderByDescending(x => x.BalanceEntry.Balance)
-            .Select(x => x.BalanceEntry.Balance.AsApiTokenAmount(x.Resource.ResourceIdentifier))
+            .Select(x => x.BalanceEntry.Balance.AsGatewayTokenAmount(x.Resource.ResourceIdentifier))
             .ToList();
     }
 
@@ -243,7 +243,7 @@ public class AccountQuerier : IAccountQuerier
             totalXrd += definiteXrd + validatorStakeSnapshot.EstimateXrdConversion(stakeUnits);
         }
 
-        return totalXrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier());
+        return totalXrd.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier());
     }
 
     private record StakePosition(string ValidatorAddress, TokenAmount Xrd);
@@ -254,8 +254,8 @@ public class AccountQuerier : IAccountQuerier
             .Where(s => s.Xrd.IsPositive())
             .OrderByDescending(s => s.Xrd)
             .Select(s => new Gateway.AccountStakeEntry(
-                s.ValidatorAddress.AsValidatorIdentifier(),
-                s.Xrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+                s.ValidatorAddress.AsGatewayValidatorIdentifier(),
+                s.Xrd.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             ))
             .ToList();
     }
@@ -268,8 +268,8 @@ public class AccountQuerier : IAccountQuerier
             .Where(s => s.Xrd.IsPositive())
             .OrderByDescending(s => s.Xrd)
             .Select(s => new Gateway.AccountUnstakeEntry(
-                s.ValidatorAddress.AsValidatorIdentifier(),
-                s.Xrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                s.ValidatorAddress.AsGatewayValidatorIdentifier(),
+                s.Xrd.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                 s.EpochsUntilUnlocked
             ))
             .ToList();

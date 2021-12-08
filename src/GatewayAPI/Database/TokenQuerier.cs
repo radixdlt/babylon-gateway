@@ -63,20 +63,25 @@
  */
 
 using Common.Database;
+using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
+using Common.Numerics;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using RadixGatewayApi.Generated.Model;
-using Api = RadixGatewayApi.Generated.Model;
+using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Database;
 
 public interface ITokenQuerier
 {
-    Task<Token> GetTokenInfoAtState(string tokenRri, LedgerState ledgerState);
+    Task<Gateway.Token> GetTokenInfoAtState(string tokenRri, Gateway.LedgerState ledgerState);
+
+    Task<CreatedTokenData> GetCreatedTokenProperties(string tokenRri, LedgerOperationGroup operationGroup);
 }
+
+public record CreatedTokenData(Gateway.TokenProperties TokenProperties, Gateway.TokenAmount TokenSupply);
 
 public class TokenQuerier : ITokenQuerier
 {
@@ -87,22 +92,79 @@ public class TokenQuerier : ITokenQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<Token> GetTokenInfoAtState(string tokenRri, LedgerState ledgerState)
+    public async Task<Gateway.Token> GetTokenInfoAtState(string tokenRri, Gateway.LedgerState ledgerState)
     {
-        var tokenIdentifier = tokenRri.AsTokenIdentifier();
+        var tokenIdentifier = tokenRri.AsGatewayTokenIdentifier();
         var tokenSupply = await GetTokenSupplyAtState(tokenRri, ledgerState);
-        return new Token(
+        return new Gateway.Token(
             tokenIdentifier,
-            tokenSupply.ResourceSupply.TotalSupply.AsApiTokenAmount(tokenIdentifier),
-            new TokenInfo(
-                tokenSupply.ResourceSupply.TotalMinted.AsApiTokenAmount(tokenIdentifier),
-                tokenSupply.ResourceSupply.TotalBurnt.AsApiTokenAmount(tokenIdentifier)
+            tokenSupply.ResourceSupply.TotalSupply.AsGatewayTokenAmount(tokenIdentifier),
+            new Gateway.TokenInfo(
+                tokenSupply.ResourceSupply.TotalMinted.AsGatewayTokenAmount(tokenIdentifier),
+                tokenSupply.ResourceSupply.TotalBurnt.AsGatewayTokenAmount(tokenIdentifier)
             ),
             await GetTokenPropertiesAtState(tokenRri, ledgerState)
         );
     }
 
-    private async Task<ResourceSupplyHistory> GetTokenSupplyAtState(string tokenRri, LedgerState ledgerState)
+    public async Task<CreatedTokenData> GetCreatedTokenProperties(string tokenRri, LedgerOperationGroup operationGroup)
+    {
+        var tokenDataSubstates = await _dbContext.ResourceDataSubstates
+            .Where(s =>
+                s.UpStateVersion == operationGroup.ResultantStateVersion
+                && s.UpOperationGroupIndex == operationGroup.OperationGroupIndex
+            )
+            .Include(s => s.TokenData!.Owner)
+            .ToListAsync();
+
+        var tokenData = tokenDataSubstates.Find(s => s.Type == ResourceDataSubstateType.TokenData)?.TokenData;
+        var tokenMetadata = tokenDataSubstates.Find(s => s.Type == ResourceDataSubstateType.TokenMetadata)?.TokenMetadata;
+
+        if (tokenDataSubstates.Count > 2)
+        {
+            throw new InvalidStateException(
+                $"More than one TokenData or TokenMetaData at (stateVersion, opGroupIndex) of ({operationGroup.ResultantStateVersion}, {operationGroup.OperationGroupIndex})"
+            );
+        }
+
+        var tokenProperties = CreateTokenProperties(tokenRri, tokenData, tokenMetadata, operationGroup.ResultantStateVersion);
+
+        var tokenSupplyAmount = tokenProperties.IsSupplyMutable
+            ? TokenAmount.Zero.AsGatewayTokenAmount(tokenRri)
+            : (await GetFixedTokenMintInOperationGroup(tokenRri, operationGroup)).AsGatewayTokenAmount(tokenRri);
+
+        return new CreatedTokenData(tokenProperties, tokenSupplyAmount);
+    }
+
+    private async Task<TokenAmount> GetFixedTokenMintInOperationGroup(string tokenRri, LedgerOperationGroup operationGroup)
+    {
+        var substates = await _dbContext.AccountResourceBalanceSubstates
+            .Where(s =>
+                s.UpStateVersion == operationGroup.ResultantStateVersion
+                && s.UpOperationGroupIndex == operationGroup.OperationGroupIndex
+            )
+            .Include(s => s.Resource)
+            .ToListAsync();
+
+        if (substates.Count != 1)
+        {
+            throw new InvalidStateException(
+                $"Expected to see 1 token mint for fixed token supply creation of {tokenRri} but saw {substates.Count} at (stateVersion, opGroupIndex) of ({operationGroup.ResultantStateVersion}, {operationGroup.OperationGroupIndex})"
+            );
+        }
+
+        var substate = substates.First();
+        if (substate.Resource.ResourceIdentifier != tokenRri)
+        {
+            throw new InvalidStateException(
+                $"Found 1 upped resource for fixed token supply creation of {tokenRri} but it was against the wrong rri {tokenRri} at (stateVersion, opGroupIndex) of ({operationGroup.ResultantStateVersion}, {operationGroup.OperationGroupIndex})"
+            );
+        }
+
+        return substate.Amount;
+    }
+
+    private async Task<ResourceSupplyHistory> GetTokenSupplyAtState(string tokenRri, Gateway.LedgerState ledgerState)
     {
         var resourceSupply = await _dbContext.ResourceSupplyHistoryAtVersionForRri(ledgerState._Version, tokenRri)
             .SingleOrDefaultAsync();
@@ -115,7 +177,7 @@ public class TokenQuerier : ITokenQuerier
         return resourceSupply;
     }
 
-    private async Task<TokenProperties> GetTokenPropertiesAtState(string tokenRri, LedgerState ledgerState)
+    private async Task<Gateway.TokenProperties> GetTokenPropertiesAtState(string tokenRri, Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
 
@@ -132,6 +194,22 @@ public class TokenQuerier : ITokenQuerier
         var tokenData = tokenDataSubstates.Find(s => s.Type == ResourceDataSubstateType.TokenData)?.TokenData;
         var tokenMetadata = tokenDataSubstates.Find(s => s.Type == ResourceDataSubstateType.TokenMetadata)?.TokenMetadata;
 
+        if (tokenDataSubstates.Count > 2)
+        {
+            throw new InvalidStateException(
+                $"More than one TokenData or TokenMetaData matched for rri '{tokenRri}' at stateVersion {stateVersion}");
+        }
+
+        return CreateTokenProperties(tokenRri, tokenData, tokenMetadata, stateVersion);
+    }
+
+    private static Gateway.TokenProperties CreateTokenProperties(
+        string tokenRri,
+        TokenData? tokenData,
+        TokenMetadata? tokenMetadata,
+        long stateVersion
+    )
+    {
         if (tokenData == null && tokenMetadata == null)
         {
             throw new TokenNotFoundException(tokenRri);
@@ -139,20 +217,17 @@ public class TokenQuerier : ITokenQuerier
 
         if (tokenData == null)
         {
-            throw new InvalidStateException($"TokenData was missing but TokenMetadata wasn't missing for rri '{tokenRri}' at stateVersion {stateVersion}");
+            throw new InvalidStateException(
+                $"TokenData was missing but TokenMetadata wasn't missing for rri '{tokenRri}' at stateVersion {stateVersion}");
         }
 
         if (tokenMetadata == null)
         {
-            throw new InvalidStateException($"TokenMetaData was missing but TokenData wasn't missing for rri '{tokenRri}' at stateVersion {stateVersion}");
+            throw new InvalidStateException(
+                $"TokenMetaData was missing but TokenData wasn't missing for rri '{tokenRri}' at stateVersion {stateVersion}");
         }
 
-        if (tokenDataSubstates.Count > 2)
-        {
-            throw new InvalidStateException($"More than one TokenData or TokenMetaData matched for rri '{tokenRri}' at stateVersion {stateVersion}");
-        }
-
-        return new TokenProperties(
+        return new Gateway.TokenProperties(
             name: tokenMetadata.Name,
             description: tokenMetadata.Description,
             iconUrl: tokenMetadata.IconUrl,
@@ -160,7 +235,7 @@ public class TokenQuerier : ITokenQuerier
             symbol: tokenMetadata.Symbol,
             isSupplyMutable: tokenData.IsMutable,
             granularity: tokenData.Granularity.ToSubUnitString(),
-            owner: tokenData.Owner.AsOptionalAccountIdentifier()
+            owner: tokenData.Owner.AsOptionalGatewayAccountIdentifier()
         );
     }
 }

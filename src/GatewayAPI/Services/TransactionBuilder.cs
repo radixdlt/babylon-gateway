@@ -118,8 +118,8 @@ public class TransactionBuilder
         if (newBalance.IsNegative())
         {
             throw createNotEnoughException(new NotEnoughError(
-                tokenAmount.Amount.AsApiTokenAmount(tokenAmount.Rri),
-                oldBalance.AsApiTokenAmount(tokenAmount.Rri)
+                tokenAmount.Amount.AsGatewayTokenAmount(tokenAmount.Rri),
+                oldBalance.AsGatewayTokenAmount(tokenAmount.Rri)
             ));
         }
     }
@@ -226,8 +226,8 @@ public class TransactionBuilder
         if (tokenAmount.Amount < TransactionBuilding.MinimumStake)
         {
             throw new BelowMinimumStakeException(
-                tokenAmount.AsApiTokenAmount(),
-                TransactionBuilding.MinimumStake.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+                tokenAmount.AsGatewayTokenAmount(),
+                TransactionBuilding.MinimumStake.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             );
         }
 
@@ -242,8 +242,8 @@ public class TransactionBuilder
             validatorDetails.Properties.OwnerAccountIdentifier.Address != account.Address)
         {
             throw new CannotStakeException(
-                owner: validatorDetails.Properties.OwnerAccountIdentifier.Address.AsAccountIdentifier(),
-                user: account.Address.AsAccountIdentifier()
+                owner: validatorDetails.Properties.OwnerAccountIdentifier.Address.AsGatewayAccountIdentifier(),
+                user: account.Address.AsGatewayAccountIdentifier()
             );
         }
 
@@ -297,13 +297,13 @@ public class TransactionBuilder
         if (requestedXrdToUnstake.Amount > estimatedTotalXrdStaked)
         {
             throw new NotEnoughTokensForUnstakeException(
-                requestedXrdToUnstake.AsApiTokenAmount(),
+                requestedXrdToUnstake.AsGatewayTokenAmount(),
                 new Gateway.AccountStakeEntry(
-                    validator.Address.AsValidatorIdentifier(),
-                    estimatedTotalXrdStaked.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())),
+                    validator.Address.AsGatewayValidatorIdentifier(),
+                    estimatedTotalXrdStaked.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())),
                 new Gateway.AccountStakeEntry(
-                    validator.Address.AsValidatorIdentifier(),
-                    stakeSnapshot.AccountValidatorStakeSnapshot.TotalPreparedXrdStake.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+                    validator.Address.AsGatewayValidatorIdentifier(),
+                    stakeSnapshot.AccountValidatorStakeSnapshot.TotalPreparedXrdStake.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
                 )
             );
         }

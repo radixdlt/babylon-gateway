@@ -103,10 +103,10 @@ public class ValidatorQuerier : IValidatorQuerier
         if (validator == null)
         {
             return new Validator(
-                validatorAddress.Address.AsValidatorIdentifier(),
-                TokenAmount.Zero.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                validatorAddress.Address.AsGatewayValidatorIdentifier(),
+                TokenAmount.Zero.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                 new ValidatorInfo(
-                    TokenAmount.Zero.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                    TokenAmount.Zero.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                     GetDefaultValidatorUptime(ledgerState)
                 ),
                 GetDefaultValidatorProperties(validatorAddress.ByteValidatorAddress.CompressedPublicKey)
@@ -158,11 +158,11 @@ public class ValidatorQuerier : IValidatorQuerier
             var (validator, validatorTotalStake, validatorOwnerStakeXrd, validatorUptime, properties) = x;
 
             return new Validator(
-                validator.Address.AsValidatorIdentifier(),
-                validatorTotalStake.TotalXrdStake.AsApiTokenAmount(
+                validator.Address.AsGatewayValidatorIdentifier(),
+                validatorTotalStake.TotalXrdStake.AsGatewayTokenAmount(
                     _networkConfigurationProvider.GetXrdTokenIdentifier()),
                 new ValidatorInfo(
-                    validatorOwnerStakeXrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                    validatorOwnerStakeXrd.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                     validatorUptime
                 ),
                 properties
@@ -277,7 +277,7 @@ public class ValidatorQuerier : IValidatorQuerier
             validatorFeePercentage: validatorOutputData.FeePercentage,
             name: validatorMetadata.Name,
             registered: validatorOutputData.IsRegistered,
-            ownerAccountIdentifier: validatorOutputData.OwnerAddress.AsAccountIdentifier(),
+            ownerAccountIdentifier: validatorOutputData.OwnerAddress.AsGatewayAccountIdentifier(),
             externalStakeAccepted: validatorAllowDelegation.AllowDelegation
         );
     }

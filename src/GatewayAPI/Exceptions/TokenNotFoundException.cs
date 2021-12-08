@@ -70,7 +70,7 @@ namespace GatewayAPI.Exceptions;
 public class TokenNotFoundException : NotFoundException
 {
     public TokenNotFoundException(string rri)
-        : base(new TokenNotFoundError(rri.AsTokenIdentifier()), "Token not found")
+        : base(new TokenNotFoundError(rri.AsGatewayTokenIdentifier()), "Token not found")
     {
     }
 }

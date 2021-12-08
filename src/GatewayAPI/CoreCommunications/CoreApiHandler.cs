@@ -105,8 +105,8 @@ public class CoreApiHandler : ICoreApiHandler
                     $"You attempted to increase validator fee by {error.AttemptedValidatorFeeIncrease}, larger than the maximum of {error.MaximumValidatorFeeIncrease}"
                 ),
                 BelowMinimumStakeError error => new BelowMinimumStakeException(
-                    requestedAmount: error.MinimumStake.AsApiTokenAmount(),
-                    minimumAmount: error.MinimumStake.AsApiTokenAmount()
+                    requestedAmount: error.MinimumStake.AsGatewayTokenAmount(),
+                    minimumAmount: error.MinimumStake.AsGatewayTokenAmount()
                 ), // Should have already detected this, but rethrow anyway
                 DataObjectNotSupportedByEntityError error => null,
                 FeeConstructionError error => new CouldNotConstructFeesException(error.Attempts),

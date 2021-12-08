@@ -167,7 +167,7 @@ public class Accounting
             return InferredAction.Complex();
         }
 
-        if (withdrawals.Count == 0)
+        if (deposits.Count == 1 && withdrawals.Count == 0)
         {
             var mint = deposits.First();
             if (mint.ResourceIdentifier is not TokenResourceIdentifier tokenResourceIdentifier)
@@ -193,7 +193,7 @@ public class Accounting
             );
         }
 
-        if (deposits.Count == 0)
+        if (withdrawals.Count == 1 && deposits.Count == 0)
         {
             var burn = withdrawals.First();
             if (burn.ResourceIdentifier is not TokenResourceIdentifier tokenResourceIdentifier)
@@ -344,8 +344,8 @@ public class Accounting
             fromAccount: null,
             toAccount: entity != null ? dbActionsPlanner.GetLoadedAccount(entity.AccountAddress!) : null,
             validator: null,
-            resource: dbActionsPlanner.GetLoadedResource(tokenData.Key.ResourceAddress!),
-            amount: deposits.FirstOrDefault()?.Delta ?? TokenAmount.Zero
+            amount: deposits.FirstOrDefault()?.Delta ?? TokenAmount.Zero,
+            resource: dbActionsPlanner.GetLoadedResource(tokenData.Key.ResourceAddress!)
         );
     }
 }

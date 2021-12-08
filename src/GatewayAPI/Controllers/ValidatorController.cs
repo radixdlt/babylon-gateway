@@ -124,6 +124,6 @@ public class ValidatorController : ControllerBase
             _validations.ExtractValidPublicKey(request.PublicKey).Bytes
         );
 
-        return new ValidatorDeriveResponse(validatorAddress.AsValidatorIdentifier());
+        return new ValidatorDeriveResponse(validatorAddress.AsGatewayValidatorIdentifier());
     }
 }
