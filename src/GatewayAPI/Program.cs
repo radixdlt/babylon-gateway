@@ -159,7 +159,7 @@ app.MapControllers();
 app.UseCors();
 
 await EnsureCanConnectToDatabase(app);
-await LoadNetworkConfigurationFromDb(app);
+await LoadNetworkConfiguration(app);
 
 await app.RunAsync();
 
@@ -171,11 +171,13 @@ async Task EnsureCanConnectToDatabase(WebApplication app1)
     await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app1.Services, maxWaitForDbMs);
 }
 
-async Task LoadNetworkConfigurationFromDb(WebApplication webApplication)
+async Task LoadNetworkConfiguration(WebApplication webApplication)
 {
     using (var scope = webApplication.Services.CreateScope())
     {
-        await scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>()
+        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+
+        await networkConfigurationProvider
             .LoadNetworkConfigurationFromDatabase(
                 scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
                 CancellationToken.None

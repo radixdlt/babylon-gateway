@@ -103,6 +103,10 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     {
         return new GatewayResponse(
             _networkConfigurationProvider.GetNetworkName().AsNetworkIdentifier(),
+            new GatewayApiVersions(
+                _networkConfigurationProvider.GetGatewayApiVersion(),
+                _networkConfigurationProvider.GetGatewayApiSchemaVersion()
+            ),
             await GetLedgerState(),
             new TargetLedgerState() // TODO:NG-12 - fix this once we know what the max ledger state seen by nodes is
         );

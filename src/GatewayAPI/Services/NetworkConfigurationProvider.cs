@@ -86,12 +86,22 @@ public interface INetworkConfigurationProvider
     string GetXrdAddress();
 
     TokenIdentifier GetXrdTokenIdentifier();
+
+    string GetGatewayApiSchemaVersion();
+
+    string GetGatewayApiVersion();
 }
 
 public class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
+    private readonly IConfiguration _configuration;
     private readonly object _writeLock = new();
     private CapturedConfig? _capturedConfig;
+
+    public NetworkConfigurationProvider(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
 
     private record CapturedConfig(
         NetworkConfiguration NetworkConfiguration,
@@ -134,6 +144,16 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
     public TokenIdentifier GetXrdTokenIdentifier()
     {
         return GetCapturedConfig().XrdTokenIdentifier;
+    }
+
+    public string GetGatewayApiSchemaVersion()
+    {
+        return _configuration.GetValue("GatewayOpenApiSchemaVersion", "UNKNOWN");
+    }
+
+    public string GetGatewayApiVersion()
+    {
+        return _configuration.GetValue("GatewayApiVersion", "UNKNOWN");
     }
 
     private CapturedConfig GetCapturedConfig()

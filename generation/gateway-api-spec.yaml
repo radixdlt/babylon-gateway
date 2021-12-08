@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: 1.0.2
   title: Radix Gateway API
   license:
     name: MIT
@@ -809,10 +809,13 @@ components:
       type: object
       required:
         - network_identifier
+        - gateway_api
         - ledger_state
       properties:
         network_identifier:
           $ref: "#/components/schemas/NetworkIdentifier"
+        gateway_api:
+          $ref: "#/components/schemas/GatewayApiVersions"
         ledger_state:
           $ref: "#/components/schemas/LedgerState"
         target_ledger_state:
@@ -1295,6 +1298,16 @@ components:
     BigInteger:
       type: string
       pattern: "^-?[0-9]+$"
+    GatewayApiVersions:
+      type: object
+      required:
+        - version
+        - open_api_schema_version
+      properties:
+        version:
+          type: string
+        open_api_schema_version:
+          type: string
     NetworkIdentifier:
       type: object
       required:

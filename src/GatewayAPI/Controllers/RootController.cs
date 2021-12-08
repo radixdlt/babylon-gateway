@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayAPI.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GatewayAPI.Controllers;
@@ -70,13 +71,21 @@ namespace GatewayAPI.Controllers;
 [Route("")]
 public class RootController : ControllerBase
 {
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+
+    public RootController(ILedgerStateQuerier ledgerStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+    }
+
     [HttpGet("")]
-    public object GetRootResponse()
+    public async Task<object> GetRootResponse()
     {
         return new
         {
             docs = "https://docs.radixdlt.com",
             repo = "https://github.com/radixdlt/radixdlt-network-gateway",
+            gateway = await _ledgerStateQuerier.GetGatewayState(),
         };
     }
 }
