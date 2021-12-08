@@ -69,12 +69,18 @@ using Common.Database;
 using DataAggregator.DependencyInjection;
 
 var host = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((_, config) =>
+    .ConfigureAppConfiguration((context, config) =>
     {
         config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
         if (args is { Length: > 0 })
         {
             config.AddCommandLine(args);
+        }
+
+        if (context.HostingEnvironment.IsDevelopment())
+        {
+            // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
+            config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
         }
     })
     .ConfigureServices(new DefaultKernel().ConfigureServices)

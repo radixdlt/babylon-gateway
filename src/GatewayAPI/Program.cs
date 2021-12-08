@@ -69,9 +69,7 @@ using Common.Database;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
-using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 var host = builder.Host;
@@ -79,12 +77,18 @@ var services = builder.Services;
 
 /* Read in other configuration */
 
-host.ConfigureAppConfiguration((_, config) =>
+host.ConfigureAppConfiguration((context, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_API__");
     if (args is { Length: > 0 })
     {
         config.AddCommandLine(args);
+    }
+
+    if (context.HostingEnvironment.IsDevelopment())
+    {
+        // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
+        config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
     }
 });
 
