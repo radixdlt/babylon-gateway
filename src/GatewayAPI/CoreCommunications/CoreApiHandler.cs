@@ -92,8 +92,12 @@ public class CoreApiHandler : ICoreApiHandler
                 throw;
             }
 
-            // A lot of these are null because the Gateway service should have checked these -- if these exceptions
-            // get thrown it's likely a problem with the Gateway service not doing enough validation
+            // General rules here:
+            // * If the error shouldn't happen / shouldn't be handled => use null (to rethrow the apiException)
+            //   most errors fall into this category - because we shouldn't be sending invalid requests upstream!
+            // * If the error is definitely a client error => map straight to the corresponding client error
+            // * If the error doesn't have enough information, or we need to handle it specially, wrap it so that
+            //   we can catch is as a typed error further up the call stack.
             KnownGatewayErrorException? newError = coreError.Details switch
             {
                 // ReSharper disable UnusedVariable
@@ -117,13 +121,13 @@ public class CoreApiHandler : ICoreApiHandler
                     new Gateway.PublicKey(error.InvalidPublicKey.Hex),
                     "Invalid public key"
                 ),
-                InvalidSignatureError error => throw new InternalInvalidSignatureException(error.InvalidSignature), // We throw a marker exception because we don't have the required data to construct the full exception
+                InvalidSignatureError error => throw WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService when we have the required data to construct the full exception
                 InvalidSubEntityError error => null,
                 InvalidTransactionError error => null,
                 InvalidTransactionHashError error => null,
                 MessageTooLongError error => new MessageTooLongException(error.MaximumMessageLength, error.AttemptedMessageLength),
                 NetworkNotSupportedError error => null,
-                NotEnoughResourcesError error => null, // Not specific enough - rely on Gateway handling
+                NotEnoughResourcesError error => throw WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService
                 NotValidatorOwnerError error => null, // Not specific enough - rely on Gateway handling
                 PublicKeyNotSupportedError error => new InvalidPublicKeyException(
                     new Gateway.PublicKey(error.UnsupportedPublicKey.Hex),
@@ -132,9 +136,7 @@ public class CoreApiHandler : ICoreApiHandler
                 ResourceDepositOperationNotSupportedByEntityError error => null,
                 ResourceWithdrawOperationNotSupportedByEntityError error => null,
                 StateIdentifierNotFoundError error => null,
-                SubstateDependencyNotFoundError error => throw new InternalTransactionSubstateIsNotUpException(
-                    error.SubstateIdentifierNotFound.Identifier
-                ),
+                SubstateDependencyNotFoundError error => throw WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService
                 TransactionNotFoundError error => new TransactionNotFoundException(
                     new Gateway.TransactionIdentifier(error.TransactionIdentifier.Hash)
                 ),

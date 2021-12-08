@@ -63,6 +63,7 @@
  */
 
 using RadixGatewayApi.Generated.Model;
+using Core = RadixCoreApi.GeneratedClient.Model;
 
 namespace GatewayAPI.Exceptions;
 
@@ -73,31 +74,14 @@ public class InvalidTransactionException : ValidationException
     {
     }
 
-    public static InvalidTransactionException FromSubstateException(
+    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
         string invalidTransactionHex,
-        InternalTransactionSubstateIsNotUpException exception
+        Core.SubstateDependencyNotFoundError error
     )
     {
         return new InvalidTransactionException(
             invalidTransactionHex,
-            $"Reference substate does not exist or has already been used: {exception.Message}"
+            $"Reference substate does not exist or has already been used: {error.SubstateIdentifierNotFound.Identifier}"
         );
-    }
-}
-
-// A marker exception to be caught where the correct Signature can be handled
-public class InternalTransactionSubstateIsNotUpException : Exception
-{
-    public string SubstateIdentifierHex { get; }
-
-    public InternalTransactionSubstateIsNotUpException(string substateIdentifierHex)
-        : base("Transaction was submitted with a non-up substate identifier")
-    {
-        SubstateIdentifierHex = substateIdentifierHex;
-    }
-
-    public InvalidTransactionException ToInvalidTransactionException(string invalidTransactionHex)
-    {
-        return InvalidTransactionException.FromSubstateException(invalidTransactionHex, this);
     }
 }

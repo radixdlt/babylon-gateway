@@ -78,21 +78,21 @@ public class TransactionController : ControllerBase
 {
     private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly ITransactionBuildService _transactionBuildService;
+    private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
     public TransactionController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
-        ITransactionBuildService transactionBuildService,
+        IConstructionAndSubmissionService constructionAndSubmissionService,
         INetworkConfigurationProvider networkConfigurationProvider,
         IFallbackGatewayApiProvider fallbackGatewayApiProvider
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
-        _transactionBuildService = transactionBuildService;
+        _constructionAndSubmissionService = constructionAndSubmissionService;
         _networkConfigurationProvider = networkConfigurationProvider;
         _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
@@ -123,7 +123,7 @@ public class TransactionController : ControllerBase
     {
         var ledgerState = await _ledgerStateQuerier.GetLedgerState(request.NetworkIdentifier, request.AtStateIdentifier);
         return new TransactionBuildResponse(
-            await _transactionBuildService.HandleBuildRequest(request, ledgerState)
+            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState)
         );
     }
 
@@ -131,13 +131,13 @@ public class TransactionController : ControllerBase
     public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request)
     {
         _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
-        return await _transactionBuildService.HandleFinalizeRequest(request);
+        return await _constructionAndSubmissionService.HandleFinalizeRequest(request);
     }
 
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request)
     {
         _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
-        return await _transactionBuildService.HandleSubmitRequest(request);
+        return await _constructionAndSubmissionService.HandleSubmitRequest(request);
     }
 }

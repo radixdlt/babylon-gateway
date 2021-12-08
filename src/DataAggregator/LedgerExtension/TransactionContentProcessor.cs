@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Addressing;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;

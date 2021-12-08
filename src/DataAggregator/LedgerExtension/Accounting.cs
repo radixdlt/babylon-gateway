@@ -63,6 +63,7 @@
  */
 
 using Common.Database.Models.Ledger;
+using Common.Extensions;
 using Common.Numerics;
 using DataAggregator.Exceptions;
 using DataAggregator.GlobalServices;

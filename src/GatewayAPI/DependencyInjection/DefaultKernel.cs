@@ -103,7 +103,7 @@ public class DefaultKernel
         services.AddScoped<IAccountQuerier, AccountQuerier>();
         services.AddScoped<ITokenQuerier, TokenQuerier>();
         services.AddScoped<IValidatorQuerier, ValidatorQuerier>();
-        services.AddScoped<ITransactionBuildService, TransactionBuildService>();
+        services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
     }
 
     private void AddCoreApiServices(IServiceCollection services)

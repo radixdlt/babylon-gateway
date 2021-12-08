@@ -62,10 +62,18 @@
  * permissions under this License.
  */
 
+using Common.Numerics;
+
 namespace Common.Extensions;
 
 public static class DictionaryExtensions
 {
+    public static Dictionary<TKey, TValue> ShallowClone<TKey, TValue>(this Dictionary<TKey, TValue> dict)
+        where TKey : notnull
+    {
+        return dict.ToDictionary(x => x.Key, x => x.Value);
+    }
+
     public static TValue GetOrCreate<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TValue> createNew)
         where TKey : notnull
     {
@@ -91,5 +99,18 @@ public static class DictionaryExtensions
         var newValue = default(TValue);
         dict[key] = newValue;
         return newValue;
+    }
+
+    public static TokenAmount TrackBalanceDelta<TBalanceIdentifier>(
+        this Dictionary<TBalanceIdentifier, TokenAmount> balanceTracker,
+        TBalanceIdentifier balanceIdentifier,
+        TokenAmount balanceDelta
+    )
+        where TBalanceIdentifier : notnull
+    {
+        balanceTracker[balanceIdentifier] =
+            balanceTracker.GetValueOrDefault(balanceIdentifier, TokenAmount.Zero) + balanceDelta;
+        var newBalance = balanceTracker[balanceIdentifier];
+        return newBalance;
     }
 }

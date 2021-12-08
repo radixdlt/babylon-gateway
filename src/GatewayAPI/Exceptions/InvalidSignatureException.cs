@@ -68,17 +68,8 @@ namespace GatewayAPI.Exceptions;
 
 public class InvalidSignatureException : ValidationException
 {
-    public InvalidSignatureException(Signature invalidSignature, string internalMessage)
-        : base(new InvalidSignatureError(invalidSignature), "Signature was not valid", internalMessage)
-    {
-    }
-}
-
-// A marker exception to be caught where the correct Signature can be handled
-public class InternalInvalidSignatureException : Exception
-{
-    public InternalInvalidSignatureException(string message)
-        : base(message)
+    public InvalidSignatureException(Signature invalidSignature)
+        : base(new InvalidSignatureError(invalidSignature), "Signature was not valid")
     {
     }
 }

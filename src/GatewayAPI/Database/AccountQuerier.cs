@@ -65,27 +65,29 @@
 using Common.Database;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
+using Common.Numerics;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using RadixGatewayApi.Generated.Model;
-using Api = RadixGatewayApi.Generated.Model;
+using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Database;
 
 public interface IAccountQuerier
 {
-    Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState);
+    Task<Gateway.AccountBalances> GetAccountBalancesAtState(string accountAddress, Gateway.LedgerState ledgerState);
 
-    Task<AccountStakesResponse> GetStakePositionsAtState(string accountAddress, LedgerState ledgerState);
+    Task<Gateway.AccountStakesResponse> GetStakePositionsAtState(string accountAddress, Gateway.LedgerState ledgerState);
 
-    Task<AccountUnstakesResponse> GetUnstakePositionsAtState(string accountAddress, LedgerState ledgerState);
+    Task<Gateway.AccountUnstakesResponse> GetUnstakePositionsAtState(string accountAddress, Gateway.LedgerState ledgerState);
 
     Task<AccountQuerier.CombinedStakeSnapshot> GetStakeSnapshotAtState(
         ValidatedAccountAddress accountAddress,
         ValidatedValidatorAddress validatorAddress,
-        LedgerState ledgerState
+        Gateway.LedgerState ledgerState
     );
+
+    Task<Dictionary<string, TokenAmount>> GetResourceBalancesByRri(string accountAddress, Gateway.LedgerState ledgerState);
 }
 
 public class AccountQuerier : IAccountQuerier
@@ -99,42 +101,40 @@ public class AccountQuerier : IAccountQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    // TODO:NG-56 - Look up AccountId at ledger version and use that in lookups (like we do in ValidatorQuerier)
-    // This can allow skipping a lot of work for unseen account ids; and slightly more efficient querying
-    public async Task<AccountBalances> GetAccountBalancesAtState(string accountAddress, LedgerState ledgerState)
+    public async Task<Gateway.AccountBalances> GetAccountBalancesAtState(string accountAddress, Gateway.LedgerState ledgerState)
     {
         var account = await _dbContext.Account(accountAddress, ledgerState._Version).SingleOrDefaultAsync();
 
         if (account == null)
         {
-            return new AccountBalances(
-                new TokenAmount("0", _networkConfigurationProvider.GetXrdTokenIdentifier()),
-                new List<TokenAmount>()
+            return new Gateway.AccountBalances(
+                new Gateway.TokenAmount("0", _networkConfigurationProvider.GetXrdTokenIdentifier()),
+                new List<Gateway.TokenAmount>()
             );
         }
 
-        return new AccountBalances(
+        return new Gateway.AccountBalances(
             await GetAccountTotalStakeBalance(account.Id, ledgerState),
             await GetAccountResourceBalancesAtState(account.Id, ledgerState)
         );
     }
 
-    public async Task<AccountStakesResponse> GetStakePositionsAtState(string accountAddress, LedgerState ledgerState)
+    public async Task<Gateway.AccountStakesResponse> GetStakePositionsAtState(string accountAddress, Gateway.LedgerState ledgerState)
     {
         var account = await _dbContext.Account(accountAddress, ledgerState._Version).SingleOrDefaultAsync();
 
         if (account == null)
         {
-            return new AccountStakesResponse(
+            return new Gateway.AccountStakesResponse(
                 ledgerState,
-                new List<AccountStakeEntry>(),
-                new List<AccountStakeEntry>()
+                new List<Gateway.AccountStakeEntry>(),
+                new List<Gateway.AccountStakeEntry>()
             );
         }
 
         var allStakes = await GetAccountValidatorCombinedStakeSnapshots(account.Id, ledgerState).ToListAsync();
 
-        return new AccountStakesResponse(
+        return new Gateway.AccountStakesResponse(
             ledgerState,
             MapValidatorStakes(
                 allStakes.Select(x => new StakePosition(
@@ -154,7 +154,7 @@ public class AccountQuerier : IAccountQuerier
     public async Task<CombinedStakeSnapshot> GetStakeSnapshotAtState(
         ValidatedAccountAddress accountAddress,
         ValidatedValidatorAddress validatorAddress,
-        LedgerState ledgerState
+        Gateway.LedgerState ledgerState
     )
     {
         return await GetAccountValidatorCombinedStakeSnapshot(accountAddress.Address, validatorAddress.Address, ledgerState)
@@ -166,22 +166,22 @@ public class AccountQuerier : IAccountQuerier
             );
     }
 
-    public async Task<AccountUnstakesResponse> GetUnstakePositionsAtState(string accountAddress, LedgerState ledgerState)
+    public async Task<Gateway.AccountUnstakesResponse> GetUnstakePositionsAtState(string accountAddress, Gateway.LedgerState ledgerState)
     {
         var account = await _dbContext.Account(accountAddress, ledgerState._Version).SingleOrDefaultAsync();
 
         if (account == null)
         {
-            return new AccountUnstakesResponse(
+            return new Gateway.AccountUnstakesResponse(
                 ledgerState,
-                new List<AccountUnstakeEntry>(),
-                new List<AccountUnstakeEntry>()
+                new List<Gateway.AccountUnstakeEntry>(),
+                new List<Gateway.AccountUnstakeEntry>()
             );
         }
 
         var allStakes = await GetAccountValidatorCombinedStakeSnapshots(account.Id, ledgerState).ToListAsync();
 
-        return new AccountUnstakesResponse(
+        return new Gateway.AccountUnstakesResponse(
             ledgerState,
             MapValidatorUnstakes(
                 allStakes.Select(x => new UnstakePosition(
@@ -196,7 +196,22 @@ public class AccountQuerier : IAccountQuerier
         );
     }
 
-    private async Task<List<TokenAmount>> GetAccountResourceBalancesAtState(long accountId, LedgerState ledgerState)
+    public async Task<Dictionary<string, TokenAmount>> GetResourceBalancesByRri(string accountAddress, Gateway.LedgerState ledgerState)
+    {
+        var account = await _dbContext.Account(accountAddress, ledgerState._Version).SingleOrDefaultAsync();
+
+        if (account == null)
+        {
+            return new Dictionary<string, TokenAmount>();
+        }
+
+        return await _dbContext.AccountResourceBalanceHistoryAtVersion(ledgerState._Version)
+            .Where(arb => arb.AccountId == account.Id)
+            .Include(arb => arb.Resource)
+            .ToDictionaryAsync(x => x.Resource.ResourceIdentifier, x => x.BalanceEntry.Balance);
+    }
+
+    private async Task<List<Gateway.TokenAmount>> GetAccountResourceBalancesAtState(long accountId, Gateway.LedgerState ledgerState)
     {
         var balances = await _dbContext.AccountResourceBalanceHistoryAtVersion(ledgerState._Version)
             .Where(arb => arb.AccountId == accountId)
@@ -206,17 +221,14 @@ public class AccountQuerier : IAccountQuerier
         return balances
             .Where(x => x.BalanceEntry.Balance.IsPositive())
             .OrderByDescending(x => x.BalanceEntry.Balance)
-            .Select(x => new TokenAmount(
-                x.BalanceEntry.Balance.ToSubUnitString(),
-                new TokenIdentifier(x.Resource.ResourceIdentifier)
-            ))
+            .Select(x => x.BalanceEntry.Balance.AsApiTokenAmount(x.Resource.ResourceIdentifier))
             .ToList();
     }
 
-    private async Task<TokenAmount> GetAccountTotalStakeBalance(long accountId, LedgerState ledgerState)
+    private async Task<Gateway.TokenAmount> GetAccountTotalStakeBalance(long accountId, Gateway.LedgerState ledgerState)
     {
         var allStakes = await GetAccountValidatorCombinedStakeSnapshots(accountId, ledgerState).ToListAsync();
-        var totalXrd = Common.Numerics.TokenAmount.Zero;
+        var totalXrd = TokenAmount.Zero;
 
         foreach (var s in allStakes)
         {
@@ -231,31 +243,31 @@ public class AccountQuerier : IAccountQuerier
             totalXrd += definiteXrd + validatorStakeSnapshot.EstimateXrdConversion(stakeUnits);
         }
 
-        return new TokenAmount(totalXrd.ToSubUnitString(), _networkConfigurationProvider.GetXrdTokenIdentifier());
+        return totalXrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier());
     }
 
-    private record StakePosition(string ValidatorAddress, Common.Numerics.TokenAmount Xrd);
+    private record StakePosition(string ValidatorAddress, TokenAmount Xrd);
 
-    private List<AccountStakeEntry> MapValidatorStakes(IEnumerable<StakePosition> stakes)
+    private List<Gateway.AccountStakeEntry> MapValidatorStakes(IEnumerable<StakePosition> stakes)
     {
         return stakes
             .Where(s => s.Xrd.IsPositive())
             .OrderByDescending(s => s.Xrd)
-            .Select(s => new AccountStakeEntry(
+            .Select(s => new Gateway.AccountStakeEntry(
                 s.ValidatorAddress.AsValidatorIdentifier(),
                 s.Xrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             ))
             .ToList();
     }
 
-    private record UnstakePosition(string ValidatorAddress, Common.Numerics.TokenAmount Xrd, long EpochsUntilUnlocked);
+    private record UnstakePosition(string ValidatorAddress, TokenAmount Xrd, long EpochsUntilUnlocked);
 
-    private List<AccountUnstakeEntry> MapValidatorUnstakes(IEnumerable<UnstakePosition> stakes)
+    private List<Gateway.AccountUnstakeEntry> MapValidatorUnstakes(IEnumerable<UnstakePosition> stakes)
     {
         return stakes
             .Where(s => s.Xrd.IsPositive())
             .OrderByDescending(s => s.Xrd)
-            .Select(s => new AccountUnstakeEntry(
+            .Select(s => new Gateway.AccountUnstakeEntry(
                 s.ValidatorAddress.AsValidatorIdentifier(),
                 s.Xrd.AsApiTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                 s.EpochsUntilUnlocked
@@ -263,7 +275,7 @@ public class AccountQuerier : IAccountQuerier
             .ToList();
     }
 
-    private async Task<IEnumerable<UnstakePosition>> GetExitingUnstakes(long accountId, LedgerState ledgerState)
+    private async Task<IEnumerable<UnstakePosition>> GetExitingUnstakes(long accountId, Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
 
@@ -296,7 +308,7 @@ public class AccountQuerier : IAccountQuerier
         ValidatorStakeSnapshot ValidatorStakeSnapshot
     );
 
-    private IQueryable<CombinedStakeSnapshot> GetAccountValidatorCombinedStakeSnapshots(long accountId, LedgerState ledgerState)
+    private IQueryable<CombinedStakeSnapshot> GetAccountValidatorCombinedStakeSnapshots(long accountId, Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
 
@@ -311,7 +323,7 @@ public class AccountQuerier : IAccountQuerier
         ;
     }
 
-    private IQueryable<CombinedStakeSnapshot> GetAccountValidatorCombinedStakeSnapshot(string accountAddress, string validatorAddress, LedgerState ledgerState)
+    private IQueryable<CombinedStakeSnapshot> GetAccountValidatorCombinedStakeSnapshot(string accountAddress, string validatorAddress, Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
 

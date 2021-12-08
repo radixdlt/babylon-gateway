@@ -60,12 +60,12 @@ public static class TransactionBuilding
 
     public static Core.Operation CreateTokenData(this ValidatedResourceAddress resourceAddress, Core.TokenData tokenData)
     {
-        return DownDataOperation(resourceAddress.ToEntityIdentifier(), tokenData);
+        return UpDataOperation(resourceAddress.ToEntityIdentifier(), tokenData);
     }
 
     public static Core.Operation CreateTokenMetadata(this ValidatedResourceAddress resourceAddress, Core.TokenMetadata tokenMetadata)
     {
-        return DownDataOperation(resourceAddress.ToEntityIdentifier(), tokenMetadata);
+        return UpDataOperation(resourceAddress.ToEntityIdentifier(), tokenMetadata);
     }
 
     public static Core.EntityIdentifier ToEntityIdentifier(this ValidatedAccountAddress accountAddress)

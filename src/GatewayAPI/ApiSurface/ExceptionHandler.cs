@@ -108,6 +108,12 @@ public class ExceptionHandler : IExceptionHandler
             _logger.Log(LogLevel.Information, exception, "Unhandled error response from upstream core API [RequestTrace={TraceId}]", traceId);
             gatewayErrorException = InternalServerException.OfUnhandledCoreApiException(coreApiException.ErrorContent.ToString() ?? string.Empty, traceId);
         }
+        else if (exception is WrappedCoreApiException wrappedCoreApiException)
+        {
+            // CoreApi.ApiException is returned if we get a 500 from upstream
+            _logger.Log(LogLevel.Information, exception, "Unhandled error response from upstream core API [RequestTrace={TraceId}]", traceId);
+            gatewayErrorException = InternalServerException.OfUnhandledCoreApiException(wrappedCoreApiException.ApiException.ErrorContent.ToString() ?? string.Empty, traceId);
+        }
         else if (exception is GatewayApi.ApiException gatewayApiException)
         {
             // GatewayApi.ApiException is returned if we get a 500 from upstream
