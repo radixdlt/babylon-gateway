@@ -23,6 +23,7 @@ public class TransactionBuilder
 {
     private readonly IValidations _validations;
     private readonly IAccountQuerier _accountQuerier;
+    private readonly IValidatorQuerier _validatorQuerier;
     private readonly ITokenQuerier _tokenQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly Gateway.LedgerState _ledgerState;
@@ -37,6 +38,7 @@ public class TransactionBuilder
     public TransactionBuilder(
         IValidations validations,
         IAccountQuerier accountQuerier,
+        IValidatorQuerier validatorQuerier,
         ITokenQuerier tokenQuerier,
         INetworkConfigurationProvider networkConfigurationProvider,
         Gateway.LedgerState ledgerState,
@@ -45,6 +47,7 @@ public class TransactionBuilder
     {
         _validations = validations;
         _accountQuerier = accountQuerier;
+        _validatorQuerier = validatorQuerier;
         _tokenQuerier = tokenQuerier;
         _networkConfigurationProvider = networkConfigurationProvider;
         _ledgerState = ledgerState;
@@ -128,7 +131,7 @@ public class TransactionBuilder
             Gateway.TransferTokens transferTokens => MapTransferTokens(transferTokens),
             Gateway.BurnTokens burnTokens => await MapBurnTokens(burnTokens),
             Gateway.MintTokens mintTokens => await MapMintTokens(mintTokens),
-            Gateway.StakeTokens stakeTokens => MapStakeTokens(stakeTokens),
+            Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
             Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
             Gateway.CreateTokenDefinition createTokenDefinition => MapCreateTokenDefinition(createTokenDefinition),
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unhandled action type"),
@@ -214,7 +217,7 @@ public class TransactionBuilder
         );
     }
 
-    private Core.OperationGroup MapStakeTokens(Gateway.StakeTokens action)
+    private async Task<Core.OperationGroup> MapStakeTokens(Gateway.StakeTokens action)
     {
         var account = _validations.ExtractValidAccountAddress(action.FromAccount);
         var validator = _validations.ExtractValidValidatorAddress(action.ToValidator);
@@ -233,9 +236,19 @@ public class TransactionBuilder
             throw new InvalidActionException(action, "The fee payer can't stake for an account that's not their own");
         }
 
+        var validatorDetails = await _validatorQuerier.GetValidatorAtState(validator, _ledgerState);
+
+        if (!validatorDetails.Properties.ExternalStakeAccepted &&
+            validatorDetails.Properties.OwnerAccountIdentifier.Address != account.Address)
+        {
+            throw new CannotStakeException(
+                owner: validatorDetails.Properties.OwnerAccountIdentifier.Address.AsAccountIdentifier(),
+                user: account.Address.AsAccountIdentifier()
+            );
+        }
+
         ValidateAccountDebit(action, account, tokenAmount, error => new NotEnoughTokensForStakeException(error.RequestedAmount, error.AvailableAmount));
 
-        // TODO:NG-23 - Check for allow delegation flag
         return TransactionBuilding.OperationGroupOf(
             account.DebitOperation(tokenAmount),
             TransactionBuilding.CreditPendingStakeVaultOperation(account, validator, tokenAmount)
@@ -253,6 +266,7 @@ public class TransactionBuilder
         }
 
         // We read in the stakeSnapshot at the given ledgerState so that the wallet can make the request against the given ledger state
+        //  at which the stake estimate was given, to ensure the stakeUnits are calculated relative to that estimate
         var stakeSnapshot = await _accountQuerier.GetStakeSnapshotAtState(account, validator, _ledgerState);
 
         var stakeUnitsToUnstake = action switch

@@ -76,6 +76,6 @@ public class CannotStakeException : ValidationException
 
     private static string BuildErrorMessage(Gateway.AccountIdentifier owner, Gateway.AccountIdentifier user)
     {
-        return $"You cannot stake to the validator because it has delegation switched off, and you ({owner.Address}) are not the validator's owner ({user.Address})";
+        return $"You cannot stake to the validator because it has delegation switched off, and you ({user.Address}) are not the validator's owner ({owner.Address})";
     }
 }

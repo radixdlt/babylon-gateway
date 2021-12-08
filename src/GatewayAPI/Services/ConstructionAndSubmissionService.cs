@@ -85,6 +85,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 {
     private readonly IValidations _validations;
     private readonly IAccountQuerier _accountQuerier;
+    private readonly IValidatorQuerier _validatorQuerier;
     private readonly ITokenQuerier _tokenQuerier;
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -92,6 +93,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     public ConstructionAndSubmissionService(
         IValidations validations,
         IAccountQuerier accountQuerier,
+        IValidatorQuerier validatorQuerier,
         ITokenQuerier tokenQuerier,
         ICoreApiHandler coreApiHandler,
         INetworkConfigurationProvider networkConfigurationProvider
@@ -99,6 +101,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     {
         _validations = validations;
         _accountQuerier = accountQuerier;
+        _validatorQuerier = validatorQuerier;
         _tokenQuerier = tokenQuerier;
         _coreApiHandler = coreApiHandler;
         _networkConfigurationProvider = networkConfigurationProvider;
@@ -173,7 +176,15 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             throw new MessageTooLongException(TransactionBuilding.MaximumMessageLength, validatedMessage.Bytes.Length);
         }
 
-        var transactionBuilder = new TransactionBuilder(_validations, _accountQuerier, _tokenQuerier, _networkConfigurationProvider, ledgerState, feePayer);
+        var transactionBuilder = new TransactionBuilder(
+            _validations,
+            _accountQuerier,
+            _validatorQuerier,
+            _tokenQuerier,
+            _networkConfigurationProvider,
+            ledgerState,
+            feePayer
+        );
 
         var mappedTransaction = await transactionBuilder.MapAndValidateActions(request.Actions);
 
