@@ -73,8 +73,8 @@ using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using DataAggregator.Extensions;
 using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
-using Api = RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
+using Api = RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
 

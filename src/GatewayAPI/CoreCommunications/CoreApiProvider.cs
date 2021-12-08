@@ -63,7 +63,7 @@
  */
 
 using GatewayAPI.Configuration.Models;
-using RadixCoreApi.GeneratedClient.Api;
+using RadixCoreApi.Generated.Api;
 using System.Net.Http.Headers;
 
 namespace GatewayAPI.CoreCommunications;

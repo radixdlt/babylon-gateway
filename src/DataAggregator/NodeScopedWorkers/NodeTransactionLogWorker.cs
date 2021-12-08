@@ -67,7 +67,7 @@ using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices.ApiReaders;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.NodeScopedWorkers;
 

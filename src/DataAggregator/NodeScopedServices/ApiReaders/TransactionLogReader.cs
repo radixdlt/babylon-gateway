@@ -63,8 +63,8 @@
  */
 
 using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Api;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Api;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.NodeScopedServices.ApiReaders;
 

@@ -66,7 +66,7 @@ using GatewayAPI.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RadixGatewayApi.Generated.Model;
-using CoreApi = RadixCoreApi.GeneratedClient.Client;
+using CoreApi = RadixCoreApi.Generated.Client;
 using GatewayApi = RadixGatewayApi.Generated.Client;
 
 namespace GatewayAPI.ApiSurface;

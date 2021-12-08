@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DataAggregator.Extensions;

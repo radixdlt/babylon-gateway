@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.GeneratedClient.Api;
+using RadixCoreApi.Generated.Api;
 using System.Net.Http.Headers;
 
 namespace DataAggregator.NodeScopedServices.ApiReaders;

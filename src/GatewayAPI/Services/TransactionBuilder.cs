@@ -4,7 +4,7 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
 using System.Globalization;
-using Core = RadixCoreApi.GeneratedClient.Model;
+using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 using TokenAmount = Common.Numerics.TokenAmount;
 

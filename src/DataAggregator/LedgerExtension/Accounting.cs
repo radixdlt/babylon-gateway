@@ -67,8 +67,8 @@ using Common.Extensions;
 using Common.Numerics;
 using DataAggregator.Exceptions;
 using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
-using TokenData = RadixCoreApi.GeneratedClient.Model.TokenData;
+using RadixCoreApi.Generated.Model;
+using TokenData = RadixCoreApi.Generated.Model.TokenData;
 
 namespace DataAggregator.LedgerExtension;
 

@@ -68,7 +68,7 @@ using Common.Database.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
-using Api = RadixCoreApi.GeneratedClient.Model;
+using Api = RadixCoreApi.Generated.Model;
 using Db = Common.Database.Models.Ledger.Substates;
 
 namespace Common.Database.Models.Ledger.Substates;

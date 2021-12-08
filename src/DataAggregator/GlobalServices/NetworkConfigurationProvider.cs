@@ -66,7 +66,7 @@ using Common.Addressing;
 using Common.Database.Models.SingleEntries;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.GlobalServices;
 

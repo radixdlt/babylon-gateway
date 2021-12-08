@@ -67,7 +67,7 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
-using Core = RadixCoreApi.GeneratedClient.Model;
+using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Services;

@@ -68,7 +68,7 @@ using DataAggregator.Configuration;
 using DataAggregator.Exceptions;
 using DataAggregator.GlobalServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.NodeScopedServices;
 

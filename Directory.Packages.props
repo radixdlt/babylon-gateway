@@ -19,8 +19,8 @@
       <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.2.3" />
 
       <!-- Generated / Local -->
-      <PackageVersion Include="RadixCoreApi.GeneratedClient" Version="0.9.6" />
-      <PackageVersion Include="RadixGatewayApi.Generated" Version="1.0.2" />
+      <PackageVersion Include="RadixCoreApi.Generated" Version="0.9.8" />
+      <PackageVersion Include="RadixGatewayApi.Generated" Version="1.0.6" />
 
     <!-- NON-PRODUCTION DEPENDENCIES -->
 

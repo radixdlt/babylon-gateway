@@ -63,7 +63,7 @@
  */
 
 using Common.Addressing;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DataAggregator.GlobalServices;

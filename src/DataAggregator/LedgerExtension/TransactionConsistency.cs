@@ -65,7 +65,7 @@
 using Common.Extensions;
 using Common.StaticHelpers;
 using DataAggregator.Exceptions;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
 

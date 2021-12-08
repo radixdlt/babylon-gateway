@@ -12,7 +12,7 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-        <PackageReference Include="RadixCoreApi.GeneratedClient" />
+        <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
 
 </Project>

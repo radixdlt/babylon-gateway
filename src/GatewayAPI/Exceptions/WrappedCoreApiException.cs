@@ -1,5 +1,5 @@
-using Core = RadixCoreApi.GeneratedClient.Model;
-using CoreClient = RadixCoreApi.GeneratedClient.Client;
+using Core = RadixCoreApi.Generated.Model;
+using CoreClient = RadixCoreApi.Generated.Client;
 
 namespace GatewayAPI.Exceptions;
 

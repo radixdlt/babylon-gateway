@@ -66,7 +66,7 @@ using Common.Database.Models.Ledger.Normalization;
 using Common.Extensions;
 using Common.Numerics;
 using GatewayAPI.Exceptions;
-using Core = RadixCoreApi.GeneratedClient.Model;
+using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.ApiSurface;

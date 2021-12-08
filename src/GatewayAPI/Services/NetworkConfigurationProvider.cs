@@ -68,7 +68,7 @@ using Common.Database.Models.SingleEntries;
 using GatewayAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
-using Core = RadixCoreApi.GeneratedClient.Model;
+using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Services;

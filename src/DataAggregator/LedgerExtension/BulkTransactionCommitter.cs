@@ -66,7 +66,7 @@ using Common.Database.Models.Ledger;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
 

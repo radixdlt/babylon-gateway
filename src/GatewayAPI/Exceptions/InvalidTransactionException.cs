@@ -63,7 +63,7 @@
  */
 
 using RadixGatewayApi.Generated.Model;
-using Core = RadixCoreApi.GeneratedClient.Model;
+using Core = RadixCoreApi.Generated.Model;
 
 namespace GatewayAPI.Exceptions;
 

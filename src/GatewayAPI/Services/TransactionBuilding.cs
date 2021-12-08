@@ -1,6 +1,6 @@
 using Common.Numerics;
 using GatewayAPI.ApiSurface;
-using Core = RadixCoreApi.GeneratedClient.Model;
+using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Services;

@@ -66,7 +66,7 @@ using Common.Extensions;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Extensions;
 using Microsoft.EntityFrameworkCore;
-using RadixCoreApi.GeneratedClient.Model;
+using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
 

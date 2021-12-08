@@ -64,7 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Diagnostics;
-using CoreApi = RadixCoreApi.GeneratedClient.Client;
+using CoreApi = RadixCoreApi.Generated.Client;
 using GatewayApi = RadixGatewayApi.Generated.Client;
 
 namespace GatewayAPI.ApiSurface;
