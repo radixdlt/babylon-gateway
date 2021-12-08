@@ -76,7 +76,7 @@ public interface ITransactionQuerier
 {
     Task<TransactionPage> GetAccountTransactions(TransactionPageRequest request, Gateway.LedgerState ledgerState);
 
-    Task<Gateway.AccountTransaction?> LookupCommittedTransaction(
+    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
         ValidatedTransactionIdentifier transactionIdentifier,
         Gateway.LedgerState ledgerState
     );
@@ -102,7 +102,7 @@ public record CommittedTransactionPaginationCursor(long? NextPageAtAndBelowState
 public record TransactionPage(
     long TotalRecords,
     CommittedTransactionPaginationCursor? NextPageCursor,
-    List<Gateway.AccountTransaction> Transactions
+    List<Gateway.TransactionInfo> Transactions
 );
 
 public record TransactionPageRequest(
@@ -143,7 +143,7 @@ public class TransactionQuerier : ITransactionQuerier
         return new TransactionPage(totalCount, nextCursor, transactions);
     }
 
-    public async Task<Gateway.AccountTransaction?> LookupCommittedTransaction(
+    public async Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
         ValidatedTransactionIdentifier transactionIdentifier,
         Gateway.LedgerState ledgerState
     )
@@ -186,7 +186,7 @@ public class TransactionQuerier : ITransactionQuerier
             .ToListAsync();
     }
 
-    private async Task<List<Gateway.AccountTransaction>> GetTransactions(List<long> transactionStateVersions)
+    private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions)
     {
         // Should be fine, but if performance is bad, consider https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
         var transactionWithOperationGroups = await _dbContext.LedgerTransactions
@@ -202,7 +202,7 @@ public class TransactionQuerier : ITransactionQuerier
             .Include(t => t.RawTransaction)
             .ToListAsync();
 
-        var gatewayTransactions = new List<Gateway.AccountTransaction>();
+        var gatewayTransactions = new List<Gateway.TransactionInfo>();
         foreach (var ledgerTransaction in transactionWithOperationGroups)
         {
             gatewayTransactions.Add(await MapToGatewayAccountTransaction(ledgerTransaction));
@@ -211,7 +211,7 @@ public class TransactionQuerier : ITransactionQuerier
         return gatewayTransactions;
     }
 
-    private async Task<Gateway.AccountTransaction> MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
+    private async Task<Gateway.TransactionInfo> MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
     {
         var gatewayActions = new List<Gateway.Action>();
 
@@ -224,15 +224,16 @@ public class TransactionQuerier : ITransactionQuerier
             }
         }
 
-        return new Gateway.AccountTransaction(
-            new Gateway.AccountTransactionStatus(
-                Gateway.AccountTransactionStatus.StatusEnum.CONFIRMED,
-                ledgerTransaction.NormalizedTimestamp.AsUtcIsoDateWithMillisString()
+        return new Gateway.TransactionInfo(
+            new Gateway.TransactionStatus(
+                Gateway.TransactionStatus.StatusEnum.CONFIRMED,
+                ledgerTransaction.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
+                ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
             ledgerTransaction.TransactionIdentifierHash.AsGatewayTransactionIdentifier(),
             gatewayActions,
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-            new Gateway.AccountTransactionMetadata(
+            new Gateway.TransactionMetadata(
                 hex: ledgerTransaction.RawTransaction!.TransactionIdentifierHash.ToHex(),
                 message: ledgerTransaction.Message?.ToHex()
             )
