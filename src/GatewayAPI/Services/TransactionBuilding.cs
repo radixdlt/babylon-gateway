@@ -117,11 +117,6 @@ public static class TransactionBuilding
         return ResourceOperation(account.ToPreparedUnstakesEntityIdentifier(), stakeUnitAmount.AsStakeUnitAmount(validatorAddress));
     }
 
-    public static Core.Operation ClaimAddressOperation(this ValidatedResourceAddress resourceAddress)
-    {
-        return DownDataOperation(resourceAddress.ToEntityIdentifier(), new Core.UnclaimedRadixEngineAddress());
-    }
-
     public static Core.Operation CreateTokenData(this ValidatedResourceAddress resourceAddress, Core.TokenData tokenData)
     {
         return UpDataOperation(resourceAddress.ToEntityIdentifier(), tokenData);
@@ -234,6 +229,9 @@ public static class TransactionBuilding
         );
     }
 
+    /// <summary>
+    /// Note: This isn't supported in the Core API at present. Downs are typically handled automatically.
+    /// </summary>
     private static Core.Operation DownDataOperation(
         Core.EntityIdentifier entityIdentifier,
         Core.DataObject dataObject

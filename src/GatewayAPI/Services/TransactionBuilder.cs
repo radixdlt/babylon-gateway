@@ -457,9 +457,8 @@ public class TransactionBuilder
         }
 
         /* On node, token data construction starts by calling Syscall.READDR_CLAIM syscall for the symbol
-            -- but we can't do that through the Core API so I think we can skip this? */
+           and then DOWN'ing the REAddressClaim -- but this is done for us by the Core API. */
         return TransactionBuilding.OperationGroupOf(
-            resourceAddress.ClaimAddressOperation(),
             resourceAddress.CreateTokenData(new Core.TokenData(
                 granularity: validatedGranularity,
                 isMutable: true,
@@ -480,9 +479,8 @@ public class TransactionBuilder
         ValidateAccountCredit(recipient, validatedTokenSupply);
 
         /* On node, token data construction starts by calling Syscall.READDR_CLAIM syscall for the symbol
-            -- but we can't do that through the Core API so I think we can skip this? */
+           and then DOWN'ing the REAddressClaim -- but this is done for us by the Core API. */
         return TransactionBuilding.OperationGroupOf(
-            resourceAddress.ClaimAddressOperation(),
             resourceAddress.CreateTokenData(new Core.TokenData(
                 granularity: validatedGranularity,
                 isMutable: false,
