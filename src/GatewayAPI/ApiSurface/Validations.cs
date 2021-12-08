@@ -287,7 +287,7 @@ public class Validations : IValidations
 
         if (input > upperBound)
         {
-            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} must be >= {upperBound}");
+            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} must be <= {upperBound}");
         }
 
         return input;
