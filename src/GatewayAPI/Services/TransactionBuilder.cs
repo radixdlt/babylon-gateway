@@ -134,6 +134,10 @@ public class TransactionBuilder
             Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
             Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
             Gateway.CreateTokenDefinition createTokenDefinition => MapCreateTokenDefinition(createTokenDefinition),
+            /* Users can supply a type which validates as an action (because it has a string type), but not as a type
+               which matches the discriminator, so the deserializer doesn't deserialize it into one of the subtypes
+               above. This error catches these issues */
+            not null => throw new InvalidActionException(action, $"Action type of {action.Type} is not supported"),
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unhandled action type"),
         };
     }
