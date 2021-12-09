@@ -62,73 +62,36 @@
  * permissions under this License.
  */
 
-using System.Security.Cryptography;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Common.StaticHelpers;
+namespace Common.Database.Models.Ledger;
 
-public static class HashingHelper
+/// <summary>
+/// The raw transaction details and payload.
+/// </summary>
+[Table("raw_transactions")]
+public class RawTransaction
 {
-    public static void ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
+    public RawTransaction(byte[] transactionIdentifierHash, byte[] payload)
     {
-        if (hash1.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash1));
-        }
-
-        if (hash2.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash2));
-        }
-
-        Span<byte> aggregate = stackalloc byte[64];
-        hash1.CopyTo(aggregate);
-        hash2.CopyTo(aggregate[32..]);
-
-        Sha256Twice(aggregate, destination);
+        TransactionIdentifierHash = transactionIdentifierHash;
+        Payload = payload;
     }
 
-    public static byte[] ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
+    // Public empty constructor created for use with the Upsert library
+    public RawTransaction()
     {
-        var destination = new byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, destination);
-        return destination;
     }
 
-    public static bool VerifyConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
+    [Key]
+    [Column(name: "transaction_id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public byte[] TransactionIdentifierHash { get; set; }
 
-        Span<byte> hashResult = stackalloc byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
-    }
-
-    public static void Sha256Twice(ReadOnlySpan<byte> source, Span<byte> destination)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        SHA256.HashData(hashResult1, destination);
-    }
-
-    public static byte[] Sha256Twice(ReadOnlySpan<byte> source)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        return SHA256.HashData(hashResult1);
-    }
-
-    public static bool VerifySha256TwiceHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        Sha256Twice(source, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
-    }
+    /// <summary>
+    /// The payload of the transaction.
+    /// </summary>
+    [Column("payload")]
+    public byte[] Payload { get; set; }
 }

@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using Common.Database.Models;
+using Common.Database.Models.Ledger;
 using Common.Extensions;
 using Common.StaticHelpers;
 using DataAggregator.Exceptions;
@@ -102,7 +104,7 @@ public static class TransactionConsistency
             );
         }
 
-        if (!AccumulatorVerifier.IsValidAccumulator(
+        if (!RadixHashing.IsValidAccumulator(
                 parent.TransactionAccumulator,
                 child.TransactionIdentifierHash,
                 child.TransactionAccumulator
@@ -113,8 +115,20 @@ public static class TransactionConsistency
                 $" The parent (with resultant state version {parent.StateVersion}) has accumulator {parent.TransactionAccumulator.ToHex()}" +
                 $" and the child has transaction id hash {child.TransactionIdentifierHash.ToHex()}" +
                 " which should result in an accumulator of" +
-                $" {AccumulatorVerifier.CreateNewAccumulator(parent.TransactionAccumulator, child.TransactionIdentifierHash).ToHex()}" +
+                $" {RadixHashing.CreateNewAccumulator(parent.TransactionAccumulator, child.TransactionIdentifierHash).ToHex()}" +
                 $" but the child reports an inconsistent accumulator of {child.TransactionAccumulator.ToHex()}."
+            );
+        }
+    }
+
+    public static void AssertTransactionHashCorrect(RawTransaction rawTransaction)
+    {
+        if (!RadixHashing.IsValidTransactionHashIdentifier(rawTransaction.Payload!, rawTransaction.TransactionIdentifierHash))
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with claimed identifier hash {rawTransaction.TransactionIdentifierHash.ToHex()} " +
+                $"but it was calculated to have identifier {RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(rawTransaction.Payload).ToHex()} " +
+                $"(transaction contents: {rawTransaction.Payload!.ToHex()})"
             );
         }
     }

@@ -74,6 +74,16 @@ public class InvalidTransactionException : ValidationException
     {
     }
 
+    public static InvalidTransactionException FromInvalidTransaction(
+        string invalidTransactionHex
+    )
+    {
+        return new InvalidTransactionException(
+            invalidTransactionHex,
+            $"Transaction is invalid"
+        );
+    }
+
     public static InvalidTransactionException FromSubstateDependencyNotFoundError(
         string invalidTransactionHex,
         Core.SubstateDependencyNotFoundError error
@@ -81,7 +91,7 @@ public class InvalidTransactionException : ValidationException
     {
         return new InvalidTransactionException(
             invalidTransactionHex,
-            $"Reference substate does not exist or has already been used: {error.SubstateIdentifierNotFound.Identifier}"
+            $"Referenced substate does not exist or has already been used: {error.SubstateIdentifierNotFound.Identifier}"
         );
     }
 }

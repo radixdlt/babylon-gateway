@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Exceptions;
 using GatewayAPI.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;

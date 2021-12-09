@@ -76,7 +76,6 @@ public static class TransactionMapping
     {
         return new RawTransaction(
             transactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
-            submittedTimestamp: null,
             payload: transaction.Metadata.Hex.ConvertFromHex()
         );
     }

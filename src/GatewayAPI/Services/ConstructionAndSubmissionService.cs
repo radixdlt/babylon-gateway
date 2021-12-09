@@ -62,7 +62,11 @@
  * permissions under this License.
  */
 
+using Common.Exceptions;
+using Common.Extensions;
 using Common.Numerics;
+using Common.Services;
+using Common.StaticHelpers;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
@@ -89,6 +93,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     private readonly ITokenQuerier _tokenQuerier;
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ISubmissionTrackingService _submissionTrackingService;
+    private readonly ILogger<ConstructionAndSubmissionService> _logger;
 
     public ConstructionAndSubmissionService(
         IValidations validations,
@@ -96,7 +102,9 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         IValidatorQuerier validatorQuerier,
         ITokenQuerier tokenQuerier,
         ICoreApiHandler coreApiHandler,
-        INetworkConfigurationProvider networkConfigurationProvider
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ISubmissionTrackingService submissionTrackingService,
+        ILogger<ConstructionAndSubmissionService> logger
     )
     {
         _validations = validations;
@@ -105,6 +113,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         _tokenQuerier = tokenQuerier;
         _coreApiHandler = coreApiHandler;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _submissionTrackingService = submissionTrackingService;
+        _logger = logger;
     }
 
     public async Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
@@ -117,10 +127,22 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             signed: false
         ));
 
+        var unsignedTransactionPayload = coreBuildResponse.UnsignedTransaction.ConvertFromHex();
+        var payloadToSign = coreBuildResponse.PayloadToSign.ConvertFromHex();
+
+        if (!RadixHashing.IsValidPayloadToSign(unsignedTransactionPayload, payloadToSign))
+        {
+            throw new InvalidCoreApiResponseException(
+                $"Built transaction was claimed to have payload to sign {payloadToSign.ToHex()} " +
+                $"but the Gateway calculates it as {RadixHashing.CreatePayloadToSignFromUnsignedTransactionPayload(unsignedTransactionPayload)} " +
+                $"(transaction contents: {unsignedTransactionPayload.ToHex()}"
+            );
+        }
+
         return new Gateway.TransactionBuild(
             fee: coreParseResponse.Metadata.Fee.AsGatewayTokenAmount(),
-            unsignedTransaction: coreBuildResponse.UnsignedTransaction,
-            payloadToSign: coreBuildResponse.PayloadToSign
+            unsignedTransaction: unsignedTransactionPayload.ToHex(),
+            payloadToSign: payloadToSign.ToHex()
         );
     }
 
@@ -137,32 +159,38 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             )
         ));
 
-        var transactionHashResponse = await _coreApiHandler.GetTransactionHash(new Core.ConstructionHashRequest(
-            _coreApiHandler.GetNetworkIdentifier(),
-            coreFinalizeResponse.SignedTransaction
-        ));
+        var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
+            coreFinalizeResponse.SignedTransaction.ConvertFromHex()
+        );
 
         if (request.Submit)
         {
             await HandleSubmission(
-                _validations.ExtractValidHex("Signed transaction", coreFinalizeResponse.SignedTransaction)
+                _validations.ExtractValidHex("Signed transaction", coreFinalizeResponse.SignedTransaction),
+                transactionHashIdentifier
             );
         }
 
         return new Gateway.TransactionFinalizeResponse(
             signedTransaction: coreFinalizeResponse.SignedTransaction,
-            transactionIdentifier: transactionHashResponse.TransactionIdentifier.AsGatewayTransactionIdentifier()
+            transactionIdentifier: transactionHashIdentifier.AsGatewayTransactionIdentifier()
         );
     }
 
     public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request)
     {
-        var submitResponse = await HandleSubmission(
-            _validations.ExtractValidHex("Signed transaction", request.SignedTransaction)
+        var signedTransactionContents = _validations.ExtractValidHex("Signed transaction", request.SignedTransaction);
+        var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
+            signedTransactionContents.Bytes
+        );
+
+        await HandleSubmission(
+            signedTransactionContents,
+            transactionHashIdentifier
         );
 
         return new Gateway.TransactionSubmitResponse(
-            transactionIdentifier: submitResponse.TransactionIdentifier.AsGatewayTransactionIdentifier()
+            transactionIdentifier: transactionHashIdentifier.AsGatewayTransactionIdentifier()
         );
     }
 
@@ -254,14 +282,38 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
     }
 
-    private async Task<Core.ConstructionSubmitResponse> HandleSubmission(
+    private async Task<Core.ConstructionParseResponse> HandleParseSignedTransaction(
         ValidatedHex signedTransaction
     )
     {
-        // TODO:NG-35 - Support for saving transactions as pending, and automated retry (will need to GetHash first before submission)
         try
         {
-            return await _coreApiHandler.SubmitTransaction(new Core.ConstructionSubmitRequest(
+            return await _coreApiHandler.ParseTransaction(new Core.ConstructionParseRequest(
+                networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
+                transaction: signedTransaction.AsString,
+                signed: true
+            ));
+        }
+        catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
+        {
+            throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
+        }
+        catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        {
+            throw InvalidTransactionException.FromInvalidTransaction(signedTransaction.AsString);
+        }
+    }
+
+    private async Task HandleSubmission(
+        ValidatedHex signedTransaction,
+        byte[] transactionIdentifierHash
+    )
+    {
+        var parseResponse = await HandleParseSignedTransaction(signedTransaction);
+
+        try
+        {
+            await _coreApiHandler.SubmitTransaction(new Core.ConstructionSubmitRequest(
                 _coreApiHandler.GetNetworkIdentifier(),
                 signedTransaction.AsString
             ));
@@ -270,5 +322,33 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         {
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
         }
+        catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        {
+            throw InvalidTransactionException.FromInvalidTransaction(signedTransaction.AsString);
+        }
+        catch (KnownGatewayErrorException)
+        {
+            // This is a client error which has already been identified - in the mapping from the Core API
+            // so the transaction is invalid, and we can let it bubble up
+            throw;
+        }
+        catch (WrappedCoreApiException ex) when (!ex.Properties.HasUndefinedBehaviour)
+        {
+            // Any other known Core exception which can't result in the transaction being submitted
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // Any other kind of exception is unknown - eg it could be a connection drop or a 500 from the Core API
+            // In theory, the transaction could have been submitted -- so we return success and
+            // mark it as PENDING -- and we'll retry automatically if the transaction is not committed within a while
+            _logger.LogWarning(
+                ex,
+                "Unknown error submitting transaction with hash {TransactionHash}",
+                transactionIdentifierHash.ToHex()
+            );
+        }
+
+        await _submissionTrackingService.TrackSubmission(signedTransaction.Bytes, transactionIdentifierHash, parseResponse);
     }
 }

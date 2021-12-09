@@ -12,7 +12,9 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
         <PackageReference Include="RadixCoreApi.Generated" />
+        <PackageReference Include="RadixGatewayApi.Generated" />
     </ItemGroup>
 
 </Project>

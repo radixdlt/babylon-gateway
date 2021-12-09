@@ -62,73 +62,65 @@
  * permissions under this License.
  */
 
-using System.Security.Cryptography;
+using Common.CoreCommunications;
+using Common.Database;
+using Common.Database.Models.Mempool;
+using Common.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace Common.StaticHelpers;
+using Core = RadixCoreApi.Generated.Model;
+using Gateway = RadixGatewayApi.Generated.Model;
 
-public static class HashingHelper
+namespace Common.Services;
+
+public interface ISubmissionTrackingService
 {
-    public static void ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
+    Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
+
+    Task TrackSubmission(byte[] signedTransaction, byte[] transactionIdentifierHash, Core.ConstructionParseResponse parseResponse);
+}
+
+public class SubmissionTrackingService<T> : ISubmissionTrackingService
+    where T : CommonDbContext
+{
+    private readonly ILogger<SubmissionTrackingService<T>> _logger;
+    private readonly T _dbContext;
+
+    public SubmissionTrackingService(ILogger<SubmissionTrackingService<T>> logger, T dbContext)
     {
-        if (hash1.Length != 32)
+        _logger = logger;
+        _dbContext = dbContext;
+    }
+
+    public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
+    {
+        return await _dbContext.MempoolTransactions
+            .Where(t => t.TransactionIdentifierHash == transactionIdentifierHash)
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task TrackSubmission(byte[] signedTransaction, byte[] transactionIdentifierHash, Core.ConstructionParseResponse parseResponse)
+    {
+        var submittedTimestamp = DateTime.UtcNow;
+        var mempoolTransaction = new MempoolTransaction
         {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash1));
-        }
+            TransactionIdentifierHash = transactionIdentifierHash,
+            Payload = signedTransaction,
+            SubmittedByThisGateway = true,
+            SubmittedTimestamp = submittedTimestamp,
+            TransactionsContents = ParsedTransactionMapper.MapToGatewayTransactionContents(parseResponse),
+            SubmissionStatus = MempoolTransactionSubmissionStatus.Pending,
+        };
 
-        if (hash2.Length != 32)
-        {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash2));
-        }
-
-        Span<byte> aggregate = stackalloc byte[64];
-        hash1.CopyTo(aggregate);
-        hash2.CopyTo(aggregate[32..]);
-
-        Sha256Twice(aggregate, destination);
-    }
-
-    public static byte[] ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
-    {
-        var destination = new byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, destination);
-        return destination;
-    }
-
-    public static bool VerifyConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
-    }
-
-    public static void Sha256Twice(ReadOnlySpan<byte> source, Span<byte> destination)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        SHA256.HashData(hashResult1, destination);
-    }
-
-    public static byte[] Sha256Twice(ReadOnlySpan<byte> source)
-    {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        return SHA256.HashData(hashResult1);
-    }
-
-    public static bool VerifySha256TwiceHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
-    {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        Sha256Twice(source, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
+        // https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
+        await _dbContext.MempoolTransactions
+            .Upsert(mempoolTransaction)
+            .WhenMatched((dbTxn, newTxn) => new MempoolTransaction
+            {
+                SubmittedTimestamp = dbTxn.SubmittedTimestamp ?? newTxn.SubmittedTimestamp,
+                /* All other properties follow newTxn - including MempoolTransactionSubmissionStatus.Pending - which allows a transaction to be re-committed */
+            })
+            .RunAsync();
     }
 }

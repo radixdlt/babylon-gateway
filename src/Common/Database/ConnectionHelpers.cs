@@ -89,6 +89,12 @@ public static class ConnectionHelpers
         });
     }
 
+    /// <summary>
+    ///  Note - if the database doesn't exist yet, we can't use CanConnectAsync - so instead, we retry migrating
+    ///         on launch in order to protect against the database server not being available on first load.
+    ///         This can mean migrations get arbitrarily retried if they fail, but this shouldn't be a problem in practice.
+    ///         And in fact, I've seen slow migrations succeed on a third attempt.
+    /// </summary>
     public static async Task MigrateWithRetry(ILogger logger, DbContext dbContext, int maxWaitForDbMs)
     {
         if (await TryToMigrate(dbContext, maxWaitForDbMs <= 0))
@@ -96,7 +102,7 @@ public static class ConnectionHelpers
             return;
         }
 
-        logger.LogInformation("Database does not appear to be accepting connections yet. Waiting up to {MaxWaitForDbMs}ms to connect... ", maxWaitForDbMs);
+        logger.LogInformation("Database does not appear to be accepting connections yet or database migrations failed. Waiting up to {MaxWaitForDbMs}ms to connect/try again... ", maxWaitForDbMs);
 
         var timer = new Stopwatch();
         timer.Start();
@@ -111,7 +117,7 @@ public static class ConnectionHelpers
             }
         }
 
-        logger.LogWarning("Could not connect to database after waiting {MaxWaitForDbMs}ms. Trying one last time...", timer.ElapsedMilliseconds);
+        logger.LogWarning("Could not connect to database / run migrations after waiting {MaxWaitForDbMs}ms. Trying one last time...", timer.ElapsedMilliseconds);
 
         // Try to throw a useful exception explaining that it can't connect
         await TryToMigrate(dbContext, true);

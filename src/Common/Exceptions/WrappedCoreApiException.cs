@@ -62,48 +62,53 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Core = RadixCoreApi.Generated.Model;
+using CoreClient = RadixCoreApi.Generated.Client;
 
-namespace Common.Database.Models;
+namespace Common.Exceptions;
+
+public class CoreApiErrorProperties
+{
+    public bool MarksInvalidTransaction { get; set; }
+
+    public bool HasUndefinedBehaviour { get; set; }
+}
 
 /// <summary>
-/// The raw transaction details and payload.
+/// A marker exception to be caught / handled in other code.
+/// We use this rather than the ApiException itself so that we have a typesafe CoreError we can use in other places.
 /// </summary>
-[Table("raw_transactions")]
-public class RawTransaction
+/// <typeparam name="T">The type of the core error.</typeparam>
+public class WrappedCoreApiException<T> : WrappedCoreApiException
+    where T : Core.CoreError
 {
-    public RawTransaction(byte[] transactionIdentifierHash, DateTime? submittedTimestamp = null, byte[]? payload = null)
+    public override T Error { get; }
+
+    public WrappedCoreApiException(CoreClient.ApiException apiException, T error, CoreApiErrorProperties? properties = null)
+        : base($"Core API reported a {typeof(T).Name}", apiException, properties)
     {
-        TransactionIdentifierHash = transactionIdentifierHash;
-        SubmittedTimestamp = submittedTimestamp;
-        Payload = payload;
+        Error = error;
+    }
+}
+
+public abstract class WrappedCoreApiException : Exception
+{
+    public abstract Core.CoreError Error { get; }
+
+    public CoreClient.ApiException ApiException { get; }
+
+    public CoreApiErrorProperties Properties { get; }
+
+    public WrappedCoreApiException(string message, CoreClient.ApiException apiException, CoreApiErrorProperties? properties = null)
+        : base(message, apiException)
+    {
+        ApiException = apiException;
+        Properties = properties ?? new CoreApiErrorProperties();
     }
 
-    // Public empty constructor created for use with the Upsert library
-    public RawTransaction()
+    public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error, CoreApiErrorProperties? properties = null)
+        where T : Core.CoreError
     {
+        return new WrappedCoreApiException<T>(apiException, error, properties);
     }
-
-    [Key]
-    [Column(name: "transaction_id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public byte[] TransactionIdentifierHash { get; set; }
-
-    /// <summary>
-    /// The timestamp when the transaction was committed through this gateway.
-    ///
-    /// We may not have this timestamp if the transaction wasn't submitted through this gateway,
-    /// and was first seen in the mempool or on-ledger.
-    /// </summary>
-    [Column("submitted_timestamp")]
-    public DateTime? SubmittedTimestamp { get; set; }
-
-    /// <summary>
-    /// The payload of the transaction.
-    ///
-    /// We may not have this payload if we have just seen the transaction in the mempool list.
-    /// </summary>
-    [Column("payload")]
-    public byte[]? Payload { get; set; }
 }

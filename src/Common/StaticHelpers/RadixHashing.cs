@@ -62,73 +62,63 @@
  * permissions under this License.
  */
 
-using System.Security.Cryptography;
-
 namespace Common.StaticHelpers;
 
-public static class HashingHelper
+public static class RadixHashing
 {
-    public static void ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, Span<byte> destination)
+    public static bool IsValidAccumulator(ReadOnlySpan<byte> parentAccumulator, ReadOnlySpan<byte> childHash, ReadOnlySpan<byte> newAccumulator)
     {
-        if (hash1.Length != 32)
+        return HashingHelper.VerifyConcatHashesAndTakeSha256Twice(parentAccumulator, childHash, newAccumulator);
+    }
+
+    // NB - There is some repetition with the above for performance gains regarding stackalloc.
+    // By using dynamic sizes we can ensure this always returns a value
+    public static byte[] CreateNewAccumulator(byte[] parentAccumulator, byte[] childHash)
+    {
+        if (parentAccumulator.Length != 32)
         {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash1));
+            throw new ArgumentException("Parent accumulator must to be 32 bytes long", nameof(parentAccumulator));
         }
 
-        if (hash2.Length != 32)
+        if (childHash.Length != 32)
         {
-            throw new ArgumentException("must to be 32 bytes long", nameof(hash2));
+            throw new ArgumentException("Child hash must to be 32 bytes long", nameof(childHash));
         }
 
-        Span<byte> aggregate = stackalloc byte[64];
-        hash1.CopyTo(aggregate);
-        hash2.CopyTo(aggregate[32..]);
-
-        Sha256Twice(aggregate, destination);
+        return HashingHelper.ConcatHashesAndTakeSha256Twice(parentAccumulator, childHash);
     }
 
-    public static byte[] ConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2)
+    /// <summary>
+    ///  Creates the 32-byte TransactionHash of an unsigned transaction payload.
+    /// </summary>
+    public static byte[] CreatePayloadToSignFromUnsignedTransactionPayload(ReadOnlySpan<byte> unsignedTransactionPayload)
     {
-        var destination = new byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, destination);
-        return destination;
+        return HashingHelper.Sha256Twice(unsignedTransactionPayload);
     }
 
-    public static bool VerifyConcatHashesAndTakeSha256Twice(ReadOnlySpan<byte> hash1, ReadOnlySpan<byte> hash2, ReadOnlySpan<byte> hashToVerify)
+    /// <summary>
+    ///  Creates the 32-byte TransactionHash of an unsigned transaction payload.
+    /// </summary>
+    public static void CreatePayloadToSignFromUnsignedTransactionPayload(ReadOnlySpan<byte> unsignedTransactionPayload, Span<byte> destination)
     {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        ConcatHashesAndTakeSha256Twice(hash1, hash2, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
+        HashingHelper.Sha256Twice(unsignedTransactionPayload, destination);
     }
 
-    public static void Sha256Twice(ReadOnlySpan<byte> source, Span<byte> destination)
+    public static bool IsValidPayloadToSign(ReadOnlySpan<byte> unsignedTransactionPayload, ReadOnlySpan<byte> payloadToSign)
     {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        SHA256.HashData(hashResult1, destination);
+        return HashingHelper.VerifySha256TwiceHash(unsignedTransactionPayload, payloadToSign);
     }
 
-    public static byte[] Sha256Twice(ReadOnlySpan<byte> source)
+    /// <summary>
+    ///  Creates the 32-byte TransactionHash of a signed transaction payload.
+    /// </summary>
+    public static byte[] CreateTransactionHashIdentifierFromSignTransactionPayload(ReadOnlySpan<byte> signedTransactionPayload)
     {
-        Span<byte> hashResult1 = stackalloc byte[32];
-        SHA256.HashData(source, hashResult1);
-        return SHA256.HashData(hashResult1);
+        return HashingHelper.Sha256Twice(signedTransactionPayload);
     }
 
-    public static bool VerifySha256TwiceHash(ReadOnlySpan<byte> source, ReadOnlySpan<byte> hashToVerify)
+    public static bool IsValidTransactionHashIdentifier(ReadOnlySpan<byte> signedTransactionPayload, ReadOnlySpan<byte> transactionHashIdentifier)
     {
-        if (hashToVerify.Length != 32)
-        {
-            return false;
-        }
-
-        Span<byte> hashResult = stackalloc byte[32];
-        Sha256Twice(source, hashResult);
-        return hashToVerify.SequenceEqual(hashResult);
+        return HashingHelper.VerifySha256TwiceHash(signedTransactionPayload, transactionHashIdentifier);
     }
 }

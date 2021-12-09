@@ -69,6 +69,7 @@ using Common.Database.Models.Ledger.Joins;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
+using Common.Database.Models.Mempool;
 using Common.Database.Models.SingleEntries;
 using Common.Database.ValueConverters;
 using Common.Extensions;
@@ -122,6 +123,8 @@ public class CommonDbContext : DbContext
 
     public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
 
+    public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -161,6 +164,12 @@ public class CommonDbContext : DbContext
 
         configurationBuilder.Properties<ValidatorDataSubstateType>()
             .HaveConversion<ValidatorDataSubstateTypeValueConverter>();
+
+        configurationBuilder.Properties<MempoolTransactionSubmissionStatus>()
+            .HaveConversion<MempoolTransactionSubmissionStatusValueConverter>();
+
+        configurationBuilder.Properties<MempoolTransactionFailureReason>()
+            .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
     }
 
     private static void HookupLedgerTransactions(ModelBuilder modelBuilder)

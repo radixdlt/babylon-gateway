@@ -63,29 +63,25 @@
  */
 
 using Common.Database.Models;
+using Common.Database.Models.Ledger;
 using DataAggregator.DependencyInjection;
+using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAggregator.GlobalServices;
 
 public interface IRawTransactionWriter
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token);
+    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
 {
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, IEnumerable<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
     {
         // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
         return await context.RawTransactions
             .UpsertRange(rawTransactions)
-            .WhenMatched((existingTransaction, newTransaction) => new RawTransaction
-            {
-                TransactionIdentifierHash = newTransaction.TransactionIdentifierHash,
-                SubmittedTimestamp = newTransaction.SubmittedTimestamp ?? existingTransaction.SubmittedTimestamp,
-                Payload = newTransaction.Payload ?? existingTransaction.Payload,
-            })
             .RunAsync(token);
     }
 }

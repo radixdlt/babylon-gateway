@@ -62,43 +62,70 @@
  * permissions under this License.
  */
 
-using Core = RadixCoreApi.Generated.Model;
-using CoreClient = RadixCoreApi.Generated.Client;
+﻿using System;
+using Common.Database.Models.Mempool;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace GatewayAPI.Exceptions;
+#nullable disable
 
-/// <summary>
-/// A marker exception to be caught / handled in other code.
-/// We use this rather than the ApiException itself so that we have a typesafe CoreError we can use in other places.
-/// </summary>
-/// <typeparam name="T">The type of the core error.</typeparam>
-public class WrappedCoreApiException<T> : WrappedCoreApiException
-    where T : Core.CoreError
+namespace DataAggregator.Migrations
 {
-    public override T Error { get; }
-
-    public WrappedCoreApiException(CoreClient.ApiException apiException, T error)
-        : base($"Core API reported a {typeof(T).Name}", apiException)
+    public partial class CreatedMempoolTransactionsTable : Migration
     {
-        Error = error;
-    }
-}
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "submitted_timestamp",
+                table: "raw_transactions");
 
-public abstract class WrappedCoreApiException : Exception
-{
-    public abstract Core.CoreError Error { get; }
+            migrationBuilder.AlterColumn<byte[]>(
+                name: "payload",
+                table: "raw_transactions",
+                type: "bytea",
+                nullable: false,
+                defaultValue: new byte[0],
+                oldClrType: typeof(byte[]),
+                oldType: "bytea",
+                oldNullable: true);
 
-    public CoreClient.ApiException ApiException { get; }
+            migrationBuilder.CreateTable(
+                name: "mempool_transactions",
+                columns: table => new
+                {
+                    transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payload = table.Column<byte[]>(type: "bytea", nullable: false),
+                    submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
+                    submitted_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    first_seen_in_mempool_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    last_seen_in_mempool_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    transaction_contents = table.Column<GatewayTransactionContents>(type: "jsonb", nullable: false),
+                    submission_status = table.Column<string>(type: "text", nullable: false),
+                    submission_failure_reason = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mempool_transactions", x => x.transaction_id);
+                });
+        }
 
-    public WrappedCoreApiException(string message, CoreClient.ApiException apiException)
-        : base(message, apiException)
-    {
-        ApiException = apiException;
-    }
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "mempool_transactions");
 
-    public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error)
-        where T : Core.CoreError
-    {
-        return new WrappedCoreApiException<T>(apiException, error);
+            migrationBuilder.AlterColumn<byte[]>(
+                name: "payload",
+                table: "raw_transactions",
+                type: "bytea",
+                nullable: true,
+                oldClrType: typeof(byte[]),
+                oldType: "bytea");
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "submitted_timestamp",
+                table: "raw_transactions",
+                type: "timestamp with time zone",
+                nullable: true);
+        }
     }
 }

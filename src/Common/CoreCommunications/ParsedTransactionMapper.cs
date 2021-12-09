@@ -62,41 +62,31 @@
  * permissions under this License.
  */
 
-using System.Security.Cryptography;
+using Common.Database.Models.Mempool;
 
-namespace Common.StaticHelpers;
+namespace Common.CoreCommunications;
 
-public static class AccumulatorVerifier
+using Core = RadixCoreApi.Generated.Model;
+using Gateway = RadixGatewayApi.Generated.Model;
+
+public static class ParsedTransactionMapper
 {
-    public static bool IsValidAccumulator(byte[] parentAccumulator, byte[] childHash, byte[] newAccumulator)
+    public static GatewayTransactionContents MapToGatewayTransactionContents(Core.ConstructionParseResponse parseResponse)
     {
-        if (parentAccumulator.Length != 32 || childHash.Length != 32 || newAccumulator.Length != 32)
+        return new GatewayTransactionContents
         {
-            return false;
-        }
-
-        Span<byte> aggregate = stackalloc byte[64];
-        parentAccumulator.CopyTo(aggregate);
-        childHash.CopyTo(aggregate[32..]);
-
-        Span<byte> hashResult = stackalloc byte[32];
-        HashingHelper.Sha256Twice(aggregate, hashResult);
-
-        // Compare
-        return hashResult.SequenceEqual(newAccumulator);
+            Actions = MapActions(parseResponse.OperationGroups),
+            FeePaidSubunits = parseResponse.Metadata.Fee.Value,
+            MessageHex = parseResponse.Metadata.Message,
+        };
     }
 
-    // NB - There is some repetition with the above for performance gains regarding stackalloc.
-    // By using dynamic sizes we can ensure this always returns a value
-    public static byte[] CreateNewAccumulator(byte[] parentAccumulator, byte[] childHash)
+    // TODO: Implement this.
+    // DbActionsPlanner and Accounting > Suggestion - recreate more general account/Gateway.Action mapping
+    // and reuse that in Accounting. Will likely need some manner of fetching dependencies for mapping
+    // ReSharper disable once UnusedParameter.Local
+    private static List<Gateway.Action> MapActions(List<Core.OperationGroup> operationGroups)
     {
-        // Create Aggregate
-        var totalLength = parentAccumulator.Length + childHash.Length;
-        Span<byte> aggregate = totalLength > 256 ? new byte[totalLength] : stackalloc byte[totalLength];
-        parentAccumulator.CopyTo(aggregate);
-        childHash.CopyTo(aggregate[parentAccumulator.Length..]);
-
-        // Create result - Sha256Twice
-        return HashingHelper.Sha256Twice(aggregate);
+        return new List<Gateway.Action>();
     }
 }

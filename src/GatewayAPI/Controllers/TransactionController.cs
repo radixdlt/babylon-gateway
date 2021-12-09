@@ -68,7 +68,6 @@ using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
-using TokenAmount = Common.Numerics.TokenAmount;
 
 namespace GatewayAPI.Controllers;
 
@@ -120,13 +119,19 @@ public class TransactionController : ControllerBase
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);
 
-        // TODO:NG-35 - Add support for pending/failed transactions
-        if (committedTransaction == null)
+        if (committedTransaction != null)
         {
-            throw new TransactionNotFoundException(request.TransactionIdentifier);
+            return new TransactionStatusResponse(ledgerState, committedTransaction);
         }
 
-        return new TransactionStatusResponse(ledgerState, committedTransaction);
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier);
+
+        if (mempoolTransaction != null)
+        {
+            return new TransactionStatusResponse(ledgerState, mempoolTransaction);
+        }
+
+        throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
     [HttpPost("build")]

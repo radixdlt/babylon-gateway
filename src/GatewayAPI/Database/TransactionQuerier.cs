@@ -63,7 +63,10 @@
  */
 
 using Common.Database.Models.Ledger;
+using Common.Database.Models.Mempool;
 using Common.Extensions;
+using Common.Numerics;
+using Common.Services;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +82,10 @@ public interface ITransactionQuerier
     Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
         ValidatedTransactionIdentifier transactionIdentifier,
         Gateway.LedgerState ledgerState
+    );
+
+    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier
     );
 }
 
@@ -116,16 +123,19 @@ public class TransactionQuerier : ITransactionQuerier
     private readonly GatewayReadOnlyDbContext _dbContext;
     private readonly ITokenQuerier _tokenQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ISubmissionTrackingService _submissionTrackingService;
 
     public TransactionQuerier(
         GatewayReadOnlyDbContext dbContext,
         ITokenQuerier tokenQuerier,
-        INetworkConfigurationProvider networkConfigurationProvider
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ISubmissionTrackingService submissionTrackingService
     )
     {
         _dbContext = dbContext;
         _tokenQuerier = tokenQuerier;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _submissionTrackingService = submissionTrackingService;
     }
 
     public async Task<TransactionPage> GetAccountTransactions(TransactionPageRequest request, Gateway.LedgerState ledgerState)
@@ -159,6 +169,46 @@ public class TransactionQuerier : ITransactionQuerier
         return stateVersion == 0
             ? null :
             (await GetTransactions(new List<long> { stateVersion })).First();
+    }
+
+    public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier
+    )
+    {
+        // We lookup the mempool transaction using the _submissionTrackingService which is bound to the
+        // ReadWriteDbContext so that it gets the most recent details -- to ensure that submitted transactions
+        // are immediately shown as pending.
+        var mempoolTransaction = await _submissionTrackingService.GetMempoolTransaction(transactionIdentifier.Bytes);
+
+        if (mempoolTransaction is null)
+        {
+            return null;
+        }
+
+        var status = mempoolTransaction.SubmissionStatus switch
+        {
+            // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
+            MempoolTransactionSubmissionStatus.Committed => new Gateway.TransactionStatus(
+                Gateway.TransactionStatus.StatusEnum.CONFIRMED,
+                mempoolTransaction.TransactionsContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
+                mempoolTransaction.TransactionsContents.LedgerStateVersion ?? 0
+            ),
+            MempoolTransactionSubmissionStatus.Pending => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionSubmissionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            MempoolTransactionSubmissionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        return new Gateway.TransactionInfo(
+            status,
+            new Gateway.TransactionIdentifier(mempoolTransaction.TransactionIdentifierHash.ToHex()),
+            mempoolTransaction.TransactionsContents.Actions,
+            feePaid: TokenAmount.FromSubUnitsString(mempoolTransaction.TransactionsContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+            new Gateway.TransactionMetadata(
+                hex: mempoolTransaction.Payload.ToHex(),
+                message: mempoolTransaction.TransactionsContents.MessageHex
+            )
+        );
     }
 
     private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState)
@@ -227,7 +277,7 @@ public class TransactionQuerier : ITransactionQuerier
         return new Gateway.TransactionInfo(
             new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                ledgerTransaction.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
+                confirmedTime: ledgerTransaction.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
             ledgerTransaction.TransactionIdentifierHash.AsGatewayTransactionIdentifier(),

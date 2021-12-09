@@ -174,10 +174,14 @@ public class LedgerExtenderService : ILedgerExtenderService
             await EnsureDbLedgerIsInitialized(token);
         }
 
+        var rawTransactions = transactions.Select(TransactionMapping.CreateRawTransaction).ToList();
+
+        rawTransactions.ForEach(TransactionConsistency.AssertTransactionHashCorrect);
+
         var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
             () => _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(
                 dbContext,
-                transactions.Select(TransactionMapping.CreateRawTransaction),
+                rawTransactions,
                 token
             )
         );
