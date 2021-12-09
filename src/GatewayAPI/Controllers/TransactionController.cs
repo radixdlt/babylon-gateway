@@ -65,7 +65,6 @@
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
-using GatewayAPI.Fallback;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
@@ -96,7 +95,6 @@ public class TransactionController : ControllerBase
         _transactionQuerier = transactionQuerier;
         _constructionAndSubmissionService = constructionAndSubmissionService;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _fallbackGatewayApiProvider = fallbackGatewayApiProvider;
     }
 
     [HttpPost("rules")]

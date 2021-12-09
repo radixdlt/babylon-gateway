@@ -66,7 +66,6 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
-using GatewayAPI.Fallback;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
