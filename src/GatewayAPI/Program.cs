@@ -195,15 +195,25 @@ async Task EnsureCanConnectToDatabase(WebApplication app1)
 
 async Task LoadNetworkConfiguration(WebApplication webApplication)
 {
-    using (var scope = webApplication.Services.CreateScope())
-    {
-        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+    using var scope = webApplication.Services.CreateScope();
+    var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
 
-        await networkConfigurationProvider
-            .LoadNetworkConfigurationFromDatabase(
-                scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
-                CancellationToken.None
-            );
+    while (true)
+    {
+        try
+        {
+            await networkConfigurationProvider
+                .LoadNetworkConfigurationFromDatabase(
+                    scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
+                    CancellationToken.None
+                );
+            break;
+        }
+        catch (Exception exception)
+        {
+            programLogger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
+            await Task.Delay(2000);
+        }
     }
 }
 
@@ -212,7 +222,7 @@ void StartMetricServer()
     var metricPort = configuration.GetValue<int>("PrometheusMetricsPort");
     if (metricPort != 0)
     {
-        programLogger.LogInformation("Starting metrics server on port {MetricPort}", metricPort);
+        programLogger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", metricPort);
         new KestrelMetricServer(port: metricPort).Start();
     }
     else
