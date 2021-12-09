@@ -76,9 +76,6 @@ public class AggregatorHealthCheck : IHealthCheck
     private static readonly Gauge _aggregatorIsPrimary = Metrics
         .CreateGauge("aggregator_is_primary_info", "0 if the aggregator is not primary, 1 if it is the write primary (at the last health check).");
 
-    private static readonly Gauge _aggregatorIsUnhealthyPrimary = Metrics
-        .CreateGauge("aggregator_is_unhealthy_primary_info", "0 if the aggregator is not primary or healthy, 1 if it is the write primary and unhealthy (at the last health check).");
-
     private static readonly LogLimiter _unhealthyLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 
     private readonly ISystemStatusService _systemStatusService;
@@ -90,13 +87,18 @@ public class AggregatorHealthCheck : IHealthCheck
         _logger = logger;
     }
 
+    /// <summary>
+    /// This is called whenever a client requests /health, or failing that, every 30 seconds (by the framework).
+    /// </summary>
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        var healthReport = _systemStatusService.GenerateHealthReport();
-        RecordHealthCheck(healthReport.IsHealthy);
+        var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
+
+        RecordHealthReport(healthReport.IsHealthy);
+
         if (healthReport.IsHealthy)
         {
-            _logger.LogTrace("Aggregator ledger commit status checked - status is healthy"); // Checked every 30 seconds by default
+            _logger.LogTrace("Aggregator ledger commit status checked - status is healthy");
         }
         else
         {
@@ -114,12 +116,11 @@ public class AggregatorHealthCheck : IHealthCheck
         );
     }
 
-    private void RecordHealthCheck(bool isHealthy)
+    private void RecordHealthReport(bool isHealthy)
     {
         var isPrimary = _systemStatusService.IsPrimary();
 
         _aggregatorIsUnhealthy.Set(!isHealthy ? 1 : 0);
         _aggregatorIsPrimary.Set(isPrimary ? 1 : 0);
-        _aggregatorIsUnhealthyPrimary.Set(!isHealthy && isPrimary ? 1 : 0);
     }
 }

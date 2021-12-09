@@ -118,7 +118,7 @@ servicesBuilder.AddControllers();
 
 servicesBuilder.AddHealthChecks()
     .AddCheck<AggregatorHealthCheck>("aggregator_health_check")
-    .AddDbContextCheck<AggregatorDbContext>()
+    .AddDbContextCheck<AggregatorDbContext>("database_connection_check")
     .ForwardToPrometheus();
 
 var app = builder.Build();

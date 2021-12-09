@@ -77,7 +77,7 @@ public interface ISystemStatusService
 
     bool IsPrimary();
 
-    HealthReport GenerateHealthReport();
+    HealthReport GenerateTransactionCommitmentHealthReport();
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
@@ -135,13 +135,22 @@ public class SystemStatusService : ISystemStatusService
         return _isPrimary;
     }
 
-    public HealthReport GenerateHealthReport()
+    public HealthReport GenerateTransactionCommitmentHealthReport()
     {
         if (InStartupGracePeriod())
         {
             return new HealthReport(
                 true,
                 $"Within start up grace period of {StartupGracePeriod}",
+                _startupTime
+            );
+        }
+
+        if (!IsPrimary())
+        {
+            return new HealthReport(
+                true,
+                "Marked as healthy as this data aggregator isn't the primary",
                 _startupTime
             );
         }

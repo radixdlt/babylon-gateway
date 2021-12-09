@@ -151,8 +151,8 @@ servicesBuilder.AddCors(options =>
 });
 
 servicesBuilder.AddHealthChecks()
-    .AddDbContextCheck<GatewayReadOnlyDbContext>()
-    .AddDbContextCheck<GatewayReadWriteDbContext>()
+    .AddDbContextCheck<GatewayReadOnlyDbContext>("readonly_database_connection_check")
+    .AddDbContextCheck<GatewayReadWriteDbContext>("readwrite_database_connection_check")
     .ForwardToPrometheus();
 
 var app = builder.Build();

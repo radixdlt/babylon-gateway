@@ -83,7 +83,7 @@ public class RootController : ControllerBase
     [HttpGet("")]
     public JsonResult GetRootResponse()
     {
-        var healthReport = _systemStatusService.GenerateHealthReport();
+        var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
         return new JsonResult(new
         {
             docs = "https://docs.radixdlt.com",
