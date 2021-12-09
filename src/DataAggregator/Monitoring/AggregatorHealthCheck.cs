@@ -71,10 +71,10 @@ namespace DataAggregator.Monitoring;
 public class AggregatorHealthCheck : IHealthCheck
 {
     private static readonly Gauge _aggregatorIsUnhealthy = Metrics
-        .CreateGauge("aggregator_is_unhealthy_info", "0 if the aggregator is healthy, 1 if it's unhealthy (at the last health check).");
+        .CreateGauge("aggregator_is_unhealthy_info", "0 if the aggregator is healthy (has committed recently or is not the primary), 1 if it's unhealthy [as of the last health check].");
 
     private static readonly Gauge _aggregatorIsPrimary = Metrics
-        .CreateGauge("aggregator_is_primary_info", "0 if the aggregator is not primary, 1 if it is the write primary (at the last health check).");
+        .CreateGauge("aggregator_is_primary_info", "0 if the aggregator is not the write primary, 1 if it is the write primary [as of the last health check].");
 
     private static readonly LogLimiter _unhealthyLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 
