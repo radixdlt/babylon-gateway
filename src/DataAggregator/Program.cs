@@ -66,7 +66,9 @@
 #pragma warning disable SA1516
 
 using Common.Database;
+using DataAggregator.Configuration;
 using DataAggregator.DependencyInjection;
+using DataAggregator.GlobalServices;
 using DataAggregator.Monitoring;
 using Prometheus;
 
@@ -125,6 +127,7 @@ var app = builder.Build();
 var services = app.Services;
 
 var configuration = services.GetRequiredService<IConfiguration>();
+var aggregatorConfiguration = services.GetRequiredService<IAggregatorConfiguration>();
 var programLogger = services.GetRequiredService<ILogger<Program>>();
 
 // https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-6.0
@@ -136,7 +139,7 @@ var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
 
 if (shouldWipeDatabaseInsteadOfStart)
 {
-    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (logger, dbContext) =>
+    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (_, logger, dbContext) =>
     {
         logger.LogInformation("Connecting to database - if it exists");
 
@@ -155,13 +158,25 @@ if (shouldWipeDatabaseInsteadOfStart)
 
 // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
 // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (logger, dbContext) =>
+await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (scope, logger, dbContext) =>
 {
     logger.LogInformation("Starting database migrations if required");
 
     await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
 
     logger.LogInformation("Database migrations (if required) were completed");
+
+    var networkConfigurationService = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+
+    var existingNetworkName = await networkConfigurationService
+        .EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName();
+
+    if (existingNetworkName != null && existingNetworkName != aggregatorConfiguration.GetNetworkName())
+    {
+        throw new Exception(
+            $"Aggregator was started up with network name {aggregatorConfiguration.GetNetworkName()} but the database has an existing ledger with network name {existingNetworkName}"
+        );
+    }
 });
 
 app.MapControllers(); // Root controllers - mapped to port 80 by default in prod

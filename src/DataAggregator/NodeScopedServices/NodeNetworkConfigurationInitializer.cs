@@ -63,6 +63,7 @@
  */
 
 using Common.Addressing;
+using Common.Database.Models;
 using Common.Database.Models.SingleEntries;
 using DataAggregator.Configuration;
 using DataAggregator.Exceptions;
@@ -77,16 +78,19 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
     private readonly IAggregatorConfiguration _configuration;
     private readonly INetworkConfigurationReader _networkConfigurationReader;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ILogger<NodeNetworkConfigurationInitializer> _logger;
 
     public NodeNetworkConfigurationInitializer(
         IAggregatorConfiguration configuration,
         INetworkConfigurationReader networkConfigurationReader,
-        INetworkConfigurationProvider networkConfigurationProvider
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ILogger<NodeNetworkConfigurationInitializer> logger
     )
     {
         _configuration = configuration;
         _networkConfigurationReader = networkConfigurationReader;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _logger = logger;
     }
 
     public async Task Initialize(CancellationToken token)
@@ -101,12 +105,17 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
         }
 
         await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(
-            MapNetworkConfigurationToNetworkDetails(networkConfiguration),
+            MapNetworkConfigurationResponse(networkConfiguration),
             token
+        );
+
+        _logger.LogInformation(
+            "The node has network name {NodeNetworkName}, with matching config to db ledger and/or any other nodes",
+            networkConfiguration.NetworkIdentifier.Network
         );
     }
 
-    private static NetworkConfiguration MapNetworkConfigurationToNetworkDetails(
+    private static NetworkConfiguration MapNetworkConfigurationResponse(
         NetworkConfigurationResponse networkConfiguration
     )
     {

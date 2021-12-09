@@ -71,19 +71,19 @@ namespace Common.Database;
 
 public static class ConnectionHelpers
 {
-    public static async Task PerformScopedDbAction<TContext>(IServiceProvider services, Func<ILogger, DbContext, Task> dbAction)
+    public static async Task PerformScopedDbAction<TContext>(IServiceProvider services, Func<IServiceScope, ILogger, DbContext, Task> dbAction)
         where TContext : DbContext
     {
         using var scope = services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<TContext>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
-        await dbAction(logger, dbContext);
+        await dbAction(scope, logger, dbContext);
     }
 
     public static async Task MigrateWithRetry<TContext>(IServiceProvider services, int maxWaitForDbMs)
         where TContext : DbContext
     {
-        await PerformScopedDbAction<TContext>(services, async (logger, dbContext) =>
+        await PerformScopedDbAction<TContext>(services, async (_, logger, dbContext) =>
         {
             await TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
         });
@@ -124,7 +124,7 @@ public static class ConnectionHelpers
     public static async Task TryWaitForExistingDb<TContext>(IServiceProvider services, int maxWaitForDbMs)
         where TContext : DbContext
     {
-        await PerformScopedDbAction<TContext>(services, async (logger, dbContext) =>
+        await PerformScopedDbAction<TContext>(services, async (_, logger, dbContext) =>
         {
             await TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
         });

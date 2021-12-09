@@ -74,7 +74,7 @@ public interface INetworkConfigurationProvider
 {
     Task SetNetworkConfigurationOrAssertMatching(NetworkConfiguration inputNetworkConfiguration, CancellationToken token);
 
-    Task EnsureNetworkConfigurationLoadedFromDatabase(NetworkConfiguration networkConfiguration, CancellationToken token);
+    Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default);
 
     Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token);
 
@@ -95,6 +95,7 @@ public interface INetworkConfigurationProvider
 public class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly ILogger<NetworkConfigurationProvider> _logger;
 
     private readonly object _writeLock = new();
     private CapturedConfig? _capturedConfig;
@@ -105,9 +106,13 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
         NetworkIdentifier NetworkIdentifier
     );
 
-    public NetworkConfigurationProvider(IDbContextFactory<AggregatorDbContext> dbContextFactory)
+    public NetworkConfigurationProvider(
+        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        ILogger<NetworkConfigurationProvider> logger
+    )
     {
         _dbContextFactory = dbContextFactory;
+        _logger = logger;
     }
 
     public async Task SetNetworkConfigurationOrAssertMatching(NetworkConfiguration inputNetworkConfiguration, CancellationToken token)
@@ -129,15 +134,26 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
         }
     }
 
-    public async Task EnsureNetworkConfigurationLoadedFromDatabase(NetworkConfiguration networkConfiguration, CancellationToken token)
+    public async Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(
+        CancellationToken token = default
+    )
     {
         var currentConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
-        if (currentConfiguration == null)
+        if (currentConfiguration != null)
         {
-            throw new Exception("Can't set current configuration from database as it's not there");
+            EnsureNetworkConfigurationCaptured(currentConfiguration);
+
+            _logger.LogInformation(
+                "Network configuration for network {NetworkName} loaded from database",
+                currentConfiguration.NetworkDefinition.NetworkName
+            );
+
+            return currentConfiguration.NetworkDefinition.NetworkName;
         }
 
-        EnsureNetworkConfigurationCaptured(networkConfiguration);
+        _logger.LogInformation("Network configuration not loaded from database (db ledger likely empty)");
+
+        return null;
     }
 
     public async Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token)
