@@ -83,13 +83,13 @@ public class RootController : ControllerBase
     [HttpGet("")]
     public JsonResult GetRootResponse()
     {
-        var healthReport = _systemStatusService.GetHealthReport();
+        var healthReport = _systemStatusService.GenerateHealthReport();
         return new JsonResult(new
         {
             docs = "https://docs.radixdlt.com",
             repo = "https://github.com/radixdlt/radixdlt-network-gateway",
             version = _configuration.GetValue<string>("DataAggregatorVersion") ?? "UNKNOWN",
-            health = healthReport,
+            ledger_commit_health = healthReport,
         }) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
     }
 }

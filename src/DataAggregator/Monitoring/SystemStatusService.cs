@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger;
 using Common.Extensions;
 using DataAggregator.GlobalServices;
 using DataAggregator.LedgerExtension;
@@ -76,7 +75,9 @@ public interface ISystemStatusService
 
     void RecordTopOfLedger(TransactionSummary topOfLedger);
 
-    HealthReport GetHealthReport();
+    bool IsPrimary();
+
+    HealthReport GenerateHealthReport();
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
@@ -85,18 +86,22 @@ public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUp
 public class SystemStatusService : ISystemStatusService
 {
     private static readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
+    private static readonly bool _isPrimary = true;
 
     private static readonly Counter _committedTransactions = Metrics
         .CreateCounter("ledger_committed_transactions_total", "Number of committed transactions.");
 
+    private static readonly Gauge _ledgerLastCommitTimestamp = Metrics
+        .CreateGauge("ledger_last_commit_timestamp_seconds", "Number of seconds the DB ledger is behind the present.");
+
     private static readonly Gauge _ledgerStateVersion = Metrics
-        .CreateGauge("ledger_state_version", "The state version of the top of the DB ledger.");
+        .CreateGauge("ledger_tip_state_version", "The state version of the top of the DB ledger.");
 
     private static readonly Gauge _ledgerUnixTimestamp = Metrics
-        .CreateGauge("ledger_unix_timestamp_seconds", "Unix timestamp of the top of the committed DB ledger.");
+        .CreateGauge("ledger_tip_unix_timestamp_seconds", "Unix timestamp of the top of the committed DB ledger.");
 
     private static readonly Gauge _ledgerSecondsBehind = Metrics
-        .CreateGauge("ledger_behind_present_seconds", "Number of seconds the DB ledger is behind the present.");
+        .CreateGauge("ledger_tip_behind_at_last_commit_seconds", "Number of seconds the DB ledger was behind the present time (at the last time transactions were committed).");
 
     private readonly IConfiguration _configuration;
 
@@ -125,7 +130,12 @@ public class SystemStatusService : ISystemStatusService
         _ledgerSecondsBehind.Set(topOfLedger.NormalizedTimestamp.GetTimeAgo().TotalSeconds);
     }
 
-    public HealthReport GetHealthReport()
+    public bool IsPrimary()
+    {
+        return _isPrimary;
+    }
+
+    public HealthReport GenerateHealthReport()
     {
         if (InStartupGracePeriod())
         {

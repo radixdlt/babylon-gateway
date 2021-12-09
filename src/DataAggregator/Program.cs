@@ -67,6 +67,7 @@
 
 using Common.Database;
 using DataAggregator.DependencyInjection;
+using DataAggregator.Monitoring;
 using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -116,6 +117,7 @@ var servicesBuilder = builder.Services;
 servicesBuilder.AddControllers();
 
 servicesBuilder.AddHealthChecks()
+    .AddCheck<AggregatorHealthCheck>("aggregator_health_check")
     .AddDbContextCheck<AggregatorDbContext>()
     .ForwardToPrometheus();
 
@@ -124,6 +126,9 @@ var services = app.Services;
 
 var configuration = services.GetRequiredService<IConfiguration>();
 var programLogger = services.GetRequiredService<ILogger<Program>>();
+
+// https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-6.0
+app.MapHealthChecks("/health");
 
 var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
 
@@ -159,10 +164,10 @@ await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, asy
     logger.LogInformation("Database migrations (if required) were completed");
 });
 
-app.MapControllers(); // HealthCheck controllers - mapped to port 80 by default in prod
+app.MapControllers(); // Root controllers - mapped to port 80 by default in prod
 StartMetricServer();
 
-await app.RunAsync();
+await app.RunAsync(); // Health and Root controller on default port
 
 /* Methods */
 
@@ -171,7 +176,7 @@ void StartMetricServer()
     var metricPort = configuration.GetValue<int>("PrometheusMetricsPort");
     if (metricPort != 0)
     {
-        programLogger.LogInformation("Starting metrics server on port {MetricPort}", metricPort);
+        programLogger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", metricPort);
         new KestrelMetricServer(port: metricPort).Start();
     }
     else

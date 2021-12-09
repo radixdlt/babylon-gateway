@@ -62,28 +62,64 @@
  * permissions under this License.
  */
 
-using DataAggregator.Monitoring;
-using Microsoft.AspNetCore.Mvc;
+using Common.Utilities;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Prometheus;
 
-namespace DataAggregator.Controllers;
+namespace DataAggregator.Monitoring;
 
-[ApiController]
-[Route("")]
-public class HealthCheckController : ControllerBase
+public class AggregatorHealthCheck : IHealthCheck
 {
-    private readonly ISystemStatusService _systemStatusService;
+    private static readonly Gauge _aggregatorIsUnhealthy = Metrics
+        .CreateGauge("aggregator_is_unhealthy_info", "0 if the aggregator is healthy, 1 if it's unhealthy (at the last health check).");
 
-    public HealthCheckController(ISystemStatusService systemStatusService)
+    private static readonly Gauge _aggregatorIsPrimary = Metrics
+        .CreateGauge("aggregator_is_primary_info", "0 if the aggregator is not primary, 1 if it is the write primary (at the last health check).");
+
+    private static readonly Gauge _aggregatorIsUnhealthyPrimary = Metrics
+        .CreateGauge("aggregator_is_unhealthy_primary_info", "0 if the aggregator is not primary or healthy, 1 if it is the write primary and unhealthy (at the last health check).");
+
+    private static readonly LogLimiter _unhealthyLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
+
+    private readonly ISystemStatusService _systemStatusService;
+    private readonly ILogger<AggregatorHealthCheck> _logger;
+
+    public AggregatorHealthCheck(ISystemStatusService systemStatusService, ILogger<AggregatorHealthCheck> logger)
     {
         _systemStatusService = systemStatusService;
+        _logger = logger;
     }
 
-    // We use https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-6.0 in API Gateway
-    // We can transition to that too by creating a custom ingestion health check
-    [HttpGet("health")]
-    public JsonResult GetHealthCheckResponse()
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        var healthReport = _systemStatusService.GetHealthReport();
-        return new JsonResult(healthReport) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
+        var healthReport = _systemStatusService.GenerateHealthReport();
+        RecordHealthCheck(healthReport.IsHealthy);
+        if (healthReport.IsHealthy)
+        {
+            _logger.LogTrace("Aggregator ledger commit status checked - status is healthy"); // Checked every 30 seconds by default
+        }
+        else
+        {
+            _logger.Log(
+                _unhealthyLogLimiter.GetLogLevel(),
+                "Aggregator ledger commit status checked - status is unhealthy: {Reason}",
+                healthReport.Reason
+            );
+        }
+
+        return Task.FromResult(
+            healthReport.IsHealthy
+            ? HealthCheckResult.Healthy(healthReport.Reason)
+            : HealthCheckResult.Unhealthy(healthReport.Reason)
+        );
+    }
+
+    private void RecordHealthCheck(bool isHealthy)
+    {
+        var isPrimary = _systemStatusService.IsPrimary();
+
+        _aggregatorIsUnhealthy.Set(!isHealthy ? 1 : 0);
+        _aggregatorIsPrimary.Set(isPrimary ? 1 : 0);
+        _aggregatorIsUnhealthyPrimary.Set(!isHealthy && isPrimary ? 1 : 0);
     }
 }
