@@ -124,8 +124,15 @@ for f in `find $dummyApiDirectory -name '*.cs'`; do
     mv $f.out $f
     echo "$f - Performed BaseValidate fix to source code"
   fi
+  if (grep -q "long EpochUnlock" $f) && [[ $f != *"/obj/"* ]]; then
+    awk '{sub(/long EpochUnlock/,"long? EpochUnlock"); print}' $f > $f.out
+    mv $f.out $f
+    awk '{sub(/long epochUnlock = default\(long\)/,"long? epochUnlock = default(long?)"); print}' $f > $f.out
+    mv $f.out $f
+    echo "$f - Performed long EpochUnlock fix to source code"
+  fi
 done
-# Code to help with testing:
+# Uncomment these lines to see the code, to debug:
 # code $dummyApiDirectory
 # exit 1
 

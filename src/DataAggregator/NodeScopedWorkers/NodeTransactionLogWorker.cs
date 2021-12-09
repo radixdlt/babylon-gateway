@@ -110,7 +110,6 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
     private FetchPipeline? _pipelinedFetch;
 
-
     // NB - So that we can get new transient dependencies each iteration, we create most dependencies
     //      from the service provider.
     public NodeTransactionLogWorker(

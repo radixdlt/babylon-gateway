@@ -23,7 +23,7 @@
       <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
 
       <!-- Generated / Local -->
-      <PackageVersion Include="RadixCoreApi.Generated" Version="0.9.8" />
+      <PackageVersion Include="RadixCoreApi.Generated" Version="0.9.9" />
       <PackageVersion Include="RadixGatewayApi.Generated" Version="1.0.6" />
 
     <!-- NON-PRODUCTION DEPENDENCIES -->
