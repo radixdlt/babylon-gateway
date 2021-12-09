@@ -106,7 +106,7 @@ public class CoreApiHandler : ICoreApiHandler
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiProvider _coreApiProvider;
 
-    public CoreApiHandler(INetworkGatewayConfiguration configuration, INetworkConfigurationProvider networkConfigurationProvider, HttpClient httpClient)
+    public CoreApiHandler(IGatewayApiConfiguration configuration, INetworkConfigurationProvider networkConfigurationProvider, HttpClient httpClient)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _coreApiProvider = ChooseCoreApiProvider(configuration, httpClient);
@@ -229,7 +229,7 @@ public class CoreApiHandler : ICoreApiHandler
         }
     }
 
-    private static ICoreApiProvider ChooseCoreApiProvider(INetworkGatewayConfiguration configuration, HttpClient httpClient)
+    private static ICoreApiProvider ChooseCoreApiProvider(IGatewayApiConfiguration configuration, HttpClient httpClient)
     {
         var chosenNode = configuration.GetCoreNodes()
             .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))

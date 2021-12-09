@@ -86,12 +86,11 @@ public class DefaultKernel
         // Request scoped services
         AddRequestScopedServices(services);
         AddCoreApiServices(services);
-        AddFallbackApiServices(services);
     }
 
     private void AddGlobalScopedServices(IServiceCollection services)
     {
-        services.AddSingleton<INetworkGatewayConfiguration, NetworkGatewayConfiguration>();
+        services.AddSingleton<IGatewayApiConfiguration, GatewayApiConfiguration>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<IValidations, Validations>();
         services.AddSingleton<IExceptionHandler, ExceptionHandler>();
@@ -119,19 +118,6 @@ public class DefaultKernel
                 serviceProvider,
                 "DisableCoreApiHttpsCertificateChecks",
                 "CoreApiHttpProxyAddress"
-            ));
-    }
-
-    private void AddFallbackApiServices(IServiceCollection services)
-    {
-        // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
-        // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        services.AddHttpClient<IFallbackGatewayApiProvider, FallbackGatewayApiProvider>()
-            .UseHttpClientMetrics()
-            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
-                serviceProvider,
-                "DisableFallbackGatewayApiHttpsCertificateChecks",
-                "FallbackGatewayApiHttpProxyAddress"
             ));
     }
 

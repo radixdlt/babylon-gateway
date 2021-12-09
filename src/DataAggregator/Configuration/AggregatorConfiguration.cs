@@ -87,10 +87,17 @@ public class AggregatorConfiguration : IAggregatorConfiguration
 
     public List<NodeAppSettings> GetNodes()
     {
-        var nodesSection = _configuration.GetSection("Nodes");
+        var nodesSection = _configuration.GetSection("CoreApiNodes");
+
+        // Read from fallback to legacy Nodes section
         if (!nodesSection.Exists())
         {
-            throw new InvalidConfigurationException("appsettings.json requires a Nodes section");
+            nodesSection = _configuration.GetSection("Nodes");
+        }
+
+        if (!nodesSection.Exists())
+        {
+            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
         }
 
         var nodesList = new List<NodeAppSettings>();
@@ -98,7 +105,7 @@ public class AggregatorConfiguration : IAggregatorConfiguration
 
         if (!nodesList.Any())
         {
-            _logger.LogWarning("appsettings.json Nodes section is empty");
+            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
         }
 
         nodesList.ForEach(n => n.AssertValid());

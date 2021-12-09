@@ -82,15 +82,13 @@ public class TransactionController : ControllerBase
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IFallbackGatewayApiProvider _fallbackGatewayApiProvider;
 
     public TransactionController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
         IConstructionAndSubmissionService constructionAndSubmissionService,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IFallbackGatewayApiProvider fallbackGatewayApiProvider
+        INetworkConfigurationProvider networkConfigurationProvider
     )
     {
         _validations = validations;

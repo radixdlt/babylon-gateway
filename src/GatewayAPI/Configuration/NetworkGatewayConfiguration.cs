@@ -67,21 +67,19 @@ using GatewayAPI.Configuration.Models;
 
 namespace GatewayAPI.Configuration;
 
-public interface INetworkGatewayConfiguration
+public interface IGatewayApiConfiguration
 {
     List<CoreApiNode> GetCoreNodes();
-
-    List<FallbackGatewayApiNode> GetFallbackGatewayApiNodes();
 
     string GetNetworkName();
 }
 
-public class NetworkGatewayConfiguration : INetworkGatewayConfiguration
+public class GatewayApiConfiguration : IGatewayApiConfiguration
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<NetworkGatewayConfiguration> _logger;
+    private readonly ILogger<GatewayApiConfiguration> _logger;
 
-    public NetworkGatewayConfiguration(IConfiguration configuration, ILogger<NetworkGatewayConfiguration> logger)
+    public GatewayApiConfiguration(IConfiguration configuration, ILogger<GatewayApiConfiguration> logger)
     {
         _configuration = configuration;
         _logger = logger;
@@ -89,10 +87,11 @@ public class NetworkGatewayConfiguration : INetworkGatewayConfiguration
 
     public List<CoreApiNode> GetCoreNodes()
     {
-        var nodesSection = _configuration.GetSection("CoreApiNodes");
+        const string SectionName = "CoreApiNodes";
+        var nodesSection = _configuration.GetSection(SectionName);
         if (!nodesSection.Exists())
         {
-            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
+            throw new InvalidConfigurationException($"appsettings.json requires a {SectionName} section");
         }
 
         var nodesList = new List<CoreApiNode>();
@@ -100,27 +99,7 @@ public class NetworkGatewayConfiguration : INetworkGatewayConfiguration
 
         if (!nodesList.Any())
         {
-            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
-        }
-
-        nodesList.ForEach(n => n.AssertValid());
-        return nodesList;
-    }
-
-    public List<FallbackGatewayApiNode> GetFallbackGatewayApiNodes()
-    {
-        var nodesSection = _configuration.GetSection("FallbackGatewayApiNodes");
-        if (!nodesSection.Exists())
-        {
-            throw new InvalidConfigurationException("appsettings.json requires a FallbackGatewayApiNodes section");
-        }
-
-        var nodesList = new List<FallbackGatewayApiNode>();
-        nodesSection.Bind(nodesList);
-
-        if (!nodesList.Any())
-        {
-            _logger.LogWarning("appsettings.json FallbackGatewayApiNodes section is empty");
+            _logger.LogWarning($"appsettings.json {SectionName} section is empty");
         }
 
         nodesList.ForEach(n => n.AssertValid());

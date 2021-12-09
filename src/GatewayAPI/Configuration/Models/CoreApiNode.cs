@@ -102,12 +102,12 @@ public record CoreApiNode
     {
         if (string.IsNullOrEmpty(Name))
         {
-            throw new InvalidConfigurationException("A node's name cannot be empty");
+            throw new InvalidConfigurationException("A node's Name cannot be empty");
         }
 
         if (string.IsNullOrEmpty(CoreApiAddress))
         {
-            throw new InvalidConfigurationException("A node's address cannot be empty");
+            throw new InvalidConfigurationException("A node's CoreApiAddress cannot be empty");
         }
     }
 }

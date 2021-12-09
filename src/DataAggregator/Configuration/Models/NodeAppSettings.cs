@@ -93,10 +93,19 @@ public record NodeAppSettings
     public decimal TrustWeighting { get; set; } = 1;
 
     /// <summary>
-    /// If false, the node should not be used for indexing.
+    /// If false, the node should not be used.
+    /// </summary>
+    [ConfigurationKeyName("Enabled")]
+    public bool? ConfigEnabled { get; set; }
+
+    /// <summary>
+    /// If false, the node should not be used. [Deprecated].
     /// </summary>
     [ConfigurationKeyName("EnabledForIndexing")]
-    public bool EnabledForIndexing { get; set; } = false;
+    public bool? ConfigEnabledForIndexing { get; set; }
+
+    // Note -- this is to support the legacy EnabledForIndexing property
+    public bool Enabled => ConfigEnabled ?? ConfigEnabledForIndexing ?? false;
 
     public void AssertValid()
     {

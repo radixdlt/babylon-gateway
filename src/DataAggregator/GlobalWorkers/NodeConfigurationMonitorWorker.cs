@@ -105,7 +105,7 @@ public class NodeConfigurationMonitorWorker : LoopedWorkerBase
         var nodeConfiguration = _configuration.GetNodes();
 
         var enabledNodes = nodeConfiguration
-            .Where(n => n.EnabledForIndexing)
+            .Where(n => n.Enabled)
             /* TODO:NG-12 - Enable syncing from more than one node! */
             .Take(1)
             .ToList();
