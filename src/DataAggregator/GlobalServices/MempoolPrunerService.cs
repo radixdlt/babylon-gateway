@@ -62,42 +62,77 @@
  * permissions under this License.
  */
 
-namespace Common.Extensions;
+using Common.Database.Models.Mempool;
+using DataAggregator.Configuration;
+using DataAggregator.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
-public static class EnumerableExtensions
+using Core = RadixCoreApi.Generated.Model;
+
+namespace DataAggregator.GlobalServices;
+
+public interface IMempoolPrunerService
 {
-    public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    Task PruneMempool(CancellationToken token = default);
+}
+
+public class MempoolPrunerService : IMempoolPrunerService
+{
+    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly ILogger<MempoolPrunerService> _logger;
+
+    public MempoolPrunerService(
+        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IAggregatorConfiguration aggregatorConfiguration,
+        ILogger<MempoolPrunerService> logger
+    )
     {
-        var allItems = items.ToList();
-        if (allItems.Count == 0)
-        {
-            throw new ArgumentException("enumerable cannot be empty", nameof(items));
-        }
-
-        var totalWeighting = allItems.Sum(weightingSelector);
-        var randWeighting = Random.Shared.NextDouble() * totalWeighting;
-        double trackedWeighting = 0;
-        foreach (var item in allItems)
-        {
-            trackedWeighting += weightingSelector(item);
-            if (trackedWeighting >= randWeighting)
-            {
-                return item;
-            }
-        }
-
-        // Shouldn't happen - but let's do something sensible anyway
-        return allItems[0];
+        _dbContextFactory = dbContextFactory;
+        _aggregatorConfiguration = aggregatorConfiguration;
+        _logger = logger;
     }
 
-    private record ItemWithResult<TItem>(TItem Item, double Result);
-
-    public static List<TItem> GetWeightedRandomOrdering<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    public async Task PruneMempool(CancellationToken token = default)
     {
-        return items
-            .Select(item => new ItemWithResult<TItem>(item, Random.Shared.NextDouble() * weightingSelector(item)))
-            .OrderByDescending(x => x.Result)
-            .Select(x => x.Item)
-            .ToList();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
+        var times = _aggregatorConfiguration.GetMempoolTimeouts();
+
+        var transactionsToPrune = await dbContext.MempoolTransactions
+            .Where(mt =>
+                (
+                    /* For committed transactions, remove from the mempool if */
+                    mt.Status == MempoolTransactionStatus.Committed
+                    && mt.CommitTimestamp!.Value.AddSeconds(times.PruneCommittedAfterSeconds) < DateTime.UtcNow
+                )
+                ||
+                (
+                    /* For those submitted by this gateway, prune if it was submitted a while ago and was not seen in the mempool recently */
+                    mt.SubmittedByThisGateway
+                    && mt.LastSubmittedToGatewayTimestamp!.Value.AddMinutes(times.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds) < DateTime.UtcNow
+                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value.AddMinutes(times.PruneRequiresMissingFromMempoolForSeconds) < DateTime.UtcNow)
+                )
+                ||
+                (
+                    /* For those not submitted by this gateway, prune if it first appeared a while ago and was not seen in the mempool recently */
+                    !mt.SubmittedByThisGateway
+                    && mt.FirstSeenInMempoolTimestamp!.Value.AddMinutes(times.PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds) < DateTime.UtcNow
+                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value.AddMinutes(times.PruneRequiresMissingFromMempoolForSeconds) < DateTime.UtcNow)
+                )
+            )
+            .ToListAsync(token);
+
+        if (transactionsToPrune.Count > 0)
+        {
+            _logger.LogInformation(
+                "Pruning {PrunedCount} transactions from the mempool, of which {PrunedCommittedCount} were committed",
+                transactionsToPrune.Count,
+                transactionsToPrune.Count(t => t.Status == MempoolTransactionStatus.Committed)
+            );
+
+            dbContext.MempoolTransactions.RemoveRange(transactionsToPrune);
+            await dbContext.SaveChangesAsync(token);
+        }
     }
 }

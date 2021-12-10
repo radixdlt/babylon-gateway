@@ -165,7 +165,7 @@ public class CommonDbContext : DbContext
         configurationBuilder.Properties<ValidatorDataSubstateType>()
             .HaveConversion<ValidatorDataSubstateTypeValueConverter>();
 
-        configurationBuilder.Properties<MempoolTransactionSubmissionStatus>()
+        configurationBuilder.Properties<MempoolTransactionStatus>()
             .HaveConversion<MempoolTransactionSubmissionStatusValueConverter>();
 
         configurationBuilder.Properties<MempoolTransactionFailureReason>()

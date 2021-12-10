@@ -62,9 +62,6 @@
  * permissions under this License.
  */
 
-using System.Text;
-using System.Text.Json;
-
 namespace Common.Extensions;
 
 public static class DateTimeExtensions
@@ -97,6 +94,31 @@ public static class DateTimeExtensions
     public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan period)
     {
         return dateTime.GetTimeAgo().Duration() <= period;
+    }
+
+    public static bool WithinPeriodOfNow(this DateTime dateTime, TimeSpan period)
+    {
+        return dateTime.GetTimeAgo().Duration() <= period;
+    }
+
+    public static bool WithinPeriod(this DateTime? dateTime, TimeSpan period)
+    {
+        return dateTime != null && dateTime.Value.WithinPeriodOfNow(period);
+    }
+
+    public static bool NotWithinPeriod(this DateTime? dateTime, TimeSpan period)
+    {
+        return !dateTime.WithinPeriod(period);
+    }
+
+    public static DateTime LatestOf(DateTime a, DateTime b)
+    {
+        return a >= b ? a : b;
+    }
+
+    public static DateTime EarliestOf(DateTime a, DateTime b)
+    {
+        return a <= b ? a : b;
     }
 
     public static string FormatSecondsHumanReadable(this TimeSpan period)

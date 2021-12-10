@@ -65,10 +65,7 @@
 using Common.CoreCommunications;
 using Common.Database;
 using Common.Database.Models.Mempool;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
@@ -78,18 +75,21 @@ public interface ISubmissionTrackingService
 {
     Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
 
-    Task TrackSubmission(byte[] signedTransaction, byte[] transactionIdentifierHash, Core.ConstructionParseResponse parseResponse);
+    Task TrackInitialSubmission(
+        byte[] signedTransaction,
+        byte[] transactionIdentifierHash,
+        string submittedToNodeName,
+        Core.ConstructionParseResponse parseResponse
+    );
 }
 
 public class SubmissionTrackingService<T> : ISubmissionTrackingService
     where T : CommonDbContext
 {
-    private readonly ILogger<SubmissionTrackingService<T>> _logger;
     private readonly T _dbContext;
 
-    public SubmissionTrackingService(ILogger<SubmissionTrackingService<T>> logger, T dbContext)
+    public SubmissionTrackingService(T dbContext)
     {
-        _logger = logger;
         _dbContext = dbContext;
     }
 
@@ -100,7 +100,12 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
             .SingleOrDefaultAsync();
     }
 
-    public async Task TrackSubmission(byte[] signedTransaction, byte[] transactionIdentifierHash, Core.ConstructionParseResponse parseResponse)
+    public async Task TrackInitialSubmission(
+        byte[] signedTransaction,
+        byte[] transactionIdentifierHash,
+        string submittedToNodeName,
+        Core.ConstructionParseResponse parseResponse
+    )
     {
         var submittedTimestamp = DateTime.UtcNow;
         var mempoolTransaction = new MempoolTransaction
@@ -108,9 +113,12 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
             TransactionIdentifierHash = transactionIdentifierHash,
             Payload = signedTransaction,
             SubmittedByThisGateway = true,
-            SubmittedTimestamp = submittedTimestamp,
+            FirstSubmittedToGatewayTimestamp = submittedTimestamp,
+            LastSubmittedToGatewayTimestamp = submittedTimestamp,
+            LastSubmittedToNodeTimestamp = submittedTimestamp,
+            LastSubmittedToNodeName = submittedToNodeName,
             TransactionsContents = ParsedTransactionMapper.MapToGatewayTransactionContents(parseResponse),
-            SubmissionStatus = MempoolTransactionSubmissionStatus.Pending,
+            Status = MempoolTransactionStatus.InNodeMempool,
         };
 
         // https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
@@ -118,8 +126,14 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
             .Upsert(mempoolTransaction)
             .WhenMatched((dbTxn, newTxn) => new MempoolTransaction
             {
-                SubmittedTimestamp = dbTxn.SubmittedTimestamp ?? newTxn.SubmittedTimestamp,
-                /* All other properties follow newTxn - including MempoolTransactionSubmissionStatus.Pending - which allows a transaction to be re-committed */
+                /*
+                 * Allow a transaction which previously was dropped to be resubmitted from fresh
+                 *  ie we reset FirstSubmittedTimestamp and Status
+                 */
+                SubmittedByThisGateway = newTxn.SubmittedByThisGateway,
+                LastSubmittedToGatewayTimestamp = newTxn.FirstSubmittedToGatewayTimestamp,
+                LastSubmittedToNodeTimestamp = newTxn.LastSubmittedToNodeTimestamp,
+                Status = MempoolTransactionStatus.InNodeMempool,
             })
             .RunAsync();
     }

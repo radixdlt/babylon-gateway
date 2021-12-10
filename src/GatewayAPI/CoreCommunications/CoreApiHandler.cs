@@ -62,24 +62,21 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Exceptions;
 using Common.Extensions;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
+using GatewayAPI.Configuration.Models;
 using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
-using Newtonsoft.Json;
 using RadixCoreApi.Generated.Client;
 using RadixCoreApi.Generated.Model;
 using BelowMinimumStakeError = RadixCoreApi.Generated.Model.BelowMinimumStakeError;
 using Gateway = RadixGatewayApi.Generated.Model;
-using InternalServerError = RadixCoreApi.Generated.Model.InternalServerError;
 using InvalidPublicKeyError = RadixCoreApi.Generated.Model.InvalidPublicKeyError;
-using InvalidSignatureError = RadixCoreApi.Generated.Model.InvalidSignatureError;
-using InvalidTransactionError = RadixCoreApi.Generated.Model.InvalidTransactionError;
 using MessageTooLongError = RadixCoreApi.Generated.Model.MessageTooLongError;
 using NetworkIdentifier = RadixCoreApi.Generated.Model.NetworkIdentifier;
-using NetworkNotSupportedError = RadixCoreApi.Generated.Model.NetworkNotSupportedError;
 using TransactionNotFoundError = RadixCoreApi.Generated.Model.TransactionNotFoundError;
 
 namespace GatewayAPI.CoreCommunications;
@@ -87,6 +84,8 @@ namespace GatewayAPI.CoreCommunications;
 public interface ICoreApiHandler
 {
     NetworkIdentifier GetNetworkIdentifier();
+
+    CoreApiNode GetCoreNodeConnectedTo();
 
     Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
 
@@ -116,6 +115,11 @@ public class CoreApiHandler : ICoreApiHandler
     public NetworkIdentifier GetNetworkIdentifier()
     {
         return new NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
+    }
+
+    public CoreApiNode GetCoreNodeConnectedTo()
+    {
+        return _coreApiProvider.CoreApiNode;
     }
 
     public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
@@ -151,76 +155,53 @@ public class CoreApiHandler : ICoreApiHandler
         }
         catch (ApiException apiException)
         {
-            var coreError = ExtractUpstreamGatewayErrorResponse(apiException.ErrorContent?.ToString());
-            if (coreError == null)
+            var exceptionToThrow = ExtractExceptionToThrow(apiException);
+
+            if (exceptionToThrow == null)
             {
-                throw;
+                throw; // Throw unwrapped exception
             }
 
-            // General rules here:
-            // * If the error shouldn't happen / shouldn't be handled => use null (to rethrow the apiException)
-            //   most errors fall into this category - because we shouldn't be sending invalid requests upstream!
-            // * If the error is definitely a client error => map straight to the corresponding client error
-            // * If the error doesn't have enough information, or we need to handle it specially,
-            //   (or we may not wish to handle it at all) wrap it so that we can catch is as a typed error further up the call stack.
-            _ = coreError.Details switch
-            {
-                AboveMaximumValidatorFeeIncreaseError error => throw InvalidRequestException.FromOtherError(
-                    $"You attempted to increase validator fee by {error.AttemptedValidatorFeeIncrease}, larger than the maximum of {error.MaximumValidatorFeeIncrease}"
-                ),
-                BelowMinimumStakeError error => throw new BelowMinimumStakeException(
-                    requestedAmount: error.MinimumStake.AsGatewayTokenAmount(),
-                    minimumAmount: error.MinimumStake.AsGatewayTokenAmount()
-                ), // Should have already detected this, but rethrow anyway
-                DataObjectNotSupportedByEntityError error => throw WrappedCoreApiException.Of(apiException, error),
-                FeeConstructionError error => throw new CouldNotConstructFeesException(error.Attempts),
-                InternalServerError error => throw WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { HasUndefinedBehaviour = true }),
-                InvalidAddressError error => throw WrappedCoreApiException.Of(apiException, error), // Not specific enough - rely on Gateway handling
-                InvalidDataObjectError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidFeePayerEntityError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidHexError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidJsonError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidPartialStateIdentifierError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidPublicKeyError error => throw new InvalidPublicKeyException(
-                    new Gateway.PublicKey(error.InvalidPublicKey.Hex),
-                    "Invalid public key"
-                ),
-                InvalidSignatureError error => throw WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }), // Handle in ConstructionService when we have the required data to construct the full exception
-                InvalidSubEntityError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidTransactionError error => throw WrappedCoreApiException.Of(apiException, error),
-                InvalidTransactionHashError error => throw WrappedCoreApiException.Of(apiException, error),
-                MessageTooLongError error => throw new MessageTooLongException(error.MaximumMessageLength, error.AttemptedMessageLength),
-                NetworkNotSupportedError error => throw WrappedCoreApiException.Of(apiException, error),
-                NotEnoughResourcesError error => throw WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService
-                NotValidatorOwnerError error => throw WrappedCoreApiException.Of(apiException, error), // Not specific enough - rely on Gateway handling
-                PublicKeyNotSupportedError error => throw new InvalidPublicKeyException(
-                    new Gateway.PublicKey(error.UnsupportedPublicKey.Hex),
-                    "Public key is not supported"
-                ),
-                ResourceDepositOperationNotSupportedByEntityError error => throw WrappedCoreApiException.Of(apiException, error),
-                ResourceWithdrawOperationNotSupportedByEntityError error => throw WrappedCoreApiException.Of(apiException, error),
-                StateIdentifierNotFoundError error => throw WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-                SubstateDependencyNotFoundError error => throw WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-                TransactionNotFoundError error => throw new TransactionNotFoundException(
-                    new Gateway.TransactionIdentifier(error.TransactionIdentifier.Hash)
-                ),
-                _ => true,
-            };
-
-            throw; // Rethrow unknown error to be handled as an unhandled Core API exception in the ExceptionHandler
+            throw exceptionToThrow;
         }
     }
 
-    private static UnexpectedError? ExtractUpstreamGatewayErrorResponse(string? upstreamErrorResponse)
+    private static Exception? ExtractExceptionToThrow(ApiException apiException)
     {
-        try
-        {
-            return string.IsNullOrWhiteSpace(upstreamErrorResponse) ? null : JsonConvert.DeserializeObject<UnexpectedError>(upstreamErrorResponse);
-        }
-        catch (Exception)
+        var wrappedCoreApiException = CoreApiErrorWrapper.ExtractWrappedCoreApiException(apiException);
+
+        if (wrappedCoreApiException == null)
         {
             return null;
         }
+
+        return wrappedCoreApiException switch
+        {
+            WrappedCoreApiException<AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
+                $"You attempted to increase validator fee by {ex.Error.AttemptedValidatorFeeIncrease}, larger than the maximum of {ex.Error.MaximumValidatorFeeIncrease}"
+            ),
+            WrappedCoreApiException<BelowMinimumStakeError> ex => new BelowMinimumStakeException(
+                requestedAmount: ex.Error.MinimumStake.AsGatewayTokenAmount(),
+                minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
+            ),
+            WrappedCoreApiException<FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
+            WrappedCoreApiException<InvalidPublicKeyError> ex => new InvalidPublicKeyException(
+                new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
+                "Invalid public key"
+            ),
+            WrappedCoreApiException<MessageTooLongError> ex => new MessageTooLongException(
+                ex.Error.MaximumMessageLength,
+                ex.Error.AttemptedMessageLength
+            ),
+            WrappedCoreApiException<PublicKeyNotSupportedError> ex => new InvalidPublicKeyException(
+                new Gateway.PublicKey(ex.Error.UnsupportedPublicKey.Hex),
+                "Public key is not supported"
+            ),
+            WrappedCoreApiException<TransactionNotFoundError> ex => new TransactionNotFoundException(
+                new Gateway.TransactionIdentifier(ex.Error.TransactionIdentifier.Hash)
+            ),
+            _ => wrappedCoreApiException,
+        };
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(IGatewayApiConfiguration configuration, HttpClient httpClient)

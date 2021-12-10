@@ -349,6 +349,11 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             );
         }
 
-        await _submissionTrackingService.TrackSubmission(signedTransaction.Bytes, transactionIdentifierHash, parseResponse);
+        await _submissionTrackingService.TrackInitialSubmission(
+            signedTransaction.Bytes,
+            transactionIdentifierHash,
+            _coreApiHandler.GetCoreNodeConnectedTo().Name,
+            parseResponse
+        );
     }
 }

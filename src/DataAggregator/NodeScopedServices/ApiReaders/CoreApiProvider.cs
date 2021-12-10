@@ -69,14 +69,22 @@ namespace DataAggregator.NodeScopedServices.ApiReaders;
 
 public interface ICoreApiProvider
 {
+    ConstructionApi ConstructionApi { get; }
+
     TransactionsApi TransactionsApi { get; }
+
+    MempoolApi MempoolApi { get; }
 
     NetworkApi NetworkApi { get; }
 }
 
 public class CoreApiProvider : ICoreApiProvider
 {
+    public ConstructionApi ConstructionApi { get; }
+
     public TransactionsApi TransactionsApi { get; }
+
+    public MempoolApi MempoolApi { get; }
 
     public NetworkApi NetworkApi { get; }
 
@@ -87,7 +95,9 @@ public class CoreApiProvider : ICoreApiProvider
             httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader);
         }
 
+        ConstructionApi = new ConstructionApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
         TransactionsApi = new TransactionsApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
+        MempoolApi = new MempoolApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
         NetworkApi = new NetworkApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
     }
 }

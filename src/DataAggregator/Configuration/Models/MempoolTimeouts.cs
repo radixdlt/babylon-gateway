@@ -62,42 +62,37 @@
  * permissions under this License.
  */
 
-namespace Common.Extensions;
+namespace DataAggregator.Configuration.Models;
 
-public static class EnumerableExtensions
+public record MempoolTimeouts
 {
-    public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
-    {
-        var allItems = items.ToList();
-        if (allItems.Count == 0)
-        {
-            throw new ArgumentException("enumerable cannot be empty", nameof(items));
-        }
+    [ConfigurationKeyName("PruneCommittedAfterSeconds")]
+    public long PruneCommittedAfterSeconds { get; set; } = 10;
 
-        var totalWeighting = allItems.Sum(weightingSelector);
-        var randWeighting = Random.Shared.NextDouble() * totalWeighting;
-        double trackedWeighting = 0;
-        foreach (var item in allItems)
-        {
-            trackedWeighting += weightingSelector(item);
-            if (trackedWeighting >= randWeighting)
-            {
-                return item;
-            }
-        }
+    public TimeSpan PruneCommittedAfter => TimeSpan.FromSeconds(PruneCommittedAfterSeconds);
 
-        // Shouldn't happen - but let's do something sensible anyway
-        return allItems[0];
-    }
+    [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
+    public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
 
-    private record ItemWithResult<TItem>(TItem Item, double Result);
+    public TimeSpan MinDelayBetweenResubmissions => TimeSpan.FromSeconds(MinDelayBetweenResubmissionsSeconds);
 
-    public static List<TItem> GetWeightedRandomOrdering<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
-    {
-        return items
-            .Select(item => new ItemWithResult<TItem>(item, Random.Shared.NextDouble() * weightingSelector(item)))
-            .OrderByDescending(x => x.Result)
-            .Select(x => x.Item)
-            .ToList();
-    }
+    [ConfigurationKeyName("StopResubmittingAfterSeconds")]
+    public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
+
+    public TimeSpan StopResubmittingAfter => TimeSpan.FromSeconds(StopResubmittingAfterSeconds);
+
+    [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds")]
+    public long PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
+
+    public TimeSpan PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
+
+    [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds")]
+    public long PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
+
+    public TimeSpan PruneMissingTransactionsAfterTimeSinceFirstSeen => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
+
+    [ConfigurationKeyName("PruneRequiresMissingFromMempoolForSeconds")]
+    public long PruneRequiresMissingFromMempoolForSeconds { get; set; } = 60;
+
+    public TimeSpan PruneRequiresMissingFromMempoolFor => TimeSpan.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
 }

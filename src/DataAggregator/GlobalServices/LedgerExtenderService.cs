@@ -80,13 +80,16 @@ public interface ILedgerExtenderService
 public record PreparationForLedgerExtensionReport(
     TransactionSummary ParentSummary,
     long RawTxnPersistenceMs,
-    int RawTxnUpsertTouchedRecords
+    int RawTxnUpsertTouchedRecords,
+    long MempoolTransactionUpdateMs,
+    int MempoolTransactionsTouchedRecords
 );
 
 public record CommitTransactionsReport(
     int TransactionsCommittedCount,
     TransactionSummary FinalTransaction,
     long RawTxnPersistenceMs,
+    long MempoolTransactionUpdateMs,
     long TransactionContentHandlingMs,
     long DbDependenciesLoadingMs,
     int TransactionContentDbActionsCount,
@@ -147,12 +150,13 @@ public class LedgerExtenderService : ILedgerExtenderService
             transactions.Count,
             bulkTransactionCommitReport.FinalTransaction,
             preparationReport.RawTxnPersistenceMs,
+            preparationReport.MempoolTransactionUpdateMs,
             bulkTransactionCommitReport.TransactionContentHandlingMs,
             bulkTransactionCommitReport.DbDependenciesLoadingMs,
             bulkTransactionCommitReport.TransactionContentDbActionsCount,
             bulkTransactionCommitReport.LocalDbContextActionsMs,
             dbPersistenceMs,
-            preparationReport.RawTxnUpsertTouchedRecords + preparationEntriesTouched + ledgerExtensionEntriesWritten
+            preparationReport.RawTxnUpsertTouchedRecords + preparationReport.MempoolTransactionsTouchedRecords + preparationEntriesTouched + ledgerExtensionEntriesWritten
         );
     }
 
@@ -186,10 +190,20 @@ public class LedgerExtenderService : ILedgerExtenderService
             )
         );
 
+        var (mempoolTransactionsTouched, mempoolTransactionUpdateMs) = await CodeStopwatch.TimeInMs(
+            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(
+                dbContext,
+                rawTransactions,
+                token
+            )
+        );
+
         return new PreparationForLedgerExtensionReport(
             parentSummary,
             rawTransactionCommitMs,
-            rawTransactionsTouched
+            rawTransactionsTouched,
+            mempoolTransactionUpdateMs,
+            mempoolTransactionsTouched
         );
     }
 

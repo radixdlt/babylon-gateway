@@ -70,22 +70,23 @@ using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace Common.Database.Models.Mempool;
 
-public enum MempoolTransactionSubmissionStatus
+public enum MempoolTransactionStatus
 {
-    Pending,
-    Missing, // A transaction submitted by someone else which is no longer in the mempool
-    Failed,
-    Committed,
+    InNodeMempool, // A transaction which appears in at least one mempool at the last update
+    Missing,       // A transaction which is no longer in any mempool
+    Failed,        // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (eg substate clash)
+    Committed,     // A transaction which we know got committed to the ledger
+                   // NOTE due to race conditions, it might be possible for a transaction to end up Pending/Missing even it's committed
 }
 
-public class MempoolTransactionSubmissionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionSubmissionStatus>
+public class MempoolTransactionSubmissionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
 {
-    private static readonly Dictionary<MempoolTransactionSubmissionStatus, string> _conversion = new()
+    private static readonly Dictionary<MempoolTransactionStatus, string> _conversion = new()
     {
-        { MempoolTransactionSubmissionStatus.Pending, "PENDING" },
-        { MempoolTransactionSubmissionStatus.Missing, "MISSING" },
-        { MempoolTransactionSubmissionStatus.Failed, "FAILED" },
-        { MempoolTransactionSubmissionStatus.Committed, "COMMITTED" },
+        { MempoolTransactionStatus.InNodeMempool, "IN_NODE_MEMPOOL" },
+        { MempoolTransactionStatus.Missing, "MISSING" },
+        { MempoolTransactionStatus.Failed, "FAILED" },
+        { MempoolTransactionStatus.Committed, "COMMITTED" },
     };
 
     public MempoolTransactionSubmissionStatusValueConverter()
@@ -163,10 +164,28 @@ public class MempoolTransaction
     public bool SubmittedByThisGateway { get; set; }
 
     /// <summary>
-    /// The timestamp when the transaction was sucessfully submitted to a node through this gateway.
+    /// The timestamp when the transaction was initially submitted to a node through this gateway.
     /// </summary>
-    [Column("submitted_timestamp")]
-    public DateTime? SubmittedTimestamp { get; set; }
+    [Column("first_submitted_to_gateway_timestamp")]
+    public DateTime? FirstSubmittedToGatewayTimestamp { get; set; }
+
+    /// <summary>
+    /// The timestamp when the transaction was last submitted to a node.
+    /// </summary>
+    [Column("last_submitted_to_gateway_timestamp")]
+    public DateTime? LastSubmittedToGatewayTimestamp { get; set; }
+
+    /// <summary>
+    /// The timestamp when the transaction was last submitted to a node.
+    /// </summary>
+    [Column("last_submitted_to_node_timestamp")]
+    public DateTime? LastSubmittedToNodeTimestamp { get; set; }
+
+    /// <summary>
+    /// The timestamp when the transaction was last submitted to a node.
+    /// </summary>
+    [Column("last_submitted_to_node_name")]
+    public string? LastSubmittedToNodeName { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was first seen in a node's mempool.
@@ -180,12 +199,18 @@ public class MempoolTransaction
     [Column("last_seen_in_mempool_timestamp")]
     public DateTime? LastSeenInMempoolTimestamp { get; set; }
 
+    /// <summary>
+    /// The timestamp when the transaction was committed to the DB ledger.
+    /// </summary>
+    [Column("commit_timestamp")]
+    public DateTime? CommitTimestamp { get; set; }
+
     // https://www.npgsql.org/efcore/mapping/json.html?tabs=data-annotations%2Cpoco
     [Column("transaction_contents", TypeName="jsonb")]
     public GatewayTransactionContents TransactionsContents { get; set; }
 
     [Column("submission_status")]
-    public MempoolTransactionSubmissionStatus SubmissionStatus { get; set; }
+    public MempoolTransactionStatus Status { get; set; }
 
     [Column("submission_failure_reason")]
     public MempoolTransactionFailureReason? SubmissionFailureReason { get; set; }

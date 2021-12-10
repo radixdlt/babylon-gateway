@@ -62,42 +62,69 @@
  * permissions under this License.
  */
 
-namespace Common.Extensions;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-public static class EnumerableExtensions
+#nullable disable
+
+namespace DataAggregator.Migrations
 {
-    public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    public partial class UpdatesToMempoolTransactionsTable : Migration
     {
-        var allItems = items.ToList();
-        if (allItems.Count == 0)
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            throw new ArgumentException("enumerable cannot be empty", nameof(items));
+            migrationBuilder.RenameColumn(
+                name: "submitted_timestamp",
+                table: "mempool_transactions",
+                newName: "last_submitted_to_node_timestamp");
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "commit_timestamp",
+                table: "mempool_transactions",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "first_submitted_to_gateway_timestamp",
+                table: "mempool_transactions",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "last_submitted_to_gateway_timestamp",
+                table: "mempool_transactions",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "last_submitted_to_node_name",
+                table: "mempool_transactions",
+                type: "text",
+                nullable: true);
         }
 
-        var totalWeighting = allItems.Sum(weightingSelector);
-        var randWeighting = Random.Shared.NextDouble() * totalWeighting;
-        double trackedWeighting = 0;
-        foreach (var item in allItems)
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            trackedWeighting += weightingSelector(item);
-            if (trackedWeighting >= randWeighting)
-            {
-                return item;
-            }
+            migrationBuilder.DropColumn(
+                name: "commit_timestamp",
+                table: "mempool_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "first_submitted_to_gateway_timestamp",
+                table: "mempool_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "last_submitted_to_gateway_timestamp",
+                table: "mempool_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "last_submitted_to_node_name",
+                table: "mempool_transactions");
+
+            migrationBuilder.RenameColumn(
+                name: "last_submitted_to_node_timestamp",
+                table: "mempool_transactions",
+                newName: "submitted_timestamp");
         }
-
-        // Shouldn't happen - but let's do something sensible anyway
-        return allItems[0];
-    }
-
-    private record ItemWithResult<TItem>(TItem Item, double Result);
-
-    public static List<TItem> GetWeightedRandomOrdering<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
-    {
-        return items
-            .Select(item => new ItemWithResult<TItem>(item, Random.Shared.NextDouble() * weightingSelector(item)))
-            .OrderByDescending(x => x.Result)
-            .Select(x => x.Item)
-            .ToList();
     }
 }

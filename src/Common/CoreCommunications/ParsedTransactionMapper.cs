@@ -71,6 +71,16 @@ using Gateway = RadixGatewayApi.Generated.Model;
 
 public static class ParsedTransactionMapper
 {
+    public static GatewayTransactionContents MapToGatewayTransactionContents(Core.Transaction transaction)
+    {
+        return new GatewayTransactionContents
+        {
+            Actions = MapActions(transaction.OperationGroups),
+            FeePaidSubunits = transaction.Metadata.Fee.Value,
+            MessageHex = transaction.Metadata.Message,
+        };
+    }
+
     public static GatewayTransactionContents MapToGatewayTransactionContents(Core.ConstructionParseResponse parseResponse)
     {
         return new GatewayTransactionContents

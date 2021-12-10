@@ -120,6 +120,7 @@ public class SystemStatusService : ISystemStatusService
     {
         _lastTransactionCommitment = DateTimeOffset.UtcNow;
         _committedTransactions.Inc(committedTransactionReport.TransactionsCommittedCount);
+        _ledgerLastCommitTimestamp.Set(DateTime.UtcNow.GetUnixTimestampSeconds());
         RecordTopOfLedger(committedTransactionReport.FinalTransaction);
     }
 

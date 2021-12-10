@@ -70,11 +70,15 @@ namespace GatewayAPI.CoreCommunications;
 
 public interface ICoreApiProvider
 {
+    public CoreApiNode CoreApiNode { get; }
+
     ConstructionApi ConstructionApi { get; }
 }
 
 public class CoreApiProvider : ICoreApiProvider
 {
+    public CoreApiNode CoreApiNode { get; }
+
     public ConstructionApi ConstructionApi { get; }
 
     public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
@@ -84,6 +88,7 @@ public class CoreApiProvider : ICoreApiProvider
             httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);
         }
 
+        CoreApiNode = coreApiNode;
         ConstructionApi = new ConstructionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

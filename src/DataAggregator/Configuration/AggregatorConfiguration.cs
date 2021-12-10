@@ -72,6 +72,8 @@ public interface IAggregatorConfiguration
     List<NodeAppSettings> GetNodes();
 
     string GetNetworkName();
+
+    MempoolTimeouts GetMempoolTimeouts();
 }
 
 public class AggregatorConfiguration : IAggregatorConfiguration
@@ -110,6 +112,13 @@ public class AggregatorConfiguration : IAggregatorConfiguration
 
         nodesList.ForEach(n => n.AssertValid());
         return nodesList;
+    }
+
+    public MempoolTimeouts GetMempoolTimeouts()
+    {
+        var mempoolPruneTimeouts = new MempoolTimeouts();
+        _configuration.GetSection("MempoolPruneTimeouts").Bind(mempoolPruneTimeouts);
+        return mempoolPruneTimeouts;
     }
 
     public string GetNetworkName()

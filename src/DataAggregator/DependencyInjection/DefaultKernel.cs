@@ -101,11 +101,17 @@ public class DefaultKernel
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.AddSingleton<ISystemStatusService, SystemStatusService>();
+        services.AddSingleton<IMempoolTrackerService, MempoolTrackerService>();
+        services.AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>();
+        services.AddSingleton<IMempoolPrunerService, MempoolPrunerService>();
     }
 
     private void AddGlobalHostedServices(IServiceCollection services)
     {
         services.AddHostedService<NodeConfigurationMonitorWorker>();
+        services.AddHostedService<MempoolTrackerWorker>();
+        services.AddHostedService<MempoolResubmissionWorker>();
+        services.AddHostedService<MempoolPrunerWorker>();
     }
 
     private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
@@ -150,6 +156,7 @@ public class DefaultKernel
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolReaderWorker>();
     }
 
     private HttpClientHandler ConfigureHttpClientHandler(

@@ -67,7 +67,6 @@ using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.Monitoring;
-using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
@@ -183,8 +182,9 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             committedTransactionReport.TransactionContentDbActionsCount
         );
         _logger.LogInformation(
-            "[TimeSplitsInMs: RawTxnPersistence={RawTxnPersistenceMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},LocalDbContextActions={LocalDbContextActionsMs},DbPersistence={DbPersistanceMs}]",
+            "[TimeSplitsInMs: RawTxns={RawTxnPersistenceMs},Mempool={MempoolTransactionUpdateMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},LocalActionPlanning={LocalDbContextActionsMs},DbPersistence={DbPersistanceMs}]",
             committedTransactionReport.RawTxnPersistenceMs,
+            committedTransactionReport.MempoolTransactionUpdateMs,
             committedTransactionReport.TransactionContentHandlingMs,
             committedTransactionReport.DbDependenciesLoadingMs,
             committedTransactionReport.LocalDbContextActionsMs,

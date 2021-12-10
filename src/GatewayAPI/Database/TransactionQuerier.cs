@@ -185,17 +185,17 @@ public class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
-        var status = mempoolTransaction.SubmissionStatus switch
+        var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
-            MempoolTransactionSubmissionStatus.Committed => new Gateway.TransactionStatus(
+            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
                 mempoolTransaction.TransactionsContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
                 mempoolTransaction.TransactionsContents.LedgerStateVersion ?? 0
             ),
-            MempoolTransactionSubmissionStatus.Pending => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-            MempoolTransactionSubmissionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
-            MempoolTransactionSubmissionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            MempoolTransactionStatus.InNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
             _ => throw new ArgumentOutOfRangeException(),
         };
 

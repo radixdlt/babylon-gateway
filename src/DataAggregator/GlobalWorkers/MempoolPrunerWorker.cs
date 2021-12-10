@@ -62,42 +62,28 @@
  * permissions under this License.
  */
 
-namespace Common.Extensions;
+using DataAggregator.GlobalServices;
 
-public static class EnumerableExtensions
+namespace DataAggregator.GlobalWorkers;
+
+/// <summary>
+/// Responsible for keeping the db mempool pruned.
+/// </summary>
+public class MempoolPrunerWorker : LoopedWorkerBase
 {
-    public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    private readonly IMempoolPrunerService _mempoolPrunerService;
+
+    public MempoolPrunerWorker(
+        ILogger<MempoolPrunerWorker> logger,
+        IMempoolPrunerService mempoolPrunerService
+    )
+        : base(logger, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
     {
-        var allItems = items.ToList();
-        if (allItems.Count == 0)
-        {
-            throw new ArgumentException("enumerable cannot be empty", nameof(items));
-        }
-
-        var totalWeighting = allItems.Sum(weightingSelector);
-        var randWeighting = Random.Shared.NextDouble() * totalWeighting;
-        double trackedWeighting = 0;
-        foreach (var item in allItems)
-        {
-            trackedWeighting += weightingSelector(item);
-            if (trackedWeighting >= randWeighting)
-            {
-                return item;
-            }
-        }
-
-        // Shouldn't happen - but let's do something sensible anyway
-        return allItems[0];
+        _mempoolPrunerService = mempoolPrunerService;
     }
 
-    private record ItemWithResult<TItem>(TItem Item, double Result);
-
-    public static List<TItem> GetWeightedRandomOrdering<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    protected override async Task DoWork(CancellationToken stoppingToken)
     {
-        return items
-            .Select(item => new ItemWithResult<TItem>(item, Random.Shared.NextDouble() * weightingSelector(item)))
-            .OrderByDescending(x => x.Result)
-            .Select(x => x.Item)
-            .ToList();
+        await _mempoolPrunerService.PruneMempool(stoppingToken);
     }
 }

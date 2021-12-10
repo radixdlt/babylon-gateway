@@ -62,42 +62,35 @@
  * permissions under this License.
  */
 
-namespace Common.Extensions;
+using DataAggregator.GlobalServices;
 
-public static class EnumerableExtensions
+namespace DataAggregator.GlobalWorkers;
+
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public class MempoolTrackerWorker : LoopedWorkerBase
 {
-    public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    private readonly IMempoolTrackerService _mempoolTrackerService;
+
+    public MempoolTrackerWorker(
+        ILogger<MempoolTrackerWorker> logger,
+        IMempoolTrackerService mempoolTrackerService
+    )
+        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(60))
     {
-        var allItems = items.ToList();
-        if (allItems.Count == 0)
-        {
-            throw new ArgumentException("enumerable cannot be empty", nameof(items));
-        }
-
-        var totalWeighting = allItems.Sum(weightingSelector);
-        var randWeighting = Random.Shared.NextDouble() * totalWeighting;
-        double trackedWeighting = 0;
-        foreach (var item in allItems)
-        {
-            trackedWeighting += weightingSelector(item);
-            if (trackedWeighting >= randWeighting)
-            {
-                return item;
-            }
-        }
-
-        // Shouldn't happen - but let's do something sensible anyway
-        return allItems[0];
+        _mempoolTrackerService = mempoolTrackerService;
     }
 
-    private record ItemWithResult<TItem>(TItem Item, double Result);
-
-    public static List<TItem> GetWeightedRandomOrdering<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
+    protected override async Task OnStart(CancellationToken stoppingToken)
     {
-        return items
-            .Select(item => new ItemWithResult<TItem>(item, Random.Shared.NextDouble() * weightingSelector(item)))
-            .OrderByDescending(x => x.Result)
-            .Select(x => x.Item)
-            .ToList();
+        // Wait on start-up for nodes to load to allow some time for the nodes to populate their mempools
+        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+        await base.OnStart(stoppingToken);
+    }
+
+    protected override async Task DoWork(CancellationToken stoppingToken)
+    {
+        await _mempoolTrackerService.HandleMempoolChanges(stoppingToken);
     }
 }

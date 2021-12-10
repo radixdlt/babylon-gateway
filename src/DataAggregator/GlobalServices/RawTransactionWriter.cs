@@ -62,10 +62,9 @@
  * permissions under this License.
  */
 
-using Common.Database.Models;
 using Common.Database.Models.Ledger;
+using Common.Database.Models.Mempool;
 using DataAggregator.DependencyInjection;
-using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAggregator.GlobalServices;
@@ -73,6 +72,8 @@ namespace DataAggregator.GlobalServices;
 public interface IRawTransactionWriter
 {
     Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
+
+    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
@@ -83,5 +84,21 @@ public class RawTransactionWriter : IRawTransactionWriter
         return await context.RawTransactions
             .UpsertRange(rawTransactions)
             .RunAsync(token);
+    }
+
+    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
+    {
+        var ids = rawTransactions.Select(rt => rt.TransactionIdentifierHash).ToList();
+        var toUpdate = await context.MempoolTransactions
+            .Where(mt => ids.Contains(mt.TransactionIdentifierHash))
+            .ToListAsync(token);
+
+        foreach (var mempoolTransaction in toUpdate)
+        {
+            mempoolTransaction.CommitTimestamp = DateTime.UtcNow;
+            mempoolTransaction.Status = MempoolTransactionStatus.Committed;
+        }
+
+        return await context.SaveChangesAsync(token);
     }
 }

@@ -90,7 +90,7 @@ public abstract class LoopedWorkerBase : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTime.UtcNow.AsUtcIsoDateToSecondsForLogs());
+        await OnStart(stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -135,11 +135,17 @@ public abstract class LoopedWorkerBase : BackgroundService
         return timespan < TimeSpan.Zero ? TimeSpan.Zero : timespan;
     }
 
+    protected virtual Task OnStart(CancellationToken stoppingToken)
+    {
+        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTime.UtcNow.AsUtcIsoDateToSecondsForLogs());
+        return Task.CompletedTask;
+    }
+
     protected abstract Task DoWork(CancellationToken stoppingToken);
 
     protected virtual Task OnStop(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Stopping at: {Time}", DateTimeOffset.Now);
+        _logger.LogInformation("Stopping at: {Time}", DateTime.UtcNow.AsUtcIsoDateToSecondsForLogs());
         return Task.CompletedTask;
     }
 
