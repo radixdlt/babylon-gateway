@@ -63,6 +63,7 @@
  */
 
 using Common.Database.ValueConverters;
+using NodaTime;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -167,19 +168,19 @@ public class MempoolTransaction
     /// The timestamp when the transaction was initially submitted to a node through this gateway.
     /// </summary>
     [Column("first_submitted_to_gateway_timestamp")]
-    public DateTime? FirstSubmittedToGatewayTimestamp { get; set; }
+    public Instant? FirstSubmittedToGatewayTimestamp { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_gateway_timestamp")]
-    public DateTime? LastSubmittedToGatewayTimestamp { get; set; }
+    public Instant? LastSubmittedToGatewayTimestamp { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_node_timestamp")]
-    public DateTime? LastSubmittedToNodeTimestamp { get; set; }
+    public Instant? LastSubmittedToNodeTimestamp { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
@@ -191,19 +192,19 @@ public class MempoolTransaction
     /// The timestamp when the transaction was first seen in a node's mempool.
     /// </summary>
     [Column("first_seen_in_mempool_timestamp")]
-    public DateTime? FirstSeenInMempoolTimestamp { get; set; }
+    public Instant? FirstSeenInMempoolTimestamp { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was last seen in a node's mempool.
     /// </summary>
     [Column("last_seen_in_mempool_timestamp")]
-    public DateTime? LastSeenInMempoolTimestamp { get; set; }
+    public Instant? LastSeenInMempoolTimestamp { get; set; }
 
     /// <summary>
     /// The timestamp when the transaction was committed to the DB ledger.
     /// </summary>
     [Column("commit_timestamp")]
-    public DateTime? CommitTimestamp { get; set; }
+    public Instant? CommitTimestamp { get; set; }
 
     // https://www.npgsql.org/efcore/mapping/json.html?tabs=data-annotations%2Cpoco
     [Column("transaction_contents", TypeName="jsonb")]

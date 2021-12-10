@@ -62,40 +62,76 @@
  * permissions under this License.
  */
 
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+using Common.Database.Models.Ledger.Normalization;
+using Common.Database.ValueConverters;
+using Common.Numerics;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
-#nullable disable
+namespace Common.Database.Models.Ledger.Substates;
 
-namespace DataAggregator.Migrations
+public enum AccountStakeUnitBalanceSubstateType
 {
-    public partial class MovedTransactionSignerToAccountTransactions : Migration
+    Stake,
+    PreparedUnstake,
+}
+
+public class AccountStakeUnitBalanceSubstateTypeValueConverter : EnumTypeValueConverterBase<AccountStakeUnitBalanceSubstateType>
+{
+    private static readonly Dictionary<AccountStakeUnitBalanceSubstateType, string> _conversion = new()
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "signed_by",
-                table: "ledger_transactions");
+        { AccountStakeUnitBalanceSubstateType.Stake, "STAKE" },
+        { AccountStakeUnitBalanceSubstateType.PreparedUnstake, "PREPARED_UNSTAKE" },
+    };
 
-            migrationBuilder.AddColumn<bool>(
-                name: "is_signer",
-                table: "account_transactions",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "is_signer",
-                table: "account_transactions");
-
-            migrationBuilder.AddColumn<byte[]>(
-                name: "signed_by",
-                table: "ledger_transactions",
-                type: "bytea",
-                nullable: true);
-        }
+    public AccountStakeUnitBalanceSubstateTypeValueConverter()
+        : base(_conversion, Invert(_conversion))
+    {
     }
+}
+
+/// <summary>
+/// UTXOs related to Accounts staking to Validators, where the resource is a share of StakeUnit in that Validator.
+/// In particular, this is stake which is Staked or PreparingUnstake.
+/// </summary>
+[Index(nameof(AccountId), nameof(ValidatorId))]
+[Index(nameof(ValidatorId), nameof(AccountId))]
+[Table("account_stake_unit_balance_substates")]
+public class AccountStakeUnitBalanceSubstate : BalanceSubstateBase
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AccountStakeUnitBalanceSubstate"/> class.
+    /// The SubstateBase properties should be set separately.
+    /// </summary>
+    public AccountStakeUnitBalanceSubstate(
+        Account account,
+        Validator validator,
+        AccountStakeUnitBalanceSubstateType type,
+        TokenAmount StakeUnitBalance
+    )
+    {
+        Account = account;
+        Validator = validator;
+        Type = type;
+        Amount = StakeUnitBalance;
+    }
+
+    private AccountStakeUnitBalanceSubstate()
+    {
+    }
+
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
+
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
+
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
+
+    [Column(name: "type")]
+    public AccountStakeUnitBalanceSubstateType Type { get; set; }
 }

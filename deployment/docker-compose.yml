@@ -2,7 +2,7 @@ version: "3.8"
 services:
   postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
-    image: "postgres:14-alpine"
+    image: "postgres:12.9-alpine"
     ports:
       - "5532:5432" # This allows you to connect to the database locally on port localhost:5532
     volumes:

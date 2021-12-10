@@ -66,6 +66,7 @@ using Common.Database.Models.Ledger;
 using Common.Database.Models.Mempool;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace DataAggregator.GlobalServices;
 
@@ -95,7 +96,7 @@ public class RawTransactionWriter : IRawTransactionWriter
 
         foreach (var mempoolTransaction in toUpdate)
         {
-            mempoolTransaction.CommitTimestamp = DateTime.UtcNow;
+            mempoolTransaction.CommitTimestamp = SystemClock.Instance.GetCurrentInstant();
             mempoolTransaction.Status = MempoolTransactionStatus.Committed;
         }
 

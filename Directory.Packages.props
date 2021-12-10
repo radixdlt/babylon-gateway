@@ -14,7 +14,9 @@
       <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.0" />
 
       <!-- PUBLIC NUGET: Non-Microsoft -->
+      <PackageVersion Include="NodaTime" Version="3.0.9" />
       <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />
+      <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="6.0.0" />
       <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.0-preview5" />
       <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.2.3" />
       <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.2.3" />
@@ -23,7 +25,7 @@
       <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
 
       <!-- Generated / Local -->
-      <PackageVersion Include="RadixCoreApi.Generated" Version="0.9.9" />
+      <PackageVersion Include="RadixCoreApi.Generated" Version="0.9.10" />
       <PackageVersion Include="RadixGatewayApi.Generated" Version="1.0.6" />
 
     <!-- NON-PRODUCTION DEPENDENCIES -->

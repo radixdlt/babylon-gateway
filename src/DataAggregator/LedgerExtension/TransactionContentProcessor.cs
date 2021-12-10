@@ -330,7 +330,7 @@ public class TransactionContentProcessor
             case EntityType.Resource:
             default:
                 throw GenerateDetailedInvalidTransactionException(
-                    $"Stake ownership amount operation against unsupported entity type: {_entity!.EntityType}"
+                    $"Stake unit amount operation against unsupported entity type: {_entity!.EntityType}"
                 );
         }
     }

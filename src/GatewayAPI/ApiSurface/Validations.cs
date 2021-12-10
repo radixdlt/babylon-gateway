@@ -65,6 +65,7 @@
 using Common.Addressing;
 using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
+using NodaTime;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.ApiSurface;
@@ -93,7 +94,7 @@ public interface IValidations
 
     ValidatedSymbol ExtractValidTokenSymbol(string symbol);
 
-    DateTimeOffset ExtractValidDateTime(string capitalizedFieldDescriptor, string dateTimeStr);
+    Instant ExtractValidTimestamp(string capitalizedFieldDescriptor, string timestampString);
 
     int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound);
 }
@@ -268,14 +269,14 @@ public class Validations : IValidations
         return new ValidatedSymbol(symbol);
     }
 
-    public DateTimeOffset ExtractValidDateTime(string capitalizedFieldDescriptor, string dateTimeStr)
+    public Instant ExtractValidTimestamp(string capitalizedFieldDescriptor, string timestampString)
     {
-        if (!DateTimeOffset.TryParse(dateTimeStr, out var dateTimeOffset))
+        if (!DateTimeOffset.TryParse(timestampString, out var dateTimeOffset))
         {
             throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} DateTime could not be parsed");
         }
 
-        return dateTimeOffset;
+        return Instant.FromDateTimeOffset(dateTimeOffset);
     }
 
     public int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound)

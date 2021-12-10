@@ -68,6 +68,7 @@ using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
+using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
@@ -255,7 +256,7 @@ public class NodeMempoolReaderWorker : LoopedWorkerBase, INodeWorker
             return new TransactionDataWithId(
                 transactionId,
                 new TransactionData(
-                    DateTime.UtcNow,
+                    SystemClock.Instance.GetCurrentInstant(),
                     response.Transaction.Metadata.Hex.ConvertFromHex(),
                     response.Transaction
                 )

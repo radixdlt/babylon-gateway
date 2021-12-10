@@ -65,6 +65,7 @@
 using Common.Extensions;
 using DataAggregator.GlobalServices;
 using DataAggregator.LedgerExtension;
+using NodaTime;
 using Prometheus;
 
 namespace DataAggregator.Monitoring;
@@ -81,11 +82,11 @@ public interface ISystemStatusService
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
+public record HealthReport(bool IsHealthy, string Reason, Instant StartUpTime);
 
 public class SystemStatusService : ISystemStatusService
 {
-    private static readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
+    private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
     private static readonly bool _isPrimary = true;
 
     private static readonly Counter _committedTransactions = Metrics
@@ -105,11 +106,11 @@ public class SystemStatusService : ISystemStatusService
 
     private readonly IConfiguration _configuration;
 
-    private DateTimeOffset? _lastTransactionCommitment;
+    private Instant? _lastTransactionCommitment;
 
-    private TimeSpan StartupGracePeriod => TimeSpan.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
+    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
 
-    private TimeSpan UnhealthyCommitmentGapSeconds => TimeSpan.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
+    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
 
     public SystemStatusService(IConfiguration configuration)
     {
@@ -118,16 +119,16 @@ public class SystemStatusService : ISystemStatusService
 
     public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport)
     {
-        _lastTransactionCommitment = DateTimeOffset.UtcNow;
+        _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
         _committedTransactions.Inc(committedTransactionReport.TransactionsCommittedCount);
-        _ledgerLastCommitTimestamp.Set(DateTime.UtcNow.GetUnixTimestampSeconds());
+        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
         RecordTopOfLedger(committedTransactionReport.FinalTransaction);
     }
 
     public void RecordTopOfLedger(TransactionSummary topOfLedger)
     {
         _ledgerStateVersion.Set(topOfLedger.StateVersion);
-        _ledgerUnixTimestamp.Set(topOfLedger.NormalizedTimestamp.GetUnixTimestampSeconds());
+        _ledgerUnixTimestamp.Set(topOfLedger.NormalizedTimestamp.ToUnixTimeSeconds());
         _ledgerSecondsBehind.Set(topOfLedger.NormalizedTimestamp.GetTimeAgo().TotalSeconds);
     }
 

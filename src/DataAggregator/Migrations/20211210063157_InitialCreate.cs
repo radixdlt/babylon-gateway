@@ -64,7 +64,9 @@
 
 ﻿using System;
 using System.Numerics;
+using Common.Database.Models.Mempool;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -75,6 +77,29 @@ namespace DataAggregator.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "mempool_transactions",
+                columns: table => new
+                {
+                    transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payload = table.Column<byte[]>(type: "bytea", nullable: false),
+                    submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
+                    first_submitted_to_gateway_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    last_submitted_to_gateway_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    last_submitted_to_node_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    last_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
+                    first_seen_in_mempool_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    last_seen_in_mempool_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    commit_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    transaction_contents = table.Column<GatewayTransactionContents>(type: "jsonb", nullable: false),
+                    submission_status = table.Column<string>(type: "text", nullable: false),
+                    submission_failure_reason = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mempool_transactions", x => x.transaction_id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "network_configuration",
                 columns: table => new
@@ -111,8 +136,7 @@ namespace DataAggregator.Migrations
                 columns: table => new
                 {
                     transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
-                    submitted_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    payload = table.Column<byte[]>(type: "bytea", nullable: true)
+                    payload = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -128,16 +152,15 @@ namespace DataAggregator.Migrations
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    signed_by = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
                     index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     is_only_round_change = table.Column<bool>(type: "boolean", nullable: false),
                     is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
-                    round_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    created_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    round_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    created_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -168,29 +191,6 @@ namespace DataAggregator.Migrations
                     table.ForeignKey(
                         name: "FK_account_from_transaction",
                         column: x => x.from_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "operation_groups",
-                columns: table => new
-                {
-                    state_version = table.Column<long>(type: "bigint", nullable: false),
-                    operation_group_index = table.Column<int>(type: "integer", nullable: false),
-                    inferred_action_type = table.Column<string>(type: "text", nullable: true),
-                    inferred_action_from = table.Column<string>(type: "text", nullable: true),
-                    inferred_action_to = table.Column<string>(type: "text", nullable: true),
-                    inferred_action_amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    inferred_action_rri = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_operation_groups", x => new { x.state_version, x.operation_group_index });
-                    table.ForeignKey(
-                        name: "FK_operation_groups_ledger_transactions_state_version",
-                        column: x => x.state_version,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version",
                         onDelete: ReferentialAction.Cascade);
@@ -239,6 +239,32 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "account_transactions",
+                columns: table => new
+                {
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    is_fee_payer = table.Column<bool>(type: "boolean", nullable: false),
+                    is_signer = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_transactions", x => new { x.account_id, x.state_version });
+                    table.ForeignKey(
+                        name: "FK_account_transactions_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_transactions_ledger_transactions_state_version",
+                        column: x => x.state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "account_resource_balance_history",
                 columns: table => new
                 {
@@ -272,6 +298,188 @@ namespace DataAggregator.Migrations
                         name: "FK_account_resource_balance_history_resources_resource_id",
                         column: x => x.resource_id,
                         principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "resource_supply_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    resource_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_supply_history", x => new { x.resource_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_resources_resource_id",
+                        column: x => x.resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_resource_supply_history_to_transaction",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_stake_units = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_unstake_units = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_validator_stake_history", x => new { x.account_id, x.validator_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_to_transaction",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_account_validator_stake_history_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "operation_groups",
+                columns: table => new
+                {
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    inferred_action_type = table.Column<string>(type: "text", nullable: true),
+                    inferred_action_from_account_id = table.Column<long>(type: "bigint", nullable: true),
+                    inferred_action_to_account_id = table.Column<long>(type: "bigint", nullable: true),
+                    inferred_action_validator_id = table.Column<long>(type: "bigint", nullable: true),
+                    inferred_action_amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    inferred_action_resource_id = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_operation_groups", x => new { x.state_version, x.operation_group_index });
+                    table.ForeignKey(
+                        name: "FK_operation_groups_accounts_inferred_action_from_account_id",
+                        column: x => x.inferred_action_from_account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_operation_groups_accounts_inferred_action_to_account_id",
+                        column: x => x.inferred_action_to_account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_operation_groups_ledger_transactions_state_version",
+                        column: x => x.state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_operation_groups_resources_inferred_action_resource_id",
+                        column: x => x.inferred_action_resource_id,
+                        principalTable: "resources",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_operation_groups_validators_inferred_action_validator_id",
+                        column: x => x.inferred_action_validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "validator_proposal_records",
+                columns: table => new
+                {
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    epoch = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_completed = table.Column<long>(type: "bigint", nullable: false),
+                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
+                    last_updated_state_version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_proposal_records", x => new { x.epoch, x.validator_id });
+                    table.ForeignKey(
+                        name: "FK_validator_proposal_record_last_updated_transaction",
+                        column: x => x.last_updated_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version");
+                    table.ForeignKey(
+                        name: "FK_validator_proposal_records_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "validator_stake_history",
+                columns: table => new
+                {
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_stake_units = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_prepared_unstake_units = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_id, x.from_state_version });
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_from_transaction",
+                        column: x => x.from_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_to_transaction",
+                        column: x => x.to_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_validator_stake_history_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -317,6 +525,99 @@ namespace DataAggregator.Migrations
                         name: "FK_account_resource_balance_substates_resources_resource_id",
                         column: x => x.resource_id,
                         principalTable: "resources",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_stake_unit_balance_substates",
+                columns: table => new
+                {
+                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
+                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
+                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_stake_unit_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_account_stake_unit_balance_substates_substate_identifier", x => x.substate_identifier);
+                    table.ForeignKey(
+                        name: "FK_account_stake_unit_balance_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_account_stake_unit_balance_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_stake_unit_balance_substates_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_stake_unit_balance_substates_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "account_xrd_stake_balance_substates",
+                columns: table => new
+                {
+                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
+                    account_id = table.Column<long>(type: "bigint", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    unlock_epoch = table.Column<long>(type: "bigint", nullable: true),
+                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
+                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
+                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_xrd_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_account_xrd_stake_balance_substates_substate_identifier", x => x.substate_identifier);
+                    table.ForeignKey(
+                        name: "FK_account_xrd_stake_balance_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_account_xrd_stake_balance_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_xrd_stake_balance_substates_accounts_account_id",
+                        column: x => x.account_id,
+                        principalTable: "accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_account_xrd_stake_balance_substates_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -368,175 +669,6 @@ namespace DataAggregator.Migrations
                         name: "FK_resource_data_substates_resources_resource_id",
                         column: x => x.resource_id,
                         principalTable: "resources",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "resource_supply_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    resource_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_resource_supply_history", x => new { x.resource_id, x.from_state_version });
-                    table.ForeignKey(
-                        name: "FK_resource_supply_history_from_transaction",
-                        column: x => x.from_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_resource_supply_history_resources_resource_id",
-                        column: x => x.resource_id,
-                        principalTable: "resources",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_resource_supply_history_to_transaction",
-                        column: x => x.to_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "account_stake_ownership_balance_substates",
-                columns: table => new
-                {
-                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
-                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    account_id = table.Column<long>(type: "bigint", nullable: false),
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
-                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
-                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
-                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
-                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_account_stake_ownership_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("AK_account_stake_ownership_balance_substates_substate_identifi~", x => x.substate_identifier);
-                    table.ForeignKey(
-                        name: "FK_account_stake_ownership_balance_substates_accounts_account_~",
-                        column: x => x.account_id,
-                        principalTable: "accounts",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_stake_ownership_balance_substates_validators_valida~",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_stake_unit_balance_substate_down_operation_group",
-                        columns: x => new { x.down_state_version, x.down_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_account_stake_unit_balance_substate_up_operation_group",
-                        columns: x => new { x.up_state_version, x.up_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "account_validator_stake_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    account_id = table.Column<long>(type: "bigint", nullable: false),
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_account_validator_stake_history", x => new { x.account_id, x.validator_id, x.from_state_version });
-                    table.ForeignKey(
-                        name: "FK_account_validator_stake_history_accounts_account_id",
-                        column: x => x.account_id,
-                        principalTable: "accounts",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_validator_stake_history_from_transaction",
-                        column: x => x.from_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_validator_stake_history_to_transaction",
-                        column: x => x.to_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_account_validator_stake_history_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "account_xrd_stake_balance_substates",
-                columns: table => new
-                {
-                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
-                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
-                    account_id = table.Column<long>(type: "bigint", nullable: false),
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    unlock_epoch = table.Column<long>(type: "bigint", nullable: true),
-                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
-                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
-                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
-                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false),
-                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_account_xrd_stake_balance_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
-                    table.UniqueConstraint("AK_account_xrd_stake_balance_substates_substate_identifier", x => x.substate_identifier);
-                    table.ForeignKey(
-                        name: "FK_account_xrd_stake_balance_substate_down_operation_group",
-                        columns: x => new { x.down_state_version, x.down_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_account_xrd_stake_balance_substate_up_operation_group",
-                        columns: x => new { x.up_state_version, x.up_operation_group_index },
-                        principalTable: "operation_groups",
-                        principalColumns: new[] { "state_version", "operation_group_index" },
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_xrd_stake_balance_substates_accounts_account_id",
-                        column: x => x.account_id,
-                        principalTable: "accounts",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_account_xrd_stake_balance_substates_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -602,32 +734,6 @@ namespace DataAggregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "validator_proposal_records",
-                columns: table => new
-                {
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    epoch = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_completed = table.Column<long>(type: "bigint", nullable: false),
-                    proposals_missed = table.Column<long>(type: "bigint", nullable: false),
-                    last_updated_state_version = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_proposal_records", x => new { x.epoch, x.validator_id });
-                    table.ForeignKey(
-                        name: "FK_validator_proposal_record_last_updated_transaction",
-                        column: x => x.last_updated_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version");
-                    table.ForeignKey(
-                        name: "FK_validator_proposal_records_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "validator_stake_balance_substates",
                 columns: table => new
                 {
@@ -660,42 +766,6 @@ namespace DataAggregator.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_validator_stake_balance_substates_validators_validator_id",
-                        column: x => x.validator_id,
-                        principalTable: "validators",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "validator_stake_history",
-                columns: table => new
-                {
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    validator_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_xrd_staked = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_stake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_prepared_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_prepared_unstake_ownership = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_exiting_xrd_stake = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_validator_stake_history", x => new { x.validator_id, x.from_state_version });
-                    table.ForeignKey(
-                        name: "FK_validator_stake_history_from_transaction",
-                        column: x => x.from_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_validator_stake_history_to_transaction",
-                        column: x => x.to_state_version,
-                        principalTable: "ledger_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_validator_stake_history_validators_validator_id",
                         column: x => x.validator_id,
                         principalTable: "validators",
                         principalColumn: "id",
@@ -757,19 +827,24 @@ namespace DataAggregator.Migrations
                 columns: new[] { "resource_id", "account_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_stake_ownership_balance_substates_account_id_valida~",
-                table: "account_stake_ownership_balance_substates",
+                name: "IX_account_stake_unit_balance_substates_account_id_validator_id",
+                table: "account_stake_unit_balance_substates",
                 columns: new[] { "account_id", "validator_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_stake_ownership_balance_substates_down_state_versio~",
-                table: "account_stake_ownership_balance_substates",
+                name: "IX_account_stake_unit_balance_substates_down_state_version_dow~",
+                table: "account_stake_unit_balance_substates",
                 columns: new[] { "down_state_version", "down_operation_group_index" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_account_stake_ownership_balance_substates_validator_id_acco~",
-                table: "account_stake_ownership_balance_substates",
+                name: "IX_account_stake_unit_balance_substates_validator_id_account_id",
+                table: "account_stake_unit_balance_substates",
                 columns: new[] { "validator_id", "account_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_transactions_state_version",
+                table: "account_transactions",
+                column: "state_version");
 
             migrationBuilder.CreateIndex(
                 name: "IX_account_validator_stake_history_account_id_from_state_versi~",
@@ -841,6 +916,26 @@ namespace DataAggregator.Migrations
                 name: "IX_ledger_transactions_timestamp",
                 table: "ledger_transactions",
                 column: "timestamp");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_operation_groups_inferred_action_from_account_id",
+                table: "operation_groups",
+                column: "inferred_action_from_account_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_operation_groups_inferred_action_resource_id",
+                table: "operation_groups",
+                column: "inferred_action_resource_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_operation_groups_inferred_action_to_account_id",
+                table: "operation_groups",
+                column: "inferred_action_to_account_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_operation_groups_inferred_action_validator_id",
+                table: "operation_groups",
+                column: "inferred_action_validator_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_resource_data_substates_down_state_version_down_operation_g~",
@@ -971,13 +1066,19 @@ namespace DataAggregator.Migrations
                 name: "account_resource_balance_substates");
 
             migrationBuilder.DropTable(
-                name: "account_stake_ownership_balance_substates");
+                name: "account_stake_unit_balance_substates");
+
+            migrationBuilder.DropTable(
+                name: "account_transactions");
 
             migrationBuilder.DropTable(
                 name: "account_validator_stake_history");
 
             migrationBuilder.DropTable(
                 name: "account_xrd_stake_balance_substates");
+
+            migrationBuilder.DropTable(
+                name: "mempool_transactions");
 
             migrationBuilder.DropTable(
                 name: "network_configuration");
@@ -1004,13 +1105,13 @@ namespace DataAggregator.Migrations
                 name: "validator_stake_history");
 
             migrationBuilder.DropTable(
-                name: "resources");
+                name: "operation_groups");
 
             migrationBuilder.DropTable(
                 name: "accounts");
 
             migrationBuilder.DropTable(
-                name: "operation_groups");
+                name: "resources");
 
             migrationBuilder.DropTable(
                 name: "validators");

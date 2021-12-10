@@ -70,6 +70,7 @@ using DataAggregator.Configuration;
 using DataAggregator.DependencyInjection;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using System.Collections.Concurrent;
 
 using Core = RadixCoreApi.Generated.Model;
@@ -78,18 +79,18 @@ namespace DataAggregator.GlobalServices;
 
 public record TransactionDataWithId(byte[] Id, TransactionData TransactionData);
 
-public record TransactionData(DateTime SeenAt, byte[] Payload, Core.Transaction Transaction);
+public record TransactionData(Instant SeenAt, byte[] Payload, Core.Transaction Transaction);
 
 public record NodeMempoolContents
 {
     public Dictionary<byte[], TransactionData> Transactions { get; }
 
-    public DateTime AtTime { get; }
+    public Instant AtTime { get; }
 
     public NodeMempoolContents(Dictionary<byte[], TransactionData> transactions)
     {
         Transactions = transactions;
-        AtTime = DateTime.UtcNow;
+        AtTime = SystemClock.Instance.GetCurrentInstant();
     }
 }
 
@@ -135,7 +136,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private Dictionary<byte[], TransactionData> CombineNodeMempools()
     {
-        var lastUpdatedToBeConsidered = TimeSpan.FromSeconds(15);
+        var lastUpdatedToBeConsidered = Duration.FromSeconds(15);
 
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
             .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(lastUpdatedToBeConsidered))
@@ -238,10 +239,10 @@ public class MempoolTrackerService : IMempoolTrackerService
                 continue;
             }
 
-            var resubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null ? DateTime.UtcNow
+            var resubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null ? SystemClock.Instance.GetCurrentInstant()
                 : DateTimeExtensions.LatestOf(
                     mempoolItem.LastSubmittedToNodeTimestamp.Value + timeouts.MinDelayBetweenResubmissions,
-                    DateTime.UtcNow
+                    SystemClock.Instance.GetCurrentInstant()
                 );
 
             var resubmissionLimit = mempoolItem.LastSubmittedToGatewayTimestamp!.Value + timeouts.StopResubmittingAfter;

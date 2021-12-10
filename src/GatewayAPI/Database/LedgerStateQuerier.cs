@@ -69,6 +69,7 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Database;
@@ -169,14 +170,14 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerState> GetLedgerStateBeforeTimestamp(string timestamp)
     {
-        var dateTime = _validations.ExtractValidDateTime("The ledger state timestamp", timestamp);
+        var validatedTimestamp = _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
 
-        if (dateTime > DateTimeOffset.UtcNow)
+        if (validatedTimestamp > SystemClock.Instance.GetCurrentInstant())
         {
             throw InvalidRequestException.FromOtherError("Timestamp is in the future");
         }
 
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(dateTime));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(validatedTimestamp));
 
         if (ledgerState == null)
         {

@@ -64,7 +64,6 @@
 
 using Common.Exceptions;
 using Common.Extensions;
-using Common.Numerics;
 using Common.Services;
 using Common.StaticHelpers;
 using GatewayAPI.ApiSurface;
@@ -224,47 +223,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             disableResourceAllocateAndDestroy: request.DisableTokenMintAndBurn
         );
 
-        try
-        {
-            return await _coreApiHandler.BuildTransaction(coreBuildRequest);
-        }
-        catch (WrappedCoreApiException<Core.NotEnoughResourcesError> notEnoughResourcesException)
-        {
-            var xrdAddress = _networkConfigurationProvider.GetXrdAddress();
-
-            if (notEnoughResourcesException.Error.Available.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
-            {
-                throw;
-            }
-
-            if (tokenResourceIdentifier.Rri != _networkConfigurationProvider.GetXrdAddress())
-            {
-                throw;
-            }
-
-            var reportedAvailableXrd = TokenAmount.FromSubUnitsString(notEnoughResourcesException.Error.Available.Value);
-            var beforeXrdBalance = mappedTransaction.BeforeBalances.GetValueOrDefault(xrdAddress);
-
-            if (reportedAvailableXrd != beforeXrdBalance)
-            {
-                throw;
-            }
-
-            var attemptedToTakeXrd = TokenAmount.FromSubUnitsString(notEnoughResourcesException.Error.AttemptedToTake.Value);
-            var xrdFeePayerBalanceChangeInTransaction = mappedTransaction.BalanceChanges.GetValueOrDefault(xrdAddress);
-
-            // Core API is complaining about the amount of XRD they have, but agrees on how much they have on balance.
-            // We already validated they have enough for transfers, so the difference must be the fee -- which they don't have.
-
-            // NB: attemptedToTake = -totalAccountDebit = -(xrdChangeInTransaction - calculatedFee) = -xrdChangeInTransaction + calculatedFee. Rearranging:
-            var calculatedFee = attemptedToTakeXrd + xrdFeePayerBalanceChangeInTransaction;
-            var availableAmount = beforeXrdBalance + xrdFeePayerBalanceChangeInTransaction;
-
-            throw new NotEnoughNativeTokensForFeeException(
-                requiredAmount: calculatedFee.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-                availableAmount: availableAmount.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
-            );
-        }
+        return await _coreApiHandler.BuildTransaction(coreBuildRequest);
     }
 
     private async Task<Core.ConstructionFinalizeResponse> HandleCoreFinalizeRequest(

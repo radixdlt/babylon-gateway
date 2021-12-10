@@ -2,7 +2,7 @@ version: "3.8"
 services:
   dev_postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
-    image: "postgres:14-alpine"
+    image: "postgres:12.9-alpine"
     ports:
       - "5432:5432"
     volumes:

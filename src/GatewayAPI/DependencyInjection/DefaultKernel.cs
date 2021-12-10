@@ -127,7 +127,10 @@ public class DefaultKernel
         services.AddDbContext<GatewayReadOnlyDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"));
+            options.UseNpgsql(
+                hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"),
+                o => o.UseNodaTime()
+            );
         });
     }
 
@@ -136,7 +139,10 @@ public class DefaultKernel
         services.AddDbContext<GatewayReadWriteDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadWriteDbContext"));
+            options.UseNpgsql(
+                hostContext.Configuration.GetConnectionString("ReadWriteDbContext"),
+                o => o.UseNodaTime()
+            );
         });
     }
 

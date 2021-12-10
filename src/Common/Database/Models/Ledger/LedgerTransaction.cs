@@ -63,6 +63,7 @@
  */
 
 using Common.Numerics;
+using NodaTime;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -78,7 +79,7 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, DateTime roundTimestamp, DateTime createdTimestamp, DateTime normalizedTimestamp)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
@@ -152,13 +153,13 @@ public class LedgerTransaction
     /// As a consequence of this, it is not guaranteed to be increasing, and it may be affected by Byzantine nodes.
     /// </summary>
     [Column(name: "round_timestamp")]
-    public DateTime RoundTimestamp { get; set; }
+    public Instant RoundTimestamp { get; set; }
 
     /// <summary>
     /// The time of the DataAggregator server when the LedgerTransaction was added to the service.
     /// </summary>
     [Column(name: "created_timestamp")]
-    public DateTime CreatedTimestamp { get; set; }
+    public Instant CreatedTimestamp { get; set; }
 
     /// <summary>
     /// This timestamp attempts to be "sensible" - ie increasing and semi-resistant to byzantine attacks.
@@ -167,7 +168,7 @@ public class LedgerTransaction
     /// </summary>
     // TODO:NG-51 - Further improvements
     [Column(name: "timestamp")]
-    public DateTime NormalizedTimestamp { get; set; }
+    public Instant NormalizedTimestamp { get; set; }
 
     [InverseProperty(nameof(LedgerOperationGroup.LedgerTransaction))]
     public ICollection<LedgerOperationGroup> SubstantiveOperationGroups { get; set; }

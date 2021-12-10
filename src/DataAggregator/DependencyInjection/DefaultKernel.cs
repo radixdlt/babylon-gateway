@@ -119,7 +119,10 @@ public class DefaultKernel
         services.AddDbContextFactory<AggregatorDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(hostContext.Configuration.GetConnectionString("AggregatorDbContext"));
+            options.UseNpgsql(
+                hostContext.Configuration.GetConnectionString("AggregatorDbContext"),
+                o => o.UseNodaTime()
+            );
         });
     }
 

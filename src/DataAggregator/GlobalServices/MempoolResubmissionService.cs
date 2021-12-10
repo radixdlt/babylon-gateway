@@ -73,6 +73,7 @@ using DataAggregator.DependencyInjection;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
@@ -146,7 +147,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             );
         }
 
-        var submittedAt = DateTime.UtcNow;
+        var submittedAt = SystemClock.Instance.GetCurrentInstant();
         var submissionResults = await ResubmitAll(transactionsToResubmit, token);
 
         foreach (var (transaction, failed, failureReason, nodeName) in submissionResults)
@@ -164,11 +165,14 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     {
         var timeouts = _aggregatorConfiguration.GetMempoolTimeouts();
 
+        var needsResubmissionIfLastSubmittedBefore = SystemClock.Instance.GetCurrentInstant() -
+                                                     Duration.FromSeconds(timeouts.MinDelayBetweenResubmissionsSeconds);
+
         return dbContext.MempoolTransactions
             .Where(mt =>
                 mt.SubmittedByThisGateway
                 && mt.Status == MempoolTransactionStatus.Missing
-                && mt.LastSubmittedToNodeTimestamp!.Value.AddSeconds(timeouts.MinDelayBetweenResubmissionsSeconds) < DateTime.UtcNow
+                && mt.LastSubmittedToNodeTimestamp!.Value < needsResubmissionIfLastSubmittedBefore
             );
     }
 

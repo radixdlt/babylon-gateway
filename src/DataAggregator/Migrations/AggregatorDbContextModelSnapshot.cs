@@ -70,6 +70,7 @@ using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -270,7 +271,7 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
-                    b.Property<DateTime>("CreatedTimestamp")
+                    b.Property<Instant>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_timestamp");
 
@@ -303,7 +304,7 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
-                    b.Property<DateTime>("NormalizedTimestamp")
+                    b.Property<Instant>("NormalizedTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 
@@ -311,7 +312,7 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("round_in_epoch");
 
-                    b.Property<DateTime>("RoundTimestamp")
+                    b.Property<Instant>("RoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
@@ -608,7 +609,7 @@ namespace DataAggregator.Migrations
 
                     b.HasIndex("ValidatorId", "AccountId");
 
-                    b.ToTable("account_stake_ownership_balance_substates");
+                    b.ToTable("account_stake_unit_balance_substates");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountXrdStakeBalanceSubstate", b =>
@@ -851,23 +852,23 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_id");
 
-                    b.Property<DateTime?>("CommitTimestamp")
+                    b.Property<Instant?>("CommitTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("commit_timestamp");
 
-                    b.Property<DateTime?>("FirstSeenInMempoolTimestamp")
+                    b.Property<Instant?>("FirstSeenInMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_seen_in_mempool_timestamp");
 
-                    b.Property<DateTime?>("FirstSubmittedToGatewayTimestamp")
+                    b.Property<Instant?>("FirstSubmittedToGatewayTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_submitted_to_gateway_timestamp");
 
-                    b.Property<DateTime?>("LastSeenInMempoolTimestamp")
+                    b.Property<Instant?>("LastSeenInMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_seen_in_mempool_timestamp");
 
-                    b.Property<DateTime?>("LastSubmittedToGatewayTimestamp")
+                    b.Property<Instant?>("LastSubmittedToGatewayTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_gateway_timestamp");
 
@@ -875,7 +876,7 @@ namespace DataAggregator.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_submitted_to_node_name");
 
-                    b.Property<DateTime?>("LastSubmittedToNodeTimestamp")
+                    b.Property<Instant?>("LastSubmittedToNodeTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_node_timestamp");
 
@@ -1048,7 +1049,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_unstake_ownership");
+                                .HasColumnName("total_prepared_unstake_units");
 
                             b1.Property<BigInteger>("TotalPreparedXrdStake")
                                 .HasPrecision(1000)
@@ -1058,7 +1059,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_stake_ownership");
+                                .HasColumnName("total_stake_units");
 
                             b1.HasKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
 
@@ -1179,7 +1180,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_unstake_ownership");
+                                .HasColumnName("total_prepared_unstake_units");
 
                             b1.Property<BigInteger>("TotalPreparedXrdStake")
                                 .HasPrecision(1000)
@@ -1189,7 +1190,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_stake_ownership");
+                                .HasColumnName("total_stake_units");
 
                             b1.Property<BigInteger>("TotalXrdStake")
                                 .HasPrecision(1000)

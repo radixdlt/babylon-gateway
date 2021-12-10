@@ -66,7 +66,7 @@ using Common.Database.Models.Mempool;
 using DataAggregator.Configuration;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-
+using NodaTime;
 using Core = RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.GlobalServices;
@@ -99,26 +99,34 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         var times = _aggregatorConfiguration.GetMempoolTimeouts();
 
+        var currTime = SystemClock.Instance.GetCurrentInstant();
+
+        var pruneIfCommittedBefore = currTime.Minus(Duration.FromSeconds(times.PruneCommittedAfterSeconds));
+        var pruneIfLastGatewaySubmissionBefore = currTime.Minus(Duration.FromSeconds(times.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds));
+        var pruneIfFirstSeenBefore = currTime.Minus(Duration.FromSeconds(times.PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds));
+
+        var pruneIfNotSeenSince = currTime.Minus(Duration.FromSeconds(times.PruneRequiresMissingFromMempoolForSeconds));
+
         var transactionsToPrune = await dbContext.MempoolTransactions
             .Where(mt =>
                 (
                     /* For committed transactions, remove from the mempool if */
                     mt.Status == MempoolTransactionStatus.Committed
-                    && mt.CommitTimestamp!.Value.AddSeconds(times.PruneCommittedAfterSeconds) < DateTime.UtcNow
+                    && mt.CommitTimestamp!.Value < pruneIfCommittedBefore
                 )
                 ||
                 (
                     /* For those submitted by this gateway, prune if it was submitted a while ago and was not seen in the mempool recently */
                     mt.SubmittedByThisGateway
-                    && mt.LastSubmittedToGatewayTimestamp!.Value.AddMinutes(times.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds) < DateTime.UtcNow
-                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value.AddMinutes(times.PruneRequiresMissingFromMempoolForSeconds) < DateTime.UtcNow)
+                    && mt.LastSubmittedToGatewayTimestamp!.Value < pruneIfLastGatewaySubmissionBefore
+                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value < pruneIfNotSeenSince)
                 )
                 ||
                 (
                     /* For those not submitted by this gateway, prune if it first appeared a while ago and was not seen in the mempool recently */
                     !mt.SubmittedByThisGateway
-                    && mt.FirstSeenInMempoolTimestamp!.Value.AddMinutes(times.PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds) < DateTime.UtcNow
-                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value.AddMinutes(times.PruneRequiresMissingFromMempoolForSeconds) < DateTime.UtcNow)
+                    && mt.FirstSeenInMempoolTimestamp!.Value < pruneIfFirstSeenBefore
+                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value < pruneIfNotSeenSince)
                 )
             )
             .ToListAsync(token);

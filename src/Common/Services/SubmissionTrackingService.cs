@@ -66,6 +66,7 @@ using Common.CoreCommunications;
 using Common.Database;
 using Common.Database.Models.Mempool;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
@@ -107,7 +108,7 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
         Core.ConstructionParseResponse parseResponse
     )
     {
-        var submittedTimestamp = DateTime.UtcNow;
+        var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
         var mempoolTransaction = new MempoolTransaction
         {
             TransactionIdentifierHash = transactionIdentifierHash,

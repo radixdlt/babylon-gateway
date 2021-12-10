@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using NodaTime;
+
 namespace DataAggregator.Configuration.Models;
 
 public record MempoolTimeouts
@@ -69,30 +71,30 @@ public record MempoolTimeouts
     [ConfigurationKeyName("PruneCommittedAfterSeconds")]
     public long PruneCommittedAfterSeconds { get; set; } = 10;
 
-    public TimeSpan PruneCommittedAfter => TimeSpan.FromSeconds(PruneCommittedAfterSeconds);
+    public Duration PruneCommittedAfter => Duration.FromSeconds(PruneCommittedAfterSeconds);
 
     [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
     public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
 
-    public TimeSpan MinDelayBetweenResubmissions => TimeSpan.FromSeconds(MinDelayBetweenResubmissionsSeconds);
+    public Duration MinDelayBetweenResubmissions => Duration.FromSeconds(MinDelayBetweenResubmissionsSeconds);
 
     [ConfigurationKeyName("StopResubmittingAfterSeconds")]
     public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
 
-    public TimeSpan StopResubmittingAfter => TimeSpan.FromSeconds(StopResubmittingAfterSeconds);
+    public Duration StopResubmittingAfter => Duration.FromSeconds(StopResubmittingAfterSeconds);
 
     [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds")]
     public long PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
 
-    public TimeSpan PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
+    public Duration PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => Duration.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
 
     [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds")]
     public long PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
 
-    public TimeSpan PruneMissingTransactionsAfterTimeSinceFirstSeen => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
+    public Duration PruneMissingTransactionsAfterTimeSinceFirstSeen => Duration.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
 
     [ConfigurationKeyName("PruneRequiresMissingFromMempoolForSeconds")]
     public long PruneRequiresMissingFromMempoolForSeconds { get; set; } = 60;
 
-    public TimeSpan PruneRequiresMissingFromMempoolFor => TimeSpan.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
+    public Duration PruneRequiresMissingFromMempoolFor => Duration.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
 }
