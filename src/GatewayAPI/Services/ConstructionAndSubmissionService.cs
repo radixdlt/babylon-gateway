@@ -79,9 +79,9 @@ public interface IConstructionAndSubmissionService
 {
     Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState);
 
-    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request);
+    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, Gateway.LedgerState ledgerState);
 
-    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request);
+    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, Gateway.LedgerState ledgerState);
 }
 
 public class ConstructionAndSubmissionService : IConstructionAndSubmissionService
@@ -145,7 +145,10 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         );
     }
 
-    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request)
+    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(
+        Gateway.TransactionFinalizeRequest request,
+        Gateway.LedgerState ledgerState
+    )
     {
         var coreFinalizeResponse = await HandleCoreFinalizeRequest(request, new Core.ConstructionFinalizeRequest(
             _coreApiHandler.GetNetworkIdentifier(),
@@ -166,7 +169,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         {
             await HandleSubmission(
                 _validations.ExtractValidHex("Signed transaction", coreFinalizeResponse.SignedTransaction),
-                transactionHashIdentifier
+                transactionHashIdentifier,
+                ledgerState
             );
         }
 
@@ -176,7 +180,10 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         );
     }
 
-    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request)
+    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(
+        Gateway.TransactionSubmitRequest request,
+        Gateway.LedgerState ledgerState
+    )
     {
         var signedTransactionContents = _validations.ExtractValidHex("Signed transaction", request.SignedTransaction);
         var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
@@ -185,7 +192,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         await HandleSubmission(
             signedTransactionContents,
-            transactionHashIdentifier
+            transactionHashIdentifier,
+            ledgerState
         );
 
         return new Gateway.TransactionSubmitResponse(
@@ -265,7 +273,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
     private async Task HandleSubmission(
         ValidatedHex signedTransaction,
-        byte[] transactionIdentifierHash
+        byte[] transactionIdentifierHash,
+        Gateway.LedgerState ledgerState
     )
     {
         var parseResponse = await HandleParseSignedTransaction(signedTransaction);
@@ -312,7 +321,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             signedTransaction.Bytes,
             transactionIdentifierHash,
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
-            parseResponse
+            parseResponse,
+            ledgerState
         );
     }
 }

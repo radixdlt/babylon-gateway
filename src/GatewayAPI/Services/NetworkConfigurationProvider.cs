@@ -63,6 +63,7 @@
  */
 
 using Common.Addressing;
+using Common.CoreCommunications;
 using Common.Database;
 using Common.Database.Models.SingleEntries;
 using GatewayAPI.Database;
@@ -73,17 +74,13 @@ using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Services;
 
-public interface INetworkConfigurationProvider
+public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
     Task LoadNetworkConfigurationFromDatabase(GatewayReadOnlyDbContext dbContext, CancellationToken token);
 
     string GetNetworkName();
 
     Core.NetworkIdentifier GetCoreNetworkIdentifier();
-
-    AddressHrps GetAddressHrps();
-
-    string GetXrdAddress();
 
     TokenIdentifier GetXrdTokenIdentifier();
 

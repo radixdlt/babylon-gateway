@@ -80,6 +80,8 @@ public interface ILedgerStateQuerier
 
     Task<LedgerState> GetLedgerState(NetworkIdentifier networkIdentifier, PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
+    Task<LedgerState> GetTopOfLedgerState();
+
     void AssertMatchingNetwork(NetworkIdentifier networkIdentifier);
 }
 
@@ -120,6 +122,18 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return await GetLedgerState(atLedgerStateIdentifier);
     }
 
+    public async Task<LedgerState> GetTopOfLedgerState()
+    {
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetTopLedgerTransaction());
+
+        if (ledgerState == null)
+        {
+            throw new InvalidStateException("There are no transactions in the database");
+        }
+
+        return ledgerState;
+    }
+
     public void AssertMatchingNetwork(NetworkIdentifier networkIdentifier)
     {
         var ledgerNetworkName = _networkConfigurationProvider.GetNetworkName();
@@ -142,18 +156,6 @@ public class LedgerStateQuerier : ILedgerStateQuerier
                 "The at_state_identifier was not either (A) missing (B) with only a state_version; (C) with only a Timestamp; (D) with only an Epoch; or (E) with only an Epoch and Round"
             ),
         };
-    }
-
-    private async Task<LedgerState> GetTopOfLedgerState()
-    {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetTopLedgerTransaction());
-
-        if (ledgerState == null)
-        {
-            throw new InvalidStateException("There are no transactions in the database");
-        }
-
-        return ledgerState;
     }
 
     private async Task<LedgerState> GetLedgerStateBeforeStateVersion(long stateVersion)

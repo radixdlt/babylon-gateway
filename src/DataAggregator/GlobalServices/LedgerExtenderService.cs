@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Extensions;
 using Common.Utilities;

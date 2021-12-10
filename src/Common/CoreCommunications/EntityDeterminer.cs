@@ -63,10 +63,11 @@
  */
 
 using Common.Addressing;
+using Microsoft.Extensions.Logging;
 using RadixCoreApi.Generated.Model;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DataAggregator.GlobalServices;
+namespace Common.CoreCommunications;
 
 public record Entity(
     EntityType EntityType,
@@ -91,7 +92,7 @@ public enum EntityType
 
 public interface IEntityDeterminer
 {
-    Entity? DetermineEntity(EntityIdentifier entityIdentifier);
+    Entity? DetermineEntity(EntityIdentifier? entityIdentifier);
 
     bool IsXrd(string rri);
 
@@ -106,19 +107,31 @@ public interface IEntityDeterminer
     string CreateAccountAddress(byte[] publicKey);
 }
 
+public interface INetworkAddressConfigProvider
+{
+    AddressHrps GetAddressHrps();
+
+    string GetXrdAddress();
+}
+
 public class EntityDeterminer : IEntityDeterminer
 {
     private readonly ILogger<EntityDeterminer> _logger;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly INetworkAddressConfigProvider _networkAddressProvider;
 
-    public EntityDeterminer(ILogger<EntityDeterminer> logger, INetworkConfigurationProvider networkConfigurationProvider)
+    public EntityDeterminer(ILogger<EntityDeterminer> logger, INetworkAddressConfigProvider networkAddressProvider)
     {
         _logger = logger;
-        _networkConfigurationProvider = networkConfigurationProvider;
+        _networkAddressProvider = networkAddressProvider;
     }
 
-    public Entity? DetermineEntity(EntityIdentifier entityIdentifier)
+    public Entity? DetermineEntity(EntityIdentifier? entityIdentifier)
     {
+        if (entityIdentifier == null)
+        {
+            return null;
+        }
+
         var primaryEntityAddress = entityIdentifier.Address;
         if (primaryEntityAddress == "system")
         {
@@ -126,7 +139,7 @@ public class EntityDeterminer : IEntityDeterminer
         }
 
         if (!RadixAddressParser.TryParse(
-                _networkConfigurationProvider.GetAddressHrps(),
+                _networkAddressProvider.GetAddressHrps(),
                 primaryEntityAddress,
                 out var primaryEntityRadixAddress,
                 out var errorMessage
@@ -177,7 +190,7 @@ public class EntityDeterminer : IEntityDeterminer
     public byte[] ParseValidatorPublicKey(string validatorAddress)
     {
         if (!RadixAddressParser.TryParseValidatorAddress(
-                _networkConfigurationProvider.GetAddressHrps(),
+                _networkAddressProvider.GetAddressHrps(),
                 validatorAddress,
                 out var radixAddress,
                 out var errorMessage
@@ -192,7 +205,7 @@ public class EntityDeterminer : IEntityDeterminer
     public byte[] ParseAccountPublicKey(string accountAddress)
     {
         if (!RadixAddressParser.TryParseAccountAddress(
-                _networkConfigurationProvider.GetAddressHrps(),
+                _networkAddressProvider.GetAddressHrps(),
                 accountAddress,
                 out var radixAddress,
                 out var errorMessage
@@ -207,7 +220,7 @@ public class EntityDeterminer : IEntityDeterminer
     public byte[] ParseResourceRadixEngineAddress(string rri)
     {
         if (!RadixAddressParser.TryParseResourceAddress(
-                _networkConfigurationProvider.GetAddressHrps(),
+                _networkAddressProvider.GetAddressHrps(),
                 rri,
                 out var radixAddress,
                 out var errorMessage
@@ -226,11 +239,11 @@ public class EntityDeterminer : IEntityDeterminer
 
     public string GetXrdAddress()
     {
-        return _networkConfigurationProvider.GetXrdAddress();
+        return _networkAddressProvider.GetXrdAddress();
     }
 
     public string CreateAccountAddress(byte[] publicKey)
     {
-        return RadixBech32.GenerateAccountAddress(_networkConfigurationProvider.GetAddressHrps().AccountHrp, publicKey);
+        return RadixBech32.GenerateAccountAddress(_networkAddressProvider.GetAddressHrps().AccountHrp, publicKey);
     }
 }

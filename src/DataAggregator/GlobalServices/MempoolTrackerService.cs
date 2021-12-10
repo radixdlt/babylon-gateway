@@ -63,6 +63,7 @@
  */
 
 using Common.CoreCommunications;
+using Common.Database;
 using Common.Database.Models.Mempool;
 using Common.Extensions;
 using Common.Utilities;
@@ -107,17 +108,20 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IActionInferrer _actionInferrer;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolContents> _latestMempoolContentsByNode = new();
 
     public MempoolTrackerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IAggregatorConfiguration aggregatorConfiguration,
+        IActionInferrer actionInferrer,
         ILogger<MempoolTrackerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
         _aggregatorConfiguration = aggregatorConfiguration;
+        _actionInferrer = actionInferrer;
         _logger = logger;
     }
 
@@ -190,8 +194,18 @@ public class MempoolTrackerService : IMempoolTrackerService
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
+        var parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
+        var topOfLedgerVersion = (await dbContext.GetTopLedgerTransaction().SingleOrDefaultAsync(token))?.ResultantStateVersion ?? 0;
+
+        var mempoolTransactions = new List<MempoolTransaction>();
+
+        foreach (var transaction in combinedMempool)
+        {
+            mempoolTransactions.Add(await MapToMempoolTransaction(parsedTransactionMapper, transaction, topOfLedgerVersion, token));
+        }
+
         await dbContext.MempoolTransactions
-            .UpsertRange(combinedMempool.Select(MapToMempoolTransaction))
+            .UpsertRange(mempoolTransactions)
             .WhenMatched((dbTxn, currTxn) => new MempoolTransaction
             {
                 FirstSeenInMempoolTimestamp = dbTxn.FirstSeenInMempoolTimestamp ?? currTxn.FirstSeenInMempoolTimestamp,
@@ -203,7 +217,12 @@ public class MempoolTrackerService : IMempoolTrackerService
             .RunAsync(token);
     }
 
-    private MempoolTransaction MapToMempoolTransaction(KeyValuePair<byte[], TransactionData> mempoolItem)
+    private async Task<MempoolTransaction> MapToMempoolTransaction(
+        IParsedTransactionMapper parsedTransactionMapper,
+        KeyValuePair<byte[], TransactionData> mempoolItem,
+        long topOfLedgerVersion,
+        CancellationToken token
+    )
     {
         var transactionData = mempoolItem.Value;
         return new MempoolTransaction
@@ -212,7 +231,7 @@ public class MempoolTrackerService : IMempoolTrackerService
             Payload = transactionData.Payload,
             FirstSeenInMempoolTimestamp = transactionData.SeenAt,
             LastSeenInMempoolTimestamp = transactionData.SeenAt,
-            TransactionsContents = ParsedTransactionMapper.MapToGatewayTransactionContents(transactionData.Transaction),
+            TransactionsContents = await parsedTransactionMapper.MapToGatewayTransactionContents(transactionData.Transaction, topOfLedgerVersion, token),
             Status = MempoolTransactionStatus.InNodeMempool,
         };
     }

@@ -62,41 +62,93 @@
  * permissions under this License.
  */
 
+using Common.Database;
+using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Mempool;
+using Common.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Common.CoreCommunications;
 
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
-public static class ParsedTransactionMapper
+public interface IParsedTransactionMapper
 {
-    public static GatewayTransactionContents MapToGatewayTransactionContents(Core.Transaction transaction)
+    Task<GatewayTransactionContents> MapToGatewayTransactionContents(Core.Transaction transaction, long stateVersionForEstimate, CancellationToken token = default);
+
+    Task<GatewayTransactionContents> MapToGatewayTransactionContents(Core.ConstructionParseResponse parseResponse, long stateVersionForEstimate, CancellationToken token = default);
+}
+
+public class ParsedTransactionMapper<T> : IParsedTransactionMapper
+    where T : CommonDbContext
+{
+    private readonly T _dbContext;
+    private readonly IActionInferrer _actionInferrer;
+
+    public ParsedTransactionMapper(T dbContext, IActionInferrer actionInferrer)
+    {
+        _dbContext = dbContext;
+        _actionInferrer = actionInferrer;
+    }
+
+    public async Task<GatewayTransactionContents> MapToGatewayTransactionContents(Core.Transaction transaction, long stateVersionForEstimate, CancellationToken token = default)
     {
         return new GatewayTransactionContents
         {
-            Actions = MapActions(transaction.OperationGroups),
+            Actions = await MapActions(transaction.OperationGroups, stateVersionForEstimate, token),
             FeePaidSubunits = transaction.Metadata.Fee.Value,
             MessageHex = transaction.Metadata.Message,
         };
     }
 
-    public static GatewayTransactionContents MapToGatewayTransactionContents(Core.ConstructionParseResponse parseResponse)
+    public async Task<GatewayTransactionContents> MapToGatewayTransactionContents(Core.ConstructionParseResponse parseResponse, long stateVersionForEstimate, CancellationToken token = default)
     {
         return new GatewayTransactionContents
         {
-            Actions = MapActions(parseResponse.OperationGroups),
+            Actions = await MapActions(parseResponse.OperationGroups, stateVersionForEstimate, token),
             FeePaidSubunits = parseResponse.Metadata.Fee.Value,
             MessageHex = parseResponse.Metadata.Message,
         };
     }
 
-    // TODO: Implement this.
-    // DbActionsPlanner and Accounting > Suggestion - recreate more general account/Gateway.Action mapping
-    // and reuse that in Accounting. Will likely need some manner of fetching dependencies for mapping
-    // ReSharper disable once UnusedParameter.Local
-    private static List<Gateway.Action> MapActions(List<Core.OperationGroup> operationGroups)
+    private async Task<List<Gateway.Action>> MapActions(List<Core.OperationGroup> operationGroups, long stateVersionForEstimate, CancellationToken token)
     {
-        return new List<Gateway.Action>();
+        var summarisations = operationGroups
+            .Select(op => _actionInferrer.SummariseOperationGroup(op))
+            .ToList();
+
+        var allValidatorAddressesToLookup = new HashSet<string>();
+
+        foreach (var summarisation in summarisations)
+        {
+            allValidatorAddressesToLookup.AddRange(summarisation.PendingStakeValidatorAddressesSeen);
+        }
+
+        var stakeSnapshotsByValidatorAddress = allValidatorAddressesToLookup.Count > 0
+            ? await CreateValidatorAddressStakeSnapshotLookup(allValidatorAddressesToLookup, stateVersionForEstimate, token)
+            : new Dictionary<string, ValidatorStakeSnapshot>();
+
+        return summarisations
+            .Select(s => _actionInferrer.InferAction(false, s, stakeSnapshotsByValidatorAddress)?.Action)
+            .Where(s => s != null)
+            .Select(s => s!)
+            .ToList();
+    }
+
+    private async Task<Dictionary<string, ValidatorStakeSnapshot>> CreateValidatorAddressStakeSnapshotLookup(
+        HashSet<string> allValidatorAddressesToLookup,
+        long stateVersionForEstimate,
+        CancellationToken token
+    )
+    {
+        return await _dbContext.ValidatorStakeHistoryAtVersion(stateVersionForEstimate)
+            .Where(v => allValidatorAddressesToLookup.Contains(v.Validator.Address))
+            .Include(v => v.Validator)
+            .ToDictionaryAsync(
+                v => v.Validator.Address,
+                v => v.StakeSnapshot,
+                token
+            );
     }
 }

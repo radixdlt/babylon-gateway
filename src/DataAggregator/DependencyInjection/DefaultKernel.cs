@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
@@ -99,7 +100,9 @@ public class DefaultKernel
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
         services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
+        services.AddSingleton<IActionInferrer, ActionInferrer>();
         services.AddSingleton<ISystemStatusService, SystemStatusService>();
         services.AddSingleton<IMempoolTrackerService, MempoolTrackerService>();
         services.AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>();

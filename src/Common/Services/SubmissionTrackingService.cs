@@ -80,7 +80,8 @@ public interface ISubmissionTrackingService
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        Core.ConstructionParseResponse parseResponse
+        Core.ConstructionParseResponse parseResponse,
+        Gateway.LedgerState ledgerState
     );
 }
 
@@ -88,10 +89,12 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
     where T : CommonDbContext
 {
     private readonly T _dbContext;
+    private readonly IParsedTransactionMapper _parsedTransactionMapper;
 
-    public SubmissionTrackingService(T dbContext)
+    public SubmissionTrackingService(T dbContext, IParsedTransactionMapper parsedTransactionMapper)
     {
         _dbContext = dbContext;
+        _parsedTransactionMapper = parsedTransactionMapper;
     }
 
     public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
@@ -105,7 +108,8 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        Core.ConstructionParseResponse parseResponse
+        Core.ConstructionParseResponse parseResponse,
+        Gateway.LedgerState ledgerState
     )
     {
         var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
@@ -118,7 +122,7 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
             LastSubmittedToGatewayTimestamp = submittedTimestamp,
             LastSubmittedToNodeTimestamp = submittedTimestamp,
             LastSubmittedToNodeName = submittedToNodeName,
-            TransactionsContents = ParsedTransactionMapper.MapToGatewayTransactionContents(parseResponse),
+            TransactionsContents = await _parsedTransactionMapper.MapToGatewayTransactionContents(parseResponse, ledgerState._Version),
             Status = MempoolTransactionStatus.InNodeMempool,
         };
 

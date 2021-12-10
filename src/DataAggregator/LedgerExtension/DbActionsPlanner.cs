@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Joins;
@@ -74,6 +75,7 @@ using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using DataAggregator.GlobalServices;
 using Microsoft.EntityFrameworkCore;
+using InvalidTransactionException = DataAggregator.Exceptions.InvalidTransactionException;
 
 namespace DataAggregator.LedgerExtension;
 
