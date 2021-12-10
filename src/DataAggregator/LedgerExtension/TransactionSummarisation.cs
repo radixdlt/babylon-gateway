@@ -71,6 +71,12 @@ using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
 
+public record CommittedTransactionData(
+    CommittedTransaction CommittedTransaction,
+    TransactionSummary TransactionSummary,
+    byte[] TransactionContents
+);
+
 public record TransactionSummary(
     long StateVersion,
     long Epoch,

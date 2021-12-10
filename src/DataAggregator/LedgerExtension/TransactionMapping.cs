@@ -80,11 +80,14 @@ public static class TransactionMapping
         );
     }
 
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransaction transaction, TransactionSummary summary)
+    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
     {
+        var (transaction, summary, _) = transactionData;
+
         var fee = transaction.Metadata.Fee == null
             ? TokenAmount.Zero
             : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
+
         return new LedgerTransaction(
             resultantStateVersion: summary.StateVersion,
             transactionIdentifierHash: summary.TransactionIdentifierHash,

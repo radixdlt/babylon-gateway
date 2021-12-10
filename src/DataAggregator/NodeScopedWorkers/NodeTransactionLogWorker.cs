@@ -161,6 +161,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
                 "No new transactions found, sleeping for {DelayMs}ms",
                 GetRemainingRestartDelay().Milliseconds
             );
+            return;
         }
 
         var (committedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
