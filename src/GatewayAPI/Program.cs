@@ -161,12 +161,13 @@ var services = app.Services;
 
 var configuration = services.GetRequiredService<IConfiguration>();
 var programLogger = services.GetRequiredService<ILogger<Program>>();
+var isSwaggerEnabled = configuration.GetValue<bool>("EnableSwagger");
 
 // https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-6.0
 app.MapHealthChecks("/health");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (isSwaggerEnabled)
 {
     app.UseSwagger();
     app.UseSwaggerUI();

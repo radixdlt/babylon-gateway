@@ -117,7 +117,7 @@ public class AggregatorConfiguration : IAggregatorConfiguration
     public MempoolTimeouts GetMempoolTimeouts()
     {
         var mempoolPruneTimeouts = new MempoolTimeouts();
-        _configuration.GetSection("MempoolPruneTimeouts").Bind(mempoolPruneTimeouts);
+        _configuration.GetSection("MempoolTimeouts").Bind(mempoolPruneTimeouts);
         return mempoolPruneTimeouts;
     }
 

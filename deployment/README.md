@@ -41,3 +41,15 @@ Finally, you can bring up the whole stack with:
 ./build-and-start-network-gateway.sh
 ```
 
+### Links to try
+
+* GET http://localhost:5308/swagger/ - Swagger on Gateway API (if enabled)
+
+Or some diagnosis endpoints:
+
+* GET http://localhost:5207 - Root overview for Data Aggregator
+* GET http://localhost:5207/health - Health check on Data Aggregator
+* GET http://localhost:1234/metrics - Metrics for Data Aggregator
+* GET http://localhost:5308 - Root overview check for Gateway API
+* GET http://localhost:5308/health - Health check on Gateway API
+* GET http://localhost:1235/metrics - Metrics for Gateway API
