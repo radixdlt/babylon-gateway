@@ -242,7 +242,6 @@ public class TransactionQuerier : ITransactionQuerier
 
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions)
     {
-        // Should be fine, but if performance is bad, consider https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
         var transactionWithOperationGroups = await _dbContext.LedgerTransactions
             .Where(t => transactionStateVersions.Contains(t.ResultantStateVersion))
             .Include(t => t.SubstantiveOperationGroups)
@@ -255,7 +254,7 @@ public class TransactionQuerier : ITransactionQuerier
             .ThenInclude(op => op.InferredAction!.ToAccount)
             .Include(t => t.RawTransaction)
             .OrderByDescending(lt => lt.ResultantStateVersion)
-            .AsSplitQuery()
+            .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
             .ToListAsync();
 
         var gatewayTransactions = new List<Gateway.TransactionInfo>();
