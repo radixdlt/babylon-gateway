@@ -185,16 +185,18 @@ public class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
+        var transactionContents = mempoolTransaction.GetTransactionContents();
+
         var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
             MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                mempoolTransaction.TransactionsContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
-                mempoolTransaction.TransactionsContents.LedgerStateVersion ?? 0
+                transactionContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
+                transactionContents.LedgerStateVersion ?? 0
             ),
             MempoolTransactionStatus.InNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -202,11 +204,11 @@ public class TransactionQuerier : ITransactionQuerier
         return new Gateway.TransactionInfo(
             status,
             new Gateway.TransactionIdentifier(mempoolTransaction.TransactionIdentifierHash.ToHex()),
-            mempoolTransaction.TransactionsContents.Actions,
-            feePaid: TokenAmount.FromSubUnitsString(mempoolTransaction.TransactionsContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+            transactionContents.Actions,
+            feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
                 hex: mempoolTransaction.Payload.ToHex(),
-                message: mempoolTransaction.TransactionsContents.MessageHex
+                message: transactionContents.MessageHex
             )
         );
     }

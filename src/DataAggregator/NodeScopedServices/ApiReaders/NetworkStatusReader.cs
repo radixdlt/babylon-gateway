@@ -62,58 +62,37 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
-using RadixGatewayApi.Generated.Model;
-using Core = RadixCoreApi.Generated.Model;
+using DataAggregator.GlobalServices;
+using Prometheus;
+using RadixCoreApi.Generated.Api;
+using RadixCoreApi.Generated.Model;
 
-namespace GatewayAPI.Exceptions;
+namespace DataAggregator.NodeScopedServices.ApiReaders;
 
-public class InvalidTransactionException : ValidationException
+public interface INetworkStatusReader
 {
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
+    Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
+}
+
+public class NetworkStatusReader : INetworkStatusReader
+{
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly NetworkApi _networkApi;
+
+    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider)
     {
+        _networkConfigurationProvider = networkConfigurationProvider;
+        _networkApi = coreApiProvider.NetworkApi;
     }
 
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
+    public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-    }
-
-    public static InvalidTransactionException FromInvalidTransaction(
-        string invalidTransactionHex
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            $"Transaction is invalid"
-        );
-    }
-
-    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
-        string invalidTransactionHex,
-        Core.SubstateDependencyNotFoundError error
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "The transaction clashes with a previous transaction",
-            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
-        );
-    }
-
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(
-        string invalidTransactionHex,
-        MempoolTransactionFailureReason previousFailureReason
-    )
-    {
-        var userFacingMessage = previousFailureReason == MempoolTransactionFailureReason.DoubleSpend
-            ? "The transaction submission has already failed as it clashes with a previous transaction"
-            : "The transaction submission has already failed";
-
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            userFacingMessage
-        );
+        return await _networkApi
+            .NetworkStatusPostAsync(
+                new NetworkStatusRequest(
+                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
+                ),
+                token
+            );
     }
 }

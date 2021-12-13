@@ -62,58 +62,70 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
-using RadixGatewayApi.Generated.Model;
-using Core = RadixCoreApi.Generated.Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using NodaTime;
 
-namespace GatewayAPI.Exceptions;
+#nullable disable
 
-public class InvalidTransactionException : ValidationException
+namespace DataAggregator.Migrations
 {
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
+    public partial class FurtherTweaksToMempoolTransactions : Migration
     {
-    }
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "submission_failure_reason",
+                table: "mempool_transactions",
+                newName: "failure_reason");
 
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
-    {
-    }
+            migrationBuilder.RenameColumn(
+                name: "last_seen_in_mempool_timestamp",
+                table: "mempool_transactions",
+                newName: "last_missing_from_mempool_timestamp");
 
-    public static InvalidTransactionException FromInvalidTransaction(
-        string invalidTransactionHex
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            $"Transaction is invalid"
-        );
-    }
+            migrationBuilder.AddColumn<string>(
+                name: "failure_explanation",
+                table: "mempool_transactions",
+                type: "text",
+                nullable: true);
 
-    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
-        string invalidTransactionHex,
-        Core.SubstateDependencyNotFoundError error
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "The transaction clashes with a previous transaction",
-            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
-        );
-    }
+            migrationBuilder.AddColumn<Instant>(
+                name: "failure_timestamp",
+                table: "mempool_transactions",
+                type: "timestamp with time zone",
+                nullable: true);
 
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(
-        string invalidTransactionHex,
-        MempoolTransactionFailureReason previousFailureReason
-    )
-    {
-        var userFacingMessage = previousFailureReason == MempoolTransactionFailureReason.DoubleSpend
-            ? "The transaction submission has already failed as it clashes with a previous transaction"
-            : "The transaction submission has already failed";
+            migrationBuilder.AddColumn<int>(
+                name: "submission_count",
+                table: "mempool_transactions",
+                type: "integer",
+                nullable: false,
+                defaultValue: 0);
+        }
 
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            userFacingMessage
-        );
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "failure_explanation",
+                table: "mempool_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "failure_timestamp",
+                table: "mempool_transactions");
+
+            migrationBuilder.DropColumn(
+                name: "submission_count",
+                table: "mempool_transactions");
+
+            migrationBuilder.RenameColumn(
+                name: "last_missing_from_mempool_timestamp",
+                table: "mempool_transactions",
+                newName: "last_seen_in_mempool_timestamp");
+
+            migrationBuilder.RenameColumn(
+                name: "failure_reason",
+                table: "mempool_transactions",
+                newName: "submission_failure_reason");
+        }
     }
 }

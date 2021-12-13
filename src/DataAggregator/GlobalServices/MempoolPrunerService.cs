@@ -65,6 +65,7 @@
 using Common.Database.Models.Mempool;
 using DataAggregator.Configuration;
 using DataAggregator.DependencyInjection;
+using DataAggregator.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Core = RadixCoreApi.Generated.Model;
@@ -80,16 +81,19 @@ public class MempoolPrunerService : IMempoolPrunerService
 {
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolPrunerService> _logger;
 
     public MempoolPrunerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IAggregatorConfiguration aggregatorConfiguration,
+        ISystemStatusService systemStatusService,
         ILogger<MempoolPrunerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
         _aggregatorConfiguration = aggregatorConfiguration;
+        _systemStatusService = systemStatusService;
         _logger = logger;
     }
 
@@ -97,7 +101,7 @@ public class MempoolPrunerService : IMempoolPrunerService
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var times = _aggregatorConfiguration.GetMempoolTimeouts();
+        var times = _aggregatorConfiguration.GetMempoolConfiguration();
 
         var currTime = SystemClock.Instance.GetCurrentInstant();
 
@@ -107,11 +111,14 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         var pruneIfNotSeenSince = currTime.Minus(Duration.FromSeconds(times.PruneRequiresMissingFromMempoolForSeconds));
 
+        var aggregatorIsSyncedUp = _systemStatusService.IsSyncedUp();
+
         var transactionsToPrune = await dbContext.MempoolTransactions
             .Where(mt =>
                 (
-                    /* For committed transactions, remove from the mempool if */
+                    /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */
                     mt.Status == MempoolTransactionStatus.Committed
+                    && aggregatorIsSyncedUp
                     && mt.CommitTimestamp!.Value < pruneIfCommittedBefore
                 )
                 ||
@@ -119,14 +126,14 @@ public class MempoolPrunerService : IMempoolPrunerService
                     /* For those submitted by this gateway, prune if it was submitted a while ago and was not seen in the mempool recently */
                     mt.SubmittedByThisGateway
                     && mt.LastSubmittedToGatewayTimestamp!.Value < pruneIfLastGatewaySubmissionBefore
-                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value < pruneIfNotSeenSince)
+                    && (mt.LastDroppedOutOfMempoolTimestamp != null && mt.LastDroppedOutOfMempoolTimestamp < pruneIfNotSeenSince)
                 )
                 ||
                 (
                     /* For those not submitted by this gateway, prune if it first appeared a while ago and was not seen in the mempool recently */
                     !mt.SubmittedByThisGateway
                     && mt.FirstSeenInMempoolTimestamp!.Value < pruneIfFirstSeenBefore
-                    && (mt.LastSeenInMempoolTimestamp == null || mt.LastSeenInMempoolTimestamp.Value < pruneIfNotSeenSince)
+                    && (mt.LastDroppedOutOfMempoolTimestamp != null && mt.LastDroppedOutOfMempoolTimestamp < pruneIfNotSeenSince)
                 )
             )
             .ToListAsync(token);

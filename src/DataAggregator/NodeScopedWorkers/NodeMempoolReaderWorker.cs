@@ -71,6 +71,7 @@ using DataAggregator.NodeScopedServices.ApiReaders;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
+using System.Collections.Concurrent;
 
 namespace DataAggregator.NodeScopedWorkers;
 
@@ -132,6 +133,12 @@ public class NodeMempoolReaderWorker : LoopedWorkerBase, INodeWorker
         _mempoolItemsRemoved = _mempoolItemsRemovedUnScoped.WithLabels(nodeConfig.NodeAppSettings.Name);
     }
 
+    public bool IsEnabled()
+    {
+        var nodeConfig = _services.GetRequiredService<INodeConfigProvider>();
+        return nodeConfig.NodeAppSettings.Enabled && !nodeConfig.NodeAppSettings.DisabledForMempool;
+    }
+
     protected override async Task DoWork(CancellationToken stoppingToken)
     {
         await FetchAndShareMempoolTransactions(stoppingToken);
@@ -177,67 +184,47 @@ public class NodeMempoolReaderWorker : LoopedWorkerBase, INodeWorker
 
         foreach (var transaction in transactionsToAdd)
         {
-            _currentTransactions.Add(transaction.Id, transaction.TransactionData);
+            _currentTransactions.Add(transaction.Id, transaction);
         }
 
         if (transactionsToAdd.Count > 0 || transactionsToRemove.Count > 0)
         {
             _logger.LogInformation(
-                "Node mempool updated: {TransactionsAdded} transactions added and {TransactionsRemoved} transactions removed",
+                "Node mempool updated: {TransactionsAdded} txns added (fetched in {TransactionFetchMs}ms) and {TransactionsRemoved} txns removed",
                 transactionsToAdd.Count,
+                transactionFetchMs,
                 transactionsToRemove.Count
-            );
-            _logger.LogInformation(
-                "Node mempool transaction contents fetched in {TransactionFetchMs}ms",
-                transactionFetchMs
             );
         }
 
         _mempoolTrackerService.RegisterNodeMempool(_nodeConfig.NodeAppSettings.Name, new NodeMempoolContents(_currentTransactions));
     }
 
-    private async Task<List<TransactionDataWithId>> FetchTransactions(
+    private async Task<List<TransactionData>> FetchTransactions(
         ICoreApiProvider coreApiProvider,
         HashSet<byte[]> transactionsToFetch,
         CancellationToken stoppingToken
     )
     {
-        var list = new List<TransactionDataWithId>();
+        var fetchedTransactions = new ConcurrentBag<TransactionData>();
 
-        // Fetch them sequentially instead of in parallel to try to avoid overloading the node
-        foreach (var transactionId in transactionsToFetch)
-        {
-            var transactionData = await FetchTransaction(coreApiProvider, transactionId, 3, stoppingToken);
-            if (transactionData != null)
+        // Fetch max of 5 at a time to avoid overloading the node
+        await Parallel.ForEachAsync(
+            transactionsToFetch,
+            new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = stoppingToken },
+            async (transactionId, token) =>
             {
-                list.Add(transactionData);
-            }
-        }
+                var transactionData = await FetchTransaction(coreApiProvider, transactionId, token);
+                if (transactionData != null)
+                {
+                    fetchedTransactions.Add(transactionData);
+                }
+            });
 
-        return list;
+        return fetchedTransactions.ToList();
     }
 
-    private async Task<TransactionDataWithId?> FetchTransaction(
-        ICoreApiProvider coreApiProvider,
-        byte[] transactionId,
-        int retryCount,
-        CancellationToken stoppingToken
-    )
-    {
-        for (int i = 0; i < retryCount; i++)
-        {
-            var result = await FetchTransaction(coreApiProvider, transactionId, stoppingToken);
-
-            if (result != null)
-            {
-                return result;
-            }
-        }
-
-        return null;
-    }
-
-    private async Task<TransactionDataWithId?> FetchTransaction(
+    private async Task<TransactionData?> FetchTransaction(
         ICoreApiProvider coreApiProvider,
         byte[] transactionId,
         CancellationToken stoppingToken
@@ -253,13 +240,11 @@ public class NodeMempoolReaderWorker : LoopedWorkerBase, INodeWorker
                 stoppingToken
             );
 
-            return new TransactionDataWithId(
+            return new TransactionData(
                 transactionId,
-                new TransactionData(
-                    SystemClock.Instance.GetCurrentInstant(),
-                    response.Transaction.Metadata.Hex.ConvertFromHex(),
-                    response.Transaction
-                )
+                SystemClock.Instance.GetCurrentInstant(),
+                response.Transaction.Metadata.Hex.ConvertFromHex(),
+                response.Transaction
             );
         }
         catch (Exception)

@@ -69,4 +69,5 @@ namespace DataAggregator.NodeScopedWorkers;
 /// </summary>
 public interface INodeWorker : IHostedService, IDisposable
 {
+    public bool IsEnabled();
 }

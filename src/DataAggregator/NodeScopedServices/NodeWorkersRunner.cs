@@ -105,7 +105,9 @@ public class NodeWorkersRunner : IDisposable
         _logScope = logScope;
         _cancellationTokenSource = new CancellationTokenSource();
         _initializers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeInitializer>().ToList();
-        _workers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeWorker>().ToList();
+        _workers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeWorker>()
+            .Where(nw => nw.IsEnabled())
+            .ToList();
         Status = NodeWorkersRunnerStatus.Uninitialized;
     }
 

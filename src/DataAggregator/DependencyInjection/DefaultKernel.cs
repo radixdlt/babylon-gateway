@@ -150,6 +150,7 @@ public class DefaultKernel
         // These should be transient so that they don't capture a transient HttpClient
         services.AddTransient<ITransactionLogReader, TransactionLogReader>();
         services.AddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
+        services.AddTransient<INetworkStatusReader, NetworkStatusReader>();
     }
 
     private void AddNodeInitializers(IServiceCollection services)
@@ -163,6 +164,7 @@ public class DefaultKernel
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
         services.AddScoped<INodeWorker, NodeMempoolReaderWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolCommitWhenUnsyncedWorker>();
     }
 
     private HttpClientHandler ConfigureHttpClientHandler(

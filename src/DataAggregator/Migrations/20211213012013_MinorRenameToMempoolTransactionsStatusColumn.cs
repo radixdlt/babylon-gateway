@@ -62,58 +62,28 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
-using RadixGatewayApi.Generated.Model;
-using Core = RadixCoreApi.Generated.Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace GatewayAPI.Exceptions;
+#nullable disable
 
-public class InvalidTransactionException : ValidationException
+namespace DataAggregator.Migrations
 {
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
+    public partial class MinorRenameToMempoolTransactionsStatusColumn : Migration
     {
-    }
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "submission_status",
+                table: "mempool_transactions",
+                newName: "status");
+        }
 
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
-    {
-    }
-
-    public static InvalidTransactionException FromInvalidTransaction(
-        string invalidTransactionHex
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            $"Transaction is invalid"
-        );
-    }
-
-    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
-        string invalidTransactionHex,
-        Core.SubstateDependencyNotFoundError error
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "The transaction clashes with a previous transaction",
-            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
-        );
-    }
-
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(
-        string invalidTransactionHex,
-        MempoolTransactionFailureReason previousFailureReason
-    )
-    {
-        var userFacingMessage = previousFailureReason == MempoolTransactionFailureReason.DoubleSpend
-            ? "The transaction submission has already failed as it clashes with a previous transaction"
-            : "The transaction submission has already failed";
-
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            userFacingMessage
-        );
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "status",
+                table: "mempool_transactions",
+                newName: "submission_status");
+        }
     }
 }

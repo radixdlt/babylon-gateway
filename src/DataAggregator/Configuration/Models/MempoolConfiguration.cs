@@ -66,7 +66,7 @@ using NodaTime;
 
 namespace DataAggregator.Configuration.Models;
 
-public record MempoolTimeouts
+public record MempoolConfiguration
 {
     [ConfigurationKeyName("PruneCommittedAfterSeconds")]
     public long PruneCommittedAfterSeconds { get; set; } = 10;
@@ -75,6 +75,13 @@ public record MempoolTimeouts
 
     [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
     public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
+
+    // NB - A transaction goes missing from the mempool when it gets put onto the ledger, but it may take some time
+    // for the aggregator to see the committed transaction. This delay should be long enough that, under normal
+    // operation, we'll have seen the transaction committed before we attempt to resubmit it -- as resubmitting a
+    // committed transaction will result in us seeing a double spend, and marking it as failed incorrectly
+    [ConfigurationKeyName("MinDelayBetweenMissingFromMempoolAndResubmissionSeconds")]
+    public long MinDelayBetweenMissingFromMempoolAndResubmissionSeconds { get; set; } = 10;
 
     public Duration MinDelayBetweenResubmissions => Duration.FromSeconds(MinDelayBetweenResubmissionsSeconds);
 

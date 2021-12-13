@@ -92,6 +92,7 @@ public class RawTransactionWriter : IRawTransactionWriter
     public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
     {
         var transactionsById = transactionData
+            .Where(td => !td.TransactionSummary.IsOnlyRoundChange)
             .ToDictionary(
                 rt => rt.TransactionSummary.TransactionIdentifierHash,
                 ByteArrayEqualityComparer.Default
@@ -103,14 +104,11 @@ public class RawTransactionWriter : IRawTransactionWriter
 
         foreach (var mempoolTransaction in toUpdate)
         {
-            mempoolTransaction.CommitTimestamp = SystemClock.Instance.GetCurrentInstant();
-            mempoolTransaction.Status = MempoolTransactionStatus.Committed;
-
-            var transaction = transactionsById[mempoolTransaction.TransactionIdentifierHash];
-            mempoolTransaction.TransactionsContents.ConfirmedTime =
-                transaction.TransactionSummary.NormalizedTimestamp.ToDateTimeUtc();
-            mempoolTransaction.TransactionsContents.LedgerStateVersion
-                = transaction.TransactionSummary.StateVersion;
+            var transactionSummary = transactionsById[mempoolTransaction.TransactionIdentifierHash].TransactionSummary;
+            mempoolTransaction.MarkAsCommitted(
+                transactionSummary.StateVersion,
+                transactionSummary.NormalizedTimestamp
+            );
         }
 
         return await context.SaveChangesAsync(token);

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Mempool;
 using Common.Exceptions;
 using Common.Extensions;
 using Common.Services;
@@ -279,6 +280,27 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     {
         var parseResponse = await HandleParseSignedTransaction(signedTransaction);
 
+        var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(
+            signedTransaction.Bytes,
+            transactionIdentifierHash,
+            _coreApiHandler.GetCoreNodeConnectedTo().Name,
+            parseResponse,
+            ledgerState
+        );
+
+        if (mempoolTrackGuidance.TransactionAlreadyFailedReason != null)
+        {
+            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
+                signedTransaction.AsString,
+                mempoolTrackGuidance.TransactionAlreadyFailedReason.Value
+            );
+        }
+
+        if (!mempoolTrackGuidance.ShouldSubmitToNode)
+        {
+            return;
+        }
+
         try
         {
             await _coreApiHandler.SubmitTransaction(new Core.ConstructionSubmitRequest(
@@ -288,41 +310,54 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
         {
+            await _submissionTrackingService.MarkAsFailed(
+                transactionIdentifierHash,
+                MempoolTransactionFailureReason.DoubleSpend,
+                "Double spend on initial submission"
+            );
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
+            await _submissionTrackingService.MarkAsFailed(
+                transactionIdentifierHash,
+                MempoolTransactionFailureReason.Unknown,
+                $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission"
+            );
             throw InvalidTransactionException.FromInvalidTransaction(signedTransaction.AsString);
         }
-        catch (KnownGatewayErrorException)
+        catch (KnownGatewayErrorException ex)
         {
             // This is a client error which has already been identified - in the mapping from the Core API
             // so the transaction is invalid, and we can let it bubble up
+            await _submissionTrackingService.MarkAsFailed(
+                transactionIdentifierHash,
+                MempoolTransactionFailureReason.Unknown,
+                $"Known Gateway Error: {ex.GetType().Name} on initial submission"
+            );
             throw;
         }
         catch (WrappedCoreApiException ex) when (!ex.Properties.HasUndefinedBehaviour)
         {
             // Any other known Core exception which can't result in the transaction being submitted
+            await _submissionTrackingService.MarkAsFailed(
+                transactionIdentifierHash,
+                MempoolTransactionFailureReason.Unknown,
+                $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission"
+            );
             throw;
         }
         catch (Exception ex)
         {
             // Any other kind of exception is unknown - eg it could be a connection drop or a 500 from the Core API
             // In theory, the transaction could have been submitted -- so we return success and
-            // mark it as PENDING -- and we'll retry automatically if the transaction is not committed within a while
+            // if it wasn't submitted successfully, it'll be retried automatically by the resubmission service in
+            // any case.
             _logger.LogWarning(
                 ex,
                 "Unknown error submitting transaction with hash {TransactionHash}",
                 transactionIdentifierHash.ToHex()
             );
         }
-
-        await _submissionTrackingService.TrackInitialSubmission(
-            signedTransaction.Bytes,
-            transactionIdentifierHash,
-            _coreApiHandler.GetCoreNodeConnectedTo().Name,
-            parseResponse,
-            ledgerState
-        );
     }
 }

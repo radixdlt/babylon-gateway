@@ -64,7 +64,6 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
-using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Common.Numerics;
 using DataAggregator.Extensions;
@@ -84,14 +83,6 @@ public interface IActionInferrer
     );
 }
 
-public class InvalidTransactionException : Exception
-{
-    public InvalidTransactionException(string message)
-        : base(message)
-    {
-    }
-}
-
 public record GatewayInferredAction(InferredActionType Type, Gateway.Action? Action);
 
 public record EntityResource(Entity Entity, Core.ResourceIdentifier ResourceIdentifier);
@@ -107,6 +98,14 @@ public record OperationGroupSummarisation(
 public class ActionInferrer : IActionInferrer
 {
     private readonly IEntityDeterminer _entityDeterminer;
+
+    public class InvalidTransactionException : Exception
+    {
+        public InvalidTransactionException(string message)
+            : base(message)
+        {
+        }
+    }
 
     public ActionInferrer(IEntityDeterminer entityDeterminer)
     {

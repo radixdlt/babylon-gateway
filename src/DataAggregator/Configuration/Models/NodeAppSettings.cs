@@ -93,6 +93,12 @@ public record NodeAppSettings
     public decimal TrustWeighting { get; set; } = 1;
 
     /// <summary>
+    /// Relative weighting of the node.
+    /// </summary>
+    [ConfigurationKeyName("RequestWeighting")]
+    public decimal RequestWeighting { get; set; } = 1;
+
+    /// <summary>
     /// If false, the node should not be used.
     /// </summary>
     [ConfigurationKeyName("Enabled")]
@@ -106,6 +112,18 @@ public record NodeAppSettings
 
     // Note -- this is to support the legacy EnabledForIndexing property
     public bool Enabled => ConfigEnabled ?? ConfigEnabledForIndexing ?? false;
+
+    [ConfigurationKeyName("DisabledForTransactionIndexing")]
+    public bool DisabledForTransactionIndexing { get; set; } = false;
+
+    [ConfigurationKeyName("DisabledForTopOfTransactionReadingIfNotFullySynced")]
+    public bool DisabledForTopOfTransactionReadingIfNotFullySynced { get; set; } = false;
+
+    [ConfigurationKeyName("DisabledForMempool")]
+    public bool DisabledForMempool { get; set; } = false;
+
+    [ConfigurationKeyName("DisabledForConstruction")]
+    public bool DisabledForConstruction { get; set; } = false;
 
     public void AssertValid()
     {

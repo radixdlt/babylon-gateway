@@ -72,11 +72,13 @@ namespace DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport);
+    void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport, bool isSyncedUp);
 
     void RecordTopOfLedger(TransactionSummary topOfLedger);
 
     bool IsPrimary();
+
+    bool IsSyncedUp();
 
     HealthReport GenerateTransactionCommitmentHealthReport();
 }
@@ -107,6 +109,7 @@ public class SystemStatusService : ISystemStatusService
     private readonly IConfiguration _configuration;
 
     private Instant? _lastTransactionCommitment;
+    private bool _isSyncedUp = false;
 
     private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
 
@@ -117,12 +120,13 @@ public class SystemStatusService : ISystemStatusService
         _configuration = configuration;
     }
 
-    public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport)
+    public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport, bool isSyncedUp)
     {
         _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
         _committedTransactions.Inc(committedTransactionReport.TransactionsCommittedCount);
         _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
         RecordTopOfLedger(committedTransactionReport.FinalTransaction);
+        _isSyncedUp = isSyncedUp;
     }
 
     public void RecordTopOfLedger(TransactionSummary topOfLedger)
@@ -130,6 +134,11 @@ public class SystemStatusService : ISystemStatusService
         _ledgerStateVersion.Set(topOfLedger.StateVersion);
         _ledgerUnixTimestamp.Set(topOfLedger.NormalizedTimestamp.ToUnixTimeSeconds());
         _ledgerSecondsBehind.Set(topOfLedger.NormalizedTimestamp.GetTimeAgo().TotalSeconds);
+    }
+
+    public bool IsSyncedUp()
+    {
+        return _isSyncedUp;
     }
 
     public bool IsPrimary()

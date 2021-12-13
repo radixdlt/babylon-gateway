@@ -184,7 +184,7 @@ public static class TransactionSummarisation
         );
     }
 
-    private static TransactionSummary PreGenesisTransactionSummary()
+    public static TransactionSummary PreGenesisTransactionSummary()
     {
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(

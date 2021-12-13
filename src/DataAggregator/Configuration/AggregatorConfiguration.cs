@@ -73,7 +73,7 @@ public interface IAggregatorConfiguration
 
     string GetNetworkName();
 
-    MempoolTimeouts GetMempoolTimeouts();
+    MempoolConfiguration GetMempoolConfiguration();
 }
 
 public class AggregatorConfiguration : IAggregatorConfiguration
@@ -114,10 +114,10 @@ public class AggregatorConfiguration : IAggregatorConfiguration
         return nodesList;
     }
 
-    public MempoolTimeouts GetMempoolTimeouts()
+    public MempoolConfiguration GetMempoolConfiguration()
     {
-        var mempoolPruneTimeouts = new MempoolTimeouts();
-        _configuration.GetSection("MempoolTimeouts").Bind(mempoolPruneTimeouts);
+        var mempoolPruneTimeouts = new MempoolConfiguration();
+        _configuration.GetSection("MempoolConfiguration").Bind(mempoolPruneTimeouts);
         return mempoolPruneTimeouts;
     }
 
