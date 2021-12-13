@@ -219,6 +219,7 @@ public class TransactionQuerier : ITransactionQuerier
             .Where(at =>
                 at.Account.Address == accountAddress.Address
                 && at.ResultantStateVersion <= ledgerState._Version
+                && !at.LedgerTransaction.IsStartOfEpoch
             )
             .CountAsync();
     }
@@ -231,6 +232,7 @@ public class TransactionQuerier : ITransactionQuerier
             .Where(at =>
                 at.Account.Address == request.AccountAddress.Address
                 && at.ResultantStateVersion <= stateVersionUpperBound
+                && !at.LedgerTransaction.IsStartOfEpoch
             )
             .OrderByDescending(at => at.ResultantStateVersion)
             .Take(request.PageSize + 1)
@@ -252,6 +254,8 @@ public class TransactionQuerier : ITransactionQuerier
             .Include(t => t.SubstantiveOperationGroups) // https://stackoverflow.com/a/50898208
             .ThenInclude(op => op.InferredAction!.ToAccount)
             .Include(t => t.RawTransaction)
+            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .AsSplitQuery()
             .ToListAsync();
 
         var gatewayTransactions = new List<Gateway.TransactionInfo>();
@@ -286,7 +290,7 @@ public class TransactionQuerier : ITransactionQuerier
             gatewayActions,
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
-                hex: ledgerTransaction.RawTransaction!.TransactionIdentifierHash.ToHex(),
+                hex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
                 message: ledgerTransaction.Message?.ToHex()
             )
         );

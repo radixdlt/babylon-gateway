@@ -104,6 +104,10 @@ public class Accounting
         return _trackedTotals;
     }
 
+    /// <summary>
+    /// This captures all transactions where the entity or subentity is the relevant account, so it will
+    /// also capture start of epoch transactions where one of the stake subentities are involved.
+    /// </summary>
     public HashSet<string> GetReferencedAccountAddresses()
     {
         return _trackedTotals
