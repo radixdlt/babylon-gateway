@@ -187,7 +187,7 @@ public class CommonDbContext : DbContext
 
         // This index lets you quickly translate Time => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.NormalizedTimestamp);
+            .HasIndex(lt => lt.RoundTimestamp);
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder.Entity<LedgerTransaction>()

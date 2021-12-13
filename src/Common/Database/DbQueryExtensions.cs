@@ -129,8 +129,8 @@ public static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.NormalizedTimestamp <= timestamp)
-            .OrderByDescending(lt => lt.NormalizedTimestamp)
+            .Where(lt => lt.RoundTimestamp <= timestamp)
+            .OrderByDescending(lt => lt.RoundTimestamp)
             .ThenByDescending(lt => lt.ResultantStateVersion)
             .Take(1);
     }

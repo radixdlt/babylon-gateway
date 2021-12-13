@@ -283,7 +283,7 @@ public class TransactionQuerier : ITransactionQuerier
         return new Gateway.TransactionInfo(
             new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                confirmedTime: ledgerTransaction.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
+                confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
             ledgerTransaction.TransactionIdentifierHash.AsGatewayTransactionIdentifier(),

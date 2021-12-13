@@ -206,7 +206,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return await query
             .Select(lt => new LedgerState(
                 lt.ResultantStateVersion,
-                lt.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
+                lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 lt.Epoch,
                 lt.RoundInEpoch
             ))

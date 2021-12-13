@@ -149,8 +149,8 @@ public class LedgerTransaction
     public bool IsStartOfRound { get; set; }
 
     /// <summary>
-    /// The round timestamp is derived as an average of the timestamp of all the validators performing consensus.
-    /// As a consequence of this, it is not guaranteed to be increasing, and it may be affected by Byzantine nodes.
+    /// The round timestamp is derived as the median of the timestamp of all the validators performing consensus.
+    /// As a consequence of this, it is not guaranteed to be increasing.
     /// </summary>
     [Column(name: "round_timestamp")]
     public Instant RoundTimestamp { get; set; }
@@ -166,8 +166,7 @@ public class LedgerTransaction
     /// If calculates itself by clamping RoundTimestamp between the previous NormalizedTimestamp and CreatedTimestamp.
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
-    // TODO:NG-51 - Further improvements
-    [Column(name: "timestamp")]
+    [Column(name: "normalized_timestamp")]
     public Instant NormalizedTimestamp { get; set; }
 
     [InverseProperty(nameof(LedgerOperationGroup.LedgerTransaction))]
