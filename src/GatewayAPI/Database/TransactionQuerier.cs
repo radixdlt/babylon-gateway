@@ -273,7 +273,7 @@ public class TransactionQuerier : ITransactionQuerier
 
         foreach (var operationGroup in ledgerTransaction.SubstantiveOperationGroups)
         {
-            var action = await GetAction(operationGroup);
+            var action = await GetAction(ledgerTransaction, operationGroup);
             if (action != null)
             {
                 gatewayActions.Add(action);
@@ -296,7 +296,7 @@ public class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private async Task<Gateway.Action?> GetAction(LedgerOperationGroup operationGroup)
+    private async Task<Gateway.Action?> GetAction(LedgerTransaction ledgerTransaction, LedgerOperationGroup operationGroup)
     {
         var inferredAction = operationGroup.InferredAction;
         if (inferredAction?.Type == null)
@@ -345,10 +345,12 @@ public class TransactionQuerier : ITransactionQuerier
                 toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
                 amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
             ),
-            InferredActionType.PayXrd => new Gateway.BurnTokens(
-                fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
+            InferredActionType.PayXrd => inferredAction.Amount!.Value == ledgerTransaction.FeePaid
+                ? null // Filter out fee payments
+                : new Gateway.BurnTokens(
+                    fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
+                    amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
+                ),
             InferredActionType.Complex => null,
             _ => throw new ArgumentOutOfRangeException(),
         };
