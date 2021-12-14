@@ -73,6 +73,7 @@ using DataAggregator.DependencyInjection;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
@@ -146,15 +147,19 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             );
         }
 
-        var submittedAt = DateTime.UtcNow;
+        var submittedAt = SystemClock.Instance.GetCurrentInstant();
         var submissionResults = await ResubmitAll(transactionsToResubmit, token);
 
-        foreach (var (transaction, failed, failureReason, nodeName) in submissionResults)
+        foreach (var (transaction, failed, failureReason, failureExplanation, nodeName) in submissionResults)
         {
-            transaction.Status = failed ? MempoolTransactionStatus.Failed : MempoolTransactionStatus.InNodeMempool;
-            transaction.SubmissionFailureReason = failureReason;
-            transaction.LastSubmittedToNodeTimestamp = submittedAt;
-            transaction.LastSubmittedToNodeName = nodeName;
+            if (failed)
+            {
+                transaction.MarkAsInvalidOnceSubmittedToNode(nodeName, failureReason!.Value, failureExplanation!, submittedAt);
+            }
+            else
+            {
+                transaction.MarkAsSuccessfullySubmittedToNode(nodeName, submittedAt);
+            }
         }
 
         await dbContext.SaveChangesAsync(token);
@@ -162,13 +167,20 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(AggregatorDbContext dbContext)
     {
-        var timeouts = _aggregatorConfiguration.GetMempoolTimeouts();
+        var timeouts = _aggregatorConfiguration.GetMempoolConfiguration();
+
+        var allowResubmissionIfLastSubmittedBefore = SystemClock.Instance.GetCurrentInstant() -
+                                                     Duration.FromSeconds(timeouts.MinDelayBetweenResubmissionsSeconds);
+
+        var allowResubmissionIfDroppedOutOfMempoolBefore = SystemClock.Instance.GetCurrentInstant() -
+                                                     Duration.FromSeconds(timeouts.MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
 
         return dbContext.MempoolTransactions
             .Where(mt =>
                 mt.SubmittedByThisGateway
-                && mt.Status == MempoolTransactionStatus.Missing
-                && mt.LastSubmittedToNodeTimestamp!.Value.AddSeconds(timeouts.MinDelayBetweenResubmissionsSeconds) < DateTime.UtcNow
+                && mt.Status == MempoolTransactionStatus.Missing // This needs to be marked this way by the MempoolTrackerService
+                && mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore
+                && mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore
             );
     }
 
@@ -176,39 +188,18 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         MempoolTransaction MempoolTransaction,
         bool TransactionInvalid,
         MempoolTransactionFailureReason? FailureReason,
+        string? SubmissionFailureExplanation,
         string NodeName
     );
 
     private async Task<SubmissionResult[]> ResubmitAll(List<MempoolTransaction> transactionsToResubmit, CancellationToken token)
     {
-        return await Task.WhenAll(transactionsToResubmit.Select(t => ResubmitWithRetries(t, 3, token)));
+        return await Task.WhenAll(transactionsToResubmit.Select(t => Resubmit(t, token)));
     }
 
-    private async Task<SubmissionResult> ResubmitWithRetries(MempoolTransaction transaction, int retryCount, CancellationToken cancellationToken)
+    private async Task<SubmissionResult> Resubmit(MempoolTransaction transaction, CancellationToken cancellationToken)
     {
-        var nodesInWeightedOrder = _aggregatorConfiguration.GetNodes()
-            .Where(n => n.Enabled)
-            .GetWeightedRandomOrdering(n => 1);
-
-        NodeAppSettings? chosenNode = null;
-
-        for (int i = 0; i < retryCount; i++)
-        {
-            chosenNode = i < nodesInWeightedOrder.Count ? nodesInWeightedOrder[i] : GetRandomCoreApi();
-            var result = await Resubmit(chosenNode, transaction, cancellationToken);
-
-            if (result != null)
-            {
-                return result;
-            }
-        }
-
-        // Failed a few times for unknown reasons - we have to assume that the transaction was submitted for now...
-        return new SubmissionResult(transaction, false, null, chosenNode!.Name);
-    }
-
-    private async Task<SubmissionResult?> Resubmit(NodeAppSettings chosenNode, MempoolTransaction transaction, CancellationToken cancellationToken)
-    {
+        var chosenNode = GetRandomCoreApi();
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().NodeAppSettings = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
@@ -223,7 +214,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await
                 coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(submitRequest, cancellationToken)
             );
-            return new SubmissionResult(transaction, false, null, chosenNode.Name);
+            return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
@@ -231,24 +222,26 @@ public class MempoolResubmissionService : IMempoolResubmissionService
                 "Dropping transaction because of a double spend - possibly it's already been committed. Substate Identifier: {Substate}",
                 ex.Error.SubstateIdentifierNotFound.Identifier
             );
-            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.DoubleSpend, chosenNode.Name);
+            var failureExplanation = "Double spend on resubmission";
+            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.DoubleSpend, failureExplanation, chosenNode.Name);
         }
         catch (WrappedCoreApiException ex) when (!ex.Properties.HasUndefinedBehaviour)
         {
-            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, chosenNode.Name);
+            var failureExplanation = $"Core API Exception: {ex.Error.GetType().Name} on resubmission";
+            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, failureExplanation, chosenNode.Name);
         }
         catch (Exception)
         {
             // Unsure of what the problem is -- it could be that the connection died or there was an internal server error
-            // Return null to try
-            return null;
+            // We have to assume the submission may have succeeded and wait for resubmission if not.
+            return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
     }
 
     private NodeAppSettings GetRandomCoreApi()
     {
         return _aggregatorConfiguration.GetNodes()
-            .Where(n => n.Enabled)
+            .Where(n => n.Enabled && !n.DisabledForConstruction)
             .GetRandomBy(_ => 1);
     }
 }

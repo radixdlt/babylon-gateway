@@ -62,65 +62,37 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
-using NodaTime;
+using Prometheus;
+using RadixCoreApi.Generated.Api;
+using RadixCoreApi.Generated.Model;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.NodeScopedServices.ApiReaders;
 
-/// <summary>
-/// Responsible for reading the config, and ensuring workers are running for each node.
-/// </summary>
-public class NodeConfigurationMonitorWorker : LoopedWorkerBase
+public interface INetworkStatusReader
 {
-    private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
-    private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
-    private readonly IAggregatorConfiguration _configuration;
+    Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
+}
 
-    public NodeConfigurationMonitorWorker(
-        ILogger<NodeConfigurationMonitorWorker> logger,
-        IAggregatorConfiguration configuration,
-        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry
-    )
-        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(60))
+public class NetworkStatusReader : INetworkStatusReader
+{
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly NetworkApi _networkApi;
+
+    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider)
     {
-        _logger = logger;
-        _configuration = configuration;
-        _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
+        _networkConfigurationProvider = networkConfigurationProvider;
+        _networkApi = coreApiProvider.NetworkApi;
     }
 
-    protected override async Task DoWork(CancellationToken stoppingToken)
+    public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-        await HandleNodeConfiguration(stoppingToken);
-    }
-
-    protected override async Task OnStop(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Received cancellation at: {Time} - instructing all node workers to stop", SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
-        await _nodeWorkersRunnerRegistry.StopAllWorkers(stoppingToken);
-        _logger.LogInformation("Instructed all workers to stop");
-    }
-
-    private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
-    {
-        var nodeConfiguration = _configuration.GetNodes();
-
-        var enabledNodes = nodeConfiguration
-            .Where(n => n.Enabled)
-            /* TODO:NG-12 - Enable syncing from more than one node! */
-            .Take(1)
-            .ToList();
-
-        await Task.WhenAll(
-            UpdateNodeConfigurationInDatabaseIfNeeded(),
-            _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken)
-        );
-    }
-
-    private Task UpdateNodeConfigurationInDatabaseIfNeeded()
-    {
-        // TODO:NG-12 - Ensure we write this if it's needed, or we get rid of this if it's not
-        return Task.CompletedTask;
+        return await _networkApi
+            .NetworkStatusPostAsync(
+                new NetworkStatusRequest(
+                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
+                ),
+                token
+            );
     }
 }

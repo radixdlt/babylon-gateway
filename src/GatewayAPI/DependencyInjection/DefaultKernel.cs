@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Services;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
@@ -92,10 +93,13 @@ public class DefaultKernel
     {
         services.AddSingleton<IGatewayApiConfiguration, GatewayApiConfiguration>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IValidations, Validations>();
         services.AddSingleton<IExceptionHandler, ExceptionHandler>();
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.AddSingleton<ICoreApiHandler, CoreApiHandler>();
+        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
+        services.AddSingleton<IActionInferrer, ActionInferrer>();
     }
 
     private void AddRequestScopedServices(IServiceCollection services)
@@ -107,6 +111,7 @@ public class DefaultKernel
         services.AddScoped<ITransactionQuerier, TransactionQuerier>();
         services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
         services.AddScoped<ISubmissionTrackingService, SubmissionTrackingService<GatewayReadWriteDbContext>>();
+        services.AddScoped<IParsedTransactionMapper, ParsedTransactionMapper<GatewayReadWriteDbContext>>();
     }
 
     private void AddCoreApiServices(IServiceCollection services)
@@ -127,7 +132,10 @@ public class DefaultKernel
         services.AddDbContext<GatewayReadOnlyDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"));
+            options.UseNpgsql(
+                hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"),
+                o => o.UseNodaTime()
+            );
         });
     }
 
@@ -136,7 +144,10 @@ public class DefaultKernel
         services.AddDbContext<GatewayReadWriteDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(hostContext.Configuration.GetConnectionString("ReadWriteDbContext"));
+            options.UseNpgsql(
+                hostContext.Configuration.GetConnectionString("ReadWriteDbContext"),
+                o => o.UseNodaTime()
+            );
         });
     }
 

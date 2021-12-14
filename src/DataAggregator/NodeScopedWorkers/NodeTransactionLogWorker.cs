@@ -67,6 +67,7 @@ using Common.Utilities;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
 using DataAggregator.Monitoring;
+using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
@@ -116,11 +117,17 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         IServiceProvider services,
         ISystemStatusService systemStatusService
     )
-        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
+        : base(logger, TimeSpan.FromMilliseconds(300), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;
         _systemStatusService = systemStatusService;
+    }
+
+    public bool IsEnabled()
+    {
+        var nodeConfig = _services.GetRequiredService<INodeConfigProvider>();
+        return nodeConfig.NodeAppSettings.Enabled && !nodeConfig.NodeAppSettings.DisabledForTransactionIndexing;
     }
 
     protected override async Task DoWork(CancellationToken stoppingToken)
@@ -161,6 +168,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
                 "No new transactions found, sleeping for {DelayMs}ms",
                 GetRemainingRestartDelay().Milliseconds
             );
+            return;
         }
 
         var (committedTransactionReport, totalCommitTransactionsMs) = await CodeStopwatch.TimeInMs(
@@ -171,7 +179,9 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
             )
         );
 
-        _systemStatusService.RecordTransactionsCommitted(committedTransactionReport);
+        var isSyncedUp = transactionsResponse.Transactions.Count < TransactionsToPull;
+
+        _systemStatusService.RecordTransactionsCommitted(committedTransactionReport, isSyncedUp);
         _totalCommitTimeSeconds.Observe(totalCommitTransactionsMs / 1000D);
 
         _logger.LogInformation(

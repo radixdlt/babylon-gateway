@@ -62,78 +62,59 @@
  * permissions under this License.
  */
 
+using NodaTime;
+
 namespace Common.Extensions;
 
 public static class DateTimeExtensions
 {
+    public static string AsUtcIsoDateWithMillisString(this Instant instant)
+    {
+        return instant.ToDateTimeUtc().ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
+    }
+
     public static string AsUtcIsoDateWithMillisString(this DateTime dateTime)
     {
         return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
     }
 
-    public static string AsUtcIsoDateToSecondsForLogs(this DateTime dateTime)
+    public static string AsUtcIsoDateToSecondsForLogs(this Instant instant)
     {
-        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
+        return instant.ToDateTimeUtc().ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
     }
 
-    public static TimeSpan GetTimeAgo(this DateTime dateTime)
+    public static Duration GetTimeAgo(this Instant instant)
     {
-        return DateTimeOffset.UtcNow - dateTime;
+        return SystemClock.Instance.GetCurrentInstant() - instant;
     }
 
-    public static TimeSpan GetTimeAgo(this DateTimeOffset dateTime)
+    public static Duration Absolute(this Duration duration)
     {
-        return DateTimeOffset.UtcNow - dateTime;
+        return duration.BclCompatibleTicks >= 0 ? duration : -duration;
     }
 
-    public static double GetUnixTimestampSeconds(this DateTime dateTime)
+    public static bool WithinPeriodOfNow(this Instant dateTime, Duration duration)
     {
-        return (dateTime - DateTimeOffset.UnixEpoch).TotalSeconds;
+        return dateTime.GetTimeAgo().Absolute() <= duration;
     }
 
-    public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan period)
-    {
-        return dateTime.GetTimeAgo().Duration() <= period;
-    }
-
-    public static bool WithinPeriodOfNow(this DateTime dateTime, TimeSpan period)
-    {
-        return dateTime.GetTimeAgo().Duration() <= period;
-    }
-
-    public static bool WithinPeriod(this DateTime? dateTime, TimeSpan period)
-    {
-        return dateTime != null && dateTime.Value.WithinPeriodOfNow(period);
-    }
-
-    public static bool NotWithinPeriod(this DateTime? dateTime, TimeSpan period)
-    {
-        return !dateTime.WithinPeriod(period);
-    }
-
-    public static DateTime LatestOf(DateTime a, DateTime b)
+    public static Instant LatestOf(Instant a, Instant b)
     {
         return a >= b ? a : b;
     }
 
-    public static DateTime EarliestOf(DateTime a, DateTime b)
+    public static string FormatSecondsHumanReadable(this Duration duration)
     {
-        return a <= b ? a : b;
+        return $"{duration.Absolute().TotalSeconds:F3}s";
     }
 
-    public static string FormatSecondsHumanReadable(this TimeSpan period)
+    public static string FormatSecondsAgo(this Instant dateTime)
     {
-        var duration = period.Duration();
-        return $"{duration.TotalSeconds:F3}s";
+        return $"{(SystemClock.Instance.GetCurrentInstant() - dateTime).FormatSecondsHumanReadable()} ago";
     }
 
-    public static string FormatSecondsAgo(this DateTimeOffset dateTime)
+    public static string FormatSecondsAgo(this Instant? dateTime)
     {
-        return $"{(DateTimeOffset.UtcNow - dateTime).FormatSecondsHumanReadable()} ago";
-    }
-
-    public static string FormatSecondsAgo(this DateTimeOffset? dateTime)
-    {
-        return dateTime == null ? "never" : $"{(DateTimeOffset.UtcNow - dateTime.Value).FormatSecondsHumanReadable()} ago";
+        return dateTime == null ? "never" : $"{(SystemClock.Instance.GetCurrentInstant() - dateTime.Value).FormatSecondsHumanReadable()} ago";
     }
 }

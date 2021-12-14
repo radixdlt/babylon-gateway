@@ -70,6 +70,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -77,8 +78,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    [Migration("20211203123741_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20211213173329_UseRoundTimestampOverNormalizedTimestamp")]
+    partial class UseRoundTimestampOverNormalizedTimestamp
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -225,6 +226,31 @@ namespace DataAggregator.Migrations
                     b.ToTable("validator_stake_history");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.Joins.AccountTransaction", b =>
+                {
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<long>("ResultantStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
+
+                    b.Property<bool>("IsFeePayer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_fee_payer");
+
+                    b.Property<bool>("IsSigner")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_signer");
+
+                    b.HasKey("AccountId", "ResultantStateVersion");
+
+                    b.HasIndex("ResultantStateVersion");
+
+                    b.ToTable("account_transactions");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
                 {
                     b.Property<long>("ResultantStateVersion")
@@ -246,7 +272,7 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
-                    b.Property<DateTime>("CreatedTimestamp")
+                    b.Property<Instant>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_timestamp");
 
@@ -279,21 +305,17 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
-                    b.Property<DateTime>("NormalizedTimestamp")
+                    b.Property<Instant>("NormalizedTimestamp")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("timestamp");
+                        .HasColumnName("normalized_timestamp");
 
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")
                         .HasColumnName("round_in_epoch");
 
-                    b.Property<DateTime>("RoundTimestamp")
+                    b.Property<Instant>("RoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
-
-                    b.Property<byte[]>("SignedBy")
-                        .HasColumnType("bytea")
-                        .HasColumnName("signed_by");
 
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
@@ -311,7 +333,7 @@ namespace DataAggregator.Migrations
 
                     b.HasAlternateKey("TransactionIdentifierHash");
 
-                    b.HasIndex("NormalizedTimestamp");
+                    b.HasIndex("RoundTimestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
@@ -423,6 +445,22 @@ namespace DataAggregator.Migrations
                     b.HasIndex("FromStateVersion");
 
                     b.ToTable("validators");
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.RawTransaction", b =>
+                {
+                    b.Property<byte[]>("TransactionIdentifierHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<byte[]>("Payload")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload");
+
+                    b.HasKey("TransactionIdentifierHash");
+
+                    b.ToTable("raw_transactions");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Records.ValidatorProposalRecord", b =>
@@ -572,7 +610,7 @@ namespace DataAggregator.Migrations
 
                     b.HasIndex("ValidatorId", "AccountId");
 
-                    b.ToTable("account_stake_ownership_balance_substates");
+                    b.ToTable("account_stake_unit_balance_substates");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountXrdStakeBalanceSubstate", b =>
@@ -809,6 +847,80 @@ namespace DataAggregator.Migrations
                     b.ToTable("validator_stake_balance_substates");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Mempool.MempoolTransaction", b =>
+                {
+                    b.Property<byte[]>("TransactionIdentifierHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<Instant?>("CommitTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("commit_timestamp");
+
+                    b.Property<string>("FailureExplanation")
+                        .HasColumnType("text")
+                        .HasColumnName("failure_explanation");
+
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("text")
+                        .HasColumnName("failure_reason");
+
+                    b.Property<Instant?>("FailureTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("failure_timestamp");
+
+                    b.Property<Instant?>("FirstSeenInMempoolTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_seen_in_mempool_timestamp");
+
+                    b.Property<Instant?>("FirstSubmittedToGatewayTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_submitted_to_gateway_timestamp");
+
+                    b.Property<Instant?>("LastDroppedOutOfMempoolTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_missing_from_mempool_timestamp");
+
+                    b.Property<Instant?>("LastSubmittedToGatewayTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_submitted_to_gateway_timestamp");
+
+                    b.Property<string>("LastSubmittedToNodeName")
+                        .HasColumnType("text")
+                        .HasColumnName("last_submitted_to_node_name");
+
+                    b.Property<Instant?>("LastSubmittedToNodeTimestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_submitted_to_node_timestamp");
+
+                    b.Property<byte[]>("Payload")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<int>("SubmissionToNodesCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("submission_count");
+
+                    b.Property<bool>("SubmittedByThisGateway")
+                        .HasColumnType("boolean")
+                        .HasColumnName("submitted_by_this_gateway");
+
+                    b.Property<string>("TransactionContents")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("transaction_contents");
+
+                    b.HasKey("TransactionIdentifierHash");
+
+                    b.ToTable("mempool_transactions");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Node", b =>
                 {
                     b.Property<string>("Name")
@@ -831,25 +943,6 @@ namespace DataAggregator.Migrations
                     b.HasKey("Name");
 
                     b.ToTable("nodes");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.RawTransaction", b =>
-                {
-                    b.Property<byte[]>("TransactionIdentifierHash")
-                        .HasColumnType("bytea")
-                        .HasColumnName("transaction_id");
-
-                    b.Property<byte[]>("Payload")
-                        .HasColumnType("bytea")
-                        .HasColumnName("payload");
-
-                    b.Property<DateTime?>("SubmittedTimestamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("submitted_timestamp");
-
-                    b.HasKey("TransactionIdentifierHash");
-
-                    b.ToTable("raw_transactions");
                 });
 
             modelBuilder.Entity("Common.Database.Models.SingleEntries.NetworkConfiguration", b =>
@@ -969,7 +1062,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_unstake_ownership");
+                                .HasColumnName("total_prepared_unstake_units");
 
                             b1.Property<BigInteger>("TotalPreparedXrdStake")
                                 .HasPrecision(1000)
@@ -979,7 +1072,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_stake_ownership");
+                                .HasColumnName("total_stake_units");
 
                             b1.HasKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
 
@@ -1100,7 +1193,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_unstake_ownership");
+                                .HasColumnName("total_prepared_unstake_units");
 
                             b1.Property<BigInteger>("TotalPreparedXrdStake")
                                 .HasPrecision(1000)
@@ -1110,7 +1203,7 @@ namespace DataAggregator.Migrations
                             b1.Property<BigInteger>("TotalStakeUnits")
                                 .HasPrecision(1000)
                                 .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_stake_ownership");
+                                .HasColumnName("total_stake_units");
 
                             b1.Property<BigInteger>("TotalXrdStake")
                                 .HasPrecision(1000)
@@ -1135,10 +1228,29 @@ namespace DataAggregator.Migrations
                     b.Navigation("Validator");
                 });
 
+            modelBuilder.Entity("Common.Database.Models.Ledger.Joins.AccountTransaction", b =>
+                {
+                    b.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LedgerTransaction")
+                        .WithMany()
+                        .HasForeignKey("ResultantStateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("LedgerTransaction");
+                });
+
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
                 {
                     b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LedgerTransaction")
-                        .WithMany()
+                        .WithMany("SubstantiveOperationGroups")
                         .HasForeignKey("ResultantStateVersion")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1156,29 +1268,65 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("numeric(1000,0)")
                                 .HasColumnName("inferred_action_amount");
 
-                            b1.Property<string>("FromAddress")
-                                .HasColumnType("text")
-                                .HasColumnName("inferred_action_from");
+                            b1.Property<long?>("FromAccountId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("inferred_action_from_account_id");
 
-                            b1.Property<string>("ResourceIdentifier")
-                                .HasColumnType("text")
-                                .HasColumnName("inferred_action_rri");
+                            b1.Property<long?>("ResourceId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("inferred_action_resource_id");
 
-                            b1.Property<string>("ToAddress")
-                                .HasColumnType("text")
-                                .HasColumnName("inferred_action_to");
+                            b1.Property<long?>("ToAccountId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("inferred_action_to_account_id");
 
                             b1.Property<string>("Type")
                                 .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("inferred_action_type");
 
+                            b1.Property<long?>("ValidatorId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("inferred_action_validator_id");
+
                             b1.HasKey("LedgerOperationGroupResultantStateVersion", "LedgerOperationGroupOperationGroupIndex");
+
+                            b1.HasIndex("FromAccountId");
+
+                            b1.HasIndex("ResourceId");
+
+                            b1.HasIndex("ToAccountId");
+
+                            b1.HasIndex("ValidatorId");
 
                             b1.ToTable("operation_groups");
 
+                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "FromAccount")
+                                .WithMany()
+                                .HasForeignKey("FromAccountId");
+
+                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
+                                .WithMany()
+                                .HasForeignKey("ResourceId");
+
+                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "ToAccount")
+                                .WithMany()
+                                .HasForeignKey("ToAccountId");
+
+                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
+                                .WithMany()
+                                .HasForeignKey("ValidatorId");
+
                             b1.WithOwner()
                                 .HasForeignKey("LedgerOperationGroupResultantStateVersion", "LedgerOperationGroupOperationGroupIndex");
+
+                            b1.Navigation("FromAccount");
+
+                            b1.Navigation("Resource");
+
+                            b1.Navigation("ToAccount");
+
+                            b1.Navigation("Validator");
                         });
 
                     b.Navigation("InferredAction");
@@ -1188,7 +1336,7 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
                 {
-                    b.HasOne("Common.Database.Models.RawTransaction", "RawTransaction")
+                    b.HasOne("Common.Database.Models.Ledger.RawTransaction", "RawTransaction")
                         .WithMany()
                         .HasForeignKey("TransactionIdentifierHash")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1823,6 +1971,11 @@ namespace DataAggregator.Migrations
 
                     b.Navigation("WellKnownAddresses")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
+                {
+                    b.Navigation("SubstantiveOperationGroups");
                 });
 #pragma warning restore 612, 618
         }

@@ -63,9 +63,12 @@
  */
 
 using Common.Database.ValueConverters;
+using Newtonsoft.Json;
+using NodaTime;
+using NodaTime.Serialization.JsonNet;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+using System.Runtime.Serialization;
 using Gateway = RadixGatewayApi.Generated.Model;
 
 namespace Common.Database.Models.Mempool;
@@ -79,7 +82,7 @@ public enum MempoolTransactionStatus
                    // NOTE due to race conditions, it might be possible for a transaction to end up Pending/Missing even it's committed
 }
 
-public class MempoolTransactionSubmissionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
+public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
 {
     private static readonly Dictionary<MempoolTransactionStatus, string> _conversion = new()
     {
@@ -89,7 +92,7 @@ public class MempoolTransactionSubmissionStatusValueConverter : EnumTypeValueCon
         { MempoolTransactionStatus.Committed, "COMMITTED" },
     };
 
-    public MempoolTransactionSubmissionStatusValueConverter()
+    public MempoolTransactionStatusValueConverter()
         : base(_conversion, Invert(_conversion))
     {
     }
@@ -121,22 +124,28 @@ public class MempoolTransactionFailureReasonValueConverter : EnumTypeValueConver
 /// <summary>
 ///  This stores all the data needed to construct a Gateway.TransactionInfo (alongside the other data in the DB).
 /// </summary>
+[DataContract(Name = "TransactionContents")]
 public record GatewayTransactionContents
 {
-    [JsonPropertyName("actions")]
+    [DataMember(Name = "actions", EmitDefaultValue = false)]
     public List<Gateway.Action> Actions { get; set; }
 
-    [JsonPropertyName("fee")]
+    [DataMember(Name = "fee", EmitDefaultValue = false)]
     public string FeePaidSubunits { get; set; }
 
-    [JsonPropertyName("message")]
+    [DataMember(Name = "message", EmitDefaultValue = false)]
     public string? MessageHex { get; set; }
 
-    [JsonPropertyName("confirmed_time")]
-    public DateTime? ConfirmedTime { get; set; }
+    [DataMember(Name = "confirmed_time", EmitDefaultValue = false)]
+    public Instant? ConfirmedTime { get; set; }
 
-    [JsonPropertyName("state_version")]
+    [DataMember(Name = "state_version", EmitDefaultValue = false)]
     public long? LedgerStateVersion { get; set; }
+
+    public static GatewayTransactionContents Default()
+    {
+        return new GatewayTransactionContents { Actions = new List<Gateway.Action>(), FeePaidSubunits = string.Empty };
+    }
 }
 
 /// <summary>
@@ -145,73 +154,211 @@ public record GatewayTransactionContents
 [Table("mempool_transactions")]
 public class MempoolTransaction
 {
+    private static readonly JsonSerializerSettings _transactionContentsSerializerSettings = new JsonSerializerSettings()
+        .ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+
+    private MempoolTransaction(byte[] transactionIdentifierHash, byte[] payload, GatewayTransactionContents transactionContents)
+    {
+        TransactionIdentifierHash = transactionIdentifierHash;
+        Payload = payload;
+        SetTransactionContents(transactionContents);
+    }
+
+    // For EF Core
+    private MempoolTransaction()
+    {
+    }
+
     [Key]
     [Column(name: "transaction_id")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public byte[] TransactionIdentifierHash { get; set; }
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
+    public byte[] TransactionIdentifierHash { get; private set; }
 
     /// <summary>
     /// The payload of the transaction.
     /// </summary>
     [Column("payload")]
-    public byte[] Payload { get; set; }
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
+    public byte[] Payload { get; private set; }
+
+    // https://www.npgsql.org/efcore/mapping/json.html?tabs=data-annotations%2Cpoco
+    [Column("transaction_contents", TypeName="jsonb")]
+    public string TransactionContents { get; private set; }
+
+    [Column("status")]
+    public MempoolTransactionStatus Status { get; private set; }
 
     /// <summary>
     /// True if the transaction was submitted by this gateway. In which case, the gateway is responsible for
     /// monitoring its status in the core API, and resubmitting.
     /// </summary>
     [Column("submitted_by_this_gateway")]
-    public bool SubmittedByThisGateway { get; set; }
+    public bool SubmittedByThisGateway { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was initially submitted to a node through this gateway.
     /// </summary>
     [Column("first_submitted_to_gateway_timestamp")]
-    public DateTime? FirstSubmittedToGatewayTimestamp { get; set; }
+    public Instant? FirstSubmittedToGatewayTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_gateway_timestamp")]
-    public DateTime? LastSubmittedToGatewayTimestamp { get; set; }
+    public Instant? LastSubmittedToGatewayTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_node_timestamp")]
-    public DateTime? LastSubmittedToNodeTimestamp { get; set; }
+    public Instant? LastSubmittedToNodeTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_node_name")]
-    public string? LastSubmittedToNodeName { get; set; }
+    public string? LastSubmittedToNodeName { get; private set; }
+
+    [Column("submission_count")]
+    public int SubmissionToNodesCount { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was first seen in a node's mempool.
     /// </summary>
     [Column("first_seen_in_mempool_timestamp")]
-    public DateTime? FirstSeenInMempoolTimestamp { get; set; }
+    public Instant? FirstSeenInMempoolTimestamp { get; private set; }
 
     /// <summary>
-    /// The timestamp when the transaction was last seen in a node's mempool.
+    /// The timestamp when the transaction was last changed to a MISSING state.
     /// </summary>
-    [Column("last_seen_in_mempool_timestamp")]
-    public DateTime? LastSeenInMempoolTimestamp { get; set; }
+    [Column("last_missing_from_mempool_timestamp")]
+    public Instant? LastDroppedOutOfMempoolTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was committed to the DB ledger.
     /// </summary>
     [Column("commit_timestamp")]
-    public DateTime? CommitTimestamp { get; set; }
+    public Instant? CommitTimestamp { get; private set; }
 
-    // https://www.npgsql.org/efcore/mapping/json.html?tabs=data-annotations%2Cpoco
-    [Column("transaction_contents", TypeName="jsonb")]
-    public GatewayTransactionContents TransactionsContents { get; set; }
+    [Column("failure_reason")]
+    public MempoolTransactionFailureReason? FailureReason { get; private set; }
 
-    [Column("submission_status")]
-    public MempoolTransactionStatus Status { get; set; }
+    [Column("failure_explanation")]
+    public string? FailureExplanation { get; private set; }
 
-    [Column("submission_failure_reason")]
-    public MempoolTransactionFailureReason? SubmissionFailureReason { get; set; }
+    [Column("failure_timestamp")]
+    public Instant? FailureTimestamp { get; private set; }
+
+    public static MempoolTransaction NewFirstSeenInMempool(
+        byte[] transactionIdentifierHash,
+        byte[] payload,
+        GatewayTransactionContents transactionContents,
+        Instant? firstSeenAt = null
+    )
+    {
+        var mempoolTransaction = new MempoolTransaction(transactionIdentifierHash, payload, transactionContents);
+        mempoolTransaction.MarkAsSeenInAMempool(firstSeenAt);
+        return mempoolTransaction;
+    }
+
+    public static MempoolTransaction NewAsSubmittedForFirstTimeByGateway(
+        byte[] transactionIdentifierHash,
+        byte[] payload,
+        string submittedToNodeName,
+        GatewayTransactionContents transactionContents,
+        Instant? submittedTimestamp = null
+    )
+    {
+        var mempoolTransaction = new MempoolTransaction(transactionIdentifierHash, payload, transactionContents);
+
+        submittedTimestamp ??= SystemClock.Instance.GetCurrentInstant();
+        mempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+
+        // We assume it's been successfully submitted until we see an error and then mark it as an error then
+        // This ensures the correct resubmission behaviour
+        mempoolTransaction.MarkAsSuccessfullySubmittedToNode(submittedToNodeName, submittedTimestamp);
+
+        return mempoolTransaction;
+    }
+
+    public GatewayTransactionContents GetTransactionContents()
+    {
+        try
+        {
+            return JsonConvert.DeserializeObject<GatewayTransactionContents>(
+                TransactionContents,
+                _transactionContentsSerializerSettings
+            ) ?? GatewayTransactionContents.Default();
+        }
+        catch (Exception)
+        {
+            return GatewayTransactionContents.Default();
+        }
+    }
+
+    public void MarkAsMissing(Instant? timestamp = null)
+    {
+        Status = MempoolTransactionStatus.Missing;
+        LastDroppedOutOfMempoolTimestamp = timestamp ?? SystemClock.Instance.GetCurrentInstant();
+    }
+
+    public void MarkAsCommitted(long ledgerStateVersion, Instant ledgerCommitTimestamp)
+    {
+        var commitToDbTimestamp = SystemClock.Instance.GetCurrentInstant();
+        Status = MempoolTransactionStatus.Committed;
+        CommitTimestamp = commitToDbTimestamp;
+
+        var transactionContents = GetTransactionContents();
+        transactionContents.LedgerStateVersion = ledgerStateVersion;
+        transactionContents.ConfirmedTime = ledgerCommitTimestamp;
+
+        SetTransactionContents(transactionContents);
+    }
+
+    public void MarkAsSeenInAMempool(Instant? timestamp = null)
+    {
+        Status = MempoolTransactionStatus.InNodeMempool;
+        FirstSeenInMempoolTimestamp ??= timestamp ?? SystemClock.Instance.GetCurrentInstant();
+    }
+
+    public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? timestamp = null)
+    {
+        Status = MempoolTransactionStatus.Failed;
+        FailureReason = failureReason;
+        FailureExplanation = failureExplanation;
+        FailureTimestamp = timestamp ?? SystemClock.Instance.GetCurrentInstant();
+    }
+
+    public void MarkAsSubmittedToGateway(Instant? submittedAt = null)
+    {
+        submittedAt ??= SystemClock.Instance.GetCurrentInstant();
+        SubmittedByThisGateway = true;
+        FirstSubmittedToGatewayTimestamp ??= submittedAt;
+        LastSubmittedToGatewayTimestamp = submittedAt;
+    }
+
+    public void MarkAsSuccessfullySubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
+    {
+        Status = MempoolTransactionStatus.InNodeMempool;
+        RecordSubmission(nodeSubmittedTo, submittedAt);
+    }
+
+    public void MarkAsInvalidOnceSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? submittedAt = null)
+    {
+        MarkAsFailed(failureReason, failureExplanation);
+        RecordSubmission(nodeSubmittedTo, submittedAt);
+    }
+
+    private void RecordSubmission(string nodeSubmittedTo, Instant? submittedAt = null)
+    {
+        LastSubmittedToNodeTimestamp = submittedAt ?? SystemClock.Instance.GetCurrentInstant();
+        LastSubmittedToNodeName = nodeSubmittedTo;
+        SubmissionToNodesCount += 1;
+    }
+
+    private void SetTransactionContents(GatewayTransactionContents transactionContents)
+    {
+        TransactionContents = JsonConvert.SerializeObject(transactionContents, _transactionContentsSerializerSettings);
+    }
 }

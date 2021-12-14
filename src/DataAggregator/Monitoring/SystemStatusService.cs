@@ -65,27 +65,30 @@
 using Common.Extensions;
 using DataAggregator.GlobalServices;
 using DataAggregator.LedgerExtension;
+using NodaTime;
 using Prometheus;
 
 namespace DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport);
+    void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport, bool isSyncedUp);
 
     void RecordTopOfLedger(TransactionSummary topOfLedger);
 
     bool IsPrimary();
 
+    bool IsSyncedUp();
+
     HealthReport GenerateTransactionCommitmentHealthReport();
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
+public record HealthReport(bool IsHealthy, string Reason, Instant StartUpTime);
 
 public class SystemStatusService : ISystemStatusService
 {
-    private static readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
+    private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
     private static readonly bool _isPrimary = true;
 
     private static readonly Counter _committedTransactions = Metrics
@@ -105,30 +108,37 @@ public class SystemStatusService : ISystemStatusService
 
     private readonly IConfiguration _configuration;
 
-    private DateTimeOffset? _lastTransactionCommitment;
+    private Instant? _lastTransactionCommitment;
+    private bool _isSyncedUp = false;
 
-    private TimeSpan StartupGracePeriod => TimeSpan.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
+    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
 
-    private TimeSpan UnhealthyCommitmentGapSeconds => TimeSpan.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
+    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
 
     public SystemStatusService(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-    public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport)
+    public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport, bool isSyncedUp)
     {
-        _lastTransactionCommitment = DateTimeOffset.UtcNow;
+        _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
         _committedTransactions.Inc(committedTransactionReport.TransactionsCommittedCount);
-        _ledgerLastCommitTimestamp.Set(DateTime.UtcNow.GetUnixTimestampSeconds());
+        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
         RecordTopOfLedger(committedTransactionReport.FinalTransaction);
+        _isSyncedUp = isSyncedUp;
     }
 
     public void RecordTopOfLedger(TransactionSummary topOfLedger)
     {
         _ledgerStateVersion.Set(topOfLedger.StateVersion);
-        _ledgerUnixTimestamp.Set(topOfLedger.NormalizedTimestamp.GetUnixTimestampSeconds());
+        _ledgerUnixTimestamp.Set(topOfLedger.NormalizedTimestamp.ToUnixTimeSeconds());
         _ledgerSecondsBehind.Set(topOfLedger.NormalizedTimestamp.GetTimeAgo().TotalSeconds);
+    }
+
+    public bool IsSyncedUp()
+    {
+        return _isSyncedUp;
     }
 
     public bool IsPrimary()

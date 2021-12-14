@@ -62,70 +62,28 @@
  * permissions under this License.
  */
 
-﻿using System;
-using Common.Database.Models.Mempool;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace DataAggregator.Migrations
 {
-    public partial class CreatedMempoolTransactionsTable : Migration
+    public partial class MinorRenameToMempoolTransactionsStatusColumn : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "submitted_timestamp",
-                table: "raw_transactions");
-
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "payload",
-                table: "raw_transactions",
-                type: "bytea",
-                nullable: false,
-                defaultValue: new byte[0],
-                oldClrType: typeof(byte[]),
-                oldType: "bytea",
-                oldNullable: true);
-
-            migrationBuilder.CreateTable(
-                name: "mempool_transactions",
-                columns: table => new
-                {
-                    transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
-                    payload = table.Column<byte[]>(type: "bytea", nullable: false),
-                    submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
-                    submitted_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    first_seen_in_mempool_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    last_seen_in_mempool_timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    transaction_contents = table.Column<GatewayTransactionContents>(type: "jsonb", nullable: false),
-                    submission_status = table.Column<string>(type: "text", nullable: false),
-                    submission_failure_reason = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_mempool_transactions", x => x.transaction_id);
-                });
+            migrationBuilder.RenameColumn(
+                name: "submission_status",
+                table: "mempool_transactions",
+                newName: "status");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "mempool_transactions");
-
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "payload",
-                table: "raw_transactions",
-                type: "bytea",
-                nullable: true,
-                oldClrType: typeof(byte[]),
-                oldType: "bytea");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "submitted_timestamp",
-                table: "raw_transactions",
-                type: "timestamp with time zone",
-                nullable: true);
+            migrationBuilder.RenameColumn(
+                name: "status",
+                table: "mempool_transactions",
+                newName: "submission_status");
         }
     }
 }

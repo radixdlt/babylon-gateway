@@ -147,13 +147,15 @@ public class TransactionController : ControllerBase
     public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request)
     {
         _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
-        return await _constructionAndSubmissionService.HandleFinalizeRequest(request);
+        var ledgerState = await _ledgerStateQuerier.GetTopOfLedgerState();
+        return await _constructionAndSubmissionService.HandleFinalizeRequest(request, ledgerState);
     }
 
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request)
     {
         _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
-        return await _constructionAndSubmissionService.HandleSubmitRequest(request);
+        var ledgerState = await _ledgerStateQuerier.GetTopOfLedgerState();
+        return await _constructionAndSubmissionService.HandleSubmitRequest(request, ledgerState);
     }
 }

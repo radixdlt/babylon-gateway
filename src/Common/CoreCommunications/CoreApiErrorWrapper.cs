@@ -119,6 +119,7 @@ public static class CoreApiErrorWrapper
             InvalidTransactionHashError error => WrappedCoreApiException.Of(apiException, error),
             MessageTooLongError error => WrappedCoreApiException.Of(apiException, error),
             NetworkNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
+            NotEnoughNativeTokensForFeesError error => WrappedCoreApiException.Of(apiException, error),
             NotEnoughResourcesError error => WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService
             NotValidatorOwnerError error => WrappedCoreApiException.Of(apiException, error), // Not specific enough - rely on Gateway handling
             PublicKeyNotSupportedError error => WrappedCoreApiException.Of(apiException, error),

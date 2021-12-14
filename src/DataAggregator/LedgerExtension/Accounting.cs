@@ -62,12 +62,13 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Extensions;
 using Common.Numerics;
 using DataAggregator.Exceptions;
-using DataAggregator.GlobalServices;
 using RadixCoreApi.Generated.Model;
+using InvalidTransactionException = DataAggregator.Exceptions.InvalidTransactionException;
 using TokenData = RadixCoreApi.Generated.Model.TokenData;
 
 namespace DataAggregator.LedgerExtension;
@@ -103,6 +104,10 @@ public class Accounting
         return _trackedTotals;
     }
 
+    /// <summary>
+    /// This captures all transactions where the entity or subentity is the relevant account, so it will
+    /// also capture start of epoch transactions where one of the stake subentities are involved.
+    /// </summary>
     public HashSet<string> GetReferencedAccountAddresses()
     {
         return _trackedTotals
@@ -130,6 +135,7 @@ public class Accounting
 
     public record AccountingEntry(Entity Entity, ResourceIdentifier ResourceIdentifier, TokenAmount Delta);
 
+    // TODO - wrap / deduplicate against ParsedTransactionMapper
     public InferredAction? InferAction(bool isSystemTransaction, TransactionOpLocator transactionOpLocator, DbActionsPlanner dbActionsPlanner)
     {
         var withdrawals = _trackedTotals

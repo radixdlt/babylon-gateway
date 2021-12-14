@@ -187,13 +187,13 @@ public class AccountValidatorStakeSnapshotChange
 [Owned]
 public record AccountValidatorStakeSnapshot
 {
-    [Column("total_stake_ownership")]
+    [Column("total_stake_units")]
     public TokenAmount TotalStakeUnits { get; set; }
 
     [Column("total_prepared_xrd_stake")]
     public TokenAmount TotalPreparedXrdStake { get; set; }
 
-    [Column("total_prepared_unstake_ownership")]
+    [Column("total_prepared_unstake_units")]
     public TokenAmount TotalPreparedUnStakeUnits { get; set; }
 
     [Column("total_exiting_xrd_stake")]

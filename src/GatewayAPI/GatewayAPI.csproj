@@ -7,6 +7,7 @@
 
     <!-- NB - PackageReference versions are overridden centrally in Directory.Packages.props -->
     <ItemGroup>
+        <PackageReference Include="NodaTime" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />

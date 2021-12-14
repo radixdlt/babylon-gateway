@@ -62,40 +62,46 @@
  * permissions under this License.
  */
 
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+using NodaTime;
 
-#nullable disable
+namespace DataAggregator.Configuration.Models;
 
-namespace DataAggregator.Migrations
+public record MempoolConfiguration
 {
-    public partial class MovedTransactionSignerToAccountTransactions : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "signed_by",
-                table: "ledger_transactions");
+    [ConfigurationKeyName("PruneCommittedAfterSeconds")]
+    public long PruneCommittedAfterSeconds { get; set; } = 10;
 
-            migrationBuilder.AddColumn<bool>(
-                name: "is_signer",
-                table: "account_transactions",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-        }
+    public Duration PruneCommittedAfter => Duration.FromSeconds(PruneCommittedAfterSeconds);
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "is_signer",
-                table: "account_transactions");
+    [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
+    public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
 
-            migrationBuilder.AddColumn<byte[]>(
-                name: "signed_by",
-                table: "ledger_transactions",
-                type: "bytea",
-                nullable: true);
-        }
-    }
+    // NB - A transaction goes missing from the mempool when it gets put onto the ledger, but it may take some time
+    // for the aggregator to see the committed transaction. This delay should be long enough that, under normal
+    // operation, we'll have seen the transaction committed before we attempt to resubmit it -- as resubmitting a
+    // committed transaction will result in us seeing a double spend, and marking it as failed incorrectly
+    [ConfigurationKeyName("MinDelayBetweenMissingFromMempoolAndResubmissionSeconds")]
+    public long MinDelayBetweenMissingFromMempoolAndResubmissionSeconds { get; set; } = 10;
+
+    public Duration MinDelayBetweenResubmissions => Duration.FromSeconds(MinDelayBetweenResubmissionsSeconds);
+
+    [ConfigurationKeyName("StopResubmittingAfterSeconds")]
+    public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
+
+    public Duration StopResubmittingAfter => Duration.FromSeconds(StopResubmittingAfterSeconds);
+
+    [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds")]
+    public long PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
+
+    public Duration PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => Duration.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
+
+    [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds")]
+    public long PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
+
+    public Duration PruneMissingTransactionsAfterTimeSinceFirstSeen => Duration.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
+
+    [ConfigurationKeyName("PruneRequiresMissingFromMempoolForSeconds")]
+    public long PruneRequiresMissingFromMempoolForSeconds { get; set; } = 60;
+
+    public Duration PruneRequiresMissingFromMempoolFor => Duration.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
 }

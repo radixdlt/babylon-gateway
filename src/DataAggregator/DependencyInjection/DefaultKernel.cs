@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 using DataAggregator.GlobalWorkers;
@@ -99,7 +100,9 @@ public class DefaultKernel
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
         services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
+        services.AddSingleton<IActionInferrer, ActionInferrer>();
         services.AddSingleton<ISystemStatusService, SystemStatusService>();
         services.AddSingleton<IMempoolTrackerService, MempoolTrackerService>();
         services.AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>();
@@ -119,7 +122,10 @@ public class DefaultKernel
         services.AddDbContextFactory<AggregatorDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(hostContext.Configuration.GetConnectionString("AggregatorDbContext"));
+            options.UseNpgsql(
+                hostContext.Configuration.GetConnectionString("AggregatorDbContext"),
+                o => o.UseNodaTime()
+            );
         });
     }
 
@@ -144,6 +150,7 @@ public class DefaultKernel
         // These should be transient so that they don't capture a transient HttpClient
         services.AddTransient<ITransactionLogReader, TransactionLogReader>();
         services.AddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
+        services.AddTransient<INetworkStatusReader, NetworkStatusReader>();
     }
 
     private void AddNodeInitializers(IServiceCollection services)
@@ -157,6 +164,7 @@ public class DefaultKernel
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
         services.AddScoped<INodeWorker, NodeMempoolReaderWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolCommitWhenUnsyncedWorker>();
     }
 
     private HttpClientHandler ConfigureHttpClientHandler(

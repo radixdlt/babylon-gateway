@@ -185,16 +185,18 @@ public class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
+        var transactionContents = mempoolTransaction.GetTransactionContents();
+
         var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
             MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                mempoolTransaction.TransactionsContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
-                mempoolTransaction.TransactionsContents.LedgerStateVersion ?? 0
+                transactionContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
+                transactionContents.LedgerStateVersion ?? 0
             ),
             MempoolTransactionStatus.InNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
             _ => throw new ArgumentOutOfRangeException(),
         };
@@ -202,11 +204,11 @@ public class TransactionQuerier : ITransactionQuerier
         return new Gateway.TransactionInfo(
             status,
             new Gateway.TransactionIdentifier(mempoolTransaction.TransactionIdentifierHash.ToHex()),
-            mempoolTransaction.TransactionsContents.Actions,
-            feePaid: TokenAmount.FromSubUnitsString(mempoolTransaction.TransactionsContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+            transactionContents.Actions,
+            feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
                 hex: mempoolTransaction.Payload.ToHex(),
-                message: mempoolTransaction.TransactionsContents.MessageHex
+                message: transactionContents.MessageHex
             )
         );
     }
@@ -217,6 +219,7 @@ public class TransactionQuerier : ITransactionQuerier
             .Where(at =>
                 at.Account.Address == accountAddress.Address
                 && at.ResultantStateVersion <= ledgerState._Version
+                && !at.LedgerTransaction.IsStartOfEpoch
             )
             .CountAsync();
     }
@@ -229,6 +232,7 @@ public class TransactionQuerier : ITransactionQuerier
             .Where(at =>
                 at.Account.Address == request.AccountAddress.Address
                 && at.ResultantStateVersion <= stateVersionUpperBound
+                && !at.LedgerTransaction.IsStartOfEpoch
             )
             .OrderByDescending(at => at.ResultantStateVersion)
             .Take(request.PageSize + 1)
@@ -238,7 +242,6 @@ public class TransactionQuerier : ITransactionQuerier
 
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions)
     {
-        // Should be fine, but if performance is bad, consider https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
         var transactionWithOperationGroups = await _dbContext.LedgerTransactions
             .Where(t => transactionStateVersions.Contains(t.ResultantStateVersion))
             .Include(t => t.SubstantiveOperationGroups)
@@ -250,6 +253,8 @@ public class TransactionQuerier : ITransactionQuerier
             .Include(t => t.SubstantiveOperationGroups) // https://stackoverflow.com/a/50898208
             .ThenInclude(op => op.InferredAction!.ToAccount)
             .Include(t => t.RawTransaction)
+            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
             .ToListAsync();
 
         var gatewayTransactions = new List<Gateway.TransactionInfo>();
@@ -267,7 +272,7 @@ public class TransactionQuerier : ITransactionQuerier
 
         foreach (var operationGroup in ledgerTransaction.SubstantiveOperationGroups)
         {
-            var action = await GetAction(operationGroup);
+            var action = await GetAction(ledgerTransaction, operationGroup);
             if (action != null)
             {
                 gatewayActions.Add(action);
@@ -277,20 +282,20 @@ public class TransactionQuerier : ITransactionQuerier
         return new Gateway.TransactionInfo(
             new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                confirmedTime: ledgerTransaction.NormalizedTimestamp.AsUtcIsoDateWithMillisString(),
+                confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
             ledgerTransaction.TransactionIdentifierHash.AsGatewayTransactionIdentifier(),
             gatewayActions,
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
-                hex: ledgerTransaction.RawTransaction!.TransactionIdentifierHash.ToHex(),
+                hex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
                 message: ledgerTransaction.Message?.ToHex()
             )
         );
     }
 
-    private async Task<Gateway.Action?> GetAction(LedgerOperationGroup operationGroup)
+    private async Task<Gateway.Action?> GetAction(LedgerTransaction ledgerTransaction, LedgerOperationGroup operationGroup)
     {
         var inferredAction = operationGroup.InferredAction;
         if (inferredAction?.Type == null)
@@ -339,10 +344,12 @@ public class TransactionQuerier : ITransactionQuerier
                 toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
                 amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
             ),
-            InferredActionType.PayXrd => new Gateway.BurnTokens(
-                fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
+            InferredActionType.PayXrd => inferredAction.Amount!.Value == ledgerTransaction.FeePaid
+                ? null // Filter out fee payments
+                : new Gateway.BurnTokens(
+                    fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
+                    amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
+                ),
             InferredActionType.Complex => null,
             _ => throw new ArgumentOutOfRangeException(),
         };

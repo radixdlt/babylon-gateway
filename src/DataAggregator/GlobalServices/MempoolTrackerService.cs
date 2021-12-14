@@ -63,6 +63,7 @@
  */
 
 using Common.CoreCommunications;
+using Common.Database;
 using Common.Database.Models.Mempool;
 using Common.Extensions;
 using Common.Utilities;
@@ -70,26 +71,25 @@ using DataAggregator.Configuration;
 using DataAggregator.DependencyInjection;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using System.Collections.Concurrent;
 
 using Core = RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.GlobalServices;
 
-public record TransactionDataWithId(byte[] Id, TransactionData TransactionData);
-
-public record TransactionData(DateTime SeenAt, byte[] Payload, Core.Transaction Transaction);
+public record TransactionData(byte[] Id, Instant SeenAt, byte[] Payload, Core.Transaction Transaction);
 
 public record NodeMempoolContents
 {
     public Dictionary<byte[], TransactionData> Transactions { get; }
 
-    public DateTime AtTime { get; }
+    public Instant AtTime { get; }
 
     public NodeMempoolContents(Dictionary<byte[], TransactionData> transactions)
     {
         Transactions = transactions;
-        AtTime = DateTime.UtcNow;
+        AtTime = SystemClock.Instance.GetCurrentInstant();
     }
 }
 
@@ -102,21 +102,24 @@ public interface IMempoolTrackerService
 
 public class MempoolTrackerService : IMempoolTrackerService
 {
-    private static readonly LogLimiter _combineMempoolsInfoLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Information, LogLevel.Debug);
+    private static readonly LogLimiter _combineMempoolsInfoLogLimiter = new(TimeSpan.FromSeconds(10), LogLevel.Information, LogLevel.Debug);
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IActionInferrer _actionInferrer;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolContents> _latestMempoolContentsByNode = new();
 
     public MempoolTrackerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IAggregatorConfiguration aggregatorConfiguration,
+        IActionInferrer actionInferrer,
         ILogger<MempoolTrackerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
         _aggregatorConfiguration = aggregatorConfiguration;
+        _actionInferrer = actionInferrer;
         _logger = logger;
     }
 
@@ -129,13 +132,13 @@ public class MempoolTrackerService : IMempoolTrackerService
     {
         var combinedMempool = CombineNodeMempools();
 
-        await CreateOrUpdateMempoolTransactionTimesInDb(combinedMempool, token);
+        await EnsureDbMempoolTransactionsCreatedOrMarkedReappeared(combinedMempool, token);
         await HandleMissingPendingTransactions(combinedMempool.Keys.ToHashSet(), token);
     }
 
     private Dictionary<byte[], TransactionData> CombineNodeMempools()
     {
-        var lastUpdatedToBeConsidered = TimeSpan.FromSeconds(15);
+        var lastUpdatedToBeConsidered = Duration.FromSeconds(15);
 
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
             .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(lastUpdatedToBeConsidered))
@@ -147,14 +150,6 @@ public class MempoolTrackerService : IMempoolTrackerService
                 $"Don't have any recent mempool data from nodes within {lastUpdatedToBeConsidered.FormatSecondsHumanReadable()}"
             );
         }
-
-        var logLevel = _combineMempoolsInfoLogLimiter.GetLogLevel();
-
-        _logger.Log(
-            logLevel,
-            "Combining mempool data from: {NodesUsed}",
-            nodeMempoolsToConsider.Select(kvp => kvp.Key).Humanize()
-        );
 
         var combinedMempool = new Dictionary<byte[], TransactionData>(ByteArrayEqualityComparer.Default);
 
@@ -174,46 +169,84 @@ public class MempoolTrackerService : IMempoolTrackerService
         }
 
         _logger.Log(
-            logLevel,
-            "There are {MempoolSize} transactions in at least one of the nodes' mempools",
-            combinedMempool.Count
+            _combineMempoolsInfoLogLimiter.GetLogLevel(),
+            "There are {MempoolSize} transactions across node mempools: {NodesUsed}",
+            combinedMempool.Count,
+            nodeMempoolsToConsider.Select(kvp => kvp.Key).Humanize()
         );
 
         return combinedMempool;
     }
 
-    private async Task CreateOrUpdateMempoolTransactionTimesInDb(
+    private async Task EnsureDbMempoolTransactionsCreatedOrMarkedReappeared(
         Dictionary<byte[], TransactionData> combinedMempool,
         CancellationToken token
     )
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        await dbContext.MempoolTransactions
-            .UpsertRange(combinedMempool.Select(MapToMempoolTransaction))
-            .WhenMatched((dbTxn, currTxn) => new MempoolTransaction
-            {
-                FirstSeenInMempoolTimestamp = dbTxn.FirstSeenInMempoolTimestamp ?? currTxn.FirstSeenInMempoolTimestamp,
-                LastSeenInMempoolTimestamp = currTxn.LastSeenInMempoolTimestamp,
-                Status = dbTxn.Status == MempoolTransactionStatus.Committed ? MempoolTransactionStatus.Committed
-                    : dbTxn.Status == MempoolTransactionStatus.Failed ? MempoolTransactionStatus.Failed
-                    : MempoolTransactionStatus.InNodeMempool, // Pending or Missing => Pending
-            })
-            .RunAsync(token);
+        var parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
+        var topOfLedgerVersion = (await dbContext.GetTopLedgerTransaction().SingleOrDefaultAsync(token))?.ResultantStateVersion ?? 0;
+
+        var existingDbTransactionsInANodeMempool = await dbContext.MempoolTransactions
+            .Where(mt => combinedMempool.Keys.Contains(mt.TransactionIdentifierHash))
+            .ToListAsync(token);
+
+        var existingTransactionIds = existingDbTransactionsInANodeMempool
+            .Select(et => et.TransactionIdentifierHash)
+            .ToHashSet(ByteArrayEqualityComparer.Default);
+
+        var newTransactions = combinedMempool.Values
+            .Where(mt => !existingTransactionIds.Contains(mt.Id))
+            .ToList();
+
+        var newDbMempoolTransactions = new List<MempoolTransaction>();
+
+        foreach (var transaction in newTransactions)
+        {
+            newDbMempoolTransactions.Add(await MapToMempoolTransaction(parsedTransactionMapper, transaction, topOfLedgerVersion, token));
+        }
+
+        dbContext.MempoolTransactions
+            .AddRange(newDbMempoolTransactions);
+
+        var reappearedTransactions = existingDbTransactionsInANodeMempool
+            .Where(mt => mt.Status == MempoolTransactionStatus.Missing)
+            .ToList();
+
+        foreach (var missingTransaction in reappearedTransactions)
+        {
+            missingTransaction.MarkAsSeenInAMempool();
+        }
+
+        var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
+            async () => await dbContext.SaveChangesAsync(token)
+        );
+
+        if (newTransactions.Count > 0 || reappearedTransactions.Count > 0)
+        {
+            _logger.LogInformation(
+                "{NewTransactionsCount} transactions created and {ReappearedTransactionsCount} updated in {DbUpdatesMs}ms",
+                newTransactions.Count,
+                reappearedTransactions.Count,
+                dbUpdateMs
+            );
+        }
     }
 
-    private MempoolTransaction MapToMempoolTransaction(KeyValuePair<byte[], TransactionData> mempoolItem)
+    private async Task<MempoolTransaction> MapToMempoolTransaction(
+        IParsedTransactionMapper parsedTransactionMapper,
+        TransactionData transactionData,
+        long topOfLedgerVersion,
+        CancellationToken token
+    )
     {
-        var transactionData = mempoolItem.Value;
-        return new MempoolTransaction
-        {
-            TransactionIdentifierHash = mempoolItem.Key,
-            Payload = transactionData.Payload,
-            FirstSeenInMempoolTimestamp = transactionData.SeenAt,
-            LastSeenInMempoolTimestamp = transactionData.SeenAt,
-            TransactionsContents = ParsedTransactionMapper.MapToGatewayTransactionContents(transactionData.Transaction),
-            Status = MempoolTransactionStatus.InNodeMempool,
-        };
+        return MempoolTransaction.NewFirstSeenInMempool(
+            transactionData.Id,
+            transactionData.Payload,
+            await parsedTransactionMapper.MapToGatewayTransactionContents(transactionData.Transaction, topOfLedgerVersion, token),
+            transactionData.SeenAt
+        );
     }
 
     private async Task HandleMissingPendingTransactions(
@@ -228,28 +261,39 @@ public class MempoolTrackerService : IMempoolTrackerService
             .Where(mempoolItem => !seenTransactionIds.Contains(mempoolItem.TransactionIdentifierHash))
             .ToListAsync(token);
 
-        var timeouts = _aggregatorConfiguration.GetMempoolTimeouts();
+        var timeouts = _aggregatorConfiguration.GetMempoolConfiguration();
+        var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
 
         foreach (var mempoolItem in previouslyTrackedTransactionsNowMissingFromNodeMempools)
         {
             if (!mempoolItem.SubmittedByThisGateway)
             {
-                mempoolItem.Status = MempoolTransactionStatus.Missing;
+                mempoolItem.MarkAsMissing();
                 continue;
             }
 
-            var resubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null ? DateTime.UtcNow
+            var resubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null
+                ? currentTimestamp
                 : DateTimeExtensions.LatestOf(
                     mempoolItem.LastSubmittedToNodeTimestamp.Value + timeouts.MinDelayBetweenResubmissions,
-                    DateTime.UtcNow
+                    currentTimestamp
                 );
 
             var resubmissionLimit = mempoolItem.LastSubmittedToGatewayTimestamp!.Value + timeouts.StopResubmittingAfter;
 
             var canResubmit = resubmissionTime <= resubmissionLimit;
 
-            // If it can resubmit, the transaction will be picked up by the MempoolResubmissionService for retrying
-            mempoolItem.Status = canResubmit ? MempoolTransactionStatus.Missing : MempoolTransactionStatus.Failed;
+            if (canResubmit)
+            {
+                mempoolItem.MarkAsMissing();
+            }
+            else
+            {
+                mempoolItem.MarkAsFailed(
+                    MempoolTransactionFailureReason.Timeout,
+                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
+                );
+            }
         }
 
         await dbContext.SaveChangesAsync(token);

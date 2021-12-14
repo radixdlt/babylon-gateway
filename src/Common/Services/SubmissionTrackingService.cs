@@ -65,7 +65,10 @@
 using Common.CoreCommunications;
 using Common.Database;
 using Common.Database.Models.Mempool;
+using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
+using Npgsql;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
@@ -75,22 +78,33 @@ public interface ISubmissionTrackingService
 {
     Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
 
-    Task TrackInitialSubmission(
+    Task<MempoolTrackGuidance> TrackInitialSubmission(
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        Core.ConstructionParseResponse parseResponse
+        Core.ConstructionParseResponse parseResponse,
+        Gateway.LedgerState ledgerState
+    );
+
+    Task MarkAsFailed(
+        byte[] transactionIdentifierHash,
+        MempoolTransactionFailureReason failureReason,
+        string failureExplanation
     );
 }
+
+public record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
 
 public class SubmissionTrackingService<T> : ISubmissionTrackingService
     where T : CommonDbContext
 {
     private readonly T _dbContext;
+    private readonly IParsedTransactionMapper _parsedTransactionMapper;
 
-    public SubmissionTrackingService(T dbContext)
+    public SubmissionTrackingService(T dbContext, IParsedTransactionMapper parsedTransactionMapper)
     {
         _dbContext = dbContext;
+        _parsedTransactionMapper = parsedTransactionMapper;
     }
 
     public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
@@ -100,41 +114,74 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
             .SingleOrDefaultAsync();
     }
 
-    public async Task TrackInitialSubmission(
+    public async Task<MempoolTrackGuidance> TrackInitialSubmission(
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        Core.ConstructionParseResponse parseResponse
+        Core.ConstructionParseResponse parseResponse,
+        Gateway.LedgerState ledgerState
     )
     {
-        var submittedTimestamp = DateTime.UtcNow;
-        var mempoolTransaction = new MempoolTransaction
-        {
-            TransactionIdentifierHash = transactionIdentifierHash,
-            Payload = signedTransaction,
-            SubmittedByThisGateway = true,
-            FirstSubmittedToGatewayTimestamp = submittedTimestamp,
-            LastSubmittedToGatewayTimestamp = submittedTimestamp,
-            LastSubmittedToNodeTimestamp = submittedTimestamp,
-            LastSubmittedToNodeName = submittedToNodeName,
-            TransactionsContents = ParsedTransactionMapper.MapToGatewayTransactionContents(parseResponse),
-            Status = MempoolTransactionStatus.InNodeMempool,
-        };
+        var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
 
-        // https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        await _dbContext.MempoolTransactions
-            .Upsert(mempoolTransaction)
-            .WhenMatched((dbTxn, newTxn) => new MempoolTransaction
+        var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
+
+        if (existingMempoolTransaction != null)
+        {
+            if (existingMempoolTransaction.Status == MempoolTransactionStatus.Failed)
             {
-                /*
-                 * Allow a transaction which previously was dropped to be resubmitted from fresh
-                 *  ie we reset FirstSubmittedTimestamp and Status
-                 */
-                SubmittedByThisGateway = newTxn.SubmittedByThisGateway,
-                LastSubmittedToGatewayTimestamp = newTxn.FirstSubmittedToGatewayTimestamp,
-                LastSubmittedToNodeTimestamp = newTxn.LastSubmittedToNodeTimestamp,
-                Status = MempoolTransactionStatus.InNodeMempool,
-            })
-            .RunAsync();
+                return new MempoolTrackGuidance(ShouldSubmitToNode: false, TransactionAlreadyFailedReason: existingMempoolTransaction.FailureReason);
+            }
+
+            existingMempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+            await _dbContext.SaveChangesAsync();
+
+            // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
+            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
+        }
+
+        var transactionContents = await _parsedTransactionMapper.MapToGatewayTransactionContents(parseResponse, ledgerState._Version);
+
+        var mempoolTransaction = MempoolTransaction.NewAsSubmittedForFirstTimeByGateway(
+            transactionIdentifierHash,
+            signedTransaction,
+            submittedToNodeName,
+            transactionContents,
+            submittedTimestamp
+        );
+
+        _dbContext.MempoolTransactions.Add(mempoolTransaction);
+
+        // We now try saving to the DB - but catch duplicates - if we get a duplicate reported, the gateway which saved
+        // it successfully should then submit it to the node -- and the one that reports a duplicate should return a
+        // generic success, but not resubmit.
+        // NB - 23 is Integrity Constraint Violation: https://www.postgresql.org/docs/current/errcodes-appendix.html)
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+            return new MempoolTrackGuidance(ShouldSubmitToNode: true);
+        }
+        catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
+        {
+            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
+        }
+    }
+
+    public async Task MarkAsFailed(
+        byte[] transactionIdentifierHash,
+        MempoolTransactionFailureReason failureReason,
+        string failureExplanation
+    )
+    {
+        var mempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
+
+        if (mempoolTransaction == null)
+        {
+            throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
+        }
+
+        mempoolTransaction.MarkAsFailed(failureReason, failureExplanation);
+
+        await _dbContext.SaveChangesAsync();
     }
 }

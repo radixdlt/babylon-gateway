@@ -63,6 +63,7 @@
  */
 
 using Common.Addressing;
+using Common.CoreCommunications;
 using Common.Database.Models.SingleEntries;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
@@ -70,7 +71,7 @@ using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.GlobalServices;
 
-public interface INetworkConfigurationProvider
+public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
     Task SetNetworkConfigurationOrAssertMatching(NetworkConfiguration inputNetworkConfiguration, CancellationToken token);
 
@@ -81,10 +82,6 @@ public interface INetworkConfigurationProvider
     string GetNetworkName();
 
     NetworkIdentifier GetNetworkIdentifierForApiRequests();
-
-    AddressHrps GetAddressHrps();
-
-    string GetXrdAddress();
 }
 
 /// <summary>

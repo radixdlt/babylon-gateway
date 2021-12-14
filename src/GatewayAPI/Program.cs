@@ -173,7 +173,6 @@ if (isSwaggerEnabled)
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.UseHttpMetrics();

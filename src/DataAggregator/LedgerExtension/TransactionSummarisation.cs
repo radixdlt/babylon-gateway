@@ -66,9 +66,16 @@ using Common.Extensions;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Extensions;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
+
+public record CommittedTransactionData(
+    CommittedTransaction CommittedTransaction,
+    TransactionSummary TransactionSummary,
+    byte[] TransactionContents
+);
 
 public record TransactionSummary(
     long StateVersion,
@@ -80,9 +87,9 @@ public record TransactionSummary(
     bool IsStartOfRound,
     byte[] TransactionIdentifierHash,
     byte[] TransactionAccumulator,
-    DateTime CurrentRoundTimestamp,
-    DateTime CreatedTimestamp,
-    DateTime NormalizedTimestamp
+    Instant CurrentRoundTimestamp,
+    Instant CreatedTimestamp,
+    Instant NormalizedTimestamp
 );
 
 public static class TransactionSummarisation
@@ -116,7 +123,7 @@ public static class TransactionSummarisation
     {
         long? newEpoch = null;
         long? newRoundInEpoch = null;
-        DateTime? newRoundTimestamp = null;
+        Instant? newRoundTimestamp = null;
         var isOnlyRoundChange = true;
 
         foreach (var operationGroup in transaction.OperationGroups)
@@ -140,7 +147,7 @@ public static class TransactionSummarisation
                     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
                     if (newRoundData.Timestamp != 0)
                     {
-                        newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp).UtcDateTime;
+                        newRoundTimestamp = Instant.FromUnixTimeMilliseconds(newRoundData.Timestamp);
                     }
                 }
             }
@@ -155,7 +162,7 @@ public static class TransactionSummarisation
         var isStartOfRound = newRoundInEpoch != null;
 
         var roundTimestamp = newRoundTimestamp ?? lastTransaction.CurrentRoundTimestamp;
-        var createdTimestamp = DateTime.UtcNow;
+        var createdTimestamp = SystemClock.Instance.GetCurrentInstant();
         var normalizedTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
             roundTimestamp < lastTransaction.NormalizedTimestamp ? lastTransaction.NormalizedTimestamp
             : roundTimestamp > createdTimestamp ? createdTimestamp
@@ -177,7 +184,7 @@ public static class TransactionSummarisation
         );
     }
 
-    private static TransactionSummary PreGenesisTransactionSummary()
+    public static TransactionSummary PreGenesisTransactionSummary()
     {
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
@@ -190,9 +197,9 @@ public static class TransactionSummarisation
             IsStartOfRound: false,
             TransactionIdentifierHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
-            CurrentRoundTimestamp: DateTime.UnixEpoch,
-            CreatedTimestamp: DateTime.UtcNow,
-            NormalizedTimestamp: DateTime.UnixEpoch
+            CurrentRoundTimestamp: Instant.FromUnixTimeSeconds(0),
+            CreatedTimestamp: SystemClock.Instance.GetCurrentInstant(),
+            NormalizedTimestamp: Instant.FromUnixTimeSeconds(0)
         );
     }
 }

@@ -64,6 +64,7 @@
 
 using Common.Extensions;
 using Common.Utilities;
+using NodaTime;
 using System.Diagnostics;
 
 namespace DataAggregator.GlobalWorkers;
@@ -137,7 +138,7 @@ public abstract class LoopedWorkerBase : BackgroundService
 
     protected virtual Task OnStart(CancellationToken stoppingToken)
     {
-        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", DateTime.UtcNow.AsUtcIsoDateToSecondsForLogs());
+        _logger.Log(_stillRunningLogLimiter.GetLogLevel(), "Starting at: {Time}", SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
         return Task.CompletedTask;
     }
 
@@ -145,13 +146,13 @@ public abstract class LoopedWorkerBase : BackgroundService
 
     protected virtual Task OnStop(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Stopping at: {Time}", DateTime.UtcNow.AsUtcIsoDateToSecondsForLogs());
+        _logger.LogInformation("Stopping at: {Time}", SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
         return Task.CompletedTask;
     }
 
     private async Task ExecuteLoopIteration(CancellationToken stoppingToken)
     {
-        _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", DateTimeOffset.Now);
+        _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
         await DoWork(stoppingToken);
     }
 }

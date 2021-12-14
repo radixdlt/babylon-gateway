@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
@@ -72,11 +73,10 @@ namespace DataAggregator.LedgerExtension;
 
 public interface IBulkTransactionCommitter
 {
-    Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> committedTransactions);
+    Task<CommitLedgerTransactionsReport> CommitTransactions(List<CommittedTransactionData> committedTransactions);
 }
 
 public record CommitLedgerTransactionsReport(
-    TransactionSummary FinalTransaction,
     long TransactionContentHandlingMs,
     long DbDependenciesLoadingMs,
     int TransactionContentDbActionsCount,
@@ -103,16 +103,15 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         _dbActionsPlanner = new DbActionsPlanner(_dbContext, _entityDeterminer, cancellationToken);
     }
 
-    public async Task<CommitLedgerTransactionsReport> CommitTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    public async Task<CommitLedgerTransactionsReport> CommitTransactions(List<CommittedTransactionData> transactions)
     {
-        var (finalTransactionSummary, transactionContentProcessingMs) = CodeStopwatch.TimeInMs(
-            () => HandleTransactions(parentSummary, transactions)
+        var transactionContentProcessingMs = CodeStopwatch.TimeInMs(
+            () => HandleTransactions(transactions)
         );
 
         var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
 
         return new CommitLedgerTransactionsReport(
-            finalTransactionSummary,
             transactionContentProcessingMs,
             dbActionsReport.DbDependenciesLoadingMs,
             dbActionsReport.ActionsCount,
@@ -120,21 +119,15 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         );
     }
 
-    private TransactionSummary HandleTransactions(TransactionSummary parentSummary, List<CommittedTransaction> transactions)
+    private void HandleTransactions(List<CommittedTransactionData> transactions)
     {
-        foreach (var transaction in transactions)
+        foreach (var transactionData in transactions)
         {
-            var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
-            TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
-
-            var dbTransaction = TransactionMapping.CreateLedgerTransaction(transaction, summary);
+            var dbTransaction = TransactionMapping.CreateLedgerTransaction(transactionData);
             _dbContext.LedgerTransactions.Add(dbTransaction);
 
-            HandleTransaction(transaction, dbTransaction, summary);
-            parentSummary = summary;
+            HandleTransaction(transactionData.CommittedTransaction, dbTransaction, transactionData.TransactionSummary);
         }
-
-        return parentSummary;
     }
 
     private void HandleTransaction(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary summary)

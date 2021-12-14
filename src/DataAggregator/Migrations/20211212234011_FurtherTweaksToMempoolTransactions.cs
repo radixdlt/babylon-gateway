@@ -62,69 +62,70 @@
  * permissions under this License.
  */
 
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using NodaTime;
 
 #nullable disable
 
 namespace DataAggregator.Migrations
 {
-    public partial class UpdatesToMempoolTransactionsTable : Migration
+    public partial class FurtherTweaksToMempoolTransactions : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "submitted_timestamp",
+                name: "submission_failure_reason",
                 table: "mempool_transactions",
-                newName: "last_submitted_to_node_timestamp");
+                newName: "failure_reason");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "commit_timestamp",
+            migrationBuilder.RenameColumn(
+                name: "last_seen_in_mempool_timestamp",
                 table: "mempool_transactions",
-                type: "timestamp with time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "first_submitted_to_gateway_timestamp",
-                table: "mempool_transactions",
-                type: "timestamp with time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "last_submitted_to_gateway_timestamp",
-                table: "mempool_transactions",
-                type: "timestamp with time zone",
-                nullable: true);
+                newName: "last_missing_from_mempool_timestamp");
 
             migrationBuilder.AddColumn<string>(
-                name: "last_submitted_to_node_name",
+                name: "failure_explanation",
                 table: "mempool_transactions",
                 type: "text",
                 nullable: true);
+
+            migrationBuilder.AddColumn<Instant>(
+                name: "failure_timestamp",
+                table: "mempool_transactions",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "submission_count",
+                table: "mempool_transactions",
+                type: "integer",
+                nullable: false,
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "commit_timestamp",
+                name: "failure_explanation",
                 table: "mempool_transactions");
 
             migrationBuilder.DropColumn(
-                name: "first_submitted_to_gateway_timestamp",
+                name: "failure_timestamp",
                 table: "mempool_transactions");
 
             migrationBuilder.DropColumn(
-                name: "last_submitted_to_gateway_timestamp",
-                table: "mempool_transactions");
-
-            migrationBuilder.DropColumn(
-                name: "last_submitted_to_node_name",
+                name: "submission_count",
                 table: "mempool_transactions");
 
             migrationBuilder.RenameColumn(
-                name: "last_submitted_to_node_timestamp",
+                name: "last_missing_from_mempool_timestamp",
                 table: "mempool_transactions",
-                newName: "submitted_timestamp");
+                newName: "last_seen_in_mempool_timestamp");
+
+            migrationBuilder.RenameColumn(
+                name: "failure_reason",
+                table: "mempool_transactions",
+                newName: "submission_failure_reason");
         }
     }
 }

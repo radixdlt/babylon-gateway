@@ -81,7 +81,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 
     private readonly ILogger<INodeWorkersRunnerRegistry> _logger;
     private readonly INodeWorkersRunnerFactory _nodeWorkersRunnerFactory;
-    private readonly Dictionary<string, NodeWorkersRunner> _servicesMap = new();
+    private readonly Dictionary<NodeAppSettings, NodeWorkersRunner> _servicesMap = new();
     private readonly Dictionary<string, Task> _startupBlocklist = new();
     private readonly object _servicesMapLock = new();
 
@@ -93,11 +93,8 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 
     public async Task EnsureCorrectNodeServicesRunning(List<NodeAppSettings> enabledNodes, CancellationToken cancellationToken)
     {
-        var enabledNodesSettingsMap = enabledNodes
-            .ToDictionary(n => n.Name);
-
-        var startTask = StartNodeWorkersForNodes(GetWorkersToStart(enabledNodesSettingsMap), cancellationToken);
-        var endTask = StopNodeWorkersForNodes(GetWorkersToStop(enabledNodesSettingsMap), cancellationToken);
+        var startTask = StartNodeWorkersForNodes(GetWorkersToStart(enabledNodes), cancellationToken);
+        var endTask = StopNodeWorkersForNodes(GetWorkersToStop(enabledNodes), cancellationToken);
 
         await Task.WhenAll(startTask, endTask);
     }
@@ -107,27 +104,26 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         await StopNodeWorkersForNodes(GetAllWorkers(), cancellationToken);
     }
 
-    private List<NodeAppSettings> GetWorkersToStart(Dictionary<string, NodeAppSettings> enabledNodesSettingsMap)
+    private List<NodeAppSettings> GetWorkersToStart(List<NodeAppSettings> enabledNodesSettings)
     {
         lock (_servicesMapLock)
         {
-            return enabledNodesSettingsMap
-                .Where(kvp => !_servicesMap.ContainsKey(kvp.Key))
-                .Where(kvp => !_startupBlocklist.ContainsKey(kvp.Key) || _startupBlocklist[kvp.Key].IsCompleted)
-                .Select(kvp => kvp.Value)
+            return enabledNodesSettings
+                .Where(n => !_servicesMap.ContainsKey(n))
+                .Where(n => !_startupBlocklist.ContainsKey(n.Name) || _startupBlocklist[n.Name].IsCompleted)
                 .ToList();
         }
     }
 
-    private List<string> GetWorkersToStop(Dictionary<string, NodeAppSettings> enabledNodesSettingsMap)
+    private List<NodeAppSettings> GetWorkersToStop(List<NodeAppSettings> enabledNodesSettings)
     {
         lock (_servicesMapLock)
         {
-            return _servicesMap.Keys.Except(enabledNodesSettingsMap.Keys).ToList();
+            return _servicesMap.Keys.Except(enabledNodesSettings).ToList();
         }
     }
 
-    private List<string> GetAllWorkers()
+    private List<NodeAppSettings> GetAllWorkers()
     {
         lock (_servicesMapLock)
         {
@@ -140,69 +136,69 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         return Task.WhenAll(nodes.Select(n => CreateAndStartNodeWorkersIfNotExists(n, cancellationToken)));
     }
 
-    private async Task CreateAndStartNodeWorkersIfNotExists(NodeAppSettings nodeAppSettings, CancellationToken cancellationToken)
+    private async Task CreateAndStartNodeWorkersIfNotExists(NodeAppSettings node, CancellationToken cancellationToken)
     {
         NodeWorkersRunner nodeWorkersRunner;
         lock (_servicesMapLock)
         {
-            if (_servicesMap.ContainsKey(nodeAppSettings.Name))
+            if (_servicesMap.ContainsKey(node))
             {
                 return;
             }
 
-            nodeWorkersRunner = _nodeWorkersRunnerFactory.CreateWorkersForNode(nodeAppSettings);
-            _servicesMap.Add(nodeAppSettings.Name, nodeWorkersRunner);
+            nodeWorkersRunner = _nodeWorkersRunnerFactory.CreateWorkersForNode(node);
+            _servicesMap.Add(node, nodeWorkersRunner);
         }
 
         try
         {
-            _logger.LogInformation("Initializing for node: {NodeName}", nodeAppSettings.Name);
+            _logger.LogInformation("Initializing for node: {NodeName}", node.Name);
             await nodeWorkersRunner.Initialize(cancellationToken);
-            _logger.LogInformation("Starting workers for node: {NodeName}", nodeAppSettings.Name);
+            _logger.LogInformation("Starting workers for node: {NodeName}", node.Name);
             await nodeWorkersRunner.StartWorkers(cancellationToken);
-            _logger.LogInformation("Workers for node started successfully: {NodeName}", nodeAppSettings.Name);
+            _logger.LogInformation("Workers for node started successfully: {NodeName}", node.Name);
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
                 "Error initializing or starting up services for node: {NodeName}. We won't try again for {ErrorStartupBlockTimeSeconds} seconds. Now clearing up...",
-                nodeAppSettings.Name,
+                node.Name,
                 ErrorStartupBlockTimeSeconds
             );
 
             lock (_servicesMapLock)
             {
-                _startupBlocklist[nodeAppSettings.Name] = Task.Delay(TimeSpan.FromSeconds(ErrorStartupBlockTimeSeconds));
+                _startupBlocklist[node.Name] = Task.Delay(TimeSpan.FromSeconds(ErrorStartupBlockTimeSeconds), cancellationToken);
             }
 
-            await StopNodeWorkers(nodeAppSettings.Name, cancellationToken);
+            await StopNodeWorkers(node, cancellationToken);
         }
     }
 
-    private Task StopNodeWorkersForNodes(IEnumerable<string> nodeNames, CancellationToken cancellationToken)
+    private Task StopNodeWorkersForNodes(IEnumerable<NodeAppSettings> nodes, CancellationToken cancellationToken)
     {
-        return Task.WhenAll(nodeNames.Select(n => StopNodeWorkers(n, cancellationToken)));
+        return Task.WhenAll(nodes.Select(n => StopNodeWorkers(n, cancellationToken)));
     }
 
-    private async Task StopNodeWorkers(string nodeName, CancellationToken cancellationToken)
+    private async Task StopNodeWorkers(NodeAppSettings node, CancellationToken cancellationToken)
     {
-        if (!_servicesMap.TryGetValue(nodeName, out var nodeWorkersRunner))
+        if (!_servicesMap.TryGetValue(node, out var nodeWorkersRunner))
         {
             // It's already been stopped/removed
             return;
         }
 
-        _logger.LogInformation("Sending instruction to stop workers for node {NodeName}", nodeName);
+        _logger.LogInformation("Sending instruction to stop workers for node {NodeName}", node.Name);
 
         try
         {
             await nodeWorkersRunner.StopWorkersSafe(cancellationToken);
-            _logger.LogInformation("Node workers stopped successfully for node {NodeName}", nodeName);
+            _logger.LogInformation("Node workers stopped successfully for node {NodeName}", node.Name);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error stopping services for node: {NodeName}. Now clearing up regardless", nodeName);
+            _logger.LogError(ex, "Error stopping services for node: {NodeName}. Now clearing up regardless", node.Name);
         }
         finally
         {
@@ -212,7 +208,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 
         lock (_servicesMapLock)
         {
-            _servicesMap.Remove(nodeName);
+            _servicesMap.Remove(node);
         }
     }
 }

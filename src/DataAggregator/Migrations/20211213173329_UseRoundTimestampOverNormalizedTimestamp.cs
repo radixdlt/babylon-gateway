@@ -62,37 +62,46 @@
  * permissions under this License.
  */
 
-namespace DataAggregator.Configuration.Models;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-public record MempoolTimeouts
+#nullable disable
+
+namespace DataAggregator.Migrations
 {
-    [ConfigurationKeyName("PruneCommittedAfterSeconds")]
-    public long PruneCommittedAfterSeconds { get; set; } = 10;
+    public partial class UseRoundTimestampOverNormalizedTimestamp : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transactions_timestamp",
+                table: "ledger_transactions");
 
-    public TimeSpan PruneCommittedAfter => TimeSpan.FromSeconds(PruneCommittedAfterSeconds);
+            migrationBuilder.RenameColumn(
+                name: "timestamp",
+                table: "ledger_transactions",
+                newName: "normalized_timestamp");
 
-    [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
-    public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_round_timestamp",
+                table: "ledger_transactions",
+                column: "round_timestamp");
+        }
 
-    public TimeSpan MinDelayBetweenResubmissions => TimeSpan.FromSeconds(MinDelayBetweenResubmissionsSeconds);
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transactions_round_timestamp",
+                table: "ledger_transactions");
 
-    [ConfigurationKeyName("StopResubmittingAfterSeconds")]
-    public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
+            migrationBuilder.RenameColumn(
+                name: "normalized_timestamp",
+                table: "ledger_transactions",
+                newName: "timestamp");
 
-    public TimeSpan StopResubmittingAfter => TimeSpan.FromSeconds(StopResubmittingAfterSeconds);
-
-    [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds")]
-    public long PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
-
-    public TimeSpan PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
-
-    [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds")]
-    public long PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
-
-    public TimeSpan PruneMissingTransactionsAfterTimeSinceFirstSeen => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
-
-    [ConfigurationKeyName("PruneRequiresMissingFromMempoolForSeconds")]
-    public long PruneRequiresMissingFromMempoolForSeconds { get; set; } = 60;
-
-    public TimeSpan PruneRequiresMissingFromMempoolFor => TimeSpan.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_timestamp",
+                table: "ledger_transactions",
+                column: "timestamp");
+        }
+    }
 }

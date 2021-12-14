@@ -121,14 +121,14 @@ public static class TransactionConsistency
         }
     }
 
-    public static void AssertTransactionHashCorrect(RawTransaction rawTransaction)
+    public static void AssertTransactionHashCorrect(byte[] payload, byte[] transactionIdentifierHash)
     {
-        if (!RadixHashing.IsValidTransactionHashIdentifier(rawTransaction.Payload!, rawTransaction.TransactionIdentifierHash))
+        if (!RadixHashing.IsValidTransactionHashIdentifier(payload, transactionIdentifierHash))
         {
             throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with claimed identifier hash {rawTransaction.TransactionIdentifierHash.ToHex()} " +
-                $"but it was calculated to have identifier {RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(rawTransaction.Payload).ToHex()} " +
-                $"(transaction contents: {rawTransaction.Payload!.ToHex()})"
+                $"Attempted to commit a transaction with claimed identifier hash {transactionIdentifierHash.ToHex()} " +
+                $"but it was calculated to have identifier {RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(payload).ToHex()} " +
+                $"(transaction contents: {payload.ToHex()})"
             );
         }
     }

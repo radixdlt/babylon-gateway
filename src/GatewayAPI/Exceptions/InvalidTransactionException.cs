@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.Mempool;
 using RadixGatewayApi.Generated.Model;
 using Core = RadixCoreApi.Generated.Model;
 
@@ -69,6 +70,11 @@ namespace GatewayAPI.Exceptions;
 
 public class InvalidTransactionException : ValidationException
 {
+    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
+        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
+    {
+    }
+
     private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage)
         : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
     {
@@ -91,7 +97,23 @@ public class InvalidTransactionException : ValidationException
     {
         return new InvalidTransactionException(
             invalidTransactionHex,
-            $"Referenced substate does not exist or has already been used: {error.SubstateIdentifierNotFound.Identifier}"
+            "The transaction clashes with a previous transaction",
+            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
+        );
+    }
+
+    public static InvalidTransactionException FromPreviouslyFailedTransactionError(
+        string invalidTransactionHex,
+        MempoolTransactionFailureReason previousFailureReason
+    )
+    {
+        var userFacingMessage = previousFailureReason == MempoolTransactionFailureReason.DoubleSpend
+            ? "The transaction submission has already failed as it clashes with a previous transaction"
+            : "The transaction submission has already failed";
+
+        return new InvalidTransactionException(
+            invalidTransactionHex,
+            userFacingMessage
         );
     }
 }

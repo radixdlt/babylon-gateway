@@ -134,7 +134,7 @@ public class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        HookupLedgerTransactions(modelBuilder);
+        HookupTransactions(modelBuilder);
         HookupLedgerOperationGroups(modelBuilder);
         HookupNormalizedEntities(modelBuilder);
         HookupSubstates(modelBuilder);
@@ -166,13 +166,13 @@ public class CommonDbContext : DbContext
             .HaveConversion<ValidatorDataSubstateTypeValueConverter>();
 
         configurationBuilder.Properties<MempoolTransactionStatus>()
-            .HaveConversion<MempoolTransactionSubmissionStatusValueConverter>();
+            .HaveConversion<MempoolTransactionStatusValueConverter>();
 
         configurationBuilder.Properties<MempoolTransactionFailureReason>()
             .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
     }
 
-    private static void HookupLedgerTransactions(ModelBuilder modelBuilder)
+    private static void HookupTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionIdentifierHash);
@@ -187,7 +187,7 @@ public class CommonDbContext : DbContext
 
         // This index lets you quickly translate Time => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.NormalizedTimestamp);
+            .HasIndex(lt => lt.RoundTimestamp);
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder.Entity<LedgerTransaction>()

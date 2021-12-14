@@ -96,7 +96,7 @@ public class AccountStakeUnitBalanceSubstateTypeValueConverter : EnumTypeValueCo
 /// </summary>
 [Index(nameof(AccountId), nameof(ValidatorId))]
 [Index(nameof(ValidatorId), nameof(AccountId))]
-[Table("account_stake_ownership_balance_substates")]
+[Table("account_stake_unit_balance_substates")]
 public class AccountStakeUnitBalanceSubstate : BalanceSubstateBase
 {
     /// <summary>

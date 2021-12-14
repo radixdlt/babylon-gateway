@@ -185,6 +185,10 @@ public class CoreApiHandler : ICoreApiHandler
                 minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
             ),
             WrappedCoreApiException<FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
+            WrappedCoreApiException<NotEnoughNativeTokensForFeesError> ex => new NotEnoughNativeTokensForFeeException(
+                ex.Error.FeeEstimate.AsGatewayTokenAmount(),
+                ex.Error.Available.AsGatewayTokenAmount()
+            ),
             WrappedCoreApiException<InvalidPublicKeyError> ex => new InvalidPublicKeyException(
                 new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
                 "Invalid public key"

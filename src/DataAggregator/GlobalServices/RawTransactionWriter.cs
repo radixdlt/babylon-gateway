@@ -64,8 +64,11 @@
 
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Mempool;
+using Common.Utilities;
 using DataAggregator.DependencyInjection;
+using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace DataAggregator.GlobalServices;
 
@@ -73,7 +76,7 @@ public interface IRawTransactionWriter
 {
     Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
 
-    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
+    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
@@ -86,17 +89,26 @@ public class RawTransactionWriter : IRawTransactionWriter
             .RunAsync(token);
     }
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
     {
-        var ids = rawTransactions.Select(rt => rt.TransactionIdentifierHash).ToList();
+        var transactionsById = transactionData
+            .Where(td => !td.TransactionSummary.IsOnlyRoundChange)
+            .ToDictionary(
+                rt => rt.TransactionSummary.TransactionIdentifierHash,
+                ByteArrayEqualityComparer.Default
+            );
+
         var toUpdate = await context.MempoolTransactions
-            .Where(mt => ids.Contains(mt.TransactionIdentifierHash))
+            .Where(mt => transactionsById.Keys.Contains(mt.TransactionIdentifierHash))
             .ToListAsync(token);
 
         foreach (var mempoolTransaction in toUpdate)
         {
-            mempoolTransaction.CommitTimestamp = DateTime.UtcNow;
-            mempoolTransaction.Status = MempoolTransactionStatus.Committed;
+            var transactionSummary = transactionsById[mempoolTransaction.TransactionIdentifierHash].TransactionSummary;
+            mempoolTransaction.MarkAsCommitted(
+                transactionSummary.StateVersion,
+                transactionSummary.NormalizedTimestamp
+            );
         }
 
         return await context.SaveChangesAsync(token);

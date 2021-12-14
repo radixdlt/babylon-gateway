@@ -68,6 +68,7 @@ using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using System.Linq.Expressions;
 
 namespace Common.Database;
@@ -124,12 +125,12 @@ public static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, Instant timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.NormalizedTimestamp <= timestamp)
-            .OrderByDescending(lt => lt.NormalizedTimestamp)
+            .Where(lt => lt.RoundTimestamp <= timestamp)
+            .OrderByDescending(lt => lt.RoundTimestamp)
             .ThenByDescending(lt => lt.ResultantStateVersion)
             .Take(1);
     }

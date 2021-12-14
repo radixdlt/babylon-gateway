@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
@@ -72,9 +73,9 @@ using Common.Numerics;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using DataAggregator.Extensions;
-using DataAggregator.GlobalServices;
 using RadixCoreApi.Generated.Model;
 using Api = RadixCoreApi.Generated.Model;
+using InvalidTransactionException = DataAggregator.Exceptions.InvalidTransactionException;
 
 namespace DataAggregator.LedgerExtension;
 
@@ -330,7 +331,7 @@ public class TransactionContentProcessor
             case EntityType.Resource:
             default:
                 throw GenerateDetailedInvalidTransactionException(
-                    $"Stake ownership amount operation against unsupported entity type: {_entity!.EntityType}"
+                    $"Stake unit amount operation against unsupported entity type: {_entity!.EntityType}"
                 );
         }
     }

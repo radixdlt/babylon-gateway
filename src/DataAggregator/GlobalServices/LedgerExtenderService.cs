@@ -62,6 +62,9 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
+using Common.Database.Models.Ledger;
+using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
@@ -78,11 +81,11 @@ public interface ILedgerExtenderService
 }
 
 public record PreparationForLedgerExtensionReport(
-    TransactionSummary ParentSummary,
     long RawTxnPersistenceMs,
     int RawTxnUpsertTouchedRecords,
     long MempoolTransactionUpdateMs,
-    int MempoolTransactionsTouchedRecords
+    int MempoolTransactionsTouchedRecords,
+    List<CommittedTransactionData> TransactionData
 );
 
 public record CommitTransactionsReport(
@@ -140,15 +143,17 @@ public class LedgerExtenderService : ILedgerExtenderService
         await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
         var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, ledgerExtensionDbContext, token)
-            .CommitTransactions(preparationReport.ParentSummary, transactions);
+            .CommitTransactions(preparationReport.TransactionData);
 
         var (ledgerExtensionEntriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
             () => ledgerExtensionDbContext.SaveChangesAsync(token)
         );
 
+        var finalTransactionSummary = preparationReport.TransactionData.Last().TransactionSummary;
+
         return new CommitTransactionsReport(
             transactions.Count,
-            bulkTransactionCommitReport.FinalTransaction,
+            finalTransactionSummary,
             preparationReport.RawTxnPersistenceMs,
             preparationReport.MempoolTransactionUpdateMs,
             bulkTransactionCommitReport.TransactionContentHandlingMs,
@@ -164,46 +169,40 @@ public class LedgerExtenderService : ILedgerExtenderService
     ///  This should be idempotent - ie can be repeated if the main commit task fails.
     /// </summary>
     private async Task<PreparationForLedgerExtensionReport> PrepareForLedgerExtension(
-        AggregatorDbContext dbContext,
+        AggregatorDbContext preparationDbContext,
         StateIdentifier parentStateIdentifier,
         List<CommittedTransaction> transactions,
         CancellationToken token
     )
     {
-        var parentSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
-        TransactionConsistency.AssertEqualParentIdentifiers(parentStateIdentifier, parentSummary);
+        var parentSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, token);
+
+        var transactionData = AssertConsistentAndGenerateTransactionData(parentStateIdentifier, parentSummary, transactions);
 
         if (parentSummary.StateVersion == 0)
         {
             await EnsureDbLedgerIsInitialized(token);
         }
 
-        var rawTransactions = transactions.Select(TransactionMapping.CreateRawTransaction).ToList();
-
-        rawTransactions.ForEach(TransactionConsistency.AssertTransactionHashCorrect);
+        var rawTransactions = transactionData.Select(td => new RawTransaction(
+            td.TransactionSummary.TransactionIdentifierHash,
+            td.TransactionContents
+        )).ToList();
 
         var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
-            () => _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(
-                dbContext,
-                rawTransactions,
-                token
-            )
+            () => _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(preparationDbContext, rawTransactions, token)
         );
 
         var (mempoolTransactionsTouched, mempoolTransactionUpdateMs) = await CodeStopwatch.TimeInMs(
-            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(
-                dbContext,
-                rawTransactions,
-                token
-            )
+            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, transactionData, token)
         );
 
         return new PreparationForLedgerExtensionReport(
-            parentSummary,
             rawTransactionCommitMs,
             rawTransactionsTouched,
             mempoolTransactionUpdateMs,
-            mempoolTransactionsTouched
+            mempoolTransactionsTouched,
+            transactionData
         );
     }
 
@@ -217,5 +216,30 @@ public class LedgerExtenderService : ILedgerExtenderService
                 _networkConfigurationProvider.GetNetworkName()
             );
         }
+    }
+
+    private List<CommittedTransactionData> AssertConsistentAndGenerateTransactionData(
+        StateIdentifier parentStateIdentifier,
+        TransactionSummary parentSummary,
+        List<CommittedTransaction> transactions
+    )
+    {
+        TransactionConsistency.AssertEqualParentIdentifiers(parentStateIdentifier, parentSummary);
+
+        var transactionData = new List<CommittedTransactionData>();
+
+        foreach (var transaction in transactions)
+        {
+            var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
+            var contents = transaction.Metadata.Hex.ConvertFromHex();
+
+            TransactionConsistency.AssertTransactionHashCorrect(contents, summary.TransactionIdentifierHash);
+            TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
+
+            transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
+            parentSummary = summary;
+        }
+
+        return transactionData;
     }
 }
