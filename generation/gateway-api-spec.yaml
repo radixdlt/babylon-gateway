@@ -764,7 +764,7 @@ components:
         - hex
       properties:
         hex:
-          description: The compressed public key (33 bytes) in hex format
+          description: The hex-encoded compressed public key (33 bytes)
           type: string
     Signature:
       type: object
@@ -775,7 +775,7 @@ components:
         public_key:
           $ref: "#/components/schemas/PublicKey"
         bytes:
-          description: The signature should be hex-encoded in DER format
+          description: The hex-encoded signature in DER format
           type: string
     TransactionFinalizeResponse:
       type: object
