@@ -67,11 +67,18 @@ using CoreClient = RadixCoreApi.Generated.Client;
 
 namespace Common.Exceptions;
 
+public enum Transience
+{
+    Transient,
+    MaybeTransient,
+    Permanent,
+}
+
 public class CoreApiErrorProperties
 {
     public bool MarksInvalidTransaction { get; set; }
 
-    public bool HasUndefinedBehaviour { get; set; }
+    public Transience Transience { get; set; } = Transience.Permanent;
 }
 
 /// <summary>

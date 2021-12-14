@@ -105,7 +105,7 @@ public static class CoreApiErrorWrapper
             BelowMinimumStakeError error => WrappedCoreApiException.Of(apiException, error), // Should have already detected this, but rethrow anyway
             DataObjectNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
             FeeConstructionError error => WrappedCoreApiException.Of(apiException, error),
-            InternalServerError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { HasUndefinedBehaviour = true }),
+            InternalServerError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.MaybeTransient }),
             InvalidAddressError error => WrappedCoreApiException.Of(apiException, error), // Not specific enough - rely on Gateway handling
             InvalidDataObjectError error => WrappedCoreApiException.Of(apiException, error),
             InvalidFeePayerEntityError error => WrappedCoreApiException.Of(apiException, error),
@@ -118,6 +118,7 @@ public static class CoreApiErrorWrapper
             InvalidTransactionError error => WrappedCoreApiException.Of(apiException, error),
             InvalidTransactionHashError error => WrappedCoreApiException.Of(apiException, error),
             MessageTooLongError error => WrappedCoreApiException.Of(apiException, error),
+            MempoolFullError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.Transient }),
             NetworkNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
             NotEnoughNativeTokensForFeesError error => WrappedCoreApiException.Of(apiException, error),
             NotEnoughResourcesError error => WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService

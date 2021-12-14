@@ -337,7 +337,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             );
             throw;
         }
-        catch (WrappedCoreApiException ex) when (!ex.Properties.HasUndefinedBehaviour)
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
             // Any other known Core exception which can't result in the transaction being submitted
             await _submissionTrackingService.MarkAsFailed(

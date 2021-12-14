@@ -225,7 +225,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             var failureExplanation = "Double spend on resubmission";
             return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.DoubleSpend, failureExplanation, chosenNode.Name);
         }
-        catch (WrappedCoreApiException ex) when (!ex.Properties.HasUndefinedBehaviour)
+        catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
             var failureExplanation = $"Core API Exception: {ex.Error.GetType().Name} on resubmission";
             return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, failureExplanation, chosenNode.Name);
