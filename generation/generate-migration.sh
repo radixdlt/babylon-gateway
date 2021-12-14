@@ -19,3 +19,10 @@ dotnet build src/DataAggregator
 dotnet ef migrations add "$MigrationName" --project src/DataAggregator
 
 ./generation/ensure-license-headers.sh
+./generation/regenerate-idempotent-sql-script.sh
+
+echo
+echo "== Successfully generated the migration =="
+echo
+echo "You may need to manually go in and manually improve the migration code, as per https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/managing?tabs=dotnet-core-cli"
+echo "After any manual changes, run ./generation/regenerate-idempotent-sql-script.sh"
