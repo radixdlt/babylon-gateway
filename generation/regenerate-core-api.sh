@@ -48,48 +48,52 @@ if [[ ! -z "$previousPackageVersion" ]]; then
     previousPackageVersionMinor="$(echo $previousPackageVersion | cut -d"." -f 2)"
     previousPackageVersionPatch="$(echo $previousPackageVersion | cut -d"." -f 3)"
 
-    if [[ -z "$patchVersion" ]]; then
-        patchVersion=$((previousPackageVersionPatch+1))
-    fi
-
-    packageVersion="$openApiSpecVersionMajor.$openApiSpecVersionMinor.$patchVersion"
-    packageVersionMajor="$(echo $packageVersion | cut -d"." -f 1)"
-    packageVersionMinor="$(echo $packageVersion | cut -d"." -f 2)"
-    packageVersionPatch="$(echo $packageVersion | cut -d"." -f 3)"
+    packageVersionMajor=$openApiSpecVersionMajor
+    packageVersionMinor=$openApiSpecVersionMinor
 
     if [[ "$packageVersionMajor" -lt "$previousPackageVersionMajor" ]]; then
-        echo "Version $packageVersion must be larger than last version $previousPackageVersion"
+        echo "Version $packageVersionMajor.$packageVersionMinor.? must be larger than last version $previousPackageVersion"
         echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
         echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
         echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
         exit 1
     fi
     if [[ "$packageVersionMajor" -eq "$previousPackageVersionMajor" && "$packageVersionMinor" -lt "$previousPackageVersionMinor" ]]; then
-        echo "Version $packageVersion must be larger than last version $previousPackageVersion"
+        echo "Version $packageVersionMajor.$packageVersionMinor.? must be larger than last version $previousPackageVersion"
         echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
         echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
         echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
         exit 1
     fi
-    if [[ "$packageVersionMajor" -eq "$previousPackageVersionMajor" && "$packageVersionMinor" -eq "$previousPackageVersionMinor" && "$packageVersionPatch" -le "$previousPackageVersionPatch" ]]; then
-        echo "Version $packageVersion must be larger than last version $previousPackageVersion"
-        echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
-        echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
-        echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
-        exit 1
+    if [[ "$packageVersionMajor" -eq "$previousPackageVersionMajor" && "$packageVersionMinor" -eq "$previousPackageVersionMinor" ]]; then
+
+        if [[ -z "$patchVersion" ]]; then
+            patchVersion=$((previousPackageVersionPatch+1))
+        fi
+
+        if [[ "$patchVersion" -le "$previousPackageVersionPatch" ]]; then
+            echo "Version $packageVersionMajor.$packageVersionMinor.$patchVersion must be larger than last version $previousPackageVersion"
+            echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
+            echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
+            echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
+            exit 1
+        fi
     fi
 
-    echo "Building generated client $packageName.$packageVersion.nupkg against open api spec version $openApiSpecVersion, replacing old $packageName.$previousPackageVersion.nupkg"
-    echo
-else
-    if [ ! -z "$patchVersion" ]; then
+    if [[ -z "$patchVersion" ]]; then
         patchVersion="0"
     fi
 
     packageVersion="$openApiSpecVersionMajor.$openApiSpecVersionMinor.$patchVersion"
-    packageVersionMajor="$(echo $packageVersion | cut -d"." -f 1)"
-    packageVersionMinor="$(echo $packageVersion | cut -d"." -f 2)"
-    packageVersionPatch="$(echo $packageVersion | cut -d"." -f 3)"
+
+    echo "Building generated client $packageName.$packageVersion.nupkg against open api spec version $openApiSpecVersion, replacing old $packageName.$previousPackageVersion.nupkg"
+    echo
+else
+    if [[ -z "$patchVersion" ]]; then
+        patchVersion="0"
+    fi
+
+    packageVersion="$openApiSpecVersionMajor.$openApiSpecVersionMinor.$patchVersion"
 
     echo "Building generated client $packageName.$packageVersion.nupkg against open api spec version $openApiSpecVersion"
     echo
