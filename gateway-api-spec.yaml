@@ -49,7 +49,7 @@ tags:
   - name: token-endpoint
     x-displayName: Tokens
     description: To query token-related information.
-  - name: validators-endpoint
+  - name: validator-endpoint
     x-displayName: Validators
     description: To query validator-related information.
   - name: transaction-endpoint
