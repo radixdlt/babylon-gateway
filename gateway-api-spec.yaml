@@ -89,7 +89,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/GatewayResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -114,7 +114,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TokenNativeResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -139,7 +139,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TokenResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -164,7 +164,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TokenDeriveResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -189,7 +189,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountDeriveResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -214,7 +214,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountBalancesResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -239,7 +239,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountStakesResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -264,7 +264,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountUnstakesResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -291,7 +291,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/AccountTransactionsResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -316,7 +316,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ValidatorResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -341,7 +341,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ValidatorDeriveResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -366,7 +366,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ValidatorsResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -391,7 +391,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionRulesResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -416,7 +416,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionBuildResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -441,7 +441,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionFinalizeResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
@@ -468,19 +468,19 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionSubmitResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/status":
     post:
-      summary: Get Transaction
+      summary: Transaction Status
       description: |
         Returns the status and contents of the transaction with the given transaction identifier.
         Transaction identifiers which aren't recognised as either belonging to a committed transaction or a
-        transaction submitted through this Network Gateway may return a `Not Found` Gateway Error.
-        Transaction identifiers relating to failed transactions will, after a delay, also be reported as `Not Found`.
+        transaction submitted through this Network Gateway may return a `TransactionNotFoundError`.
+        Transaction identifiers relating to failed transactions will, after a delay, also be report a `TransactionNotFoundError`.
       tags:
         - transaction-endpoint
       requestBody:
@@ -497,7 +497,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/TransactionStatusResponse"
         '500':
-          description: Gateway error
+          description: Gateway Error
           content:
             application/json:
               schema:
