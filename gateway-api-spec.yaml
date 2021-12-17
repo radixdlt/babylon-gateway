@@ -9,9 +9,9 @@ info:
     This API is designed to enable clients to efficiently query information on the RadixDLT ledger, and allow clients to
     simply build and submit transactions to the network.
 
-    The API is designed to replace the original Olympia `archive node API`, and enables moving the indexes and public-facing API off-node.
+    The API is designed to replace the original Olympia "Archive Node API".
 
-    # Overview
+    # Gateway API Overview
 
     The Gateway API is separated into distinct groupings:
 
@@ -20,6 +20,9 @@ info:
     * `/token/*` - To query token-related information
     * `/validator/*` and `/validators` - To query validator-related information
     * `/transaction/*` - To build, finalize and submit transactions, and to read the status and content of submitted and on-ledger transactions.
+
+    The Gateway API is implemented by the [Network Gateway](https://github.com/radixdlt/radixdlt-network-gateway), which is configured
+    to read from full node/s to extract and index data from the network.
 
     # Radix API Comparison
 
