@@ -102,3 +102,7 @@ For more information, see the [Tests project](../../src/Tests).
 ## Reformatting
 
 Run `dotnet format` to fix whitespace and other formatting issues across all files. Rider runs this as you save each file, so this likely won't be needed regularly.
+
+## Code Generation - Migrations, Open API specs etc
+
+See the [generation](../generation) folder.

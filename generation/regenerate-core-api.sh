@@ -15,7 +15,7 @@ cd "$SCRIPT_DIR"
 packageName='RadixCoreApi.Generated'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
-specLocation='./core-api-spec.yaml'
+specLocation='./core-api-spec-copy.yaml'
 
 patchVersion="$1" # Patch version override as first command line parameter
 

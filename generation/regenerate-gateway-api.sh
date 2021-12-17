@@ -16,7 +16,7 @@ packageName='RadixGatewayApi.Generated'
 outputDirectory="../generated-dependencies"
 packageVersionLocation="../Directory.Packages.props"
 appsettingsLocation="../src/GatewayAPI/appsettings.json"
-specLocation='./gateway-api-spec.yaml'
+specLocation='../gateway-api-spec.yaml'
 
 patchVersion="$1" # Patch version override as first command line parameter
 
