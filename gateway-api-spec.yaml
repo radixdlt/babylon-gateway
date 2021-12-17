@@ -1525,7 +1525,7 @@ components:
         - address
       properties:
         address:
-          description: The Radix address of the account.
+          description: The radix address of the account.
           type: string
     ValidatorIdentifier:
       type: object
@@ -1533,7 +1533,7 @@ components:
         - address
       properties:
         address:
-          description: The Radix address of the validator.
+          description: The radix address of the validator.
           type: string
     TokenIdentifier:
       type: object
@@ -1541,7 +1541,7 @@ components:
         - rri
       properties:
         rri:
-          description: The Radix resource identifier of the token.
+          description: The radix resource identifier of the token.
           type: string
     TransactionIdentifier:
       type: object
