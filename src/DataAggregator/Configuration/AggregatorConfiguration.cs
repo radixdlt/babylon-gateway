@@ -74,6 +74,8 @@ public interface IAggregatorConfiguration
     string GetNetworkName();
 
     MempoolConfiguration GetMempoolConfiguration();
+
+    LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration();
 }
 
 public class AggregatorConfiguration : IAggregatorConfiguration
@@ -119,6 +121,13 @@ public class AggregatorConfiguration : IAggregatorConfiguration
         var mempoolPruneTimeouts = new MempoolConfiguration();
         _configuration.GetSection("MempoolConfiguration").Bind(mempoolPruneTimeouts);
         return mempoolPruneTimeouts;
+    }
+
+    public LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration()
+    {
+        var ledgerConfirmationConfiguration = new LedgerConfirmationConfiguration();
+        _configuration.GetSection("LedgerConfirmation").Bind(ledgerConfirmationConfiguration);
+        return ledgerConfirmationConfiguration;
     }
 
     public string GetNetworkName()

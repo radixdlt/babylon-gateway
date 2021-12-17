@@ -62,53 +62,52 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger;
-using Common.Utilities;
-using DataAggregator.DependencyInjection;
-using DataAggregator.LedgerExtension;
-using Microsoft.EntityFrameworkCore;
+namespace DataAggregator.Configuration.Models;
 
-namespace DataAggregator.GlobalServices;
-
-public interface IRawTransactionWriter
+public record LedgerConfirmationConfiguration
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
+    /// <summary>
+    /// Gets or sets QuorumRequiresTrustProportion.
+    /// Requires at least this proportion of enabled nodes to commit (by trust weighting).
+    /// </summary>
+    [ConfigurationKeyName("QuorumRequiresTrustProportion")]
+    public decimal QuorumRequiresTrustProportion { get; set; } = 0.5m;
 
-    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
-}
+    /// <summary>
+    /// Gets or sets OnlyUseSufficientlySyncedUpNodesForQuorumCalculation.
+    /// If enabled, the quorum calculation only takes account of nodes which are considered "sufficiently synced up".
+    /// </summary>
+    /// <seealso cref="SufficientlySyncedThreshold"/>
+    [ConfigurationKeyName("OnlyUseSufficientlySyncedUpNodesForQuorumCalculation")]
+    public bool OnlyUseSufficientlySyncedUpNodesForQuorumCalculation { get; set; } = false;
 
-public class RawTransactionWriter : IRawTransactionWriter
-{
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
-    {
-        // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        return await context.RawTransactions
-            .UpsertRange(rawTransactions)
-            .RunAsync(token);
-    }
+    /// <summary>
+    /// Gets or sets SufficientlySyncedThreshold.
+    /// A node is considered sufficiently synced up if its reported top of ledger state version is with this
+    /// many transactions of the top of the db ledger (or ahead of the db ledger).
+    /// </summary>
+    [ConfigurationKeyName("SufficientlySyncedThreshold")]
+    public long SufficientlySyncedThreshold { get; set; } = 1000;
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
-    {
-        var transactionsById = transactionData
-            .Where(td => !td.TransactionSummary.IsOnlyRoundChange)
-            .ToDictionary(
-                rt => rt.TransactionSummary.TransactionIdentifierHash,
-                ByteArrayEqualityComparer.Default
-            );
+    /// <summary>
+    /// Gets or sets MinCommitBatchSize.
+    /// The minimum batch to send to the ledger extension service for committing.
+    /// </summary>
+    [ConfigurationKeyName("MinCommitBatchSize")]
+    public long MinCommitBatchSize { get; set; } = 1;
 
-        var toUpdate = await context.MempoolTransactions
-            .Where(mt => transactionsById.Keys.Contains(mt.TransactionIdentifierHash))
-            .ToListAsync(token);
+    /// <summary>
+    /// Gets or sets MaxCommitBatchSize.
+    /// The maximum batch to send to the ledger extension service for committing.
+    /// </summary>
+    [ConfigurationKeyName("MaxCommitBatchSize")]
+    public long MaxCommitBatchSize { get; set; } = 1000;
 
-        foreach (var mempoolTransaction in toUpdate)
-        {
-            var transactionSummary = transactionsById[mempoolTransaction.TransactionIdentifierHash].TransactionSummary;
-            mempoolTransaction.MarkAsCommitted(
-                transactionSummary.StateVersion,
-                transactionSummary.NormalizedTimestamp
-            );
-        }
-
-        return await context.SaveChangesAsync(token);
-    }
+    /// <summary>
+    /// Gets or sets MaxTransactionPipelineSizePerNode.
+    /// This allows this many transactions to be stored ahead of the committed ledger height for each node, to speed
+    /// up ingestion.
+    /// </summary>
+    [ConfigurationKeyName("MaxTransactionPipelineSizePerNode")]
+    public long MaxTransactionPipelineSizePerNode { get; set; } = 3000;
 }

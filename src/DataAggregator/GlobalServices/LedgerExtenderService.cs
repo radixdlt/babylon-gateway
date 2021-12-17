@@ -75,17 +75,21 @@ namespace DataAggregator.GlobalServices;
 
 public interface ILedgerExtenderService
 {
-    Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> committedTransactions, CancellationToken token);
+    Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token);
 
     Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
 }
+
+public record ConsistentLedgerExtension(
+    TransactionSummary ParentSummary,
+    List<CommittedTransactionData> TransactionData
+);
 
 public record PreparationForLedgerExtensionReport(
     long RawTxnPersistenceMs,
     int RawTxnUpsertTouchedRecords,
     long MempoolTransactionUpdateMs,
-    int MempoolTransactionsTouchedRecords,
-    List<CommittedTransactionData> TransactionData
+    int MempoolTransactionsTouchedRecords
 );
 
 public record CommitTransactionsReport(
@@ -130,12 +134,12 @@ public class LedgerExtenderService : ILedgerExtenderService
         return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
     }
 
-    public async Task<CommitTransactionsReport> CommitTransactions(StateIdentifier parentStateIdentifier, List<CommittedTransaction> transactions, CancellationToken token)
+    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
         // Create own context for the preparation unit of work.
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var preparationReport = await PrepareForLedgerExtension(preparationDbContext, parentStateIdentifier, transactions, token);
+        var preparationReport = await PrepareForLedgerExtension(preparationDbContext, ledgerExtension, token);
 
         var preparationEntriesTouched = await preparationDbContext.SaveChangesAsync(token);
 
@@ -143,16 +147,16 @@ public class LedgerExtenderService : ILedgerExtenderService
         await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
         var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, ledgerExtensionDbContext, token)
-            .CommitTransactions(preparationReport.TransactionData);
+            .CommitTransactions(ledgerExtension.TransactionData);
 
         var (ledgerExtensionEntriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
             () => ledgerExtensionDbContext.SaveChangesAsync(token)
         );
 
-        var finalTransactionSummary = preparationReport.TransactionData.Last().TransactionSummary;
+        var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;
 
         return new CommitTransactionsReport(
-            transactions.Count,
+            ledgerExtension.TransactionData.Count,
             finalTransactionSummary,
             preparationReport.RawTxnPersistenceMs,
             preparationReport.MempoolTransactionUpdateMs,
@@ -170,21 +174,26 @@ public class LedgerExtenderService : ILedgerExtenderService
     /// </summary>
     private async Task<PreparationForLedgerExtensionReport> PrepareForLedgerExtension(
         AggregatorDbContext preparationDbContext,
-        StateIdentifier parentStateIdentifier,
-        List<CommittedTransaction> transactions,
+        ConsistentLedgerExtension ledgerExtension,
         CancellationToken token
     )
     {
-        var parentSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, token);
+        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, token);
 
-        var transactionData = AssertConsistentAndGenerateTransactionData(parentStateIdentifier, parentSummary, transactions);
+        if (ledgerExtension.ParentSummary.StateVersion != topOfLedgerSummary.StateVersion)
+        {
+            throw new Exception(
+                $"Tried to commit transactions with parent state version {ledgerExtension.ParentSummary.StateVersion} " +
+                $"on top of a ledger with state version {topOfLedgerSummary.StateVersion}"
+            );
+        }
 
-        if (parentSummary.StateVersion == 0)
+        if (topOfLedgerSummary.StateVersion == 0)
         {
             await EnsureDbLedgerIsInitialized(token);
         }
 
-        var rawTransactions = transactionData.Select(td => new RawTransaction(
+        var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
             td.TransactionSummary.TransactionIdentifierHash,
             td.TransactionContents
         )).ToList();
@@ -194,15 +203,14 @@ public class LedgerExtenderService : ILedgerExtenderService
         );
 
         var (mempoolTransactionsTouched, mempoolTransactionUpdateMs) = await CodeStopwatch.TimeInMs(
-            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, transactionData, token)
+            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, ledgerExtension.TransactionData, token)
         );
 
         return new PreparationForLedgerExtensionReport(
             rawTransactionCommitMs,
             rawTransactionsTouched,
             mempoolTransactionUpdateMs,
-            mempoolTransactionsTouched,
-            transactionData
+            mempoolTransactionsTouched
         );
     }
 

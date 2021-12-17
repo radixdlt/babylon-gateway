@@ -62,53 +62,28 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger;
-using Common.Utilities;
-using DataAggregator.DependencyInjection;
-using DataAggregator.LedgerExtension;
-using Microsoft.EntityFrameworkCore;
+using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalServices;
+namespace DataAggregator.GlobalWorkers;
 
-public interface IRawTransactionWriter
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public class LedgerConfirmationWorker : LoopedWorkerBase
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
+    private readonly ILedgerConfirmationService _ledgerConfirmationService;
 
-    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
-}
-
-public class RawTransactionWriter : IRawTransactionWriter
-{
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
+    public LedgerConfirmationWorker(
+        ILogger<LedgerConfirmationWorker> logger,
+        ILedgerConfirmationService ledgerConfirmationService
+    )
+        : base(logger, TimeSpan.FromMilliseconds(300), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(60))
     {
-        // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        return await context.RawTransactions
-            .UpsertRange(rawTransactions)
-            .RunAsync(token);
+        _ledgerConfirmationService = ledgerConfirmationService;
     }
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
+    protected override async Task DoWork(CancellationToken stoppingToken)
     {
-        var transactionsById = transactionData
-            .Where(td => !td.TransactionSummary.IsOnlyRoundChange)
-            .ToDictionary(
-                rt => rt.TransactionSummary.TransactionIdentifierHash,
-                ByteArrayEqualityComparer.Default
-            );
-
-        var toUpdate = await context.MempoolTransactions
-            .Where(mt => transactionsById.Keys.Contains(mt.TransactionIdentifierHash))
-            .ToListAsync(token);
-
-        foreach (var mempoolTransaction in toUpdate)
-        {
-            var transactionSummary = transactionsById[mempoolTransaction.TransactionIdentifierHash].TransactionSummary;
-            mempoolTransaction.MarkAsCommitted(
-                transactionSummary.StateVersion,
-                transactionSummary.NormalizedTimestamp
-            );
-        }
-
-        return await context.SaveChangesAsync(token);
+        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(stoppingToken);
     }
 }

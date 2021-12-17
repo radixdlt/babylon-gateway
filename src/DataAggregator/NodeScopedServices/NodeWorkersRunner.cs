@@ -194,7 +194,7 @@ public class NodeWorkersRunner : IDisposable
         using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         // ReSharper disable once AccessToDisposedClosure
-        // Should be safe because Task.WhenAll waits till all tasks have run (even if one  faults)
+        // Should be safe because Task.WhenAll waits till all tasks have run (even if one faults)
         // So the Dispose call will happen after all references to the Tokens have been used up
         await Task.WhenAll(_workers.Select(w => w.StartAsync(combinedCancellationSource.Token)));
 

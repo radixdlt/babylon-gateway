@@ -89,7 +89,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private static readonly LogLimiter _emptyResubmissionQueueLogLimiter = new(TimeSpan.FromSeconds(60), LogLevel.Information, LogLevel.Debug);
 
     private static readonly Gauge _resubmissionQueueSize = Metrics
-        .CreateGauge("mempool_transaction_resubmission_queue_length_count", "Number of transactions which have dropped out of mempools and need resubmitting.");
+        .CreateGauge("mempool_transaction_resubmission_queue_length_total", "Current number of transactions which have dropped out of mempools and need resubmitting.");
 
     private readonly IServiceProvider _services;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;

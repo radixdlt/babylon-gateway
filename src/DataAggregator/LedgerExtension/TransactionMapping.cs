@@ -100,7 +100,7 @@ public static class TransactionMapping
             isOnlyRoundChange: summary.IsOnlyRoundChange,
             isStartOfEpoch: summary.IsStartOfEpoch,
             isStartOfRound: summary.IsStartOfRound,
-            roundTimestamp: summary.CurrentRoundTimestamp,
+            roundTimestamp: summary.RoundTimestamp,
             createdTimestamp: summary.CreatedTimestamp,
             normalizedTimestamp: summary.NormalizedTimestamp
         );

@@ -98,6 +98,7 @@ public class DefaultKernel
         services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
+        services.AddSingleton<ILedgerConfirmationService, LedgerConfirmationService>();
         services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
@@ -112,6 +113,7 @@ public class DefaultKernel
     private void AddGlobalHostedServices(IServiceCollection services)
     {
         services.AddHostedService<NodeConfigurationMonitorWorker>();
+        services.AddHostedService<LedgerConfirmationWorker>();
         services.AddHostedService<MempoolTrackerWorker>();
         services.AddHostedService<MempoolResubmissionWorker>();
         services.AddHostedService<MempoolPrunerWorker>();

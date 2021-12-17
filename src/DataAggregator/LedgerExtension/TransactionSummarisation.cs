@@ -87,7 +87,7 @@ public record TransactionSummary(
     bool IsStartOfRound,
     byte[] TransactionIdentifierHash,
     byte[] TransactionAccumulator,
-    Instant CurrentRoundTimestamp,
+    Instant RoundTimestamp,
     Instant CreatedTimestamp,
     Instant NormalizedTimestamp
 );
@@ -161,7 +161,7 @@ public static class TransactionSummarisation
         var isStartOfEpoch = newEpoch != null;
         var isStartOfRound = newRoundInEpoch != null;
 
-        var roundTimestamp = newRoundTimestamp ?? lastTransaction.CurrentRoundTimestamp;
+        var roundTimestamp = newRoundTimestamp ?? lastTransaction.RoundTimestamp;
         var createdTimestamp = SystemClock.Instance.GetCurrentInstant();
         var normalizedTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
             roundTimestamp < lastTransaction.NormalizedTimestamp ? lastTransaction.NormalizedTimestamp
@@ -178,7 +178,7 @@ public static class TransactionSummarisation
             IsStartOfRound: isStartOfRound,
             TransactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
             TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
-            CurrentRoundTimestamp: roundTimestamp,
+            RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
             NormalizedTimestamp: normalizedTimestamp
         );
@@ -197,7 +197,7 @@ public static class TransactionSummarisation
             IsStartOfRound: false,
             TransactionIdentifierHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
-            CurrentRoundTimestamp: Instant.FromUnixTimeSeconds(0),
+            RoundTimestamp: Instant.FromUnixTimeSeconds(0),
             CreatedTimestamp: SystemClock.Instance.GetCurrentInstant(),
             NormalizedTimestamp: Instant.FromUnixTimeSeconds(0)
         );
