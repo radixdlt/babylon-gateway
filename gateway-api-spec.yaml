@@ -41,19 +41,19 @@ servers:
   - url: https://mainnet-gateway.radixdlt.com
 tags:
   - name: gateway-endpoint
-    x-displayName: Gateway Status
+    x-displayName: Status Endpoints
     description: To query information about the Gateway API status.
   - name: account-endpoint
-    x-displayName: Accounts
+    x-displayName: Account Endpoints
     description: To query account-related information.
   - name: token-endpoint
-    x-displayName: Tokens
+    x-displayName: Token Endpoints
     description: To query token-related information.
   - name: validator-endpoint
-    x-displayName: Validators
+    x-displayName: Validator Endpoints
     description: To query validator-related information.
   - name: transaction-endpoint
-    x-displayName: Transactions
+    x-displayName: Transaction Endpoints
     description: To build, finalize and submit transactions, and to query transaction status and contents.
 paths:
   "/gateway":
