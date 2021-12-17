@@ -24,6 +24,16 @@ info:
     The Gateway API is implemented by the [Network Gateway](https://github.com/radixdlt/radixdlt-network-gateway), which is configured
     to read from full node/s to extract and index data from the network.
 
+    # Gateway API Format
+
+    The API is designed in a JSON-RPC style, using HTTP as a transport layer, which means that:
+
+    * All requests are POST requests.
+    * Any error is returned with an HTTP status code of 500, with a returned error object.
+      * The error object contains an HTTP-like `code`
+      * The error object also contains a structured/typed `details` sub-object, with a `type` discriminator,
+        allowing for structured error interpretation in clients.
+
     # Radix API Comparison
 
     * [Core API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt/develop/radixdlt-core/radixdlt/src/main/java/com/radixdlt/api/core/api.yaml) -
@@ -62,6 +72,7 @@ paths:
   "/gateway":
     post:
       summary: Get Gateway Info
+      description: Returns the Gateway API version, network and current ledger state.
       tags:
         - gateway-endpoint
       requestBody:
@@ -86,6 +97,7 @@ paths:
   "/token/native":
     post:
       summary: Get Native Token Info
+      description: Returns information about XRD, including its Radix Resource Identifier.
       tags:
         - token-endpoint
       requestBody:
@@ -110,6 +122,7 @@ paths:
   "/token":
     post:
       summary: Get Token Info
+      description: Returns information about any token, given its Radix Resource Identifier.
       tags:
         - token-endpoint
       requestBody:
@@ -134,6 +147,7 @@ paths:
   "/token/derive":
     post:
       summary: Derive Token Identifier
+      description: Returns the Radix Resource Identifier of a newly created token an account with the given public key.
       tags:
         - token-endpoint
       requestBody:
@@ -158,6 +172,7 @@ paths:
   "/account/derive":
     post:
       summary: Derive Account Identifier
+      description: Returns the account address associated with the given public key.
       tags:
         - account-endpoint
       requestBody:
@@ -182,6 +197,7 @@ paths:
   "/account/balances":
     post:
       summary: Get Account Balances
+      description: Returns an account's available and staked token balances, given an account address.
       tags:
         - account-endpoint
       requestBody:
@@ -206,6 +222,7 @@ paths:
   "/account/stakes":
     post:
       summary: Get Stake Positions
+      description: Returns the xrd which the account has in pending and active delegated stake positions with validators, given an account address.
       tags:
         - account-endpoint
       requestBody:
@@ -230,6 +247,7 @@ paths:
   "/account/unstakes":
     post:
       summary: Get Unstake Positions
+      description: Returns the xrd which the account has in pending and temporarily-locked delegated unstake positions with validators, given an account address.
       tags:
         - account-endpoint
       requestBody:
@@ -254,6 +272,9 @@ paths:
   "/account/transactions":
     post:
       summary: Get Account Transactions
+      description: |
+        Returns user-initiated transactions involving the given account address which have been succesfully committed to the ledger.
+        The transactions are returned in a paginated format, ordered by most recent.
       tags:
         - account-endpoint
       requestBody:
@@ -278,6 +299,7 @@ paths:
   "/validator":
     post:
       summary: Get Validator
+      description: Returns information about a validator, given a validator address.
       tags:
         - validator-endpoint
       requestBody:
@@ -302,6 +324,7 @@ paths:
   "/validator/derive":
     post:
       summary: Get Validator Identifier
+      description: Returns the validator address associated with the given public key.
       tags:
         - validator-endpoint
       requestBody:
@@ -326,6 +349,7 @@ paths:
   "/validators":
     post:
       summary: Get Validators
+      description: Returns information about all validators, given a validator address.
       tags:
         - validator-endpoint
       requestBody:
@@ -350,6 +374,7 @@ paths:
   "/transaction/rules":
     post:
       summary: Get Transaction Rules
+      description: Returns the current rules used to build and validate transactions in the Radix Engine.
       tags:
         - transaction-endpoint
       requestBody:
@@ -374,6 +399,7 @@ paths:
   "/transaction/build":
     post:
       summary: Build Transaction
+      description: Returns a built unsigned transaction payload, from a set of intended actions.
       tags:
         - transaction-endpoint
       requestBody:
@@ -398,6 +424,7 @@ paths:
   "/transaction/finalize":
     post:
       summary: Finalize Transaction
+      description: Returns a signed transaction payload and transaction identifier, from an unsigned transaction payload and signature.
       tags:
         - transaction-endpoint
       requestBody:
@@ -422,6 +449,9 @@ paths:
   "/transaction/submit":
     post:
       summary: Submit Transaction
+      description: |
+        Submits a signed transaction payload to the network.
+        The transaction identifier from finalize or submit can then be used to track the transaction status.
       tags:
         - transaction-endpoint
       requestBody:
@@ -446,6 +476,11 @@ paths:
   "/transaction/status":
     post:
       summary: Get Transaction
+      description: |
+        Returns the status and contents of the transaction with the given transaction identifier.
+        Transaction identifiers which aren't recognised as either belonging to a committed transaction or a
+        transaction submitted through this Network Gateway may return a `Not Found` Gateway Error.
+        Transaction identifiers relating to failed transactions will, after a delay, also be reported as `Not Found`.
       tags:
         - transaction-endpoint
       requestBody:
