@@ -90,7 +90,7 @@ public class InternalServerException : KnownGatewayErrorException
     public static InternalServerException OfHiddenException(Exception exception, string traceId)
     {
         return new InternalServerException(
-            new InternalServerError("UnknownException", $"N/A. TraceId={traceId}"),
+            new InternalServerError("UnknownException", $"If reporting this issue, please include TraceId={traceId}"),
             "An unexpected error occurred handling the request",
             exception.Message
         );
@@ -99,7 +99,7 @@ public class InternalServerException : KnownGatewayErrorException
     public static InternalServerException OfUnhandledCoreApiException(string coreErrorJsonContent, string traceId)
     {
         return new InternalServerException(
-            new InternalServerError("UpstreamCoreApiRequestException", $"N/A. TraceId={traceId}"),
+            new InternalServerError("UpstreamCoreApiRequestException", $"If reporting this issue, please include TraceId={traceId}"),
             "An unexpected error occurred handling the request",
             coreErrorJsonContent
         );
@@ -108,7 +108,7 @@ public class InternalServerException : KnownGatewayErrorException
     public static InternalServerException OfInvalidCoreApiResponseException(InvalidCoreApiResponseException exception, string traceId)
     {
         return new InternalServerException(
-            new InternalServerError("InvalidCoreApiResponse", $"N/A. TraceId={traceId}"),
+            new InternalServerError("InvalidCoreApiResponseException", $"If reporting this issue, please include TraceId={traceId}"),
             "An unexpected error occurred handling the request",
             exception.Message
         );
@@ -117,7 +117,7 @@ public class InternalServerException : KnownGatewayErrorException
     public static InternalServerException OfInvalidGatewayException(string traceId)
     {
         return new InternalServerException(
-            new InternalServerError("BadGateway", $"N/A. TraceId={traceId}"),
+            new InternalServerError("BadGatewayException", $"If reporting this issue, please include TraceId={traceId}"),
             "An unexpected error occurred handling the request",
             "Could not receive valid response from upstream server"
         );
