@@ -1,23 +1,61 @@
 # Developer Set-up
 
+## Pre-requisites
+
+The following are pre-requisites:
 * We use [dotnet 6](https://dotnet.microsoft.com/download/dotnet/6.0) - ensure `dotnet --version` returns at least 6.x
 * Install docker
-* Recommended IDE: Rider - you will likely wish to turn on "Show All Files" in the explorer
 
-## Running in development
+Whilst any IDE supporting dotnet core can be used for development, we would recommend Jetbrains Rider.
 
-You can change the configuration in `src/DataAggregator/appsettings.Development.json`.
+## Configuration
 
-By default, it is set up to point at http://localhost:3333, the port registered by the docker node when running the [radixdlt](https://github.com/radixdlt/radixdlt) core.
+In development, configuration comes from a few places, with items lower down the list taking priority for a given field. `[X]` is `DataAggregator` or `GatewayAPI`.
 
-### If in Rider
+* `src/[X]/appsettings.json`
+* `src/[X]/appsettings.Development.json`
+* `src/[X]/appsettings.PersonalOverrides.json` (under .gitignore)
+* Environment variables
 
-Run the following tasks in parallel:
 
-* `Postgres`
-* `DataAggregator`
+By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333. 
+There is a guide in the radixdlt node repository regarding [run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md).
 
-### From the command line
+### Custom development configuration
+
+As referenced above, the `appsettings.PersonalOverrides.json` files can be used to (eg) override configuration locally without risking updating source control. The schema for this file is the same as the main `appsettings.json` and `appsettings.Development.json`. Some example use cases include:
+
+* Changing the `NetworkName` so it matches the core nodes you're connected to
+* Connecting to a non-local Core Node (typically by adjusting `DisableCoreApiHttpsCertificateChecks`, and the `CoreApiAddress`, `CoreApiAuthorizationHeader` fields under the first configured node in `CoreApiNodes`)
+
+### Connecting to a non-local Core API
+
+A syncing full node and the data aggregator are both quite resource intensive, so it can help to run at least the full node off of your local machine.
+
+If at RDX Works, we have some Core APIs you can connect to off your local machine - talk to your team lead about getting access to these.
+
+If not at RDX Works, please see [https://docs.radixdlt.com/](https://docs.radixdlt.com/) for a how-to on running a full node.
+
+## Developing in Rider
+
+### Recommended configuration
+
+* In the explorer panel, in the dropdown, use "File System" mode instead of "Solution" mode.
+* In the explorer panel, under the cod, select "Always Select Open File"
+
+### Running the solution
+
+Run following tasks:
+
+* `Postgres` (this runs `docker-compose up`)
+
+And then, depending on what you're working on, you can run one or both of these. Note that the `Data Aggregator` needs to have run successfully at least once to create the Database, and start the ledger, for the `Gateway API` to be able to connect.
+
+* `Data Aggregator`
+* `Gateway API`
+
+You can use the `Wipe Database` task if you ever need to clear the database. (Say, because the DB ledger got corrupted; or you wish to change which network you're connected to)
+## Developing using the command line
 
 All the commands should be run from the repo root.
 
@@ -30,14 +68,26 @@ docker-compose up
 
 ```bash
 # Run the DataAggregator
-dotnet run --project src/DataAggregator
+dotnet run --project src/DataAggregator --launch-profile "Data Aggregator"
+```
+
+```bash
+# Run the Gateway API
+dotnet run --project src/GatewayAPI --launch-profile "Gateway API"
+```
+
+And, if you need to wipe the database, you should stop all of the above processes, and then either delete the `.postgresdata` folder, or run:
+
+```bash
+# Wipe the database
+dotnet run --project src/GatewayAPI --launch-profile "Wipe Database"
 ```
 
 ## Looking at the database
 
 To inspect the database, we have included a pgAdmin docker container.
 
-After doing `docker-compose up`, a pgAdmin container is also booted up.
+After doing `docker-compose up` from the repo root, a pgAdmin container is also booted up.
 
 * Location: http://localhost:5050/
 * Local server is at "Servers / Local Radix Public Gateway"
