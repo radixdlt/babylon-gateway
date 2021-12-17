@@ -3,13 +3,74 @@ info:
   version: 1.0.2
   title: Radix Gateway API
   license:
-    name: MIT
+    name: The Radix License, Version 1.0
+    url: https://www.radixfoundation.org/licenses/LICENSE-v1
+  description: |
+    This API provides an API designed for reading information from the RadixDLT ledger, and for building
+    and submitting transactions to the ledger.
+
+    # Overview
+
+    The Gateway API is separated into distinct groupings:
+
+    * `/gateway` - Information about the Gateway API status
+    * `/account/*` - To query account-related information
+    * `/token/*` - To query token-related information
+    * `/validator/*` and `/validators` - To query validator-related information
+    * `/transaction/*` - To build, finalize and submit transactions, and to read the status and content of submitted and on-ledger transactions.
+
+    # Comparison with other Radix APIs
+
+    * [Core API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt/develop/radixdlt-core/radixdlt/src/main/java/com/radixdlt/api/core/api.yaml) -
+      The Core API is a low level API exposed by full nodes, and designed for use on internal networks. It is primarily designed
+      for network integrations such as exchanges, ledger analytics providers, or hosted ledger data dashboards.
+    * [System API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt/develop/radixdlt-core/radixdlt/src/main/java/com/radixdlt/api/system/api.yaml) -
+      The System API is a private API exposed by full nodes to read system status.
+
+    The Gateway API offers a much wider range of query options and is more performant than the Core API, by indexing the Core API transaction stream into
+    a relational database.
+
+    The Gateway API transaction/construction endpoints operate with the concept of "actions" - these are higher-levels of intent compared with the
+    Core API, which makes it easier for clients to use. The Core API should be used if you require more power/flexiblity for managing UTXOs, or
+    submitting transactions which can't be mapped to a Gateway API action.
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:5208
+  - url: https://stokenet-gateway.radixdlt.com
+  - url: https://mainnet-gateway.radixdlt.com
+x-tags:
+  - name: gateway-endpoint
+    x-displayName: Gateway Status
+    description: To query information about the Gateway API status.
+  - name: account-endpoint
+    x-displayName: Accounts
+    description: To query account-related information.
+  - name: token-endpoint
+    x-displayName: Tokens
+    description: To query token-related information.
+  - name: validators-endpoint
+    x-displayName: Validators
+    description: To query validator-related information.
+  - name: transaction-endpoint
+    x-displayName: Transactions
+    description: To build, finalize and submit transactions, and to query transaction status and contents.
+# x-tagGroups:
+#   - name: Gateway Status
+#     tags:
+#       - gateway-endpoint
+#   - name: Accounts
+#       - account-endpoint
+#   - name: Tokens
+#       - token-endpoint
+#   - name: Validators
+#       - validator-endpoint
+#   - name: Transactions
+#       - transaction-endpoint
 paths:
   "/gateway":
     post:
       summary: Get Gateway Info
+      tags:
+        - gateway-endpoint
       requestBody:
         required: true
         content:
@@ -32,6 +93,8 @@ paths:
   "/token/native":
     post:
       summary: Get Native Token Info
+      tags:
+        - token-endpoint
       requestBody:
         required: true
         content:
@@ -54,6 +117,8 @@ paths:
   "/token":
     post:
       summary: Get Token Info
+      tags:
+        - token-endpoint
       requestBody:
         required: true
         content:
@@ -76,6 +141,8 @@ paths:
   "/token/derive":
     post:
       summary: Derive Token Identifier
+      tags:
+        - token-endpoint
       requestBody:
         required: true
         content:
@@ -98,6 +165,8 @@ paths:
   "/account/derive":
     post:
       summary: Derive Account Identifier
+      tags:
+        - account-endpoint
       requestBody:
         required: true
         content:
@@ -120,6 +189,8 @@ paths:
   "/account/balances":
     post:
       summary: Get Account Balances
+      tags:
+        - account-endpoint
       requestBody:
         required: true
         content:
@@ -142,6 +213,8 @@ paths:
   "/account/stakes":
     post:
       summary: Get Stake Positions
+      tags:
+        - account-endpoint
       requestBody:
         required: true
         content:
@@ -164,6 +237,8 @@ paths:
   "/account/unstakes":
     post:
       summary: Get Unstake Positions
+      tags:
+        - account-endpoint
       requestBody:
         required: true
         content:
@@ -186,6 +261,8 @@ paths:
   "/account/transactions":
     post:
       summary: Get Account Transactions
+      tags:
+        - account-endpoint
       requestBody:
         required: true
         content:
@@ -208,6 +285,8 @@ paths:
   "/validator":
     post:
       summary: Get Validator
+      tags:
+        - validator-endpoint
       requestBody:
         required: true
         content:
@@ -230,6 +309,8 @@ paths:
   "/validator/derive":
     post:
       summary: Get Validator Identifier
+      tags:
+        - validator-endpoint
       requestBody:
         required: true
         content:
@@ -252,6 +333,8 @@ paths:
   "/validators":
     post:
       summary: Get Validators
+      tags:
+        - validator-endpoint
       requestBody:
         required: true
         content:
@@ -274,6 +357,8 @@ paths:
   "/transaction/rules":
     post:
       summary: Get Transaction Rules
+      tags:
+        - transaction-endpoint
       requestBody:
         required: true
         content:
@@ -296,6 +381,8 @@ paths:
   "/transaction/build":
     post:
       summary: Build Transaction
+      tags:
+        - transaction-endpoint
       requestBody:
         required: true
         content:
@@ -318,6 +405,8 @@ paths:
   "/transaction/finalize":
     post:
       summary: Finalize Transaction
+      tags:
+        - transaction-endpoint
       requestBody:
         required: true
         content:
@@ -340,6 +429,8 @@ paths:
   "/transaction/submit":
     post:
       summary: Submit Transaction
+      tags:
+        - transaction-endpoint
       requestBody:
         required: true
         content:
@@ -362,6 +453,8 @@ paths:
   "/transaction/status":
     post:
       summary: Get Transaction
+      tags:
+        - transaction-endpoint
       requestBody:
         required: true
         content:
