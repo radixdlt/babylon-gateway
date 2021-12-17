@@ -6,5 +6,7 @@ For general documentation, please visit https://docs.radixdlt.com/.
 
 ## Contents
 
-* [Development Environment Setup](./development)
+* [Development Environment Setup](./development.md)
+* [API Specifications](./api-specifications.md)
+* [Code Generation](../generation)
 * [Recommended Deployment Setup](../deployment)

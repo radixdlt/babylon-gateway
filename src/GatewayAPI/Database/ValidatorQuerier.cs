@@ -126,7 +126,7 @@ public class ValidatorQuerier : IValidatorQuerier
     {
         var validatorIds = validators.Select(v => v.Id).ToList();
 
-        var validatorTotalStakes = await GetValidatorStakes(validatorIds, ledgerState);
+        var validatorStakeSnapshots = await GetValidatorStakes(validatorIds, ledgerState);
         var validatorProperties = await GetValidatorPropertiesByValidatorIdAtState(validators, ledgerState);
         var validatorUptimes = await GetUptimeByValidatorIdAtState(validatorIds, ledgerState);
 
@@ -135,13 +135,13 @@ public class ValidatorQuerier : IValidatorQuerier
             .Select(id => new DbQueryExtensions.AccountValidatorIds(validatorProperties[id].OwnerId!.Value, id))
             .ToList();
 
-        var validatorOwnerStakes = await GetOwnerStakesByValidatorIdAtState(validatorAndOwnerIds, ledgerState);
+        var validatorOwnerStakeSnapshots = await GetOwnerStakesByValidatorIdAtState(validatorAndOwnerIds, ledgerState);
 
         return validators.Select(validator =>
         {
-            var validatorTotalStake = validatorTotalStakes.GetValueOrDefault(validator.Id) ??
+            var validatorTotalStake = validatorStakeSnapshots.GetValueOrDefault(validator.Id) ??
                                       ValidatorStakeSnapshot.GetDefault();
-            var validatorOwnerStake = validatorOwnerStakes.GetValueOrDefault(validator.Id) ??
+            var validatorOwnerStake = validatorOwnerStakeSnapshots.GetValueOrDefault(validator.Id) ??
                                       AccountValidatorStakeSnapshot.GetDefault();
             var validatorUptime = validatorUptimes.GetValueOrDefault(validator.Id) ?? GetDefaultValidatorUptime(ledgerState);
             var properties = validatorProperties.GetValueOrDefault(validator.Id)?.Properties ??
