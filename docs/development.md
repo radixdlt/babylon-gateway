@@ -17,9 +17,9 @@ In development, configuration comes from a few places, with items lower down the
 * `src/[X]/appsettings.PersonalOverrides.json` (under .gitignore)
 * Environment variables
 
-
 By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333. 
-There is a guide in the radixdlt node repository regarding [run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md).
+
+There is a guide in the radixdlt node repository regarding [run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md). Instead of building a full node image, you can also use an image on docker hub at version `1.1.0+`. The latest at time of writing is [release 1.1.0-rc.1](https://github.com/radixdlt/radixdlt/releases/tag/1.1.0-rc.1) available as docker tag [radixdlt/radixdlt-core:1.1.0-rc.1](https://hub.docker.com/layers/radixdlt/radixdlt-core/1.1.0-rc.1/images/sha256-912939c55aa8abf6ecd0b7ae329daf8448a5b0d6137078000dc5a8797a86f045?context=explore). You should run this with similar configuration as per running a full node against a development build, in particular with `api.transactions.enable=true`.
 
 ### Custom development configuration
 

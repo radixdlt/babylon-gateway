@@ -19,9 +19,12 @@ If you wish to run a Network Gateway, you will need to have a radixdlt full node
 
 As the Core API is designed to not be exposed publicly, you will need to run your own full node/s, and expose this API for your own needs.
 
-* For development purposes, you can [run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md).
+* For development purposes, you can either:
+  * [Run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md).
+  * Run against a release candidate build of the node at build version 1.1.0+. At time of writing, the latest is [release 1.1.0-rc.1](https://github.com/radixdlt/radixdlt/releases/tag/1.1.0-rc.1), available as docker tag [radixdlt/radixdlt-core:1.1.0-rc.1](https://hub.docker.com/layers/radixdlt/radixdlt-core/1.1.0-rc.1/images/sha256-912939c55aa8abf6ecd0b7ae329daf8448a5b0d6137078000dc5a8797a86f045?context=explore). You should run this with similar configuration as per running a full node against a development build, in particular, with `api.transactions.enable=true`.
 
-* For production purposes, you should run a radixdlt full node exposing the Core API. Docs and a publicly available build is coming soon.
+* For production purposes, you should run a radixdlt full node exposing the Core API. We don't yet have a full node build exposing the Core API which is
+  released for production use.
 
 # Example toy Network Gateway set-up with docker compose
 
