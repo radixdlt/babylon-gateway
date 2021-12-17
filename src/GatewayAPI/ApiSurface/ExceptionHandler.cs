@@ -80,66 +80,17 @@ public interface IExceptionHandler
 public class ExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<ExceptionHandler> _logger;
-    private LogLevel _knownErrorLogLevel;
+    private readonly LogLevel _knownGatewayErrorLogLevel;
 
     public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env)
     {
         _logger = logger;
-        _knownErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
+        _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
     public ActionResult CreateAndLogApiResultFromException(Exception exception, string traceId)
     {
-        KnownGatewayErrorException gatewayErrorException;
-
-        if (exception is KnownGatewayErrorException httpResponseException)
-        {
-            _logger.Log(_knownErrorLogLevel, exception, "Known exception with http response code [RequestTrace={TraceId}]", traceId);
-            gatewayErrorException = httpResponseException;
-        }
-        else if (exception is HttpRequestException)
-        {
-            // HttpRequestException is returned from the Gateway or Core APIs if we can't connect
-            _logger.Log(LogLevel.Information, exception, "Error relaying request to upstream server [RequestTrace={TraceId}]", traceId);
-            gatewayErrorException = InternalServerException.OfInvalidGatewayException(traceId);
-        }
-        else if (exception is CoreApi.ApiException coreApiException)
-        {
-            // CoreApi.ApiException is returned if we get a 500 from upstream
-            _logger.Log(LogLevel.Information, exception, "Unhandled error response from upstream core API [RequestTrace={TraceId}]", traceId);
-            gatewayErrorException = InternalServerException.OfUnhandledCoreApiException(coreApiException.ErrorContent.ToString() ?? string.Empty, traceId);
-        }
-        else if (exception is WrappedCoreApiException wrappedCoreApiException)
-        {
-            // CoreApi.ApiException is returned if we get a 500 from upstream
-            _logger.Log(LogLevel.Information, exception, "Unhandled error response from upstream core API [RequestTrace={TraceId}]", traceId);
-            gatewayErrorException = InternalServerException.OfUnhandledCoreApiException(wrappedCoreApiException.ApiException.ErrorContent.ToString() ?? string.Empty, traceId);
-        }
-        else if (exception is GatewayApi.ApiException gatewayApiException)
-        {
-            // GatewayApi.ApiException is returned if we get a 500 from upstream
-            var upstreamError = ExtractUpstreamGatewayErrorResponse(gatewayApiException.ErrorContent.ToString() ?? string.Empty);
-            if (upstreamError != null)
-            {
-                _logger.Log(LogLevel.Information, exception, "Error response from upstream gateway API [RequestTrace={TraceId}]", traceId);
-                gatewayErrorException = UpstreamGatewayApiException.OfUpstreamGatewayApiError(upstreamError);
-            }
-            else
-            {
-                _logger.Log(LogLevel.Warning, exception, "Error response from upstream gateway API with unparsable error response [RequestTrace={TraceId}]", traceId);
-                gatewayErrorException = InternalServerException.OfHiddenException(exception, traceId);
-            }
-        }
-        else if (exception is InvalidCoreApiResponseException invalidCoreApiResponseException)
-        {
-            _logger.Log(LogLevel.Warning, exception, "Invalid Core API response [RequestTrace={TraceId}]", traceId);
-            gatewayErrorException = InternalServerException.OfInvalidCoreApiResponseException(invalidCoreApiResponseException, traceId);
-        }
-        else
-        {
-            _logger.Log(LogLevel.Warning, exception, "Unknown exception [RequestTrace={TraceId}]", traceId);
-            gatewayErrorException = InternalServerException.OfHiddenException(exception, traceId);
-        }
+        var gatewayErrorException = LogAndConvertToKnownGatewayErrorException(exception, traceId);
 
         return new JsonResult(new ErrorResponse(
             code: gatewayErrorException.StatusCode,
@@ -152,7 +103,105 @@ public class ExceptionHandler : IExceptionHandler
         };
     }
 
-    private static ErrorResponse? ExtractUpstreamGatewayErrorResponse(string upstreamErrorResponse)
+    private KnownGatewayErrorException LogAndConvertToKnownGatewayErrorException(Exception exception, string traceId)
+    {
+        switch (exception)
+        {
+            case KnownGatewayErrorException httpResponseException:
+                _logger.Log(
+                    _knownGatewayErrorLogLevel,
+                    exception,
+                    "Known exception with http response code [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return httpResponseException;
+
+            // HttpRequestException is returned from the Gateway or Core APIs if we can't connect
+            case HttpRequestException:
+                _logger.Log(
+                    LogLevel.Information,
+                    exception,
+                    "Error relaying request to upstream server [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return InternalServerException.OfInvalidGatewayException(traceId);
+
+            // CoreApi.ApiException is returned if we get a 500 from upstream
+            case CoreApi.ApiException coreApiException:
+                _logger.Log(
+                    LogLevel.Information,
+                    exception,
+                    "Unhandled error response from upstream core API [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return InternalServerException.OfUnhandledCoreApiException(
+                    coreApiException.ErrorContent.ToString() ?? string.Empty,
+                    traceId
+                );
+
+            // CoreApi.ApiException is returned if we get a 500 from upstream
+            case WrappedCoreApiException wrappedCoreApiException:
+                _logger.Log(
+                    LogLevel.Information,
+                    exception,
+                    "Unhandled error response from upstream core API [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return InternalServerException.OfUnhandledCoreApiException(
+                    wrappedCoreApiException.ApiException.ErrorContent.ToString() ?? string.Empty,
+                    traceId
+                );
+
+            // GatewayApi.ApiException is returned if we get a 500 from upstream
+            case GatewayApi.ApiException gatewayApiException:
+            {
+                var upstreamError = ExtractUpstreamGatewayErrorResponse(
+                    gatewayApiException.ErrorContent.ToString() ?? string.Empty
+                );
+                if (upstreamError != null)
+                {
+                    _logger.Log(
+                        LogLevel.Information,
+                        exception,
+                        "Error response from upstream gateway API [RequestTrace={TraceId}]",
+                        traceId
+                    );
+                    return UpstreamGatewayApiException.OfUpstreamGatewayApiError(upstreamError);
+                }
+
+                _logger.Log(
+                    LogLevel.Warning,
+                    exception,
+                    "Error response from upstream gateway API with unparsable error response [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return InternalServerException.OfHiddenException(exception, traceId);
+            }
+
+            case InvalidCoreApiResponseException invalidCoreApiResponseException:
+                _logger.Log(
+                    LogLevel.Warning,
+                    exception,
+                    "Invalid Core API response [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return InternalServerException.OfInvalidCoreApiResponseException(
+                    invalidCoreApiResponseException,
+                    traceId
+                );
+
+            default:
+                _logger.Log(
+                    LogLevel.Warning,
+                    exception,
+                    "Unknown exception [RequestTrace={TraceId}]",
+                    traceId
+                );
+                return InternalServerException.OfHiddenException(exception, traceId);
+        }
+    }
+
+    private ErrorResponse? ExtractUpstreamGatewayErrorResponse(string upstreamErrorResponse)
     {
         try
         {

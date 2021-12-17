@@ -1476,12 +1476,16 @@ components:
         - message
       properties:
         code:
+          description: A numeric code corresponding to the given error type, roughly aligned with HTTP Status Code semantics (eg 400/404/500).
           type: integer
         message:
+          description: A human-readable error message.
           type: string
         details:
+          description: A structured/typed details object.
           $ref: "#/components/schemas/GatewayError"
         trace_id:
+          description: A GUID to be used when reporting errors, to allow correlation with the Gateway API's error logs.
           type: string
     GatewayError:
       type: object
@@ -1489,6 +1493,7 @@ components:
         - type
       properties:
         type:
+          description: The type of error. Each subtype may have its own additional structured fields.
           type: string
       discriminator:
         propertyName: type
@@ -1518,6 +1523,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
         - type: object
+          description: Indicates that an error occurred within the Gateway API when serving the request.
           required:
             - exception
             - cause
