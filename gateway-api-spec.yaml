@@ -753,7 +753,8 @@ components:
                 Provide a PartialLedgerStateIdentifier matching the LedgerState of the response which provided the estimate
                 that was shared with the user; or simply use the `unstake_percentage` option.
               "$ref": "#/components/schemas/TokenAmount"
-            unstake_percentage: |
+            unstake_percentage:
+              description: |
                 The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current
                 active stake at the given LedgerState. To be explicit, the referenced active state does not include pending
                 stake, pending unstake or locked unstake.
@@ -1033,12 +1034,12 @@ components:
             If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information,
             or the network has stalled.
           type: string
-        epoch: |
-            The epoch number of the ledger at this state version.
+        epoch:
+          description: The epoch number of the ledger at this state version.
           type: integer
           format: int64
-        round: |
-            The consensus round in the epoch that this state version was committed in.
+        round:
+          description: The consensus round in the epoch that this state version was committed in.
           type: integer
           format: int64
     TargetLedgerState:
@@ -1816,8 +1817,8 @@ components:
           required:
             - invalid_token_symbol
           properties:
-            description: The token symbol which was invalid. A descriptive reason is given in the main error message.
             invalid_token_symbol:
+              description: The token symbol which was invalid. A descriptive reason is given in the main error message.
               type: string
     InvalidTokenRRIError:
       allOf:
