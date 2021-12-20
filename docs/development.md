@@ -48,7 +48,7 @@ You'll need to run a version 1.1.0 or higher in order for the node to have the C
 
 Run following tasks:
 
-* `Postgres` (this runs `docker-compose up`)
+* `PostgreSQL & PgAdmin` (this runs `docker-compose up`)
 
 And then, depending on what you're working on, you can run one or both of these. Note that the `Data Aggregator` needs to have run successfully at least once to create the Database, and start the ledger, for the `Gateway API` to be able to connect.
 
@@ -64,7 +64,7 @@ All the commands should be run from the repo root.
 Run the following in separate terminals:
 
 ```bash
-# Spin up Postgres and PG Adminfirst
+# Spin up PostgreSQL and PgAdmin first
 docker-compose up
 ```
 

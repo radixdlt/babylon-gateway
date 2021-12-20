@@ -27,24 +27,28 @@ As the Core API is designed to not be exposed publicly, you will need to run you
 * For production purposes, you should run a radixdlt full node exposing the Core API. We do not yet have a full node build exposing the Core API which is
   released for production use.
 
+# Configuration
+
+For information on how to configure the Network Gateway components, see [/docs/configuration.md](../docs/configuration.md).
+
 # Example toy Network Gateway set-up with docker compose
 
 An example docker-compose file is given in this folder, and demonstrates how the projects can be configured. It runs a single docker image of each of:
 
 * A RadixDLT Core - Full Node (OPTIONAL)
-* A PostGres Database
+* A PostgreSQL Database
 * A Network Gateway - Data Aggregator
 * A Network Gateway - Gateway API is given in this folder, and .
 
-Just to stress - this toy set-up should _NOT_ be used for production - the memory limits, passwords etc are all incorrect for production use. It is also recommended not to run stateful services such as databases in containers.
+This toy set-up should **NOT** be used for production - the memory limits, passwords etc are all incorrect for production use. It is also recommended not to run stateful services such as databases in containers.
 
 The aim of the toy deployment is to:
-* Demonstrate how the services can be connect, and how to configure the Network Gateway components
-* Allow the full stack to be run locally, to develop against
+* Demonstrate how the services can be connected, and how to configure the Network Gateway components
+* Allow the full stack to be run locally, to develop integrations against a non-released build of the Network Gateway.
 
 ## Preparing the toy set-up
 
-Install docker compose if you don't already have it. Then, ensure your temimal has this `/deployment` folder as its working directory.
+Install docker compose if you don't already have it. Then, ensure your terminal has this `/deployment` folder as its working directory.
 
 First, we need to set up the environment variables:
 
@@ -93,7 +97,7 @@ If you chose to run a full node through docker, you can also try out the Core AP
 If you're developing on the Network Gateway, you will likely with to run the Network Gateway locally, but you'll want to have a full node
 to connect to. You can run that full node from the `deployment` folder as follows:
 
-* Create a new terminal in this `deployment` folder.
+* Bring up a new terminal in this `deployment` folder.
 * Run `cp .template.env .env`
   * This creates a local set of configuration which you can amend - see the "Preparing the toy set-up" section
 * Run `./only-start-fullnode.sh`
