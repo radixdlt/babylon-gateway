@@ -31,26 +31,21 @@ As the Core API is designed to not be exposed publicly, you will need to run you
 
 For information on how to configure the Network Gateway components, see [/docs/configuration.md](../docs/configuration.md).
 
-# Running a toy Network Gateway and/or RadixDLT Core full node set-up locally
+# Running a Network Gateway and/or Core API node locally
 
 > ⚠️ &nbsp; This toy set-up should **NOT** be used for production - the memory limits, passwords etc are all incorrect for production use. It is also recommended not to run stateful services such as databases in containers.
 
-The aim of the toy deployment is to:
+The toy deployment is built with Docker Compose, and allows you to easily spin up various combinations of the infrastructure to fit your development needs,
+including developing integrations, testing full or partial stacks, and as a demonstration for how services can be connected and configured.
 
-* Allow the full stack to be run locally, to develop integrations against it
-* Allow for testing of the full stack or partial stack
-* Demonstrate how the services can be connected, and how to configure the Network Gateway components
-
-The toy deployment is built on Docker compose, and allows you to easily spin up various combinations of the infrastructure to fit your development needs.
-
-To begin, follow the instructions to *Prepare the toy set-up* below - and then run one of the following scripts:
+To run the set-up, follow the instructions under "**Preparing to run the toy set-up**" below - and then run one of the following scripts:
 
 * `run-full-stack-from-images.sh` - Runs the whole stack, without needing to run any code locally. This is ideal for playing about with the Gateway API, or developing against it, without needing to build any code.
 * `run-only-fullnode.sh` - Runs only a full node. This is useful for developing on the Network Gateway.
 * `run-full-stack-with-built-network-gateway.sh` - Runs ths full stack with a built network gateway. Useful for developing/testing the Network Gateway code in ani ntegrated setup.
 * `run-only-built-network-gateway.sh` - This runs only the built network gateway. This is useful for testing configuration of a Network Gateway against a non-local full node.
 
-## Preparing the toy set-up
+## Preparing to run the toy set-up
 
 * Open a new terminal.
 * Install docker compose if you don't already have it. You require `docker-compose --version` greater than 1.27.0.
@@ -83,9 +78,11 @@ errors should stabilise and logs should appear in a working state, with the data
 
 * If you want to clear the node's ledger and the DB contents (say, because you wish to point at a different network), simply delete the folders `container-volumes/fullnode/ledger` and `container-volumes/.postgresdata`.
 
-## Links to try
+## Interacting with the system
 
 ### Network Gateway
+
+Try:
 
 * GET http://localhost:5308/swagger/ - Swagger on Gateway API (if enabled)
 
@@ -98,7 +95,7 @@ Or some diagnosis endpoints:
 * GET http://localhost:5308/health - Health check on Gateway API
 * GET http://localhost:1235/metrics - Metrics for Gateway API
 
-### RadixDLT Core full node
+### RadixDLT Core API on the full node
 
 If you chose to run a full node through docker, you can also try out the Core API, changing out "stokenet" for the current network:
 
