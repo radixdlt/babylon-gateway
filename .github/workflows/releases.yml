@@ -1,0 +1,52 @@
+name: build-publish-dotnet-binary
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['6.0.x']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v1.8.2
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+          include-prerelease: true
+      - name: Build linux binaries
+        run: |
+          cd src/DataAggregator
+          mkdir output
+          dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
+          cd ../GatewayAPI
+          mkdir output
+          dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
+          cd ../..          
+          
+          zip data-aggregator.zip src/DataAggregator/output/
+          zip gateway-api.zip src/GatewayAPI/output/
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+      - name: Upload DataAggreagtor zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./data-aggregator.zip
+          asset_name: data-aggregator-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
+      - name: Upload GatewayAPI zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./gateway-api.zip
+          asset_name: gateway-api-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
+
+  
