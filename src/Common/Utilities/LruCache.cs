@@ -17,6 +17,11 @@ public class LruCache<TKey, TValue>
 
     public LruCache(int maxCapacity, IEqualityComparer<TKey>? equalityComparer = null)
     {
+        if (maxCapacity < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxCapacity), "The maximum capacity must be >= 1");
+        }
+
         _maxCapacity = maxCapacity;
         _cache = new Dictionary<TKey, TValue>(equalityComparer);
         _keyToQueueMap = new Dictionary<TKey, LinkedListNode<TKey>>(equalityComparer);
@@ -47,7 +52,7 @@ public class LruCache<TKey, TValue>
             }
             else
             {
-                if (_recentlySeenQueue.Count >= _maxCapacity)
+                while (_recentlySeenQueue.Count >= _maxCapacity)
                 {
                     DropOldestCachedItem();
                 }

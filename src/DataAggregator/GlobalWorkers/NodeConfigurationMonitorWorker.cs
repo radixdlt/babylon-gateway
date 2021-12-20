@@ -108,8 +108,6 @@ public class NodeConfigurationMonitorWorker : LoopedWorkerBase
 
         var enabledNodes = nodeConfiguration
             .Where(n => n.Enabled)
-            /* TODO:NG-12 - Enable syncing from more than one node! */
-            .Take(1)
             .ToList();
 
         await Task.WhenAll(

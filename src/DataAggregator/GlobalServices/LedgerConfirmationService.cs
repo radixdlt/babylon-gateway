@@ -66,6 +66,7 @@ using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
+using DataAggregator.Exceptions;
 using DataAggregator.LedgerExtension;
 using DataAggregator.Monitoring;
 using Prometheus;
@@ -80,7 +81,7 @@ public interface ILedgerConfirmationService
     Task HandleLedgerExtensionIfQuorum(CancellationToken token);
 
     // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitLedgerTipFromNode(string nodeName, long stateVersion, byte[] accumulator);
+    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion);
 
     void SubmitTransactionsFromNode(string nodeName, List<CommittedTransaction> transactions);
 
@@ -95,12 +96,82 @@ public record TransactionsRequested(long StateVersionExclusiveLowerBound, long S
 /// </summary>
 public class LedgerConfirmationService : ILedgerConfirmationService
 {
-    /* Metrics */
+    /* Global Metrics */
     private static readonly Histogram _batchCommitTimeSeconds = Metrics
         .CreateHistogram(
             "ledger_batch_commit_time_seconds",
             "Total time to commit a batch of transactions.",
             new HistogramConfiguration { Buckets = Histogram.LinearBuckets(start: 0.2, width: 0.2, count: 100) }
+        );
+
+    private static readonly Gauge _quorumExistsStatus = Metrics
+        .CreateGauge(
+            "ledger_node_quorum_exists_status",
+            "Whether enough nodes agree to continue committing transaction to the DB. 1 = true, 0.5 = unknown, 0 = false. (if 0, it's a critical alarm)."
+        );
+
+    private static readonly Gauge _quorumExtensionConsistentStatus = Metrics
+        .CreateGauge(
+            "ledger_node_quorum_extension_consistent_status",
+            "If a node quorum exists for a ledger extension, whether it agrees with the existing DB accumulator and is internally consistent. 1 = true, 0.5 = unknown, 0 = false. If 0, it's a critical alarm."
+        );
+
+    private static readonly Gauge _sufficientlySyncedUpNodesTotal = Metrics
+        .CreateGauge(
+            "ledger_node_sufficiently_synced_up_nodes_total",
+            "The number of nodes which are sufficiently synced up."
+        );
+
+    private static readonly Gauge _sufficientlySyncedUpNodesTrustWeightingTotal = Metrics
+        .CreateGauge(
+            "ledger_node_sufficiently_synced_up_nodes_trust_weighting_total",
+            "The trust weighting of all nodes which are currently sufficiently synced up"
+        );
+
+    private static readonly Gauge _configuredNodesTotal = Metrics
+        .CreateGauge(
+            "ledger_node_configured_nodes_total",
+            "The number of nodes which are configured for transaction syncing."
+        );
+
+    private static readonly Gauge _configuredNodesTrustWeightingTotal = Metrics
+        .CreateGauge(
+            "ledger_node_configured_nodes_trust_weighting_total",
+            "The trust weighting of all nodes which are currently configured for transaction syncing."
+        );
+
+    private static readonly Gauge _ledgerNodeTrustWeightingRequiredForQuorum = Metrics
+        .CreateGauge(
+            "ledger_node_trust_weighting_required_for_quorum_total",
+            "The trust weighting currently required for quorum"
+        );
+
+    private static readonly Gauge _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced = Metrics
+        .CreateGauge(
+            "ledger_node_trust_weighting_required_for_quorum_if_all_nodes_sufficiently_synced_total",
+            "The trust weighting required for quorum, if/once all nodes are synced up"
+        );
+
+    /* Per-Node Metrics */
+    private static readonly Gauge _nodeLedgerTipStateVersion = Metrics
+        .CreateGauge(
+            "node_ledger_tip_state_version",
+            "The state version at the tip of the node's ledger.",
+            new GaugeConfiguration { LabelNames = new[] { "node" } }
+        );
+
+    private static readonly Gauge _nodeLedgerTargetStateVersion = Metrics
+        .CreateGauge(
+            "node_ledger_target_state_version",
+            "The state version which the node reports as the highest seen on the network.",
+            new GaugeConfiguration { LabelNames = new[] { "node" } }
+        );
+
+    private static readonly Gauge _nodeLedgerTipIsConsistentWithQuorumStatus = Metrics
+        .CreateGauge(
+            "node_ledger_tip_is_consistent_with_quorum_status",
+            "If the node's ledger tip is consistent with the committed quorum. 1 = true, 0.5 = unknown, 0 = false. If 0, this is an important warning alarm - this node will need to be fixed.",
+            new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
     /* Dependencies */
@@ -110,9 +181,6 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private readonly ILedgerExtenderService _ledgerExtenderService;
 
     /* Variables */
-
-    // TODO - this is to work out if outdated nodes are consistent - Maybe implement an LRU Cache for this?
-    // See comment: https://radixdlt.atlassian.net/browse/NG-62?focusedCommentId=13423
     private readonly LruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CommittedTransaction>> _transactionsByNode = new();
@@ -121,8 +189,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     /* Properties */
     private LedgerConfirmationConfiguration Config => _aggregatorConfiguration.GetLedgerConfirmationConfiguration();
 
-    private IEnumerable<NodeAppSettings> TransactionNodes => _aggregatorConfiguration.GetNodes()
-        .Where(n => n.Enabled && !n.DisabledForTransactionIndexing);
+    private IList<NodeAppSettings> TransactionNodes { get; set; } = new List<NodeAppSettings>();
 
     public LedgerConfirmationService(
         ILogger<LedgerConfirmationService> logger,
@@ -135,6 +202,9 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         _aggregatorConfiguration = aggregatorConfiguration;
         _systemStatusService = systemStatusService;
         _ledgerExtenderService = ledgerExtenderService;
+
+        _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
+        _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Unknown);
     }
 
     /// <summary>
@@ -144,6 +214,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         await LoadTopOfDbLedger(token);
 
+        PrepareForLedgerExtensionCheck();
         var transactions = ConstructQuorumLedgerExtension();
 
         if (transactions.Count == 0)
@@ -157,18 +228,45 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             () => _ledgerExtenderService.CommitTransactions(ledgerExtension, token)
         );
 
-        ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
-
-        StopTrackingTransactionsUpToStateVersion(commitReport.FinalTransaction.StateVersion);
+        HandleLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
     }
 
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitLedgerTipFromNode(string nodeName, long stateVersion, byte[] accumulator)
+    public void SubmitNodeNetworkStatus(
+        string nodeName,
+        long ledgerTipStateVersion,
+        byte[] ledgerTipAccumulator,
+        long targetStateVersion
+    )
     {
-        _latestLedgerTipByNode[nodeName] = stateVersion;
-        // TODO - check accumulator consistency
+        _latestLedgerTipByNode[nodeName] = ledgerTipStateVersion;
+        _nodeLedgerTipStateVersion.WithLabels(nodeName).Set(ledgerTipStateVersion);
+        _nodeLedgerTargetStateVersion.WithLabels(nodeName).Set(targetStateVersion);
+
+        if (ledgerTipStateVersion > _knownTopOfCommittedLedger?.StateVersion)
+        {
+            // We handle consistency checks ahead of the commit point in the ConstructQuorumLedgerExtension method
+            return;
+        }
+
+        var cachedAccumulator = _quorumAccumulatorCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
+
+        if (cachedAccumulator == null)
+        {
+            // Ledger Tip is too far behind -- so don't report on consistency.
+            // We could change this to do a database look-up in future to give a consistency check.
+            _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Unknown);
+        }
+        else if (cachedAccumulator.BytesAreEqual(ledgerTipAccumulator))
+        {
+            _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.Yes);
+        }
+        else
+        {
+            _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(nodeName).SetStatus(MetricStatus.No);
+        }
     }
 
     /// <summary>
@@ -212,55 +310,96 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             : new TransactionsRequested(firstMissingStateVersionGap.Value - 1, inclusiveUpperBound);
     }
 
+    private void PrepareForLedgerExtensionCheck()
+    {
+        // We persist this to avoid excessive allocations; but update it at the start of each loop in case the config has changed
+        TransactionNodes = _aggregatorConfiguration.GetNodes()
+            .Where(n => n.Enabled && !n.DisabledForTransactionIndexing)
+            .ToList();
+    }
+
     private List<CommittedTransaction> ConstructQuorumLedgerExtension()
     {
         var extension = new List<CommittedTransaction>();
 
         var startStateVersion = _knownTopOfCommittedLedger!.StateVersion + 1;
-        var totalTrustWeighting = GetTotalTrustWeighting();
+        var trustRequirements = ComputeTrustWeightingRequirements();
 
-        if (totalTrustWeighting == 0)
+        if (trustRequirements.TrustWeightingAvailableAcrossAllNodes == 0)
         {
-            _logger.LogWarning("Total trust weighting computed as zero - perhaps no nodes are synced up?");
+            _logger.LogWarning("Total trust weighting across all nodes is zero - perhaps no nodes are configured for transaction reading?");
             return extension;
         }
 
-        var trustThresholdForQuorum = Config.QuorumRequiresTrustProportion * totalTrustWeighting;
+        if (trustRequirements.TrustWeightingRequiredForQuorumAtPresentTime == 0)
+        {
+            _logger.LogWarning("Total trust weighting required for extension is zero - perhaps no nodes are sufficiently synced up?");
+            return extension;
+        }
 
         for (var stateVersion = startStateVersion; stateVersion < startStateVersion + Config.MaxCommitBatchSize; stateVersion++)
         {
-            var (bestTransaction, totalTrustAcrossAllTransactions) = FindBestTransactionAtStateVersion(stateVersion);
+            var (chosenTransaction, trustAlreadyCommittedByNodes, inconsistentNodeNames) = FindMostTrustedTransaction(stateVersion);
 
-            if (bestTransaction == null || bestTransaction.Trust < trustThresholdForQuorum)
+            var haveQuorum = chosenTransaction != null && chosenTransaction.Trust >= trustRequirements.TrustWeightingRequiredForQuorumAtPresentTime;
+
+            if (haveQuorum)
             {
-                // It's likely we just don't have enough nodes contributing yet.
-                // But, if it's not possible to reach quorum even with more nodes contributing - then we need to worry.
-                var remainingTrustPossible = totalTrustWeighting - totalTrustAcrossAllTransactions;
-                if ((bestTransaction?.Trust ?? 0m) + remainingTrustPossible < trustThresholdForQuorum)
+                foreach (var inconsistentNodeName in inconsistentNodeNames)
                 {
-                    // TODO
-                    // Raise the alarm! It's impossible to reach consensus...
+                    _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(inconsistentNodeName).SetStatus(MetricStatus.No);
                 }
 
-                break;
+                foreach (var consistentNodeName in chosenTransaction!.NodeNames)
+                {
+                    _nodeLedgerTipIsConsistentWithQuorumStatus.WithLabels(consistentNodeName).SetStatus(MetricStatus.Yes);
+                }
+
+                extension.Add(chosenTransaction.Transaction);
+                continue;
             }
 
-            extension.Add(bestTransaction.Transaction);
+            /*
+             * It's likely we simply just don't have enough nodes contributing yet.
+             * But, if it's not possible to reach quorum even with more nodes contributing - then we need to worry.
+             * So let's try a couple of possibilities
+             */
+            var trustWeightingOfBestTransaction = chosenTransaction?.Trust ?? 0m;
+
+            var remainingTrustPossibleFromSufficientlySyncedNodes =
+                trustRequirements.TrustWeightingOfSufficientlySyncedUpNodes - trustAlreadyCommittedByNodes;
+
+            if (
+                trustWeightingOfBestTransaction + remainingTrustPossibleFromSufficientlySyncedNodes <
+                trustRequirements.TrustWeightingRequiredForQuorumAtPresentTime
+            )
+            {
+                // We can't make headway with all sufficiently synced up nodes - let's set this to Unknown until
+                // we get more nodes synced up...
+                _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
+            }
+
+            var remainingTrustPossibleFromAllNodes =
+                trustRequirements.TrustWeightingAvailableAcrossAllNodes - trustAlreadyCommittedByNodes;
+
+            if (
+                trustWeightingOfBestTransaction + remainingTrustPossibleFromAllNodes <
+                trustRequirements.TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum
+            )
+            {
+                // Even with all nodes synced up, we wouldn't reach a quorum - mark this as a critical alarm!
+                _quorumExistsStatus.SetStatus(MetricStatus.No);
+            }
+
+            break;
+        }
+
+        if (extension.Count > 0)
+        {
+            _quorumExistsStatus.SetStatus(MetricStatus.Yes);
         }
 
         return extension;
-    }
-
-    private void StopTrackingTransactionsUpToStateVersion(long committedStateVersion)
-    {
-        foreach (var (nodeName, transactions) in _transactionsByNode)
-        {
-            var stateVersionsToRemove = transactions.Keys.Where(k => k <= committedStateVersion).ToList();
-            foreach (var stateVersion in stateVersionsToRemove)
-            {
-                transactions.TryRemove(stateVersion, out _);
-            }
-        }
     }
 
     private async Task LoadTopOfDbLedger(CancellationToken token)
@@ -268,14 +407,24 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         var (topOfLedger, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
             () => _ledgerExtenderService.GetTopOfLedger(token)
         );
-
-        _knownTopOfCommittedLedger = topOfLedger;
-        _systemStatusService.RecordTopOfDbLedger(topOfLedger);
+        UpdateTopOfLedgerVariable(topOfLedger);
         _logger.LogDebug(
             "Top of DB ledger is at state version {StateVersion} (read in {ReadTopOfLedgerMs}ms)",
             topOfLedger.StateVersion,
             readTopOfLedgerMs
         );
+    }
+
+    private void HandleLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs,
+        CommitTransactionsReport commitReport)
+    {
+        ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
+        AddAccumulatorsToCache(ledgerExtension);
+        UpdateTopOfLedgerVariable(commitReport.FinalTransaction);
+
+        // NB - this must come after UpdateTopOfLedgerVariable so that the nodes don't try to fill the gap that's
+        //      created when we remove the transactions below it
+        StopTrackingTransactionsUpToStateVersion(commitReport.FinalTransaction.StateVersion);
     }
 
     private void ReportOnLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
@@ -313,15 +462,49 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         );
     }
 
-    private record BestTransactionReport(TransactionWithTrust? Best, decimal TotalTrustAcrossAllTransactions);
+    private void AddAccumulatorsToCache(ConsistentLedgerExtension ledgerExtension)
+    {
+        foreach (var transactionData in ledgerExtension.TransactionData)
+        {
+            _quorumAccumulatorCacheByStateVersion.Set(
+                transactionData.TransactionSummary.StateVersion,
+                transactionData.TransactionSummary.TransactionAccumulator
+            );
+        }
+    }
 
-    private record TransactionWithTrust(CommittedTransaction Transaction, decimal Trust);
+    private void UpdateTopOfLedgerVariable(TransactionSummary topOfLedger)
+    {
+        _knownTopOfCommittedLedger = topOfLedger;
+        _systemStatusService.RecordTopOfDbLedger(topOfLedger);
+    }
 
-    private BestTransactionReport FindBestTransactionAtStateVersion(long stateVersion)
+    private void StopTrackingTransactionsUpToStateVersion(long committedStateVersion)
+    {
+        foreach (var (_, transactions) in _transactionsByNode)
+        {
+            var stateVersionsToRemove = transactions.Keys.Where(k => k <= committedStateVersion).ToList();
+            foreach (var stateVersion in stateVersionsToRemove)
+            {
+                transactions.TryRemove(stateVersion, out _);
+            }
+        }
+    }
+
+    private record MostTrustedTransactionReport(
+        TransactionClaim? Best,
+        decimal TotalTrustCommittedByNodes,
+        List<string> InconsistentNodeNames
+    );
+
+    private record TransactionClaim(CommittedTransaction Transaction, List<string> NodeNames, decimal Trust);
+
+    private MostTrustedTransactionReport FindMostTrustedTransaction(long stateVersion)
     {
         var transactionsWithTrust = _transactionsByNode
             .Select(n => new
             {
+                NodeName = n.Key,
                 Transaction = n.Value.GetValueOrDefault(stateVersion),
                 Trust = GetTrustForNode(n.Key),
             })
@@ -330,21 +513,27 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         if (transactionsWithTrust.Count == 0)
         {
-            return new BestTransactionReport(null, 0m);
+            return new MostTrustedTransactionReport(null, 0m, new List<string>());
         }
 
         var groupedTransactions = transactionsWithTrust
             .GroupBy(t => t.Transaction!.CommittedStateIdentifier.TransactionAccumulator)
-            .Select(grouping => new TransactionWithTrust(
+            .Select(grouping => new TransactionClaim(
                 grouping.First().Transaction!,
+                grouping.Select(g => g.NodeName).ToList(),
                 grouping.Sum(x => x.Trust)
             ))
             .ToList();
 
         var totalTrust = groupedTransactions.Sum(t => t.Trust);
-        var topTransaction = groupedTransactions.MaxBy(t => t.Trust);
+        var orderedTransactionClaims = groupedTransactions.OrderByDescending(t => t.Trust).ToList();
+        var topTransaction = orderedTransactionClaims.First();
 
-        return new BestTransactionReport(topTransaction, totalTrust);
+        var inconsistentNodeNames = orderedTransactionClaims.Skip(1)
+            .SelectMany(t => t.NodeNames)
+            .ToList();
+
+        return new MostTrustedTransactionReport(topTransaction, totalTrust, inconsistentNodeNames);
     }
 
     private ConsistentLedgerExtension GenerateConsistentLedgerExtension(
@@ -354,29 +543,75 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         var transactionData = new List<CommittedTransactionData>();
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
         var currentParentSummary = transactionBatchParentSummary;
-
-        foreach (var transaction in transactions)
+        try
         {
-            var summary = TransactionSummarisation.GenerateSummary(currentParentSummary, transaction);
-            var contents = transaction.Metadata.Hex.ConvertFromHex();
+            foreach (var transaction in transactions)
+            {
+                var summary = TransactionSummarisation.GenerateSummary(currentParentSummary, transaction);
+                var contents = transaction.Metadata.Hex.ConvertFromHex();
 
-            TransactionConsistency.AssertTransactionHashCorrect(contents, summary.TransactionIdentifierHash);
-            TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
+                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.TransactionIdentifierHash);
+                TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
 
-            transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
-            currentParentSummary = summary;
+                transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
+                currentParentSummary = summary;
+            }
+
+            _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Yes);
+        }
+        catch (InvalidLedgerCommitException)
+        {
+            _quorumExtensionConsistentStatus.SetStatus(MetricStatus.No);
+            throw;
+        }
+        catch (InconsistentLedgerException)
+        {
+            _quorumExtensionConsistentStatus.SetStatus(MetricStatus.No);
+            throw;
         }
 
         return new ConsistentLedgerExtension(transactionBatchParentSummary, transactionData);
     }
 
-    private decimal GetTotalTrustWeighting()
-    {
-        var nodesForCalculation = Config.OnlyUseSufficientlySyncedUpNodesForQuorumCalculation
-            ? TransactionNodes.Where(node => IsSufficientlySyncedUp(node.Name))
-            : TransactionNodes;
+    private record TrustWeightingReport(
+        decimal TrustWeightingAvailableAcrossAllNodes,
+        decimal TrustWeightingOfSufficientlySyncedUpNodes,
+        decimal TrustWeightingRequiredForQuorumAtPresentTime,
+        decimal TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum
+    );
 
-        return nodesForCalculation.Sum(node => node.TrustWeighting);
+    private TrustWeightingReport ComputeTrustWeightingRequirements()
+    {
+        var sufficientlySyncedUpNodes = TransactionNodes
+            .Where(node => IsSufficientlySyncedUp(node.Name))
+            .ToList();
+
+        var sufficientlySyncedUpNodesTrustWeighting = sufficientlySyncedUpNodes.Sum(node => node.TrustWeighting);
+
+        _sufficientlySyncedUpNodesTotal.Set(sufficientlySyncedUpNodes.Count);
+        _sufficientlySyncedUpNodesTrustWeightingTotal.Set((double)sufficientlySyncedUpNodesTrustWeighting);
+
+        var trustWeightingAcrossAllNodes = TransactionNodes.Sum(node => node.TrustWeighting);
+
+        _configuredNodesTotal.Set(TransactionNodes.Count());
+        _configuredNodesTrustWeightingTotal.Set((double)trustWeightingAcrossAllNodes);
+
+        var trustWeightingTotalUsedForQuorumCalculation = Config.OnlyUseSufficientlySyncedUpNodesForQuorumCalculation
+            ? sufficientlySyncedUpNodesTrustWeighting
+            : trustWeightingAcrossAllNodes;
+
+        var trustWeightingForQuorum = Config.QuorumRequiresTrustProportion * trustWeightingTotalUsedForQuorumCalculation;
+        var trustWeightingForQuorumIfAllSyncedUp = Config.QuorumRequiresTrustProportion * trustWeightingAcrossAllNodes;
+
+        _ledgerNodeTrustWeightingRequiredForQuorum.Set((double)trustWeightingForQuorum);
+        _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)trustWeightingForQuorumIfAllSyncedUp);
+
+        return new TrustWeightingReport(
+            TrustWeightingAvailableAcrossAllNodes: trustWeightingAcrossAllNodes,
+            TrustWeightingOfSufficientlySyncedUpNodes: sufficientlySyncedUpNodesTrustWeighting,
+            TrustWeightingRequiredForQuorumAtPresentTime: trustWeightingForQuorum,
+            TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum: trustWeightingForQuorumIfAllSyncedUp
+        );
     }
 
     private decimal GetTrustForNode(string nodeName)

@@ -115,7 +115,7 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services
     )
-        : base(logger, TimeSpan.FromMilliseconds(300), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
+        : base(logger, TimeSpan.FromMilliseconds(300), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
@@ -144,11 +144,13 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 
         var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(stoppingToken);
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
+        var nodeLedgerTarget = networkStatus.SyncStatus.TargetStateVersion;
 
-        _ledgerConfirmationService.SubmitLedgerTipFromNode(
+        _ledgerConfirmationService.SubmitNodeNetworkStatus(
             NodeName,
             nodeLedgerTip,
-            networkStatus.CurrentStateIdentifier.TransactionAccumulator.ConvertFromHex()
+            networkStatus.CurrentStateIdentifier.TransactionAccumulator.ConvertFromHex(),
+            nodeLedgerTarget
         );
 
         var toFetch = _ledgerConfirmationService.GetWhichTransactionsAreRequestedFromNode(NodeName);
