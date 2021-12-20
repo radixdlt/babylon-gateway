@@ -79,25 +79,28 @@ public class DefaultKernel
 {
     public void ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
     {
-        // Globally-Scoped services
-        AddGlobalScopedServices(services);
-        AddReadOnlyDatabaseContext(hostBuilderContext, services);
-        AddReadWriteDatabaseContext(hostBuilderContext, services);
+        // Singleton-Scoped services
+        AddSingletonServices(services);
 
         // Request scoped services
         AddRequestScopedServices(services);
-        AddCoreApiServices(services);
+        AddReadOnlyDatabaseContext(hostBuilderContext, services);
+        AddReadWriteDatabaseContext(hostBuilderContext, services);
+
+        // Transient (pooled) services
+        AddCoreApiHttpClient(services);
     }
 
-    private void AddGlobalScopedServices(IServiceCollection services)
+    private void AddSingletonServices(IServiceCollection services)
     {
+        // Should only contain services without any DBContext or HttpClient - as these both need to be recycled
+        // semi-regularly
         services.AddSingleton<IGatewayApiConfiguration, GatewayApiConfiguration>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IValidations, Validations>();
         services.AddSingleton<IExceptionHandler, ExceptionHandler>();
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
-        services.AddSingleton<ICoreApiHandler, CoreApiHandler>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.AddSingleton<IActionInferrer, ActionInferrer>();
     }
@@ -114,7 +117,7 @@ public class DefaultKernel
         services.AddScoped<IParsedTransactionMapper, ParsedTransactionMapper<GatewayReadWriteDbContext>>();
     }
 
-    private void AddCoreApiServices(IServiceCollection services)
+    private void AddCoreApiHttpClient(IServiceCollection services)
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests

@@ -17,9 +17,9 @@ In development, configuration comes from a few places, with items lower down the
 * `src/[X]/appsettings.PersonalOverrides.json` (under .gitignore)
 * Environment variables
 
-By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333. 
+By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333, but you may wish to use non-local Core API, to have a synced-up system to read from, and to avoid hammering your computer too much! (see sections below).
 
-There is a guide in the radixdlt node repository regarding [run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md). Instead of building a full node image, you can also use an image on docker hub at version `1.1.0+`. The latest at time of writing is [release 1.1.0-rc.1](https://github.com/radixdlt/radixdlt/releases/tag/1.1.0-rc.1) available as docker tag [radixdlt/radixdlt-core:1.1.0-rc.1](https://hub.docker.com/layers/radixdlt/radixdlt-core/1.1.0-rc.1/images/sha256-912939c55aa8abf6ecd0b7ae329daf8448a5b0d6137078000dc5a8797a86f045?context=explore). You should run this with similar configuration as per running a full node against a development build, in particular with `api.transactions.enable=true`.
+If you wish to easily spin up a local Core API, follow the instructions in [the deployment folder](../deployment), for set-up and running only a full node.
 
 ### Custom development configuration
 
@@ -35,6 +35,7 @@ A syncing full node and the data aggregator are both quite resource intensive, s
 If at RDX Works, we have some Core APIs you can connect to off your local machine - talk to your team lead about getting access to these.
 
 If not at RDX Works, please see [https://docs.radixdlt.com/](https://docs.radixdlt.com/) for a how-to on running a full node.
+You'll need to run a version 1.1.0 or higher in order for the node to have the Core API that the Network Gateway requires.
 
 ## Developing in Rider
 
@@ -47,7 +48,7 @@ If not at RDX Works, please see [https://docs.radixdlt.com/](https://docs.radixd
 
 Run following tasks:
 
-* `Postgres` (this runs `docker-compose up`)
+* `PostgreSQL & PgAdmin` (this runs `docker-compose up`)
 
 And then, depending on what you're working on, you can run one or both of these. Note that the `Data Aggregator` needs to have run successfully at least once to create the Database, and start the ledger, for the `Gateway API` to be able to connect.
 
@@ -55,6 +56,7 @@ And then, depending on what you're working on, you can run one or both of these.
 * `Gateway API`
 
 You can use the `Wipe Database` task if you ever need to clear the database. (Say, because the DB ledger got corrupted; or you wish to change which network you're connected to)
+
 ## Developing using the command line
 
 All the commands should be run from the repo root.
@@ -62,7 +64,7 @@ All the commands should be run from the repo root.
 Run the following in separate terminals:
 
 ```bash
-# Spin up Postgres and PG Adminfirst
+# Spin up PostgreSQL and PgAdmin first
 docker-compose up
 ```
 

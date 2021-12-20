@@ -90,6 +90,14 @@ hostBuilder.ConfigureAppConfiguration((context, config) =>
         // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
         config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
     }
+
+    var customConfigurationPath = config.Build()
+        .GetValue<string?>("CustomJsonConfigurationFilePath", null);
+
+    if (customConfigurationPath != null)
+    {
+        config.AddJsonFile(customConfigurationPath, false, true);
+    }
 });
 
 /* Configure services / dependency injection */
@@ -187,10 +195,10 @@ await app.RunAsync();
 
 /* Methods */
 
-async Task EnsureCanConnectToDatabase(WebApplication app1)
+async Task EnsureCanConnectToDatabase(WebApplication webApplication)
 {
-    var maxWaitForDbMs = app1.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
-    await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app1.Services, maxWaitForDbMs);
+    var maxWaitForDbMs = webApplication.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
+    await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(webApplication.Services, maxWaitForDbMs);
 }
 
 async Task LoadNetworkConfiguration(WebApplication webApplication)
