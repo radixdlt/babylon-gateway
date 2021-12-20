@@ -31,50 +31,61 @@ As the Core API is designed to not be exposed publicly, you will need to run you
 
 For information on how to configure the Network Gateway components, see [/docs/configuration.md](../docs/configuration.md).
 
-# Example toy Network Gateway set-up with docker compose
+# Running a toy Network Gateway and/or RadixDLT Core full node set-up locally
 
-An example docker-compose file is given in this folder, and demonstrates how the projects can be configured. It runs a single docker image of each of:
-
-* A RadixDLT Core - Full Node (OPTIONAL)
-* A PostgreSQL Database
-* A Network Gateway - Data Aggregator
-* A Network Gateway - Gateway API is given in this folder, and .
-
-This toy set-up should **NOT** be used for production - the memory limits, passwords etc are all incorrect for production use. It is also recommended not to run stateful services such as databases in containers.
+> ⚠️ &nbsp; This toy set-up should **NOT** be used for production - the memory limits, passwords etc are all incorrect for production use. It is also recommended not to run stateful services such as databases in containers.
 
 The aim of the toy deployment is to:
+
+* Allow the full stack to be run locally, to develop integrations against it
+* Allow for testing of the full stack or partial stack
 * Demonstrate how the services can be connected, and how to configure the Network Gateway components
-* Allow the full stack to be run locally, to develop integrations against a non-released build of the Network Gateway.
+
+The toy deployment is built on Docker compose, and allows you to easily spin up various combinations of the infrastructure to fit your development needs.
+
+To begin, follow the instructions to *Prepare the toy set-up* below - and then run one of the following scripts:
+
+* `run-full-stack-from-images.sh` - Runs the whole stack, without needing to run any code locally. This is ideal for playing about with the Gateway API, or developing against it, without needing to build any code.
+* `run-only-fullnode.sh` - Runs only a full node. This is useful for developing on the Network Gateway.
+* `run-full-stack-with-built-network-gateway.sh` - Runs ths full stack with a built network gateway. Useful for developing/testing the Network Gateway code in ani ntegrated setup.
+* `run-only-built-network-gateway.sh` - This runs only the built network gateway. This is useful for testing configuration of a Network Gateway against a non-local full node.
 
 ## Preparing the toy set-up
 
-Install docker compose if you don't already have it. Then, ensure your terminal has this `/deployment` folder as its working directory.
+* Open a new terminal.
+* Install docker compose if you don't already have it. You require `docker-compose --version` greater than 1.27.0.
+* Check out this `/deployment` folder as its working directory.
+* Copy `.template.env` to `.env` by running this command: `cp .template.env .env` 
+* Configure the `.env` to suit your needs - see below.
 
-First, we need to set up the environment variables:
-
-```
-cp .template.env .env
-```
+### Configuring .env
 
 By default, the `.env` should be set up to connect to `stokenet`. If you have a different full node to connect to, you can configure that instead.
 
-Now, make changes to any of the values you wish in `.env`, eg in order to:
-* Change which network it runs against - there are a few parameters which will need changing (`FULLNODE_NETWORK_ID`, `FULLNODE_NETWORK_BOOTSTRAP_NODE` and `NETWORK_NAME`)
-* Configure to point to a different full node / Core API
+There are a number of changes you may wish to make in `.env`, eg in order to:
 
-## Running the toy set-up
+* Change which network it runs against.
+  * By default, it runs against `stokenet`
+  * You will want to change `FULLNODE_NETWORK_ID`, `FULLNODE_NETWORK_BOOTSTRAP_NODE` and `NETWORK_NAME`.
+* Configure the Network Gateway point to a different full node / Core API
+  * By default, it points to the full node spun up in docker-compose
+  * You may wish to change `DISABLE_CORE_API_CERTIFICATE_CHECKS`, `NODE_0_CORE_API_ADDRESS` and `NODE_0_CORE_API_AUTHORIZATION_HEADER`
+* Configure multiple full nodes or other set-ups.
+  * By default, it only spins up one of each component.
+  * You'll likely need to edit the `docker-compose.yml` file too.
 
-Finally, you can bring up the toy Network Gateway deployment in two modes - including a full node, or without a full node.
+## Debugging
 
-* To bring up the network gateway and a full node, run `./build-and-start-all.sh`
-* If you've configured `.env` to point at an existing Core API, you can use `./build-and-start-network-gateway.sh` to just spin up a Network Gateway
-
-On first load, you might get a few transient errors as things boot-up, and connection or precondition checks fail - but after 30 seconds or so,
+* On first load, you might get a few transient errors as things boot-up, and connection or precondition checks fail - but after 30 seconds or so,
 errors should stabilise and logs should appear in a working state, with the data aggregator ingesting transactions.
 
-At this point, it's time to try out some of the links below. 
+* If one of the services dies, it can cause the others to start erroring. You can check this in docker desktop to see which services are still running. Try killing them and starting them again.
 
-### Links to try
+* If you want to clear the node's ledger and the DB contents (say, because you wish to point at a different network), simply delete the folders `container-volumes/fullnode/ledger` and `container-volumes/.postgresdata`.
+
+## Links to try
+
+### Network Gateway
 
 * GET http://localhost:5308/swagger/ - Swagger on Gateway API (if enabled)
 
@@ -87,17 +98,10 @@ Or some diagnosis endpoints:
 * GET http://localhost:5308/health - Health check on Gateway API
 * GET http://localhost:1235/metrics - Metrics for Gateway API
 
+### RadixDLT Core full node
+
 If you chose to run a full node through docker, you can also try out the Core API, changing out "stokenet" for the current network:
 
 * `curl --request POST 'localhost:3333/network/configuration' --data-raw '{}'`
 * `curl --request POST 'localhost:3333/network/status' --data-raw '{"network_identifier":{"network":"stokenet"}}'`
 
-# Running just a full node to develop against
-
-If you're developing on the Network Gateway, you will likely with to run the Network Gateway locally, but you'll want to have a full node
-to connect to. You can run that full node from the `deployment` folder as follows:
-
-* Bring up a new terminal in this `deployment` folder.
-* Run `cp .template.env .env`
-  * This creates a local set of configuration which you can amend - see the "Preparing the toy set-up" section
-* Run `./only-start-fullnode.sh`

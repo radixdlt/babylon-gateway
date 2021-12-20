@@ -19,7 +19,7 @@ In development, configuration comes from a few places, with items lower down the
 
 By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333, but you may wish to use non-local Core API, to have a synced-up system to read from, and to avoid hammering your computer too much! (see sections below).
 
-If you wish to easily spin up a local Core API, follow the instructions in [the deployment folder](../deployment), for "Running just a full node to develop against".
+If you wish to easily spin up a local Core API, follow the instructions in [the deployment folder](../deployment), for set-up and running only a full node.
 
 ### Custom development configuration
 

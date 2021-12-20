@@ -25,7 +25,7 @@ services:
   postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
     image: "postgres:12.9-alpine"
-    profiles: ["network-gateway"]
+    profiles: ["network-gateway-built", "network-gateway-image"]
     ports:
       - "5532:5432" # This allows you to connect to the database locally on port localhost:5532
     volumes:
@@ -35,13 +35,9 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_SUPERUSER_PASSWORD}"
       POSTGRES_DB: "${POSTGRES_DB_NAME}"
 
-  data_aggregator:
-    depends_on:
-      - postgres_db
-    build:
-      context: "../"
-      dockerfile: "./src/DataAggregator/Dockerfile"
-    profiles: ["network-gateway"]
+  data_aggregator: # This is the base -- the _image and _built containers are defined below
+    image: radixdlt/ng-data-aggregator:1.0.0-rc.1
+    profiles: ["NONE"]
     ports:
       - "5207:80" # This allows you to connect to the API (for root and health checks) at http://localhost:5207
       - "1234:1234" # This allows you to connect to the metrics API at http://localhost:1234
@@ -79,14 +75,9 @@ services:
       RADIX_NG_AGGREGATOR__CoreApiNodes__4__TrustWeighting: "1"
       RADIX_NG_AGGREGATOR__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
 
-  gateway_api:
-    depends_on:
-      - postgres_db
-      - data_aggregator
-    build:
-      context: "../"
-      dockerfile: "./src/GatewayAPI/Dockerfile"
-    profiles: ["network-gateway"]
+  gateway_api: # This is the base -- the _image and _built containers are defined below
+    image: radixdlt/ng-gateway-api:1.0.0-rc.1
+    profiles: ["NONE"]
     ports:
       - "5308:80" # This allows you to connect to the API at http://localhost:5308
       - "1235:1235" # This allows you to connect to the metrics API at http://localhost:1235
@@ -124,3 +115,31 @@ services:
       RADIX_NG_API__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
       RADIX_NG_API__CoreApiNodes__4__RequestWeighting: "1"
       RADIX_NG_API__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
+
+  data_aggregator_image:
+    # NB - image: is defined in the base data_aggregator
+    extends:
+      service: data_aggregator
+    profiles: ["network-gateway-image"]
+
+  gateway_api_image:
+    # NB - image: is defined in the base gateway_api
+    extends:
+      service: gateway_api
+    profiles: ["network-gateway-image"]
+
+  data_aggregator_built:
+    extends:
+      service: data_aggregator
+    profiles: ["network-gateway-built"]
+    build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
+      context: "../"
+      dockerfile: "./src/DataAggregator/Dockerfile"
+
+  gateway_api_built:
+    extends:
+      service: gateway_api
+    profiles: ["network-gateway-built"]
+    build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
+      context: "../"
+      dockerfile: "./src/GatewayAPI/Dockerfile"

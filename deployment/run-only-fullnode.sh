@@ -3,5 +3,7 @@ set -e
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
-docker-compose --profile network-gateway build
-docker-compose --profile network-gateway up
+./scripts/ensure-env-exists.sh
+./scripts/ensure-key-generated.sh
+
+docker-compose --profile fullnode up
