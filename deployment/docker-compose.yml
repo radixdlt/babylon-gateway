@@ -1,22 +1,47 @@
 version: "3.8"
 services:
+  fullnode:
+    image: radixdlt/radixdlt-core:1.1.0-rc.1
+    profiles: ["fullnode"]
+    init: true
+    ports:
+      - "3333:3333" # This allows you to connect to the Core API on localhost:3333
+    cap_add:
+      - NET_ADMIN
+    environment:
+      RADIXDLT_LOG_LEVEL: "${FULLNODE_LOG_LEVEL}"
+      RADIXDLT_NETWORK_ID: "${FULLNODE_NETWORK_ID}"
+      RADIXDLT_NETWORK_SEEDS_REMOTE: "${FULLNODE_NETWORK_BOOTSTRAP_NODE}"
+      RADIX_NODE_KEYSTORE_PASSWORD: "${FULLNODE_KEY_PASSWORD}"
+      JAVA_OPTS: -server -Xmx1536m -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=jks -Djava.security.egd=file:/dev/urandom -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+      RADIXDLT_VALIDATOR_KEY_LOCATION: "/home/radixdlt/node-keystore.ks"
+      RADIXDLT_API_PORT: 3333
+      RADIXDLT_TRANSACTIONS_API_ENABLE: "true"
+    volumes:
+      -  "./container-volumes/fullnode/ledger:/home/radixdlt/RADIXDB"
+      -  "./container-volumes/fullnode/keystore.ks:/home/radixdlt/node-keystore.ks"
+      -  "./container-volumes/fullnode/logs:/home/radixdlt/logs"
+
   postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
     image: "postgres:12.9-alpine"
+    profiles: ["network-gateway"]
     ports:
       - "5532:5432" # This allows you to connect to the database locally on port localhost:5532
     volumes:
-      - ./.postgresdata:/var/lib/postgresql/data
+      - ./container-volumes/.postgresdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "${POSTGRES_SUPERUSER}"
       POSTGRES_PASSWORD: "${POSTGRES_SUPERUSER_PASSWORD}"
       POSTGRES_DB: "${POSTGRES_DB_NAME}"
+
   data_aggregator:
     depends_on:
       - postgres_db
     build:
       context: "../"
       dockerfile: "./src/DataAggregator/Dockerfile"
+    profiles: ["network-gateway"]
     ports:
       - "5207:80" # This allows you to connect to the API (for root and health checks) at http://localhost:5207
       - "1234:1234" # This allows you to connect to the metrics API at http://localhost:1234
@@ -53,6 +78,7 @@ services:
       RADIX_NG_AGGREGATOR__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
       RADIX_NG_AGGREGATOR__CoreApiNodes__4__TrustWeighting: "1"
       RADIX_NG_AGGREGATOR__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
+
   gateway_api:
     depends_on:
       - postgres_db
@@ -60,6 +86,7 @@ services:
     build:
       context: "../"
       dockerfile: "./src/GatewayAPI/Dockerfile"
+    profiles: ["network-gateway"]
     ports:
       - "5308:80" # This allows you to connect to the API at http://localhost:5308
       - "1235:1235" # This allows you to connect to the metrics API at http://localhost:1235

@@ -195,10 +195,10 @@ await app.RunAsync();
 
 /* Methods */
 
-async Task EnsureCanConnectToDatabase(WebApplication app1)
+async Task EnsureCanConnectToDatabase(WebApplication webApplication)
 {
-    var maxWaitForDbMs = app1.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
-    await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(app1.Services, maxWaitForDbMs);
+    var maxWaitForDbMs = webApplication.Configuration.GetValue("MaxWaitForDbOnStartupMs", 0);
+    await ConnectionHelpers.TryWaitForExistingDb<GatewayReadOnlyDbContext>(webApplication.Services, maxWaitForDbMs);
 }
 
 async Task LoadNetworkConfiguration(WebApplication webApplication)

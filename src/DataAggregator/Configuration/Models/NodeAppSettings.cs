@@ -127,14 +127,19 @@ public record NodeAppSettings
 
     public void AssertValid()
     {
+        if (!Enabled)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(Name))
         {
-            throw new InvalidConfigurationException("A node's name cannot be empty");
+            throw new InvalidConfigurationException("An enabled node's name cannot be empty");
         }
 
         if (string.IsNullOrEmpty(CoreApiAddress))
         {
-            throw new InvalidConfigurationException("A node's address cannot be empty");
+            throw new InvalidConfigurationException("A enabled node's address cannot be empty");
         }
     }
 }

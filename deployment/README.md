@@ -20,19 +20,27 @@ If you wish to run a Network Gateway, you will need to have a radixdlt full node
 As the Core API is designed to not be exposed publicly, you will need to run your own full node/s, and expose this API for your own needs.
 
 * For development purposes, you can either:
-  * [Run a full node against a development build](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md).
-  * Run against a release candidate build of the node at build version 1.1.0+. At time of writing, the latest is [release 1.1.0-rc.1](https://github.com/radixdlt/radixdlt/releases/tag/1.1.0-rc.1), available as docker tag [radixdlt/radixdlt-core:1.1.0-rc.1](https://hub.docker.com/layers/radixdlt/radixdlt-core/1.1.0-rc.1/images/sha256-912939c55aa8abf6ecd0b7ae329daf8448a5b0d6137078000dc5a8797a86f045?context=explore). You should run this with similar configuration as per running a full node against a development build, in particular, with `api.transactions.enable=true`.
+  * Connect to a pre-existing full node. A syncing full node and the data aggregator are both quite resource intensive, so it can help to run at least the full node off of your local machine. If at RDX Works, we have some Core APIs you can connect to off your local machine - talk to your team lead about getting access to these.
+  * Run a full node locally, using a docker image at build version 1.1.0+. At time of writing, the latest is [release 1.1.0-rc.1](https://github.com/radixdlt/radixdlt/releases/tag/1.1.0-rc.1), available as docker tag [radixdlt/radixdlt-core:1.1.0-rc.1](https://hub.docker.com/r/radixdlt/radixdlt-core/tags). The toy deployment in this folder uses this approach.
+  * Run a development build of a full node: [eg following this guide](https://github.com/radixdlt/radixdlt/blob/develop/docs/development/run-configurations/connecting-to-a-live-network-in-docker.md)
 
-* For production purposes, you should run a radixdlt full node exposing the Core API. We don't yet have a full node build exposing the Core API which is
+* For production purposes, you should run a radixdlt full node exposing the Core API. We do not yet have a full node build exposing the Core API which is
   released for production use.
 
 # Example toy Network Gateway set-up with docker compose
 
-An example docker-compose file to run a single docker image of each of the Gateway API, Database and Aggregator is given in this folder, and demonstrates how the projects can be configured.
+An example docker-compose file is given in this folder, and demonstrates how the projects can be configured. It runs a single docker image of each of:
 
-The docker file is based on locally built docker images for the code, and a PostGres image from the docker registry.
+* A RadixDLT Core - Full Node (OPTIONAL)
+* A PostGres Database
+* A Network Gateway - Data Aggregator
+* A Network Gateway - Gateway API is given in this folder, and .
 
-Standard caveat: it is recommended not to run stateful services such as databases in containers. As such, we would recommend the toy set-up not to be used for production, but can be amended for your requirements.
+Just to stress - this toy set-up should _NOT_ be used for production - the memory limits, passwords etc are all incorrect for production use. It is also recommended not to run stateful services such as databases in containers.
+
+The aim of the toy deployment is to:
+* Demonstrate how the services can be connect, and how to configure the Network Gateway components
+* Allow the full stack to be run locally, to develop against
 
 ## Preparing the toy set-up
 
@@ -44,15 +52,23 @@ First, we need to set up the environment variables:
 cp .template.env .env
 ```
 
-Now, make changes to any of the values you wish in `.env` (to eg point it at your locally running node's core API). Comments in the `.env` file should help with configuring this correctly.
+By default, the `.env` should be set up to connect to `stokenet`. If you have a different full node to connect to, you can configure that instead.
+
+Now, make changes to any of the values you wish in `.env`, eg in order to:
+* Change which network it runs against - there are a few parameters which will need changing (`FULLNODE_NETWORK_ID`, `FULLNODE_NETWORK_BOOTSTRAP_NODE` and `NETWORK_NAME`)
+* Configure to point to a different full node / Core API
 
 ## Running the toy set-up
 
-Finally, you can bring up the whole stack with:
+Finally, you can bring up the toy Network Gateway deployment in two modes - including a full node, or without a full node.
 
-```sh
-./build-and-start-network-gateway.sh
-```
+* To bring up the network gateway and a full node, run `./build-and-start-all.sh`
+* If you've configured `.env` to point at an existing Core API, you can use `./build-and-start-network-gateway.sh` to just spin up a Network Gateway
+
+On first load, you might get a few transient errors as things boot-up, and connection or precondition checks fail - but after 30 seconds or so,
+errors should stabilise and logs should appear in a working state, with the data aggregator ingesting transactions.
+
+At this point, it's time to try out some of the links below. 
 
 ### Links to try
 
@@ -66,3 +82,18 @@ Or some diagnosis endpoints:
 * GET http://localhost:5308 - Root overview check for Gateway API
 * GET http://localhost:5308/health - Health check on Gateway API
 * GET http://localhost:1235/metrics - Metrics for Gateway API
+
+If you chose to run a full node through docker, you can also try out the Core API, changing out "stokenet" for the current network:
+
+* `curl --request POST 'localhost:3333/network/configuration' --data-raw '{}'`
+* `curl --request POST 'localhost:3333/network/status' --data-raw '{"network_identifier":{"network":"stokenet"}}'`
+
+# Running just a full node to develop against
+
+If you're developing on the Network Gateway, you will likely with to run the Network Gateway locally, but you'll want to have a full node
+to connect to. You can run that full node from the `deployment` folder as follows:
+
+* Create a new terminal in this `deployment` folder.
+* Run `cp .template.env .env`
+  * This creates a local set of configuration which you can amend - see the "Preparing the toy set-up" section
+* Run `./only-start-fullnode.sh`
