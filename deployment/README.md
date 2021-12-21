@@ -27,9 +27,9 @@ As the Core API is designed to not be exposed publicly, you will need to run you
 * For production purposes, you should run a radixdlt full node exposing the Core API. We do not yet have a full node build exposing the Core API which is
   released for production use.
 
-# Configuration
+# Configuration and Monitoring
 
-For information on how to configure the Network Gateway components, see [/docs/configuration.md](../docs/configuration.md).
+For information on how to configure and monitor the Network Gateway components, see [/docs/configuration](../docs/configuration.md) and [/docs/monitoring](../docs/monitoring.md).
 
 # Running a Network Gateway and/or Core API node locally
 
