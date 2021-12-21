@@ -80,14 +80,14 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
 {
     private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
         .CreateCounter(
-            "node_transaction_batch_fetch_loop_error_total",
+            "ng_node_fetch_transaction_batch_loop_error_total",
             "Number of fetch loop errors that failed.",
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );
 
     private static readonly Histogram _totalFetchTimeSecondsUnlabeled = Metrics
         .CreateHistogram(
-            "node_transaction_batch_fetch_time_seconds",
+            "ng_node_fetch_transaction_batch_time_seconds",
             "Total time to fetch a batch of transactions.",
             new HistogramConfiguration
             {
@@ -135,9 +135,6 @@ public class NodeTransactionLogWorker : LoopedWorkerBase, INodeWorker
         await _failedFetchLoops.CountExceptionsAsync(() => FetchAndSubmitTransactions(stoppingToken));
     }
 
-    // TODO:NG-12 - Implement node-specific syncing state machine, and separate committing into a global worker...
-    // TODO:NG-40 - Do special actions when we start the ledger: Save the network of the ledger, and check this against our configuration before we commit.
-    // TODO:NG-13 - Ensure we still maintain the primary aggregator lock in the database before we commit
     private async Task FetchAndSubmitTransactions(CancellationToken stoppingToken)
     {
         const int FetchMaxBatchSize = 1000;

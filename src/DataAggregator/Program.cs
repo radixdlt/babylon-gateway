@@ -73,9 +73,11 @@ using DataAggregator.Monitoring;
 using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
-var host = builder.Host;
+var hostBuilder = builder.Host;
 
-host.ConfigureAppConfiguration((context, config) =>
+IConfigurationRoot? bootUpConfiguration = null;
+
+hostBuilder.ConfigureAppConfiguration((context, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
     if (args is { Length: > 0 })
@@ -89,37 +91,21 @@ host.ConfigureAppConfiguration((context, config) =>
         config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
     }
 
-    var customConfigurationPath = config.Build()
+    bootUpConfiguration = config.Build();
+    var customConfigurationPath = bootUpConfiguration
         .GetValue<string?>("CustomJsonConfigurationFilePath", null);
 
     if (customConfigurationPath != null)
     {
         config.AddJsonFile(customConfigurationPath, false, true);
+        bootUpConfiguration = config.Build();
     }
 });
 
-host.ConfigureServices(new DefaultKernel().ConfigureServices);
-host.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+hostBuilder.ConfigureServices(new DefaultKernel().ConfigureServices);
+hostBuilder.ConfigureLogging((_, loggingBuilder) =>
 {
-    if (hostBuilderContext.HostingEnvironment.IsDevelopment())
-    {
-        loggingBuilder.AddSimpleConsole(options =>
-        {
-            options.IncludeScopes = true;
-            options.SingleLine = true;
-            options.TimestampFormat = "HH:mm:ss ";
-            options.UseUtcTimestamp = false;
-        });
-    }
-    else
-    {
-        loggingBuilder.AddJsonConsole(options =>
-        {
-            options.IncludeScopes = true;
-            options.TimestampFormat = "yyyy-MM-ddTHH\\:mm\\:ss.fffK";
-            options.UseUtcTimestamp = true;
-        });
-    }
+    loggingBuilder.AddConsole();
 });
 
 var servicesBuilder = builder.Services;

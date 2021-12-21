@@ -82,21 +82,21 @@ public class NodeMempoolReaderWorker : LoopedWorkerBase, INodeWorker
 {
     private static readonly Gauge _mempoolSizeUnScoped = Metrics
         .CreateGauge(
-            "node_mempool_size_total",
+            "ng_node_mempool_size_total",
             "Current size of node mempool.",
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
     private static readonly Counter _mempoolItemsAddedUnScoped = Metrics
         .CreateCounter(
-            "node_mempool_added_count",
+            "ng_node_mempool_added_count",
             "Transactions added to node mempool.",
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );
 
     private static readonly Counter _mempoolItemsRemovedUnScoped = Metrics
         .CreateCounter(
-            "node_mempool_removed_count",
+            "ng_node_mempool_removed_count",
             "Transactions removed from node mempool.",
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );

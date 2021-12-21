@@ -73,9 +73,8 @@ There are a number of changes you may wish to make in `.env`, eg in order to:
 
 * On first load, you might get a few transient errors as things boot-up, and connection or precondition checks fail - but after 30 seconds or so,
 errors should stabilise and logs should appear in a working state, with the data aggregator ingesting transactions.
-
+* If PostgreSQL isn't booting up, try deleting `container-volumes/.postgresdata`
 * If one of the services dies, it can cause the others to start erroring. You can check this in docker desktop to see which services are still running. Try killing them and starting them again.
-
 * If you want to clear the node's ledger and the DB contents (say, because you wish to point at a different network), simply delete the folders `container-volumes/fullnode/ledger` and `container-volumes/.postgresdata`.
 
 ## Interacting with the system

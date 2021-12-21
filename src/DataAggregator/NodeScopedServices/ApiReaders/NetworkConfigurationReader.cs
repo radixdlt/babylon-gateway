@@ -77,7 +77,7 @@ public class NetworkConfigurationReader : INetworkConfigurationReader
 {
     private static readonly Counter _failedNetworkConfigurationFetchCounterUnScoped = Metrics
         .CreateCounter(
-            "node_network_configuration_fetch_error_total",
+            "ng_node_fetch_network_configuration_error_count",
             "Number of errors fetching the node's network configuration.",
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );

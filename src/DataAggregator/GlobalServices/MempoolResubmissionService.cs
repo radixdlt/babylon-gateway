@@ -90,31 +90,31 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     private static readonly Gauge _resubmissionQueueSize = Metrics
         .CreateGauge(
-            "mempool_transactions_needing_resubmission_total",
+            "ng_db_mempool_transactions_needing_resubmission_total",
             "Current number of transactions which have dropped out of mempools and need resubmitting."
         );
 
     private static readonly Counter _transactionResubmissionAttemptCount = Metrics
         .CreateCounter(
-            "construction_transaction_resubmission_attempt_count",
+            "ng_construction_transaction_resubmission_attempt_count",
             "Number of transaction resubmission attempts"
         );
 
     private static readonly Counter _transactionResubmissionSuccessCount = Metrics
         .CreateCounter(
-            "construction_transaction_resubmission_success_count",
+            "ng_construction_transaction_resubmission_success_count",
             "Number of transaction resubmission successes"
         );
 
     private static readonly Counter _transactionResubmissionErrorCount = Metrics
         .CreateCounter(
-            "construction_transaction_resubmission_error_count",
+            "ng_construction_transaction_resubmission_error_count",
             "Number of transaction resubmission errors"
         );
 
     private static readonly Counter _transactionResubmissionResolutionByResultCount = Metrics
         .CreateCounter(
-            "construction_transaction_resubmission_resolution_count",
+            "ng_construction_transaction_resubmission_resolution_count",
             "Number of various resolutions of transaction resubmissions",
             new CounterConfiguration { LabelNames = new[] { "result" } }
         );

@@ -90,61 +90,61 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     /* Metrics */
     private static readonly Counter _transactionBuildRequestCount = Metrics
         .CreateCounter(
-            "construction_transaction_build_request_count",
+            "ng_construction_transaction_build_request_count",
             "Number of transaction build requests"
         );
 
     private static readonly Counter _transactionBuildSuccessCount = Metrics
         .CreateCounter(
-            "construction_transaction_build_success_count",
+            "ng_construction_transaction_build_success_count",
             "Number of transaction build successes"
         );
 
     private static readonly Counter _transactionBuildErrorCount = Metrics
         .CreateCounter(
-            "construction_transaction_build_error_count",
+            "ng_construction_transaction_build_error_count",
             "Number of transaction build errors"
         );
 
     private static readonly Counter _transactionFinalizeRequestCount = Metrics
         .CreateCounter(
-            "construction_transaction_finalize_request_count",
+            "ng_construction_transaction_finalize_request_count",
             "Number of transaction finalize requests"
         );
 
     private static readonly Counter _transactionFinalizeSuccessCount = Metrics
         .CreateCounter(
-            "construction_transaction_finalize_success_count",
+            "ng_construction_transaction_finalize_success_count",
             "Number of transaction finalize successes"
         );
 
     private static readonly Counter _transactionFinalizeErrorCount = Metrics
         .CreateCounter(
-            "construction_transaction_finalize_error_count",
+            "ng_construction_transaction_finalize_error_count",
             "Number of transaction finalize errors"
         );
 
     private static readonly Counter _transactionSubmitRequestCount = Metrics
         .CreateCounter(
-            "construction_transaction_submission_request_count",
+            "ng_construction_transaction_submission_request_count",
             "Number of transaction submission requests (including as part of a finalize request)"
         );
 
     private static readonly Counter _transactionSubmitSuccessCount = Metrics
         .CreateCounter(
-            "construction_transaction_submission_success_count",
+            "ng_construction_transaction_submission_success_count",
             "Number of transaction submission successes (including as part of a finalize request)"
         );
 
     private static readonly Counter _transactionSubmitErrorCount = Metrics
         .CreateCounter(
-            "construction_transaction_submission_error_count",
+            "ng_construction_transaction_submission_error_count",
             "Number of transaction submission errors (including as part of a finalize request)"
         );
 
     private static readonly Counter _transactionSubmitResolutionByResultCount = Metrics
         .CreateCounter(
-            "construction_transaction_submission_resolution_count",
+            "ng_construction_transaction_submission_resolution_count",
             "Number of various resolutions at transaction submission time",
             new CounterConfiguration { LabelNames = new[] { "result" } }
         );

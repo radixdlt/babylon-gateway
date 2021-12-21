@@ -100,49 +100,49 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     /* Global Metrics - Quorum/Sync related - ie ledger_node prefix */
     private static readonly Gauge _quorumExistsStatus = Metrics
         .CreateGauge(
-            "ledger_node_quorum_exists_status",
+            "ng_ledger_sync_quorum_exists_status",
             "Whether enough nodes agree to continue committing transaction to the DB. 1 = true, 0.5 = unknown, 0 = false. (if 0, it's a critical alarm)."
         );
 
     private static readonly Gauge _quorumExtensionConsistentStatus = Metrics
         .CreateGauge(
-            "ledger_node_quorum_extension_consistent_status",
+            "ng_ledger_sync_quorum_extension_consistent_status",
             "If a node quorum exists for a ledger extension, whether it agrees with the existing DB accumulator and is internally consistent. 1 = true, 0.5 = unknown, 0 = false. If 0, it's a critical alarm."
         );
 
     private static readonly Gauge _sufficientlySyncedUpNodesTotal = Metrics
         .CreateGauge(
-            "ledger_node_sufficiently_synced_up_nodes_total",
+            "ng_ledger_sync_sufficiently_synced_up_nodes_total",
             "The number of nodes which are sufficiently synced up."
         );
 
     private static readonly Gauge _sufficientlySyncedUpNodesTrustWeightingTotal = Metrics
         .CreateGauge(
-            "ledger_node_sufficiently_synced_up_nodes_trust_weighting_total",
+            "ng_ledger_sync_sufficiently_synced_up_nodes_trust_weighting_total",
             "The trust weighting of all nodes which are currently sufficiently synced up"
         );
 
     private static readonly Gauge _configuredNodesTotal = Metrics
         .CreateGauge(
-            "ledger_node_configured_nodes_total",
+            "ng_ledger_sync_configured_nodes_total",
             "The number of nodes which are configured for transaction syncing."
         );
 
     private static readonly Gauge _configuredNodesTrustWeightingTotal = Metrics
         .CreateGauge(
-            "ledger_node_configured_nodes_trust_weighting_total",
+            "ng_ledger_sync_configured_nodes_trust_weighting_total",
             "The trust weighting of all nodes which are currently configured for transaction syncing."
         );
 
     private static readonly Gauge _ledgerNodeTrustWeightingRequiredForQuorum = Metrics
         .CreateGauge(
-            "ledger_node_trust_weighting_required_for_quorum_total",
+            "ng_ledger_sync_trust_weighting_required_for_quorum_total",
             "The trust weighting currently required for quorum"
         );
 
     private static readonly Gauge _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced = Metrics
         .CreateGauge(
-            "ledger_node_trust_weighting_required_for_quorum_if_all_nodes_sufficiently_synced_total",
+            "ng_ledger_sync_trust_weighting_required_for_quorum_if_all_nodes_sufficiently_synced_total",
             "The trust weighting required for quorum, if/once all nodes are synced up"
         );
 
@@ -150,41 +150,53 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
     private static readonly Histogram _batchCommitTimeSeconds = Metrics
         .CreateHistogram(
-            "ledger_commit_batch_commit_time_seconds",
+            "ng_ledger_commit_batch_commit_time_seconds",
             "Total time to commit a batch of transactions.",
             new HistogramConfiguration { Buckets = Histogram.LinearBuckets(start: 0.2, width: 0.2, count: 100) }
         );
 
     private static readonly Counter _ledgerCommittedTransactionsCount = Metrics
-        .CreateCounter("ledger_commit_committed_transactions_count", "Count of committed transactions.");
+        .CreateCounter(
+            "ng_ledger_commit_committed_transactions_count",
+            "Count of committed transactions."
+        );
 
     private static readonly Gauge _ledgerLastCommitTimestamp = Metrics
-        .CreateGauge("ledger_commit_last_commit_timestamp_seconds", "Unix timestamp of the last DB ledger commit.");
+        .CreateGauge(
+            "ng_ledger_commit_last_commit_timestamp_seconds",
+            "Unix timestamp of the last DB ledger commit."
+        );
 
     private static readonly Gauge _ledgerStateVersion = Metrics
-        .CreateGauge("ledger_commit_tip_state_version", "The state version of the top of the DB ledger.");
+        .CreateGauge(
+            "ng_ledger_commit_tip_state_version",
+            "The state version of the top of the DB ledger."
+        );
 
     private static readonly Gauge _ledgerUnixRoundTimestamp = Metrics
-        .CreateGauge("ledger_commit_tip_round_unix_timestamp_seconds", "Unix timestamp of the round at the top of the DB ledger.");
+        .CreateGauge(
+            "ng_ledger_commit_tip_round_unix_timestamp_seconds",
+            "Unix timestamp of the round at the top of the DB ledger."
+        );
 
     /* Per-Node Metrics */
     private static readonly Gauge _nodeLedgerTipStateVersion = Metrics
         .CreateGauge(
-            "node_ledger_tip_state_version",
+            "ng_node_ledger_tip_state_version",
             "The state version at the tip of the node's ledger.",
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
     private static readonly Gauge _nodeLedgerTargetStateVersion = Metrics
         .CreateGauge(
-            "node_ledger_target_state_version",
+            "ng_node_ledger_target_state_version",
             "The state version which the node reports as the highest seen on the network.",
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );
 
     private static readonly Gauge _nodeLedgerTipIsConsistentWithQuorumStatus = Metrics
         .CreateGauge(
-            "node_ledger_tip_is_consistent_with_quorum_status",
+            "ng_node_ledger_tip_is_consistent_with_quorum_status",
             "If the node's ledger tip is consistent with the committed quorum. 1 = true, 0.5 = unknown, 0 = false. If 0, this is an important warning alarm - this node will need to be fixed.",
             new GaugeConfiguration { LabelNames = new[] { "node" } }
         );

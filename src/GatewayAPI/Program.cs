@@ -103,28 +103,9 @@ hostBuilder.ConfigureAppConfiguration((context, config) =>
 /* Configure services / dependency injection */
 
 hostBuilder.ConfigureServices(new DefaultKernel().ConfigureServices);
-
-hostBuilder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+hostBuilder.ConfigureLogging((_, loggingBuilder) =>
 {
-    if (hostBuilderContext.HostingEnvironment.IsDevelopment())
-    {
-        loggingBuilder.AddSimpleConsole(options =>
-        {
-            options.IncludeScopes = true;
-            options.SingleLine = true;
-            options.TimestampFormat = "HH:mm:ss ";
-            options.UseUtcTimestamp = false;
-        });
-    }
-    else
-    {
-        loggingBuilder.AddJsonConsole(options =>
-        {
-            options.IncludeScopes = true;
-            options.TimestampFormat = "yyyy-MM-ddTHH\\:mm\\:ss.fffK";
-            options.UseUtcTimestamp = true;
-        });
-    }
+    loggingBuilder.AddConsole();
 });
 
 var servicesBuilder = builder.Services;

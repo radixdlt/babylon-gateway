@@ -90,7 +90,7 @@ public class SystemStatusService : ISystemStatusService
 
     private static readonly Gauge _isPrimaryStatus = Metrics
         .CreateGauge(
-            "aggregator_is_primary_status",
+            "ng_aggregator_is_primary_status",
             "1 if primary, 0 if secondary."
         );
 

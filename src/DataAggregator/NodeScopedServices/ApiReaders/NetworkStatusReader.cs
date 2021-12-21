@@ -76,23 +76,34 @@ public interface INetworkStatusReader
 
 public class NetworkStatusReader : INetworkStatusReader
 {
+    private static readonly Counter _failedNetworkStatusFetchCounterUnScoped = Metrics
+        .CreateCounter(
+            "ng_node_fetch_network_status_error_count",
+            "Number of errors fetching network status from the node.",
+            new CounterConfiguration { LabelNames = new[] { "node" } }
+        );
+
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly NetworkApi _networkApi;
+    private readonly Counter.Child _failedNetworkStatusFetchCounter;
 
-    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider)
+    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _networkApi = coreApiProvider.NetworkApi;
+        _failedNetworkStatusFetchCounter = _failedNetworkStatusFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
     }
 
     public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-        return await _networkApi
+        return await _failedNetworkStatusFetchCounter.CountExceptionsAsync(async () =>
+            await _networkApi
             .NetworkStatusPostAsync(
                 new NetworkStatusRequest(
                     networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
                 ),
                 token
-            );
+            )
+        );
     }
 }

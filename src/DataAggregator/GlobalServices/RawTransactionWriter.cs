@@ -83,7 +83,7 @@ public class RawTransactionWriter : IRawTransactionWriter
 {
     private static readonly Counter _transactionsMarkedCommittedCount = Metrics
         .CreateCounter(
-            "mempool_transactions_marked_committed_count",
+            "ng_db_mempool_transactions_marked_committed_count",
             "Number of mempool transactions which are marked committed"
         );
 

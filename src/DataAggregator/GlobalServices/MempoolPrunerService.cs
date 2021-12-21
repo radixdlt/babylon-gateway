@@ -82,14 +82,14 @@ public class MempoolPrunerService : IMempoolPrunerService
 {
     private static readonly Gauge _mempoolDbSizeByStatus = Metrics
         .CreateGauge(
-            "mempool_db_size_by_status_total",
+            "ng_db_mempool_size_by_status_total",
             "Number of transactions currently tracked in the MempoolTransaction table, by status.",
             new GaugeConfiguration { LabelNames = new[] { "status" } }
         );
 
     private static readonly Counter _mempoolTransactionsPrunedCount = Metrics
         .CreateCounter(
-            "mempool_db_pruned_transactions_count",
+            "ng_db_mempool_pruned_transactions_count",
             "Count of mempool transactions pruned from the DB"
         );
 

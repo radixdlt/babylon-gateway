@@ -1,0 +1,13 @@
+{
+    "Logging": {
+        "Console": {
+            "FormatterName": "simple",
+            "FormatterOptions": {
+                "IncludeScopes": true,
+                "ColorBehavior": "Enabled",
+                "TimestampFormat": "yyyy-MM-ddTHH\\:mm\\:ss.fff\\Z ",
+                "UseUtcTimestamp": true
+            }
+        }
+    }
+}

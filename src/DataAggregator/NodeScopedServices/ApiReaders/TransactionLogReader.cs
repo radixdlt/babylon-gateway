@@ -78,7 +78,7 @@ public class TransactionLogReader : ITransactionLogReader
 {
     private static readonly Counter _failedTransactionsFetchCounterUnScoped = Metrics
         .CreateCounter(
-            "node_transactions_fetch_error_total",
+            "ng_node_fetch_transactions_error_count",
             "Number of errors fetching transactions from the node.",
             new CounterConfiguration { LabelNames = new[] { "node" } }
         );

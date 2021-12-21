@@ -107,31 +107,31 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private static readonly Gauge _combinedMempoolCurrentSizeTotal = Metrics
         .CreateGauge(
-            "mempool_combined_node_mempool_current_size_total",
+            "ng_node_mempool_combined_current_size_total",
             "Number of transactions seen currently in any node mempool."
         );
 
     private static readonly Counter _dbTransactionsAddedDueToNodeMempoolAppearanceCount = Metrics
         .CreateCounter(
-            "mempool_db_transactions_added_from_node_mempool_count",
+            "ng_db_mempool_transactions_added_from_node_mempool_count",
             "Number of mempool transactions added to the DB due to appearing in a node mempool"
         );
 
     private static readonly Counter _dbTransactionsMarkedAsMissingCount = Metrics
         .CreateCounter(
-            "mempool_db_transactions_marked_as_missing_count",
+            "ng_db_mempool_transactions_marked_as_missing_count",
             "Number of mempool transactions in the DB marked as missing"
         );
 
     private static readonly Counter _dbTransactionsReappearedCount = Metrics
         .CreateCounter(
-            "mempool_db_transactions_reappeared_count",
+            "ng_db_mempool_transactions_reappeared_count",
             "Number of mempool transactions in the DB which were marked as missing but now appear in a mempool again"
         );
 
     private static readonly Counter _dbTransactionsMarkedAsFailedForTimeoutCount = Metrics
         .CreateCounter(
-            "mempool_db_transactions_marked_as_failed_for_timeout_count",
+            "ng_db_mempool_transactions_marked_as_failed_for_timeout_count",
             "Number of mempool transactions in the DB marked as failed due to timeout as they won't be resubmitted"
         );
 

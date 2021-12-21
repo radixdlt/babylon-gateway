@@ -100,7 +100,7 @@ public class SubmissionTrackingService : ISubmissionTrackingService
 {
     private static readonly Counter _dbMempoolTransactionsAddedDueToSubmissionCount = Metrics
         .CreateCounter(
-            "mempool_db_transactions_added_from_gateway_submission_count",
+            "ng_db_mempool_transactions_added_from_gateway_submission_count",
             "Number of mempool transactions added to the DB due to being submitted to the gateway"
         );
 
