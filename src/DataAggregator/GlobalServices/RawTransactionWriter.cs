@@ -63,10 +63,12 @@
  */
 
 using Common.Database.Models.Ledger;
+using Common.Database.Models.Mempool;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 
 namespace DataAggregator.GlobalServices;
 
@@ -79,6 +81,12 @@ public interface IRawTransactionWriter
 
 public class RawTransactionWriter : IRawTransactionWriter
 {
+    private static readonly Counter _transactionsMarkedCommittedCount = Metrics
+        .CreateCounter(
+            "mempool_transactions_marked_committed_count",
+            "Number of mempool transactions which are marked committed"
+        );
+
     public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
     {
         // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
@@ -96,9 +104,16 @@ public class RawTransactionWriter : IRawTransactionWriter
                 ByteArrayEqualityComparer.Default
             );
 
+        var transactionIdList = transactionsById.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
+
         var toUpdate = await context.MempoolTransactions
-            .Where(mt => transactionsById.Keys.Contains(mt.TransactionIdentifierHash))
+            .Where(mt => mt.Status != MempoolTransactionStatus.Committed && transactionIdList.Contains(mt.TransactionIdentifierHash))
             .ToListAsync(token);
+
+        if (toUpdate.Count == 0)
+        {
+            return 0;
+        }
 
         foreach (var mempoolTransaction in toUpdate)
         {
@@ -109,6 +124,10 @@ public class RawTransactionWriter : IRawTransactionWriter
             );
         }
 
-        return await context.SaveChangesAsync(token);
+        var result = await context.SaveChangesAsync(token);
+
+        _transactionsMarkedCommittedCount.Inc(toUpdate.Count);
+
+        return result;
     }
 }

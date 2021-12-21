@@ -72,9 +72,7 @@ namespace DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport, bool isSyncedUp);
-
-    void RecordTopOfDbLedger(TransactionSummary topOfLedger);
+    void RecordTransactionsCommitted(bool isSyncedUp);
 
     bool IsPrimary();
 
@@ -90,23 +88,11 @@ public class SystemStatusService : ISystemStatusService
 {
     private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
 
-    private static readonly Counter _committedTransactions = Metrics
-        .CreateCounter("ledger_committed_transactions_total", "Number of committed transactions.");
-
-    private static readonly Gauge _ledgerLastCommitTimestamp = Metrics
-        .CreateGauge("ledger_last_commit_timestamp_seconds", "Unix timestamp of the last DB ledger commit.");
-
-    private static readonly Gauge _ledgerStateVersion = Metrics
-        .CreateGauge("ledger_tip_state_version", "The state version of the top of the DB ledger.");
-
-    private static readonly Gauge _ledgerUnixRoundTimestamp = Metrics
-        .CreateGauge("ledger_tip_round_unix_timestamp_seconds", "Unix timestamp of the round at the top of the DB ledger.");
-
-    private static readonly Gauge _ledgerSecondsBehind = Metrics
-        .CreateGauge("ledger_tip_behind_at_last_commit_seconds", "Number of seconds the DB ledger was behind the present time (at the last time transactions were committed).");
-
     private static readonly Gauge _isPrimaryStatus = Metrics
-        .CreateGauge("aggregator_is_primary_status", "1 if primary, 0 if secondary.");
+        .CreateGauge(
+            "aggregator_is_primary_status",
+            "1 if primary, 0 if secondary."
+        );
 
     private readonly IConfiguration _configuration;
 
@@ -124,26 +110,16 @@ public class SystemStatusService : ISystemStatusService
         SetIsPrimary(true);
     }
 
-    public void RecordTransactionsCommitted(CommitTransactionsReport committedTransactionReport, bool isSyncedUp)
+    public void RecordTransactionsCommitted(bool isSyncedUp)
     {
         _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
-        _committedTransactions.Inc(committedTransactionReport.TransactionsCommittedCount);
-        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
-        RecordTopOfDbLedger(committedTransactionReport.FinalTransaction);
         _isSyncedUp = isSyncedUp;
-    }
-
-    public void RecordTopOfDbLedger(TransactionSummary topOfLedger)
-    {
-        _ledgerStateVersion.Set(topOfLedger.StateVersion);
-        _ledgerUnixRoundTimestamp.Set(topOfLedger.RoundTimestamp.ToUnixTimeSeconds());
-        _ledgerSecondsBehind.Set(topOfLedger.NormalizedTimestamp.GetTimeAgo().TotalSeconds);
     }
 
     public void SetIsPrimary(bool isPrimary)
     {
         _isPrimary = isPrimary;
-        _isPrimaryStatus.Set(isPrimary ? 1 : 0);
+        _isPrimaryStatus.SetStatus(isPrimary);
     }
 
     public bool IsSyncedUp()

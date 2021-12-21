@@ -68,6 +68,7 @@ using DataAggregator.DependencyInjection;
 using DataAggregator.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Prometheus;
 using Core = RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.GlobalServices;
@@ -79,6 +80,19 @@ public interface IMempoolPrunerService
 
 public class MempoolPrunerService : IMempoolPrunerService
 {
+    private static readonly Gauge _mempoolDbSizeByStatus = Metrics
+        .CreateGauge(
+            "mempool_db_size_by_status_total",
+            "Number of transactions currently tracked in the MempoolTransaction table, by status.",
+            new GaugeConfiguration { LabelNames = new[] { "status" } }
+        );
+
+    private static readonly Counter _mempoolTransactionsPrunedCount = Metrics
+        .CreateCounter(
+            "mempool_db_pruned_transactions_count",
+            "Count of mempool transactions pruned from the DB"
+        );
+
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
     private readonly ISystemStatusService _systemStatusService;
@@ -100,6 +114,8 @@ public class MempoolPrunerService : IMempoolPrunerService
     public async Task PruneMempool(CancellationToken token = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
+        await UpdateSizeMetrics(dbContext, token);
 
         var times = _aggregatorConfiguration.GetMempoolConfiguration();
 
@@ -140,6 +156,7 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         if (transactionsToPrune.Count > 0)
         {
+            _mempoolTransactionsPrunedCount.Inc(transactionsToPrune.Count);
             _logger.LogInformation(
                 "Pruning {PrunedCount} transactions from the mempool, of which {PrunedCommittedCount} were committed",
                 transactionsToPrune.Count,
@@ -148,6 +165,21 @@ public class MempoolPrunerService : IMempoolPrunerService
 
             dbContext.MempoolTransactions.RemoveRange(transactionsToPrune);
             await dbContext.SaveChangesAsync(token);
+        }
+    }
+
+    private async Task UpdateSizeMetrics(AggregatorDbContext dbContext, CancellationToken token)
+    {
+        var counts = await dbContext.MempoolTransactions
+            .GroupBy(t => t.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync(token);
+
+        foreach (var countByStatus in counts)
+        {
+            var statusName =
+                MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(countByStatus.Status) ?? "UNKNOWN";
+            _mempoolDbSizeByStatus.WithLabels(statusName).Set(countByStatus.Count);
         }
     }
 }

@@ -89,7 +89,35 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private static readonly LogLimiter _emptyResubmissionQueueLogLimiter = new(TimeSpan.FromSeconds(60), LogLevel.Information, LogLevel.Debug);
 
     private static readonly Gauge _resubmissionQueueSize = Metrics
-        .CreateGauge("mempool_transaction_resubmission_queue_length_total", "Current number of transactions which have dropped out of mempools and need resubmitting.");
+        .CreateGauge(
+            "mempool_transactions_needing_resubmission_total",
+            "Current number of transactions which have dropped out of mempools and need resubmitting."
+        );
+
+    private static readonly Counter _transactionResubmissionAttemptCount = Metrics
+        .CreateCounter(
+            "construction_transaction_resubmission_attempt_count",
+            "Number of transaction resubmission attempts"
+        );
+
+    private static readonly Counter _transactionResubmissionSuccessCount = Metrics
+        .CreateCounter(
+            "construction_transaction_resubmission_success_count",
+            "Number of transaction resubmission successes"
+        );
+
+    private static readonly Counter _transactionResubmissionErrorCount = Metrics
+        .CreateCounter(
+            "construction_transaction_resubmission_error_count",
+            "Number of transaction resubmission errors"
+        );
+
+    private static readonly Counter _transactionResubmissionResolutionByResultCount = Metrics
+        .CreateCounter(
+            "construction_transaction_resubmission_resolution_count",
+            "Number of various resolutions of transaction resubmissions",
+            new CounterConfiguration { LabelNames = new[] { "result" } }
+        );
 
     private readonly IServiceProvider _services;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
@@ -114,7 +142,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     public async Task RunBatchOfResubmissions(CancellationToken token = default)
     {
-        using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
         const int BatchSize = 30;
 
@@ -197,8 +225,10 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         return await Task.WhenAll(transactionsToResubmit.Select(t => Resubmit(t, token)));
     }
 
+    // NB - The error handling here should mirror the resubmission in ConstructionAndSubmissionService
     private async Task<SubmissionResult> Resubmit(MempoolTransaction transaction, CancellationToken cancellationToken)
     {
+        _transactionResubmissionAttemptCount.Inc();
         var chosenNode = GetRandomCoreApi();
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().NodeAppSettings = chosenNode;
@@ -211,13 +241,25 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         try
         {
-            await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await
+            var result = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await
                 coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(submitRequest, cancellationToken)
             );
+            _transactionResubmissionSuccessCount.Inc();
+            if (result.Duplicate)
+            {
+                _transactionResubmissionResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+            }
+            else
+            {
+                _transactionResubmissionResolutionByResultCount.WithLabels("success").Inc();
+            }
+
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
+            _transactionResubmissionErrorCount.Inc();
+            _transactionResubmissionResolutionByResultCount.WithLabels("double_spend").Inc();
             _logger.LogDebug(
                 "Dropping transaction because of a double spend - possibly it's already been committed. Substate Identifier: {Substate}",
                 ex.Error.SubstateIdentifierNotFound.Identifier
@@ -227,6 +269,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
+            _transactionResubmissionErrorCount.Inc();
+            _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
             var failureExplanation = $"Core API Exception: {ex.Error.GetType().Name} on resubmission";
             return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, failureExplanation, chosenNode.Name);
         }
@@ -234,6 +278,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         {
             // Unsure of what the problem is -- it could be that the connection died or there was an internal server error
             // We have to assume the submission may have succeeded and wait for resubmission if not.
+            _transactionResubmissionErrorCount.Inc();
+            _transactionResubmissionResolutionByResultCount.WithLabels("unknown_error").Inc();
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
     }

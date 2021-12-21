@@ -11,14 +11,14 @@ public enum MetricStatus
 
 public static class MetricExtensions
 {
-    public static void SetStatus(this Gauge metric, MetricStatus status)
+    public static void SetStatus(this IGauge metric, MetricStatus status)
     {
         metric.Set(GetMetricValueForStatus(status));
     }
 
-    public static void SetStatus(this Gauge.Child metric, MetricStatus status)
+    public static void SetStatus(this IGauge metric, bool status)
     {
-        metric.Set(GetMetricValueForStatus(status));
+        metric.Set(GetMetricValueForStatus(status ? MetricStatus.Yes : MetricStatus.No));
     }
 
     private static double GetMetricValueForStatus(MetricStatus status)

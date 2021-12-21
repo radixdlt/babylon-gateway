@@ -63,7 +63,6 @@
  */
 
 using Common.CoreCommunications;
-using Common.Services;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Configuration;
 using GatewayAPI.CoreCommunications;
@@ -113,7 +112,7 @@ public class DefaultKernel
         services.AddScoped<IValidatorQuerier, ValidatorQuerier>();
         services.AddScoped<ITransactionQuerier, TransactionQuerier>();
         services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
-        services.AddScoped<ISubmissionTrackingService, SubmissionTrackingService<GatewayReadWriteDbContext>>();
+        services.AddScoped<ISubmissionTrackingService, SubmissionTrackingService>();
         services.AddScoped<IParsedTransactionMapper, ParsedTransactionMapper<GatewayReadWriteDbContext>>();
     }
 

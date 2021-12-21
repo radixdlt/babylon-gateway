@@ -69,6 +69,7 @@ using DataAggregator.Configuration.Models;
 using DataAggregator.Exceptions;
 using DataAggregator.LedgerExtension;
 using DataAggregator.Monitoring;
+using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 using System.Collections.Concurrent;
@@ -96,14 +97,7 @@ public record TransactionsRequested(long StateVersionExclusiveLowerBound, long S
 /// </summary>
 public class LedgerConfirmationService : ILedgerConfirmationService
 {
-    /* Global Metrics */
-    private static readonly Histogram _batchCommitTimeSeconds = Metrics
-        .CreateHistogram(
-            "ledger_batch_commit_time_seconds",
-            "Total time to commit a batch of transactions.",
-            new HistogramConfiguration { Buckets = Histogram.LinearBuckets(start: 0.2, width: 0.2, count: 100) }
-        );
-
+    /* Global Metrics - Quorum/Sync related - ie ledger_node prefix */
     private static readonly Gauge _quorumExistsStatus = Metrics
         .CreateGauge(
             "ledger_node_quorum_exists_status",
@@ -151,6 +145,27 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             "ledger_node_trust_weighting_required_for_quorum_if_all_nodes_sufficiently_synced_total",
             "The trust weighting required for quorum, if/once all nodes are synced up"
         );
+
+    /* Global Metrics - Quorum/Sync related - ie ledger_commit prefix */
+
+    private static readonly Histogram _batchCommitTimeSeconds = Metrics
+        .CreateHistogram(
+            "ledger_commit_batch_commit_time_seconds",
+            "Total time to commit a batch of transactions.",
+            new HistogramConfiguration { Buckets = Histogram.LinearBuckets(start: 0.2, width: 0.2, count: 100) }
+        );
+
+    private static readonly Counter _ledgerCommittedTransactionsCount = Metrics
+        .CreateCounter("ledger_commit_committed_transactions_count", "Count of committed transactions.");
+
+    private static readonly Gauge _ledgerLastCommitTimestamp = Metrics
+        .CreateGauge("ledger_commit_last_commit_timestamp_seconds", "Unix timestamp of the last DB ledger commit.");
+
+    private static readonly Gauge _ledgerStateVersion = Metrics
+        .CreateGauge("ledger_commit_tip_state_version", "The state version of the top of the DB ledger.");
+
+    private static readonly Gauge _ledgerUnixRoundTimestamp = Metrics
+        .CreateGauge("ledger_commit_tip_round_unix_timestamp_seconds", "Unix timestamp of the round at the top of the DB ledger.");
 
     /* Per-Node Metrics */
     private static readonly Gauge _nodeLedgerTipStateVersion = Metrics
@@ -431,8 +446,12 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         var isSyncedUp = ledgerExtension.TransactionData.Count < Config.MaxCommitBatchSize;
 
-        _systemStatusService.RecordTransactionsCommitted(commitReport, isSyncedUp);
+        _systemStatusService.RecordTransactionsCommitted(isSyncedUp);
+
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
+        _ledgerCommittedTransactionsCount.Inc(commitReport.TransactionsCommittedCount);
+        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
+        RecordTopOfDbLedgerMetrics(commitReport.FinalTransaction);
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
@@ -476,7 +495,13 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private void UpdateTopOfLedgerVariable(TransactionSummary topOfLedger)
     {
         _knownTopOfCommittedLedger = topOfLedger;
-        _systemStatusService.RecordTopOfDbLedger(topOfLedger);
+        RecordTopOfDbLedgerMetrics(topOfLedger);
+    }
+
+    private void RecordTopOfDbLedgerMetrics(TransactionSummary topOfLedger)
+    {
+        _ledgerStateVersion.Set(topOfLedger.StateVersion);
+        _ledgerUnixRoundTimestamp.Set(topOfLedger.RoundTimestamp.ToUnixTimeSeconds());
     }
 
     private void StopTrackingTransactionsUpToStateVersion(long committedStateVersion)

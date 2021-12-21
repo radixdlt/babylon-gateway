@@ -84,7 +84,7 @@ public enum MempoolTransactionStatus
 
 public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
 {
-    private static readonly Dictionary<MempoolTransactionStatus, string> _conversion = new()
+    public static readonly Dictionary<MempoolTransactionStatus, string> Conversion = new()
     {
         { MempoolTransactionStatus.InNodeMempool, "IN_NODE_MEMPOOL" },
         { MempoolTransactionStatus.Missing, "MISSING" },
@@ -93,7 +93,7 @@ public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase
     };
 
     public MempoolTransactionStatusValueConverter()
-        : base(_conversion, Invert(_conversion))
+        : base(Conversion, Invert(Conversion))
     {
     }
 }

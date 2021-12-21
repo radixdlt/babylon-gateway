@@ -63,16 +63,17 @@
  */
 
 using Common.CoreCommunications;
-using Common.Database;
 using Common.Database.Models.Mempool;
 using Common.Extensions;
+using GatewayAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
+using Prometheus;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 
-namespace Common.Services;
+namespace GatewayAPI.Services;
 
 public interface ISubmissionTrackingService
 {
@@ -95,13 +96,18 @@ public interface ISubmissionTrackingService
 
 public record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
 
-public class SubmissionTrackingService<T> : ISubmissionTrackingService
-    where T : CommonDbContext
+public class SubmissionTrackingService : ISubmissionTrackingService
 {
-    private readonly T _dbContext;
+    private static readonly Counter _dbMempoolTransactionsAddedDueToSubmissionCount = Metrics
+        .CreateCounter(
+            "mempool_db_transactions_added_from_gateway_submission_count",
+            "Number of mempool transactions added to the DB due to being submitted to the gateway"
+        );
+
+    private readonly GatewayReadWriteDbContext _dbContext;
     private readonly IParsedTransactionMapper _parsedTransactionMapper;
 
-    public SubmissionTrackingService(T dbContext, IParsedTransactionMapper parsedTransactionMapper)
+    public SubmissionTrackingService(GatewayReadWriteDbContext dbContext, IParsedTransactionMapper parsedTransactionMapper)
     {
         _dbContext = dbContext;
         _parsedTransactionMapper = parsedTransactionMapper;
@@ -159,6 +165,7 @@ public class SubmissionTrackingService<T> : ISubmissionTrackingService
         try
         {
             await _dbContext.SaveChangesAsync();
+            _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
             return new MempoolTrackGuidance(ShouldSubmitToNode: true);
         }
         catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))

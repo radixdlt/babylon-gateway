@@ -66,7 +66,6 @@ using Common.Database.Models.Ledger;
 using Common.Database.Models.Mempool;
 using Common.Extensions;
 using Common.Numerics;
-using Common.Services;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;

@@ -72,6 +72,7 @@ using DataAggregator.DependencyInjection;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Prometheus;
 using System.Collections.Concurrent;
 
 using Core = RadixCoreApi.Generated.Model;
@@ -103,6 +104,36 @@ public interface IMempoolTrackerService
 public class MempoolTrackerService : IMempoolTrackerService
 {
     private static readonly LogLimiter _combineMempoolsInfoLogLimiter = new(TimeSpan.FromSeconds(10), LogLevel.Information, LogLevel.Debug);
+
+    private static readonly Gauge _combinedMempoolCurrentSizeTotal = Metrics
+        .CreateGauge(
+            "mempool_combined_node_mempool_current_size_total",
+            "Number of transactions seen currently in any node mempool."
+        );
+
+    private static readonly Counter _dbTransactionsAddedDueToNodeMempoolAppearanceCount = Metrics
+        .CreateCounter(
+            "mempool_db_transactions_added_from_node_mempool_count",
+            "Number of mempool transactions added to the DB due to appearing in a node mempool"
+        );
+
+    private static readonly Counter _dbTransactionsMarkedAsMissingCount = Metrics
+        .CreateCounter(
+            "mempool_db_transactions_marked_as_missing_count",
+            "Number of mempool transactions in the DB marked as missing"
+        );
+
+    private static readonly Counter _dbTransactionsReappearedCount = Metrics
+        .CreateCounter(
+            "mempool_db_transactions_reappeared_count",
+            "Number of mempool transactions in the DB which were marked as missing but now appear in a mempool again"
+        );
+
+    private static readonly Counter _dbTransactionsMarkedAsFailedForTimeoutCount = Metrics
+        .CreateCounter(
+            "mempool_db_transactions_marked_as_failed_for_timeout_count",
+            "Number of mempool transactions in the DB marked as failed due to timeout as they won't be resubmitted"
+        );
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
@@ -174,6 +205,7 @@ public class MempoolTrackerService : IMempoolTrackerService
             combinedMempool.Count,
             nodeMempoolsToConsider.Select(kvp => kvp.Key).Humanize()
         );
+        _combinedMempoolCurrentSizeTotal.Set(combinedMempool.Count);
 
         return combinedMempool;
     }
@@ -188,8 +220,10 @@ public class MempoolTrackerService : IMempoolTrackerService
         var parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
         var topOfLedgerVersion = (await dbContext.GetTopLedgerTransaction().SingleOrDefaultAsync(token))?.ResultantStateVersion ?? 0;
 
+        var mempoolTransactionIds = combinedMempool.Keys.ToList(); // Npgsql optimizes List<> Contains
+
         var existingDbTransactionsInANodeMempool = await dbContext.MempoolTransactions
-            .Where(mt => combinedMempool.Keys.Contains(mt.TransactionIdentifierHash))
+            .Where(mt => mempoolTransactionIds.Contains(mt.TransactionIdentifierHash))
             .ToListAsync(token);
 
         var existingTransactionIds = existingDbTransactionsInANodeMempool
@@ -207,6 +241,8 @@ public class MempoolTrackerService : IMempoolTrackerService
             newDbMempoolTransactions.Add(await MapToMempoolTransaction(parsedTransactionMapper, transaction, topOfLedgerVersion, token));
         }
 
+        _dbTransactionsAddedDueToNodeMempoolAppearanceCount.Inc(newTransactions.Count);
+
         dbContext.MempoolTransactions
             .AddRange(newDbMempoolTransactions);
 
@@ -218,6 +254,8 @@ public class MempoolTrackerService : IMempoolTrackerService
         {
             missingTransaction.MarkAsSeenInAMempool();
         }
+
+        _dbTransactionsReappearedCount.Inc(reappearedTransactions.Count);
 
         var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
             async () => await dbContext.SaveChangesAsync(token)
@@ -268,6 +306,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         {
             if (!mempoolItem.SubmittedByThisGateway)
             {
+                _dbTransactionsMarkedAsMissingCount.Inc();
                 mempoolItem.MarkAsMissing();
                 continue;
             }
@@ -285,10 +324,12 @@ public class MempoolTrackerService : IMempoolTrackerService
 
             if (canResubmit)
             {
+                _dbTransactionsMarkedAsMissingCount.Inc();
                 mempoolItem.MarkAsMissing();
             }
             else
             {
+                _dbTransactionsMarkedAsFailedForTimeoutCount.Inc();
                 mempoolItem.MarkAsFailed(
                     MempoolTransactionFailureReason.Timeout,
                     "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
