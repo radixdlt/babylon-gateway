@@ -71,7 +71,7 @@ public record LedgerConfirmationConfiguration
     /// Requires at least this proportion of enabled nodes to commit (by trust weighting).
     /// </summary>
     [ConfigurationKeyName("QuorumRequiresTrustProportion")]
-    public decimal QuorumRequiresTrustProportion { get; set; } = 0.5m;
+    public decimal QuorumRequiresTrustProportion { get; set; } = 0.51m;
 
     /// <summary>
     /// Gets or sets OnlyUseSufficientlySyncedUpNodesForQuorumCalculation.
