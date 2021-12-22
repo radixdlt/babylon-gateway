@@ -62,133 +62,46 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using DataAggregator.LedgerExtension;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using NodaTime;
-using Prometheus;
 
-namespace DataAggregator.Monitoring;
+#nullable disable
 
-public interface ISystemStatusService
+namespace DataAggregator.Migrations
 {
-    void SetTopOfDbLedger(TransactionSummary topOfLedger);
-
-    void RecordTransactionsCommitted();
-
-    bool IsPrimary();
-
-    HealthReport GenerateTransactionCommitmentHealthReport();
-
-    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration);
-
-    bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant);
-}
-
-// ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, Instant StartUpTime);
-
-public class SystemStatusService : ISystemStatusService
-{
-    private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
-
-    private static readonly Gauge _isPrimaryStatus = Metrics
-        .CreateGauge(
-            "ng_aggregator_is_primary_status",
-            "1 if primary, 0 if secondary."
-        );
-
-    private readonly IConfiguration _configuration;
-
-    private Instant? _lastTransactionCommitment;
-    private bool _isPrimary;
-    private TransactionSummary? _topOfLedger;
-
-    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
-
-    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
-
-    public SystemStatusService(IConfiguration configuration)
+    public partial class AddLedgerStatusEntity : Migration
     {
-        _configuration = configuration;
-        SetIsPrimary(true);
-    }
-
-    public void RecordTransactionsCommitted()
-    {
-        _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
-    }
-
-    public void SetTopOfDbLedger(TransactionSummary topOfLedger)
-    {
-        _topOfLedger = topOfLedger;
-    }
-
-    public void SetIsPrimary(bool isPrimary)
-    {
-        _isPrimary = isPrimary;
-        _isPrimaryStatus.SetStatus(isPrimary);
-    }
-
-    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
-    {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp.WithinPeriodOfNow(duration);
-    }
-
-    public bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant)
-    {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp >= instant;
-    }
-
-    public bool IsPrimary()
-    {
-        return _isPrimary;
-    }
-
-    public HealthReport GenerateTransactionCommitmentHealthReport()
-    {
-        if (InStartupGracePeriod())
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            return new HealthReport(
-                true,
-                $"Within start up grace period of {StartupGracePeriod}",
-                _startupTime
-            );
+            migrationBuilder.CreateTable(
+                name: "ledger_status",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false),
+                    top_of_ledger_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    sync_status_target_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    last_updated = table.Column<Instant>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_status", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_ledger_status_top_transactions_state_version",
+                        column: x => x.top_of_ledger_state_version,
+                        principalTable: "ledger_transactions",
+                        principalColumn: "state_version");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_status_top_of_ledger_state_version",
+                table: "ledger_status",
+                column: "top_of_ledger_state_version");
         }
 
-        if (!IsPrimary())
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            return new HealthReport(
-                true,
-                "Marked as healthy as this data aggregator isn't the primary",
-                _startupTime
-            );
+            migrationBuilder.DropTable(
+                name: "ledger_status");
         }
-
-        if (CommittedRecently())
-        {
-            return new HealthReport(
-                true,
-                $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()} within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
-                _startupTime
-            );
-        }
-
-        return new HealthReport(
-            false,
-            $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()}, not within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
-            _startupTime
-        );
-    }
-
-    private bool CommittedRecently()
-    {
-        return _lastTransactionCommitment != null && _lastTransactionCommitment.Value.WithinPeriodOfNow(UnhealthyCommitmentGapSeconds);
-    }
-
-    private bool InStartupGracePeriod()
-    {
-        return _startupTime.WithinPeriodOfNow(StartupGracePeriod);
     }
 }

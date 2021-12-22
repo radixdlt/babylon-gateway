@@ -64,18 +64,23 @@
 
 using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
+using Common.Database.Models.SingleEntries;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
-using RadixCoreApi.Generated.Model;
+using NodaTime;
 
 namespace DataAggregator.GlobalServices;
 
 public interface ILedgerExtenderService
 {
-    Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token);
+    Task<CommitTransactionsReport> CommitTransactions(
+        ConsistentLedgerExtension ledgerExtension,
+        SyncTarget latestSyncTarget,
+        CancellationToken token
+    );
 
     Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
 }
@@ -134,7 +139,11 @@ public class LedgerExtenderService : ILedgerExtenderService
         return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
     }
 
-    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, CancellationToken token)
+    public async Task<CommitTransactionsReport> CommitTransactions(
+        ConsistentLedgerExtension ledgerExtension,
+        SyncTarget latestSyncTarget,
+        CancellationToken token
+    )
     {
         // Create own context for the preparation unit of work.
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
@@ -147,13 +156,15 @@ public class LedgerExtenderService : ILedgerExtenderService
         await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
         var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, ledgerExtensionDbContext, token)
-            .CommitTransactions(ledgerExtension.TransactionData);
+            .ProcessTransactionsAndCaptureChangeInDbContext(ledgerExtension.TransactionData);
+
+        var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;
+
+        await CreateOrUpdateLedgerStatus(ledgerExtensionDbContext, finalTransactionSummary, latestSyncTarget, token);
 
         var (ledgerExtensionEntriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
             () => ledgerExtensionDbContext.SaveChangesAsync(token)
         );
-
-        var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;
 
         return new CommitTransactionsReport(
             ledgerExtension.TransactionData.Count,
@@ -226,28 +237,23 @@ public class LedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private List<CommittedTransactionData> AssertConsistentAndGenerateTransactionData(
-        StateIdentifier parentStateIdentifier,
-        TransactionSummary parentSummary,
-        List<CommittedTransaction> transactions
+    private async Task CreateOrUpdateLedgerStatus(
+        AggregatorDbContext dbContext,
+        TransactionSummary finalTransactionSummary,
+        SyncTarget latestSyncTarget,
+        CancellationToken token
     )
     {
-        TransactionConsistency.AssertEqualParentIdentifiers(parentStateIdentifier, parentSummary);
+        var ledgerStatus = await dbContext.LedgerStatus.SingleOrDefaultAsync(token);
 
-        var transactionData = new List<CommittedTransactionData>();
-
-        foreach (var transaction in transactions)
+        if (ledgerStatus == null)
         {
-            var summary = TransactionSummarisation.GenerateSummary(parentSummary, transaction);
-            var contents = transaction.Metadata.Hex.ConvertFromHex();
-
-            TransactionConsistency.AssertTransactionHashCorrect(contents, summary.TransactionIdentifierHash);
-            TransactionConsistency.AssertChildTransactionConsistent(parentSummary, summary);
-
-            transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
-            parentSummary = summary;
+            ledgerStatus = new LedgerStatus();
+            dbContext.Add(ledgerStatus);
         }
 
-        return transactionData;
+        ledgerStatus.LastUpdated = SystemClock.Instance.GetCurrentInstant();
+        ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
+        ledgerStatus.SyncTarget = latestSyncTarget;
     }
 }

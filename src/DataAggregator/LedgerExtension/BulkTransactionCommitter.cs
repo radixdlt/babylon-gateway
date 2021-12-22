@@ -73,10 +73,10 @@ namespace DataAggregator.LedgerExtension;
 
 public interface IBulkTransactionCommitter
 {
-    Task<CommitLedgerTransactionsReport> CommitTransactions(List<CommittedTransactionData> committedTransactions);
+    Task<ProcessTransactionContentReport> ProcessTransactionsAndCaptureChangeInDbContext(List<CommittedTransactionData> committedTransactions);
 }
 
-public record CommitLedgerTransactionsReport(
+public record ProcessTransactionContentReport(
     long TransactionContentHandlingMs,
     long DbDependenciesLoadingMs,
     int TransactionContentDbActionsCount,
@@ -103,15 +103,15 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         _dbActionsPlanner = new DbActionsPlanner(_dbContext, _entityDeterminer, cancellationToken);
     }
 
-    public async Task<CommitLedgerTransactionsReport> CommitTransactions(List<CommittedTransactionData> transactions)
+    public async Task<ProcessTransactionContentReport> ProcessTransactionsAndCaptureChangeInDbContext(List<CommittedTransactionData> transactions)
     {
         var transactionContentProcessingMs = CodeStopwatch.TimeInMs(
-            () => HandleTransactions(transactions)
+            () => ProcessTransactions(transactions)
         );
 
         var dbActionsReport = await _dbActionsPlanner.ProcessAllChanges();
 
-        return new CommitLedgerTransactionsReport(
+        return new ProcessTransactionContentReport(
             transactionContentProcessingMs,
             dbActionsReport.DbDependenciesLoadingMs,
             dbActionsReport.ActionsCount,
@@ -119,18 +119,18 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
         );
     }
 
-    private void HandleTransactions(List<CommittedTransactionData> transactions)
+    private void ProcessTransactions(List<CommittedTransactionData> transactions)
     {
         foreach (var transactionData in transactions)
         {
             var dbTransaction = TransactionMapping.CreateLedgerTransaction(transactionData);
             _dbContext.LedgerTransactions.Add(dbTransaction);
 
-            HandleTransaction(transactionData.CommittedTransaction, dbTransaction, transactionData.TransactionSummary);
+            ProcessTransaction(transactionData.CommittedTransaction, dbTransaction, transactionData.TransactionSummary);
         }
     }
 
-    private void HandleTransaction(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary summary)
+    private void ProcessTransaction(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary summary)
     {
         var transactionContentProcessor = new TransactionContentProcessor(_dbContext, _dbActionsPlanner, _entityDeterminer);
         transactionContentProcessor.ProcessTransactionContents(transaction, dbTransaction, summary);

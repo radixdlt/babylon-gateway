@@ -89,6 +89,8 @@ public class CommonDbContext : DbContext
 
     public DbSet<RawTransaction> RawTransactions => Set<RawTransaction>();
 
+    public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
+
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
     public DbSet<LedgerOperationGroup> OperationGroups => Set<LedgerOperationGroup>();
@@ -134,6 +136,7 @@ public class CommonDbContext : DbContext
     // So secondary indexes might benefit from the inclusion of columns for faster lookups
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupLedgerOperationGroups(modelBuilder);
         HookupNormalizedEntities(modelBuilder);
@@ -170,6 +173,16 @@ public class CommonDbContext : DbContext
 
         configurationBuilder.Properties<MempoolTransactionFailureReason>()
             .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
+    }
+
+    private static void HookupSingleEntries(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<LedgerStatus>()
+            .HasOne(ls => ls.TopOfLedgerTransaction)
+            .WithMany()
+            .HasForeignKey(ls => ls.TopOfLedgerStateVersion)
+            .HasConstraintName("FK_ledger_status_top_transactions_state_version")
+            .OnDelete(DeleteBehavior.NoAction); // Should handle this manually
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)

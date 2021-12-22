@@ -62,133 +62,38 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using DataAggregator.LedgerExtension;
+using Common.Database.Models.Ledger;
+using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using Prometheus;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataAggregator.Monitoring;
+namespace Common.Database.Models.SingleEntries;
 
-public interface ISystemStatusService
+/// <summary>
+/// This is designed to make it super-quick to look up the top of the synced ledger,
+/// and to store any other fields we might want.
+/// </summary>
+[Table("ledger_status")]
+public class LedgerStatus : SingleEntryBase
 {
-    void SetTopOfDbLedger(TransactionSummary topOfLedger);
+    [Column("top_of_ledger_state_version")]
+    public long TopOfLedgerStateVersion { get; set; }
 
-    void RecordTransactionsCommitted();
+    // FK Created in OnModelCreating to create an un-truncated name for the constraint
+    public LedgerTransaction TopOfLedgerTransaction { get; set; }
 
-    bool IsPrimary();
+    // [Owned] below
+    public SyncTarget SyncTarget { get; set; }
 
-    HealthReport GenerateTransactionCommitmentHealthReport();
-
-    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration);
-
-    bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant);
+    [ConcurrencyCheck]
+    [Column("last_updated")]
+    public Instant LastUpdated { get; set; }
 }
 
-// ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, Instant StartUpTime);
-
-public class SystemStatusService : ISystemStatusService
+[Owned]
+public record SyncTarget
 {
-    private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
-
-    private static readonly Gauge _isPrimaryStatus = Metrics
-        .CreateGauge(
-            "ng_aggregator_is_primary_status",
-            "1 if primary, 0 if secondary."
-        );
-
-    private readonly IConfiguration _configuration;
-
-    private Instant? _lastTransactionCommitment;
-    private bool _isPrimary;
-    private TransactionSummary? _topOfLedger;
-
-    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
-
-    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
-
-    public SystemStatusService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-        SetIsPrimary(true);
-    }
-
-    public void RecordTransactionsCommitted()
-    {
-        _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
-    }
-
-    public void SetTopOfDbLedger(TransactionSummary topOfLedger)
-    {
-        _topOfLedger = topOfLedger;
-    }
-
-    public void SetIsPrimary(bool isPrimary)
-    {
-        _isPrimary = isPrimary;
-        _isPrimaryStatus.SetStatus(isPrimary);
-    }
-
-    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
-    {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp.WithinPeriodOfNow(duration);
-    }
-
-    public bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant)
-    {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp >= instant;
-    }
-
-    public bool IsPrimary()
-    {
-        return _isPrimary;
-    }
-
-    public HealthReport GenerateTransactionCommitmentHealthReport()
-    {
-        if (InStartupGracePeriod())
-        {
-            return new HealthReport(
-                true,
-                $"Within start up grace period of {StartupGracePeriod}",
-                _startupTime
-            );
-        }
-
-        if (!IsPrimary())
-        {
-            return new HealthReport(
-                true,
-                "Marked as healthy as this data aggregator isn't the primary",
-                _startupTime
-            );
-        }
-
-        if (CommittedRecently())
-        {
-            return new HealthReport(
-                true,
-                $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()} within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
-                _startupTime
-            );
-        }
-
-        return new HealthReport(
-            false,
-            $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()}, not within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
-            _startupTime
-        );
-    }
-
-    private bool CommittedRecently()
-    {
-        return _lastTransactionCommitment != null && _lastTransactionCommitment.Value.WithinPeriodOfNow(UnhealthyCommitmentGapSeconds);
-    }
-
-    private bool InStartupGracePeriod()
-    {
-        return _startupTime.WithinPeriodOfNow(StartupGracePeriod);
-    }
+    [Column("sync_status_target_state_version")]
+    public long TargetStateVersion { get; set; }
 }

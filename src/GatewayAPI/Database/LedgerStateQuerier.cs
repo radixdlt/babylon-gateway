@@ -64,6 +64,7 @@
 
 using Common.Database;
 using Common.Database.Models.Ledger;
+using Common.Database.Models.SingleEntries;
 using Common.Extensions;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Exceptions;
@@ -104,14 +105,20 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     public async Task<GatewayResponse> GetGatewayState()
     {
+        var ledgerStatus = await GetLedgerStatus();
         return new GatewayResponse(
             _networkConfigurationProvider.GetNetworkName().AsNetworkIdentifier(),
             new GatewayApiVersions(
                 _networkConfigurationProvider.GetGatewayApiVersion(),
                 _networkConfigurationProvider.GetGatewayApiSchemaVersion()
             ),
-            await GetLedgerState(),
-            new TargetLedgerState() // TODO:NG-12 - fix this once we know what the max ledger state seen by nodes is
+            new LedgerState(
+                ledgerStatus.TopOfLedgerTransaction.ResultantStateVersion,
+                ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+                ledgerStatus.TopOfLedgerTransaction.Epoch,
+                ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
+            ),
+            new TargetLedgerState(ledgerStatus.SyncTarget.TargetStateVersion)
         );
     }
 
@@ -142,6 +149,20 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         {
             throw new NetworkNotSupportedException(ledgerNetworkName);
         }
+    }
+
+    private async Task<LedgerStatus> GetLedgerStatus()
+    {
+        var ledgerStatus = await _dbContext.LedgerStatus
+            .Include(ls => ls.TopOfLedgerTransaction)
+            .SingleOrDefaultAsync();
+
+        if (ledgerStatus == null)
+        {
+            throw new InvalidStateException("There are no transactions in the database");
+        }
+
+        return ledgerStatus;
     }
 
     private Task<LedgerState> GetLedgerState(PartialLedgerStateIdentifier? at = null)

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Database.Models.SingleEntries;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.Configuration;
@@ -250,9 +251,10 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var ledgerExtension = GenerateConsistentLedgerExtension(transactions);
+        var latestSyncStatus = new SyncTarget { TargetStateVersion = GetTargetStateVersion() };
 
         var (commitReport, totalCommitMs) = await CodeStopwatch.TimeInMs(
-            () => _ledgerExtenderService.CommitTransactions(ledgerExtension, token)
+            () => _ledgerExtenderService.CommitTransactions(ledgerExtension, latestSyncStatus, token)
         );
 
         HandleLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
@@ -434,7 +436,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         var (topOfLedger, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
             () => _ledgerExtenderService.GetTopOfLedger(token)
         );
-        UpdateTopOfLedgerVariable(topOfLedger);
+        UpdateRecordsOfTopOfLedger(topOfLedger);
         _logger.LogDebug(
             "Top of DB ledger is at state version {StateVersion} (read in {ReadTopOfLedgerMs}ms)",
             topOfLedger.StateVersion,
@@ -447,7 +449,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
         AddAccumulatorsToCache(ledgerExtension);
-        UpdateTopOfLedgerVariable(commitReport.FinalTransaction);
+        UpdateRecordsOfTopOfLedger(commitReport.FinalTransaction);
 
         // NB - this must come after UpdateTopOfLedgerVariable so that the nodes don't try to fill the gap that's
         //      created when we remove the transactions below it
@@ -456,13 +458,11 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
     private void ReportOnLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
     {
-        _systemStatusService.RecordTopOfLedger(commitReport.FinalTransaction);
         _systemStatusService.RecordTransactionsCommitted();
 
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
         _ledgerCommittedTransactionsCount.Inc(commitReport.TransactionsCommittedCount);
         _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
-        RecordTopOfDbLedgerMetrics(commitReport.FinalTransaction);
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
@@ -503,10 +503,11 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         }
     }
 
-    private void UpdateTopOfLedgerVariable(TransactionSummary topOfLedger)
+    private void UpdateRecordsOfTopOfLedger(TransactionSummary topOfLedger)
     {
         _knownTopOfCommittedLedger = topOfLedger;
         RecordTopOfDbLedgerMetrics(topOfLedger);
+        _systemStatusService.SetTopOfDbLedger(topOfLedger);
     }
 
     private void RecordTopOfDbLedgerMetrics(TransactionSummary topOfLedger)
@@ -607,6 +608,18 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         return new ConsistentLedgerExtension(transactionBatchParentSummary, transactionData);
+    }
+
+    private long GetTargetStateVersion()
+    {
+        var ledgerTips = _latestLedgerTipByNode.Values.ToList();
+
+        if (ledgerTips.Count == 0)
+        {
+            throw new Exception("At least one ledger tip must have been submitted");
+        }
+
+        return ledgerTips.Max();
     }
 
     private record TrustWeightingReport(

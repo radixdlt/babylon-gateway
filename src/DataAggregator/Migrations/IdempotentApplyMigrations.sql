@@ -909,3 +909,36 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211222163306_AddLedgerStatusEntity') THEN
+    CREATE TABLE ledger_status (
+        id integer NOT NULL,
+        top_of_ledger_state_version bigint NOT NULL,
+        sync_status_target_state_version bigint NOT NULL,
+        last_updated timestamp with time zone NOT NULL,
+        CONSTRAINT "PK_ledger_status" PRIMARY KEY (id),
+        CONSTRAINT "FK_ledger_status_top_transactions_state_version" FOREIGN KEY (top_of_ledger_state_version) REFERENCES ledger_transactions (state_version)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211222163306_AddLedgerStatusEntity') THEN
+    CREATE INDEX "IX_ledger_status_top_of_ledger_state_version" ON ledger_status (top_of_ledger_state_version);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211222163306_AddLedgerStatusEntity') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20211222163306_AddLedgerStatusEntity', '6.0.0');
+    END IF;
+END $EF$;
+COMMIT;
+

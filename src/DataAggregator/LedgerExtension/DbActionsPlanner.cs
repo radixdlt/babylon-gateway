@@ -73,7 +73,6 @@ using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
-using DataAggregator.GlobalServices;
 using Microsoft.EntityFrameworkCore;
 using InvalidTransactionException = DataAggregator.Exceptions.InvalidTransactionException;
 
@@ -113,7 +112,7 @@ public class DbActionsPlanner
     private readonly Dictionary<string, long> _resourcesToLoadOrCreate = new();
     private readonly Dictionary<string, long> _accountsToLoadOrCreate = new();
     private readonly Dictionary<string, long> _validatorsToLoadOrCreate = new();
-    /* > Substates - let's cheat slightly and store them all in the same dictionary */
+    /* > Substates - by Substate Type and substate id */
     private readonly Dictionary<Type, HashSet<byte[]>> _substatesToLoad = new();
     /* > History Keys - to pull the latest history for that key */
     private readonly HashSet<AccountResourceDenormalized> _accountResourceHistoryToLoad = new();
