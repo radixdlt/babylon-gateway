@@ -1,5 +1,7 @@
 using Common.Database;
 using Common.Utilities;
+using GatewayAPI.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace GatewayAPI.Monitoring;
@@ -15,12 +17,12 @@ namespace GatewayAPI.Monitoring;
 public class DiagnosticDbContextHealthCheck<TContext> : IHealthCheck
     where TContext : CommonDbContext
 {
-    private readonly TContext _dbContext;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<DiagnosticDbContextHealthCheck<TContext>> _logger;
 
-    public DiagnosticDbContextHealthCheck(TContext dbContext, ILogger<DiagnosticDbContextHealthCheck<TContext>> logger)
+    public DiagnosticDbContextHealthCheck(IConfiguration configuration, ILogger<DiagnosticDbContextHealthCheck<TContext>> logger)
     {
-        _dbContext = dbContext;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -40,7 +42,8 @@ public class DiagnosticDbContextHealthCheck<TContext> : IHealthCheck
 
     private async Task RunTestQueryOnSeparateThread(CancellationToken token, int timeoutMs)
     {
-        var queryTask = Task.Run(TestQuery); // Without a cancellation token
+        // We run it in a separate thread because; based on our tests, it appears that this operation might block
+        var queryTask = Task.Run(TestQuery); // We purposefully run it without a cancellation token so that it can outlast the health check
 
         try
         {
@@ -49,7 +52,7 @@ public class DiagnosticDbContextHealthCheck<TContext> : IHealthCheck
         catch (TimeoutException)
         {
             _logger.LogWarning(
-                "Test query for {DbContextName} timed out after {TimeoutMs}ms - but I'll try to let it carry on anyway (it might hit a Dispose exception though, because DI will dispose of the DbContext)...",
+                "Test query for {DbContextName} timed out after {TimeoutMs}ms - but I'll try to let it carry on anyway...",
                 typeof(TContext).Name,
                 timeoutMs
             );
@@ -58,14 +61,17 @@ public class DiagnosticDbContextHealthCheck<TContext> : IHealthCheck
 
     private async Task TestQuery()
     {
+        // We create a DbContext here so it's managed separately and isn't disposed by the DI framework
+        // This means we can run it after the HealthCheck gets disposed to still check on long-running thread issues
+        await using var dbContext = CreateDbContext();
         try
         {
             var (canConnect, timeInMs) = await CodeStopwatch.TimeInMs(
-                async () => await _dbContext.Database.CanConnectAsync()
+                async () => await dbContext.Database.CanConnectAsync()
             );
             _logger.LogInformation(
                 "CanConnectAsync for {DbContextName} returned {CanConnect} in {TimeInMs}ms",
-                typeof(TContext).Name,
+                dbContext.GetType().Name,
                 canConnect,
                 timeInMs
             );
@@ -75,8 +81,32 @@ public class DiagnosticDbContextHealthCheck<TContext> : IHealthCheck
             _logger.LogError(
                 ex,
                 "CanConnectAsync for {DbContextName} raised an error",
-                typeof(TContext).Name
+                dbContext.GetType().Name
             );
         }
+    }
+
+    private CommonDbContext CreateDbContext()
+    {
+        if (typeof(TContext) == typeof(GatewayReadOnlyDbContext))
+        {
+            return new GatewayReadOnlyDbContext(
+                new DbContextOptionsBuilder<GatewayReadOnlyDbContext>()
+                .UseNpgsql(
+                    _configuration.GetConnectionString("ReadOnlyDbContext"),
+                    o => o.UseNodaTime()
+                )
+                .Options
+            );
+        }
+
+        return new GatewayReadWriteDbContext(
+            new DbContextOptionsBuilder<GatewayReadWriteDbContext>()
+                .UseNpgsql(
+                    _configuration.GetConnectionString("ReadWriteDbContext"),
+                    o => o.UseNodaTime()
+                )
+                .Options
+        );
     }
 }
