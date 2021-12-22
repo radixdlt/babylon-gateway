@@ -456,9 +456,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
     private void ReportOnLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
     {
-        var isSyncedUp = ledgerExtension.TransactionData.Count < Config.MaxCommitBatchSize;
-
-        _systemStatusService.RecordTransactionsCommitted(isSyncedUp);
+        _systemStatusService.RecordTopOfLedger(commitReport.FinalTransaction);
+        _systemStatusService.RecordTransactionsCommitted();
 
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
         _ledgerCommittedTransactionsCount.Inc(commitReport.TransactionsCommittedCount);
@@ -661,7 +660,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         var ledgerTip = _latestLedgerTipByNode.GetValueOrDefault(nodeName);
 
         return ledgerTip != 0 &&
-               (ledgerTip + Config.SufficientlySyncedThreshold) > _knownTopOfCommittedLedger!.StateVersion;
+               (ledgerTip + Config.SufficientlySyncedStateVersionThreshold) > _knownTopOfCommittedLedger!.StateVersion;
     }
 
     private long? GetFirstStateVersionGapForNode(string nodeName, long stateVersionExclusiveLowerBound, long stateVersionInclusiveUpperBound)

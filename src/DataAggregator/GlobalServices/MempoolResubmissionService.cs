@@ -70,6 +70,7 @@ using Common.Utilities;
 using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
+using DataAggregator.Monitoring;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Microsoft.EntityFrameworkCore;
@@ -123,6 +124,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolResubmissionService> _logger;
 
     public MempoolResubmissionService(
@@ -130,6 +132,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IAggregatorConfiguration aggregatorConfiguration,
         INetworkConfigurationProvider networkConfigurationProvider,
+        ISystemStatusService systemStatusService,
         ILogger<MempoolResubmissionService> logger
     )
     {
@@ -137,6 +140,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         _dbContextFactory = dbContextFactory;
         _aggregatorConfiguration = aggregatorConfiguration;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _systemStatusService = systemStatusService;
         _logger = logger;
     }
 
@@ -182,11 +186,24 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         {
             if (failed)
             {
-                transaction.MarkAsInvalidOnceSubmittedToNode(nodeName, failureReason!.Value, failureExplanation!, submittedAt);
+                var isDoubleSpendWhichCouldBeItself =
+                    failureReason!.Value == MempoolTransactionFailureReason.DoubleSpend
+                    && !_systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampAfter(transaction.LastDroppedOutOfMempoolTimestamp!.Value);
+                if (isDoubleSpendWhichCouldBeItself)
+                {
+                    // If we're not synced up, we can't be sure if the double spend from the node is actually just the
+                    // transaction itself having already hit the ledger! Let's just assume it submitted correctly and
+                    // resubmit.
+                    transaction.MarkAsResolvedButUnknownAfterSubmittedToNode(nodeName, submittedAt);
+                }
+                else
+                {
+                    transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason!.Value, failureExplanation!, submittedAt);
+                }
             }
             else
             {
-                transaction.MarkAsSuccessfullySubmittedToNode(nodeName, submittedAt);
+                transaction.MarkAsAssumedSuccessfullySubmittedToNode(nodeName, submittedAt);
             }
         }
 
@@ -203,10 +220,19 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         var allowResubmissionIfDroppedOutOfMempoolBefore = SystemClock.Instance.GetCurrentInstant() -
                                                      Duration.FromSeconds(timeouts.MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
 
+        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration.FromSeconds(60));
+
         return dbContext.MempoolTransactions
             .Where(mt =>
                 mt.SubmittedByThisGateway
-                && mt.Status == MempoolTransactionStatus.Missing // This needs to be marked this way by the MempoolTrackerService
+                && (
+                    /* Transactions get marked Missing way by the MempoolTrackerService */
+                    mt.Status == MempoolTransactionStatus.Missing
+
+                    /* If we're synced up now, try submitting transactions with unknown status again. They almost
+                       certainly failed due to a real double spend - so we'll detect it now and can mark them failed */
+                    || (isEssentiallySyncedUpNow && mt.Status == MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp)
+                )
                 && mt.LastDroppedOutOfMempoolTimestamp!.Value < allowResubmissionIfDroppedOutOfMempoolBefore
                 && mt.LastSubmittedToNodeTimestamp!.Value < allowResubmissionIfLastSubmittedBefore
             );

@@ -120,7 +120,7 @@ public class RawTransactionWriter : IRawTransactionWriter
             var transactionSummary = transactionsById[mempoolTransaction.TransactionIdentifierHash].TransactionSummary;
             mempoolTransaction.MarkAsCommitted(
                 transactionSummary.StateVersion,
-                transactionSummary.NormalizedTimestamp
+                transactionSummary.NormalizedRoundTimestamp
             );
         }
 

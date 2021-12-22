@@ -79,7 +79,7 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedTimestamp)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedRoundTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
@@ -94,7 +94,7 @@ public class LedgerTransaction
         IsStartOfRound = isStartOfRound;
         RoundTimestamp = roundTimestamp;
         CreatedTimestamp = createdTimestamp;
-        NormalizedTimestamp = normalizedTimestamp;
+        NormalizedRoundTimestamp = normalizedRoundTimestamp;
     }
 
     private LedgerTransaction()
@@ -167,7 +167,7 @@ public class LedgerTransaction
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
     [Column(name: "normalized_timestamp")]
-    public Instant NormalizedTimestamp { get; set; }
+    public Instant NormalizedRoundTimestamp { get; set; }
 
     [InverseProperty(nameof(LedgerOperationGroup.LedgerTransaction))]
     public ICollection<LedgerOperationGroup> SubstantiveOperationGroups { get; set; }

@@ -72,13 +72,19 @@ namespace DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void RecordTransactionsCommitted(bool isSyncedUp);
+    void RecordTopOfLedger(TransactionSummary topOfLedger);
+
+    void RecordTransactionsCommitted();
 
     bool IsPrimary();
 
     bool IsSyncedUp();
 
     HealthReport GenerateTransactionCommitmentHealthReport();
+
+    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration);
+
+    bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant);
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
@@ -97,8 +103,8 @@ public class SystemStatusService : ISystemStatusService
     private readonly IConfiguration _configuration;
 
     private Instant? _lastTransactionCommitment;
-    private bool _isSyncedUp;
     private bool _isPrimary;
+    private TransactionSummary? _topOfLedger;
 
     private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
 
@@ -110,10 +116,14 @@ public class SystemStatusService : ISystemStatusService
         SetIsPrimary(true);
     }
 
-    public void RecordTransactionsCommitted(bool isSyncedUp)
+    public void RecordTransactionsCommitted()
     {
         _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
-        _isSyncedUp = isSyncedUp;
+    }
+
+    public void RecordTopOfLedger(TransactionSummary topOfLedger)
+    {
+        _topOfLedger = topOfLedger;
     }
 
     public void SetIsPrimary(bool isPrimary)
@@ -122,9 +132,16 @@ public class SystemStatusService : ISystemStatusService
         _isPrimaryStatus.SetStatus(isPrimary);
     }
 
-    public bool IsSyncedUp()
+    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
     {
-        return _isSyncedUp;
+        return _topOfLedger != null
+            && _topOfLedger.NormalizedRoundTimestamp.WithinPeriodOfNow(duration);
+    }
+
+    public bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant)
+    {
+        return _topOfLedger != null
+            && _topOfLedger.NormalizedRoundTimestamp >= instant;
     }
 
     public bool IsPrimary()

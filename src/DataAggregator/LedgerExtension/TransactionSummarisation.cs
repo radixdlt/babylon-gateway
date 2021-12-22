@@ -89,7 +89,7 @@ public record TransactionSummary(
     byte[] TransactionAccumulator,
     Instant RoundTimestamp,
     Instant CreatedTimestamp,
-    Instant NormalizedTimestamp
+    Instant NormalizedRoundTimestamp
 );
 
 public static class TransactionSummarisation
@@ -102,18 +102,18 @@ public static class TransactionSummarisation
             .FirstOrDefaultAsync(token);
 
         var lastOverview = lastTransaction == null ? null : new TransactionSummary(
-            lastTransaction.ResultantStateVersion,
-            lastTransaction.Epoch,
-            lastTransaction.IndexInEpoch,
-            lastTransaction.RoundInEpoch,
-            lastTransaction.IsOnlyRoundChange,
-            lastTransaction.IsStartOfEpoch,
-            lastTransaction.IsStartOfRound,
-            lastTransaction.TransactionIdentifierHash,
-            lastTransaction.TransactionAccumulator,
-            lastTransaction.RoundTimestamp,
-            lastTransaction.CreatedTimestamp,
-            lastTransaction.NormalizedTimestamp
+            StateVersion: lastTransaction.ResultantStateVersion,
+            Epoch: lastTransaction.Epoch,
+            IndexInEpoch: lastTransaction.IndexInEpoch,
+            RoundInEpoch: lastTransaction.RoundInEpoch,
+            IsOnlyRoundChange: lastTransaction.IsOnlyRoundChange,
+            IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
+            IsStartOfRound: lastTransaction.IsStartOfRound,
+            TransactionIdentifierHash: lastTransaction.TransactionIdentifierHash,
+            TransactionAccumulator: lastTransaction.TransactionAccumulator,
+            RoundTimestamp: lastTransaction.RoundTimestamp,
+            CreatedTimestamp: lastTransaction.CreatedTimestamp,
+            NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp
         );
 
         return lastOverview ?? PreGenesisTransactionSummary();
@@ -163,8 +163,8 @@ public static class TransactionSummarisation
 
         var roundTimestamp = newRoundTimestamp ?? lastTransaction.RoundTimestamp;
         var createdTimestamp = SystemClock.Instance.GetCurrentInstant();
-        var normalizedTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
-            roundTimestamp < lastTransaction.NormalizedTimestamp ? lastTransaction.NormalizedTimestamp
+        var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
+            roundTimestamp < lastTransaction.NormalizedRoundTimestamp ? lastTransaction.NormalizedRoundTimestamp
             : roundTimestamp > createdTimestamp ? createdTimestamp
             : roundTimestamp;
 
@@ -180,7 +180,7 @@ public static class TransactionSummarisation
             TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
-            NormalizedTimestamp: normalizedTimestamp
+            NormalizedRoundTimestamp: normalizedRoundTimestamp
         );
     }
 
@@ -199,7 +199,7 @@ public static class TransactionSummarisation
             TransactionAccumulator: new byte[32], // All 0s
             RoundTimestamp: Instant.FromUnixTimeSeconds(0),
             CreatedTimestamp: SystemClock.Instance.GetCurrentInstant(),
-            NormalizedTimestamp: Instant.FromUnixTimeSeconds(0)
+            NormalizedRoundTimestamp: Instant.FromUnixTimeSeconds(0)
         );
     }
 }

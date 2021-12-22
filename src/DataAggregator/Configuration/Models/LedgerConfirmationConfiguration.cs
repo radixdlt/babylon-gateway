@@ -77,24 +77,17 @@ public record LedgerConfirmationConfiguration
     /// Gets or sets OnlyUseSufficientlySyncedUpNodesForQuorumCalculation.
     /// If enabled, the quorum calculation only takes account of nodes which are considered "sufficiently synced up".
     /// </summary>
-    /// <seealso cref="SufficientlySyncedThreshold"/>
+    /// <seealso cref="SufficientlySyncedStateVersionThreshold"/>
     [ConfigurationKeyName("OnlyUseSufficientlySyncedUpNodesForQuorumCalculation")]
-    public bool OnlyUseSufficientlySyncedUpNodesForQuorumCalculation { get; set; } = false;
+    public bool OnlyUseSufficientlySyncedUpNodesForQuorumCalculation { get; set; } = true;
 
     /// <summary>
     /// Gets or sets SufficientlySyncedThreshold.
     /// A node is considered sufficiently synced up if its reported top of ledger state version is with this
     /// many transactions of the top of the db ledger (or ahead of the db ledger).
     /// </summary>
-    [ConfigurationKeyName("SufficientlySyncedThreshold")]
-    public long SufficientlySyncedThreshold { get; set; } = 1000;
-
-    /// <summary>
-    /// Gets or sets MinCommitBatchSize.
-    /// The minimum batch to send to the ledger extension service for committing.
-    /// </summary>
-    [ConfigurationKeyName("MinCommitBatchSize")]
-    public long MinCommitBatchSize { get; set; } = 1;
+    [ConfigurationKeyName("SufficientlySyncedStateVersionThreshold")]
+    public long SufficientlySyncedStateVersionThreshold { get; set; } = 1000;
 
     /// <summary>
     /// Gets or sets MaxCommitBatchSize.

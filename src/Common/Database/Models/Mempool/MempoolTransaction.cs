@@ -77,6 +77,9 @@ public enum MempoolTransactionStatus
 {
     InNodeMempool, // A transaction which appears in at least one mempool at the last update
     Missing,       // A transaction which is no longer in any mempool
+    ResolvedButUnknownTillSyncedUp, // A transaction has been marked as a double-spend by a node, but we've yet to see it on ledger
+                                    // because the aggregator service is not synced up - so we don't know if it's been committed
+                                    // and detected itself, or clashed with another transaction. This shouldn't happen in production.
     Failed,        // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (eg substate clash)
     Committed,     // A transaction which we know got committed to the ledger
                    // NOTE due to race conditions, it might be possible for a transaction to end up Pending/Missing even it's committed
@@ -88,6 +91,7 @@ public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase
     {
         { MempoolTransactionStatus.InNodeMempool, "IN_NODE_MEMPOOL" },
         { MempoolTransactionStatus.Missing, "MISSING" },
+        { MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
         { MempoolTransactionStatus.Failed, "FAILED" },
         { MempoolTransactionStatus.Committed, "COMMITTED" },
     };
@@ -277,7 +281,7 @@ public class MempoolTransaction
 
         // We assume it's been successfully submitted until we see an error and then mark it as an error then
         // This ensures the correct resubmission behaviour
-        mempoolTransaction.MarkAsSuccessfullySubmittedToNode(submittedToNodeName, submittedTimestamp);
+        mempoolTransaction.MarkAsAssumedSuccessfullySubmittedToNode(submittedToNodeName, submittedTimestamp);
 
         return mempoolTransaction;
     }
@@ -338,15 +342,21 @@ public class MempoolTransaction
         LastSubmittedToGatewayTimestamp = submittedAt;
     }
 
-    public void MarkAsSuccessfullySubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
+    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
     {
         Status = MempoolTransactionStatus.InNodeMempool;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsInvalidOnceSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? submittedAt = null)
+    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? submittedAt = null)
     {
         MarkAsFailed(failureReason, failureExplanation);
+        RecordSubmission(nodeSubmittedTo, submittedAt);
+    }
+
+    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
+    {
+        Status = MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 

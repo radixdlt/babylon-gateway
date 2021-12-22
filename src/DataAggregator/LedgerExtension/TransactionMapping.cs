@@ -102,7 +102,7 @@ public static class TransactionMapping
             isStartOfRound: summary.IsStartOfRound,
             roundTimestamp: summary.RoundTimestamp,
             createdTimestamp: summary.CreatedTimestamp,
-            normalizedTimestamp: summary.NormalizedTimestamp
+            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
         );
     }
 }

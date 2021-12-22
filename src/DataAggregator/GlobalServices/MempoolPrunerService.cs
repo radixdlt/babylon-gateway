@@ -127,14 +127,14 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         var pruneIfNotSeenSince = currTime.Minus(Duration.FromSeconds(times.PruneRequiresMissingFromMempoolForSeconds));
 
-        var aggregatorIsSyncedUp = _systemStatusService.IsSyncedUp();
+        var aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampAfter(pruneIfCommittedBefore);
 
         var transactionsToPrune = await dbContext.MempoolTransactions
             .Where(mt =>
                 (
                     /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */
                     mt.Status == MempoolTransactionStatus.Committed
-                    && aggregatorIsSyncedUp
+                    && aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions
                     && mt.CommitTimestamp!.Value < pruneIfCommittedBefore
                 )
                 ||

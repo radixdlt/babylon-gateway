@@ -196,6 +196,7 @@ public class TransactionQuerier : ITransactionQuerier
             ),
             MempoolTransactionStatus.InNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
             _ => throw new ArgumentOutOfRangeException(),
         };
