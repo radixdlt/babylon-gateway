@@ -377,7 +377,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
-            throw InvalidTransactionException.FromInvalidTransaction(signedTransaction.AsString);
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
         }
     }
 
@@ -447,19 +447,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
                 MempoolTransactionFailureReason.Unknown,
                 $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission"
             );
-            throw InvalidTransactionException.FromInvalidTransaction(signedTransaction.AsString);
-        }
-        catch (KnownGatewayErrorException ex)
-        {
-            // This is a client error which has already been identified - in the mapping from the Core API
-            // so the transaction is invalid, and we can let it bubble up
-            _transactionSubmitResolutionByResultCount.WithLabels("client_error").Inc();
-            await _submissionTrackingService.MarkAsFailed(
-                transactionIdentifierHash,
-                MempoolTransactionFailureReason.Unknown,
-                $"Known Gateway Error: {ex.GetType().Name} on initial submission"
-            );
-            throw;
+            throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
