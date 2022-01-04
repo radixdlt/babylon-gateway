@@ -53,6 +53,8 @@ public class GatewayDbContextHealthCheck<TContext> : IHealthCheck
                 timeoutMs
             );
             timeoutTokenSource.Cancel();
+            /* We await to ensure the task cancellation is completed before anything gets disposed */
+            await queryTask;
             return false;
         }
     }
@@ -63,6 +65,10 @@ public class GatewayDbContextHealthCheck<TContext> : IHealthCheck
         {
             await _dbContext.LedgerStatus.SingleOrDefaultAsync(token);
             return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
         }
         catch (Exception ex)
         {
