@@ -65,7 +65,6 @@
 using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.SingleEntries;
-using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
@@ -116,6 +115,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
+    private readonly IActionInferrer _actionInferrer;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
     public LedgerExtenderService(
@@ -123,6 +123,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer,
+        IActionInferrer actionInferrer,
         INetworkConfigurationProvider networkConfigurationProvider
     )
     {
@@ -130,6 +131,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
         _entityDeterminer = entityDeterminer;
+        _actionInferrer = actionInferrer;
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
@@ -155,7 +157,12 @@ public class LedgerExtenderService : ILedgerExtenderService
         // Create own context for ledger extension unit of work
         await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var bulkTransactionCommitReport = await new BulkTransactionCommitter(_entityDeterminer, ledgerExtensionDbContext, token)
+        var bulkTransactionCommitReport = await new BulkTransactionCommitter(
+                _entityDeterminer,
+                _actionInferrer,
+                ledgerExtensionDbContext,
+                token
+            )
             .ProcessTransactionsAndCaptureChangeInDbContext(ledgerExtension.TransactionData);
 
         var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;

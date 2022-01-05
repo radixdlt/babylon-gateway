@@ -66,7 +66,6 @@ using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Utilities;
 using DataAggregator.DependencyInjection;
-using DataAggregator.GlobalServices;
 using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
@@ -89,16 +88,19 @@ public record ProcessTransactionContentReport(
 public class BulkTransactionCommitter : IBulkTransactionCommitter
 {
     private readonly IEntityDeterminer _entityDeterminer;
+    private readonly IActionInferrer _actionInferrer;
     private readonly AggregatorDbContext _dbContext;
     private readonly DbActionsPlanner _dbActionsPlanner;
 
     public BulkTransactionCommitter(
         IEntityDeterminer entityDeterminer,
+        IActionInferrer actionInferrer,
         AggregatorDbContext dbContext,
         CancellationToken cancellationToken
     )
     {
         _entityDeterminer = entityDeterminer;
+        _actionInferrer = actionInferrer;
         _dbContext = dbContext;
         _dbActionsPlanner = new DbActionsPlanner(_dbContext, _entityDeterminer, cancellationToken);
     }
@@ -132,7 +134,12 @@ public class BulkTransactionCommitter : IBulkTransactionCommitter
 
     private void ProcessTransaction(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary summary)
     {
-        var transactionContentProcessor = new TransactionContentProcessor(_dbContext, _dbActionsPlanner, _entityDeterminer);
+        var transactionContentProcessor = new TransactionContentProcessor(
+            _dbContext,
+            _dbActionsPlanner,
+            _entityDeterminer,
+            _actionInferrer
+        );
         transactionContentProcessor.ProcessTransactionContents(transaction, dbTransaction, summary);
     }
 }

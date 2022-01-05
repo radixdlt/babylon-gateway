@@ -75,6 +75,7 @@ using DataAggregator.Exceptions;
 using DataAggregator.Extensions;
 using RadixCoreApi.Generated.Model;
 using Api = RadixCoreApi.Generated.Model;
+using Gateway = RadixGatewayApi.Generated.Model;
 using InvalidTransactionException = DataAggregator.Exceptions.InvalidTransactionException;
 
 namespace DataAggregator.LedgerExtension;
@@ -88,6 +89,7 @@ public class TransactionContentProcessor
     private readonly AggregatorDbContext _dbContext;
     private readonly DbActionsPlanner _dbActionsPlanner;
     private readonly IEntityDeterminer _entityDeterminer;
+    private readonly IActionInferrer _actionInferrer;
 
     /* History */
     private readonly Dictionary<AccountResourceDenormalized, TokenAmount> _accountResourceNetBalanceChanges = new();
@@ -99,11 +101,10 @@ public class TransactionContentProcessor
     /* > These simply help us avoid passing tons of references down the call stack.
     /* > These will all not be null at the time of use in the Handle methods. */
     private CommittedTransaction? _transaction;
-    private Accounting? _wholeTransactionAccounting;
+    private HashSet<string> _referencedAccountAddressesInTransaction = new();
     private TransactionSummary? _transactionSummary;
     private Account? _feePayer;
     private LedgerOperationGroup? _dbOperationGroup;
-    private Accounting? _operationGroupAccounting;
     private OperationGroup? _transactionOperationGroup;
     private TokenAmount _xrdResourceSupplyChange;
     private Dictionary<string, TokenAmount> _nonXrdResourceChangeThisOperationGroupByRri = new();
@@ -113,17 +114,22 @@ public class TransactionContentProcessor
     private Entity? _entity;
     private TokenAmount? _amount;
 
-    public TransactionContentProcessor(AggregatorDbContext dbContext, DbActionsPlanner dbActionsPlanner, IEntityDeterminer entityDeterminer)
+    public TransactionContentProcessor(
+        AggregatorDbContext dbContext,
+        DbActionsPlanner dbActionsPlanner,
+        IEntityDeterminer entityDeterminer,
+        IActionInferrer actionInferrer
+    )
     {
         _dbContext = dbContext;
         _dbActionsPlanner = dbActionsPlanner;
         _entityDeterminer = entityDeterminer;
+        _actionInferrer = actionInferrer;
     }
 
     public void ProcessTransactionContents(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary transactionSummary)
     {
         _transaction = transaction;
-        _wholeTransactionAccounting = new Accounting(_entityDeterminer);
         _transactionSummary = transactionSummary;
         _operationGroupIndex = -1;
         foreach (var operationGroup in transaction.OperationGroups)
@@ -160,7 +166,6 @@ public class TransactionContentProcessor
                 continue;
             }
 
-            _operationGroupAccounting = new Accounting(_entityDeterminer);
             _dbOperationGroup = new LedgerOperationGroup(
                 transaction.CommittedStateIdentifier.StateVersion,
                 _operationGroupIndex,
@@ -168,7 +173,12 @@ public class TransactionContentProcessor
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
             _operationIndexInGroup = -1;
-            CalculateInferredAction(GetCurrentTransactionOpLocator(), dbTransaction, _dbOperationGroup, _operationGroupAccounting);
+            AddDbActionToResolveInferredAction(
+                GetCurrentTransactionOpLocator(),
+                _actionInferrer.SummariseOperationGroup(operationGroup),
+                dbTransaction,
+                _dbOperationGroup
+            );
 
             // Loop through again, processing all operations except RoundData and ValidatorBftData
             foreach (var operation in _transactionOperationGroup.Operations)
@@ -255,8 +265,13 @@ public class TransactionContentProcessor
             );
         }
 
-        _operationGroupAccounting!.TrackDelta(_entity!, _operation!.Amount.ResourceIdentifier, _amount.Value);
-        _wholeTransactionAccounting!.TrackDelta(_entity!, _operation!.Amount.ResourceIdentifier, _amount.Value);
+        if (_entity!.AccountAddress != null)
+        {
+            // This captures all transactions where the entity or subentity is the relevant account, so it will
+            // also capture start of epoch transactions where one of the stake subentities are involved.
+            // EG epoch change transactions where a validator's owner account gets credited stake ownership
+            _referencedAccountAddressesInTransaction.Add(_entity!.AccountAddress);
+        }
 
         switch (_operation!.Amount.ResourceIdentifier)
         {
@@ -550,11 +565,6 @@ public class TransactionContentProcessor
         var resourceLookup = _dbActionsPlanner.ResolveResource(resourceIdentifier, _transactionSummary!.StateVersion);
         var resourceOwnerLookup = CreateAccountLookup(objects.TokenData?.Owner);
 
-        if (objects.TokenData != null && _operation!.Substate.SubstateOperation == Substate.SubstateOperationEnum.BOOTUP)
-        {
-            _operationGroupAccounting!.TrackTokenCreation(_entity!, objects.TokenData);
-        }
-
         HandleSubstateUpOrDown(
             () => objects.ToResourceDataSubstate(resourceLookup(), resourceOwnerLookup?.Invoke()),
             existingSubstate => existingSubstate.SubstateMatches(
@@ -797,39 +807,114 @@ public class TransactionContentProcessor
     }
 
     // We put this in a method to ensure we capture these arguments in a closure
-    private void CalculateInferredAction(
+    private void AddDbActionToResolveInferredAction(
         TransactionOpLocator transactionOpLocator,
+        OperationGroupSummarisation operationGroupSummarisation,
         LedgerTransaction dbTransaction,
-        LedgerOperationGroup dbOperationGroup,
-        Accounting operationGroupAccounting
+        LedgerOperationGroup dbOperationGroup
     )
     {
         _dbActionsPlanner.AddDbAction(() =>
         {
-            var inferredAction = operationGroupAccounting.InferAction(
-                dbTransaction.IsSystemTransaction,
+            var inferredAction = CalculateInferredAction(
                 transactionOpLocator,
-                _dbActionsPlanner
+                dbTransaction.IsSystemTransaction,
+                operationGroupSummarisation
             );
+
             dbOperationGroup.InferredAction = inferredAction;
 
-            if (inferredAction is not { Type: InferredActionType.PayXrd })
+            // ReSharper disable once InvertIf - it's clearer like this
+            if (inferredAction is { Type: InferredActionType.PayXrd })
             {
-                return;
-            }
+                if (_feePayer != null)
+                {
+                    throw new InvalidTransactionException(transactionOpLocator, "Transaction had two pay xrd actions");
+                }
 
-            if (_feePayer != null)
-            {
-                throw new InvalidTransactionException(transactionOpLocator, "Transaction had two pay xrd actions");
+                _feePayer = inferredAction.FromAccount!;
             }
-
-            _feePayer = inferredAction.FromAccount!;
         });
+    }
+
+    private InferredAction? CalculateInferredAction(
+        TransactionOpLocator transactionOpLocator,
+        bool isSystemTransaction,
+        OperationGroupSummarisation summarisation
+    )
+    {
+        try
+        {
+            var inferredGatewayAction = _actionInferrer.InferAction(
+                isSystemTransaction,
+                summarisation,
+                _dbActionsPlanner.GetLoadedLatestValidatorStakeSnapshot
+            );
+
+            return inferredGatewayAction switch
+            {
+                null => null,
+                { Type: InferredActionType.Complex } => InferredAction.Complex(),
+                { Type: InferredActionType.CreateTokenDefinition, Action: Gateway.CreateTokenDefinition action } => new InferredAction(
+                    inferredGatewayAction.Type,
+                    fromAccount: null,
+                    toAccount: action.ToAccount != null ? _dbActionsPlanner.GetLoadedAccount(action.ToAccount.Address) : null,
+                    validator: null,
+                    amount: TokenAmount.FromSubUnitsString(action.TokenSupply.Value),
+                    resource: _dbActionsPlanner.GetLoadedResource(action.TokenSupply.TokenIdentifier.Rri)
+                ),
+                { Type: InferredActionType.MintTokens or InferredActionType.MintXrd, Action: Gateway.MintTokens action } => new InferredAction(
+                    inferredGatewayAction.Type,
+                    fromAccount: null,
+                    toAccount: _dbActionsPlanner.GetLoadedAccount(action.ToAccount.Address),
+                    validator: null,
+                    amount: TokenAmount.FromSubUnitsString(action.Amount.Value),
+                    resource: _dbActionsPlanner.GetLoadedResource(action.Amount.TokenIdentifier.Rri)
+                ),
+                { Type: InferredActionType.PayXrd or InferredActionType.BurnTokens, Action: Gateway.BurnTokens action } => new InferredAction(
+                    inferredGatewayAction.Type,
+                    fromAccount: _dbActionsPlanner.GetLoadedAccount(action.FromAccount.Address),
+                    toAccount: null,
+                    validator: null,
+                    amount: TokenAmount.FromSubUnitsString(action.Amount.Value),
+                    resource: _dbActionsPlanner.GetLoadedResource(action.Amount.TokenIdentifier.Rri)
+                ),
+                { Type: InferredActionType.StakeTokens, Action: Gateway.StakeTokens action } => new InferredAction(
+                    inferredGatewayAction.Type,
+                    fromAccount: _dbActionsPlanner.GetLoadedAccount(action.FromAccount.Address),
+                    toAccount: null,
+                    validator: _dbActionsPlanner.GetLoadedValidator(action.ToValidator.Address),
+                    amount: TokenAmount.FromSubUnitsString(action.Amount.Value),
+                    resource: _dbActionsPlanner.GetLoadedResource(action.Amount.TokenIdentifier.Rri)
+                ),
+                { Type: InferredActionType.UnstakeTokens, Action: Gateway.UnstakeTokens action } => new InferredAction(
+                    inferredGatewayAction.Type,
+                    fromAccount: null,
+                    toAccount: _dbActionsPlanner.GetLoadedAccount(action.ToAccount.Address),
+                    validator: _dbActionsPlanner.GetLoadedValidator(action.FromValidator.Address),
+                    amount: TokenAmount.FromSubUnitsString(action.Amount.Value),
+                    resource: _dbActionsPlanner.GetLoadedResource(action.Amount.TokenIdentifier.Rri)
+                ),
+                { Type: InferredActionType.SimpleTransfer, Action: Gateway.TransferTokens action } => new InferredAction(
+                    inferredGatewayAction.Type,
+                    fromAccount: _dbActionsPlanner.GetLoadedAccount(action.FromAccount.Address),
+                    toAccount: _dbActionsPlanner.GetLoadedAccount(action.ToAccount.Address),
+                    validator: null,
+                    amount: TokenAmount.FromSubUnitsString(action.Amount.Value),
+                    resource: _dbActionsPlanner.GetLoadedResource(action.Amount.TokenIdentifier.Rri)
+                ),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
+        }
+        catch (ActionInferrer.InvalidTransactionException ex)
+        {
+            throw new InvalidTransactionException(transactionOpLocator, ex.Message);
+        }
     }
 
     private void HandleAccountTransactions()
     {
-        var accountAddresses = _wholeTransactionAccounting!.GetReferencedAccountAddresses();
+        var accountAddresses = _referencedAccountAddressesInTransaction;
         var signedByPublicKey = _transaction!.Metadata.SignedBy?.Hex.ConvertFromHex();
         var signerAccountAddress = signedByPublicKey != null ? _entityDeterminer.CreateAccountAddress(signedByPublicKey) : null;
 
