@@ -80,9 +80,9 @@ public interface IConstructionAndSubmissionService
 {
     Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState);
 
-    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, Gateway.LedgerState ledgerState);
+    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request);
 
-    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, Gateway.LedgerState ledgerState);
+    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request);
 }
 
 public class ConstructionAndSubmissionService : IConstructionAndSubmissionService
@@ -197,14 +197,13 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     }
 
     public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(
-        Gateway.TransactionFinalizeRequest request,
-        Gateway.LedgerState ledgerState
+        Gateway.TransactionFinalizeRequest request
     )
     {
         _transactionFinalizeRequestCount.Inc();
         try
         {
-            var response = await HandleFinalizeAndCreateResponse(request, ledgerState);
+            var response = await HandleFinalizeAndCreateResponse(request);
             _transactionFinalizeSuccessCount.Inc();
             return response;
         }
@@ -216,14 +215,13 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     }
 
     public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(
-        Gateway.TransactionSubmitRequest request,
-        Gateway.LedgerState ledgerState
+        Gateway.TransactionSubmitRequest request
     )
     {
         _transactionSubmitRequestCount.Inc();
         try
         {
-            var response = await HandleSubmitAndCreateResponse(request, ledgerState);
+            var response = await HandleSubmitAndCreateResponse(request);
             _transactionSubmitSuccessCount.Inc();
             return response;
         }
@@ -263,7 +261,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         );
     }
 
-    private async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeAndCreateResponse(Gateway.TransactionFinalizeRequest request, Gateway.LedgerState ledgerState)
+    private async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeAndCreateResponse(Gateway.TransactionFinalizeRequest request)
     {
         var coreFinalizeResponse = await HandleCoreFinalizeRequest(request, new Core.ConstructionFinalizeRequest(
             _coreApiHandler.GetNetworkIdentifier(),
@@ -286,8 +284,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
                 new Gateway.TransactionSubmitRequest(
                     networkIdentifier: request.NetworkIdentifier,
                     signedTransaction: coreFinalizeResponse.SignedTransaction
-                ),
-                ledgerState
+                )
             );
         }
 
@@ -297,14 +294,14 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         );
     }
 
-    private async Task<Gateway.TransactionSubmitResponse> HandleSubmitAndCreateResponse(Gateway.TransactionSubmitRequest request, Gateway.LedgerState ledgerState)
+    private async Task<Gateway.TransactionSubmitResponse> HandleSubmitAndCreateResponse(Gateway.TransactionSubmitRequest request)
     {
         var signedTransactionContents = _validations.ExtractValidHex("Signed transaction", request.SignedTransaction);
         var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
             signedTransactionContents.Bytes
         );
 
-        await HandleSubmission(signedTransactionContents, transactionHashIdentifier, ledgerState);
+        await HandleSubmission(signedTransactionContents, transactionHashIdentifier);
 
         return new Gateway.TransactionSubmitResponse(
             transactionIdentifier: transactionHashIdentifier.AsGatewayTransactionIdentifier()
@@ -384,8 +381,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     // NB - The error handling here should mirror the resubmission in MempoolResubmissionService
     private async Task HandleSubmission(
         ValidatedHex signedTransaction,
-        byte[] transactionIdentifierHash,
-        Gateway.LedgerState ledgerState
+        byte[] transactionIdentifierHash
     )
     {
         var parseResponse = await HandleParseSignedTransaction(signedTransaction);
@@ -394,8 +390,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             signedTransaction.Bytes,
             transactionIdentifierHash,
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
-            parseResponse,
-            ledgerState
+            parseResponse
         );
 
         if (mempoolTrackGuidance.TransactionAlreadyFailedReason != null)
