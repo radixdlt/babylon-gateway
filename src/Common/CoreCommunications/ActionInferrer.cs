@@ -66,7 +66,6 @@ using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Extensions;
 using Common.Numerics;
-using DataAggregator.Extensions;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
 

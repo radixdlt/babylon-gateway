@@ -72,7 +72,6 @@ using Common.Extensions;
 using Common.Numerics;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
-using DataAggregator.Extensions;
 using RadixCoreApi.Generated.Model;
 using Api = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
@@ -81,7 +80,21 @@ using InvalidTransactionException = DataAggregator.Exceptions.InvalidTransaction
 namespace DataAggregator.LedgerExtension;
 
 /// <summary>
-/// A short-lived stateful class for extracting the content of a transaction.
+/// A stateful class for processing the content of a transaction, and determining how the database should be updated.
+/// The class is short-lived, lasting to process one transaction.
+///
+/// It works in tandem with the DbActionsPlanner, which is another stateful class, which lasts across the whole
+/// batch of transactions, and is designed to enable performant bulk transaction processing.
+///
+/// Roughly, the process proceeds as follows:
+/// * TransactionContentProcessor runs for each transaction, performing initial processing, which:
+///   - Marks which dependencies need to be loaded / resolved
+///   - Adds deferred "DbActions" against the DbActionsPlanner which will create/update entities on the DbContext
+/// * DbActionsPlanner - Bulk load dependencies
+/// * DbActionsPlanner - Process deferred actions in order
+/// * DbContext is saved
+///
+/// See the DbActionsPlanner class doc for a detailed description on how this process should work.
 /// </summary>
 public class TransactionContentProcessor
 {
@@ -91,23 +104,23 @@ public class TransactionContentProcessor
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly IActionInferrer _actionInferrer;
 
-    /* History */
+    /* Tracked changes across the transaction to power history */
     private readonly Dictionary<AccountResourceDenormalized, TokenAmount> _accountResourceNetBalanceChanges = new();
-    private readonly Dictionary<string, ResourceSupplyChange> _nonXrdResourceChangesAcrossOperationGroups = new();
+    private readonly Dictionary<string, ResourceSupplyChange> _nonXrdResourceSupplyChangesAcrossOperationGroups = new();
     private readonly Dictionary<string, ValidatorStakeSnapshotChange> _validatorStakeChanges = new();
     private readonly Dictionary<AccountValidatorDenormalized, AccountValidatorStakeSnapshotChange> _accountValidatorStakeChanges = new();
+    private readonly HashSet<string> _referencedAccountAddressesInTransaction = new();
+    private Dictionary<string, TokenAmount> _nonXrdResourceChangeThisOperationGroupByRri = new();
+    private TokenAmount _xrdResourceSupplyChange;
 
     /* Mutable Class State */
     /* > These simply help us avoid passing tons of references down the call stack.
     /* > These will all not be null at the time of use in the Handle methods. */
     private CommittedTransaction? _transaction;
-    private HashSet<string> _referencedAccountAddressesInTransaction = new();
     private TransactionSummary? _transactionSummary;
     private Account? _feePayer;
     private LedgerOperationGroup? _dbOperationGroup;
     private OperationGroup? _transactionOperationGroup;
-    private TokenAmount _xrdResourceSupplyChange;
-    private Dictionary<string, TokenAmount> _nonXrdResourceChangeThisOperationGroupByRri = new();
     private int _operationGroupIndex = -1;
     private Operation? _operation;
     private int _operationIndexInGroup = -1;
@@ -169,7 +182,7 @@ public class TransactionContentProcessor
             _dbOperationGroup = new LedgerOperationGroup(
                 transaction.CommittedStateIdentifier.StateVersion,
                 _operationGroupIndex,
-                null // Inferred action calculated/set below in the dbAction after the transaction group has processed
+                null // The inferred action calculated/set below in the dbAction after the transaction group has processed
             );
             _dbContext.OperationGroups.Add(_dbOperationGroup);
             _operationIndexInGroup = -1;
@@ -616,7 +629,7 @@ public class TransactionContentProcessor
                 continue;
             }
 
-            _nonXrdResourceChangesAcrossOperationGroups.GetOrCreate(rri, ResourceSupplyChange.Default).Aggregate(change);
+            _nonXrdResourceSupplyChangesAcrossOperationGroups.GetOrCreate(rri, ResourceSupplyChange.Default).Aggregate(change);
         }
 
         // Prepare for next operation group
@@ -666,8 +679,8 @@ public class TransactionContentProcessor
     private void HandleResourceSupplyHistoryUpdates()
     {
         var totalResourceChanges = _xrdResourceSupplyChange.IsZero()
-            ? _nonXrdResourceChangesAcrossOperationGroups
-            : _nonXrdResourceChangesAcrossOperationGroups.Concat(new KeyValuePair<string, ResourceSupplyChange>[]
+            ? _nonXrdResourceSupplyChangesAcrossOperationGroups
+            : _nonXrdResourceSupplyChangesAcrossOperationGroups.Concat(new KeyValuePair<string, ResourceSupplyChange>[]
                 {
                     new(_entityDeterminer.GetXrdAddress(), ResourceSupplyChange.From(_xrdResourceSupplyChange)),
                 }
