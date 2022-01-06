@@ -213,11 +213,6 @@ public class TransactionBuilder
         var toAccount = _validations.ExtractValidAccountAddress(action.ToAccount);
         var tokenAmount = _validations.ExtractValidPositiveTokenAmount(action.Amount);
 
-        if (fromAccount.Address == toAccount.Address)
-        {
-            throw new InvalidActionException(action, "Contains a transfer from/to the same address");
-        }
-
         ValidateAccountDebit(action, fromAccount, tokenAmount, error => new NotEnoughTokensForTransferException(error.RequestedAmount, error.AvailableAmount));
         ValidateAccountCredit(toAccount, tokenAmount);
 
