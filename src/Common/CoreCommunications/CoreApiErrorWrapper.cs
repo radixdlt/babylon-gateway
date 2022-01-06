@@ -121,8 +121,8 @@ public static class CoreApiErrorWrapper
             MempoolFullError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.Transient }),
             NetworkNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
             NotEnoughNativeTokensForFeesError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            NotEnoughResourcesError error => WrappedCoreApiException.Of(apiException, error), // Handle in ConstructionService
-            NotValidatorOwnerError error => WrappedCoreApiException.Of(apiException, error), // Not specific enough - rely on Gateway handling
+            NotEnoughResourcesError error => WrappedCoreApiException.Of(apiException, error),
+            NotValidatorOwnerError error => WrappedCoreApiException.Of(apiException, error),
             PublicKeyNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
             ResourceDepositOperationNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
             ResourceWithdrawOperationNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),

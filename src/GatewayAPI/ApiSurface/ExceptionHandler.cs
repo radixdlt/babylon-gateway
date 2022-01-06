@@ -215,6 +215,27 @@ public class ExceptionHandler : IExceptionHandler
             return null;
         }
 
+        /*
+         * Not all of the errors can be converted sensibly at this point. Errors fall into various categories:
+         * 1) Client errors due to how the Gateway API has constructed a Core API request - these are Gateway API bugs
+         *   and should be Gateway 500s
+         * 2) Client errors which are errors of the Gateway API client - and which are specific enough to be passed
+         *   through directly to the client - these are mapped below for ease
+         * 3) Client errors which are errors of the Gateway API client - but which the errors at the Gateway API
+         *   abstraction level are more detailed. These fall into two sub-categories:
+         *   3a) Errors which should be noticed before sending the Core API request. So if we received a Core API error of
+         *     this type, we should return a 500 (eg a Core.NotEnoughResourcesError which doesn't relate to fees - which
+         *     we should have already mapped into a more specific type like Gateway.NotEnoughTokensForTransferError in
+         *     the TransactionBuilder)
+         *   3b) Errors which need to be remapped/re-interpreted by the Gateway service. EG extracting a
+         *     Gateway.NotEnoughNativeTokensForFeeError from a Core.NotEnoughResourcesError or
+         *     Core.NotEnoughNativeTokensForFeesError in the ConstructionAndSubmissionService
+         *     If these errors propagate to this point, we should also return a 500.
+         * 4) Core API Internal server errors - we return Gateway 500s for these.
+         *
+         * Essentially only errors of type (2) can and should be mapped below - the rest are unmapped and will return
+         * as a 500.
+         */
         return wrappedCoreApiException switch
         {
             WrappedCoreApiException<Core.AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
@@ -225,10 +246,6 @@ public class ExceptionHandler : IExceptionHandler
                 minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
             ),
             WrappedCoreApiException<Core.FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
-            WrappedCoreApiException<Core.NotEnoughNativeTokensForFeesError> ex => new NotEnoughNativeTokensForFeeException(
-                ex.Error.FeeEstimate.AsGatewayTokenAmount(),
-                ex.Error.Available.AsGatewayTokenAmount()
-            ),
             WrappedCoreApiException<Core.InvalidPublicKeyError> ex => new InvalidPublicKeyException(
                 new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
                 "Invalid public key"

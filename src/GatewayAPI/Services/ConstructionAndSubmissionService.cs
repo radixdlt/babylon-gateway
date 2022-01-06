@@ -328,6 +328,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             feePayer
         );
 
+        // This performs checks against known ledger, and throws relevant exceptions, eg if a user doesn't have enough
+        // funds for a given action. However -- it doesn't know how much fees will be at this point.
         var mappedTransaction = await transactionBuilder.MapAndValidateActions(request.Actions);
 
         var coreBuildRequest = new Core.ConstructionBuildRequest(
@@ -338,7 +340,57 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             disableResourceAllocateAndDestroy: request.DisableTokenMintAndBurn
         );
 
-        return await _coreApiHandler.BuildTransaction(coreBuildRequest);
+        /* The Core API, when building / analysing a transaction, removes the fee first, and then tries to
+         * perform the rest of the transaction.
+         *
+         * - A NotEnoughNativeTokensForFeesError fires if there is not enough XRD during the initial fee step
+         * - A NotEnoughResourcesError fires if there are not enough resources during a transaction step
+         *
+         * So, if we view a fee coming out "at the end", as a human would, "not enough fees" can actually be
+         * represented by either exception from the API.
+         */
+        try
+        {
+            return await _coreApiHandler.BuildTransaction(coreBuildRequest);
+        }
+        catch (WrappedCoreApiException<Core.NotEnoughResourcesError> ex)
+        {
+            var xrdAddress = _networkConfigurationProvider.GetXrdAddress();
+            var isXrd = (ex.Error.AttemptedToTake.ResourceIdentifier as Core.TokenResourceIdentifier)?.Rri ==
+                        xrdAddress;
+
+            if (!isXrd)
+            {
+                // We should have already detected the overspend at MapAndValidateActions time - but we didn't :(
+                // Perhaps because our ledger state is a few seconds behind. We don't have a suitable exception type
+                // to throw - so let this exception bubble up and we can return a 500.
+                throw;
+            }
+
+            var xrdAfterTransaction = mappedTransaction.BeforeBalances.GetValueOrDefault(xrdAddress) +
+                                      mappedTransaction.BalanceChanges.GetValueOrDefault(xrdAddress);
+            throw new NotEnoughNativeTokensForFeeException(
+                ex.Error.Fee.AsGatewayTokenAmount(),
+                xrdAfterTransaction.AsGatewayTokenAmount(xrdAddress)
+            );
+        }
+        catch (WrappedCoreApiException<Core.NotEnoughNativeTokensForFeesError> ex)
+        {
+            // It's possible that a fee is (say) 10XRD, but a user tries to send 5XRD, and only has 9XRD in their account.
+            // In this case, the Core.NotEnoughNativeTokensForFeesError will report an Available of 9XRD (as the Fee
+            // is taken at the start of the transaction) - but really, it would make more sense to show the user 4XRD.
+            // So we recalculate the available amount in the Gateway service.
+
+            var xrdAddress = _networkConfigurationProvider.GetXrdAddress();
+
+            var xrdAfterTransaction = mappedTransaction.BeforeBalances.GetValueOrDefault(xrdAddress) +
+                                      mappedTransaction.BalanceChanges.GetValueOrDefault(xrdAddress);
+
+            throw new NotEnoughNativeTokensForFeeException(
+                ex.Error.FeeEstimate.AsGatewayTokenAmount(),
+                xrdAfterTransaction.AsGatewayTokenAmount(xrdAddress)
+            );
+        }
     }
 
     private async Task<Core.ConstructionFinalizeResponse> HandleCoreFinalizeRequest(
