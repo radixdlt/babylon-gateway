@@ -214,10 +214,9 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;
 
-    /* Properties */
-    private LedgerConfirmationConfiguration Config => _aggregatorConfiguration.GetLedgerConfirmationConfiguration();
-
     private IList<NodeAppSettings> TransactionNodes { get; set; } = new List<NodeAppSettings>();
+
+    private LedgerConfirmationConfiguration Config { get; set; }
 
     public LedgerConfirmationService(
         ILogger<LedgerConfirmationService> logger,
@@ -233,6 +232,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
         _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Unknown);
+
+        Config = _aggregatorConfiguration.GetLedgerConfirmationConfiguration();
     }
 
     /// <summary>
@@ -341,10 +342,13 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
     private void PrepareForLedgerExtensionCheck()
     {
-        // We persist this to avoid excessive allocations; but update it at the start of each loop in case the config has changed
+        // We persist these to avoid excessive config load allocations;
+        // but update them at the start of each loop in case the config has changed
         TransactionNodes = _aggregatorConfiguration.GetNodes()
             .Where(n => n.Enabled && !n.DisabledForTransactionIndexing)
             .ToList();
+
+        Config = _aggregatorConfiguration.GetLedgerConfirmationConfiguration();
     }
 
     private List<CommittedTransaction> ConstructQuorumLedgerExtension()
