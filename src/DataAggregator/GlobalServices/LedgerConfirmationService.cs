@@ -366,7 +366,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         if (trustRequirements.TrustWeightingRequiredForQuorumAtPresentTime == 0)
         {
-            _logger.LogWarning("Total trust weighting required for extension is zero - likely the system is either yet to read from nodes, or none of the nodes are close enough to synced up");
+            var logLevel = _systemStatusService.IsInStartupGracePeriod() ? LogLevel.Debug : LogLevel.Warning;
+            _logger.Log(logLevel, "Total trust weighting required for extension is zero - likely the system is either yet to read from nodes, or none of the nodes are close enough to synced up");
             return extension;
         }
 
