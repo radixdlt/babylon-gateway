@@ -300,7 +300,7 @@ public class MempoolTrackerService : IMempoolTrackerService
                 continue;
             }
 
-            var resubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null
+            var nextResubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null
                 ? currentTimestamp
                 : DateTimeExtensions.LatestOf(
                     mempoolItem.LastSubmittedToNodeTimestamp.Value + timeouts.MinDelayBetweenResubmissions,
@@ -309,7 +309,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
             var resubmissionLimit = mempoolItem.LastSubmittedToGatewayTimestamp!.Value + timeouts.StopResubmittingAfter;
 
-            var canResubmit = resubmissionTime <= resubmissionLimit;
+            var canResubmit = nextResubmissionTime <= resubmissionLimit;
 
             if (canResubmit)
             {

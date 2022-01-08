@@ -168,7 +168,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         }
         else if (totalTransactionsNeedingResubmission <= BatchSize)
         {
-            _logger.LogInformation("Preparing to resubmit {BatchSize} transactions", totalTransactionsNeedingResubmission);
+            _logger.LogInformation("Preparing to resubmit {TransactionsCount} transactions", totalTransactionsNeedingResubmission);
         }
         else
         {
