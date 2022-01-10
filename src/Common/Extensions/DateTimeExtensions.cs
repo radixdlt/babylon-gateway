@@ -103,6 +103,11 @@ public static class DateTimeExtensions
         return a >= b ? a : b;
     }
 
+    public static double ToUnixTimeSecondsWithMilliPrecision(this Instant a)
+    {
+        return ((double)a.ToUnixTimeMilliseconds()) / 1000;
+    }
+
     public static string FormatSecondsHumanReadable(this Duration duration)
     {
         return $"{duration.Absolute().TotalSeconds:F3}s";

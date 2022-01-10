@@ -165,7 +165,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private static readonly Gauge _ledgerLastCommitTimestamp = Metrics
         .CreateGauge(
             "ng_ledger_commit_last_commit_timestamp_seconds",
-            "Unix timestamp of the last DB ledger commit."
+            "Unix timestamp of the last DB ledger commit (in seconds, to millisecond precision)."
         );
 
     private static readonly Gauge _ledgerStateVersion = Metrics
@@ -177,7 +177,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private static readonly Gauge _ledgerUnixRoundTimestamp = Metrics
         .CreateGauge(
             "ng_ledger_commit_tip_round_unix_timestamp_seconds",
-            "Unix timestamp of the round at the top of the DB ledger."
+            "Unix timestamp of the round at the top of the DB ledger (in seconds, to millisecond precision)."
         );
 
     /* Per-Node Metrics */
@@ -467,7 +467,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
         _ledgerCommittedTransactionsCount.Inc(commitReport.TransactionsCommittedCount);
-        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSeconds());
+        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSecondsWithMilliPrecision());
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
@@ -518,7 +518,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private void RecordTopOfDbLedgerMetrics(TransactionSummary topOfLedger)
     {
         _ledgerStateVersion.Set(topOfLedger.StateVersion);
-        _ledgerUnixRoundTimestamp.Set(topOfLedger.RoundTimestamp.ToUnixTimeSeconds());
+        _ledgerUnixRoundTimestamp.Set(topOfLedger.RoundTimestamp.ToUnixTimeSecondsWithMilliPrecision());
     }
 
     private void StopTrackingTransactionsUpToStateVersion(long committedStateVersion)
