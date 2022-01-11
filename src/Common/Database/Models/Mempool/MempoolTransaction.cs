@@ -192,6 +192,7 @@ public class MempoolTransaction
     public string TransactionContents { get; private set; }
 
     [Column("status")]
+    [ConcurrencyCheck]
     public MempoolTransactionStatus Status { get; private set; }
 
     /// <summary>
