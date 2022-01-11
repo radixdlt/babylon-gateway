@@ -187,14 +187,11 @@ public class ValidatorQuerier : IValidatorQuerier
     {
         var stateVersion = ledgerState._Version;
 
-        return await (
-            from validatorStakeHistory in _dbContext.ValidatorStakeHistoryAtVersion(stateVersion)
-            where validatorIds.Contains(validatorStakeHistory.ValidatorId)
-            select validatorStakeHistory
-        ).ToDictionaryAsync(
-            v => v.ValidatorId,
-            v => v.StakeSnapshot
-        );
+        return await _dbContext.ValidatorStakeHistoryAtVersionForValidatorIds(validatorIds, stateVersion)
+            .ToDictionaryAsync(
+                v => v.ValidatorId,
+                v => v.StakeSnapshot
+            );
     }
 
     private record PropertiesAndOwner(ValidatorProperties Properties, long? OwnerId);
@@ -229,7 +226,7 @@ public class ValidatorQuerier : IValidatorQuerier
         var validatorOwnerIds = validatorDataSubstatesByValidatorId
             .Where(v => v.Value.ContainsKey(ValidatorDataSubstateType.ValidatorData))
             .Select(v => v.Value[ValidatorDataSubstateType.ValidatorData].Data.ValidatorData!.OwnerId)
-            .ToHashSet();
+            .ToList();
 
         var validatorOwnerAddresses = await _dbContext.Accounts
             .Where(a => validatorOwnerIds.Contains(a.Id))

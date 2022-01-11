@@ -156,50 +156,78 @@ public static class DbQueryExtensions
             Where(s => s.UpStateVersion <= stateVersion && (s.DownStateVersion == null || s.DownStateVersion > stateVersion));
     }
 
-    public static IQueryable<THistory> GetSingleHistoryEntryAtVersion<THistory>(
-        this DbSet<THistory> dbSet,
-        Expression<Func<THistory, bool>> keySelector,
-        long stateVersion
-    )
-        where THistory : HistoryBase
-    {
-        return dbSet
-            .Where(keySelector)
-            .Where(h => h.FromStateVersion <= stateVersion)
-            .OrderByDescending(h => h.FromStateVersion)
-            .Take(1);
-    }
-
-    /* TODO:NG-39 - Check all these history queries (when filtered further to a sub-part of the key)
-     * result in sensible query plans which make use of the indexes we added
-     */
-    public static IQueryable<AccountResourceBalanceHistory> AccountResourceBalanceHistoryAtVersion<TDbContext>(
+    public static IQueryable<AccountResourceBalanceHistory> AccountResourceBalanceHistoryForAccountIdAtVersion<TDbContext>(
         this TDbContext dbContext,
+        long accountId,
         long stateVersion
     )
         where TDbContext : CommonDbContext
     {
-        var dbSet = dbContext.Set<AccountResourceBalanceHistory>();
-        var mostRecentHistoryByKeyQuery =
-            from history in dbSet
-            where history.FromStateVersion <= stateVersion
-            group history by new { history.AccountId, history.ResourceId }
-            into g
-            select new
-            {
-                AccountId = g.Key.AccountId,
-                ResourceId = g.Key.ResourceId,
-                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
-            }
-        ;
+        var accountIdParameter = new NpgsqlParameter("@account_id", accountId);
 
-        return
-            from fullHistory in dbSet
-            join historyKeys in mostRecentHistoryByKeyQuery
-                on new { fullHistory.AccountId, fullHistory.ResourceId, fullHistory.FromStateVersion }
-                equals new { historyKeys.AccountId, historyKeys.ResourceId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
-            select fullHistory
-        ;
+        // NB - UNNEST can be used to zip arrays together
+        return dbContext.Set<AccountResourceBalanceHistory>()
+            .FromSqlInterpolated($@"
+WITH PossibleResourceIds AS (
+	SELECT DISTINCT ar.resource_id FROM account_resource_balance_history ar
+	WHERE ar.account_id = {accountIdParameter}
+)
+SELECT h.*
+FROM PossibleResourceIds r
+INNER JOIN LATERAL (
+	SELECT * FROM account_resource_balance_history ar2
+	WHERE
+		ar2.account_id = {accountIdParameter}
+		AND ar2.resource_id = r.resource_id
+		AND ar2.from_state_version <= {stateVersion}
+	ORDER BY ar2.from_state_version DESC
+	LIMIT 1
+) h ON (true)
+");
+    }
+
+    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryForAccountIdValidatorIdAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long accountId,
+        long validatorId,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<AccountValidatorStakeHistory>()
+            .Where(h => h.AccountId == accountId && h.ValidatorId == validatorId && h.FromStateVersion <= stateVersion)
+            .OrderByDescending(h => h.FromStateVersion)
+            .Take(1);
+    }
+
+    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryForAccountIdAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long accountId,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var accountIdParameter = new NpgsqlParameter("@account_id", NpgsqlDbType.Bigint) { Value = accountId };
+
+        // NB - UNNEST can be used to zip arrays together
+        return dbContext.Set<AccountValidatorStakeHistory>()
+            .FromSqlInterpolated($@"
+WITH PossibleValidatorIds AS (
+	SELECT DISTINCT av.validator_id FROM account_validator_stake_history av
+	WHERE av.account_id = {accountIdParameter}
+)
+SELECT h.*
+FROM PossibleValidatorIds v
+INNER JOIN LATERAL (
+	SELECT * FROM account_validator_stake_history av2
+	WHERE
+		av2.account_id = {accountIdParameter}
+		AND av2.validator_id = v.validator_id
+		AND av2.from_state_version <= {stateVersion}
+	ORDER BY av2.from_state_version DESC
+	LIMIT 1
+) h ON (h.validator_id = v.validator_id)
+");
     }
 
     public record AccountValidatorIds(long AccountId, long ValidatorId);
@@ -246,61 +274,89 @@ INNER JOIN LATERAL (
 ");
     }
 
-    public static IQueryable<AccountValidatorStakeHistory> PossiblySlowGroupedAccountValidatorStakeHistoryAtVersion<TDbContext>(
+    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorAddresses<TDbContext>(
         this TDbContext dbContext,
+        List<string> validatorAddresses,
         long stateVersion
     )
         where TDbContext : CommonDbContext
     {
-        var dbSet = dbContext.Set<AccountValidatorStakeHistory>();
-        var mostRecentHistoryByKeyQuery =
-                from history in dbSet
-                where history.FromStateVersion <= stateVersion
-                group history by new { history.AccountId, history.ValidatorId }
-                into g
-                select new
-                {
-                    AccountId = g.Key.AccountId,
-                    ValidatorId = g.Key.ValidatorId,
-                    LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
-                }
-            ;
-
-        return
-            from fullHistory in dbSet
-            join historyKeys in mostRecentHistoryByKeyQuery
-                on new { fullHistory.AccountId, fullHistory.ValidatorId, fullHistory.FromStateVersion }
-                equals new { historyKeys.AccountId, historyKeys.ValidatorId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
-            select fullHistory
-            ;
+        return dbContext.Validators
+            .Where(v => validatorAddresses.Contains(v.Address) && v.FromStateVersion <= stateVersion)
+            .Select(v => v.Id)
+            .Select(validatorId =>
+                dbContext.Set<ValidatorStakeHistory>()
+                    .Where(h =>
+                        h.ValidatorId == validatorId
+                        && h.FromStateVersion <= stateVersion
+                    )
+                    .OrderByDescending(h => h.FromStateVersion)
+                    .FirstOrDefault()
+            )
+            .Where(vsh => vsh != null)
+            .Select(vsh => vsh!);
     }
 
-    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersion<TDbContext>(
+    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorIds<TDbContext>(
+        this TDbContext dbContext,
+        List<long> validatorIds,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<ValidatorStakeHistory>()
+            .FromSqlInterpolated($@"
+SELECT h.*
+FROM UNNEST({validatorIds}) v (validator_id)
+INNER JOIN LATERAL (
+    SELECT
+        h0.*
+    FROM validator_stake_history h0
+	WHERE
+		h0.validator_id = v.validator_id AND
+		h0.from_state_version <= {stateVersion}
+	ORDER BY h0.from_state_version DESC
+	LIMIT 1
+) h ON (true)
+");
+    }
+
+    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForAnyValidator<TDbContext>(
         this TDbContext dbContext,
         long stateVersion
     )
         where TDbContext : CommonDbContext
     {
-        var dbSet = dbContext.Set<ValidatorStakeHistory>();
-        var mostRecentHistoryByKeyQuery =
-            from history in dbSet
-            where history.FromStateVersion <= stateVersion
-            group history by history.ValidatorId
-            into g
-            select new
-            {
-                ValidatorId = g.Key,
-                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
-            }
-        ;
+        return dbContext.Set<ValidatorStakeHistory>()
+            .FromSqlInterpolated($@"
+SELECT h.*
+FROM validators v
+INNER JOIN LATERAL (
+    SELECT *
+    FROM validator_stake_history h0
+	WHERE
+		h0.validator_id = v.id AND
+		h0.from_state_version <= {stateVersion}
+	ORDER BY h0.from_state_version DESC
+	LIMIT 1
+) h ON (h.validator_id = v.id)
+");
+    }
 
-        return
-            from fullHistory in dbSet
-            join historyKeys in mostRecentHistoryByKeyQuery
-                on new { fullHistory.ValidatorId, fullHistory.FromStateVersion }
-                equals new { historyKeys.ValidatorId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
-            select fullHistory
-        ;
+    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorId<TDbContext>(
+        this TDbContext dbContext,
+        long validatorId,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<ValidatorStakeHistory>()
+            .Where(h =>
+                h.ValidatorId == validatorId
+                && h.FromStateVersion <= stateVersion
+            )
+            .OrderByDescending(h => h.FromStateVersion)
+            .Take(1);
     }
 
     public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersionForRri<TDbContext>(
@@ -321,7 +377,7 @@ INNER JOIN LATERAL (
             .Take(1);
 
         // NB - other options considered instead of the sub query:
-        // * Using group by from SlowGroupedResourceSupplyHistoryAtVersion is too slow because it doesn't use the indexes :(
+        // * Using group by - but it's too slow because it doesn't use the indexes :(
         // * Using Lateral Join (code below) doesn't work due to being too slow https://github.com/dotnet/efcore/issues/17936
         // return
         //     from resource in dbContext.Resource(rri, stateVersion)
@@ -336,46 +392,5 @@ INNER JOIN LATERAL (
         //     from resource in dbContext.Resource(rri, stateVersion)
         //     from supplyHistory in dbContext.ResourceSupplyHistoryFromResourceIdAtVersion(resource.Id, stateVersion)
         //     select supplyHistory;
-    }
-
-    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryFromResourceIdAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        long resourceId,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<ResourceSupplyHistory>()
-            .Where(h => h.ResourceId == resourceId && h.FromStateVersion <= stateVersion)
-            .OrderByDescending(h => h.FromStateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<ResourceSupplyHistory> SlowGroupedResourceSupplyHistoryAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        var dbSet = dbContext.Set<ResourceSupplyHistory>();
-        var mostRecentHistoryByKeyQuery =
-            from history in dbSet
-            where history.FromStateVersion <= stateVersion
-            group history by history.ResourceId
-            into g
-            select new
-            {
-                ResourceId = g.Key,
-                LatestUpdateStateVersion = g.Select(h => h.FromStateVersion).Max(),
-            }
-        ;
-
-        return
-            from fullHistory in dbSet
-            join historyKeys in mostRecentHistoryByKeyQuery
-                on new { fullHistory.ResourceId, fullHistory.FromStateVersion }
-                equals new { historyKeys.ResourceId, FromStateVersion = historyKeys.LatestUpdateStateVersion }
-            select fullHistory
-        ;
     }
 }

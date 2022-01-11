@@ -167,8 +167,7 @@ public class ParsedTransactionMapper<T> : IParsedTransactionMapper
         // We always use the top of the known ledger for this, as any estimates should be as present as possible
         var stateVersionToUse = (await _dbContext.GetTopLedgerTransaction().SingleAsync(token)).ResultantStateVersion;
 
-        var validatorStakeHistoryDictionary = await _dbContext.ValidatorStakeHistoryAtVersion(stateVersionToUse)
-            .Where(v => validatorAddressesForPostgreSQL.Contains(v.Validator.Address))
+        var validatorStakeHistoryDictionary = await _dbContext.ValidatorStakeHistoryAtVersionForValidatorAddresses(validatorAddressesForPostgreSQL, stateVersionToUse)
             .Include(v => v.Validator)
             .ToDictionaryAsync(
                 v => v.Validator.Address,
