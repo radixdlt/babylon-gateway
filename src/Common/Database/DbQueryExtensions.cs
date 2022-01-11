@@ -70,7 +70,6 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
 using NpgsqlTypes;
-using System.Linq.Expressions;
 
 namespace Common.Database;
 
@@ -274,7 +273,7 @@ INNER JOIN LATERAL (
 ");
     }
 
-    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorAddresses<TDbContext>(
+    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorAddressesWithIncludedValidator<TDbContext>(
         this TDbContext dbContext,
         List<string> validatorAddresses,
         long stateVersion
@@ -291,6 +290,7 @@ INNER JOIN LATERAL (
                         && h.FromStateVersion <= stateVersion
                     )
                     .OrderByDescending(h => h.FromStateVersion)
+                    .Include(v => v.Validator)
                     .FirstOrDefault()
             )
             .Where(vsh => vsh != null)

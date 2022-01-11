@@ -216,7 +216,7 @@ public class MempoolTrackerService : IMempoolTrackerService
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
+        IParsedTransactionMapper parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
 
         var mempoolTransactionIds = combinedMempool.Keys.ToList(); // Npgsql optimizes List<> Contains
 
