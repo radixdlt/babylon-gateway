@@ -1632,7 +1632,7 @@ components:
               description: The request type that triggered this exception.
               type: string
             current_sync_delay_seconds:
-              description: The current delay between the Gateway DB and the network ledger round timestamp.max_allowed_sync_delay_seconds.
+              description: The current delay between the Gateway DB and the network ledger round timestamp.
               type: integer
               format: int64
             max_allowed_sync_delay_seconds:
