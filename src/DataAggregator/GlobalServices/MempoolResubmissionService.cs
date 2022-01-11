@@ -307,9 +307,9 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
             _transactionResubmissionErrorCount.Inc();
-            _transactionResubmissionResolutionByResultCount.WithLabels("double_spend").Inc();
+            _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
             _logger.LogDebug(
-                "Dropping transaction because of a double spend - possibly it's already been committed. Substate Identifier: {Substate}",
+                "Dropping transaction because a substate identifier it used is missing or already downed - possibly it's already been committed. Substate Identifier: {Substate}",
                 ex.Error.SubstateIdentifierNotFound.Identifier
             );
             var failureExplanation = "Double spend on resubmission";
