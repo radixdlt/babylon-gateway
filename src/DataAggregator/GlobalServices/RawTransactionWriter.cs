@@ -135,8 +135,11 @@ public class RawTransactionWriter : IRawTransactionWriter
             {
                 _transactionsMarkedCommittedWhichWereFailedCount.Inc();
                 _logger.LogError(
-                    "Transaction with id {TransactionId} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
+                    "Transaction with id {TransactionId} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
                     mempoolTransaction.TransactionIdentifierHash.ToHex(),
+                    mempoolTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    mempoolTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    mempoolTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     mempoolTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     mempoolTransaction.FailureReason?.ToString(),
                     mempoolTransaction.FailureExplanation
