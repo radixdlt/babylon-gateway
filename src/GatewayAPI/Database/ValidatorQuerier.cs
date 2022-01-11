@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Addressing;
 using Common.Database;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
@@ -70,7 +69,6 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using RadixGatewayApi.Generated.Model;
-using Api = RadixGatewayApi.Generated.Model;
 using Db = Common.Database.Models.Ledger.Normalization;
 using TokenAmount = Common.Numerics.TokenAmount;
 

@@ -112,8 +112,7 @@ public static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerStatus
-            .Select(lt => lt.TopOfLedgerTransaction)
-            .Take(1);
+            .Select(lt => lt.TopOfLedgerTransaction);
     }
 
     public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
@@ -211,30 +210,45 @@ public static class DbQueryExtensions
     )
         where TDbContext : CommonDbContext
     {
-        var stateVersionPlaceholder = "{0}";
-        var tuplePlaceholder = DbSetExtensions.CreateArrayOfTuplesPlaceholder(accountValidatorIds.Count, 2, 1);
-        var placeholderValues = new object[] { stateVersion }
+        var tuplePlaceholder = DbSetExtensions.CreateArrayOfTuplesPlaceholder(accountValidatorIds.Count, 2, 0);
+        var stateVersionPlaceholder = "{" + (accountValidatorIds.Count * 2) + "}";
+
+        var placeholderValues = Array.Empty<object>()
             .Concat(accountValidatorIds.SelectMany(av => new object[] { av.AccountId, av.ValidatorId }))
+            .Concat(new object[] { stateVersion })
             .ToArray();
 
+        /*
+         * Performance Notes:
+         *
+         * This was chosen as the best query structure by comparing on mainnet (for ~200 validators) with other choices for queries:
+         * - INNER JOIN LATERAL - 2ms Execution
+         * - JOIN against GROUP BY with MAX - 200ms Execution
+         * - Using variants of PARTITION BY - 750ms-1s Execution
+         */
         var query = @$"
-SELECT h.* FROM (
-    SELECT MAX(from_state_version) state_version, account_id, validator_id FROM account_validator_stake_history
-    WHERE from_state_version < {stateVersionPlaceholder}
-    AND (account_id, validator_id) IN ({tuplePlaceholder})
-    GROUP BY (account_id, validator_id)
-) relevantEntries
-JOIN account_validator_stake_history h ON
-    relevantEntries.state_version = h.from_state_version
-    AND relevantEntries.account_id = h.account_id
-    AND relevantEntries.validator_id = h.validator_id
+SELECT h.*
+FROM (
+    VALUES {tuplePlaceholder}
+) av (account_id, validator_id)
+INNER JOIN LATERAL (
+    SELECT
+        h0.*
+    FROM account_validator_stake_history h0
+	WHERE
+		h0.account_id = av.account_id AND
+		h0.validator_id = av.validator_id AND
+		h0.from_state_version <= {stateVersionPlaceholder}
+	ORDER BY h0.from_state_version DESC
+	LIMIT 1
+) h ON (true)
 ";
 
         return dbContext.Set<AccountValidatorStakeHistory>()
             .FromSqlRaw(query, placeholderValues);
     }
 
-    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryAtVersion<TDbContext>(
+    public static IQueryable<AccountValidatorStakeHistory> PossiblySlowGroupedAccountValidatorStakeHistoryAtVersion<TDbContext>(
         this TDbContext dbContext,
         long stateVersion
     )
@@ -298,15 +312,48 @@ JOIN account_validator_stake_history h ON
     )
         where TDbContext : CommonDbContext
     {
-        return
-            from resourceApiHistory in dbContext.ResourceSupplyHistoryAtVersion(stateVersion)
-            join resource in dbContext.Resource(rri, stateVersion)
-                on resourceApiHistory.ResourceId equals resource.Id
-            select resourceApiHistory
-        ;
+        return dbContext.Set<ResourceSupplyHistory>()
+            .Where(h =>
+                h.ResourceId == dbContext.Resource(rri, stateVersion)
+                    .Select(r => r.Id)
+                    .FirstOrDefault() // This is actually done in a sub-query server-side.
+                && h.FromStateVersion <= stateVersion
+            )
+            .OrderByDescending(h => h.FromStateVersion)
+            .Take(1);
+
+        // NB - other options considered instead of the sub query:
+        // * Using group by from SlowGroupedResourceSupplyHistoryAtVersion is too slow because it doesn't use the indexes :(
+        // * Using Lateral Join (code below) doesn't work due to being too slow https://github.com/dotnet/efcore/issues/17936
+        // return
+        //     from resource in dbContext.Resource(rri, stateVersion)
+        //     from supplyHistory in dbContext.Set<ResourceSupplyHistory>()
+        //         .Where(h => h.ResourceId == resource.Id && h.FromStateVersion <= stateVersion)
+        //         .OrderByDescending(h => h.FromStateVersion)
+        //         .Take(1)
+        //     select supplyHistory;
+        // * This variant of the lateral join doesn't work because dbContext.ResourceSupplyHistoryFromResourceIdAtVersion
+        //   doesn't return an IQueryable with a parametrised expression (by resource.Id, say)
+        // return
+        //     from resource in dbContext.Resource(rri, stateVersion)
+        //     from supplyHistory in dbContext.ResourceSupplyHistoryFromResourceIdAtVersion(resource.Id, stateVersion)
+        //     select supplyHistory;
     }
 
-    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersion<TDbContext>(
+    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryFromResourceIdAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long resourceId,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        return dbContext.Set<ResourceSupplyHistory>()
+            .Where(h => h.ResourceId == resourceId && h.FromStateVersion <= stateVersion)
+            .OrderByDescending(h => h.FromStateVersion)
+            .Take(1);
+    }
+
+    public static IQueryable<ResourceSupplyHistory> SlowGroupedResourceSupplyHistoryAtVersion<TDbContext>(
         this TDbContext dbContext,
         long stateVersion
     )
