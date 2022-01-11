@@ -66,9 +66,10 @@ using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Substates;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Npgsql;
+using NpgsqlTypes;
 using System.Linq.Expressions;
 
 namespace Common.Database;
@@ -210,14 +211,6 @@ public static class DbQueryExtensions
     )
         where TDbContext : CommonDbContext
     {
-        var tuplePlaceholder = DbSetExtensions.CreateArrayOfTuplesPlaceholder(accountValidatorIds.Count, 2, 0);
-        var stateVersionPlaceholder = "{" + (accountValidatorIds.Count * 2) + "}";
-
-        var placeholderValues = Array.Empty<object>()
-            .Concat(accountValidatorIds.SelectMany(av => new object[] { av.AccountId, av.ValidatorId }))
-            .Concat(new object[] { stateVersion })
-            .ToArray();
-
         /*
          * Performance Notes:
          *
@@ -226,11 +219,19 @@ public static class DbQueryExtensions
          * - JOIN against GROUP BY with MAX - 200ms Execution
          * - Using variants of PARTITION BY - 750ms-1s Execution
          */
-        var query = @$"
+
+        var accountIdsParameter = new NpgsqlParameter("@account_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint)
+             { Value = accountValidatorIds.Select(av => av.AccountId).ToList() };
+        var validatorIdsParameter = new NpgsqlParameter("@validator_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint)
+            { Value = accountValidatorIds.Select(av => av.ValidatorId).ToList() };
+        var stateVersionParameter = new NpgsqlParameter("@state_version", NpgsqlDbType.Bigint)
+            { Value = stateVersion };
+
+        // NB - UNNEST can be used to zip arrays together
+        return dbContext.Set<AccountValidatorStakeHistory>()
+            .FromSqlInterpolated($@"
 SELECT h.*
-FROM (
-    VALUES {tuplePlaceholder}
-) av (account_id, validator_id)
+FROM UNNEST({accountIdsParameter}, {validatorIdsParameter}) av (account_id, validator_id)
 INNER JOIN LATERAL (
     SELECT
         h0.*
@@ -238,14 +239,11 @@ INNER JOIN LATERAL (
 	WHERE
 		h0.account_id = av.account_id AND
 		h0.validator_id = av.validator_id AND
-		h0.from_state_version <= {stateVersionPlaceholder}
+		h0.from_state_version <= {stateVersionParameter}
 	ORDER BY h0.from_state_version DESC
 	LIMIT 1
 ) h ON (true)
-";
-
-        return dbContext.Set<AccountValidatorStakeHistory>()
-            .FromSqlRaw(query, placeholderValues);
+");
     }
 
     public static IQueryable<AccountValidatorStakeHistory> PossiblySlowGroupedAccountValidatorStakeHistoryAtVersion<TDbContext>(
