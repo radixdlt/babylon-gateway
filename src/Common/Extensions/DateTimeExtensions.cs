@@ -63,6 +63,7 @@
  */
 
 using NodaTime;
+using System.Text;
 
 namespace Common.Extensions;
 
@@ -121,5 +122,62 @@ public static class DateTimeExtensions
     public static string FormatSecondsAgo(this Instant? dateTime)
     {
         return dateTime == null ? "never" : $"{(SystemClock.Instance.GetCurrentInstant() - dateTime.Value).FormatSecondsHumanReadable()} ago";
+    }
+
+    public static string FormatPositiveDurationHumanReadable(this Duration? durationOrNull)
+    {
+        if (durationOrNull == null)
+        {
+            return "never";
+        }
+
+        return durationOrNull.Value.FormatPositiveDurationHumanReadable();
+    }
+
+    public static string FormatPositiveDurationHumanReadable(this Duration duration)
+    {
+        var stringBuilder = new StringBuilder();
+        var notFirst = false;
+
+        AddPartialDuration(stringBuilder, duration.Days, "day", "days", ref notFirst);
+        AddPartialDuration(stringBuilder, duration.Hours, "hour", "hours", ref notFirst);
+        AddPartialDuration(stringBuilder, duration.Minutes, "minute", "minutes", ref notFirst);
+        AddPartialDuration(stringBuilder, duration.Seconds, "second", "seconds", ref notFirst);
+
+        if (!notFirst)
+        {
+            AddPartialDuration(stringBuilder, (int)duration.TotalMilliseconds, "millisecond", "milliseconds", ref notFirst);
+        }
+
+        if (!notFirst)
+        {
+            stringBuilder.Append("0 milliseconds");
+        }
+
+        return stringBuilder.ToString();
+    }
+
+    private static void AddPartialDuration(StringBuilder stringBuilder, int amount, string singular, string plural, ref bool notFirst)
+    {
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        if (notFirst)
+        {
+            stringBuilder.Append(", ");
+        }
+
+        if (amount == 1)
+        {
+            stringBuilder.Append($"1 {singular}");
+        }
+        else
+        {
+            stringBuilder.Append($"{amount} {plural}");
+        }
+
+        notFirst = true;
     }
 }

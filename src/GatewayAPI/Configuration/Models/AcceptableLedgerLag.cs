@@ -62,12 +62,21 @@
  * permissions under this License.
  */
 
-namespace Common.Exceptions;
+using Common.Exceptions;
 
-public class AppFatalExceptionDetectedException : Exception
+namespace GatewayAPI.Configuration.Models;
+
+public record AcceptableLedgerLag
 {
-    public AppFatalExceptionDetectedException(Exception innerException)
-        : base("An app fatal exception has been detected", innerException)
-    {
-    }
+    [ConfigurationKeyName("PreventReadRequestsIfDbLedgerIsBehind")]
+    public bool PreventReadRequestsIfDbLedgerIsBehind { get; set; } = true;
+
+    [ConfigurationKeyName("ReadRequestAcceptableDbLedgerLagSeconds")]
+    public long ReadRequestAcceptableDbLedgerLagSeconds { get; set; } = 30;
+
+    [ConfigurationKeyName("PreventConstructionRequestsIfDbLedgerIsBehind")]
+    public bool PreventConstructionRequestsIfDbLedgerIsBehind { get; set; } = true;
+
+    [ConfigurationKeyName("ConstructionRequestsAcceptableDbLedgerLagSeconds")]
+    public long ConstructionRequestsAcceptableDbLedgerLagSeconds { get; set; } = 30;
 }

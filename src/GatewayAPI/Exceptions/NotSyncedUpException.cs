@@ -62,12 +62,44 @@
  * permissions under this License.
  */
 
-namespace Common.Exceptions;
+using Common.Extensions;
+using NodaTime;
+using RadixGatewayApi.Generated.Model;
 
-public class AppFatalExceptionDetectedException : Exception
+namespace GatewayAPI.Exceptions;
+
+public enum NotSyncedUpRequestType
 {
-    public AppFatalExceptionDetectedException(Exception innerException)
-        : base("An app fatal exception has been detected", innerException)
+    Read,
+    Construction,
+}
+
+public class NotSyncedUpException : KnownGatewayErrorException
+{
+    private NotSyncedUpException(NotSyncedUpError gatewayError, string userFacingMessage)
+        : base(500, gatewayError, userFacingMessage)
     {
+    }
+
+    public static NotSyncedUpException FromRequest(NotSyncedUpRequestType requestType, Duration currentSyncDelay, long maxAllowedSyncDelaySeconds)
+    {
+        return new NotSyncedUpException(
+            new NotSyncedUpError(
+                RequestTypeAsString(requestType),
+                currentSyncDelaySeconds: (long)Math.Floor(currentSyncDelay.TotalSeconds),
+                maxAllowedSyncDelaySeconds: maxAllowedSyncDelaySeconds
+            ),
+            $"The Gateway API cannot return current results as its database is not sufficiently up to date with the Network's Ledger (it is currently {currentSyncDelay.FormatPositiveDurationHumanReadable()} behind)"
+        );
+    }
+
+    private static string RequestTypeAsString(NotSyncedUpRequestType requestType)
+    {
+        return requestType switch
+        {
+            NotSyncedUpRequestType.Read => "Read",
+            NotSyncedUpRequestType.Construction => "Construction",
+            _ => throw new ArgumentOutOfRangeException(nameof(requestType), requestType, null),
+        };
     }
 }
