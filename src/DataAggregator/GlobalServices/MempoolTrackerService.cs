@@ -154,27 +154,25 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     public async Task HandleMempoolChanges(CancellationToken token)
     {
-        var combinedMempool = CombineNodeMempools();
-
         var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
         var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+
+        var combinedMempool = CombineNodeMempools(mempoolConfiguration);
 
         await EnsureDbMempoolTransactionsCreatedOrMarkedReappeared(mempoolConfiguration, combinedMempool, token);
         await HandleMissingPendingTransactions(currentTimestamp, mempoolConfiguration, combinedMempool.Keys.ToHashSet(), token);
     }
 
-    private Dictionary<byte[], TransactionData> CombineNodeMempools()
+    private Dictionary<byte[], TransactionData> CombineNodeMempools(MempoolConfiguration mempoolConfiguration)
     {
-        var lastUpdatedToBeConsidered = Duration.FromSeconds(15);
-
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
-            .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(lastUpdatedToBeConsidered))
+            .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(mempoolConfiguration.ExcludeNodeMempoolsFromUnionIfStaleFor))
             .ToList();
 
         if (nodeMempoolsToConsider.Count == 0)
         {
             throw new Exception(
-                $"Don't have any recent mempool data from nodes within {lastUpdatedToBeConsidered.FormatSecondsHumanReadable()}"
+                $"Don't have any recent mempool data from nodes within {mempoolConfiguration.ExcludeNodeMempoolsFromUnionIfStaleFor.FormatSecondsHumanReadable()}"
             );
         }
 

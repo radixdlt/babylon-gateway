@@ -71,8 +71,15 @@ public record MempoolConfiguration
     [ConfigurationKeyName("TrackTransactionsNotSubmittedByThisGateway")]
     public bool TrackTransactionsNotSubmittedByThisGateway { get; set; } = true;
 
+    [ConfigurationKeyName("ExcludeNodeMempoolsFromUnionIfStaleForSeconds")]
+    public long ExcludeNodeMempoolsFromUnionIfStaleForSeconds { get; set; } = 10;
+
+    public Duration ExcludeNodeMempoolsFromUnionIfStaleFor => Duration.FromSeconds(ExcludeNodeMempoolsFromUnionIfStaleForSeconds);
+
+    // This should be above ExcludeNodeMempoolsFromUnionIfStaleFor ideally, as it provides defense in depth against
+    // adding a mempool transaction back to the database if a node crashes and so its information is stale
     [ConfigurationKeyName("PruneCommittedAfterSeconds")]
-    public long PruneCommittedAfterSeconds { get; set; } = 10;
+    public long PruneCommittedAfterSeconds { get; set; } = 20;
 
     public Duration PruneCommittedAfter => Duration.FromSeconds(PruneCommittedAfterSeconds);
 
