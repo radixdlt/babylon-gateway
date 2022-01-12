@@ -175,11 +175,20 @@ public class MempoolPrunerService : IMempoolPrunerService
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync(token);
 
+        var existingStatusLabelsNeedingUpdating = _mempoolDbSizeByStatus.GetAllLabelValues().SelectMany(x => x).ToHashSet();
+
         foreach (var countByStatus in counts)
         {
             var statusName =
                 MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(countByStatus.Status) ?? "UNKNOWN";
             _mempoolDbSizeByStatus.WithLabels(statusName).Set(countByStatus.Count);
+            existingStatusLabelsNeedingUpdating.Remove(statusName);
+        }
+
+        // If a known status doesn't appear in the database, it should be set to 0.
+        foreach (var statusName in existingStatusLabelsNeedingUpdating)
+        {
+            _mempoolDbSizeByStatus.WithLabels(statusName).Set(0);
         }
     }
 }
