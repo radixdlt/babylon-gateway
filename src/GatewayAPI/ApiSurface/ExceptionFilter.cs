@@ -94,7 +94,7 @@ public class ExceptionFilter : IActionFilter, IOrderedFilter
         // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
         var traceId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
 
-        context.Result = _exceptionHandler.CreateAndLogApiResultFromException(context.Exception!, traceId);
+        context.Result = _exceptionHandler.CreateAndLogApiResultFromException(context, context.Exception!, traceId);
         context.ExceptionHandled = true;
     }
 }

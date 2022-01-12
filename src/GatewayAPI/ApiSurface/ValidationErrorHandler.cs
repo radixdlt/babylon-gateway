@@ -104,6 +104,6 @@ public class ValidationErrorHandler : IValidationErrorHandler
         // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
         var traceId = Activity.Current?.Id ?? actionContext.HttpContext.TraceIdentifier;
 
-        return _exceptionHandler.CreateAndLogApiResultFromException(invalidRequestError, traceId);
+        return _exceptionHandler.CreateAndLogApiResultFromException(actionContext, invalidRequestError, traceId);
     }
 }
