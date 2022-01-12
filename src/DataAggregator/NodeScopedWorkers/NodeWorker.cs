@@ -63,6 +63,7 @@
  */
 
 using DataAggregator.GlobalWorkers;
+using Prometheus;
 
 namespace DataAggregator.NodeScopedWorkers;
 
@@ -76,10 +77,20 @@ public interface INodeWorker : ILoopedWorkerBase
 
 public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 {
-    protected NodeWorker(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayAfterErrorLoop, TimeSpan minDelayBetweenInfoLogs)
+    private static readonly Counter _nodeWorkerErrorsCount = Metrics
+        .CreateCounter(
+            "ng_workers_node_error_count",
+            "Number of non-fatal errors during the work loop in node workers.",
+            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error" } }
+        );
+
+    private readonly string _nodeName;
+
+    protected NodeWorker(ILogger logger, string nodeName, TimeSpan minDelayBetweenLoops, TimeSpan minDelayAfterErrorLoop, TimeSpan minDelayBetweenInfoLogs)
         // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
         : base(logger, BehaviourOnFault.Nothing, minDelayBetweenLoops, minDelayAfterErrorLoop, minDelayBetweenInfoLogs)
     {
+        _nodeName = nodeName;
     }
 
     public abstract bool IsEnabledByNodeConfiguration();
@@ -87,5 +98,10 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
     public override bool IsCurrentlyEnabled()
     {
         return IsEnabledByNodeConfiguration();
+    }
+
+    protected override void TrackNonFatalExceptionInWorkLoop(Exception ex)
+    {
+        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetType().Name).Inc();
     }
 }

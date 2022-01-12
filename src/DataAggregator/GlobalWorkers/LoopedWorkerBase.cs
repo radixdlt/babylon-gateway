@@ -90,7 +90,6 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
 {
     public bool IsFaulted { get; private set; }
 
-
     public Exception? FaultedException { get; private set; }
 
     public bool IsStoppedSuccessfully { get; private set; }
@@ -249,6 +248,10 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         return Task.CompletedTask;
     }
 
+    protected virtual void TrackNonFatalExceptionInWorkLoop(Exception ex)
+    {
+    }
+
     private async Task RunLoopWhilstNotCancelled(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -281,6 +284,8 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
                 // a key Worker to crash.
                 // If only fatally failing on known System errors is good enough for ASP.NET Core (eg during creating
                 // an API call response), it's good enough for us.
+
+                TrackNonFatalExceptionInWorkLoop(ex);
 
                 var remainingTime = GetRemainingRestartAfterErrorDelay();
                 _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", remainingTime.Milliseconds);
