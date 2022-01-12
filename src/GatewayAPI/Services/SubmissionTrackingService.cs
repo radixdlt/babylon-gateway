@@ -80,6 +80,7 @@ public interface ISubmissionTrackingService
     Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
 
     Task<MempoolTrackGuidance> TrackInitialSubmission(
+        Instant submittedTimestamp,
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
@@ -126,14 +127,13 @@ public class SubmissionTrackingService : ISubmissionTrackingService
     }
 
     public async Task<MempoolTrackGuidance> TrackInitialSubmission(
+        Instant submittedTimestamp,
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
         Core.ConstructionParseResponse parseResponse
     )
     {
-        var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
-
         var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
 
         if (existingMempoolTransaction != null)

@@ -75,9 +75,10 @@ namespace Common.Database.Models.Mempool;
 
 public enum MempoolTransactionStatus
 {
-    InNodeMempool, // We believe the transaction is in at least one node mempool, or has possibly (just) entered one
-    Missing,       // A transaction which was previously InNodeMempool, but at last check, was no longer seen in any mempool
-                   // after transitioning to Missing, we wait for a further delay before attempting resubmission, to allow the
+    SubmittedOrKnownInNodeMempool, // We believe the transaction is in at least one node mempool, or will hopefully (just) be entering one, or has entered one
+    Missing,       // A transaction which was previously SubmittedOrKnownInNodeMempool, but at last check, was past its
+                   // post-submission grace period, and no longer seen in any mempool.
+                   // After transitioning to Missing, we wait for a further delay before attempting resubmission, to allow the
                    // Gateway DB time to sync and mark it committed
     ResolvedButUnknownTillSyncedUp, // A transaction has been marked as substate not found by a node at resubmission, but we've yet to see it on ledger
                                     // because the aggregator service is not sufficiently synced up - so we don't know if it's been committed
@@ -90,7 +91,7 @@ public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase
 {
     public static readonly Dictionary<MempoolTransactionStatus, string> Conversion = new()
     {
-        { MempoolTransactionStatus.InNodeMempool, "IN_NODE_MEMPOOL" },
+        { MempoolTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
         { MempoolTransactionStatus.Missing, "MISSING" },
         { MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
         { MempoolTransactionStatus.Failed, "FAILED" },
@@ -324,7 +325,7 @@ public class MempoolTransaction
 
     public void MarkAsSeenInAMempool(Instant? timestamp = null)
     {
-        Status = MempoolTransactionStatus.InNodeMempool;
+        Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
         FirstSeenInMempoolTimestamp ??= timestamp ?? SystemClock.Instance.GetCurrentInstant();
     }
 
@@ -346,7 +347,7 @@ public class MempoolTransaction
 
     public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
     {
-        Status = MempoolTransactionStatus.InNodeMempool;
+        Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 

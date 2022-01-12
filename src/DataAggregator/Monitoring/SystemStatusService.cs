@@ -83,7 +83,7 @@ public interface ISystemStatusService
 
     bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration);
 
-    bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant);
+    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant);
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
@@ -137,10 +137,10 @@ public class SystemStatusService : ISystemStatusService
             && _topOfLedger.NormalizedRoundTimestamp.WithinPeriodOfNow(duration);
     }
 
-    public bool IsTopOfDbLedgerValidatorCommitTimestampAfter(Instant instant)
+    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant)
     {
         return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp >= instant;
+            && _topOfLedger.NormalizedRoundTimestamp + assumedBoundOnClockDrift >= instant;
     }
 
     public bool IsPrimary()

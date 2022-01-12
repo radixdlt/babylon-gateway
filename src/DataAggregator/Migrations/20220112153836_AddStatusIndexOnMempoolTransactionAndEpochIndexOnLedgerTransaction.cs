@@ -62,87 +62,38 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using Common.Extensions;
-using GatewayAPI.Configuration;
-using GatewayAPI.Configuration.Models;
-using GatewayAPI.Services;
-using RadixCoreApi.Generated.Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace GatewayAPI.CoreCommunications;
+#nullable disable
 
-public interface ICoreApiHandler
+namespace DataAggregator.Migrations
 {
-    NetworkIdentifier GetNetworkIdentifier();
-
-    CoreApiNode GetCoreNodeConnectedTo();
-
-    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
-
-    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request);
-
-    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request);
-
-    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request);
-
-    Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
-}
-
-/// <summary>
-/// This should be Scoped to the request, so it picks up a fresh HttpClient per request.
-/// </summary>
-public class CoreApiHandler : ICoreApiHandler
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiProvider _coreApiProvider;
-
-    public CoreApiHandler(IGatewayApiConfiguration configuration, INetworkConfigurationProvider networkConfigurationProvider, HttpClient httpClient)
+    public partial class AddStatusIndexOnMempoolTransactionAndEpochIndexOnLedgerTransaction : Migration
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(configuration, httpClient);
-    }
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateIndex(
+                name: "IX_mempool_transactions_status",
+                table: "mempool_transactions",
+                column: "status");
 
-    public NetworkIdentifier GetNetworkIdentifier()
-    {
-        return new NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
-    }
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_epoch",
+                table: "ledger_transactions",
+                column: "epoch",
+                unique: true,
+                filter: "is_start_of_epoch = true");
+        }
 
-    public CoreApiNode GetCoreNodeConnectedTo()
-    {
-        return _coreApiProvider.CoreApiNode;
-    }
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_mempool_transactions_status",
+                table: "mempool_transactions");
 
-    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request));
-    }
-
-    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request));
-    }
-
-    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request));
-    }
-
-    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request));
-    }
-
-    public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(request, token));
-    }
-
-    private static ICoreApiProvider ChooseCoreApiProvider(IGatewayApiConfiguration configuration, HttpClient httpClient)
-    {
-        var chosenNode = configuration.GetCoreNodes()
-            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .GetRandomBy(n => (double)n.RequestWeighting);
-
-        return new CoreApiProvider(chosenNode, httpClient);
+            migrationBuilder.DropIndex(
+                name: "IX_ledger_transactions_epoch",
+                table: "ledger_transactions");
+        }
     }
 }

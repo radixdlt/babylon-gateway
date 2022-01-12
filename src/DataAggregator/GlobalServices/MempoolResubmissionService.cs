@@ -113,6 +113,12 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             "Number of mempool transactions marked as InNodeMempool after resubmission"
         );
 
+    private static readonly Counter _dbTransactionsMarkedAsFailedForTimeoutCount = Metrics
+        .CreateCounter(
+            "ng_db_mempool_transactions_marked_as_failed_for_timeout_count",
+            "Number of mempool transactions in the DB marked as failed due to timeout as they won't be resubmitted"
+        );
+
     private static readonly Counter _transactionResubmissionAttemptCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_resubmission_attempt_count",
@@ -168,25 +174,64 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         const int BatchSize = 30;
 
+        var instantForTransactionChoosing = SystemClock.Instance.GetCurrentInstant();
+        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+
+        var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
+
+        var submittedAt = SystemClock.Instance.GetCurrentInstant();
+
+        // The timeout should be relative to the submittedAt time we save to the DB, so needs to include the time for initial db saving (which should be very quick).
+        using var ctsWithSubmissionTimeout = CancellationTokenSource.CreateLinkedTokenSource(token);
+        ctsWithSubmissionTimeout.CancelAfter(mempoolConfiguration.ResubmissionNodeRequestTimeout.ToTimeSpan());
+
+        var transactionsToResubmitWithNodes = MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
+            mempoolConfiguration,
+            transactionsToResubmit,
+            submittedAt
+        );
+
+        // We save as assumed successfully submitted here to lock in the fact we're resubmitting - in case we hit an
+        // exception below and fail to resubmit. By virtue of the ConcurrencyToken on the Status, this protects us
+        // against resubmitting the same transaction multiple times - even if (eg) two data aggregators are running.
+        await dbContext.SaveChangesAsync(token);
+
+        await ResubmitAllAndUpdateTransactionStatusesOnFailure(mempoolConfiguration, transactionsToResubmitWithNodes, submittedAt, ctsWithSubmissionTimeout.Token);
+
+        await dbContext.SaveChangesAsync(token);
+    }
+
+    private async Task<List<MempoolTransaction>> SelectTransactionsToResubmit(
+        AggregatorDbContext dbContext,
+        Instant instantForTransactionChoosing,
+        MempoolConfiguration mempoolConfiguration,
+        int batchSize,
+        CancellationToken token
+    )
+    {
         var transactionsToResubmit =
-            await GetMempoolTransactionsNeedingResubmission(dbContext)
+            await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolConfiguration, dbContext)
                 .OrderBy(mt => mt.LastSubmittedToNodeTimestamp)
-                .Take(BatchSize)
+                .Take(batchSize)
                 .ToListAsync(token);
 
-        var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < BatchSize
+        var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < batchSize
             ? transactionsToResubmit.Count
-            : await GetMempoolTransactionsNeedingResubmission(dbContext).CountAsync(token);
+            : await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolConfiguration, dbContext)
+                .CountAsync(token);
 
-        _resubmissionQueueSize.Set(0);
+        _resubmissionQueueSize.Set(totalTransactionsNeedingResubmission);
 
         if (totalTransactionsNeedingResubmission == 0)
         {
             _logger.Log(_emptyResubmissionQueueLogLimiter.GetLogLevel(), "There are no transactions needing resubmission");
         }
-        else if (totalTransactionsNeedingResubmission <= BatchSize)
+        else if (totalTransactionsNeedingResubmission <= batchSize)
         {
-            _logger.LogInformation("Preparing to resubmit {TransactionsCount} transactions", totalTransactionsNeedingResubmission);
+            _logger.LogInformation(
+                "Preparing to resubmit all {TransactionsCount} transactions needing resubmission",
+                totalTransactionsNeedingResubmission
+            );
         }
         else
         {
@@ -197,50 +242,54 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             );
         }
 
-        var submittedAt = SystemClock.Instance.GetCurrentInstant();
-        var submissionResults = await ResubmitAll(transactionsToResubmit, token);
+        return transactionsToResubmit;
+    }
 
-        foreach (var (transaction, failed, failureReason, failureExplanation, nodeName) in submissionResults)
+    private List<MempoolTransactionWithChosenNode> MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
+        MempoolConfiguration mempoolConfiguration,
+        List<MempoolTransaction> transactionsWantingResubmission,
+        Instant submittedAt
+    )
+    {
+        var transactionsToResubmitWithNodes = new List<MempoolTransactionWithChosenNode>();
+
+        foreach (var transaction in transactionsWantingResubmission)
         {
-            if (failed)
-            {
-                var isDoubleSpendWhichCouldBeItself =
-                    failureReason!.Value == MempoolTransactionFailureReason.DoubleSpend
-                    && !_systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampAfter(transaction.LastDroppedOutOfMempoolTimestamp!.Value);
-                if (isDoubleSpendWhichCouldBeItself)
-                {
-                    // If we're not synced up, we can't be sure if the double spend from the node is actually just the
-                    // transaction itself having already hit the ledger! Let's just assume it submitted correctly and
-                    // resubmit.
+            var resubmissionLimit = transaction.LastSubmittedToGatewayTimestamp!.Value + mempoolConfiguration.StopResubmittingAfter;
 
-                    _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount.Inc();
-                    transaction.MarkAsResolvedButUnknownAfterSubmittedToNode(nodeName, submittedAt);
-                }
-                else
-                {
-                    _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount.Inc();
-                    transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason!.Value, failureExplanation!, submittedAt);
-                }
+            var canResubmit = submittedAt <= resubmissionLimit;
+
+            if (canResubmit)
+            {
+                var nodeToSubmitTo = GetRandomCoreApi();
+                _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount.Inc();
+                transaction.MarkAsAssumedSuccessfullySubmittedToNode(nodeToSubmitTo.Name, submittedAt);
+                transactionsToResubmitWithNodes.Add(new MempoolTransactionWithChosenNode(transaction, nodeToSubmitTo));
             }
             else
             {
-                _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount.Inc();
-                transaction.MarkAsAssumedSuccessfullySubmittedToNode(nodeName, submittedAt);
+                _dbTransactionsMarkedAsFailedForTimeoutCount.Inc();
+                transaction.MarkAsFailed(
+                    MempoolTransactionFailureReason.Timeout,
+                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
+                );
             }
         }
 
-        await dbContext.SaveChangesAsync(token);
+        return transactionsToResubmitWithNodes;
     }
 
-    private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(AggregatorDbContext dbContext)
+    private record MempoolTransactionWithChosenNode(MempoolTransaction MempoolTransaction, NodeAppSettings Node);
+
+    private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(
+        Instant currentTimestamp,
+        MempoolConfiguration mempoolConfiguration,
+        AggregatorDbContext dbContext
+    )
     {
-        var timeouts = _aggregatorConfiguration.GetMempoolConfiguration();
+        var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolConfiguration.MinDelayBetweenResubmissions;
 
-        var allowResubmissionIfLastSubmittedBefore = SystemClock.Instance.GetCurrentInstant() -
-                                                     Duration.FromSeconds(timeouts.MinDelayBetweenResubmissionsSeconds);
-
-        var allowResubmissionIfDroppedOutOfMempoolBefore = SystemClock.Instance.GetCurrentInstant() -
-                                                     Duration.FromSeconds(timeouts.MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
+        var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolConfiguration.MinDelayBetweenMissingFromMempoolAndResubmission;
 
         var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration.FromSeconds(60));
 
@@ -260,6 +309,46 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             );
     }
 
+    private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
+        MempoolConfiguration mempoolConfiguration,
+        List<MempoolTransactionWithChosenNode> transactionsToResubmitWithNodes,
+        Instant submittedAt,
+        CancellationToken token
+    )
+    {
+        var submissionResults = await ResubmitAll(transactionsToResubmitWithNodes, token);
+
+        foreach (var (transaction, failed, failureReason, failureExplanation, nodeName) in submissionResults)
+        {
+            if (!failed)
+            {
+                continue;
+            }
+
+            var isDoubleSpendWhichCouldBeItself =
+                failureReason!.Value == MempoolTransactionFailureReason.DoubleSpend
+                && !_systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
+                    mempoolConfiguration.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,
+                    transaction.LastDroppedOutOfMempoolTimestamp!.Value
+                );
+
+            if (isDoubleSpendWhichCouldBeItself)
+            {
+                // If we're not synced up, we can't be sure if the double spend from the node is actually just the
+                // transaction itself having already hit the ledger! Let's just assume it submitted correctly and
+                // resubmit.
+
+                _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount.Inc();
+                transaction.MarkAsResolvedButUnknownAfterSubmittedToNode(nodeName, submittedAt);
+            }
+            else
+            {
+                _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount.Inc();
+                transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt);
+            }
+        }
+    }
+
     private record SubmissionResult(
         MempoolTransaction MempoolTransaction,
         bool TransactionInvalid,
@@ -268,16 +357,17 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         string NodeName
     );
 
-    private async Task<SubmissionResult[]> ResubmitAll(List<MempoolTransaction> transactionsToResubmit, CancellationToken token)
+    private async Task<SubmissionResult[]> ResubmitAll(List<MempoolTransactionWithChosenNode> transactionsToResubmit, CancellationToken token)
     {
         return await Task.WhenAll(transactionsToResubmit.Select(t => Resubmit(t, token)));
     }
 
     // NB - The error handling here should mirror the resubmission in ConstructionAndSubmissionService
-    private async Task<SubmissionResult> Resubmit(MempoolTransaction transaction, CancellationToken cancellationToken)
+    private async Task<SubmissionResult> Resubmit(MempoolTransactionWithChosenNode transactionWithNode, CancellationToken cancellationToken)
     {
         _transactionResubmissionAttemptCount.Inc();
-        var chosenNode = GetRandomCoreApi();
+        var transaction = transactionWithNode.MempoolTransaction;
+        var chosenNode = transactionWithNode.Node;
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().NodeAppSettings = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
@@ -321,6 +411,12 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
             var failureExplanation = $"Core API Exception: {ex.Error.GetType().Name} on resubmission";
             return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, failureExplanation, chosenNode.Name);
+        }
+        catch (OperationCanceledException)
+        {
+            _transactionResubmissionErrorCount.Inc();
+            _transactionResubmissionResolutionByResultCount.WithLabels("request_timeout").Inc();
+            return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
         catch (Exception)
         {

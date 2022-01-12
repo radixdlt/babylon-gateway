@@ -138,6 +138,7 @@ public class CommonDbContext : DbContext
     {
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
+        HookupMempoolTransactions(modelBuilder);
         HookupLedgerOperationGroups(modelBuilder);
         HookupNormalizedEntities(modelBuilder);
         HookupSubstates(modelBuilder);
@@ -207,6 +208,18 @@ public class CommonDbContext : DbContext
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
             .HasFilter("is_start_of_round = true");
+
+        // This index allows us to use the LedgerTransactions as an Epoch table, to look up the start of each epoch
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => new { lt.Epoch })
+            .IsUnique()
+            .HasFilter("is_start_of_epoch = true");
+    }
+
+    private static void HookupMempoolTransactions(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<MempoolTransaction>()
+            .HasIndex(lt => lt.Status);
     }
 
     private static void HookupLedgerOperationGroups(ModelBuilder modelBuilder)

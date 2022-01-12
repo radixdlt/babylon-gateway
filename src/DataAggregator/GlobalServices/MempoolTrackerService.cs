@@ -67,13 +67,13 @@ using Common.Database.Models.Mempool;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.Configuration;
+using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Prometheus;
 using System.Collections.Concurrent;
-
 using Core = RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.GlobalServices;
@@ -128,12 +128,6 @@ public class MempoolTrackerService : IMempoolTrackerService
             "Number of mempool transactions in the DB which were marked as missing but now appear in a mempool again"
         );
 
-    private static readonly Counter _dbTransactionsMarkedAsFailedForTimeoutCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_as_failed_for_timeout_count",
-            "Number of mempool transactions in the DB marked as failed due to timeout as they won't be resubmitted"
-        );
-
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
     private readonly IActionInferrer _actionInferrer;
@@ -162,8 +156,11 @@ public class MempoolTrackerService : IMempoolTrackerService
     {
         var combinedMempool = CombineNodeMempools();
 
-        await EnsureDbMempoolTransactionsCreatedOrMarkedReappeared(combinedMempool, token);
-        await HandleMissingPendingTransactions(combinedMempool.Keys.ToHashSet(), token);
+        var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
+        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+
+        await EnsureDbMempoolTransactionsCreatedOrMarkedReappeared(mempoolConfiguration, combinedMempool, token);
+        await HandleMissingPendingTransactions(currentTimestamp, mempoolConfiguration, combinedMempool.Keys.ToHashSet(), token);
     }
 
     private Dictionary<byte[], TransactionData> CombineNodeMempools()
@@ -210,6 +207,7 @@ public class MempoolTrackerService : IMempoolTrackerService
     }
 
     private async Task EnsureDbMempoolTransactionsCreatedOrMarkedReappeared(
+        MempoolConfiguration mempoolConfiguration,
         Dictionary<byte[], TransactionData> combinedMempool,
         CancellationToken token
     )
@@ -237,18 +235,22 @@ public class MempoolTrackerService : IMempoolTrackerService
             token
         );
 
-        var newDbMempoolTransactions = newTransactions
-            .Select((transactionData, index) => MempoolTransaction.NewFirstSeenInMempool(
-                transactionData.Id,
-                transactionData.Payload,
-                gatewayTransactionDetails[index],
-                transactionData.SeenAt
-            ));
+        var newTransactionsAddedCount = 0;
 
-        _dbTransactionsAddedDueToNodeMempoolAppearanceCount.Inc(newTransactions.Count);
+        if (mempoolConfiguration.TrackTransactionsNotSubmittedByThisGateway)
+        {
+            var newDbMempoolTransactions = newTransactions
+                .Select((transactionData, index) => MempoolTransaction.NewFirstSeenInMempool(
+                    transactionData.Id,
+                    transactionData.Payload,
+                    gatewayTransactionDetails[index],
+                    transactionData.SeenAt
+                ));
 
-        dbContext.MempoolTransactions
-            .AddRange(newDbMempoolTransactions);
+            newTransactionsAddedCount = newTransactions.Count;
+
+            dbContext.MempoolTransactions.AddRange(newDbMempoolTransactions);
+        }
 
         var reappearedTransactions = existingDbTransactionsInANodeMempool
             .Where(mt => mt.Status == MempoolTransactionStatus.Missing)
@@ -259,6 +261,8 @@ public class MempoolTrackerService : IMempoolTrackerService
             missingTransaction.MarkAsSeenInAMempool();
         }
 
+        // If save changes partially succeeds, we might double-count these metrics
+        _dbTransactionsAddedDueToNodeMempoolAppearanceCount.Inc(newTransactionsAddedCount);
         _dbTransactionsReappearedCount.Inc(reappearedTransactions.Count);
 
         var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
@@ -268,8 +272,9 @@ public class MempoolTrackerService : IMempoolTrackerService
         if (newTransactions.Count > 0 || reappearedTransactions.Count > 0)
         {
             _logger.LogInformation(
-                "{NewTransactionsCount} transactions created and {ReappearedTransactionsCount} updated in {DbUpdatesMs}ms",
+                "{UntrackedTransactionsCount} untracked transactions detected, {TransactionsAddedCount} created and {ReappearedTransactionsCount} updated in {DbUpdatesMs}ms",
                 newTransactions.Count,
+                newTransactionsAddedCount,
                 reappearedTransactions.Count,
                 dbUpdateMs
             );
@@ -277,53 +282,33 @@ public class MempoolTrackerService : IMempoolTrackerService
     }
 
     private async Task HandleMissingPendingTransactions(
+        Instant currentTimestamp,
+        MempoolConfiguration mempoolConfiguration,
         HashSet<byte[]> seenTransactionIds,
         CancellationToken token
     )
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
+        var submissionGracePeriodCutOff = currentTimestamp - mempoolConfiguration.PostSubmissionGracePeriodBeforeCanBeMarkedMissing;
+
         var previouslyTrackedTransactionsNowMissingFromNodeMempools = await dbContext.MempoolTransactions
-            .Where(mt => mt.Status == MempoolTransactionStatus.InNodeMempool)
+            .Where(mt => mt.Status == MempoolTransactionStatus.SubmittedOrKnownInNodeMempool)
+            .Where(mt =>
+                !mt.SubmittedByThisGateway
+                ||
+                (mt.SubmittedByThisGateway && (
+                    mt.LastSubmittedToNodeTimestamp == null // Shouldn't happen, but protect against it regardless
+                    || mt.LastSubmittedToNodeTimestamp < submissionGracePeriodCutOff
+                ))
+            )
             .Where(mempoolItem => !seenTransactionIds.Contains(mempoolItem.TransactionIdentifierHash))
             .ToListAsync(token);
 
-        var timeouts = _aggregatorConfiguration.GetMempoolConfiguration();
-        var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
-
         foreach (var mempoolItem in previouslyTrackedTransactionsNowMissingFromNodeMempools)
         {
-            if (!mempoolItem.SubmittedByThisGateway)
-            {
-                _dbTransactionsMarkedAsMissingCount.Inc();
-                mempoolItem.MarkAsMissing();
-                continue;
-            }
-
-            var nextResubmissionTime = mempoolItem.LastSubmittedToNodeTimestamp == null
-                ? currentTimestamp
-                : DateTimeExtensions.LatestOf(
-                    mempoolItem.LastSubmittedToNodeTimestamp.Value + timeouts.MinDelayBetweenResubmissions,
-                    currentTimestamp
-                );
-
-            var resubmissionLimit = mempoolItem.LastSubmittedToGatewayTimestamp!.Value + timeouts.StopResubmittingAfter;
-
-            var canResubmit = nextResubmissionTime <= resubmissionLimit;
-
-            if (canResubmit)
-            {
-                _dbTransactionsMarkedAsMissingCount.Inc();
-                mempoolItem.MarkAsMissing();
-            }
-            else
-            {
-                _dbTransactionsMarkedAsFailedForTimeoutCount.Inc();
-                mempoolItem.MarkAsFailed(
-                    MempoolTransactionFailureReason.Timeout,
-                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
-                );
-            }
+            _dbTransactionsMarkedAsMissingCount.Inc();
+            mempoolItem.MarkAsMissing();
         }
 
         await dbContext.SaveChangesAsync(token);

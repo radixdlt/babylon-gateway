@@ -805,7 +805,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211210063157_InitialCreate') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20211210063157_InitialCreate', '6.0.0');
+    VALUES ('20211210063157_InitialCreate', '6.0.1');
     END IF;
 END $EF$;
 COMMIT;
@@ -852,7 +852,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211212234011_FurtherTweaksToMempoolTransactions') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20211212234011_FurtherTweaksToMempoolTransactions', '6.0.0');
+    VALUES ('20211212234011_FurtherTweaksToMempoolTransactions', '6.0.1');
     END IF;
 END $EF$;
 COMMIT;
@@ -871,7 +871,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211213012013_MinorRenameToMempoolTransactionsStatusColumn') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20211213012013_MinorRenameToMempoolTransactionsStatusColumn', '6.0.0');
+    VALUES ('20211213012013_MinorRenameToMempoolTransactionsStatusColumn', '6.0.1');
     END IF;
 END $EF$;
 COMMIT;
@@ -904,7 +904,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211213173329_UseRoundTimestampOverNormalizedTimestamp') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20211213173329_UseRoundTimestampOverNormalizedTimestamp', '6.0.0');
+    VALUES ('20211213173329_UseRoundTimestampOverNormalizedTimestamp', '6.0.1');
     END IF;
 END $EF$;
 COMMIT;
@@ -937,7 +937,33 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20211222163306_AddLedgerStatusEntity') THEN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-    VALUES ('20211222163306_AddLedgerStatusEntity', '6.0.0');
+    VALUES ('20211222163306_AddLedgerStatusEntity', '6.0.1');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220112153836_AddStatusIndexOnMempoolTransactionAndEpochIndexOnLedgerTransaction') THEN
+    CREATE INDEX "IX_mempool_transactions_status" ON mempool_transactions (status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220112153836_AddStatusIndexOnMempoolTransactionAndEpochIndexOnLedgerTransaction') THEN
+    CREATE UNIQUE INDEX "IX_ledger_transactions_epoch" ON ledger_transactions (epoch) WHERE is_start_of_epoch = true;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220112153836_AddStatusIndexOnMempoolTransactionAndEpochIndexOnLedgerTransaction') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20220112153836_AddStatusIndexOnMempoolTransactionAndEpochIndexOnLedgerTransaction', '6.0.1');
     END IF;
 END $EF$;
 COMMIT;

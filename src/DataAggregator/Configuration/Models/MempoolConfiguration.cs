@@ -68,22 +68,50 @@ namespace DataAggregator.Configuration.Models;
 
 public record MempoolConfiguration
 {
+    [ConfigurationKeyName("TrackTransactionsNotSubmittedByThisGateway")]
+    public bool TrackTransactionsNotSubmittedByThisGateway { get; set; } = true;
+
     [ConfigurationKeyName("PruneCommittedAfterSeconds")]
     public long PruneCommittedAfterSeconds { get; set; } = 10;
 
     public Duration PruneCommittedAfter => Duration.FromSeconds(PruneCommittedAfterSeconds);
 
+    // This is designed to give time for:
+    // * The request to be sent (ie the timeout on the submission request should be less than this)
+    // * The MempoolTracker to start seeing the transaction in its mempools (if the mempool is backed up) - as it can
+    //   read in stale data from nodes.
+    // This value won't have any safety implications, but may improve monitoring / db churn.
+    // After being marked missing, we still need to wait MinDelayBetweenMissingFromMempoolAndResubmissionSeconds before
+    // we can resubmit.
+    [ConfigurationKeyName("PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds")]
+    public long PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds { get; set; } = 5000;
+
+    public Duration PostSubmissionGracePeriodBeforeCanBeMarkedMissing => Duration.FromMilliseconds(PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds);
+
+    [ConfigurationKeyName("ResubmissionNodeRequestTimeoutMilliseconds")]
+    public long ResubmissionNodeRequestTimeoutMilliseconds { get; set; } = 4000;
+
+    public Duration ResubmissionNodeRequestTimeout => Duration.FromMilliseconds(ResubmissionNodeRequestTimeoutMilliseconds);
+
+    [ConfigurationKeyName("AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds")]
+    public long AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds { get; set; } = 1000;
+
+    public Duration AssumedBoundOnNetworkLedgerDataAggregatorClockDrift => Duration.FromMilliseconds(AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds);
+
     [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
     public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
+
+    public Duration MinDelayBetweenResubmissions => Duration.FromSeconds(MinDelayBetweenResubmissionsSeconds);
 
     // NB - A transaction goes missing from the mempool when it gets put onto the ledger, but it may take some time
     // for the aggregator to see the committed transaction. This delay should be long enough that, under normal
     // operation, we'll have seen the transaction committed before we attempt to resubmit it -- as resubmitting a
-    // committed transaction will result in us seeing a double spend, and marking it as failed incorrectly
+    // committed transaction may result in us seeing a self spend, and we're willing to sacrifice some delay on
+    // resubmission to likely ideally avoid getting a ResolvedButUnknownTillSyncedUp state in most cases.
     [ConfigurationKeyName("MinDelayBetweenMissingFromMempoolAndResubmissionSeconds")]
     public long MinDelayBetweenMissingFromMempoolAndResubmissionSeconds { get; set; } = 10;
 
-    public Duration MinDelayBetweenResubmissions => Duration.FromSeconds(MinDelayBetweenResubmissionsSeconds);
+    public Duration MinDelayBetweenMissingFromMempoolAndResubmission => Duration.FromSeconds(MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
 
     [ConfigurationKeyName("StopResubmittingAfterSeconds")]
     public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;

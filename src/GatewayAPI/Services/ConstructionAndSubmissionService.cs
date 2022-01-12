@@ -70,6 +70,7 @@ using GatewayAPI.ApiSurface;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
+using NodaTime;
 using Prometheus;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
@@ -438,7 +439,11 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     {
         var parseResponse = await HandleParseSignedTransaction(signedTransaction);
 
+        var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
+        using var submissionTimeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(3000));
+
         var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(
+            submittedTimestamp,
             signedTransaction.Bytes,
             transactionIdentifierHash,
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
@@ -462,10 +467,13 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         try
         {
-            var result = await _coreApiHandler.SubmitTransaction(new Core.ConstructionSubmitRequest(
-                _coreApiHandler.GetNetworkIdentifier(),
-                signedTransaction.AsString
-            ));
+            var result = await _coreApiHandler.SubmitTransaction(
+                new Core.ConstructionSubmitRequest(
+                    _coreApiHandler.GetNetworkIdentifier(),
+                    signedTransaction.AsString
+                ),
+                submissionTimeoutCts.Token
+            );
 
             if (result.Duplicate)
             {
@@ -507,9 +515,18 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             );
             throw;
         }
+        catch (OperationCanceledException ex)
+        {
+            _transactionSubmitResolutionByResultCount.WithLabels("request_timeout").Inc();
+            _logger.LogWarning(
+                ex,
+                "Request timeout submitting transaction with hash {TransactionHash}",
+                transactionIdentifierHash.ToHex()
+            );
+        }
         catch (Exception ex)
         {
-            // Any other kind of exception is unknown - eg it could be a connection drop or a 500 from the Core API
+            // Any other kind of exception is unknown - eg it a connection drop or a 500 from the Core API.
             // In theory, the transaction could have been submitted -- so we return success and
             // if it wasn't submitted successfully, it'll be retried automatically by the resubmission service in
             // any case.

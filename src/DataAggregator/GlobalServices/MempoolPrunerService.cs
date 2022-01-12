@@ -117,17 +117,20 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         await UpdateSizeMetrics(dbContext, token);
 
-        var times = _aggregatorConfiguration.GetMempoolConfiguration();
+        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
 
         var currTime = SystemClock.Instance.GetCurrentInstant();
 
-        var pruneIfCommittedBefore = currTime.Minus(Duration.FromSeconds(times.PruneCommittedAfterSeconds));
-        var pruneIfLastGatewaySubmissionBefore = currTime.Minus(Duration.FromSeconds(times.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds));
-        var pruneIfFirstSeenBefore = currTime.Minus(Duration.FromSeconds(times.PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds));
+        var pruneIfCommittedBefore = currTime.Minus(mempoolConfiguration.PruneCommittedAfter);
+        var pruneIfLastGatewaySubmissionBefore = currTime.Minus(mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission);
+        var pruneIfFirstSeenBefore = currTime.Minus(mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceFirstSeen);
 
-        var pruneIfNotSeenSince = currTime.Minus(Duration.FromSeconds(times.PruneRequiresMissingFromMempoolForSeconds));
+        var pruneIfNotSeenSince = currTime.Minus(mempoolConfiguration.PruneRequiresMissingFromMempoolFor);
 
-        var aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampAfter(pruneIfCommittedBefore);
+        var aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions = _systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
+            mempoolConfiguration.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,
+            pruneIfCommittedBefore
+        );
 
         var transactionsToPrune = await dbContext.MempoolTransactions
             .Where(mt =>

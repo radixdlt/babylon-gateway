@@ -194,7 +194,7 @@ public class TransactionQuerier : ITransactionQuerier
                 transactionContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
                 transactionContents.LedgerStateVersion ?? 0
             ),
-            MempoolTransactionStatus.InNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
             MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
