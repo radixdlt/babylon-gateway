@@ -218,16 +218,27 @@ public class MempoolTrackerService : IMempoolTrackerService
 
         var mempoolTransactionIds = combinedMempool.Keys.ToList(); // Npgsql optimizes List<> Contains
 
-        var existingDbTransactionsInANodeMempool = await dbContext.MempoolTransactions
+        var existingDbMempoolTransactionsInANodeMempool = await dbContext.MempoolTransactions
             .Where(mt => mempoolTransactionIds.Contains(mt.TransactionIdentifierHash))
             .ToListAsync(token);
 
-        var existingTransactionIds = existingDbTransactionsInANodeMempool
+        var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = await dbContext.LedgerTransactions
+            .Where(lt => mempoolTransactionIds.Contains(lt.TransactionIdentifierHash))
+            .Select(lt => lt.TransactionIdentifierHash)
+            .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
+
+        var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = existingDbMempoolTransactionsInANodeMempool
             .Select(et => et.TransactionIdentifierHash)
             .ToHashSet(ByteArrayEqualityComparer.Default);
 
         var newTransactions = combinedMempool.Values
-            .Where(mt => !existingTransactionIds.Contains(mt.Id))
+            .Where(mt =>
+                !transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb.Contains(mt.Id)
+                &&
+                // If a node mempool gets really far behind, it could include committed transactions we've already pruned
+                // from our MempoolTranasctions table. Let's ensure these don't get re-added.
+                !transactionIdsInANodeMempoolWhichAreAlreadyCommitted.Contains(mt.Id)
+            )
             .ToList();
 
         var gatewayTransactionDetails = await parsedTransactionMapper.MapToGatewayTransactionContents(
@@ -252,7 +263,7 @@ public class MempoolTrackerService : IMempoolTrackerService
             dbContext.MempoolTransactions.AddRange(newDbMempoolTransactions);
         }
 
-        var reappearedTransactions = existingDbTransactionsInANodeMempool
+        var reappearedTransactions = existingDbMempoolTransactionsInANodeMempool
             .Where(mt => mt.Status == MempoolTransactionStatus.Missing)
             .ToList();
 
