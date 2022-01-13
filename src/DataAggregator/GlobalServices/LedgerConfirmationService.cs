@@ -174,6 +174,12 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             "Unix timestamp of the start of the last attempt to extend the ledger (in seconds, to millisecond precision)."
         );
 
+    private static readonly Gauge _peakLedgerLagBeforeLastCommit = Metrics
+        .CreateGauge(
+            "ng_ledger_commit_peak_round_timestamp_data_aggregator_clock_delay_before_last_commit_seconds",
+            "The worst delay measured between the DB and the round timestamp at last commit (in seconds, to millisecond precision)."
+        );
+
     private static readonly Gauge _ledgerStateVersion = Metrics
         .CreateGauge(
             "ng_ledger_commit_tip_state_version",
@@ -473,9 +479,11 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         _systemStatusService.RecordTransactionsCommitted();
 
+        var currentTimestampSeconds = SystemClock.Instance.GetCurrentInstant().ToUnixTimeSecondsWithMilliPrecision();
+        _peakLedgerLagBeforeLastCommit.Set(currentTimestampSeconds - ledgerExtension.ParentSummary.RoundTimestamp.ToUnixTimeSecondsWithMilliPrecision());
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
         _ledgerCommittedTransactionsCount.Inc(commitReport.TransactionsCommittedCount);
-        _ledgerLastCommitTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSecondsWithMilliPrecision());
+        _ledgerLastCommitTimestamp.Set(currentTimestampSeconds);
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
