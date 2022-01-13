@@ -168,6 +168,12 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             "Unix timestamp of the last DB ledger commit (in seconds, to millisecond precision)."
         );
 
+    private static readonly Gauge _ledgerLastExtensionAttemptStartTimestamp = Metrics
+        .CreateGauge(
+            "ng_ledger_commit_last_ledger_extension_attempt_start_timestamp_seconds",
+            "Unix timestamp of the start of the last attempt to extend the ledger (in seconds, to millisecond precision)."
+        );
+
     private static readonly Gauge _ledgerStateVersion = Metrics
         .CreateGauge(
             "ng_ledger_commit_tip_state_version",
@@ -241,6 +247,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     /// </summary>
     public async Task HandleLedgerExtensionIfQuorum(CancellationToken token)
     {
+        _ledgerLastExtensionAttemptStartTimestamp.Set(SystemClock.Instance.GetCurrentInstant().ToUnixTimeSecondsWithMilliPrecision());
+
         await LoadTopOfDbLedger(token);
 
         PrepareForLedgerExtensionCheck();

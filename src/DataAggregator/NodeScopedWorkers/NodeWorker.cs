@@ -75,6 +75,9 @@ public interface INodeWorker : ILoopedWorkerBase
     public bool IsEnabledByNodeConfiguration();
 }
 
+/// <summary>
+/// A base class for NodeWorkers. There is one worker of each type spawned by NodeWorkers / NodeWorkersRunner.
+/// </summary>
 public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 {
     private static readonly Counter _nodeWorkerErrorsCount = Metrics
@@ -86,9 +89,9 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 
     private readonly string _nodeName;
 
-    protected NodeWorker(ILogger logger, string nodeName, TimeSpan minDelayBetweenLoops, TimeSpan minDelayAfterErrorLoop, TimeSpan minDelayBetweenInfoLogs)
+    protected NodeWorker(ILogger logger, string nodeName, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenLoopsAfterError, TimeSpan minDelayBetweenInfoLogs)
         // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
-        : base(logger, BehaviourOnFault.Nothing, minDelayBetweenLoops, minDelayAfterErrorLoop, minDelayBetweenInfoLogs)
+        : base(logger, BehaviourOnFault.Nothing, minDelayBetweenLoops, minDelayBetweenLoopsAfterError, minDelayBetweenInfoLogs)
     {
         _nodeName = nodeName;
     }

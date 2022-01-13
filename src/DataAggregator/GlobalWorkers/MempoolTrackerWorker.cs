@@ -77,7 +77,7 @@ public class MempoolTrackerWorker : GlobalWorker
         ILogger<MempoolTrackerWorker> logger,
         IMempoolTrackerService mempoolTrackerService
     )
-        : base(logger, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(60))
+        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(500), TimeSpan.FromSeconds(60))
     {
         _mempoolTrackerService = mempoolTrackerService;
     }

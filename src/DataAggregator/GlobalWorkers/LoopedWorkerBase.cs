@@ -98,7 +98,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     private readonly BehaviourOnFault _behaviourOnFault;
     private readonly LogLimiter _stillRunningLogLimiter;
     private readonly TimeSpan _minDelayBetweenLoops;
-    private readonly TimeSpan _minDelayAfterErrorLoop;
+    private readonly TimeSpan _minDelayBetweenLoopsAfterError;
     private Stopwatch? _loopIterationStopwatch;
     private bool? _wasEnabledAtLastLoopIteration;
 
@@ -107,14 +107,14 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         ILogger logger,
         BehaviourOnFault behaviourOnFault,
         TimeSpan minDelayBetweenLoops,
-        TimeSpan minDelayAfterErrorLoop,
+        TimeSpan minDelayBetweenLoopsAfterError,
         TimeSpan minDelayBetweenInfoLogs
     )
     {
         _logger = logger;
         _behaviourOnFault = behaviourOnFault;
         _minDelayBetweenLoops = minDelayBetweenLoops;
-        _minDelayAfterErrorLoop = minDelayAfterErrorLoop;
+        _minDelayBetweenLoopsAfterError = minDelayBetweenLoopsAfterError;
         _stillRunningLogLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
     }
 
@@ -198,7 +198,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
 
     protected virtual TimeSpan GetRemainingRestartAfterErrorDelay()
     {
-        var timespan = _minDelayAfterErrorLoop - _loopIterationStopwatch!.Elapsed;
+        var timespan = _minDelayBetweenLoopsAfterError - _loopIterationStopwatch!.Elapsed;
         return timespan < TimeSpan.Zero ? TimeSpan.Zero : timespan;
     }
 
