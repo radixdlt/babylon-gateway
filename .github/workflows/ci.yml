@@ -205,7 +205,6 @@ jobs:
   dispatch-pr-hns-deletion-events:
     if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
-    needs: dispatch-pr-deployment-events
     steps:
       - name: Get PR HSN
         run: |
