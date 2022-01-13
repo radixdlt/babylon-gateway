@@ -106,7 +106,7 @@ public abstract class WrappedCoreApiException : Exception
 
     public CoreApiErrorProperties Properties { get; }
 
-    public WrappedCoreApiException(string message, CoreClient.ApiException apiException, CoreApiErrorProperties? properties = null)
+    protected WrappedCoreApiException(string message, CoreClient.ApiException apiException, CoreApiErrorProperties? properties = null)
         : base(message, apiException)
     {
         ApiException = apiException;
