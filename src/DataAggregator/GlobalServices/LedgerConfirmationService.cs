@@ -479,11 +479,11 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         _systemStatusService.RecordTransactionsCommitted();
 
-        var currentTimestampSeconds = SystemClock.Instance.GetCurrentInstant().ToUnixTimeSecondsWithMilliPrecision();
-        _peakLedgerLagBeforeLastCommit.Set(currentTimestampSeconds - ledgerExtension.ParentSummary.RoundTimestamp.ToUnixTimeSecondsWithMilliPrecision());
+        var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
+        _peakLedgerLagBeforeLastCommit.Set((currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp).TotalSeconds);
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
         _ledgerCommittedTransactionsCount.Inc(commitReport.TransactionsCommittedCount);
-        _ledgerLastCommitTimestamp.Set(currentTimestampSeconds);
+        _ledgerLastCommitTimestamp.Set(currentTimestamp.ToUnixTimeSecondsWithMilliPrecision());
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",

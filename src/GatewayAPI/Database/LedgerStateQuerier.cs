@@ -72,6 +72,7 @@ using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Prometheus;
 using RadixGatewayApi.Generated.Model;
 
 namespace GatewayAPI.Database;
@@ -89,6 +90,12 @@ public interface ILedgerStateQuerier
 
 public class LedgerStateQuerier : ILedgerStateQuerier
 {
+    private static readonly Gauge _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds = Metrics
+        .CreateGauge(
+            "ng_gateway_ledger_tip_round_timestamp_gateway_api_clock_lag_at_last_request_seconds",
+            "The delay measured between the Gateway API clock and the round timestamp at last request to the top of the ledger (in seconds, to millisecond precision)."
+        );
+
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly GatewayReadOnlyDbContext _dbContext;
     private readonly IValidations _validations;
@@ -143,6 +150,9 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+
+        _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
+
         if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds)
         {
             return ledgerState;
@@ -178,6 +188,9 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+
+        _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
+
         if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds)
         {
             return ledgerState;
