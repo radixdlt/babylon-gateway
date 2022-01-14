@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using DataAggregator.GlobalServices;
 using Prometheus;
 using RadixCoreApi.Generated.Api;
@@ -96,13 +97,15 @@ public class NetworkStatusReader : INetworkStatusReader
 
     public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-        return await _failedNetworkStatusFetchCounter.CountExceptionsAsync(async () =>
-            await _networkApi
-            .NetworkStatusPostAsync(
-                new NetworkStatusRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
-                ),
-                token
+        return await _failedNetworkStatusFetchCounter.CountExceptionsAsync(() =>
+            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+                await _networkApi
+                    .NetworkStatusPostAsync(
+                        new NetworkStatusRequest(
+                            networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
+                        ),
+                        token
+                    )
             )
         );
     }

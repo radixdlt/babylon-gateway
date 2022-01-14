@@ -71,6 +71,11 @@ namespace Common.CoreCommunications;
 
 public static class CoreApiErrorWrapper
 {
+    public static string GetDetailedExceptionName(this WrappedCoreApiException wrappedCoreApiException)
+    {
+        return $"{nameof(WrappedCoreApiException)}<{wrappedCoreApiException.Error.GetType().Name}>";
+    }
+
     public static async Task<T> ExtractCoreApiErrors<T>(Func<Task<T>> requestAction)
     {
         try

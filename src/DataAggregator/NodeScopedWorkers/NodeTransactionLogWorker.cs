@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
+using Common.Exceptions;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
-using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
@@ -135,11 +135,11 @@ public class NodeTransactionLogWorker : NodeWorker
         await _failedFetchLoops.CountExceptionsAsync(() => FetchAndSubmitTransactions(cancellationToken));
     }
 
-    private async Task FetchAndSubmitTransactions(CancellationToken stoppingToken)
+    private async Task FetchAndSubmitTransactions(CancellationToken cancellationToken)
     {
         const int FetchMaxBatchSize = 1000;
 
-        var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(stoppingToken);
+        var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(cancellationToken);
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
         var nodeLedgerTarget = networkStatus.SyncStatus.TargetStateVersion;
 
@@ -166,30 +166,30 @@ public class NodeTransactionLogWorker : NodeWorker
             FetchMaxBatchSize
         );
 
-        var transactionResponse = await FetchTransactionsFromCoreApi(
+        var transactions = await FetchTransactionsFromCoreApiWithLogging(
             toFetch.StateVersionExclusiveLowerBound,
             batchSize,
-            stoppingToken
+            cancellationToken
         );
 
-        _ledgerConfirmationService.SubmitTransactionsFromNode(
-            NodeName,
-            transactionResponse.Transactions
-        );
-
-        if (transactionResponse.Transactions.Count == 0)
+        if (transactions.Count == 0)
         {
             _logger.LogDebug(
                 "No new transactions found, sleeping for {DelayMs}ms",
                 GetRemainingRestartDelay().Milliseconds
             );
         }
+
+        _ledgerConfirmationService.SubmitTransactionsFromNode(
+            NodeName,
+            transactions
+        );
     }
 
-    private async Task<CommittedTransactionsResponse> FetchTransactionsFromCoreApi(
+    private async Task<List<CommittedTransaction>> FetchTransactionsFromCoreApiWithLogging(
         long fromStateVersion,
         int transactionsToPull,
-        CancellationToken stoppingToken
+        CancellationToken cancellationToken
     )
     {
         _logger.LogInformation(
@@ -198,19 +198,43 @@ public class NodeTransactionLogWorker : NodeWorker
             fromStateVersion
         );
 
-        var (transactionsResponse, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
-            () => _services.GetRequiredService<ITransactionLogReader>().GetTransactions(fromStateVersion, transactionsToPull, stoppingToken)
+        var (transactions, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
+            () => FetchTransactionsOrEmptyList(fromStateVersion, transactionsToPull, cancellationToken)
         );
 
         _totalFetchTimeSeconds.Observe(fetchTransactionsMs / 1000D);
 
         _logger.LogInformation(
             "Fetched {TransactionCount} transactions from version {FromStateVersion} from the core api in {FetchTransactionsMs}ms",
-            transactionsResponse.Transactions.Count,
+            transactions.Count,
             fromStateVersion,
             fetchTransactionsMs
         );
 
-        return transactionsResponse;
+        return transactions;
+    }
+
+    private async Task<List<CommittedTransaction>> FetchTransactionsOrEmptyList(
+        long fromStateVersion,
+        int transactionsToPull,
+        CancellationToken cancellationToken
+    )
+    {
+        var transactionLogReader = _services.GetRequiredService<ITransactionLogReader>();
+        try
+        {
+            var transactionsResponse = await transactionLogReader.GetTransactions(
+                fromStateVersion,
+                transactionsToPull,
+                cancellationToken
+            );
+            return transactionsResponse.Transactions;
+        }
+        catch (WrappedCoreApiException<StateIdentifierNotFoundError>)
+        {
+            // We're requested transactions on top of state version X, but this particular full node doesn't know about
+            // state version X yet (because, say, it's not synced up to that point), so it returns a StateIdentifierNotFoundError.
+            return new List<CommittedTransaction>();
+        }
     }
 }

@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
@@ -147,12 +148,12 @@ public class NodeMempoolReaderWorker : NodeWorker
     {
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
 
-        var mempoolContents = await coreApiProvider.MempoolApi.MempoolPostAsync(
+        var mempoolContents = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolPostAsync(
             new MempoolRequest(
                 _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
             ),
             stoppingToken
-        );
+        ));
 
         _mempoolSize.Set(mempoolContents.TransactionIdentifiers.Count);
 
@@ -231,13 +232,13 @@ public class NodeMempoolReaderWorker : NodeWorker
     {
         try
         {
-            var response = await coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
+            var response = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
                 new MempoolTransactionRequest(
                     _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
                     new TransactionIdentifier(transactionId.ToHex())
                 ),
                 stoppingToken
-            );
+            ));
 
             return new TransactionData(
                 transactionId,

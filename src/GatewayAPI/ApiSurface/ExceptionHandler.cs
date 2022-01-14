@@ -63,6 +63,7 @@
  */
 
 using Common.Exceptions;
+using Common.Extensions;
 using GatewayAPI.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Prometheus;
@@ -224,10 +225,6 @@ public class ExceptionHandler : IExceptionHandler
         // actionContext.HttpContext.Request.Method - GET or POST
         var routeValueDictionary = actionContext.RouteData.Values;
 
-        var originalExceptionName = originalException is WrappedCoreApiException wrappedCoreApiException
-            ? $"WrappedCoreApiException<{wrappedCoreApiException.Error.GetType().Name}>"
-            : originalException.GetType().Name;
-
         // This is a lot of labels, but the rest depend on the action and exception, so the cardinality isn't massive / worrying
         // Method/Controller/Action align with the prometheus-net http metrics
         // https://github.com/prometheus-net/prometheus-net/blob/master/Prometheus.AspNetCore/HttpMetrics/HttpRequestMiddlewareBase.cs
@@ -235,7 +232,7 @@ public class ExceptionHandler : IExceptionHandler
             actionContext.HttpContext.Request.Method, // method (GET or POST)
             routeValueDictionary.GetValueOrDefault("Controller") as string ?? string.Empty, // controller
             routeValueDictionary.GetValueOrDefault("Action") as string ?? string.Empty, // action
-            originalExceptionName, // exception
+            originalException.GetNameForMetricsOrLogging(), // exception
             gatewayErrorException.GatewayError.GetType().Name, // gateway_error
             gatewayErrorException.StatusCode.ToString(CultureInfo.InvariantCulture) // status_code
         ).Inc();

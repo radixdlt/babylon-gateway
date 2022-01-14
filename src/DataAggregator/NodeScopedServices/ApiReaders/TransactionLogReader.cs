@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using DataAggregator.GlobalServices;
 using Prometheus;
 using RadixCoreApi.Generated.Api;
@@ -96,15 +97,17 @@ public class TransactionLogReader : ITransactionLogReader
 
     public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        return await _failedTransactionsFetchCounter.CountExceptionsAsync(async () =>
-             await _transactionsApi
-            .TransactionsPostAsync(
-                new CommittedTransactionsRequest(
-                    networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    stateIdentifier: new PartialStateIdentifier(stateVersion),
-                    limit: count
-                ),
-                token
+        return await _failedTransactionsFetchCounter.CountExceptionsAsync(() =>
+            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+                await _transactionsApi
+                    .TransactionsPostAsync(
+                        new CommittedTransactionsRequest(
+                            networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
+                            stateIdentifier: new PartialStateIdentifier(stateVersion),
+                            limit: count
+                        ),
+                        token
+                    )
             )
         );
     }

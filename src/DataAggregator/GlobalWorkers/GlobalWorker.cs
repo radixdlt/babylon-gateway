@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Extensions;
 using Prometheus;
 
 namespace DataAggregator.GlobalWorkers;
@@ -84,6 +85,6 @@ public abstract class GlobalWorker : LoopedWorkerBase
 
     protected override void TrackNonFatalExceptionInWorkLoop(Exception ex)
     {
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetType().Name).Inc();
+        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging()).Inc();
     }
 }

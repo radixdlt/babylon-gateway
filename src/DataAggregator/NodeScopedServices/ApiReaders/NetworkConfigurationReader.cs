@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.CoreCommunications;
 using Prometheus;
 using RadixCoreApi.Generated.Api;
 using RadixCoreApi.Generated.Model;
@@ -93,9 +94,11 @@ public class NetworkConfigurationReader : INetworkConfigurationReader
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return await _failedNetworkConfigurationFetchCounter.CountExceptionsAsync(async () =>
-            await _networkApi
-                .NetworkConfigurationPostAsync(new object(), token)
+        return await _failedNetworkConfigurationFetchCounter.CountExceptionsAsync(() =>
+            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+                await _networkApi
+                    .NetworkConfigurationPostAsync(new object(), token)
+            )
         );
     }
 }
