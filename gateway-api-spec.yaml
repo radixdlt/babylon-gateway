@@ -56,19 +56,19 @@ servers:
   - url: https://stokenet-gateway.radixdlt.com
   - url: https://mainnet-gateway.radixdlt.com
 tags:
-  - name: gateway-endpoint
+  - name: Status
     x-displayName: Status Endpoints
     description: To query information about the Gateway API status.
-  - name: account-endpoint
+  - name: Account
     x-displayName: Account Endpoints
     description: To query account-related information.
-  - name: token-endpoint
+  - name: Token
     x-displayName: Token Endpoints
     description: To query token-related information.
-  - name: validator-endpoint
+  - name: Validator
     x-displayName: Validator Endpoints
     description: To query validator-related information.
-  - name: transaction-endpoint
+  - name: Transaction
     x-displayName: Transaction Endpoints
     description: To build, finalize and submit transactions, and to query transaction status and contents.
 paths:
@@ -77,7 +77,7 @@ paths:
       summary: Get Gateway Info
       description: Returns the Gateway API version, network and current ledger state.
       tags:
-        - gateway-endpoint
+        - Status
       requestBody:
         required: true
         content:
@@ -102,7 +102,7 @@ paths:
       summary: Get Native Token Info
       description: Returns information about XRD, including its Radix Resource Identifier.
       tags:
-        - token-endpoint
+        - Token
       requestBody:
         required: true
         content:
@@ -127,7 +127,7 @@ paths:
       summary: Get Token Info
       description: Returns information about any token, given its Radix Resource Identifier.
       tags:
-        - token-endpoint
+        - Token
       requestBody:
         required: true
         content:
@@ -152,7 +152,7 @@ paths:
       summary: Derive Token Identifier
       description: Returns the Radix Resource Identifier of a newly created token an account with the given public key.
       tags:
-        - token-endpoint
+        - Token
       requestBody:
         required: true
         content:
@@ -177,7 +177,7 @@ paths:
       summary: Derive Account Identifier
       description: Returns the account address associated with the given public key.
       tags:
-        - account-endpoint
+        - Account
       requestBody:
         required: true
         content:
@@ -204,7 +204,7 @@ paths:
         Returns an account's available and staked token balances, given an account address.
         If an account address is valid, but doesn't have any ledger transactions against it, this endpoint still returns a successful response.
       tags:
-        - account-endpoint
+        - Account
       requestBody:
         required: true
         content:
@@ -231,7 +231,7 @@ paths:
         Returns the xrd which the account has in pending and active delegated stake positions with validators, given an account address.
         If an account address is valid, but doesn't have any ledger transactions against it, this endpoint still returns a successful response.
       tags:
-        - account-endpoint
+        - Account
       requestBody:
         required: true
         content:
@@ -258,7 +258,7 @@ paths:
         Returns the xrd which the account has in pending and temporarily-locked delegated unstake positions with validators, given an account address.
         If an account address is valid, but doesn't have any ledger transactions against it, this endpoint still returns a successful response.
       tags:
-        - account-endpoint
+        - Account
       requestBody:
         required: true
         content:
@@ -286,7 +286,7 @@ paths:
         The transactions are returned in a paginated format, ordered by most recent.
         If an account address is valid, but doesn't have any ledger transactions against it, this endpoint still returns a successful response.
       tags:
-        - account-endpoint
+        - Account
       requestBody:
         required: true
         content:
@@ -313,7 +313,7 @@ paths:
         Returns information about a validator, given a validator address.
         If a validator address is valid, but has not appeared on ledger as a validator, this endpoint still returns a successful response.
       tags:
-        - validator-endpoint
+        - Validator
       requestBody:
         required: true
         content:
@@ -338,7 +338,7 @@ paths:
       summary: Get Validator Identifier
       description: Returns the validator address associated with the given public key.
       tags:
-        - validator-endpoint
+        - Validator
       requestBody:
         required: true
         content:
@@ -363,7 +363,7 @@ paths:
       summary: Get Validators
       description: Returns information about all validators, given a validator address.
       tags:
-        - validator-endpoint
+        - Validator
       requestBody:
         required: true
         content:
@@ -388,7 +388,7 @@ paths:
       summary: Get Transaction Rules
       description: Returns the current rules used to build and validate transactions in the Radix Engine.
       tags:
-        - transaction-endpoint
+        - Transaction
       requestBody:
         required: true
         content:
@@ -413,7 +413,7 @@ paths:
       summary: Build Transaction
       description: Returns a built unsigned transaction payload, from a set of intended actions.
       tags:
-        - transaction-endpoint
+        - Transaction
       requestBody:
         required: true
         content:
@@ -438,7 +438,7 @@ paths:
       summary: Finalize Transaction
       description: Returns a signed transaction payload and transaction identifier, from an unsigned transaction payload and signature.
       tags:
-        - transaction-endpoint
+        - Transaction
       requestBody:
         required: true
         content:
@@ -465,7 +465,7 @@ paths:
         Submits a signed transaction payload to the network.
         The transaction identifier from finalize or submit can then be used to track the transaction status.
       tags:
-        - transaction-endpoint
+        - Transaction
       requestBody:
         required: true
         content:
@@ -494,7 +494,7 @@ paths:
         transaction submitted through this Network Gateway may return a `TransactionNotFoundError`.
         Transaction identifiers relating to failed transactions will, after a delay, also be report a `TransactionNotFoundError`.
       tags:
-        - transaction-endpoint
+        - Transaction
       requestBody:
         required: true
         content:
