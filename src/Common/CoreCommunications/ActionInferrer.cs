@@ -214,6 +214,7 @@ public class ActionInferrer : IActionInferrer
             var mint = deposits.First();
             if (mint.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
             {
+                // Mint of stake units by the system - not something we can/should infer an action for
                 return null;
             }
 
@@ -239,6 +240,7 @@ public class ActionInferrer : IActionInferrer
             var burn = withdrawals.First();
             if (burn.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
             {
+                // Burn of stake units by the system - not something we can/should infer an action for
                 return null;
             }
 
