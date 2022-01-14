@@ -406,12 +406,7 @@ public class TransactionBuilder
             _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix
         );
 
-        var validatedGranularity = action.TokenProperties.Granularity;
-
-        if (validatedGranularity != TransactionBuilding.OnlyValidGranularity)
-        {
-            throw new InvalidActionException(action, $"Only a granularity of {TransactionBuilding.OnlyValidGranularity} is currently supported");
-        }
+        var validatedGranularity = ExtractValidatedGranularity(action);
 
         var resourceAddress = _validations.ExtractValidResourceAddress(new Gateway.TokenIdentifier(resourceAddressStr));
 
@@ -434,6 +429,18 @@ public class TransactionBuilder
         return action.TokenProperties.IsSupplyMutable
             ? CreateMutableSupplyToken(action, resourceAddress, validatedTokenSupply, validatedGranularity, ownerOrRecipient, tokenMetadata)
             : CreateFixedSupplyToken(resourceAddress, validatedTokenSupply,  validatedGranularity, ownerOrRecipient, tokenMetadata);
+    }
+
+    private string ExtractValidatedGranularity(Gateway.CreateTokenDefinition action)
+    {
+        var granularity = action.TokenProperties.Granularity;
+
+        if (granularity != TransactionBuilding.OnlyValidGranularity)
+        {
+            throw new InvalidActionException(action, $"Only a granularity of {TransactionBuilding.OnlyValidGranularity} is currently supported");
+        }
+
+        return granularity;
     }
 
     private Core.OperationGroup CreateMutableSupplyToken(
