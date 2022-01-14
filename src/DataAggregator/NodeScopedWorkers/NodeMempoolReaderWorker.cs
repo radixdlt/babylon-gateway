@@ -65,6 +65,8 @@
 using Common.CoreCommunications;
 using Common.Extensions;
 using Common.Utilities;
+using DataAggregator.Configuration;
+using DataAggregator.Configuration.Models;
 using DataAggregator.GlobalServices;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
@@ -103,6 +105,7 @@ public class NodeMempoolReaderWorker : NodeWorker
 
     private readonly ILogger<NodeMempoolReaderWorker> _logger;
     private readonly IServiceProvider _services;
+    private readonly IAggregatorConfiguration _aggregatorConfiguration;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
@@ -117,6 +120,7 @@ public class NodeMempoolReaderWorker : NodeWorker
     public NodeMempoolReaderWorker(
         ILogger<NodeMempoolReaderWorker> logger,
         IServiceProvider services,
+        IAggregatorConfiguration aggregatorConfiguration,
         INetworkConfigurationProvider networkConfigurationProvider,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
@@ -125,6 +129,7 @@ public class NodeMempoolReaderWorker : NodeWorker
     {
         _logger = logger;
         _services = services;
+        _aggregatorConfiguration = aggregatorConfiguration;
         _networkConfigurationProvider = networkConfigurationProvider;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
@@ -146,6 +151,7 @@ public class NodeMempoolReaderWorker : NodeWorker
 
     private async Task FetchAndShareMempoolTransactions(CancellationToken stoppingToken)
     {
+        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
 
         var mempoolContents = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolPostAsync(
@@ -177,7 +183,7 @@ public class NodeMempoolReaderWorker : NodeWorker
             .ToHashSet(ByteArrayEqualityComparer.Default);
 
         var (transactionsToAdd, transactionFetchMs) = await CodeStopwatch.TimeInMs(
-            async () => await FetchTransactions(coreApiProvider, transactionIdsToAdd, stoppingToken)
+            async () => await FetchTransactions(mempoolConfiguration, coreApiProvider, transactionIdsToAdd, stoppingToken)
         );
 
         _mempoolItemsAdded.Inc(transactionsToAdd.Count);
@@ -201,9 +207,10 @@ public class NodeMempoolReaderWorker : NodeWorker
     }
 
     private async Task<List<TransactionData>> FetchTransactions(
+        MempoolConfiguration mempoolConfiguration,
         ICoreApiProvider coreApiProvider,
         HashSet<byte[]> transactionsToFetch,
-        CancellationToken stoppingToken
+        CancellationToken cancellationToken
     )
     {
         var fetchedTransactions = new ConcurrentBag<TransactionData>();
@@ -211,7 +218,11 @@ public class NodeMempoolReaderWorker : NodeWorker
         // Fetch max of 5 at a time to avoid overloading the node
         await Parallel.ForEachAsync(
             transactionsToFetch,
-            new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = stoppingToken },
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = mempoolConfiguration.FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode,
+                CancellationToken = cancellationToken,
+            },
             async (transactionId, token) =>
             {
                 var transactionData = await FetchTransaction(coreApiProvider, transactionId, token);

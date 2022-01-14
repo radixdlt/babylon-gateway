@@ -71,6 +71,9 @@ public record MempoolConfiguration
     [ConfigurationKeyName("TrackTransactionsNotSubmittedByThisGateway")]
     public bool TrackTransactionsNotSubmittedByThisGateway { get; set; } = true;
 
+    [ConfigurationKeyName("FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode")]
+    public int FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode { get; set; } = 5;
+
     [ConfigurationKeyName("ExcludeNodeMempoolsFromUnionIfStaleForSeconds")]
     public long ExcludeNodeMempoolsFromUnionIfStaleForSeconds { get; set; } = 10;
 
