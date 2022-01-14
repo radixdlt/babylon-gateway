@@ -91,7 +91,6 @@ public class NodeTransactionLogWorker : NodeWorker
             "Total time to fetch a batch of transactions.",
             new HistogramConfiguration
             {
-                Buckets = Histogram.LinearBuckets(start: 0.1, width: 0.1, count: 50),
                 LabelNames = new[] { "node" },
             }
         );
