@@ -63,65 +63,52 @@
  */
 
 using Common.CoreCommunications;
+using Common.Exceptions;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
+using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
+using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
-using System.Collections.Concurrent;
 
 namespace DataAggregator.NodeScopedWorkers;
 
 /// <summary>
-/// Responsible for syncing the mempool from a node.
+/// Responsible for syncing unknown transaction contents from the mempool of a node.
+///
+/// Only needed when we care about tracking transactions which weren't submitted by the network.
 /// </summary>
-public class NodeMempoolReaderWorker : NodeWorker
+public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 {
-    private static readonly Gauge _mempoolSizeUnScoped = Metrics
-        .CreateGauge(
-            "ng_node_mempool_size_total",
-            "Current size of node mempool.",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Counter _mempoolItemsAddedUnScoped = Metrics
+    private static readonly Counter _fullTransactionsFetchedCount = Metrics
         .CreateCounter(
-            "ng_node_mempool_added_count",
-            "Transactions added to node mempool.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
+            "ng_node_mempool_full_transactions_fetched_count",
+            "Count of transaction contents fetched from the node.",
+            new CounterConfiguration { LabelNames = new[] { "node", "is_duplicate" } }
         );
 
-    private static readonly Counter _mempoolItemsRemovedUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_mempool_removed_count",
-            "Transactions removed from node mempool.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private readonly ILogger<NodeMempoolReaderWorker> _logger;
+    private readonly ILogger<NodeMempoolFullTransactionReaderWorker> _logger;
     private readonly IServiceProvider _services;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
-    private readonly Gauge.Child _mempoolSize;
-    private readonly Counter.Child _mempoolItemsAdded;
-    private readonly Counter.Child _mempoolItemsRemoved;
 
-    private readonly Dictionary<byte[], TransactionData> _currentTransactions = new(ByteArrayEqualityComparer.Default);
-
-    // NB - So that we can get new transient dependencies each iteration, we create most dependencies
-    //      from the service provider.
-    public NodeMempoolReaderWorker(
-        ILogger<NodeMempoolReaderWorker> logger,
+    // NB - So that we can get new transient dependencies each iteration (such as the HttpClients)
+    //      we create such dependencies from the service provider.
+    public NodeMempoolFullTransactionReaderWorker(
+        ILogger<NodeMempoolFullTransactionReaderWorker> logger,
         IServiceProvider services,
         IAggregatorConfiguration aggregatorConfiguration,
         INetworkConfigurationProvider networkConfigurationProvider,
+        IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
@@ -131,91 +118,79 @@ public class NodeMempoolReaderWorker : NodeWorker
         _services = services;
         _aggregatorConfiguration = aggregatorConfiguration;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _dbContextFactory = dbContextFactory;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
-        _mempoolSize = _mempoolSizeUnScoped.WithLabels(nodeConfig.NodeAppSettings.Name);
-        _mempoolItemsAdded = _mempoolItemsAddedUnScoped.WithLabels(nodeConfig.NodeAppSettings.Name);
-        _mempoolItemsRemoved = _mempoolItemsRemovedUnScoped.WithLabels(nodeConfig.NodeAppSettings.Name);
     }
 
     public override bool IsEnabledByNodeConfiguration()
     {
-        var nodeConfig = _services.GetRequiredService<INodeConfigProvider>();
-        return nodeConfig.NodeAppSettings.Enabled && !nodeConfig.NodeAppSettings.DisabledForMempool;
+        return _nodeConfig.NodeAppSettings.Enabled
+               && !_nodeConfig.NodeAppSettings.DisabledForMempool
+               && !_nodeConfig.NodeAppSettings.DisabledForMempoolUnknownTransactionFetching
+               && _aggregatorConfiguration.GetMempoolConfiguration().TrackTransactionsNotSubmittedByThisGateway;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await FetchAndShareMempoolTransactions(cancellationToken);
+        await FetchAndShareUnknownFullTransactions(cancellationToken);
     }
 
-    private async Task FetchAndShareMempoolTransactions(CancellationToken stoppingToken)
+    private async Task FetchAndShareUnknownFullTransactions(CancellationToken cancellationToken)
     {
         var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        var mempoolContents = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolPostAsync(
+        // We duplicate this call from the TransactionIdsReader for simplicity, to mean the workers don't need
+        // to sync up. This should be a cheap call to the Core API.
+        var transactionIdentifiersInMempool = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolPostAsync(
             new MempoolRequest(
                 _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
             ),
-            stoppingToken
+            cancellationToken
         ));
 
-        _mempoolSize.Set(mempoolContents.TransactionIdentifiers.Count);
-
-        var idsInMempool = mempoolContents.TransactionIdentifiers
+        var idsInMempool = transactionIdentifiersInMempool.TransactionIdentifiers
             .Select(ti => ti.Hash.ConvertFromHex())
-            .ToHashSet(ByteArrayEqualityComparer.Default);
+            .ToList();
 
-        var transactionsToRemove = _currentTransactions.Keys
-            .Except(idsInMempool)
-            .ToHashSet(ByteArrayEqualityComparer.Default);
-
-        foreach (var id in transactionsToRemove)
+        if (idsInMempool.Count == 0)
         {
-            _currentTransactions.Remove(id);
+            return;
         }
 
-        _mempoolItemsRemoved.Inc(transactionsToRemove.Count);
+        var transactionIdsToFetch = await _mempoolTrackerService.WhichTransactionsNeedContentFetching(idsInMempool, cancellationToken);
 
-        var transactionIdsToAdd = idsInMempool
-            .Except(_currentTransactions.Keys)
-            .ToHashSet(ByteArrayEqualityComparer.Default);
+        if (transactionIdsToFetch.Count == 0)
+        {
+            return;
+        }
 
-        var (transactionsToAdd, transactionFetchMs) = await CodeStopwatch.TimeInMs(
-            async () => await FetchTransactions(mempoolConfiguration, coreApiProvider, transactionIdsToAdd, stoppingToken)
+        var (fetchAndSubmissionReport, transactionFetchMs) = await CodeStopwatch.TimeInMs(
+            async () => await FetchAndSubmitEachTransactionContents(mempoolConfiguration, coreApiProvider, transactionIdsToFetch, cancellationToken)
         );
 
-        _mempoolItemsAdded.Inc(transactionsToAdd.Count);
-
-        foreach (var transaction in transactionsToAdd)
-        {
-            _currentTransactions.Add(transaction.Id, transaction);
-        }
-
-        if (transactionsToAdd.Count > 0 || transactionsToRemove.Count > 0)
-        {
-            _logger.LogInformation(
-                "Node mempool updated: {TransactionsAdded} txns added (fetched in {TransactionFetchMs}ms) and {TransactionsRemoved} txns removed",
-                transactionsToAdd.Count,
-                transactionFetchMs,
-                transactionsToRemove.Count
-            );
-        }
-
-        _mempoolTrackerService.RegisterNodeMempool(_nodeConfig.NodeAppSettings.Name, new NodeMempoolContents(_currentTransactions));
+        _logger.LogInformation(
+            "Full transaction contents fetched from node: {NonDuplicateCount} were new and {DuplicateCount} were already fetched by another node in the mean-time (fetched in {TransactionFetchMs}ms)",
+            fetchAndSubmissionReport.NonDuplicateCount,
+            fetchAndSubmissionReport.DuplicateCount,
+            transactionFetchMs
+        );
     }
 
-    private async Task<List<TransactionData>> FetchTransactions(
+    private record FetchAndSubmissionReport(int NonDuplicateCount, int DuplicateCount);
+
+    private async Task<FetchAndSubmissionReport> FetchAndSubmitEachTransactionContents(
         MempoolConfiguration mempoolConfiguration,
         ICoreApiProvider coreApiProvider,
         HashSet<byte[]> transactionsToFetch,
         CancellationToken cancellationToken
     )
     {
-        var fetchedTransactions = new ConcurrentBag<TransactionData>();
+        var fetchedNonDuplicateCount = 0;
+        var fetchedDuplicateCount = 0;
 
-        // Fetch max of 5 at a time to avoid overloading the node
         await Parallel.ForEachAsync(
             transactionsToFetch,
             new ParallelOptions
@@ -225,17 +200,33 @@ public class NodeMempoolReaderWorker : NodeWorker
             },
             async (transactionId, token) =>
             {
-                var transactionData = await FetchTransaction(coreApiProvider, transactionId, token);
+                if (!_mempoolTrackerService.TransactionContentsStillNeedFetching(transactionId))
+                {
+                    return;
+                }
+
+                var transactionData = await FetchTransactionContents(coreApiProvider, transactionId, token);
+
                 if (transactionData != null)
                 {
-                    fetchedTransactions.Add(transactionData);
+                    var wasDuplicate = !_mempoolTrackerService.SubmitTransactionContents(transactionData);
+                    _fullTransactionsFetchedCount.WithLabels(_nodeConfig.NodeAppSettings.Name, wasDuplicate ? "true" : "false").Inc();
+
+                    if (wasDuplicate)
+                    {
+                        Interlocked.Increment(ref fetchedDuplicateCount);
+                    }
+                    else
+                    {
+                        Interlocked.Increment(ref fetchedNonDuplicateCount);
+                    }
                 }
             });
 
-        return fetchedTransactions.ToList();
+        return new FetchAndSubmissionReport(fetchedNonDuplicateCount, fetchedDuplicateCount);
     }
 
-    private async Task<TransactionData?> FetchTransaction(
+    private async Task<FullTransactionData?> FetchTransactionContents(
         ICoreApiProvider coreApiProvider,
         byte[] transactionId,
         CancellationToken stoppingToken
@@ -243,23 +234,25 @@ public class NodeMempoolReaderWorker : NodeWorker
     {
         try
         {
-            var response = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
-                new MempoolTransactionRequest(
-                    _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                    new TransactionIdentifier(transactionId.ToHex())
-                ),
-                stoppingToken
-            ));
+            var response = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+                await coreApiProvider.MempoolApi.MempoolTransactionPostAsync(
+                    new MempoolTransactionRequest(
+                        _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
+                        new TransactionIdentifier(transactionId.ToHex())
+                    ),
+                    stoppingToken
+                ));
 
-            return new TransactionData(
+            return new FullTransactionData(
                 transactionId,
                 SystemClock.Instance.GetCurrentInstant(),
                 response.Transaction.Metadata.Hex.ConvertFromHex(),
                 response.Transaction
             );
         }
-        catch (Exception)
+        catch (WrappedCoreApiException<TransactionNotFoundError>)
         {
+            // It's likely dropped out of the mempool, so we can't fetch it
             return null;
         }
     }

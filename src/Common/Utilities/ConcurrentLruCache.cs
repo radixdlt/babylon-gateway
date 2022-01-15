@@ -66,11 +66,11 @@ namespace Common.Utilities;
 
 /// <summary>
 /// Provides a sized-cache, with a max capacity, which evicts old entries from the cache.
-/// Thread safe.
+/// Thread safe is implemented naively via locking around all methods.
 /// </summary>
 /// <typeparam name="TKey">The key for the cache.</typeparam>
 /// <typeparam name="TValue">The value for the cache.</typeparam>
-public class LruCache<TKey, TValue>
+public class ConcurrentLruCache<TKey, TValue>
     where TKey : notnull
 {
     private readonly int _maxCapacity;
@@ -79,7 +79,7 @@ public class LruCache<TKey, TValue>
     private readonly LinkedList<TKey> _recentlySeenQueue = new();
     private readonly object _lock = new();
 
-    public LruCache(int maxCapacity, IEqualityComparer<TKey>? equalityComparer = null)
+    public ConcurrentLruCache(int maxCapacity, IEqualityComparer<TKey>? equalityComparer = null)
     {
         if (maxCapacity < 1)
         {
@@ -105,6 +105,20 @@ public class LruCache<TKey, TValue>
         }
     }
 
+    public bool Contains(TKey key)
+    {
+        lock (_lock)
+        {
+            if (!_cache.ContainsKey(key))
+            {
+                return false;
+            }
+
+            MarkExistingValueAsRecentlySeen(key);
+            return true;
+        }
+    }
+
     public void Set(TKey key, TValue value)
     {
         lock (_lock)
@@ -123,6 +137,26 @@ public class LruCache<TKey, TValue>
 
                 AddItem(key, value);
             }
+        }
+    }
+
+    public bool SetIfNotExists(TKey key, TValue value)
+    {
+        lock (_lock)
+        {
+            if (_keyToQueueMap.ContainsKey(key))
+            {
+                MarkExistingValueAsRecentlySeen(key);
+                return false;
+            }
+
+            while (_recentlySeenQueue.Count >= _maxCapacity)
+            {
+                DropOldestCachedItem();
+            }
+
+            AddItem(key, value);
+            return true;
         }
     }
 

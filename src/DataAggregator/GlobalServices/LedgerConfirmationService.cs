@@ -221,7 +221,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private readonly ILedgerExtenderService _ledgerExtenderService;
 
     /* Variables */
-    private readonly LruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
+    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;

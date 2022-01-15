@@ -74,6 +74,9 @@ public record MempoolConfiguration
     [ConfigurationKeyName("FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode")]
     public int FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode { get; set; } = 5;
 
+    [ConfigurationKeyName("RecentFetchedUnknownTransactionsCacheSize")]
+    public int RecentFetchedUnknownTransactionsCacheSize { get; set; } = 2000;
+
     [ConfigurationKeyName("ExcludeNodeMempoolsFromUnionIfStaleForSeconds")]
     public long ExcludeNodeMempoolsFromUnionIfStaleForSeconds { get; set; } = 10;
 

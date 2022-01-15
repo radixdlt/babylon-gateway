@@ -191,7 +191,7 @@ public class NodeTransactionLogWorker : NodeWorker
         CancellationToken cancellationToken
     )
     {
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Fetching up to {TransactionCount} transactions from version {FromStateVersion} from the core api",
             transactionsToPull,
             fromStateVersion
@@ -203,12 +203,15 @@ public class NodeTransactionLogWorker : NodeWorker
 
         _totalFetchTimeSeconds.Observe(fetchTransactionsMs / 1000D);
 
-        _logger.LogInformation(
-            "Fetched {TransactionCount} transactions from version {FromStateVersion} from the core api in {FetchTransactionsMs}ms",
-            transactions.Count,
-            fromStateVersion,
-            fetchTransactionsMs
-        );
+        if (transactions.Count > 0)
+        {
+            _logger.LogInformation(
+                "Fetched {TransactionCount} transactions from version {FromStateVersion} from the core api in {FetchTransactionsMs}ms",
+                transactions.Count,
+                fromStateVersion,
+                fetchTransactionsMs
+            );
+        }
 
         return transactions;
     }

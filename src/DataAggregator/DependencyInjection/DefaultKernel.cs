@@ -166,7 +166,8 @@ public class DefaultKernel
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
-        services.AddScoped<INodeWorker, NodeMempoolReaderWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolTransactionIdsReaderWorker>();
+        services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }
 
     private HttpClientHandler ConfigureHttpClientHandler(

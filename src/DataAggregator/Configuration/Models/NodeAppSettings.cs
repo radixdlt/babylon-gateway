@@ -122,6 +122,9 @@ public record NodeAppSettings
     [ConfigurationKeyName("DisabledForMempool")]
     public bool DisabledForMempool { get; set; } = false;
 
+    [ConfigurationKeyName("DisabledForMempoolUnknownTransactionFetching")]
+    public bool DisabledForMempoolUnknownTransactionFetching { get; set; } = false;
+
     [ConfigurationKeyName("DisabledForConstruction")]
     public bool DisabledForConstruction { get; set; } = false;
 

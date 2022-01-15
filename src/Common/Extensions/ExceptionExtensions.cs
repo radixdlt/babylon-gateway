@@ -69,12 +69,6 @@ namespace Common.Extensions;
 
 public static class ExceptionExtensions
 {
-    public static string GetNameForMetricsOrLogging(this Exception exception)
-    {
-        return exception is WrappedCoreApiException wrappedCoreApiException
-            ? wrappedCoreApiException.GetDetailedExceptionName()
-            : exception.GetType().Name;
-    }
 
     /// <summary>
     /// In situations where it is safer to catch all Exceptions to protect the server's iteration loop, there are
@@ -82,6 +76,12 @@ public static class ExceptionExtensions
     /// </summary>
     public static bool ShouldBeConsideredAppFatal(this Exception exception)
     {
+        if (exception is AggregateException aggregateException)
+        {
+            return aggregateException.InnerExceptions
+                .Any(innerException => innerException.ShouldBeConsideredAppFatal());
+        }
+
         return exception is
             // Crucial system errors
             OutOfMemoryException or
@@ -91,5 +91,21 @@ public static class ExceptionExtensions
             NullReferenceException or
             // Wrapped AppFatalException
             AppFatalExceptionDetectedException;
+    }
+
+    public static string GetNameForMetricsOrLogging(this Exception exception)
+    {
+        return exception is WrappedCoreApiException wrappedCoreApiException
+            ? wrappedCoreApiException.GetDetailedExceptionName()
+            : exception is AggregateException aggregateException
+                ? aggregateException.GetArrayOfExceptionNamesForMetricsOrLogging()
+                : exception.GetType().Name;
+    }
+
+    private static string GetArrayOfExceptionNamesForMetricsOrLogging(this AggregateException exception)
+    {
+        var innerExceptionNames = exception.InnerExceptions.Select(e => e.GetNameForMetricsOrLogging());
+
+        return $"[{string.Join(",", innerExceptionNames)}]";
     }
 }
