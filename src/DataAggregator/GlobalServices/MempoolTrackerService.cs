@@ -236,9 +236,9 @@ public class MempoolTrackerService : IMempoolTrackerService
         var combinedMempool = CombineNodeMempools(mempoolConfiguration);
 
         await Task.WhenAll(
-            EnsureDbMempoolTransactionsMarkedReappeared(combinedMempool, token),
-            HandleMissingPendingTransactions(currentTimestamp, mempoolConfiguration, combinedMempool, token),
-            CreateExternalMempoolTransactions(mempoolConfiguration, combinedMempool, token)
+            MarkRelevantMempoolTransactionsInCombinedMempoolAsReappeared(combinedMempool, token),
+            MarkRelevantMempoolTransactionsNotInCombinedMempoolAsMissing(currentTimestamp, mempoolConfiguration, combinedMempool, token),
+            CreateMempoolTransactionsFromNewTransactionsDiscoveredInCombinedMempool(mempoolConfiguration, combinedMempool, token)
         );
     }
 
@@ -283,7 +283,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         return combinedMempoolByLatestSeen;
     }
 
-    private async Task EnsureDbMempoolTransactionsMarkedReappeared(
+    private async Task MarkRelevantMempoolTransactionsInCombinedMempoolAsReappeared(
         Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
         CancellationToken token
     )
@@ -321,7 +321,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         );
     }
 
-    private async Task CreateExternalMempoolTransactions(
+    private async Task CreateMempoolTransactionsFromNewTransactionsDiscoveredInCombinedMempool(
         MempoolConfiguration mempoolConfiguration,
         Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
         CancellationToken token
@@ -335,7 +335,10 @@ public class MempoolTrackerService : IMempoolTrackerService
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
         IParsedTransactionMapper parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
 
-        // Filter to transactions which we've fetched which might be new.
+        // Gather the transaction contents if we've loaded them from a node recently.
+        // If we don't have the transaction contents, either these transactions are already in our MempoolTransactions
+        // table, or they've yet to be fetched by a node. Either way, we filter them out and don't consider them further
+        // for the time being.
         var transactionsWhichMightNeedAdding = combinedMempoolWithLastSeen.Keys
             .SelectNonNull(transactionId => _recentFullTransactionsFetched.GetOrDefault(transactionId))
             .ToList();
@@ -400,7 +403,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         );
     }
 
-    private async Task HandleMissingPendingTransactions(
+    private async Task MarkRelevantMempoolTransactionsNotInCombinedMempoolAsMissing(
         Instant currentTimestamp,
         MempoolConfiguration mempoolConfiguration,
         Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
