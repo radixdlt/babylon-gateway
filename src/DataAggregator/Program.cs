@@ -75,7 +75,7 @@ using Prometheus;
 var builder = WebApplication.CreateBuilder(args);
 var hostBuilder = builder.Host;
 
-IConfigurationRoot? bootUpConfiguration = null;
+IConfigurationRoot? bootUpConfiguration;
 
 hostBuilder.ConfigureAppConfiguration((context, config) =>
 {
@@ -89,6 +89,10 @@ hostBuilder.ConfigureAppConfiguration((context, config) =>
     {
         // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
         config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
+    }
+    else
+    {
+        config.AddJsonFile("appsettings.ProductionOverrides.json", optional: true, reloadOnChange: true);
     }
 
     bootUpConfiguration = config.Build();

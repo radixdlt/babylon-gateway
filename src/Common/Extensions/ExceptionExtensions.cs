@@ -69,7 +69,6 @@ namespace Common.Extensions;
 
 public static class ExceptionExtensions
 {
-
     /// <summary>
     /// In situations where it is safer to catch all Exceptions to protect the server's iteration loop, there are
     /// still some explicit exceptions we know it's not safe to catch. These should be logged and re-thrown.
