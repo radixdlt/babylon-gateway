@@ -77,7 +77,7 @@ public class MempoolResubmissionWorker : GlobalWorker
         ILogger<MempoolResubmissionWorker> logger,
         IMempoolResubmissionService mempoolResubmissionService
     )
-        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(500), TimeSpan.FromSeconds(60))
+        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(60))
     {
         _mempoolResubmissionService = mempoolResubmissionService;
     }

@@ -77,7 +77,7 @@ public class LedgerConfirmationWorker : GlobalWorker
         ILogger<LedgerConfirmationWorker> logger,
         ILedgerConfirmationService ledgerConfirmationService
     )
-        : base(logger, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(100), TimeSpan.FromSeconds(60))
+        : base(logger, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30))
     {
         _ledgerConfirmationService = ledgerConfirmationService;
     }

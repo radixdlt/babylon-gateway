@@ -116,7 +116,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;
@@ -159,11 +159,11 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         _latestTransactionHashes = latestMempoolHashes;
 
         var transactionIdsRemovedCount = previousMempoolHashes
-            .Except(latestMempoolHashes)
+            .ExceptInSet(latestMempoolHashes)
             .Count();
 
         var transactionIdsAddedCount = latestMempoolHashes
-            .Except(previousMempoolHashes)
+            .ExceptInSet(previousMempoolHashes)
             .Count();
 
         _mempoolItemsAddedUnScoped.WithLabels(_nodeConfig.NodeAppSettings.Name).Inc(transactionIdsAddedCount);

@@ -81,6 +81,20 @@ public static class EnumerableExtensions
         }
     }
 
+    public static IEnumerable<TSource> ExceptInSet<TSource>(
+        this IEnumerable<TSource> source,
+        IReadOnlySet<TSource> set
+    )
+    {
+        foreach (var item in source)
+        {
+            if (!set.Contains(item))
+            {
+                yield return item;
+            }
+        }
+    }
+
     public static TItem GetRandomBy<TItem>(this IEnumerable<TItem> items, Func<TItem, double> weightingSelector)
     {
         var allItems = items.ToList();

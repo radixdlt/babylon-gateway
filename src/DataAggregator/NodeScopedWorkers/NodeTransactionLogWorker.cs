@@ -114,7 +114,7 @@ public class NodeTransactionLogWorker : NodeWorker
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services
     )
-        : base(logger, nodeConfigProvider.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfigProvider.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;

@@ -112,7 +112,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;

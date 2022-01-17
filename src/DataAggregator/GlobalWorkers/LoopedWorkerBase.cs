@@ -288,7 +288,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
                 TrackNonFatalExceptionInWorkLoop(ex);
 
                 var remainingTime = GetRemainingRestartAfterErrorDelay();
-                _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", remainingTime.Milliseconds);
+                _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", remainingTime.TotalMilliseconds);
                 if (remainingTime > TimeSpan.Zero)
                 {
                     await Task.Delay(remainingTime, cancellationToken);
