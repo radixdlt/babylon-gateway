@@ -466,9 +466,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private void HandleLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs,
         CommitTransactionsReport commitReport)
     {
-        ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
         AddAccumulatorsToCache(ledgerExtension);
-        UpdateRecordsOfTopOfLedger(commitReport.FinalTransaction);
+        ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
 
         // NB - this must come after UpdateTopOfLedgerVariable so that the nodes don't try to fill the gap that's
         //      created when we remove the transactions below it
@@ -478,6 +477,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private void ReportOnLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
     {
         _systemStatusService.RecordTransactionsCommitted();
+
+        UpdateRecordsOfTopOfLedger(commitReport.FinalTransaction);
 
         var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
         _peakLedgerLagBeforeLastCommit.Set((currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp).TotalSeconds);
