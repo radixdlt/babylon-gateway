@@ -409,7 +409,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
     }
 
-    private async Task<Core.ConstructionParseResponse> HandleParseSignedTransaction(
+    private async Task<Core.ConstructionParseResponse> HandlePreSubmissionParseSignedTransaction(
         ValidatedHex signedTransaction
     )
     {
@@ -423,11 +423,18 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
         {
+            _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
+            _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
             throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
+        }
+        catch (Exception)
+        {
+            _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_unknown_error").Inc();
+            throw;
         }
     }
 
@@ -437,7 +444,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         byte[] transactionIdentifierHash
     )
     {
-        var parseResponse = await HandleParseSignedTransaction(signedTransaction);
+        var parseResponse = await HandlePreSubmissionParseSignedTransaction(signedTransaction);
 
         var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
         using var submissionTimeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(3000));
