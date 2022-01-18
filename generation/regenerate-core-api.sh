@@ -135,6 +135,11 @@ for f in `find $dummyApiDirectory -name '*.cs'`; do
     mv $f.out $f
     echo "$f - Performed long EpochUnlock fix to source code"
   fi
+  if (grep -q "CreateLinkedTokenSource" $f) && [[ $f != *"/obj/"* ]]; then
+    awk '{sub(/finalToken = CancellationTokenSource\.CreateLinkedTokenSource\(finalToken, tokenSource.Token\)\.Token;/,""); print}' $f > $f.out
+    mv $f.out $f
+    echo "$f - Performed CreateLinkedTokenSource memory leak fix to source code"
+  fi
 done
 # Uncomment these lines to see the code, to debug:
 # code $dummyApiDirectory
