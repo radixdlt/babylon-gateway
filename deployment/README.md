@@ -10,7 +10,7 @@ Whilst the system can be run with one of each component, a resilient deployment 
 
 * Multiple Gateway APIs
 * A managed database cluster, with read replicas.
-* [Support coming soon] The Data Aggregator reading from one or more full nodes.
+* The Data Aggregator reading from two or more full nodes.
 * [Support coming soon] A Data Aggregator primary and inactive secondary (which will take over should the primary fail to write to the database for a pre-determined time)
 
 ## Running a radixdlt full node for the Core API
@@ -42,7 +42,7 @@ To run the set-up, follow the instructions under "**Preparing to run the toy set
 
 * `run-full-stack-from-images.sh` - Runs the whole stack, without needing to run any code locally. This is ideal for playing about with the Gateway API, or developing against it, without needing to build any code.
 * `run-only-fullnode.sh` - Runs only a full node. This is useful for developing on the Network Gateway.
-* `run-full-stack-with-built-network-gateway.sh` - Runs ths full stack with a built network gateway. Useful for developing/testing the Network Gateway code in ani ntegrated setup.
+* `run-full-stack-with-built-network-gateway.sh` - Runs the full stack with a built network gateway. Useful for developing/testing the Network Gateway code in an integrated setup.
 * `run-only-built-network-gateway.sh` - This runs only the built network gateway. This is useful for testing configuration of a Network Gateway against a non-local full node.
 
 ## Preparing to run the toy set-up
