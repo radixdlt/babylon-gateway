@@ -1,7 +1,5 @@
 # RadixDLT Network Gateway
 
-> ⚠️ &nbsp; This service is yet to be officially released as v1, and we do not recommend running the current build for production workloads.
-
 This system is designed to be the Radix-run publicly exposed gateway into the Olympia Radix network, and replaces the archive module which previously ran on-node.
 
 The system is in two main parts:
@@ -14,6 +12,8 @@ For documentation on the Gateway API, see the [Gateway API docs on ReDocly](http
 
 ## Technical Docs
 
-For technical docs, including development set-up to develop on the Network Gateway, see the [docs folder](./docs).
+For docs giving an overview of the Network Gateway and its place in the Radix Ecosystem - including information on the Radix-run Network Gateway, and how to run one of your own - check out [the Radix docs site](https://docs.radixdlt.com/).
 
-For docs on the recommended deployment set-up, including to run a toy-deployment locally to test against, see the [deployment folder](./deployment).
+For docs related to development on the Network Gateway, see the [docs folder](./docs).
+
+For docs related to running a Network Gateway locally, see the instructions about running a local toy deployment in the [deployment folder](./deployment).
