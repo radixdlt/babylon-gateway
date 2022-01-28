@@ -164,7 +164,6 @@ public static class DbQueryExtensions
     {
         var accountIdParameter = new NpgsqlParameter("@account_id", accountId);
 
-        // NB - UNNEST can be used to zip arrays together
         return dbContext.Set<AccountResourceBalanceHistory>()
             .FromSqlInterpolated($@"
 WITH PossibleResourceIds AS (
@@ -208,7 +207,6 @@ INNER JOIN LATERAL (
     {
         var accountIdParameter = new NpgsqlParameter("@account_id", NpgsqlDbType.Bigint) { Value = accountId };
 
-        // NB - UNNEST can be used to zip arrays together
         return dbContext.Set<AccountValidatorStakeHistory>()
             .FromSqlInterpolated($@"
 WITH PossibleValidatorIds AS (
@@ -366,6 +364,17 @@ INNER JOIN LATERAL (
     )
         where TDbContext : CommonDbContext
     {
+        // NB - other options considered instead of the sub query:
+        // * First do a call to get the resource id, then do this query - but this is 2 round trips
+        // * Using group by - but it's too slow because it doesn't use the indexes :(
+        // * Trying to force a Lateral Join doesn't work as it outputs something else https://github.com/dotnet/efcore/issues/17936
+        // * This variant of the lateral join doesn't work because dbContext.ResourceSupplyHistoryFromResourceIdAtVersion
+        //   doesn't return an IQueryable with a parametrised expression (by resource.Id, say)
+        // return
+        //     from resource in dbContext.Resource(rri, stateVersion)
+        //     from supplyHistory in dbContext.ResourceSupplyHistoryFromResourceIdAtVersion(resource.Id, stateVersion)
+        //     select supplyHistory;
+
         return dbContext.Set<ResourceSupplyHistory>()
             .Where(h =>
                 h.ResourceId == dbContext.Resource(rri, stateVersion)
@@ -375,22 +384,5 @@ INNER JOIN LATERAL (
             )
             .OrderByDescending(h => h.FromStateVersion)
             .Take(1);
-
-        // NB - other options considered instead of the sub query:
-        // * Using group by - but it's too slow because it doesn't use the indexes :(
-        // * Using Lateral Join (code below) doesn't work due to being too slow https://github.com/dotnet/efcore/issues/17936
-        // return
-        //     from resource in dbContext.Resource(rri, stateVersion)
-        //     from supplyHistory in dbContext.Set<ResourceSupplyHistory>()
-        //         .Where(h => h.ResourceId == resource.Id && h.FromStateVersion <= stateVersion)
-        //         .OrderByDescending(h => h.FromStateVersion)
-        //         .Take(1)
-        //     select supplyHistory;
-        // * This variant of the lateral join doesn't work because dbContext.ResourceSupplyHistoryFromResourceIdAtVersion
-        //   doesn't return an IQueryable with a parametrised expression (by resource.Id, say)
-        // return
-        //     from resource in dbContext.Resource(rri, stateVersion)
-        //     from supplyHistory in dbContext.ResourceSupplyHistoryFromResourceIdAtVersion(resource.Id, stateVersion)
-        //     select supplyHistory;
     }
 }
