@@ -357,29 +357,23 @@ INNER JOIN LATERAL (
             .Take(1);
     }
 
-    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersionForRri<TDbContext>(
+    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersionForResourceId<TDbContext>(
         this TDbContext dbContext,
         long stateVersion,
-        string rri
+        long resourceId
     )
         where TDbContext : CommonDbContext
     {
-        // NB - other options considered instead of the sub query:
-        // * First do a call to get the resource id, then do this query - but this is 2 round trips
-        // * Using group by - but it's too slow because it doesn't use the indexes :(
-        // * Trying to force a Lateral Join doesn't work as it outputs something else https://github.com/dotnet/efcore/issues/17936
-        // * This variant of the lateral join doesn't work because dbContext.ResourceSupplyHistoryFromResourceIdAtVersion
-        //   doesn't return an IQueryable with a parametrised expression (by resource.Id, say)
-        // return
-        //     from resource in dbContext.Resource(rri, stateVersion)
-        //     from supplyHistory in dbContext.ResourceSupplyHistoryFromResourceIdAtVersion(resource.Id, stateVersion)
-        //     select supplyHistory;
+        /*
+         * NB - I previously tried to merge the rri look-up with this, but no matter the query formulation (eg Lateral Join),
+         * the query planner still often didn't use the right indexes in the right order, resulting in a very slow query
+         * as it would try to parallelize the resource id look up with the supply histoy read, which was super slow for
+         * non-XRD tokens.
+         */
 
         return dbContext.Set<ResourceSupplyHistory>()
             .Where(h =>
-                h.ResourceId == dbContext.Resource(rri, stateVersion)
-                    .Select(r => r.Id)
-                    .FirstOrDefault() // This is actually done in a sub-query server-side.
+                h.ResourceId == resourceId
                 && h.FromStateVersion <= stateVersion
             )
             .OrderByDescending(h => h.FromStateVersion)
