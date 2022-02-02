@@ -179,7 +179,8 @@ public class TokenQuerier : ITokenQuerier
 
         if (resourceSupply == null)
         {
-            throw new TokenNotFoundException(resource.ResourceIdentifier);
+            // Mutable supply tokens which have yet to be minted will have no supply history, so return 0 supply for them.
+            return new ResourceSupplyHistory(resource, ResourceSupply.Default());
         }
 
         return resourceSupply;
