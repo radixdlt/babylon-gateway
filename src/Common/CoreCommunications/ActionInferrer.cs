@@ -77,6 +77,7 @@ public interface IActionInferrer
 
     GatewayInferredAction? InferAction(
         bool isSystemTransaction,
+        bool isStartOfEpochTransaction,
         OperationGroupSummarisation summarisation,
         Func<string, ValidatorStakeSnapshot> stakeSnapshotsByValidatorAddress
     );
@@ -183,6 +184,7 @@ public class ActionInferrer : IActionInferrer
 
     public GatewayInferredAction? InferAction(
         bool isSystemTransaction,
+        bool isStartOfEpochTransaction,
         OperationGroupSummarisation summarisation,
         Func<string, ValidatorStakeSnapshot> stakeSnapshotsByValidatorAddress
     )
@@ -280,12 +282,18 @@ public class ActionInferrer : IActionInferrer
             if (mint.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
             {
                 // Mint of stake units by the system - not something we can/should infer an action for
-                return null;
+                return new GatewayInferredAction(InferredActionType.Complex, null);
             }
 
             var rri = tokenResourceIdentifier.Rri;
 
             var entity = mint.Entity;
+            if (entity.EntityType == EntityType.Validator_System && isStartOfEpochTransaction)
+            {
+                // Emissions to a single validator (can happen in test networks)
+                return new GatewayInferredAction(InferredActionType.Complex, null);
+            }
+
             if (entity.EntityType != EntityType.Account)
             {
                 throw new InvalidTransactionException("Token minted to non-account");
@@ -306,7 +314,7 @@ public class ActionInferrer : IActionInferrer
             if (burn.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
             {
                 // Burn of stake units by the system - not something we can/should infer an action for
-                return null;
+                return new GatewayInferredAction(InferredActionType.Complex, null);
             }
 
             var rri = tokenResourceIdentifier.Rri;

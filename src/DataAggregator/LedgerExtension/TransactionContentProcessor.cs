@@ -832,6 +832,7 @@ public class TransactionContentProcessor
             var inferredAction = CalculateInferredAction(
                 transactionOpLocator,
                 dbTransaction.IsSystemTransaction,
+                dbTransaction.IsStartOfEpoch,
                 operationGroupSummarisation
             );
 
@@ -853,6 +854,7 @@ public class TransactionContentProcessor
     private InferredAction? CalculateInferredAction(
         TransactionOpLocator transactionOpLocator,
         bool isSystemTransaction,
+        bool isStartOfEpochTransaction,
         OperationGroupSummarisation summarisation
     )
     {
@@ -860,6 +862,7 @@ public class TransactionContentProcessor
         {
             var inferredGatewayAction = _actionInferrer.InferAction(
                 isSystemTransaction,
+                isStartOfEpochTransaction,
                 summarisation,
                 _dbActionsPlanner.GetLoadedLatestValidatorStakeSnapshot
             );

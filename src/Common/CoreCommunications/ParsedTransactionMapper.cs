@@ -145,7 +145,7 @@ public class ParsedTransactionMapper<T> : IParsedTransactionMapper
 
         return summarisationsByTransaction
             .Select(sbt => sbt
-                .SelectNonNull(s => _actionInferrer.InferAction(false, s, stakeSnapshotLookup)?.Action)
+                .SelectNonNull(s => _actionInferrer.InferAction(false, false, s, stakeSnapshotLookup)?.Action)
                 .ToList()
             )
             .ToList();
