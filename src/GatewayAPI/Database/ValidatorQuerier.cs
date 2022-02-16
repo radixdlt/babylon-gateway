@@ -66,20 +66,72 @@ using Common.Database;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
 using GatewayAPI.ApiSurface;
+using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using RadixGatewayApi.Generated.Model;
+using System.Runtime.Serialization;
 using Db = Common.Database.Models.Ledger.Normalization;
+using Gateway = RadixGatewayApi.Generated.Model;
 using TokenAmount = Common.Numerics.TokenAmount;
 
 namespace GatewayAPI.Database;
 
 public interface IValidatorQuerier
 {
-    Task<Validator> GetValidatorAtState(ValidatedValidatorAddress validatorAddress, LedgerState ledgerState);
+    Task<Gateway.Validator> GetValidatorAtState(ValidatedValidatorAddress validatorAddress, Gateway.LedgerState ledgerState);
 
-    Task<List<Validator>> GetValidatorsAtState(LedgerState ledgerState);
+    Task<List<Gateway.Validator>> GetValidatorsAtState(Gateway.LedgerState ledgerState);
+
+    Task<ValidatorStakesPage> GetValidatorStakesPage(ValidatorStakesPageRequest request, Gateway.LedgerState ledgerState);
 }
+
+[DataContract]
+public record ValidatorStakesPaginationCursor(long? FixedStateVersion, long? NextPageStartsWithAccountId)
+{
+    [DataMember(EmitDefaultValue = false, Name = "v")]
+    public long? FixedStateVersion { get; set; } = FixedStateVersion;
+
+    [DataMember(EmitDefaultValue = false, Name = "a")]
+    public long? NextPageStartsWithAccountId { get; set; } = NextPageStartsWithAccountId;
+
+    public static ValidatorStakesPaginationCursor FromCursorString(string? cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<ValidatorStakesPaginationCursor>(cursorString)
+            ?? new ValidatorStakesPaginationCursor(null, null);
+    }
+
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
+
+    public Gateway.PartialLedgerStateIdentifier? GetPartialStateIdentifier()
+    {
+        return FixedStateVersion.HasValue
+            ? new Gateway.PartialLedgerStateIdentifier(version: FixedStateVersion.Value)
+            : null;
+    }
+
+    public void AssertLedgerStateIsConsistent(Gateway.LedgerState ledgerState)
+    {
+        if (FixedStateVersion.HasValue && FixedStateVersion.Value != ledgerState._Version)
+        {
+            throw InvalidRequestException.FromOtherError("The provided partial state identifier can't change when making requests for later pages. You may leave the partial state identifier off requests for later pages, as it's captured in the cursor.");
+        }
+    }
+}
+
+public record ValidatorStakesPage(
+    long TotalRecords,
+    ValidatorStakesPaginationCursor? NextPageCursor,
+    List<Gateway.ValidatorAccountStake> ValidatorAccountStakes
+);
+
+public record ValidatorStakesPageRequest(
+    ValidatedValidatorAddress ValidatorAddress,
+    ValidatorStakesPaginationCursor? Cursor,
+    int PageSize
+);
 
 public class ValidatorQuerier : IValidatorQuerier
 {
@@ -94,16 +146,16 @@ public class ValidatorQuerier : IValidatorQuerier
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
-    public async Task<Validator> GetValidatorAtState(ValidatedValidatorAddress validatorAddress, LedgerState ledgerState)
+    public async Task<Gateway.Validator> GetValidatorAtState(ValidatedValidatorAddress validatorAddress, Gateway.LedgerState ledgerState)
     {
         var validator = await GetDbValidatorAtState(validatorAddress.Address, ledgerState);
 
         if (validator == null)
         {
-            return new Validator(
+            return new Gateway.Validator(
                 validatorAddress.Address.AsGatewayValidatorIdentifier(),
                 TokenAmount.Zero.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-                new ValidatorInfo(
+                new Gateway.ValidatorInfo(
                     TokenAmount.Zero.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                     GetDefaultValidatorUptime(ledgerState)
                 ),
@@ -114,13 +166,73 @@ public class ValidatorQuerier : IValidatorQuerier
         return (await CreateApiValidatorsAtState(new List<Db.Validator> { validator }, ledgerState)).Single();
     }
 
-    public async Task<List<Validator>> GetValidatorsAtState(LedgerState ledgerState)
+    public async Task<List<Gateway.Validator>> GetValidatorsAtState(Gateway.LedgerState ledgerState)
     {
         var validators = await GetDbValidatorsAtState(ledgerState);
+
         return await CreateApiValidatorsAtState(validators, ledgerState);
     }
 
-    private async Task<List<Validator>> CreateApiValidatorsAtState(List<Db.Validator> validators, LedgerState ledgerState)
+    public async Task<ValidatorStakesPage> GetValidatorStakesPage(ValidatorStakesPageRequest request, Gateway.LedgerState ledgerState)
+    {
+        var validator = await GetDbValidatorAtState(request.ValidatorAddress.Address, ledgerState);
+        if (validator == null)
+        {
+            return new ValidatorStakesPage(0, null, new List<Gateway.ValidatorAccountStake>());
+        }
+
+        var validatorId = validator.Id;
+        var validatorStakeSnapshot = (await GetValidatorStakes(new List<long> { validatorId }, ledgerState))[validatorId];
+
+        var totalCount = await CountValidatorAccountStakes(validator.Id, ledgerState);
+        var pagePlusOne = await GetValidatorAccountStakesPagePlusOne(validator, request, ledgerState);
+
+        var nextCursor = pagePlusOne.Count == request.PageSize + 1
+            ? new ValidatorStakesPaginationCursor(ledgerState._Version, pagePlusOne.Last().AccountId)
+            : null;
+
+        var pageContents = pagePlusOne
+            .Take(request.PageSize)
+            .Select(h => new Gateway.ValidatorAccountStake(
+                account: h.Account.Address.AsGatewayAccountIdentifier(),
+                validator: validator.AsGatewayValidatorIdentifier(),
+                totalPendingStake: h.StakeSnapshot.TotalPreparedXrdStake
+                    .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                totalStake: validatorStakeSnapshot.EstimateXrdConversion(h.StakeSnapshot.TotalStakeUnits)
+                    .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                totalPendingUnstake: validatorStakeSnapshot.EstimateXrdConversion(h.StakeSnapshot.TotalPreparedUnStakeUnits)
+                    .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                totalUnstaking: h.StakeSnapshot.TotalExitingXrdStake
+                    .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+            ))
+            .ToList();
+
+        return new ValidatorStakesPage(totalCount, nextCursor, pageContents);
+    }
+
+    private async Task<long> CountValidatorAccountStakes(long validatorId, Gateway.LedgerState ledgerState)
+    {
+        return await _dbContext.NonZeroAccountValidatorStakeHistoryForValidatorIdAtVersion(validatorId, ledgerState._Version)
+            .CountAsync();
+    }
+
+    private async Task<List<AccountValidatorStakeHistory>> GetValidatorAccountStakesPagePlusOne(
+        Db.Validator validator,
+        ValidatorStakesPageRequest request,
+        Gateway.LedgerState ledgerState
+    )
+    {
+        var accountIdMinBound = request.Cursor?.NextPageStartsWithAccountId ?? 0;
+
+        return await _dbContext.NonZeroAccountValidatorStakeHistoryForValidatorIdAtVersion(validator.Id, ledgerState._Version)
+            .Where(h => h.AccountId >= accountIdMinBound)
+            .Include(h => h.Account)
+            .OrderBy(h => h.AccountId)
+            .Take(request.PageSize + 1)
+            .ToListAsync();
+    }
+
+    private async Task<List<Gateway.Validator>> CreateApiValidatorsAtState(List<Db.Validator> validators, Gateway.LedgerState ledgerState)
     {
         var validatorIds = validators.Select(v => v.Id).ToList();
 
@@ -155,11 +267,10 @@ public class ValidatorQuerier : IValidatorQuerier
         {
             var (validator, validatorTotalStake, validatorOwnerStakeXrd, validatorUptime, properties) = x;
 
-            return new Validator(
+            return new Gateway.Validator(
                 validator.Address.AsGatewayValidatorIdentifier(),
-                validatorTotalStake.TotalXrdStake.AsGatewayTokenAmount(
-                    _networkConfigurationProvider.GetXrdTokenIdentifier()),
-                new ValidatorInfo(
+                validatorTotalStake.TotalXrdStake.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                new Gateway.ValidatorInfo(
                     validatorOwnerStakeXrd.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                     validatorUptime
                 ),
@@ -169,13 +280,13 @@ public class ValidatorQuerier : IValidatorQuerier
         .ToList();
     }
 
-    private async Task<Db.Validator?> GetDbValidatorAtState(string validatorAddress, LedgerState ledgerState)
+    private async Task<Db.Validator?> GetDbValidatorAtState(string validatorAddress, Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
         return await _dbContext.Validator(validatorAddress, stateVersion).SingleOrDefaultAsync();
     }
 
-    private async Task<List<Db.Validator>> GetDbValidatorsAtState(LedgerState ledgerState)
+    private async Task<List<Db.Validator>> GetDbValidatorsAtState(Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
         return await _dbContext.Validators
@@ -183,7 +294,7 @@ public class ValidatorQuerier : IValidatorQuerier
             .ToListAsync();
     }
 
-    private async Task<Dictionary<long, ValidatorStakeSnapshot>> GetValidatorStakes(List<long> validatorIds, LedgerState ledgerState)
+    private async Task<Dictionary<long, ValidatorStakeSnapshot>> GetValidatorStakes(List<long> validatorIds, Gateway.LedgerState ledgerState)
     {
         var stateVersion = ledgerState._Version;
 
@@ -194,9 +305,9 @@ public class ValidatorQuerier : IValidatorQuerier
             );
     }
 
-    private record PropertiesAndOwner(ValidatorProperties Properties, long? OwnerId);
+    private record PropertiesAndOwner(Gateway.ValidatorProperties Properties, long? OwnerId);
 
-    private async Task<Dictionary<long, PropertiesAndOwner>> GetValidatorPropertiesByValidatorIdAtState(List<Db.Validator> validators, LedgerState ledgerState)
+    private async Task<Dictionary<long, PropertiesAndOwner>> GetValidatorPropertiesByValidatorIdAtState(List<Db.Validator> validators, Gateway.LedgerState ledgerState)
     {
         var validatorIds = validators.Select(v => v.Id).ToList();
         var validatorsById = validators.ToDictionary(v => v.Id);
@@ -279,7 +390,7 @@ public class ValidatorQuerier : IValidatorQuerier
         return outDictionary;
     }
 
-    private ValidatorProperties GetDefaultValidatorProperties(byte[] validatorPublicKey)
+    private Gateway.ValidatorProperties GetDefaultValidatorProperties(byte[] validatorPublicKey)
     {
         return GetValidatorPropertiesFromStates(
             ValidatorData.GetDefaultOutputData(_networkConfigurationProvider.GetAddressHrps(), validatorPublicKey),
@@ -288,7 +399,7 @@ public class ValidatorQuerier : IValidatorQuerier
         );
     }
 
-    private ValidatorProperties GetValidatorPropertiesFromStates(
+    private Gateway.ValidatorProperties GetValidatorPropertiesFromStates(
         OutputValidatorData validatorOutputData,
         ValidatorMetadata validatorMetadata,
         ValidatorAllowDelegation validatorAllowDelegation,
@@ -298,7 +409,7 @@ public class ValidatorQuerier : IValidatorQuerier
     )
     {
         // TODO NG-100 - revert the overrides once NG-97 is implemented and used by wallets
-        return new ValidatorProperties(
+        return new Gateway.ValidatorProperties(
             url: validatorMetadata.Url,
             validatorFeePercentage: preparedFee?.FeePercentage ?? validatorOutputData.FeePercentage,
             name: validatorMetadata.Name,
@@ -309,7 +420,7 @@ public class ValidatorQuerier : IValidatorQuerier
     }
 
     private async Task<Dictionary<long, AccountValidatorStakeSnapshot>> GetOwnerStakesByValidatorIdAtState(
-        List<DbQueryExtensions.AccountValidatorIds> validatorOwnerIds, LedgerState ledgerState
+        List<DbQueryExtensions.AccountValidatorIds> validatorOwnerIds, Gateway.LedgerState ledgerState
     )
     {
         var stateVersion = ledgerState._Version;
@@ -326,7 +437,7 @@ public class ValidatorQuerier : IValidatorQuerier
     /// to a given epoch.
     /// In particular, if the ledger state points into the current epoch, the uptime will change as the epoch progresses.
     /// </summary>
-    private async Task<Dictionary<long, ValidatorUptime>> GetUptimeByValidatorIdAtState(List<long> validatorIds, LedgerState ledgerState)
+    private async Task<Dictionary<long, Gateway.ValidatorUptime>> GetUptimeByValidatorIdAtState(List<long> validatorIds, Gateway.LedgerState ledgerState)
     {
         // These are inclusive endpoints
         var fromEpoch = Math.Max(1, ledgerState.Epoch - UptimeDefaultEpochRange);
@@ -352,7 +463,7 @@ public class ValidatorQuerier : IValidatorQuerier
             g => g
         );
 
-        var outDictionary = new Dictionary<long, ValidatorUptime>();
+        var outDictionary = new Dictionary<long, Gateway.ValidatorUptime>();
 
         foreach (var (validatorId, results) in proposalCounts)
         {
@@ -361,8 +472,8 @@ public class ValidatorQuerier : IValidatorQuerier
 
             var proportion = 100 * (decimal)proposalsCompleted / Math.Max(1, proposalsCompleted + proposalsMissed);
 
-            var uptime = new ValidatorUptime(
-                new EpochRange(fromEpoch, toEpoch),
+            var uptime = new Gateway.ValidatorUptime(
+                new Gateway.EpochRange(fromEpoch, toEpoch),
                 Math.Round(proportion, 2),
                 proposalsMissed: proposalsMissed,
                 proposalsCompleted: proposalsCompleted
@@ -373,13 +484,13 @@ public class ValidatorQuerier : IValidatorQuerier
         return outDictionary;
     }
 
-    private ValidatorUptime GetDefaultValidatorUptime(LedgerState ledgerState)
+    private Gateway.ValidatorUptime GetDefaultValidatorUptime(Gateway.LedgerState ledgerState)
     {
         var fromEpoch = Math.Max(1, ledgerState.Epoch - UptimeDefaultEpochRange);
         var toEpoch = ledgerState.Epoch;
 
-        return new ValidatorUptime(
-            new EpochRange(fromEpoch, toEpoch),
+        return new Gateway.ValidatorUptime(
+            new Gateway.EpochRange(fromEpoch, toEpoch),
             uptimePercentage: 0,
             proposalsMissed: 0,
             proposalsCompleted: 0

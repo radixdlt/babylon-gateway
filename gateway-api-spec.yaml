@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.1.0
+  version: 1.1.1
   title: Radix Gateway API
   license:
     name: The Radix License, Version 1.0
@@ -367,6 +367,33 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ValidatorsResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/validators/stakes":
+    post:
+      summary: Get Validator Stakes
+      description: |
+        Returns paginated results about the delegated stakes from accounts to a validator.
+        The results are totalled by account, and ordered by account age (oldest to newest).
+      tags:
+        - Validator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ValidatorStakesRequest"
+      responses:
+        '200':
+          description: Page of account-validator stakes.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidatorStakesResponse"
         '500':
           description: Gateway Error
           content:
@@ -1264,6 +1291,72 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Validator"
+    ValidatorStakesRequest:
+      type: object
+      required:
+        - network_identifier
+        - validator_identifier
+      properties:
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        validator_identifier:
+          $ref: "#/components/schemas/ValidatorIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+        limit:
+          description: The page size requested. The maximum value is 30 at present.
+          type: integer
+      example:
+        network_identifier:
+          network: mainnet
+        validator_identifier:
+          address: rv1qf2x63qx4jdaxj83kkw2yytehvvmu6r2xll5gcp6c9rancmrfsgfwttnczx
+    ValidatorStakesResponse:
+      type: object
+      required:
+        - ledger_state
+        - total_count
+        - account_stake_delegations
+      properties:
+        ledger_state:
+          $ref: "#/components/schemas/LedgerState"
+        total_count:
+          description: The total number of accounts delegating stake to the validator in some state.
+          type: integer
+          format: int64
+        next_cursor:
+          description: The cursor to be provided for the next page of results. If missing, this is the last page of results.
+          type: string
+        account_stake_delegations:
+          description: The page of account stake delegations.
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidatorAccountStake"
+    ValidatorAccountStake:
+      type: object
+      required:
+        - account
+        - validator
+      properties:
+        account:
+          $ref: "#/components/schemas/AccountIdentifier"
+        validator:
+          $ref: "#/components/schemas/ValidatorIdentifier"
+        total_pending_stake:
+          $ref: "#/components/schemas/TokenAmount"
+          description: XRD which will become active as stake at the next epoch.
+        total_stake:
+          $ref: "#/components/schemas/TokenAmount"
+          description: XRD which is currently actively staked, and contributing to the validator's voting power.
+        total_pending_unstake:
+          $ref: "#/components/schemas/TokenAmount"
+          description: XRD which is currently actively staked, but will be moved to unstaking state at the next epoch.
+        total_unstaking:
+          $ref: "#/components/schemas/TokenAmount"
+          description: XRD which is currently in the unstaking state.
     Validator:
       type: object
       required:
@@ -1275,7 +1368,7 @@ components:
         validator_identifier:
           "$ref": "#/components/schemas/ValidatorIdentifier"
         stake:
-          description: The total XRD staked to the validator. Excludes pending stake / pending unstake / locked unstake.
+          description: The total XRD staked to the validator. Includes active stake and pending unstake. Excludes pending stake / locked unstake.
           "$ref": "#/components/schemas/TokenAmount"
         info:
           "$ref": "#/components/schemas/ValidatorInfo"
