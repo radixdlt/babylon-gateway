@@ -227,6 +227,42 @@ INNER JOIN LATERAL (
 ");
     }
 
+    public static IQueryable<AccountValidatorStakeHistory> NonZeroAccountValidatorStakeHistoryForValidatorIdAtVersion<TDbContext>(
+        this TDbContext dbContext,
+        long validatorId,
+        long stateVersion
+    )
+        where TDbContext : CommonDbContext
+    {
+        var validatorIdParameter = new NpgsqlParameter("@validator_id", NpgsqlDbType.Bigint) { Value = validatorId };
+
+        return dbContext.Set<AccountValidatorStakeHistory>()
+            .FromSqlInterpolated($@"
+WITH PossibleAccountIds AS (
+	SELECT DISTINCT av.account_id FROM account_validator_stake_history av
+	WHERE av.validator_id = {validatorIdParameter}
+    AND av.from_state_version <= {stateVersion}
+)
+SELECT h.*
+FROM PossibleAccountIds a
+INNER JOIN LATERAL (
+	SELECT * FROM account_validator_stake_history av2
+	WHERE
+		av2.account_id = a.account_id
+		AND av2.validator_id = {validatorIdParameter}
+		AND av2.from_state_version <= {stateVersion}
+        AND (
+            av2.total_stake_units > 0
+            OR av2.total_prepared_xrd_stake > 0
+            OR av2.total_prepared_unstake_units > 0
+            OR av2.total_exiting_xrd_stake > 0
+        )
+	ORDER BY av2.from_state_version DESC
+	LIMIT 1
+) h ON (h.account_id = a.account_id)
+");
+    }
+
     public record AccountValidatorIds(long AccountId, long ValidatorId);
 
     public static IQueryable<AccountValidatorStakeHistory> BulkAccountValidatorStakeHistoryAtVersion<TDbContext>(

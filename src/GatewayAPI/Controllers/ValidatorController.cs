@@ -104,6 +104,40 @@ public class ValidatorController : ControllerBase
         );
     }
 
+    [HttpPost("validator/stakes")]
+    public async Task<ValidatorStakesResponse> GetValidatorStakes(ValidatorStakesRequest request)
+    {
+        var validatorAddress = _validations.ExtractValidValidatorAddress(request.ValidatorIdentifier);
+        var cursor = ValidatorStakesPaginationCursor.FromCursorString(request.Cursor);
+
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.NetworkIdentifier, request.AtStateIdentifier ?? cursor.GetPartialStateIdentifier());
+
+        cursor.AssertLedgerStateIsConsistent(ledgerState);
+
+        var validatedPageSize = _validations.ExtractValidIntInBoundInclusive(
+            "Page size",
+            request.Limit is default(int) ? 10 : request.Limit,
+            1,
+            30
+        );
+
+        var results = await _validatorQuerier.GetValidatorStakesPage(
+            new ValidatorStakesPageRequest(
+                validatorAddress,
+                cursor,
+                validatedPageSize
+            ),
+            ledgerState
+        );
+
+        return new ValidatorStakesResponse(
+            ledgerState,
+            results.TotalRecords,
+            results.NextPageCursor?.ToCursorString(),
+            results.ValidatorAccountStakes
+        );
+    }
+
     [HttpPost("validators")]
     public async Task<ValidatorsResponse> GetValidators(ValidatorsRequest request)
     {
