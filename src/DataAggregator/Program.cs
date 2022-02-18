@@ -80,6 +80,7 @@ IConfigurationRoot? bootUpConfiguration;
 hostBuilder.ConfigureAppConfiguration((context, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR__");
+    config.AddEnvironmentVariables("RADIX_NG_AGGREGATOR:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
     if (args is { Length: > 0 })
     {
         config.AddCommandLine(args);
