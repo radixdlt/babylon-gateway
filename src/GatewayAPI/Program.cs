@@ -89,7 +89,7 @@ hostBuilder.ConfigureAppConfiguration((context, config) =>
     if (context.HostingEnvironment.IsDevelopment())
     {
         // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
-        config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
+        config.AddJsonFile("appsettings.DevelopmentOverrides.json", optional: true, reloadOnChange: true);
     }
     else
     {

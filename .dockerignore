@@ -13,6 +13,8 @@ generation/
 .run
 deployment/
 **/*.user
+**/appsettings.DevelopmentOverrides.json
+**/appsettings.ProductionOverrides.json
 
 # DEFAULTS
 **/.dockerignore
