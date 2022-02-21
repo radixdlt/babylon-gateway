@@ -80,6 +80,7 @@ var hostBuilder = builder.Host;
 hostBuilder.ConfigureAppConfiguration((context, config) =>
 {
     config.AddEnvironmentVariables("RADIX_NG_API__");
+    config.AddEnvironmentVariables("RADIX_NG_API:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
     if (args is { Length: > 0 })
     {
         config.AddCommandLine(args);
@@ -88,7 +89,7 @@ hostBuilder.ConfigureAppConfiguration((context, config) =>
     if (context.HostingEnvironment.IsDevelopment())
     {
         // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
-        config.AddJsonFile("appsettings.PersonalOverrides.json", optional: true, reloadOnChange: true);
+        config.AddJsonFile("appsettings.DevelopmentOverrides.json", optional: true, reloadOnChange: true);
     }
     else
     {
