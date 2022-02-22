@@ -104,6 +104,7 @@ public record CommitTransactionsReport(
 
 public class LedgerExtenderService : ILedgerExtenderService
 {
+    private readonly IConfiguration _configuration;
     private readonly ILogger<LedgerExtenderService> _logger;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
@@ -119,6 +120,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     );
 
     public LedgerExtenderService(
+        IConfiguration configuration,
         ILogger<LedgerExtenderService> logger,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
@@ -127,6 +129,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         INetworkConfigurationProvider networkConfigurationProvider
     )
     {
+        _configuration = configuration;
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
@@ -276,7 +279,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         CancellationToken cancellationToken
     )
     {
-        var dbActionsPlanner = new DbActionsPlanner(dbContext, _entityDeterminer, cancellationToken);
+        var dbActionsPlanner = new DbActionsPlanner(_configuration, dbContext, _entityDeterminer, cancellationToken);
 
         var transactionContentProcessingMs = CodeStopwatch.TimeInMs(
             () => ProcessTransactions(dbContext, dbActionsPlanner, transactions)
