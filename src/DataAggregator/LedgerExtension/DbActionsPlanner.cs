@@ -114,6 +114,7 @@ public record ActionsPlannerReport(
 /// </summary>
 public class DbActionsPlanner
 {
+    private readonly IConfiguration _configuration;
     private readonly AggregatorDbContext _dbContext;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly CancellationToken _cancellationToken;
@@ -148,8 +149,9 @@ public class DbActionsPlanner
     private Dictionary<Validator, ValidatorStakeHistory>? _latestValidatorStakeHistory;
     private Dictionary<AccountValidator, AccountValidatorStakeHistory>? _latestAccountValidatorStakeHistory;
 
-    public DbActionsPlanner(AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
+    public DbActionsPlanner(IConfiguration configuration, AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
     {
+        _configuration = configuration;
         _dbContext = dbContext;
         _entityDeterminer = entityDeterminer;
         _cancellationToken = cancellationToken;
@@ -555,7 +557,10 @@ public class DbActionsPlanner
             );
         }
 
-        if (!verifySubstateMatches(substate))
+        if (
+            _configuration.GetValue<bool>("TransactionAssertions:AssertDownedSubstatesMatchDownFromCoreApi")
+            && !verifySubstateMatches(substate)
+        )
         {
             throw new InvalidTransactionException(
                 transactionOpLocator,
