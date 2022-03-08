@@ -23,10 +23,10 @@ jobs:
       - name: Build linux binaries
         run: |
           cd src/DataAggregator
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.upload_url }}"}' appsettings.json )" > appsettings.json
+          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../GatewayAPI
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.upload_url }}"}' appsettings.json )" > appsettings.json
+          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../..          
           
