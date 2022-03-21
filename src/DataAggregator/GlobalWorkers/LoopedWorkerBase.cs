@@ -92,6 +92,8 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
 
     public Exception? FaultedException { get; private set; }
 
+    public bool ExplicitStopRequested { get; private set; }
+
     public bool IsStoppedSuccessfully { get; private set; }
 
     private readonly ILogger _logger;
@@ -127,23 +129,31 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
             await OnStartRequested(cancellationToken, isCurrentlyEnabled);
             await base.StartAsync(cancellationToken);
         }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            await OnCancellationObserved();
+            HandleFaultedWorkerException(cancellationToken.IsCancellationRequested, ex, "startup");
+            await OnStoppedSuccessfully();
+            throw;
+        }
         catch (Exception ex)
         {
-            TrackFatalWorkerException(false, ex, "startup");
+            HandleFaultedWorkerException(cancellationToken.IsCancellationRequested, ex, "startup");
             throw;
         }
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CancellationToken nonGracefulShutdownCancellationToken)
     {
         try
         {
-            await OnStopRequested(cancellationToken);
-            await base.StopAsync(cancellationToken);
+            ExplicitStopRequested = true;
+            await OnStopRequested(nonGracefulShutdownCancellationToken);
+            await base.StopAsync(nonGracefulShutdownCancellationToken);
         }
         catch (Exception ex)
         {
-            TrackFatalWorkerException(true, ex, "requested shutdown");
+            HandleFaultedWorkerException(true, ex, "requested shutdown");
             throw;
         }
     }
@@ -161,7 +171,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         }
         catch (Exception ex)
         {
-            TrackFatalWorkerException(false, ex, "the on start callback");
+            HandleFaultedWorkerException(cancellationToken.IsCancellationRequested, ex, "the on start callback");
             throw;
         }
 
@@ -171,10 +181,11 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            await OnCancellationObserved();
         }
         catch (Exception ex)
         {
-            TrackFatalWorkerException(false, ex, "the main execution loop");
+            HandleFaultedWorkerException(cancellationToken.IsCancellationRequested, ex, "the main execution loop");
             throw;
         }
 
@@ -185,7 +196,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         }
         catch (Exception ex)
         {
-            TrackFatalWorkerException(true, ex, "the on stopped successfully callback");
+            HandleFaultedWorkerException(true, ex, "the on stopped successfully callback");
             throw;
         }
     }
@@ -229,11 +240,24 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     /// <summary>
     ///  If this errors, the Worker is faulted.
     /// </summary>
-    protected virtual Task OnStopRequested(CancellationToken nonGracefulShutdownToken)
+    protected virtual async Task OnCancellationObserved()
+    {
+        if (!ExplicitStopRequested)
+        {
+            // As we haven't already tracked the stop request, record it now.
+            await OnStopRequested(default);
+        }
+    }
+
+    /// <summary>
+    ///  If this errors, the Worker is faulted.
+    /// </summary>
+    protected virtual Task OnStopRequested(CancellationToken nonGracefulShutdownCancellationToken)
     {
         _logger.LogInformation(
-            "{GracefulState} stop requested. Stopping at: {Time}",
-            nonGracefulShutdownToken.IsCancellationRequested ? "Non-graceful" : "Graceful",
+            "{GracefulState} stop requested via {StopInstantiationMethod}. Stopping at: {Time}",
+            nonGracefulShutdownCancellationToken.IsCancellationRequested ? "Non-graceful" : "Graceful",
+            ExplicitStopRequested ? "an explicit StopAsync call" : "the cancellation of the token passed on start",
             SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs()
         );
         return Task.CompletedTask;
@@ -248,7 +272,11 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         return Task.CompletedTask;
     }
 
-    protected virtual void TrackNonFatalExceptionInWorkLoop(Exception ex)
+    protected virtual void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    {
+    }
+
+    protected virtual void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
     {
     }
 
@@ -285,7 +313,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
                 // If only fatally failing on known System errors is good enough for ASP.NET Core (eg during creating
                 // an API call response), it's good enough for us.
 
-                TrackNonFatalExceptionInWorkLoop(ex);
+                TrackNonFaultingExceptionInWorkLoop(ex);
 
                 var remainingTime = GetRemainingRestartAfterErrorDelay();
                 _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", remainingTime.TotalMilliseconds);
@@ -321,10 +349,12 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         }
     }
 
-    private void TrackFatalWorkerException(bool isStopRequested, Exception ex, string lifeCycleDescription)
+    private void HandleFaultedWorkerException(bool isStopRequested, Exception ex, string lifeCycleDescription)
     {
         FaultedException = ex;
         IsFaulted = true;
+
+        TrackWorkerFaultedException(ex, isStopRequested);
 
         if (isStopRequested)
         {
@@ -335,13 +365,18 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
                     "Expected operation cancelled exception whilst worker stopping during {LifeCycleDescription}",
                     lifeCycleDescription
                 );
+                return;
             }
 
-            _logger.LogWarning(
-                ex,
-                "Unexpected exception whist worker stopping during {LifeCycleDescription}",
-                lifeCycleDescription
-            );
+            if (!ex.ShouldBeConsideredAppFatal())
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Unexpected exception whist worker stopping during {LifeCycleDescription}",
+                    lifeCycleDescription
+                );
+                return;
+            }
         }
 
         // This should never happen in the execute loop. If this happens, this is likely a failure of the LoopedWorkerBase
@@ -349,7 +384,17 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
 
         // Some workers (eg node workers) can get restarted as they're run by the NodeWorkersRunner.
         // Global services can't, and this will need to trigger an application exit in order to get restarted.
-        if (_behaviourOnFault == BehaviourOnFault.ApplicationExit)
+
+        if (ex.ShouldBeConsideredAppFatal())
+        {
+            _logger.LogCritical(
+                ex,
+                "THE PROCESS WILL BE SHUTDOWN. Exception deemed app-fatal occurred during {LifeCycleDescription}, the application will exit so that it can be restarted automatically",
+                lifeCycleDescription
+            );
+            Environment.Exit(1);
+        }
+        else if (_behaviourOnFault == BehaviourOnFault.ApplicationExit)
         {
             _logger.LogCritical(
                 ex,

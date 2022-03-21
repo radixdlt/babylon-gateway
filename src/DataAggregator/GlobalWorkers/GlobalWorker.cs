@@ -72,8 +72,8 @@ public abstract class GlobalWorker : LoopedWorkerBase
     private static readonly Counter _globalWorkerErrorsCount = Metrics
         .CreateCounter(
             "ng_workers_global_error_count",
-            "Number of non-fatal errors during the work loop in global workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "error" } }
+            "Number of errors in global workers.",
+            new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
         );
 
     protected GlobalWorker(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenLoopsAfterError, TimeSpan minDelayBetweenInfoLogs)
@@ -83,8 +83,14 @@ public abstract class GlobalWorker : LoopedWorkerBase
     {
     }
 
-    protected override void TrackNonFatalExceptionInWorkLoop(Exception ex)
+    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging()).Inc();
+        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+    }
+
+    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    {
+        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
+        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), errorType).Inc();
     }
 }

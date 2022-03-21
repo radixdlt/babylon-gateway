@@ -200,7 +200,7 @@ public class NodeWorkersRunner : IDisposable
 
         try
         {
-            await Task.WhenAll(_initializers.Select(i => i.Initialize(combinedCancellationToken)));
+            await Task.WhenAll(_initializers.Select(i => i.Run(combinedCancellationToken)));
         }
         catch (Exception ex)
         {

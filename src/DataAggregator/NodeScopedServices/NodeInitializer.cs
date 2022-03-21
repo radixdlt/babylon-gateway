@@ -62,9 +62,58 @@
  * permissions under this License.
  */
 
+using Common.Extensions;
+using Prometheus;
+
 namespace DataAggregator.NodeScopedServices;
 
+/// <summary>
+/// A marker interface for NodeInitializers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.
+/// </summary>
 public interface INodeInitializer
 {
-    public Task Initialize(CancellationToken token);
+    public Task Run(CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// A base class for NodeInitializers, which handles errors etc.
+/// </summary>
+public abstract class NodeInitializer : INodeInitializer
+{
+    // NB - The namespace and choice of tag "worker" is so that it fits into the same metric namespace, and
+    // aligns with the metrics in NodeWorker and GlobalWorker
+    private static readonly Counter _nodeInitializersErrorsCount = Metrics
+        .CreateCounter(
+            "ng_workers_node_initializers_error_count",
+            "Number of errors in node initializers.",
+            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
+        );
+
+    private readonly string _nodeName;
+
+    protected NodeInitializer(string nodeName)
+    {
+        _nodeName = nodeName;
+    }
+
+    public async Task Run(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Initialize(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            TrackInitializerFaultedException(cancellationToken.IsCancellationRequested, ex);
+            throw;
+        }
+    }
+
+    protected abstract Task Initialize(CancellationToken cancellationToken);
+
+    protected void TrackInitializerFaultedException(bool isStopRequested, Exception ex)
+    {
+        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
+        _nodeInitializersErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+    }
 }
