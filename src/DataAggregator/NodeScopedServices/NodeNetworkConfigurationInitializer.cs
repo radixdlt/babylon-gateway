@@ -63,7 +63,6 @@
  */
 
 using Common.Addressing;
-using Common.Database.Models;
 using Common.Database.Models.SingleEntries;
 using DataAggregator.Configuration;
 using DataAggregator.Exceptions;
@@ -73,7 +72,7 @@ using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.NodeScopedServices;
 
-public class NodeNetworkConfigurationInitializer : INodeInitializer
+public class NodeNetworkConfigurationInitializer : NodeInitializer
 {
     private readonly IAggregatorConfiguration _configuration;
     private readonly INetworkConfigurationReader _networkConfigurationReader;
@@ -81,11 +80,13 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
     private readonly ILogger<NodeNetworkConfigurationInitializer> _logger;
 
     public NodeNetworkConfigurationInitializer(
+        INodeConfigProvider nodeConfigProvider,
         IAggregatorConfiguration configuration,
         INetworkConfigurationReader networkConfigurationReader,
         INetworkConfigurationProvider networkConfigurationProvider,
         ILogger<NodeNetworkConfigurationInitializer> logger
     )
+        : base(nodeConfigProvider.NodeAppSettings.Name)
     {
         _configuration = configuration;
         _networkConfigurationReader = networkConfigurationReader;
@@ -93,7 +94,7 @@ public class NodeNetworkConfigurationInitializer : INodeInitializer
         _logger = logger;
     }
 
-    public async Task Initialize(CancellationToken token)
+    protected override async Task Initialize(CancellationToken token)
     {
         var networkConfiguration = await ReadNetworkConfigurationFromNode(token);
 

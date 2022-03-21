@@ -84,8 +84,8 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
     private static readonly Counter _nodeWorkerErrorsCount = Metrics
         .CreateCounter(
             "ng_workers_node_error_count",
-            "Number of non-fatal errors during the work loop in node workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error" } }
+            "Number of errors in node workers.",
+            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
         );
 
     private readonly string _nodeName;
@@ -104,8 +104,14 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
         return IsEnabledByNodeConfiguration();
     }
 
-    protected override void TrackNonFatalExceptionInWorkLoop(Exception ex)
+    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging()).Inc();
+        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+    }
+
+    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    {
+        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
+        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
     }
 }

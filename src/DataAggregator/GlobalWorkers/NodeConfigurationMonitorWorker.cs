@@ -62,10 +62,8 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
-using NodaTime;
 
 namespace DataAggregator.GlobalWorkers;
 
@@ -97,13 +95,15 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
 
     protected override async Task OnStoppedSuccessfully()
     {
-        _logger.LogInformation("Received cancellation at: {Time} - instructing all node workers to stop", SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
+        _logger.LogInformation("Service execution has stopped - now instructing all node workers to stop");
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(1000));
         await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationTokenSource.Token);
 
         _logger.LogInformation("All node workers have been stopped");
+
+        await base.OnStoppedSuccessfully();
     }
 
     private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
