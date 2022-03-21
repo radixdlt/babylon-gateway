@@ -364,7 +364,7 @@ public class TransactionBuilder
         var stakeUnitsToUnstake = action switch
         {
             { Amount: { } xrdAmount, UnstakePercentage: 0 } => GetStakeUnitsToUnstakeGivenFixedXrdAmountRequested(validator, stakeSnapshot, xrdAmount),
-            { Amount: null, UnstakePercentage: > 0 and var percentage } => GetStakeUnitsGivenUnstakePercentage(action, stakeSnapshot, percentage),
+            { Amount: null, UnstakePercentage: > 0 and var percentage } => GetStakeUnitsGivenUnstakePercentage(action, validator, stakeSnapshot, percentage),
             _ => throw new InvalidActionException(action, "Only one of Amount or UnstakePercentage should be provided for an UnstakeTokens action"),
         };
 
@@ -406,7 +406,12 @@ public class TransactionBuilder
             : (stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits * requestedXrdToUnstake.Amount) / estimatedTotalXrdStaked;
     }
 
-    private TokenAmount GetStakeUnitsGivenUnstakePercentage(Gateway.Action action, AccountQuerier.CombinedStakeSnapshot stakeSnapshot, decimal percentage)
+    private TokenAmount GetStakeUnitsGivenUnstakePercentage(
+        Gateway.Action action,
+        ValidatedValidatorAddress validator,
+        AccountQuerier.CombinedStakeSnapshot stakeSnapshot,
+        decimal percentage
+    )
     {
         if (percentage is not (> 0 and <= 100))
         {
@@ -415,7 +420,28 @@ public class TransactionBuilder
 
         var proportionAsTokenAmount = TokenAmount.FromDecimalString((percentage / 100).ToString(CultureInfo.InvariantCulture));
 
-        return (stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits * proportionAsTokenAmount) / TokenAmount.OneFullUnit;
+        var stakeUnitsToUnstake = (stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits * proportionAsTokenAmount) / TokenAmount.OneFullUnit;
+
+        // Stake units to unstake can be zero if you have no stake.
+        // Building a transaction to unstake 0 stake units causes a Core API NotEnoughResourcesError,
+        // so we avoid this by returning our own, better, error.
+        if (stakeUnitsToUnstake == TokenAmount.Zero)
+        {
+            throw new NotEnoughTokensForUnstakeException(
+                stakeUnitsToUnstake.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+                new Gateway.AccountStakeEntry(
+                    validator.Address.AsGatewayValidatorIdentifier(),
+                    stakeSnapshot.ValidatorStakeSnapshot.EstimateXrdConversion(stakeSnapshot.AccountValidatorStakeSnapshot.TotalStakeUnits)
+                        .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())),
+                new Gateway.AccountStakeEntry(
+                    validator.Address.AsGatewayValidatorIdentifier(),
+                    stakeSnapshot.AccountValidatorStakeSnapshot.TotalPreparedXrdStake
+                        .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+                )
+            );
+        }
+
+        return stakeUnitsToUnstake;
     }
 
     private Core.OperationGroup MapCreateTokenDefinition(Gateway.CreateTokenDefinition action)
