@@ -1,0 +1,8 @@
+name: Release Drafter
+on:
+ push:
+   branches:
+     - DO-412-release-drafter
+jobs:
+  release-drafter:
+    uses: .github/workflows/release-drafter-reusable.yml@DO-412-release-drafter
