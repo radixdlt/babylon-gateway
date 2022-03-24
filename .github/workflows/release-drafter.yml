@@ -2,7 +2,7 @@ name: Release Drafter
 on:
  push:
    branches:
-     - DO-412-release-drafter
+     - main
 jobs:
   release-drafter:
     uses: ./.github/workflows/release-drafter-reusable.yml
