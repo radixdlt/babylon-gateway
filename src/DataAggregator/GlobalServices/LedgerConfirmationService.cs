@@ -98,6 +98,8 @@ public record TransactionsRequested(long StateVersionExclusiveLowerBound, long S
 /// </summary>
 public class LedgerConfirmationService : ILedgerConfirmationService
 {
+    private static readonly LogLimiter _noExtensionLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
+
     /* Global Metrics - Quorum/Sync related - ie ledger_node prefix */
     private static readonly Gauge _quorumExistsStatus = Metrics
         .CreateGauge(
@@ -380,7 +382,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         if (trustRequirements.TrustWeightingRequiredForQuorumAtPresentTime == 0)
         {
-            var logLevel = _systemStatusService.IsInStartupGracePeriod() ? LogLevel.Debug : LogLevel.Warning;
+            var logLevel = _systemStatusService.IsInStartupGracePeriod() ? LogLevel.Debug : _noExtensionLogLimiter.GetLogLevel();
             _logger.Log(logLevel, "Total trust weighting required for extension is zero - likely the system is either yet to read from nodes, or none of the nodes are close enough to synced up");
             return extension;
         }
