@@ -4,7 +4,7 @@ services:
     # See https://hub.docker.com/_/postgres for details about configuration
     image: "postgres:12.9-alpine"
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - ./.postgresdata:/var/lib/postgresql/data
     # Should match with the appsettings.Development.json file/s
@@ -16,7 +16,7 @@ services:
     # See https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html
     image: "dpage/pgadmin4:6.2"
     ports:
-      - "5050:80"
+      - "127.0.0.1:5050:80"
     volumes:
       - ./.pgadmin-dev/servers.json:/pgadmin4/servers.json
       - ./.pgadmin-dev/.pgadmin-data:/var/lib/pgadmin
