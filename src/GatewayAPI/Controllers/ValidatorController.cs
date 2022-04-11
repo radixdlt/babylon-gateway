@@ -64,6 +64,7 @@
 
 using Common.Addressing;
 using GatewayAPI.ApiSurface;
+using GatewayAPI.Configuration;
 using GatewayAPI.Database;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -79,18 +80,21 @@ public class ValidatorController : ControllerBase
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IValidatorQuerier _validatorQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
 
     public ValidatorController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         IValidatorQuerier validatorQuerier,
-        INetworkConfigurationProvider networkConfigurationProvider
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IGatewayApiConfiguration gatewayApiConfiguration
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _validatorQuerier = validatorQuerier;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _gatewayApiConfiguration = gatewayApiConfiguration;
     }
 
     [HttpPost("validator")]
@@ -118,7 +122,7 @@ public class ValidatorController : ControllerBase
             "Page size",
             request.Limit is default(int) ? 10 : request.Limit,
             1,
-            30
+            _gatewayApiConfiguration.GetMaxPageSize()
         );
 
         var results = await _validatorQuerier.GetValidatorStakesPage(

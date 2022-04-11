@@ -74,6 +74,8 @@ public interface IGatewayApiConfiguration
     string GetNetworkName();
 
     AcceptableLedgerLag GetAcceptableLedgerLag();
+
+    int GetMaxPageSize();
 }
 
 public class GatewayApiConfiguration : IGatewayApiConfiguration
@@ -125,5 +127,9 @@ public class GatewayApiConfiguration : IGatewayApiConfiguration
         _configuration.GetSection("AcceptableLedgerLag").Bind(acceptableLedgerLag);
 
         return acceptableLedgerLag;
+    }
+
+    public int GetMaxPageSize() {
+        return _configuration.GetValue("MaxPageSize", 30);
     }
 }
