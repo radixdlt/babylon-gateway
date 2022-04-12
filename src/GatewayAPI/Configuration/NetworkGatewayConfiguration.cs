@@ -129,7 +129,8 @@ public class GatewayApiConfiguration : IGatewayApiConfiguration
         return acceptableLedgerLag;
     }
 
-    public int GetMaxPageSize() {
+    public int GetMaxPageSize()
+    {
         return _configuration.GetValue("MaxPageSize", 30);
     }
 }
