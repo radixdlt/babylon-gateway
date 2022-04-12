@@ -140,7 +140,7 @@ servicesBuilder.AddCors(options =>
 {
     options.AddDefaultPolicy(corsPolicyBuilder =>
     {
-        corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod();
+        corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
 

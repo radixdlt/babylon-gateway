@@ -64,6 +64,7 @@
 
 using Common.Addressing;
 using GatewayAPI.ApiSurface;
+using GatewayAPI.Configuration;
 using GatewayAPI.Database;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -80,13 +81,15 @@ public class AccountController : ControllerBase
     private readonly IAccountQuerier _accountQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
 
     public AccountController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         IAccountQuerier accountQuerier,
         ITransactionQuerier transactionQuerier,
-        INetworkConfigurationProvider networkConfigurationProvider
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IGatewayApiConfiguration gatewayApiConfiguration
     )
     {
         _validations = validations;
@@ -94,6 +97,7 @@ public class AccountController : ControllerBase
         _accountQuerier = accountQuerier;
         _transactionQuerier = transactionQuerier;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _gatewayApiConfiguration = gatewayApiConfiguration;
     }
 
     [HttpPost("balances")]
@@ -145,7 +149,12 @@ public class AccountController : ControllerBase
         var transactionsPageRequest = new TransactionPageRequest(
             accountAddress,
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
-            PageSize: _validations.ExtractValidIntInBoundInclusive("Page size", unvalidatedLimit, 1, 30)
+            PageSize: _validations.ExtractValidIntInBoundInclusive(
+                "Page size",
+                unvalidatedLimit,
+                1,
+                _gatewayApiConfiguration.GetMaxPageSize()
+            )
         );
 
         var results = await _transactionQuerier.GetAccountTransactions(transactionsPageRequest, ledgerState);
