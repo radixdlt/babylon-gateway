@@ -75,6 +75,72 @@ public enum BehaviourOnFault
     ApplicationExit,
 }
 
+public interface IDelayBetweenLoopsStrategy
+{
+    public static IDelayBetweenLoopsStrategy ConstantDelayStrategy(
+        TimeSpan minDelayAfterSuccess, TimeSpan minDelayAfterError)
+    {
+        // Reusing exponential backoff implementation with an exponent of 0
+        return new ExponentialBackoffDelayBetweenLoopsStrategy(
+            minDelayAfterSuccess, minDelayAfterError,
+            0, 0, 0);
+    }
+
+    TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning);
+
+    TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors);
+}
+
+public class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
+{
+    private readonly TimeSpan _minDelayAfterSuccess;
+    private readonly TimeSpan _baseDelayAfterError;
+    private readonly int _exponentialBackoffErrorsGracePeriod;
+    private readonly uint _delayAfterErrorExponentialRate;
+    private readonly uint _delayAfterErrorMaxExponent;
+
+    public ExponentialBackoffDelayBetweenLoopsStrategy(
+        TimeSpan minDelayAfterSuccess,
+        TimeSpan baseDelayAfterError,
+        int exponentialBackoffErrorsGracePeriod,
+        uint delayAfterErrorExponentialRate,
+        uint delayAfterErrorMaxExponent
+    )
+    {
+        _minDelayAfterSuccess = minDelayAfterSuccess;
+        _baseDelayAfterError = baseDelayAfterError;
+        _exponentialBackoffErrorsGracePeriod = exponentialBackoffErrorsGracePeriod;
+        _delayAfterErrorExponentialRate = delayAfterErrorExponentialRate;
+        _delayAfterErrorMaxExponent = delayAfterErrorMaxExponent;
+    }
+
+    public TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning)
+    {
+        var delayRemaining = _minDelayAfterSuccess - elapsedSinceLoopBeginning;
+        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
+    }
+
+    public TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors)
+    {
+        var totalDelay = numConsecutiveErrors <= _exponentialBackoffErrorsGracePeriod
+            ? _baseDelayAfterError
+            : ExponentialDelayAfterError(numConsecutiveErrors);
+
+        var delayRemaining = totalDelay - elapsedSinceLoopBeginning;
+        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
+    }
+
+    private TimeSpan ExponentialDelayAfterError(uint numConsecutiveErrors)
+    {
+        var numConsecutiveErrorsMinusGrace =
+            numConsecutiveErrors - _exponentialBackoffErrorsGracePeriod;
+        var exponentialFactor = Math.Pow(
+            _delayAfterErrorExponentialRate,
+            Math.Min(_delayAfterErrorMaxExponent, numConsecutiveErrorsMinusGrace));
+        return _baseDelayAfterError * exponentialFactor;
+    }
+}
+
 public interface ILoopedWorkerBase : IHostedService, IDisposable
 {
     bool IsFaulted { get; }
@@ -99,24 +165,22 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     private readonly ILogger _logger;
     private readonly BehaviourOnFault _behaviourOnFault;
     private readonly LogLimiter _stillRunningLogLimiter;
-    private readonly TimeSpan _minDelayBetweenLoops;
-    private readonly TimeSpan _minDelayBetweenLoopsAfterError;
+    private readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy;
     private Stopwatch? _loopIterationStopwatch;
+    private uint _numConsecutiveErrors;
     private bool? _wasEnabledAtLastLoopIteration;
 
     // ReSharper disable once ContextualLoggerProblem
     protected LoopedWorkerBase(
         ILogger logger,
         BehaviourOnFault behaviourOnFault,
-        TimeSpan minDelayBetweenLoops,
-        TimeSpan minDelayBetweenLoopsAfterError,
+        IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
         TimeSpan minDelayBetweenInfoLogs
     )
     {
         _logger = logger;
         _behaviourOnFault = behaviourOnFault;
-        _minDelayBetweenLoops = minDelayBetweenLoops;
-        _minDelayBetweenLoopsAfterError = minDelayBetweenLoopsAfterError;
+        _delayBetweenLoopsStrategy = delayBetweenLoopsStrategy;
         _stillRunningLogLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
     }
 
@@ -201,18 +265,6 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         }
     }
 
-    protected virtual TimeSpan GetRemainingRestartDelay()
-    {
-        var timespan = _minDelayBetweenLoops - _loopIterationStopwatch!.Elapsed;
-        return timespan < TimeSpan.Zero ? TimeSpan.Zero : timespan;
-    }
-
-    protected virtual TimeSpan GetRemainingRestartAfterErrorDelay()
-    {
-        var timespan = _minDelayBetweenLoopsAfterError - _loopIterationStopwatch!.Elapsed;
-        return timespan < TimeSpan.Zero ? TimeSpan.Zero : timespan;
-    }
-
     protected abstract Task DoWork(CancellationToken cancellationToken);
 
     /// <summary>
@@ -280,6 +332,11 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     {
     }
 
+    protected TimeSpan ElapsedSinceLoopBeginning()
+    {
+        return _loopIterationStopwatch?.Elapsed ?? TimeSpan.Zero;
+    }
+
     private async Task RunLoopWhilstNotCancelled(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -288,10 +345,11 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
             try
             {
                 await ExecuteLoopIteration(cancellationToken);
-                var remainingTime = GetRemainingRestartDelay();
-                if (remainingTime > TimeSpan.Zero)
+                _numConsecutiveErrors = 0;
+                var delay = _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning());
+                if (delay > TimeSpan.Zero)
                 {
-                    await Task.Delay(remainingTime, cancellationToken);
+                    await Task.Delay(delay, cancellationToken);
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -315,11 +373,13 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
 
                 TrackNonFaultingExceptionInWorkLoop(ex);
 
-                var remainingTime = GetRemainingRestartAfterErrorDelay();
-                _logger.LogError(ex, "An error occurred. Will restart work in {Delay}ms", remainingTime.TotalMilliseconds);
-                if (remainingTime > TimeSpan.Zero)
+                _numConsecutiveErrors += 1;
+                var delay =
+                    _delayBetweenLoopsStrategy.DelayAfterError(ElapsedSinceLoopBeginning(), _numConsecutiveErrors);
+                _logger.LogError(ex, "An error occurred. Will restart work in {delay}ms", delay.TotalMilliseconds);
+                if (delay > TimeSpan.Zero)
                 {
-                    await Task.Delay(remainingTime, cancellationToken);
+                    await Task.Delay(delay, cancellationToken);
                 }
             }
         }

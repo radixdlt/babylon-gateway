@@ -66,6 +66,7 @@ using Common.CoreCommunications;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
+using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
@@ -78,6 +79,12 @@ namespace DataAggregator.NodeScopedWorkers;
 /// </summary>
 public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        new ExponentialBackoffDelayBetweenLoopsStrategy(
+            TimeSpan.FromMilliseconds(200),
+            TimeSpan.FromMilliseconds(1000),
+            1, 2, 5);
+
     private static readonly Gauge _mempoolSizeUnScoped = Metrics
         .CreateGauge(
             "ng_node_mempool_size_total",
@@ -116,7 +123,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;

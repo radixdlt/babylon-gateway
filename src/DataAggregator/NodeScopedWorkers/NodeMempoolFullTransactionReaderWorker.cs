@@ -70,6 +70,7 @@ using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
+using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +87,12 @@ namespace DataAggregator.NodeScopedWorkers;
 /// </summary>
 public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        new ExponentialBackoffDelayBetweenLoopsStrategy(
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500),
+            1, 2, 5);
+
     private static readonly Counter _fullTransactionsFetchedCount = Metrics
         .CreateCounter(
             "ng_node_mempool_full_transactions_fetched_count",
@@ -112,7 +119,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;

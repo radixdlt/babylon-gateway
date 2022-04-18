@@ -76,10 +76,10 @@ public abstract class GlobalWorker : LoopedWorkerBase
             new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
         );
 
-    protected GlobalWorker(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenLoopsAfterError, TimeSpan minDelayBetweenInfoLogs)
+    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
         // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
         // crash the application so that it can be automatically restarted.
-        : base(logger, BehaviourOnFault.ApplicationExit, minDelayBetweenLoops, minDelayBetweenLoopsAfterError, minDelayBetweenInfoLogs)
+        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
     }
 

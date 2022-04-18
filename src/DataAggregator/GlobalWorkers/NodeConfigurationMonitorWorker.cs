@@ -72,6 +72,11 @@ namespace DataAggregator.GlobalWorkers;
 /// </summary>
 public class NodeConfigurationMonitorWorker : GlobalWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(1000),
+            TimeSpan.FromMilliseconds(3000));
+
     private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
     private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
     private readonly IAggregatorConfiguration _configuration;
@@ -81,7 +86,7 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
         IAggregatorConfiguration configuration,
         INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry
     )
-        : base(logger, TimeSpan.FromMilliseconds(1000), TimeSpan.FromMilliseconds(3000), TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _configuration = configuration;

@@ -71,13 +71,18 @@ namespace DataAggregator.GlobalWorkers;
 /// </summary>
 public class MempoolTrackerWorker : GlobalWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500));
+
     private readonly IMempoolTrackerService _mempoolTrackerService;
 
     public MempoolTrackerWorker(
         ILogger<MempoolTrackerWorker> logger,
         IMempoolTrackerService mempoolTrackerService
     )
-        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _mempoolTrackerService = mempoolTrackerService;
     }

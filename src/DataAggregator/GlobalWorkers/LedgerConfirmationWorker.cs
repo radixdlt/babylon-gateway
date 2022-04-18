@@ -71,13 +71,18 @@ namespace DataAggregator.GlobalWorkers;
 /// </summary>
 public class LedgerConfirmationWorker : GlobalWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100));
+
     private readonly ILedgerConfirmationService _ledgerConfirmationService;
 
     public LedgerConfirmationWorker(
         ILogger<LedgerConfirmationWorker> logger,
         ILedgerConfirmationService ledgerConfirmationService
     )
-        : base(logger, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
     {
         _ledgerConfirmationService = ledgerConfirmationService;
     }

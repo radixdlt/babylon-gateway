@@ -71,13 +71,18 @@ namespace DataAggregator.GlobalWorkers;
 /// </summary>
 public class MempoolResubmissionWorker : GlobalWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500));
+
     private readonly IMempoolResubmissionService _mempoolResubmissionService;
 
     public MempoolResubmissionWorker(
         ILogger<MempoolResubmissionWorker> logger,
         IMempoolResubmissionService mempoolResubmissionService
     )
-        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _mempoolResubmissionService = mempoolResubmissionService;
     }

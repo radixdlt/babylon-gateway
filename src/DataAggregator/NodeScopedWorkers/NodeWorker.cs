@@ -90,9 +90,9 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 
     private readonly string _nodeName;
 
-    protected NodeWorker(ILogger logger, string nodeName, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenLoopsAfterError, TimeSpan minDelayBetweenInfoLogs)
+    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
         // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
-        : base(logger, BehaviourOnFault.Nothing, minDelayBetweenLoops, minDelayBetweenLoopsAfterError, minDelayBetweenInfoLogs)
+        : base(logger, BehaviourOnFault.Nothing, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
         _nodeName = nodeName;
     }

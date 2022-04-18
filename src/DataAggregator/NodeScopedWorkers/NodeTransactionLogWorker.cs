@@ -66,6 +66,7 @@ using Common.Exceptions;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
+using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
@@ -78,6 +79,12 @@ namespace DataAggregator.NodeScopedWorkers;
 /// </summary>
 public class NodeTransactionLogWorker : NodeWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        new ExponentialBackoffDelayBetweenLoopsStrategy(
+            TimeSpan.FromMilliseconds(200),
+            TimeSpan.FromMilliseconds(1000),
+            1, 2, 5);
+
     private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
         .CreateCounter(
             "ng_node_fetch_transaction_batch_loop_error_total",
@@ -114,7 +121,7 @@ public class NodeTransactionLogWorker : NodeWorker
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services
     )
-        : base(logger, nodeConfigProvider.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfigProvider.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
@@ -155,7 +162,7 @@ public class NodeTransactionLogWorker : NodeWorker
         {
             _logger.LogDebug(
                 "No new transactions to fetch, sleeping for {DelayMs}ms",
-                GetRemainingRestartDelay().Milliseconds
+                _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning())
             );
             return;
         }
@@ -175,7 +182,7 @@ public class NodeTransactionLogWorker : NodeWorker
         {
             _logger.LogDebug(
                 "No new transactions found, sleeping for {DelayMs}ms",
-                GetRemainingRestartDelay().Milliseconds
+                _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning())
             );
         }
 
