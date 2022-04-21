@@ -66,13 +66,12 @@ using Common.Exceptions;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.GlobalServices;
-using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedWorkers;
+namespace DataAggregator.Workers.NodeScopedWorkers;
 
 /// <summary>
 /// Responsible for syncing the transaction stream from a node.
@@ -80,10 +79,12 @@ namespace DataAggregator.NodeScopedWorkers;
 public class NodeTransactionLogWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        new ExponentialBackoffDelayBetweenLoopsStrategy(
-            TimeSpan.FromMilliseconds(200),
-            TimeSpan.FromMilliseconds(1000),
-            1, 2, 5);
+        IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
+            delayBetweenLoopTriggersIfSuccessful: TimeSpan.FromMilliseconds(200),
+            baseDelayAfterError: TimeSpan.FromMilliseconds(1000),
+            consecutiveErrorsAllowedBeforeExponentialBackoff: 1,
+            delayAfterErrorExponentialRate: 2,
+            maxDelayAfterError: TimeSpan.FromSeconds(30));
 
     private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
         .CreateCounter(

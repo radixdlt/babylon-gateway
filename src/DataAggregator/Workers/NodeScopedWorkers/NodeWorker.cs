@@ -63,10 +63,10 @@
  */
 
 using Common.Extensions;
-using DataAggregator.GlobalWorkers;
+using DataAggregator.Workers.GlobalWorkers;
 using Prometheus;
 
-namespace DataAggregator.NodeScopedWorkers;
+namespace DataAggregator.Workers.NodeScopedWorkers;
 
 /// <summary>
 /// A marker interface for NodeWorkers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.

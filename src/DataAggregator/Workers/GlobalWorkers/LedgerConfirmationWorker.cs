@@ -62,35 +62,33 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using Prometheus;
+using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
-public abstract class GlobalWorker : LoopedWorkerBase
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public class LedgerConfirmationWorker : GlobalWorker
 {
-    private static readonly Counter _globalWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_global_error_count",
-            "Number of errors in global workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
-        );
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100));
 
-    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
-        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
-        // crash the application so that it can be automatically restarted.
-        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
+    private readonly ILedgerConfirmationService _ledgerConfirmationService;
+
+    public LedgerConfirmationWorker(
+        ILogger<LedgerConfirmationWorker> logger,
+        ILedgerConfirmationService ledgerConfirmationService
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
     {
+        _ledgerConfirmationService = ledgerConfirmationService;
     }
 
-    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
-    }
-
-    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
-    {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
     }
 }

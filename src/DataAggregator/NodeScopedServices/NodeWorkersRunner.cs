@@ -64,7 +64,7 @@
 
 using Common.Exceptions;
 using Common.Extensions;
-using DataAggregator.NodeScopedWorkers;
+using DataAggregator.Workers.NodeScopedWorkers;
 using NodaTime;
 
 namespace DataAggregator.NodeScopedServices;

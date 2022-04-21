@@ -62,33 +62,35 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
+using Common.Extensions;
+using Prometheus;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
-/// <summary>
-/// Responsible for keeping the db mempool pruned.
-/// </summary>
-public class MempoolPrunerWorker : GlobalWorker
+public abstract class GlobalWorker : LoopedWorkerBase
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(30),
-            TimeSpan.FromMilliseconds(10));
+    private static readonly Counter _globalWorkerErrorsCount = Metrics
+        .CreateCounter(
+            "ng_workers_global_error_count",
+            "Number of errors in global workers.",
+            new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
+        );
 
-    private readonly IMempoolPrunerService _mempoolPrunerService;
-
-    public MempoolPrunerWorker(
-        ILogger<MempoolPrunerWorker> logger,
-        IMempoolPrunerService mempoolPrunerService
-    )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
+        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
+        // crash the application so that it can be automatically restarted.
+        : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
-        _mempoolPrunerService = mempoolPrunerService;
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        await _mempoolPrunerService.PruneMempool(cancellationToken);
+        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+    }
+
+    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    {
+        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
+        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), errorType).Inc();
     }
 }

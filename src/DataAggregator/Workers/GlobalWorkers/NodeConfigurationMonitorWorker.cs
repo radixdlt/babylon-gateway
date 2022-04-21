@@ -62,33 +62,63 @@
  * permissions under this License.
  */
 
+using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
-/// Responsible for keeping the db mempool pruned.
+/// Responsible for reading the config, and ensuring workers are running for each node.
 /// </summary>
-public class MempoolResubmissionWorker : GlobalWorker
+public class NodeConfigurationMonitorWorker : GlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(500),
-            TimeSpan.FromMilliseconds(500));
+            TimeSpan.FromMilliseconds(1000),
+            TimeSpan.FromMilliseconds(3000));
 
-    private readonly IMempoolResubmissionService _mempoolResubmissionService;
+    private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
+    private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
+    private readonly IAggregatorConfiguration _configuration;
 
-    public MempoolResubmissionWorker(
-        ILogger<MempoolResubmissionWorker> logger,
-        IMempoolResubmissionService mempoolResubmissionService
+    public NodeConfigurationMonitorWorker(
+        ILogger<NodeConfigurationMonitorWorker> logger,
+        IAggregatorConfiguration configuration,
+        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry
     )
         : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
-        _mempoolResubmissionService = mempoolResubmissionService;
+        _logger = logger;
+        _configuration = configuration;
+        _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _mempoolResubmissionService.RunBatchOfResubmissions(cancellationToken);
+        await HandleNodeConfiguration(cancellationToken);
+    }
+
+    protected override async Task OnStoppedSuccessfully()
+    {
+        _logger.LogInformation("Service execution has stopped - now instructing all node workers to stop");
+
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(1000));
+        await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationTokenSource.Token);
+
+        _logger.LogInformation("All node workers have been stopped");
+
+        await base.OnStoppedSuccessfully();
+    }
+
+    private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
+    {
+        var nodeConfiguration = _configuration.GetNodes();
+
+        var enabledNodes = nodeConfiguration
+            .Where(n => n.Enabled)
+            .ToList();
+
+        await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
     }
 }

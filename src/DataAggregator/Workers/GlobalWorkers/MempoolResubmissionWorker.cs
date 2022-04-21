@@ -64,31 +64,31 @@
 
 using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// Responsible for keeping the db mempool pruned.
 /// </summary>
-public class LedgerConfirmationWorker : GlobalWorker
+public class MempoolResubmissionWorker : GlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(100),
-            TimeSpan.FromMilliseconds(100));
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500));
 
-    private readonly ILedgerConfirmationService _ledgerConfirmationService;
+    private readonly IMempoolResubmissionService _mempoolResubmissionService;
 
-    public LedgerConfirmationWorker(
-        ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService
+    public MempoolResubmissionWorker(
+        ILogger<MempoolResubmissionWorker> logger,
+        IMempoolResubmissionService mempoolResubmissionService
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
-        _ledgerConfirmationService = ledgerConfirmationService;
+        _mempoolResubmissionService = mempoolResubmissionService;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
+        await _mempoolResubmissionService.RunBatchOfResubmissions(cancellationToken);
     }
 }

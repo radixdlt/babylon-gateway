@@ -70,7 +70,6 @@ using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
 using DataAggregator.GlobalServices;
-using DataAggregator.GlobalWorkers;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;
 using Microsoft.EntityFrameworkCore;
@@ -78,7 +77,7 @@ using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedWorkers;
+namespace DataAggregator.Workers.NodeScopedWorkers;
 
 /// <summary>
 /// Responsible for syncing unknown transaction contents from the mempool of a node.
@@ -88,10 +87,12 @@ namespace DataAggregator.NodeScopedWorkers;
 public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        new ExponentialBackoffDelayBetweenLoopsStrategy(
-            TimeSpan.FromMilliseconds(500),
-            TimeSpan.FromMilliseconds(500),
-            1, 2, 5);
+        IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
+            delayBetweenLoopTriggersIfSuccessful: TimeSpan.FromMilliseconds(500),
+            baseDelayAfterError: TimeSpan.FromMilliseconds(500),
+            consecutiveErrorsAllowedBeforeExponentialBackoff: 1,
+            delayAfterErrorExponentialRate: 2,
+            maxDelayAfterError: TimeSpan.FromSeconds(30));
 
     private static readonly Counter _fullTransactionsFetchedCount = Metrics
         .CreateCounter(

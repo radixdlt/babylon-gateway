@@ -67,78 +67,12 @@ using Common.Utilities;
 using NodaTime;
 using System.Diagnostics;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
 public enum BehaviourOnFault
 {
     Nothing,
     ApplicationExit,
-}
-
-public interface IDelayBetweenLoopsStrategy
-{
-    public static IDelayBetweenLoopsStrategy ConstantDelayStrategy(
-        TimeSpan minDelayAfterSuccess, TimeSpan minDelayAfterError)
-    {
-        // Reusing exponential backoff implementation with an exponent of 0
-        return new ExponentialBackoffDelayBetweenLoopsStrategy(
-            minDelayAfterSuccess, minDelayAfterError,
-            0, 0, 0);
-    }
-
-    TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning);
-
-    TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors);
-}
-
-public class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
-{
-    private readonly TimeSpan _minDelayAfterSuccess;
-    private readonly TimeSpan _baseDelayAfterError;
-    private readonly int _exponentialBackoffErrorsGracePeriod;
-    private readonly uint _delayAfterErrorExponentialRate;
-    private readonly uint _delayAfterErrorMaxExponent;
-
-    public ExponentialBackoffDelayBetweenLoopsStrategy(
-        TimeSpan minDelayAfterSuccess,
-        TimeSpan baseDelayAfterError,
-        int exponentialBackoffErrorsGracePeriod,
-        uint delayAfterErrorExponentialRate,
-        uint delayAfterErrorMaxExponent
-    )
-    {
-        _minDelayAfterSuccess = minDelayAfterSuccess;
-        _baseDelayAfterError = baseDelayAfterError;
-        _exponentialBackoffErrorsGracePeriod = exponentialBackoffErrorsGracePeriod;
-        _delayAfterErrorExponentialRate = delayAfterErrorExponentialRate;
-        _delayAfterErrorMaxExponent = delayAfterErrorMaxExponent;
-    }
-
-    public TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning)
-    {
-        var delayRemaining = _minDelayAfterSuccess - elapsedSinceLoopBeginning;
-        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
-    }
-
-    public TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors)
-    {
-        var totalDelay = numConsecutiveErrors <= _exponentialBackoffErrorsGracePeriod
-            ? _baseDelayAfterError
-            : ExponentialDelayAfterError(numConsecutiveErrors);
-
-        var delayRemaining = totalDelay - elapsedSinceLoopBeginning;
-        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
-    }
-
-    private TimeSpan ExponentialDelayAfterError(uint numConsecutiveErrors)
-    {
-        var numConsecutiveErrorsMinusGrace =
-            numConsecutiveErrors - _exponentialBackoffErrorsGracePeriod;
-        var exponentialFactor = Math.Pow(
-            _delayAfterErrorExponentialRate,
-            Math.Min(_delayAfterErrorMaxExponent, numConsecutiveErrorsMinusGrace));
-        return _baseDelayAfterError * exponentialFactor;
-    }
 }
 
 public interface ILoopedWorkerBase : IHostedService, IDisposable

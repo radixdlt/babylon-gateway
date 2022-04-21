@@ -64,7 +64,7 @@
 
 using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
 /// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
