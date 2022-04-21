@@ -6,4 +6,4 @@ cd "$SCRIPT_DIR"
 ./scripts/ensure-env-exists.sh
 ./scripts/ensure-key-generated.sh
 
-docker-compose --profile fullnode --profile network-gateway-image up
+docker-compose --profile fullnode --profile network-gateway-image up --abort-on-container-exit

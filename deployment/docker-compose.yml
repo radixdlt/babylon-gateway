@@ -8,6 +8,9 @@ services:
       - "127.0.0.1:3333:3333" # This allows you to connect to the Core API on localhost:3333
     cap_add:
       - NET_ADMIN
+    deploy:
+      restart_policy:
+        condition: on-failure
     environment:
       RADIXDLT_LOG_LEVEL: "${FULLNODE_LOG_LEVEL}"
       RADIXDLT_NETWORK_ID: "${FULLNODE_NETWORK_ID}"
@@ -24,10 +27,17 @@ services:
 
   postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
-    image: "postgres:12.9-alpine"
+    image: "postgres:12-alpine"
     profiles: ["network-gateway-built", "network-gateway-image"]
     ports:
       - "127.0.0.1:5532:5432" # This allows you to connect to the database locally on port localhost:5532
+    # The default shutdown mode for this container is SIGINT:
+    # https://github.com/docker-library/postgres/blob/e483778176ca34bcbe83ee17000820d4f6e64c28/12/alpine/Dockerfile
+    # This enables fast Shutdown mode - see eg https://www.postgresql.org/docs/10/server-shutdown.html
+    stop_grace_period: 90s # Ensure the DB is allowed time to stop to prevent needing to recover on next start-up
+    deploy:
+      restart_policy:
+        condition: on-failure
     volumes:
       - ./container-volumes/.postgresdata:/var/lib/postgresql/data
     environment:
@@ -38,6 +48,9 @@ services:
   data_aggregator: # This is the base -- the _image and _built containers are defined below
     image: radixdlt/ng-data-aggregator:1.1.2
     profiles: ["NONE"]
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "127.0.0.1:5207:80" # This allows you to connect to the API (for root and health checks) at http://localhost:5207
       - "127.0.0.1:1234:1234" # This allows you to connect to the metrics API at http://localhost:1234
@@ -84,6 +97,9 @@ services:
     ports:
       - "127.0.0.1:5308:80" # This allows you to connect to the API at http://localhost:5308
       - "127.0.0.1:1235:1235" # This allows you to connect to the metrics API at http://localhost:1235
+    deploy:
+      restart_policy:
+        condition: on-failure
     environment:
       ASPNETCORE_URLS: "http://*:80" # Binds to 80 on all interfaces
       RADIX_NG_API__CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
