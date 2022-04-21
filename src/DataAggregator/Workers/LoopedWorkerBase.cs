@@ -67,7 +67,7 @@ using Common.Utilities;
 using NodaTime;
 using System.Diagnostics;
 
-namespace DataAggregator.Workers.GlobalWorkers;
+namespace DataAggregator.Workers;
 
 public enum BehaviourOnFault
 {
