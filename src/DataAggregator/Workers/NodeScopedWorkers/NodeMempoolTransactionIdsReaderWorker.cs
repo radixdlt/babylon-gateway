@@ -71,13 +71,21 @@ using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedWorkers;
+namespace DataAggregator.Workers.NodeScopedWorkers;
 
 /// <summary>
 /// Responsible for syncing the mempool from a node.
 /// </summary>
 public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
+            delayBetweenLoopTriggersIfSuccessful: TimeSpan.FromMilliseconds(200),
+            baseDelayAfterError: TimeSpan.FromMilliseconds(1000),
+            consecutiveErrorsAllowedBeforeExponentialBackoff: 1,
+            delayAfterErrorExponentialRate: 2,
+            maxDelayAfterError: TimeSpan.FromSeconds(30));
+
     private static readonly Gauge _mempoolSizeUnScoped = Metrics
         .CreateGauge(
             "ng_node_mempool_size_total",
@@ -116,7 +124,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;

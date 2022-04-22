@@ -64,26 +64,31 @@
 
 using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
-/// Responsible for keeping the db mempool pruned.
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
 /// </summary>
-public class MempoolPrunerWorker : GlobalWorker
+public class LedgerConfirmationWorker : GlobalWorker
 {
-    private readonly IMempoolPrunerService _mempoolPrunerService;
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromMilliseconds(100));
 
-    public MempoolPrunerWorker(
-        ILogger<MempoolPrunerWorker> logger,
-        IMempoolPrunerService mempoolPrunerService
+    private readonly ILedgerConfirmationService _ledgerConfirmationService;
+
+    public LedgerConfirmationWorker(
+        ILogger<LedgerConfirmationWorker> logger,
+        ILedgerConfirmationService ledgerConfirmationService
     )
-        : base(logger, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
     {
-        _mempoolPrunerService = mempoolPrunerService;
+        _ledgerConfirmationService = ledgerConfirmationService;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _mempoolPrunerService.PruneMempool(cancellationToken);
+        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
     }
 }

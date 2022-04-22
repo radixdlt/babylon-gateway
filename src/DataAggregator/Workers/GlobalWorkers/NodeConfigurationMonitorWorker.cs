@@ -62,56 +62,63 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using DataAggregator.GlobalWorkers;
-using Prometheus;
+using DataAggregator.Configuration;
+using DataAggregator.GlobalServices;
 
-namespace DataAggregator.NodeScopedWorkers;
-
-/// <summary>
-/// A marker interface for NodeWorkers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.
-/// </summary>
-public interface INodeWorker : ILoopedWorkerBase
-{
-    public bool IsEnabledByNodeConfiguration();
-}
+namespace DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
-/// A base class for NodeWorkers. There is one worker of each type spawned by NodeWorkers / NodeWorkersRunner.
+/// Responsible for reading the config, and ensuring workers are running for each node.
 /// </summary>
-public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
+public class NodeConfigurationMonitorWorker : GlobalWorker
 {
-    private static readonly Counter _nodeWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_node_error_count",
-            "Number of errors in node workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
-        );
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(1000),
+            TimeSpan.FromMilliseconds(3000));
 
-    private readonly string _nodeName;
+    private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
+    private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
+    private readonly IAggregatorConfiguration _configuration;
 
-    protected NodeWorker(ILogger logger, string nodeName, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenLoopsAfterError, TimeSpan minDelayBetweenInfoLogs)
-        // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
-        : base(logger, BehaviourOnFault.Nothing, minDelayBetweenLoops, minDelayBetweenLoopsAfterError, minDelayBetweenInfoLogs)
+    public NodeConfigurationMonitorWorker(
+        ILogger<NodeConfigurationMonitorWorker> logger,
+        IAggregatorConfiguration configuration,
+        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
-        _nodeName = nodeName;
+        _logger = logger;
+        _configuration = configuration;
+        _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
     }
 
-    public abstract bool IsEnabledByNodeConfiguration();
-
-    public override bool IsCurrentlyEnabled()
+    protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        return IsEnabledByNodeConfiguration();
+        await HandleNodeConfiguration(cancellationToken);
     }
 
-    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    protected override async Task OnStoppedSuccessfully()
     {
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+        _logger.LogInformation("Service execution has stopped - now instructing all node workers to stop");
+
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(1000));
+        await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationTokenSource.Token);
+
+        _logger.LogInformation("All node workers have been stopped");
+
+        await base.OnStoppedSuccessfully();
     }
 
-    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        var nodeConfiguration = _configuration.GetNodes();
+
+        var enabledNodes = nodeConfiguration
+            .Where(n => n.Enabled)
+            .ToList();
+
+        await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
     }
 }

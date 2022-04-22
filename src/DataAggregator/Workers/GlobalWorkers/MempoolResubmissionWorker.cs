@@ -64,33 +64,31 @@
 
 using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
 /// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// Responsible for keeping the db mempool pruned.
 /// </summary>
-public class MempoolTrackerWorker : GlobalWorker
+public class MempoolResubmissionWorker : GlobalWorker
 {
-    private readonly IMempoolTrackerService _mempoolTrackerService;
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500));
 
-    public MempoolTrackerWorker(
-        ILogger<MempoolTrackerWorker> logger,
-        IMempoolTrackerService mempoolTrackerService
+    private readonly IMempoolResubmissionService _mempoolResubmissionService;
+
+    public MempoolResubmissionWorker(
+        ILogger<MempoolResubmissionWorker> logger,
+        IMempoolResubmissionService mempoolResubmissionService
     )
-        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
-        _mempoolTrackerService = mempoolTrackerService;
-    }
-
-    protected override async Task OnStart(CancellationToken cancellationToken, bool isCurrentlyEnabled)
-    {
-        // Wait on start-up for nodes to load to allow some time for the nodes to populate their mempools
-        await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
-        await base.OnStart(cancellationToken, isCurrentlyEnabled);
+        _mempoolResubmissionService = mempoolResubmissionService;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _mempoolTrackerService.HandleMempoolChanges(cancellationToken);
+        await _mempoolResubmissionService.RunBatchOfResubmissions(cancellationToken);
     }
 }

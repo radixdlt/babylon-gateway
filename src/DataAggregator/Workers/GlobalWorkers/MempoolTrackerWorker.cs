@@ -62,35 +62,40 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using Prometheus;
+using DataAggregator.GlobalServices;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.GlobalWorkers;
 
-public abstract class GlobalWorker : LoopedWorkerBase
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public class MempoolTrackerWorker : GlobalWorker
 {
-    private static readonly Counter _globalWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_global_error_count",
-            "Number of errors in global workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
-        );
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500));
 
-    protected GlobalWorker(ILogger logger, TimeSpan minDelayBetweenLoops, TimeSpan minDelayBetweenLoopsAfterError, TimeSpan minDelayBetweenInfoLogs)
-        // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
-        // crash the application so that it can be automatically restarted.
-        : base(logger, BehaviourOnFault.ApplicationExit, minDelayBetweenLoops, minDelayBetweenLoopsAfterError, minDelayBetweenInfoLogs)
+    private readonly IMempoolTrackerService _mempoolTrackerService;
+
+    public MempoolTrackerWorker(
+        ILogger<MempoolTrackerWorker> logger,
+        IMempoolTrackerService mempoolTrackerService
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
+        _mempoolTrackerService = mempoolTrackerService;
     }
 
-    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    protected override async Task OnStart(CancellationToken cancellationToken, bool isCurrentlyEnabled)
     {
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+        // Wait on start-up for nodes to load to allow some time for the nodes to populate their mempools
+        await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+        await base.OnStart(cancellationToken, isCurrentlyEnabled);
     }
 
-    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        await _mempoolTrackerService.HandleMempoolChanges(cancellationToken);
     }
 }

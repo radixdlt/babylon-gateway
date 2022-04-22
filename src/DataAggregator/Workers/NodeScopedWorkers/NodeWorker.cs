@@ -62,28 +62,56 @@
  * permissions under this License.
  */
 
-using DataAggregator.GlobalServices;
+using Common.Extensions;
+using DataAggregator.Workers.GlobalWorkers;
+using Prometheus;
 
-namespace DataAggregator.GlobalWorkers;
+namespace DataAggregator.Workers.NodeScopedWorkers;
 
 /// <summary>
-/// Responsible for keeping the db mempool pruned.
+/// A marker interface for NodeWorkers - Dependency Injection will pick each of them up to start them in the NodeWorkersRunner.
 /// </summary>
-public class MempoolResubmissionWorker : GlobalWorker
+public interface INodeWorker : ILoopedWorkerBase
 {
-    private readonly IMempoolResubmissionService _mempoolResubmissionService;
+    public bool IsEnabledByNodeConfiguration();
+}
 
-    public MempoolResubmissionWorker(
-        ILogger<MempoolResubmissionWorker> logger,
-        IMempoolResubmissionService mempoolResubmissionService
-    )
-        : base(logger, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(60))
+/// <summary>
+/// A base class for NodeWorkers. There is one worker of each type spawned by NodeWorkers / NodeWorkersRunner.
+/// </summary>
+public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
+{
+    private static readonly Counter _nodeWorkerErrorsCount = Metrics
+        .CreateCounter(
+            "ng_workers_node_error_count",
+            "Number of errors in node workers.",
+            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
+        );
+
+    private readonly string _nodeName;
+
+    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
+        // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
+        : base(logger, BehaviourOnFault.Nothing, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
-        _mempoolResubmissionService = mempoolResubmissionService;
+        _nodeName = nodeName;
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    public abstract bool IsEnabledByNodeConfiguration();
+
+    public override bool IsCurrentlyEnabled()
     {
-        await _mempoolResubmissionService.RunBatchOfResubmissions(cancellationToken);
+        return IsEnabledByNodeConfiguration();
+    }
+
+    protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
+    {
+        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+    }
+
+    protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
+    {
+        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
+        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
     }
 }

@@ -71,13 +71,21 @@ using DataAggregator.NodeScopedServices.ApiReaders;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 
-namespace DataAggregator.NodeScopedWorkers;
+namespace DataAggregator.Workers.NodeScopedWorkers;
 
 /// <summary>
 /// Responsible for syncing the transaction stream from a node.
 /// </summary>
 public class NodeTransactionLogWorker : NodeWorker
 {
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
+            delayBetweenLoopTriggersIfSuccessful: TimeSpan.FromMilliseconds(200),
+            baseDelayAfterError: TimeSpan.FromMilliseconds(1000),
+            consecutiveErrorsAllowedBeforeExponentialBackoff: 1,
+            delayAfterErrorExponentialRate: 2,
+            maxDelayAfterError: TimeSpan.FromSeconds(30));
+
     private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
         .CreateCounter(
             "ng_node_fetch_transaction_batch_loop_error_total",
@@ -114,7 +122,7 @@ public class NodeTransactionLogWorker : NodeWorker
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services
     )
-        : base(logger, nodeConfigProvider.NodeAppSettings.Name, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfigProvider.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
@@ -155,7 +163,7 @@ public class NodeTransactionLogWorker : NodeWorker
         {
             _logger.LogDebug(
                 "No new transactions to fetch, sleeping for {DelayMs}ms",
-                GetRemainingRestartDelay().Milliseconds
+                _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning())
             );
             return;
         }
@@ -175,7 +183,7 @@ public class NodeTransactionLogWorker : NodeWorker
         {
             _logger.LogDebug(
                 "No new transactions found, sleeping for {DelayMs}ms",
-                GetRemainingRestartDelay().Milliseconds
+                _delayBetweenLoopsStrategy.DelayAfterSuccess(ElapsedSinceLoopBeginning())
             );
         }
 
