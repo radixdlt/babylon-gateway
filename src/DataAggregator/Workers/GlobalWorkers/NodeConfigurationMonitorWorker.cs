@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Common.Workers;
 using DataAggregator.Configuration;
 using DataAggregator.GlobalServices;
 

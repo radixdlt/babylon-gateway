@@ -62,34 +62,10 @@
  * permissions under this License.
  */
 
-using Common.Workers;
-using DataAggregator.GlobalServices;
+namespace GatewayAPI.Configuration.Models;
 
-namespace DataAggregator.Workers.GlobalWorkers;
-
-/// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
-/// </summary>
-public class LedgerConfirmationWorker : GlobalWorker
+public record CoreApiNodeHealth
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(100),
-            TimeSpan.FromMilliseconds(100));
-
-    private readonly ILedgerConfirmationService _ledgerConfirmationService;
-
-    public LedgerConfirmationWorker(
-        ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService
-    )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
-    {
-        _ledgerConfirmationService = ledgerConfirmationService;
-    }
-
-    protected override async Task DoWork(CancellationToken cancellationToken)
-    {
-        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
-    }
+    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
+    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
 }

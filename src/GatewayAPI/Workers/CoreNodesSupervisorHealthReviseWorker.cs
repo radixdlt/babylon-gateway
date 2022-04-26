@@ -63,33 +63,30 @@
  */
 
 using Common.Workers;
-using DataAggregator.GlobalServices;
+using GatewayAPI.Services;
 
-namespace DataAggregator.Workers.GlobalWorkers;
+namespace GatewayAPI.Workers;
 
-/// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
-/// </summary>
-public class LedgerConfirmationWorker : GlobalWorker
+public class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(100),
-            TimeSpan.FromMilliseconds(100));
+            TimeSpan.FromSeconds(5),
+            TimeSpan.FromSeconds(5));
 
-    private readonly ILedgerConfirmationService _ledgerConfirmationService;
+    private readonly ICoreNodesSupervisorService _coreNodesSupervisorService;
 
-    public LedgerConfirmationWorker(
-        ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService
+    public CoreNodesSupervisorStatusReviseWorker(
+        ILogger<CoreNodesSupervisorStatusReviseWorker> logger,
+        ICoreNodesSupervisorService coreNodesSupervisorService
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
+        : base(logger, BehaviourOnFault.ApplicationExit, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
-        _ledgerConfirmationService = ledgerConfirmationService;
+        _coreNodesSupervisorService = coreNodesSupervisorService;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
+        await _coreNodesSupervisorService.ReviseCoreNodesHealth(cancellationToken);
     }
 }

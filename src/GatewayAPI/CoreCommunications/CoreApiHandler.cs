@@ -63,8 +63,6 @@
  */
 
 using Common.CoreCommunications;
-using Common.Extensions;
-using GatewayAPI.Configuration;
 using GatewayAPI.Configuration.Models;
 using GatewayAPI.Services;
 using RadixCoreApi.Generated.Model;
@@ -96,10 +94,13 @@ public class CoreApiHandler : ICoreApiHandler
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiProvider _coreApiProvider;
 
-    public CoreApiHandler(IGatewayApiConfiguration configuration, INetworkConfigurationProvider networkConfigurationProvider, HttpClient httpClient)
+    public CoreApiHandler(
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ICoreNodesSupervisorService coreNodesSupervisorService,
+        HttpClient httpClient)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(configuration, httpClient);
+        _coreApiProvider = ChooseCoreApiProvider(coreNodesSupervisorService, httpClient);
     }
 
     public NetworkIdentifier GetNetworkIdentifier()
@@ -137,12 +138,10 @@ public class CoreApiHandler : ICoreApiHandler
         return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(request, token));
     }
 
-    private static ICoreApiProvider ChooseCoreApiProvider(IGatewayApiConfiguration configuration, HttpClient httpClient)
+    private static ICoreApiProvider ChooseCoreApiProvider(
+        ICoreNodesSupervisorService coreNodesSupervisorService,
+        HttpClient httpClient)
     {
-        var chosenNode = configuration.GetCoreNodes()
-            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .GetRandomBy(n => (double)n.RequestWeighting);
-
-        return new CoreApiProvider(chosenNode, httpClient);
+        return new CoreApiProvider(coreNodesSupervisorService.GetRandomHealthiestCoreNode(), httpClient);
     }
 }

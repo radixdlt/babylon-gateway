@@ -65,6 +65,7 @@
 using Common.Exceptions;
 using Common.Extensions;
 using Common.Utilities;
+using Common.Workers;
 using DataAggregator.GlobalServices;
 using DataAggregator.NodeScopedServices;
 using DataAggregator.NodeScopedServices.ApiReaders;

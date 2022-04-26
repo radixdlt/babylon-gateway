@@ -1,7 +1,7 @@
-using DataAggregator.Workers;
+using Common.Workers;
 using Xunit;
 
-namespace Tests.MiniUnitTests.DataAggregator.Workers;
+namespace Tests.MiniUnitTests.Common.Workers;
 
 public class ExponentialBackoffDelayBetweenLoopsStrategyTests
 {

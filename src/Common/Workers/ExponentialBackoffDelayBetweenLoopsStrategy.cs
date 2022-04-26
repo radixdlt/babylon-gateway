@@ -62,34 +62,60 @@
  * permissions under this License.
  */
 
-using Common.Workers;
-using DataAggregator.GlobalServices;
+namespace Common.Workers;
 
-namespace DataAggregator.Workers.GlobalWorkers;
-
-/// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
-/// </summary>
-public class LedgerConfirmationWorker : GlobalWorker
+public class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(100),
-            TimeSpan.FromMilliseconds(100));
+    private readonly TimeSpan _delayBetweenLoopTriggersIfSuccessful;
+    private readonly TimeSpan _baseDelayAfterError;
+    private readonly int _consecutiveErrorsAllowedBeforeExponentialBackoff;
+    private readonly float _delayAfterErrorExponentialRate;
+    private readonly TimeSpan _maxDelayAfterError;
 
-    private readonly ILedgerConfirmationService _ledgerConfirmationService;
-
-    public LedgerConfirmationWorker(
-        ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService
+    public ExponentialBackoffDelayBetweenLoopsStrategy(
+        TimeSpan delayBetweenLoopTriggersIfSuccessful,
+        TimeSpan baseDelayAfterError,
+        int consecutiveErrorsAllowedBeforeExponentialBackoff,
+        float delayAfterErrorExponentialRate,
+        TimeSpan maxDelayAfterError
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
     {
-        _ledgerConfirmationService = ledgerConfirmationService;
+        if (baseDelayAfterError > maxDelayAfterError)
+        {
+            throw new ArgumentException("baseDelayAfterError can't be greater than maxDelayAfterError");
+        }
+
+        _delayBetweenLoopTriggersIfSuccessful = delayBetweenLoopTriggersIfSuccessful;
+        _baseDelayAfterError = baseDelayAfterError;
+        _consecutiveErrorsAllowedBeforeExponentialBackoff = consecutiveErrorsAllowedBeforeExponentialBackoff;
+        _delayAfterErrorExponentialRate = delayAfterErrorExponentialRate;
+        _maxDelayAfterError = maxDelayAfterError;
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    public TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning)
     {
-        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
+        var delayRemaining = _delayBetweenLoopTriggersIfSuccessful - elapsedSinceLoopBeginning;
+        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
+    }
+
+    public TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors)
+    {
+        var totalDelay = numConsecutiveErrors <= _consecutiveErrorsAllowedBeforeExponentialBackoff
+            ? _baseDelayAfterError
+            : ExponentialDelayAfterError(numConsecutiveErrors);
+
+        var delayRemaining = totalDelay - elapsedSinceLoopBeginning;
+        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
+    }
+
+    private TimeSpan ExponentialDelayAfterError(uint numConsecutiveErrors)
+    {
+        var numConsecutiveErrorsOverAllowed =
+            numConsecutiveErrors - _consecutiveErrorsAllowedBeforeExponentialBackoff;
+        var exponentialFactor = Math.Pow(
+            _delayAfterErrorExponentialRate,
+            numConsecutiveErrorsOverAllowed);
+        var calculatedDelay = _baseDelayAfterError * exponentialFactor;
+        return calculatedDelay > _maxDelayAfterError ? _maxDelayAfterError : calculatedDelay;
     }
 }

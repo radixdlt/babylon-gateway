@@ -62,34 +62,38 @@
  * permissions under this License.
  */
 
-using Common.Workers;
-using DataAggregator.GlobalServices;
+namespace Common.Workers;
 
-namespace DataAggregator.Workers.GlobalWorkers;
-
-/// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
-/// </summary>
-public class LedgerConfirmationWorker : GlobalWorker
+public interface IDelayBetweenLoopsStrategy
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(100),
-            TimeSpan.FromMilliseconds(100));
-
-    private readonly ILedgerConfirmationService _ledgerConfirmationService;
-
-    public LedgerConfirmationWorker(
-        ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService
-    )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
+    public static IDelayBetweenLoopsStrategy ConstantDelayStrategy(
+        TimeSpan delayBetweenLoopTriggersIfSuccessful, TimeSpan delayBetweenLoopTriggersIfError)
     {
-        _ledgerConfirmationService = ledgerConfirmationService;
+        // Reusing exponential backoff strategy with a rate of 1
+        return ExponentialDelayStrategy(
+            delayBetweenLoopTriggersIfSuccessful: delayBetweenLoopTriggersIfSuccessful,
+            baseDelayAfterError: delayBetweenLoopTriggersIfError,
+            consecutiveErrorsAllowedBeforeExponentialBackoff: 0,
+            delayAfterErrorExponentialRate: 1,
+            maxDelayAfterError: delayBetweenLoopTriggersIfError);
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    public static IDelayBetweenLoopsStrategy ExponentialDelayStrategy(
+        TimeSpan delayBetweenLoopTriggersIfSuccessful,
+        TimeSpan baseDelayAfterError,
+        int consecutiveErrorsAllowedBeforeExponentialBackoff,
+        float delayAfterErrorExponentialRate,
+        TimeSpan maxDelayAfterError)
     {
-        await _ledgerConfirmationService.HandleLedgerExtensionIfQuorum(cancellationToken);
+        return new ExponentialBackoffDelayBetweenLoopsStrategy(
+            delayBetweenLoopTriggersIfSuccessful,
+            baseDelayAfterError,
+            consecutiveErrorsAllowedBeforeExponentialBackoff,
+            delayAfterErrorExponentialRate,
+            maxDelayAfterError);
     }
+
+    TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning);
+
+    TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors);
 }

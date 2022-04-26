@@ -66,6 +66,7 @@ using Common.CoreCommunications;
 using Common.Exceptions;
 using Common.Extensions;
 using Common.Utilities;
+using Common.Workers;
 using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
