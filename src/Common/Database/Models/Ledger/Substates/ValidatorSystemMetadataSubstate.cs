@@ -62,91 +62,115 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
-using DataAggregator.Configuration.Models;
+using Common.Extensions;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+using Core = RadixCoreApi.Generated.Model;
+using Validator = Common.Database.Models.Ledger.Normalization.Validator;
 
-namespace DataAggregator.Configuration;
+namespace Common.Database.Models.Ledger.Substates;
 
-public interface IAggregatorConfiguration
+/// <summary>
+/// Represents Validator fork votes.
+/// </summary>
+[Index(nameof(ValidatorId))]
+[Table("validator_system_metadata_substates")]
+public class ValidatorSystemMetadataSubstate : DataSubstateBase
 {
-    List<NodeAppSettings> GetNodes();
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
 
-    string GetNetworkName();
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
 
-    MempoolConfiguration GetMempoolConfiguration();
+    // These are all [Owned] types below - exactly one of these will be present on each
+    public ValidatorCandidateForkVote? ValidatorCandidateForkVote { get; set; }
 
-    LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration();
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidatorSystemMetadataSubstate"/> class.
+    /// The SubstateBase properties should be set separately.
+    /// </summary>
+    public ValidatorSystemMetadataSubstate(Validator validator, ValidatorCandidateForkVote validatorCandidateForkVote)
+    {
+        Validator = validator;
+        ValidatorCandidateForkVote = validatorCandidateForkVote;
+    }
 
-    TransactionAssertionConfiguration GetTransactionAssertionConfiguration();
+    private ValidatorSystemMetadataSubstate()
+    {
+    }
+
+    public bool SubstateMatches(ValidatorSystemMetadataSubstate otherSubstate)
+    {
+        return Validator == otherSubstate.Validator
+               && ValidatorCandidateForkVote == otherSubstate.ValidatorCandidateForkVote;
+    }
 }
 
-public class AggregatorConfiguration : IAggregatorConfiguration
+[Owned]
+// Aka ValidatorSystemMetadata in the engine
+public record ValidatorCandidateForkVote
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AggregatorConfiguration> _logger;
+    /// <summary>
+    ///  The FullBytes field is technically schema-less according to the engine, but a 32 byte vote will be
+    ///  interpreted as a vote from that validator for the given fork.
+    ///  We attempt to parse out the meaning from the FullBytes field into the other fields.
+    /// </summary>
+    [Column(name: "full_bytes")]
+    public byte[] FullBytes { get; set; }
 
-    public AggregatorConfiguration(IConfiguration configuration, ILogger<AggregatorConfiguration> logger)
+    [Column(name: "fork_name")]
+    public string? ForkName { get; set; }
+
+    [Column(name: "fork_id")]
+    public byte[]? ForkId { get; set; }
+
+    [Column(name: "nonce")]
+    public byte[]? Nonce { get; set; }
+
+    public static ValidatorCandidateForkVote From(Core.ValidatorSystemMetadata apiModel)
     {
-        _configuration = configuration;
-        _logger = logger;
-    }
+        var fullBytes = apiModel.Data.ConvertFromHex();
+        var fullBytesAreCorrectLength = fullBytes.Length == 32;
 
-    public List<NodeAppSettings> GetNodes()
-    {
-        var nodesSection = _configuration.GetSection("CoreApiNodes");
-
-        // Read from fallback to legacy Nodes section
-        if (!nodesSection.Exists())
+        if (!fullBytesAreCorrectLength)
         {
-            nodesSection = _configuration.GetSection("Nodes");
+            return new ValidatorCandidateForkVote { FullBytes = fullBytes };
         }
 
-        if (!nodesSection.Exists())
+        if (fullBytes.All(b => b == 0))
         {
-            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
+            // Empty / withdrawn vote - don't extract name etc as they're meaningless
+            return new ValidatorCandidateForkVote { FullBytes = fullBytes };
         }
 
-        var nodesList = new List<NodeAppSettings>();
-        nodesSection.Bind(nodesList);
+        // See CandidateForkVote in the Java Repo
+        var forkName = ExtractForkName(fullBytes[..16]);
+        var forkId = fullBytes[..24];
+        var nonce = fullBytes[24..32];
 
-        if (!nodesList.Any())
+        return new ValidatorCandidateForkVote
         {
-            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
-        }
-
-        nodesList.ForEach(n => n.AssertValid());
-        return nodesList;
+            FullBytes = fullBytes,
+            ForkName = forkName,
+            ForkId = forkId,
+            Nonce = nonce,
+        };
     }
 
-    public MempoolConfiguration GetMempoolConfiguration()
+    private static string? ExtractForkName(byte[] nameBytes)
     {
-        var mempoolPruneTimeouts = new MempoolConfiguration();
-        _configuration.GetSection("MempoolConfiguration").Bind(mempoolPruneTimeouts);
-        return mempoolPruneTimeouts;
-    }
-
-    public LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration()
-    {
-        var ledgerConfirmationConfiguration = new LedgerConfirmationConfiguration();
-        _configuration.GetSection("LedgerConfirmation").Bind(ledgerConfirmationConfiguration);
-        return ledgerConfirmationConfiguration;
-    }
-
-    public TransactionAssertionConfiguration GetTransactionAssertionConfiguration()
-    {
-        var transactionAssertionConfiguration = new TransactionAssertionConfiguration();
-        _configuration.GetSection("TransactionAssertions").Bind(transactionAssertionConfiguration);
-        return transactionAssertionConfiguration;
-    }
-
-    public string GetNetworkName()
-    {
-        var networkId = _configuration.GetValue<string?>("NetworkName", null);
-        if (networkId == null)
+        var trimmedNameBytes = nameBytes.Reverse().SkipWhile(b => b == 0).Reverse().ToArray();
+        try
         {
-            throw new InvalidConfigurationException("appsettings.json requires a string NetworkName");
+            return Encoding.ASCII.GetString(trimmedNameBytes);
         }
-
-        return networkId;
+        catch (ArgumentException)
+        {
+            // The byte array contains invalid Unicode code points.
+            // See: https://docs.microsoft.com/en-us/dotnet/api/System.Text.Encoding.GetString?view=net-6.0
+            return null;
+        }
     }
 }

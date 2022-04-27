@@ -62,91 +62,43 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
-using DataAggregator.Configuration.Models;
+using System.Collections.Immutable;
 
-namespace DataAggregator.Configuration;
+namespace DataAggregator.Configuration.Models;
 
-public interface IAggregatorConfiguration
+public record TransactionAssertionConfiguration
 {
-    List<NodeAppSettings> GetNodes();
+    /// <summary>
+    /// Due to changes of parsing certain Core API responses by the Open API library between before/after the 1.1.1
+    /// release, we disable this matching check by default. This can be re-enabled if re-syncing from scratch.
+    /// </summary>
+    [ConfigurationKeyName("AssertDownedSubstatesMatchDownFromCoreApi")]
+    public bool AssertDownedSubstatesMatchDownFromCoreApi { get; set; } = false;
 
-    string GetNetworkName();
+    /// <summary>
+    /// Some releases of the Gateway API have included tracking of new substates.
+    /// To permit clients to upgrade late to these versions, without breaking, this configuration option is used.
+    /// Use the value "NONE" to override configuration (as an empty string is not sufficient).
+    ///
+    /// Note - we use a comma separated string instead of a list as it can be overriden better.
+    /// DotNet configuration of enumerables only supports merging which we don't want... (and empty arrays count as
+    /// "null") - see also https://github.com/dotnet/runtime/issues/36384.
+    /// </summary>
+    [ConfigurationKeyName("SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated")]
+    public string SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated { get; set; } = "ValidatorSystemMetadataSubstate";
 
-    MempoolConfiguration GetMempoolConfiguration();
+    private IReadOnlyList<string>? _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory;
 
-    LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration();
+    // This gets cached when called for the first time
+    public IReadOnlyList<string> SubstateTypesWhichAreAllowedToHaveIncompleteHistory =>
+        _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory ??=
+            SplitCommaSeparatedList(SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated);
 
-    TransactionAssertionConfiguration GetTransactionAssertionConfiguration();
-}
-
-public class AggregatorConfiguration : IAggregatorConfiguration
-{
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AggregatorConfiguration> _logger;
-
-    public AggregatorConfiguration(IConfiguration configuration, ILogger<AggregatorConfiguration> logger)
+    private IReadOnlyList<string> SplitCommaSeparatedList(string list)
     {
-        _configuration = configuration;
-        _logger = logger;
-    }
-
-    public List<NodeAppSettings> GetNodes()
-    {
-        var nodesSection = _configuration.GetSection("CoreApiNodes");
-
-        // Read from fallback to legacy Nodes section
-        if (!nodesSection.Exists())
-        {
-            nodesSection = _configuration.GetSection("Nodes");
-        }
-
-        if (!nodesSection.Exists())
-        {
-            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
-        }
-
-        var nodesList = new List<NodeAppSettings>();
-        nodesSection.Bind(nodesList);
-
-        if (!nodesList.Any())
-        {
-            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
-        }
-
-        nodesList.ForEach(n => n.AssertValid());
-        return nodesList;
-    }
-
-    public MempoolConfiguration GetMempoolConfiguration()
-    {
-        var mempoolPruneTimeouts = new MempoolConfiguration();
-        _configuration.GetSection("MempoolConfiguration").Bind(mempoolPruneTimeouts);
-        return mempoolPruneTimeouts;
-    }
-
-    public LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration()
-    {
-        var ledgerConfirmationConfiguration = new LedgerConfirmationConfiguration();
-        _configuration.GetSection("LedgerConfirmation").Bind(ledgerConfirmationConfiguration);
-        return ledgerConfirmationConfiguration;
-    }
-
-    public TransactionAssertionConfiguration GetTransactionAssertionConfiguration()
-    {
-        var transactionAssertionConfiguration = new TransactionAssertionConfiguration();
-        _configuration.GetSection("TransactionAssertions").Bind(transactionAssertionConfiguration);
-        return transactionAssertionConfiguration;
-    }
-
-    public string GetNetworkName()
-    {
-        var networkId = _configuration.GetValue<string?>("NetworkName", null);
-        if (networkId == null)
-        {
-            throw new InvalidConfigurationException("appsettings.json requires a string NetworkName");
-        }
-
-        return networkId;
+        return list.Split(",")
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToImmutableList();
     }
 }

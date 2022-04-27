@@ -561,6 +561,9 @@ public class TransactionContentProcessor
             case Api.PreparedValidatorOwner preparedValidatorOwner:
                 HandleValidatorDataOperation(new ValidatorDataObjects { PreparedValidatorOwner = preparedValidatorOwner });
                 return;
+            case ValidatorSystemMetadata validatorSystemMetadata:
+                HandleValidatorSystemMetadataDataOperation(validatorSystemMetadata);
+                return;
             default:
                 // Don't handle other data types for now
                 return;
@@ -601,6 +604,30 @@ public class TransactionContentProcessor
             existingSubstate => existingSubstate.SubstateMatches(
                 objects.ToDbValidatorData(validatorLookup(), validatorOwnerLookup?.Invoke())
             )
+        );
+    }
+
+    private void HandleValidatorSystemMetadataDataOperation(ValidatorSystemMetadata validatorSystemMetadata)
+    {
+        if (_entity!.EntityType != EntityType.Validator && _entity!.EntityType != EntityType.Validator_System)
+        {
+            // Presently, the "ValidatorSystemMetadata" (which is a rather confusing name for the Validator Fork Vote
+            //   - for historic reasons) is stored against the validator_system entity.
+            // However, as it's validator controlled, it should more accurately be stored against the validator entity.
+            // We allow either here in case it changes in future.
+            throw GenerateDetailedInvalidTransactionException("Validator system metadata update not against validator or validator__system entity");
+        }
+
+        var validatorLookup = _dbActionsPlanner.ResolveValidator(_entity.ValidatorAddress!, _transactionSummary!.StateVersion);
+
+        var createNewSubstate = () => new ValidatorSystemMetadataSubstate(
+            validatorLookup(),
+            ValidatorCandidateForkVote.From(validatorSystemMetadata)
+        );
+
+        HandleSubstateUpOrDown(
+            createNewSubstate,
+            existingSubstate => existingSubstate.SubstateMatches(createNewSubstate())
         );
     }
 

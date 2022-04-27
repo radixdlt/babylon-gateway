@@ -1008,3 +1008,54 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220427122411_AddValidatorSystemMetadataSubstates') THEN
+    CREATE TABLE validator_system_metadata_substates (
+        up_state_version bigint NOT NULL,
+        up_operation_group_index integer NOT NULL,
+        up_operation_index_in_group integer NOT NULL,
+        validator_id bigint NOT NULL,
+        full_bytes bytea NULL,
+        fork_name text NULL,
+        fork_id bytea NULL,
+        nonce bytea NULL,
+        down_state_version bigint NULL,
+        down_operation_group_index integer NULL,
+        down_operation_index_in_group integer NULL,
+        substate_identifier bytea NOT NULL,
+        CONSTRAINT "PK_validator_system_metadata_substates" PRIMARY KEY (up_state_version, up_operation_group_index, up_operation_index_in_group),
+        CONSTRAINT "AK_validator_system_metadata_substates_substate_identifier" UNIQUE (substate_identifier),
+        CONSTRAINT "FK_validator_system_metadata_substate_down_operation_group" FOREIGN KEY (down_state_version, down_operation_group_index) REFERENCES operation_groups (state_version, operation_group_index) ON DELETE RESTRICT,
+        CONSTRAINT "FK_validator_system_metadata_substate_up_operation_group" FOREIGN KEY (up_state_version, up_operation_group_index) REFERENCES operation_groups (state_version, operation_group_index) ON DELETE CASCADE,
+        CONSTRAINT "FK_validator_system_metadata_substates_validators_validator_id" FOREIGN KEY (validator_id) REFERENCES validators (id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220427122411_AddValidatorSystemMetadataSubstates') THEN
+    CREATE INDEX "IX_validator_system_metadata_substates_down_state_version_down~" ON validator_system_metadata_substates (down_state_version, down_operation_group_index);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220427122411_AddValidatorSystemMetadataSubstates') THEN
+    CREATE INDEX "IX_validator_system_metadata_substates_validator_id" ON validator_system_metadata_substates (validator_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220427122411_AddValidatorSystemMetadataSubstates') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20220427122411_AddValidatorSystemMetadataSubstates', '6.0.1');
+    END IF;
+END $EF$;
+COMMIT;
+
