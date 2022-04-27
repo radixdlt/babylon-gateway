@@ -7,4 +7,4 @@ cd "$SCRIPT_DIR"
 ./scripts/ensure-key-generated.sh
 
 docker-compose --profile network-gateway-built build
-docker-compose --profile fullnode --profile network-gateway-built up
+docker-compose --profile fullnode --profile network-gateway-built up --abort-on-container-exit
