@@ -142,6 +142,6 @@ public class CoreApiHandler : ICoreApiHandler
         ICoreNodesSupervisorService coreNodesSupervisorService,
         HttpClient httpClient)
     {
-        return new CoreApiProvider(coreNodesSupervisorService.GetRandomHealthiestCoreNode(), httpClient);
+        return new CoreApiProvider(coreNodesSupervisorService.GetRandomTopTierCoreNode(), httpClient);
     }
 }
