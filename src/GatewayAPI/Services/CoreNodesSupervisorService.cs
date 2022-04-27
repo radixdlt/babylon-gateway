@@ -66,6 +66,7 @@ using Common.Extensions;
 using GatewayAPI.Configuration;
 using GatewayAPI.Configuration.Models;
 using GatewayAPI.CoreCommunications;
+using GatewayAPI.Exceptions;
 using CoreApiModel = RadixCoreApi.Generated.Model;
 
 namespace GatewayAPI.Services;
@@ -89,16 +90,15 @@ public class CoreNodesSupervisorService : ICoreNodesSupervisorService
         Unhealthy = 3,
     }
 
-    private static readonly IEnumerable<CoreNodeStatus> _statusesFromBestToWorst =
-        Enum.GetValues(typeof(CoreNodeStatus)).Cast<CoreNodeStatus>().OrderBy(s => s);
+    private static readonly List<CoreNodeStatus> _nonLaggingStatuses =
+        new() { CoreNodeStatus.HealthyAndSynced, CoreNodeStatus.Unknown };
 
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly CoreApiModel.NetworkIdentifier _networkIdentifier;
     private readonly long _maxAllowedStateVersionLagToBeConsideredSynced;
-
-    private readonly Dictionary<CoreApiNode, CoreNodeStatus> _coreNodesStatuses;
-    private readonly object _coreNodesStatusesLock = new();
+    private readonly IEnumerable<CoreNodeStatus> _usableStatusesFromBestToWorst;
+    private Dictionary<CoreApiNode, CoreNodeStatus> _coreNodesStatuses;
 
     public CoreNodesSupervisorService(
         ILogger<CoreNodesSupervisorService> logger,
@@ -109,8 +109,13 @@ public class CoreNodesSupervisorService : ICoreNodesSupervisorService
         _httpClient = httpClient;
 
         _networkIdentifier = new CoreApiModel.NetworkIdentifier(configuration.GetNetworkName());
-        _maxAllowedStateVersionLagToBeConsideredSynced = configuration
-            .GetCoreApiNodeHealth().MaxAllowedStateVersionLagToBeConsideredSynced;
+
+        var nodeHealthConfig = configuration.GetCoreApiNodeHealth();
+        _maxAllowedStateVersionLagToBeConsideredSynced = nodeHealthConfig.MaxAllowedStateVersionLagToBeConsideredSynced;
+
+        _usableStatusesFromBestToWorst = Enum.GetValues(typeof(CoreNodeStatus)).Cast<CoreNodeStatus>()
+            .Where(status => !nodeHealthConfig.IgnoreLaggingNodes || _nonLaggingStatuses.Contains(status))
+            .OrderBy(s => s);
 
         _coreNodesStatuses = configuration.GetCoreNodes()
             .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
@@ -119,52 +124,61 @@ public class CoreNodesSupervisorService : ICoreNodesSupervisorService
 
     public CoreApiNode GetRandomHealthiestCoreNode()
     {
-        lock (_coreNodesStatusesLock)
+        // We need to take a reference to the current dictionary so that a node that
+        // changes status while iterating is not missed due to concurrent access to _coreNodesStatuses.
+        var coreNodesStatusesSnapshot = _coreNodesStatuses;
+        foreach (var status in _usableStatusesFromBestToWorst)
         {
-            foreach (var status in _statusesFromBestToWorst)
+            var coreNodesOfStatus = GetNodesOfStatus(coreNodesStatusesSnapshot, status);
+            if (coreNodesOfStatus.Any())
             {
-                var coreNodesOfStatus = GetCoreNodesOfStatus(status);
-                if (coreNodesOfStatus.Any())
-                {
-                    return coreNodesOfStatus.GetRandomBy(n => (double)n.RequestWeighting);
-                }
+                return coreNodesOfStatus.GetRandomBy(n => (double)n.RequestWeighting);
             }
         }
 
-        throw new Exception("No core nodes available");
+        throw InternalServerException.OfNoValidCoreApiNodesAvailable(
+            PrepareNoAvailableNodesErrorMessage(coreNodesStatusesSnapshot));
     }
 
-    private List<CoreApiNode> GetCoreNodesOfStatus(CoreNodeStatus status)
+    private static List<CoreApiNode> GetNodesOfStatus(
+        Dictionary<CoreApiNode, CoreNodeStatus> coreNodesStatusesSnapshot,
+        CoreNodeStatus status)
     {
-        return _coreNodesStatuses.Where(kv => kv.Value == status)
+        return coreNodesStatusesSnapshot
+            .Where(kv => kv.Value == status)
             .Select(kv => kv.Key)
             .ToList();
     }
 
+    private static string PrepareNoAvailableNodesErrorMessage(
+        Dictionary<CoreApiNode, CoreNodeStatus> coreNodesStatusesSnapshot)
+    {
+        var totalCount = coreNodesStatusesSnapshot.Count;
+        var laggingCount =
+            GetNodesOfStatus(coreNodesStatusesSnapshot, CoreNodeStatus.HealthyButLagging).Count;
+        var unhealthyCount =
+            GetNodesOfStatus(coreNodesStatusesSnapshot, CoreNodeStatus.Unhealthy).Count;
+        return
+            "No valid core nodes available. " +
+            $"{totalCount} nodes are configured but {laggingCount} have been flagged as lagging " +
+            $"and {unhealthyCount} as unhealthy. " +
+            "If you wish to use lagging and unhealthy nodes consider setting " +
+            "CoreApiNodeHealth.IgnoreLaggingNodes to false.";
+    }
+
     public async Task ReviseCoreNodesHealth(CancellationToken cancellationToken)
     {
-        Dictionary<CoreApiNode, CoreNodeStatus>.KeyCollection coreApiNodes;
-        lock (_coreNodesStatusesLock)
-        {
-            coreApiNodes = _coreNodesStatuses.Keys;
-        }
-
         var nodesStateVersionTasks =
-            coreApiNodes.Select(n => GetCoreNodeStateVersion(n, cancellationToken));
+            _coreNodesStatuses.Keys.Select(n => GetCoreNodeStateVersion(n, cancellationToken));
 
         var nodesStateVersions = (await Task.WhenAll(nodesStateVersionTasks))
             .ToDictionary(p => p.CoreApiNode, p => p.StateVersion);
 
         var highestKnownStateVersion = nodesStateVersions.Values.Max() ?? 0;
 
-        lock (_coreNodesStatusesLock)
-        {
-            foreach (var (coreApiNode, nodeStateVersion) in nodesStateVersions)
-            {
-                var nodeStatus = DetermineNodeStatus(nodeStateVersion, highestKnownStateVersion);
-                _coreNodesStatuses[coreApiNode] = nodeStatus;
-            }
-        }
+        _coreNodesStatuses = nodesStateVersions.ToDictionary(
+            kv => kv.Key,
+            kv => DetermineNodeStatus(kv.Value, highestKnownStateVersion));
     }
 
     private CoreNodeStatus DetermineNodeStatus(long? maybeNodeStateVersion, long highestKnownStateVersion)

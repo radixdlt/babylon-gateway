@@ -68,4 +68,7 @@ public record CoreApiNodeHealth
 {
     [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
     public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
+
+    [ConfigurationKeyName("IgnoreLaggingNodes")]
+    public bool IgnoreLaggingNodes { get; set; } = true;
 }
