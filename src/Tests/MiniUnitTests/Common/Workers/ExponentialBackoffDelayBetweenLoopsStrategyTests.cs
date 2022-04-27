@@ -62,86 +62,42 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using GatewayAPI.Configuration.Models;
-using GatewayAPI.Services;
-using RadixCoreApi.Generated.Model;
+using Common.Workers;
+using Xunit;
 
-namespace GatewayAPI.CoreCommunications;
+namespace Tests.MiniUnitTests.Common.Workers;
 
-public interface ICoreApiHandler
+public class ExponentialBackoffDelayBetweenLoopsStrategyTests
 {
-    NetworkIdentifier GetNetworkIdentifier();
-
-    CoreApiNode GetCoreNodeConnectedTo();
-
-    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
-
-    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request);
-
-    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request);
-
-    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request);
-
-    Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
-}
-
-/// <summary>
-/// This should be Scoped to the request, so it picks up a fresh HttpClient per request.
-/// </summary>
-public class CoreApiHandler : ICoreApiHandler
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiProvider _coreApiProvider;
-
-    public CoreApiHandler(
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreNodesSupervisorService coreNodesSupervisorService,
-        HttpClient httpClient)
+    [Theory]
+    [InlineData(1000, 2, 2, 4000, 1, 1000)]
+    [InlineData(1000, 2, 2, 4000, 2, 1000)]
+    [InlineData(1000, 2, 2, 4000, 3, 2000)]
+    [InlineData(1000, 2, 2, 4000, 4, 4000)]
+    [InlineData(1000, 0, 2, 9500, 4, 9500)]
+    [InlineData(2000, 0, 4, 513000, 4, 512000)]
+    [InlineData(2000, 0, 2, 10000, 4, 10000)]
+    [InlineData(2000, 0, 1, 10000, 1, 2000)]
+    [InlineData(2000, 0, 1, 2000, 2, 2000)]
+    [InlineData(2000, 0, 1, 2000, 3, 2000)]
+    [InlineData(2000, 0, 1, 2000, 4, 2000)]
+    public void ExponentialBackoff_IsCalculatedCorrectly(
+        long baseDelayAfterErrorMs,
+        int consecutiveErrorsAllowedBeforeExponentialBackoff,
+        uint rate,
+        uint maxDelayAfterErrorMs,
+        uint numErrors,
+        long expectedMs)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(coreNodesSupervisorService, httpClient);
-    }
+        var exponentialDelay = new ExponentialBackoffDelayBetweenLoopsStrategy(
+            TimeSpan.Zero,
+            TimeSpan.FromMilliseconds(baseDelayAfterErrorMs),
+            consecutiveErrorsAllowedBeforeExponentialBackoff,
+            rate,
+            TimeSpan.FromMilliseconds(maxDelayAfterErrorMs));
 
-    public NetworkIdentifier GetNetworkIdentifier()
-    {
-        return new NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
-    }
-
-    public CoreApiNode GetCoreNodeConnectedTo()
-    {
-        return _coreApiProvider.CoreApiNode;
-    }
-
-    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request));
-    }
-
-    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request));
-    }
-
-    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request));
-    }
-
-    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request));
-    }
-
-    public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(request, token));
-    }
-
-    private static ICoreApiProvider ChooseCoreApiProvider(
-        ICoreNodesSupervisorService coreNodesSupervisorService,
-        HttpClient httpClient)
-    {
-        return new CoreApiProvider(coreNodesSupervisorService.GetRandomTopTierCoreNode(), httpClient);
+        Assert.Equal(
+            TimeSpan.FromMilliseconds(expectedMs),
+            exponentialDelay.DelayAfterError(TimeSpan.Zero, numErrors));
     }
 }

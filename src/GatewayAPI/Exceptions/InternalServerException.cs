@@ -122,4 +122,13 @@ public class InternalServerException : KnownGatewayErrorException
             "Could not receive valid response from upstream server"
         );
     }
+
+    public static InternalServerException OfNoValidCoreApiNodesAvailable(string internalMessage)
+    {
+        return new InternalServerException(
+            new InternalServerError("NoValidCoreApiNodesAvailable", "N/A"),
+            "An unexpected error occurred handling the request.",
+            internalMessage
+        );
+    }
 }

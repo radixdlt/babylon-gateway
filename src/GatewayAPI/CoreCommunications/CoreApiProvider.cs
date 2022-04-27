@@ -81,6 +81,8 @@ public class CoreApiProvider : ICoreApiProvider
 
     public ConstructionApi ConstructionApi { get; }
 
+    public NetworkApi NetworkApi { get; }
+
     public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
         if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
@@ -90,5 +92,6 @@ public class CoreApiProvider : ICoreApiProvider
 
         CoreApiNode = coreApiNode;
         ConstructionApi = new ConstructionApi(httpClient, coreApiNode.CoreApiAddress);
+        NetworkApi = new NetworkApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

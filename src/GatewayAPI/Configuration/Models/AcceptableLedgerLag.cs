@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
-
 namespace GatewayAPI.Configuration.Models;
 
 public record AcceptableLedgerLag

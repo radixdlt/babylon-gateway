@@ -62,86 +62,13 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using GatewayAPI.Configuration.Models;
-using GatewayAPI.Services;
-using RadixCoreApi.Generated.Model;
+namespace GatewayAPI.Configuration.Models;
 
-namespace GatewayAPI.CoreCommunications;
-
-public interface ICoreApiHandler
+public record CoreApiNodeHealth
 {
-    NetworkIdentifier GetNetworkIdentifier();
+    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
+    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
 
-    CoreApiNode GetCoreNodeConnectedTo();
-
-    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
-
-    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request);
-
-    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request);
-
-    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request);
-
-    Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
-}
-
-/// <summary>
-/// This should be Scoped to the request, so it picks up a fresh HttpClient per request.
-/// </summary>
-public class CoreApiHandler : ICoreApiHandler
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiProvider _coreApiProvider;
-
-    public CoreApiHandler(
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreNodesSupervisorService coreNodesSupervisorService,
-        HttpClient httpClient)
-    {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(coreNodesSupervisorService, httpClient);
-    }
-
-    public NetworkIdentifier GetNetworkIdentifier()
-    {
-        return new NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
-    }
-
-    public CoreApiNode GetCoreNodeConnectedTo()
-    {
-        return _coreApiProvider.CoreApiNode;
-    }
-
-    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request));
-    }
-
-    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request));
-    }
-
-    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request));
-    }
-
-    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request));
-    }
-
-    public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(request, token));
-    }
-
-    private static ICoreApiProvider ChooseCoreApiProvider(
-        ICoreNodesSupervisorService coreNodesSupervisorService,
-        HttpClient httpClient)
-    {
-        return new CoreApiProvider(coreNodesSupervisorService.GetRandomTopTierCoreNode(), httpClient);
-    }
+    [ConfigurationKeyName("IgnoreNonSyncedNodes")]
+    public bool IgnoreNonSyncedNodes { get; set; } = true;
 }

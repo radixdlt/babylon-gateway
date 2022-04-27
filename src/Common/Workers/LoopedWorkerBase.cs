@@ -64,10 +64,12 @@
 
 using Common.Extensions;
 using Common.Utilities;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NodaTime;
 using System.Diagnostics;
 
-namespace DataAggregator.Workers;
+namespace Common.Workers;
 
 public enum BehaviourOnFault
 {
