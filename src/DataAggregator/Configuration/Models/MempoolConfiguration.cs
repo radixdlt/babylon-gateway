@@ -68,8 +68,13 @@ namespace DataAggregator.Configuration.Models;
 
 public record MempoolConfiguration
 {
+    // If enabling this option, you should note the following:
+    //   Transactions not submitted by this gateway will never be marked as failed
+    //     this is because we're unsure if they might be valid again and someone might resubmit them
+    //   Instead, they stick around as PENDING until eventually being pruned
+    //     after PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds
     [ConfigurationKeyName("TrackTransactionsNotSubmittedByThisGateway")]
-    public bool TrackTransactionsNotSubmittedByThisGateway { get; set; } = true;
+    public bool TrackTransactionsNotSubmittedByThisGateway { get; set; } = false;
 
     [ConfigurationKeyName("FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode")]
     public int FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode { get; set; } = 5;
