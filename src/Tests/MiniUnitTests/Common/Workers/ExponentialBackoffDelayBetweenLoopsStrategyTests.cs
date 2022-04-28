@@ -62,60 +62,42 @@
  * permissions under this License.
  */
 
-namespace DataAggregator.Workers;
+using Common.Workers;
+using Xunit;
 
-public class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
+namespace Tests.MiniUnitTests.Common.Workers;
+
+public class ExponentialBackoffDelayBetweenLoopsStrategyTests
 {
-    private readonly TimeSpan _delayBetweenLoopTriggersIfSuccessful;
-    private readonly TimeSpan _baseDelayAfterError;
-    private readonly int _consecutiveErrorsAllowedBeforeExponentialBackoff;
-    private readonly float _delayAfterErrorExponentialRate;
-    private readonly TimeSpan _maxDelayAfterError;
-
-    public ExponentialBackoffDelayBetweenLoopsStrategy(
-        TimeSpan delayBetweenLoopTriggersIfSuccessful,
-        TimeSpan baseDelayAfterError,
+    [Theory]
+    [InlineData(1000, 2, 2, 4000, 1, 1000)]
+    [InlineData(1000, 2, 2, 4000, 2, 1000)]
+    [InlineData(1000, 2, 2, 4000, 3, 2000)]
+    [InlineData(1000, 2, 2, 4000, 4, 4000)]
+    [InlineData(1000, 0, 2, 9500, 4, 9500)]
+    [InlineData(2000, 0, 4, 513000, 4, 512000)]
+    [InlineData(2000, 0, 2, 10000, 4, 10000)]
+    [InlineData(2000, 0, 1, 10000, 1, 2000)]
+    [InlineData(2000, 0, 1, 2000, 2, 2000)]
+    [InlineData(2000, 0, 1, 2000, 3, 2000)]
+    [InlineData(2000, 0, 1, 2000, 4, 2000)]
+    public void ExponentialBackoff_IsCalculatedCorrectly(
+        long baseDelayAfterErrorMs,
         int consecutiveErrorsAllowedBeforeExponentialBackoff,
-        float delayAfterErrorExponentialRate,
-        TimeSpan maxDelayAfterError
-    )
+        uint rate,
+        uint maxDelayAfterErrorMs,
+        uint numErrors,
+        long expectedMs)
     {
-        if (baseDelayAfterError > maxDelayAfterError)
-        {
-            throw new ArgumentException("baseDelayAfterError can't be greater than maxDelayAfterError");
-        }
+        var exponentialDelay = new ExponentialBackoffDelayBetweenLoopsStrategy(
+            TimeSpan.Zero,
+            TimeSpan.FromMilliseconds(baseDelayAfterErrorMs),
+            consecutiveErrorsAllowedBeforeExponentialBackoff,
+            rate,
+            TimeSpan.FromMilliseconds(maxDelayAfterErrorMs));
 
-        _delayBetweenLoopTriggersIfSuccessful = delayBetweenLoopTriggersIfSuccessful;
-        _baseDelayAfterError = baseDelayAfterError;
-        _consecutiveErrorsAllowedBeforeExponentialBackoff = consecutiveErrorsAllowedBeforeExponentialBackoff;
-        _delayAfterErrorExponentialRate = delayAfterErrorExponentialRate;
-        _maxDelayAfterError = maxDelayAfterError;
-    }
-
-    public TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning)
-    {
-        var delayRemaining = _delayBetweenLoopTriggersIfSuccessful - elapsedSinceLoopBeginning;
-        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
-    }
-
-    public TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors)
-    {
-        var totalDelay = numConsecutiveErrors <= _consecutiveErrorsAllowedBeforeExponentialBackoff
-            ? _baseDelayAfterError
-            : ExponentialDelayAfterError(numConsecutiveErrors);
-
-        var delayRemaining = totalDelay - elapsedSinceLoopBeginning;
-        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
-    }
-
-    private TimeSpan ExponentialDelayAfterError(uint numConsecutiveErrors)
-    {
-        var numConsecutiveErrorsOverAllowed =
-            numConsecutiveErrors - _consecutiveErrorsAllowedBeforeExponentialBackoff;
-        var exponentialFactor = Math.Pow(
-            _delayAfterErrorExponentialRate,
-            numConsecutiveErrorsOverAllowed);
-        var calculatedDelay = _baseDelayAfterError * exponentialFactor;
-        return calculatedDelay > _maxDelayAfterError ? _maxDelayAfterError : calculatedDelay;
+        Assert.Equal(
+            TimeSpan.FromMilliseconds(expectedMs),
+            exponentialDelay.DelayAfterError(TimeSpan.Zero, numErrors));
     }
 }

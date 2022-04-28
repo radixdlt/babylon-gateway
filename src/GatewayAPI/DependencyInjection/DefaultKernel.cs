@@ -69,6 +69,7 @@ using GatewayAPI.Configuration;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
 using GatewayAPI.Services;
+using GatewayAPI.Workers;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
 using System.Net;
@@ -81,6 +82,7 @@ public class DefaultKernel
     {
         // Singleton-Scoped services
         AddSingletonServices(services);
+        AddHostedServices(services);
 
         // Request scoped services
         AddRequestScopedServices(services);
@@ -103,6 +105,12 @@ public class DefaultKernel
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.AddSingleton<IActionInferrer, ActionInferrer>();
+        services.AddSingleton<ICoreNodesSupervisorService, CoreNodesSupervisorService>();
+    }
+
+    private void AddHostedServices(IServiceCollection services)
+    {
+        services.AddHostedService<CoreNodesSupervisorStatusReviseWorker>();
     }
 
     private void AddRequestScopedServices(IServiceCollection services)

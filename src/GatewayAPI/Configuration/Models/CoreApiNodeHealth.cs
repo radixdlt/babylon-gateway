@@ -62,38 +62,13 @@
  * permissions under this License.
  */
 
-namespace DataAggregator.Workers;
+namespace GatewayAPI.Configuration.Models;
 
-public interface IDelayBetweenLoopsStrategy
+public record CoreApiNodeHealth
 {
-    public static IDelayBetweenLoopsStrategy ConstantDelayStrategy(
-        TimeSpan delayBetweenLoopTriggersIfSuccessful, TimeSpan delayBetweenLoopTriggersIfError)
-    {
-        // Reusing exponential backoff strategy with a rate of 1
-        return ExponentialDelayStrategy(
-            delayBetweenLoopTriggersIfSuccessful: delayBetweenLoopTriggersIfSuccessful,
-            baseDelayAfterError: delayBetweenLoopTriggersIfError,
-            consecutiveErrorsAllowedBeforeExponentialBackoff: 0,
-            delayAfterErrorExponentialRate: 1,
-            maxDelayAfterError: delayBetweenLoopTriggersIfError);
-    }
+    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
+    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
 
-    public static IDelayBetweenLoopsStrategy ExponentialDelayStrategy(
-        TimeSpan delayBetweenLoopTriggersIfSuccessful,
-        TimeSpan baseDelayAfterError,
-        int consecutiveErrorsAllowedBeforeExponentialBackoff,
-        float delayAfterErrorExponentialRate,
-        TimeSpan maxDelayAfterError)
-    {
-        return new ExponentialBackoffDelayBetweenLoopsStrategy(
-            delayBetweenLoopTriggersIfSuccessful,
-            baseDelayAfterError,
-            consecutiveErrorsAllowedBeforeExponentialBackoff,
-            delayAfterErrorExponentialRate,
-            maxDelayAfterError);
-    }
-
-    TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning);
-
-    TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors);
+    [ConfigurationKeyName("IgnoreNonSyncedNodes")]
+    public bool IgnoreNonSyncedNodes { get; set; } = true;
 }

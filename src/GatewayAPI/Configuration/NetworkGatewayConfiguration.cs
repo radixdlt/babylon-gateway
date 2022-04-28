@@ -71,6 +71,8 @@ public interface IGatewayApiConfiguration
 {
     List<CoreApiNode> GetCoreNodes();
 
+    CoreApiNodeHealth GetCoreApiNodeHealth();
+
     string GetNetworkName();
 
     AcceptableLedgerLag GetAcceptableLedgerLag();
@@ -108,6 +110,14 @@ public class GatewayApiConfiguration : IGatewayApiConfiguration
 
         nodesList.ForEach(n => n.AssertValid());
         return nodesList;
+    }
+
+    public CoreApiNodeHealth GetCoreApiNodeHealth()
+    {
+        var coreApiNodeHealth = new CoreApiNodeHealth();
+        _configuration.GetSection("CoreApiNodeHealth").Bind(coreApiNodeHealth);
+
+        return coreApiNodeHealth;
     }
 
     public string GetNetworkName()

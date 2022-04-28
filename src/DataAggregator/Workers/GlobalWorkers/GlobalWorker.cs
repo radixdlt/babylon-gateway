@@ -63,6 +63,7 @@
  */
 
 using Common.Extensions;
+using Common.Workers;
 using Prometheus;
 
 namespace DataAggregator.Workers.GlobalWorkers;

@@ -86,6 +86,8 @@ public interface ILedgerStateQuerier
     Task<LedgerState> GetValidLedgerStateForConstructionRequest(NetworkIdentifier networkIdentifier, PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
     void AssertMatchingNetwork(NetworkIdentifier networkIdentifier);
+
+    Task<LedgerStatus> GetLedgerStatus();
 }
 
 public class LedgerStateQuerier : ILedgerStateQuerier
@@ -223,7 +225,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         }
     }
 
-    private async Task<LedgerStatus> GetLedgerStatus()
+    public async Task<LedgerStatus> GetLedgerStatus()
     {
         var ledgerStatus = await _dbContext.LedgerStatus
             .Include(ls => ls.TopOfLedgerTransaction)

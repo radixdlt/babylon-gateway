@@ -62,86 +62,60 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using GatewayAPI.Configuration.Models;
-using GatewayAPI.Services;
-using RadixCoreApi.Generated.Model;
+namespace Common.Workers;
 
-namespace GatewayAPI.CoreCommunications;
-
-public interface ICoreApiHandler
+public class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
 {
-    NetworkIdentifier GetNetworkIdentifier();
+    private readonly TimeSpan _delayBetweenLoopTriggersIfSuccessful;
+    private readonly TimeSpan _baseDelayAfterError;
+    private readonly int _consecutiveErrorsAllowedBeforeExponentialBackoff;
+    private readonly float _delayAfterErrorExponentialRate;
+    private readonly TimeSpan _maxDelayAfterError;
 
-    CoreApiNode GetCoreNodeConnectedTo();
-
-    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
-
-    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request);
-
-    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request);
-
-    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request);
-
-    Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
-}
-
-/// <summary>
-/// This should be Scoped to the request, so it picks up a fresh HttpClient per request.
-/// </summary>
-public class CoreApiHandler : ICoreApiHandler
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ICoreApiProvider _coreApiProvider;
-
-    public CoreApiHandler(
-        INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreNodesSupervisorService coreNodesSupervisorService,
-        HttpClient httpClient)
+    public ExponentialBackoffDelayBetweenLoopsStrategy(
+        TimeSpan delayBetweenLoopTriggersIfSuccessful,
+        TimeSpan baseDelayAfterError,
+        int consecutiveErrorsAllowedBeforeExponentialBackoff,
+        float delayAfterErrorExponentialRate,
+        TimeSpan maxDelayAfterError
+    )
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(coreNodesSupervisorService, httpClient);
+        if (baseDelayAfterError > maxDelayAfterError)
+        {
+            throw new ArgumentException("baseDelayAfterError can't be greater than maxDelayAfterError");
+        }
+
+        _delayBetweenLoopTriggersIfSuccessful = delayBetweenLoopTriggersIfSuccessful;
+        _baseDelayAfterError = baseDelayAfterError;
+        _consecutiveErrorsAllowedBeforeExponentialBackoff = consecutiveErrorsAllowedBeforeExponentialBackoff;
+        _delayAfterErrorExponentialRate = delayAfterErrorExponentialRate;
+        _maxDelayAfterError = maxDelayAfterError;
     }
 
-    public NetworkIdentifier GetNetworkIdentifier()
+    public TimeSpan DelayAfterSuccess(TimeSpan elapsedSinceLoopBeginning)
     {
-        return new NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
+        var delayRemaining = _delayBetweenLoopTriggersIfSuccessful - elapsedSinceLoopBeginning;
+        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
     }
 
-    public CoreApiNode GetCoreNodeConnectedTo()
+    public TimeSpan DelayAfterError(TimeSpan elapsedSinceLoopBeginning, uint numConsecutiveErrors)
     {
-        return _coreApiProvider.CoreApiNode;
+        var totalDelay = numConsecutiveErrors <= _consecutiveErrorsAllowedBeforeExponentialBackoff
+            ? _baseDelayAfterError
+            : ExponentialDelayAfterError(numConsecutiveErrors);
+
+        var delayRemaining = totalDelay - elapsedSinceLoopBeginning;
+        return delayRemaining < TimeSpan.Zero ? TimeSpan.Zero : delayRemaining;
     }
 
-    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
+    private TimeSpan ExponentialDelayAfterError(uint numConsecutiveErrors)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request));
-    }
-
-    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request));
-    }
-
-    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request));
-    }
-
-    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request));
-    }
-
-    public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)
-    {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(request, token));
-    }
-
-    private static ICoreApiProvider ChooseCoreApiProvider(
-        ICoreNodesSupervisorService coreNodesSupervisorService,
-        HttpClient httpClient)
-    {
-        return new CoreApiProvider(coreNodesSupervisorService.GetRandomTopTierCoreNode(), httpClient);
+        var numConsecutiveErrorsOverAllowed =
+            numConsecutiveErrors - _consecutiveErrorsAllowedBeforeExponentialBackoff;
+        var exponentialFactor = Math.Pow(
+            _delayAfterErrorExponentialRate,
+            numConsecutiveErrorsOverAllowed);
+        var calculatedDelay = _baseDelayAfterError * exponentialFactor;
+        return calculatedDelay > _maxDelayAfterError ? _maxDelayAfterError : calculatedDelay;
     }
 }
