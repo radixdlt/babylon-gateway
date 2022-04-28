@@ -62,44 +62,28 @@
  * permissions under this License.
  */
 
-using System.Collections.Immutable;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DataAggregator.Configuration.Models;
+#nullable disable
 
-public record TransactionAssertionConfiguration
+namespace DataAggregator.Migrations
 {
-    /// <summary>
-    /// Due to changes of parsing certain Core API responses by the Open API library between before/after the 1.1.1
-    /// release, we disable this matching check by default. This can be re-enabled if re-syncing from scratch.
-    /// </summary>
-    [ConfigurationKeyName("AssertDownedSubstatesMatchDownFromCoreApi")]
-    public bool AssertDownedSubstatesMatchDownFromCoreApi { get; set; } = false;
-
-    /// <summary>
-    /// Some releases of the Gateway API have included tracking of new substates.
-    /// This configuration option allows Gateway runners to upgrade late to these releases without breaking.
-    /// Specifically, this option allows substates to be DOWN'd without having seen the substate previously been UP'd.
-    /// Use the value "" to override this default configuration to not permit any inaccurate substate history.
-    ///
-    /// Note - we use a comma separated string instead of a list as it can be overriden better.
-    /// DotNet configuration of enumerables only supports merging which we don't want... (and empty arrays count as
-    /// "null") - see also https://github.com/dotnet/runtime/issues/36384.
-    /// </summary>
-    [ConfigurationKeyName("SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated")]
-    public string SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated { get; set; } = "ValidatorSystemMetadataSubstate";
-
-    private IReadOnlyList<string>? _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory;
-
-    // This gets cached when called for the first time
-    public IReadOnlyList<string> SubstateTypesWhichAreAllowedToHaveIncompleteHistory =>
-        _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory ??=
-            SplitCommaSeparatedList(SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated);
-
-    private IReadOnlyList<string> SplitCommaSeparatedList(string list)
+    public partial class UpdateValidatorSystemMetadataSubstateNonceHashName : Migration
     {
-        return list.Split(",")
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToImmutableList();
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "nonce",
+                table: "validator_system_metadata_substates",
+                newName: "nonce_hash");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "nonce_hash",
+                table: "validator_system_metadata_substates",
+                newName: "nonce");
+        }
     }
 }

@@ -1059,3 +1059,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220428101716_UpdateValidatorSystemMetadataSubstateNonceHashName') THEN
+    ALTER TABLE validator_system_metadata_substates RENAME COLUMN nonce TO nonce_hash;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20220428101716_UpdateValidatorSystemMetadataSubstateNonceHashName') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20220428101716_UpdateValidatorSystemMetadataSubstateNonceHashName', '6.0.1');
+    END IF;
+END $EF$;
+COMMIT;
+

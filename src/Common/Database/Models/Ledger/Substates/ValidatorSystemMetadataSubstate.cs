@@ -84,7 +84,7 @@ public class ValidatorSystemMetadataSubstate : DataSubstateBase
     [ForeignKey(nameof(ValidatorId))]
     public Validator Validator { get; set; }
 
-    // These are all [Owned] types below - exactly one of these will be present on each
+    // This is [Owned] below
     public ValidatorCandidateForkVote? ValidatorCandidateForkVote { get; set; }
 
     /// <summary>
@@ -126,8 +126,8 @@ public record ValidatorCandidateForkVote
     [Column(name: "fork_id")]
     public byte[]? ForkId { get; set; }
 
-    [Column(name: "nonce")]
-    public byte[]? Nonce { get; set; }
+    [Column(name: "nonce_hash")]
+    public byte[]? NonceHash { get; set; }
 
     public static ValidatorCandidateForkVote From(Core.ValidatorSystemMetadata apiModel)
     {
@@ -148,14 +148,14 @@ public record ValidatorCandidateForkVote
         // See CandidateForkVote in the Java Repo
         var forkName = ExtractForkName(fullBytes[..16]);
         var forkId = fullBytes[..24];
-        var nonce = fullBytes[24..32];
+        var nonceHash = fullBytes[24..32];
 
         return new ValidatorCandidateForkVote
         {
             FullBytes = fullBytes,
             ForkName = forkName,
             ForkId = forkId,
-            Nonce = nonce,
+            NonceHash = nonceHash,
         };
     }
 
@@ -168,7 +168,7 @@ public record ValidatorCandidateForkVote
         }
         catch (ArgumentException)
         {
-            // The byte array contains invalid Unicode code points.
+            // The byte array contains invalid code points.
             // See: https://docs.microsoft.com/en-us/dotnet/api/System.Text.Encoding.GetString?view=net-6.0
             return null;
         }
