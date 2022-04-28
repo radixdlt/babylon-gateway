@@ -73,13 +73,23 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
     private const int DecimalPrecision = 18;
     private const int MaxPostgresPrecision = 1000;
 
-    // We under-estimate this so that we're definitely safe
-    private static readonly int _safeByteLengthLimitBeforePostgresError = (int)Math.Floor(MaxPostgresPrecision * Math.Log(10, 256));
-    private static readonly BigInteger _divisor = BigInteger.Pow(10, DecimalPrecision);
+    private static readonly int _safeByteLengthLimitBeforePostgresError;
+    private static readonly BigInteger _divisor;
 
-    public static readonly TokenAmount Zero = new(0);
-    public static readonly TokenAmount NaN = new(true);
-    public static readonly TokenAmount OneFullUnit = new(_divisor);
+    public static readonly TokenAmount Zero;
+    public static readonly TokenAmount NaN;
+    public static readonly TokenAmount OneFullUnit;
+
+    static TokenAmount()
+    {
+        // We under-estimate this so that we're definitely safe
+        _safeByteLengthLimitBeforePostgresError = (int)Math.Floor(MaxPostgresPrecision * Math.Log(10, 256));
+        _divisor = BigInteger.Pow(10, DecimalPrecision);
+
+        Zero = new TokenAmount(0);
+        NaN = new TokenAmount(true);
+        OneFullUnit = new TokenAmount(_divisor);
+    }
 
     private readonly BigInteger _subUnits;
     private readonly bool _isNaN;

@@ -288,7 +288,7 @@ public class CommonDbContext : DbContext
 
     private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)
     {
-        HookupHistory<AccountResourceBalanceHistory>(modelBuilder);
+        HookupHistoryOf<AccountResourceBalanceHistory>(modelBuilder);
 
         modelBuilder.Entity<AccountResourceBalanceHistory>()
             .HasKey(h => new { h.AccountId, h.ResourceId, h.FromStateVersion });
@@ -309,7 +309,7 @@ public class CommonDbContext : DbContext
 
     private static void HookUpResourceSupplyHistory(ModelBuilder modelBuilder)
     {
-        HookupHistory<ResourceSupplyHistory>(modelBuilder);
+        HookupHistoryOf<ResourceSupplyHistory>(modelBuilder);
 
         modelBuilder.Entity<ResourceSupplyHistory>()
             .HasKey(h => new { h.ResourceId, h.FromStateVersion });
@@ -323,7 +323,7 @@ public class CommonDbContext : DbContext
 
     private static void HookUpValidatorStakeHistory(ModelBuilder modelBuilder)
     {
-        HookupHistory<ValidatorStakeHistory>(modelBuilder);
+        HookupHistoryOf<ValidatorStakeHistory>(modelBuilder);
 
         modelBuilder.Entity<ValidatorStakeHistory>()
             .HasKey(h => new { h.ValidatorId, h.FromStateVersion });
@@ -337,7 +337,7 @@ public class CommonDbContext : DbContext
 
     private static void HookUpAccountValidatorStakeHistory(ModelBuilder modelBuilder)
     {
-        HookupHistory<AccountValidatorStakeHistory>(modelBuilder);
+        HookupHistoryOf<AccountValidatorStakeHistory>(modelBuilder);
 
         modelBuilder.Entity<AccountValidatorStakeHistory>()
             .HasKey(h => new { h.AccountId, h.ValidatorId, h.FromStateVersion });
@@ -407,7 +407,7 @@ public class CommonDbContext : DbContext
             .HasConstraintName($"FK_{substateNameSnakeCase}_down_operation_group");
     }
 
-    private static void HookupHistory<THistory>(ModelBuilder modelBuilder)
+    private static void HookupHistoryOf<THistory>(ModelBuilder modelBuilder)
         where THistory : HistoryBase
     {
         var substateNameSnakeCase = typeof(THistory).Name.ToSnakeCase();
