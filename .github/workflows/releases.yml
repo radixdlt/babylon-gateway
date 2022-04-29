@@ -8,6 +8,7 @@ jobs:
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
+    environment: release
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -53,6 +54,7 @@ jobs:
 
   publish-docker:
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Dump context
         uses: crazy-max/ghaction-dump-context@v1
