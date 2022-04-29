@@ -66,6 +66,7 @@ using Common.Database.ValueConverters;
 using Newtonsoft.Json;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
@@ -89,14 +90,15 @@ public enum MempoolTransactionStatus
 
 public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
 {
-    public static readonly Dictionary<MempoolTransactionStatus, string> Conversion = new()
-    {
-        { MempoolTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
-        { MempoolTransactionStatus.Missing, "MISSING" },
-        { MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
-        { MempoolTransactionStatus.Failed, "FAILED" },
-        { MempoolTransactionStatus.Committed, "COMMITTED" },
-    };
+    public static readonly ImmutableDictionary<MempoolTransactionStatus, string> Conversion =
+        new Dictionary<MempoolTransactionStatus, string>()
+        {
+            { MempoolTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
+            { MempoolTransactionStatus.Missing, "MISSING" },
+            { MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
+            { MempoolTransactionStatus.Failed, "FAILED" },
+            { MempoolTransactionStatus.Committed, "COMMITTED" },
+        }.ToImmutableDictionary();
 
     public MempoolTransactionStatusValueConverter()
         : base(Conversion, Invert(Conversion))
