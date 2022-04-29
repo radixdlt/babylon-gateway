@@ -65,11 +65,9 @@
 using Common.Addressing;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
-using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using RadixGatewayApi.Generated.Model;
-using System.Text.RegularExpressions;
 
 namespace GatewayAPI.Controllers;
 
@@ -77,8 +75,6 @@ namespace GatewayAPI.Controllers;
 [Route("token")]
 public class TokenController : ControllerBase
 {
-    private static readonly Regex _symbolRegex = new("^[a-z0-9]{1,35}$");
-
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITokenQuerier _tokenQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;

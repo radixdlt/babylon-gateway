@@ -67,6 +67,7 @@ using Common.Extensions;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
+using Microsoft.VisualBasic.CompilerServices;
 using System.Globalization;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
@@ -461,13 +462,21 @@ public class TransactionBuilder
 
         var resourceAddress = _validations.ExtractValidResourceAddress(new Gateway.TokenIdentifier(resourceAddressStr));
 
+        var validatedUrl = ExtractValidHttpOrHttpsUrlOrElseThrow(
+            action.TokenProperties.Url,
+            () => new InvalidActionException(action, "Token URL must be a valid http or https URL."));
+
+        var validatedIconUrl = ExtractValidHttpOrHttpsUrlOrElseThrow(
+            action.TokenProperties.IconUrl,
+            () => new InvalidActionException(action, "Token icon URL must be a valid http or https URL."));
+
         var tokenMetadata = new Core.TokenMetadata(
             symbol: validatedSymbol,
-            /* The following properties aren't currently validated, beyond the cost of the bytes required to create them */
+            /* Name and description aren't currently validated, beyond the cost of the bytes required to create them */
             name: action.TokenProperties.Name,
             description: action.TokenProperties.Description,
-            url: action.TokenProperties.Url,
-            iconUrl: action.TokenProperties.IconUrl
+            url: validatedUrl,
+            iconUrl: validatedIconUrl
         );
 
         var validatedTokenSupply = _validations.ExtractValidPositiveTokenAmount(action.TokenSupply);
@@ -492,6 +501,23 @@ public class TransactionBuilder
         }
 
         return granularity;
+    }
+
+    private string ExtractValidHttpOrHttpsUrlOrElseThrow(string unverifiedUrl, Func<InvalidActionException> mkException)
+    {
+        if (!string.IsNullOrWhiteSpace(unverifiedUrl) && !IsValidHttpOrHttpsUrl(unverifiedUrl))
+        {
+            throw mkException.Invoke();
+        }
+
+        return unverifiedUrl;
+    }
+
+    private bool IsValidHttpOrHttpsUrl(string uncheckedUrl)
+    {
+        Uri uriResult;
+        return Uri.TryCreate(uncheckedUrl, UriKind.Absolute, out uriResult) &&
+            (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
     private Core.OperationGroup CreateMutableSupplyToken(
