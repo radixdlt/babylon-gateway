@@ -62,91 +62,28 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
-using DataAggregator.Configuration.Models;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DataAggregator.Configuration;
+#nullable disable
 
-public interface IAggregatorConfiguration
+namespace DataAggregator.Migrations
 {
-    List<NodeAppSettings> GetNodes();
-
-    string GetNetworkName();
-
-    MempoolConfiguration GetMempoolConfiguration();
-
-    LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration();
-
-    TransactionAssertionConfiguration GetTransactionAssertionConfiguration();
-}
-
-public class AggregatorConfiguration : IAggregatorConfiguration
-{
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AggregatorConfiguration> _logger;
-
-    public AggregatorConfiguration(IConfiguration configuration, ILogger<AggregatorConfiguration> logger)
+    public partial class UpdateValidatorSystemMetadataSubstateNonceHashName : Migration
     {
-        _configuration = configuration;
-        _logger = logger;
-    }
-
-    public List<NodeAppSettings> GetNodes()
-    {
-        var nodesSection = _configuration.GetSection("CoreApiNodes");
-
-        // Read from fallback to legacy Nodes section
-        if (!nodesSection.Exists())
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            nodesSection = _configuration.GetSection("Nodes");
+            migrationBuilder.RenameColumn(
+                name: "nonce",
+                table: "validator_system_metadata_substates",
+                newName: "nonce_hash");
         }
 
-        if (!nodesSection.Exists())
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
+            migrationBuilder.RenameColumn(
+                name: "nonce_hash",
+                table: "validator_system_metadata_substates",
+                newName: "nonce");
         }
-
-        var nodesList = new List<NodeAppSettings>();
-        nodesSection.Bind(nodesList);
-
-        if (!nodesList.Any())
-        {
-            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
-        }
-
-        nodesList.ForEach(n => n.AssertValid());
-        return nodesList;
-    }
-
-    public MempoolConfiguration GetMempoolConfiguration()
-    {
-        var mempoolPruneTimeouts = new MempoolConfiguration();
-        _configuration.GetSection("MempoolConfiguration").Bind(mempoolPruneTimeouts);
-        return mempoolPruneTimeouts;
-    }
-
-    public LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration()
-    {
-        var ledgerConfirmationConfiguration = new LedgerConfirmationConfiguration();
-        _configuration.GetSection("LedgerConfirmation").Bind(ledgerConfirmationConfiguration);
-        return ledgerConfirmationConfiguration;
-    }
-
-    public TransactionAssertionConfiguration GetTransactionAssertionConfiguration()
-    {
-        var transactionAssertionConfiguration = new TransactionAssertionConfiguration();
-        _configuration.GetSection("TransactionAssertions").Bind(transactionAssertionConfiguration);
-        return transactionAssertionConfiguration;
-    }
-
-    public string GetNetworkName()
-    {
-        var networkId = _configuration.GetValue<string?>("NetworkName", null);
-        if (networkId == null)
-        {
-            throw new InvalidConfigurationException("appsettings.json requires a string NetworkName");
-        }
-
-        return networkId;
     }
 }

@@ -66,6 +66,7 @@ using Common.CoreCommunications;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.SingleEntries;
 using Common.Utilities;
+using DataAggregator.Configuration;
 using DataAggregator.DependencyInjection;
 using DataAggregator.LedgerExtension;
 using Microsoft.EntityFrameworkCore;
@@ -104,7 +105,7 @@ public record CommitTransactionsReport(
 
 public class LedgerExtenderService : ILedgerExtenderService
 {
-    private readonly IConfiguration _configuration;
+    private readonly IAggregatorConfiguration _configuration;
     private readonly ILogger<LedgerExtenderService> _logger;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
@@ -120,7 +121,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     );
 
     public LedgerExtenderService(
-        IConfiguration configuration,
+        IAggregatorConfiguration configuration,
         ILogger<LedgerExtenderService> logger,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
@@ -279,7 +280,12 @@ public class LedgerExtenderService : ILedgerExtenderService
         CancellationToken cancellationToken
     )
     {
-        var dbActionsPlanner = new DbActionsPlanner(_configuration, dbContext, _entityDeterminer, cancellationToken);
+        var dbActionsPlanner = new DbActionsPlanner(
+            _configuration.GetTransactionAssertionConfiguration(),
+            dbContext,
+            _entityDeterminer,
+            cancellationToken
+        );
 
         var transactionContentProcessingMs = CodeStopwatch.TimeInMs(
             () => ProcessTransactions(dbContext, dbActionsPlanner, transactions)

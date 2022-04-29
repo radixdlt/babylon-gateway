@@ -68,6 +68,7 @@ using System.Numerics;
 using DataAggregator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -77,9 +78,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(AggregatorDbContext))]
-    partial class AggregatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220427122411_AddValidatorSystemMetadataSubstates")]
+    partial class AddValidatorSystemMetadataSubstates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1990,7 +1992,7 @@ namespace DataAggregator.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_validator_system_metadata_substate_up_operation_group");
 
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorCandidateForkVote", "ValidatorCandidateForkVote", b1 =>
+                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorForkVote", "ValidatorForkVote", b1 =>
                         {
                             b1.Property<long>("ValidatorSystemMetadataSubstateUpStateVersion")
                                 .HasColumnType("bigint");
@@ -2014,9 +2016,9 @@ namespace DataAggregator.Migrations
                                 .HasColumnType("bytea")
                                 .HasColumnName("full_bytes");
 
-                            b1.Property<byte[]>("NonceHash")
+                            b1.Property<byte[]>("Nonce")
                                 .HasColumnType("bytea")
-                                .HasColumnName("nonce_hash");
+                                .HasColumnName("nonce");
 
                             b1.HasKey("ValidatorSystemMetadataSubstateUpStateVersion", "ValidatorSystemMetadataSubstateUpOperationGroupIndex", "ValidatorSystemMetadataSubstateUpOperationIndexInGroup");
 
@@ -2032,7 +2034,7 @@ namespace DataAggregator.Migrations
 
                     b.Navigation("Validator");
 
-                    b.Navigation("ValidatorCandidateForkVote");
+                    b.Navigation("ValidatorForkVote");
                 });
 
             modelBuilder.Entity("Common.Database.Models.SingleEntries.LedgerStatus", b =>

@@ -62,91 +62,73 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
-using DataAggregator.Configuration.Models;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DataAggregator.Configuration;
+#nullable disable
 
-public interface IAggregatorConfiguration
+namespace DataAggregator.Migrations
 {
-    List<NodeAppSettings> GetNodes();
-
-    string GetNetworkName();
-
-    MempoolConfiguration GetMempoolConfiguration();
-
-    LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration();
-
-    TransactionAssertionConfiguration GetTransactionAssertionConfiguration();
-}
-
-public class AggregatorConfiguration : IAggregatorConfiguration
-{
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AggregatorConfiguration> _logger;
-
-    public AggregatorConfiguration(IConfiguration configuration, ILogger<AggregatorConfiguration> logger)
+    public partial class AddValidatorSystemMetadataSubstates : Migration
     {
-        _configuration = configuration;
-        _logger = logger;
-    }
-
-    public List<NodeAppSettings> GetNodes()
-    {
-        var nodesSection = _configuration.GetSection("CoreApiNodes");
-
-        // Read from fallback to legacy Nodes section
-        if (!nodesSection.Exists())
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            nodesSection = _configuration.GetSection("Nodes");
+            migrationBuilder.CreateTable(
+                name: "validator_system_metadata_substates",
+                columns: table => new
+                {
+                    up_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    up_operation_group_index = table.Column<int>(type: "integer", nullable: false),
+                    up_operation_index_in_group = table.Column<int>(type: "integer", nullable: false),
+                    validator_id = table.Column<long>(type: "bigint", nullable: false),
+                    full_bytes = table.Column<byte[]>(type: "bytea", nullable: true),
+                    fork_name = table.Column<string>(type: "text", nullable: true),
+                    fork_id = table.Column<byte[]>(type: "bytea", nullable: true),
+                    nonce = table.Column<byte[]>(type: "bytea", nullable: true),
+                    down_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    down_operation_group_index = table.Column<int>(type: "integer", nullable: true),
+                    down_operation_index_in_group = table.Column<int>(type: "integer", nullable: true),
+                    substate_identifier = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_validator_system_metadata_substates", x => new { x.up_state_version, x.up_operation_group_index, x.up_operation_index_in_group });
+                    table.UniqueConstraint("AK_validator_system_metadata_substates_substate_identifier", x => x.substate_identifier);
+                    table.ForeignKey(
+                        name: "FK_validator_system_metadata_substate_down_operation_group",
+                        columns: x => new { x.down_state_version, x.down_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_validator_system_metadata_substate_up_operation_group",
+                        columns: x => new { x.up_state_version, x.up_operation_group_index },
+                        principalTable: "operation_groups",
+                        principalColumns: new[] { "state_version", "operation_group_index" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_validator_system_metadata_substates_validators_validator_id",
+                        column: x => x.validator_id,
+                        principalTable: "validators",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_system_metadata_substates_down_state_version_down~",
+                table: "validator_system_metadata_substates",
+                columns: new[] { "down_state_version", "down_operation_group_index" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_validator_system_metadata_substates_validator_id",
+                table: "validator_system_metadata_substates",
+                column: "validator_id");
         }
 
-        if (!nodesSection.Exists())
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
-            throw new InvalidConfigurationException("appsettings.json requires a CoreApiNodes section");
+            migrationBuilder.DropTable(
+                name: "validator_system_metadata_substates");
         }
-
-        var nodesList = new List<NodeAppSettings>();
-        nodesSection.Bind(nodesList);
-
-        if (!nodesList.Any())
-        {
-            _logger.LogWarning("appsettings.json CoreApiNodes section is empty");
-        }
-
-        nodesList.ForEach(n => n.AssertValid());
-        return nodesList;
-    }
-
-    public MempoolConfiguration GetMempoolConfiguration()
-    {
-        var mempoolPruneTimeouts = new MempoolConfiguration();
-        _configuration.GetSection("MempoolConfiguration").Bind(mempoolPruneTimeouts);
-        return mempoolPruneTimeouts;
-    }
-
-    public LedgerConfirmationConfiguration GetLedgerConfirmationConfiguration()
-    {
-        var ledgerConfirmationConfiguration = new LedgerConfirmationConfiguration();
-        _configuration.GetSection("LedgerConfirmation").Bind(ledgerConfirmationConfiguration);
-        return ledgerConfirmationConfiguration;
-    }
-
-    public TransactionAssertionConfiguration GetTransactionAssertionConfiguration()
-    {
-        var transactionAssertionConfiguration = new TransactionAssertionConfiguration();
-        _configuration.GetSection("TransactionAssertions").Bind(transactionAssertionConfiguration);
-        return transactionAssertionConfiguration;
-    }
-
-    public string GetNetworkName()
-    {
-        var networkId = _configuration.GetValue<string?>("NetworkName", null);
-        if (networkId == null)
-        {
-            throw new InvalidConfigurationException("appsettings.json requires a string NetworkName");
-        }
-
-        return networkId;
     }
 }

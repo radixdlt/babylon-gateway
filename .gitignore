@@ -1,6 +1,6 @@
 # Custom gitignore
 .postgresdata/
-.postgresdata_backup/
+.postgresdata_backup*/
 
 # Rider gitignore
 

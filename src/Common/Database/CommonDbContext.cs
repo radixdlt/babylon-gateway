@@ -80,6 +80,8 @@ namespace Common.Database;
 
 /// <summary>
 /// Common DB Context for the Network Gateway database.
+///
+/// After updating this file, run ./generation/generate-migration.sh.
 /// </summary>
 public class CommonDbContext : DbContext
 {
@@ -106,6 +108,8 @@ public class CommonDbContext : DbContext
     public DbSet<ResourceDataSubstate> ResourceDataSubstates => Set<ResourceDataSubstate>();
 
     public DbSet<ValidatorDataSubstate> ValidatorDataSubstates => Set<ValidatorDataSubstate>();
+
+    public DbSet<ValidatorSystemMetadataSubstate> ValidatorSystemMetadataSubstates => Set<ValidatorSystemMetadataSubstate>();
 
     public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
@@ -266,6 +270,7 @@ public class CommonDbContext : DbContext
         // Data substates
         HookUpSubstate<ResourceDataSubstate>(modelBuilder);
         HookUpSubstate<ValidatorDataSubstate>(modelBuilder);
+        HookUpSubstate<ValidatorSystemMetadataSubstate>(modelBuilder);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)

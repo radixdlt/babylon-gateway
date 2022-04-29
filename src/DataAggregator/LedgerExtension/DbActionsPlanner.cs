@@ -71,6 +71,7 @@ using Common.Database.Models.Ledger.Records;
 using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Common.Utilities;
+using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
 using DataAggregator.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -114,7 +115,7 @@ public record ActionsPlannerReport(
 /// </summary>
 public class DbActionsPlanner
 {
-    private readonly IConfiguration _configuration;
+    private readonly TransactionAssertionConfiguration _configuration;
     private readonly AggregatorDbContext _dbContext;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly CancellationToken _cancellationToken;
@@ -149,7 +150,12 @@ public class DbActionsPlanner
     private Dictionary<Validator, ValidatorStakeHistory>? _latestValidatorStakeHistory;
     private Dictionary<AccountValidator, AccountValidatorStakeHistory>? _latestAccountValidatorStakeHistory;
 
-    public DbActionsPlanner(IConfiguration configuration, AggregatorDbContext dbContext, IEntityDeterminer entityDeterminer, CancellationToken cancellationToken)
+    public DbActionsPlanner(
+        TransactionAssertionConfiguration configuration,
+        AggregatorDbContext dbContext,
+        IEntityDeterminer entityDeterminer,
+        CancellationToken cancellationToken
+    )
     {
         _configuration = configuration;
         _dbContext = dbContext;
@@ -451,6 +457,7 @@ public class DbActionsPlanner
         await LoadSubstatesOfType<ValidatorStakeBalanceSubstate>();
         await LoadSubstatesOfType<ResourceDataSubstate>();
         await LoadSubstatesOfType<ValidatorDataSubstate>();
+        await LoadSubstatesOfType<ValidatorSystemMetadataSubstate>();
         await LoadAccountResourceBalanceHistoryEntries();
         await LoadResourceSupplyHistoryEntries();
         await LoadValidatorStakeHistoryEntries();
@@ -508,7 +515,7 @@ public class DbActionsPlanner
     private void DownSubstateFutureAction<TSubstate>(
         TransactionOpLocator transactionOpLocator,
         byte[] identifier,
-        Func<TSubstate> createNewSubstateIfVirtual,
+        Func<TSubstate> recreateDownedSubstate,
         Func<TSubstate, bool> verifySubstateMatches,
         LedgerOperationGroup downOperationGroup,
         int downOperationIndexInGroup
@@ -521,24 +528,36 @@ public class DbActionsPlanner
         var untypedSubstate = localSubstatesOfType.GetValueOrDefault(identifier);
         if (untypedSubstate == null)
         {
-            if (!SubstateBase.IsVirtualIdentifier(identifier))
+            // We permit downs of previously untracked substates in two cases:
+            //
+            // * Virtual substates - because these can be downed in the Core API without being previously upped
+            //
+            // * Newly tracked substates, where we are happy to potentially track incomplete history
+            //   Certain substates are introduced to the Gateway after launch (eg ValidatorSystemMetadata tracking
+            //   validator fork votes). We wish to allow Gateway runners to update late, without needing to resync
+            //   their database. So we permit substate downs without previous ups in these cases.
+
+            var permitDownOfPreviouslyUntrackedSubstate =
+                SubstateBase.IsVirtualIdentifier(identifier) ||
+                _configuration.SubstateTypesWhichAreAllowedToHaveIncompleteHistory.Contains(typeof(TSubstate).Name);
+
+            if (permitDownOfPreviouslyUntrackedSubstate)
             {
-                throw new InvalidTransactionException(
-                    transactionOpLocator,
-                    $"Non-virtual {typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as it did not exist in the database"
-                );
+                var newSubstate = recreateDownedSubstate();
+                newSubstate.SubstateIdentifier = identifier;
+                newSubstate.UpOperationGroup = downOperationGroup;
+                newSubstate.UpOperationIndexInGroup = downOperationIndexInGroup;
+                newSubstate.DownOperationGroup = downOperationGroup;
+                newSubstate.DownOperationIndexInGroup = downOperationIndexInGroup;
+                substates.Add(newSubstate);
+                localSubstatesOfType.Add(identifier, newSubstate);
+                return;
             }
 
-            // Virtual substates can be downed without being upped
-            var newSubstate = createNewSubstateIfVirtual();
-            newSubstate.SubstateIdentifier = identifier;
-            newSubstate.UpOperationGroup = downOperationGroup;
-            newSubstate.UpOperationIndexInGroup = downOperationIndexInGroup;
-            newSubstate.DownOperationGroup = downOperationGroup;
-            newSubstate.DownOperationIndexInGroup = downOperationIndexInGroup;
-            substates.Add(newSubstate);
-            localSubstatesOfType.Add(identifier, newSubstate);
-            return;
+            throw new InvalidTransactionException(
+                transactionOpLocator,
+                $"Non-virtual {typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as it did not exist in the database"
+            );
         }
 
         if (untypedSubstate is not TSubstate substate)
@@ -558,7 +577,7 @@ public class DbActionsPlanner
         }
 
         if (
-            _configuration.GetValue<bool>("TransactionAssertions:AssertDownedSubstatesMatchDownFromCoreApi")
+            _configuration.AssertDownedSubstatesMatchDownFromCoreApi
             && !verifySubstateMatches(substate)
         )
         {
