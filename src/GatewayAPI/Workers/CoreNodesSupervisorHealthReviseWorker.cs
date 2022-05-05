@@ -71,22 +71,23 @@ public class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromSeconds(5),
-            TimeSpan.FromSeconds(5));
+            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(10)
+        );
 
-    private readonly ICoreNodesSupervisorService _coreNodesSupervisorService;
+    private readonly ICoreNodesSelectorService _coreNodesSelectorService;
 
     public CoreNodesSupervisorStatusReviseWorker(
         ILogger<CoreNodesSupervisorStatusReviseWorker> logger,
-        ICoreNodesSupervisorService coreNodesSupervisorService
+        ICoreNodesSelectorService coreNodesSelectorService
     )
         : base(logger, BehaviourOnFault.ApplicationExit, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
-        _coreNodesSupervisorService = coreNodesSupervisorService;
+        _coreNodesSelectorService = coreNodesSelectorService;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _coreNodesSupervisorService.ReviseCoreNodesHealth(cancellationToken);
+        await _coreNodesSelectorService.ReviseCoreNodesHealth(cancellationToken);
     }
 }

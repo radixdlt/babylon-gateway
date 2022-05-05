@@ -65,54 +65,32 @@
 using Common.Extensions;
 using GatewayAPI.Configuration;
 using GatewayAPI.Configuration.Models;
-using GatewayAPI.CoreCommunications;
-using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
 using CoreApiModel = RadixCoreApi.Generated.Model;
 
 namespace GatewayAPI.Services;
 
-public interface ICoreNodesSupervisorService
+public interface ICoreNodesSelectorService
 {
     CoreApiNode GetRandomTopTierCoreNode();
 
     Task ReviseCoreNodesHealth(CancellationToken cancellationToken);
 }
 
-public class CoreNodesSupervisorService : ICoreNodesSupervisorService
+public class CoreNodesSelectorService : ICoreNodesSelectorService
 {
-    // Using explicit integers for enum values
-    // because they're used for ordering the nodes (from best to worst).
-    private enum CoreNodeStatus
-    {
-        HealthyAndSynced = 0,
-        HealthyButLagging = 1,
-        Unhealthy = 2,
-    }
-
-    private readonly ILogger _logger;
-    private readonly HttpClient _httpClient;
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly CoreApiModel.NetworkIdentifier _networkIdentifier;
-    private readonly long _maxAllowedStateVersionLagToBeConsideredSynced;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<CoreNodeStatus> _usableStatusesFromBestToWorst;
     private readonly List<CoreApiNode> _allEnabledCoreNodes;
     private List<CoreApiNode> _nodesInTheTopTierStatus;
 
-    public CoreNodesSupervisorService(
-        ILogger<CoreNodesSupervisorService> logger,
-        HttpClient httpClient,
-        ILedgerStateQuerier ledgerStateQuerier,
+    public CoreNodesSelectorService(
+        IServiceProvider serviceProvider,
         IGatewayApiConfiguration configuration)
     {
-        _logger = logger;
-        _httpClient = httpClient;
-        _ledgerStateQuerier = ledgerStateQuerier;
-
-        _networkIdentifier = new CoreApiModel.NetworkIdentifier(configuration.GetNetworkName());
+        _serviceProvider = serviceProvider;
 
         var nodeHealthConfig = configuration.GetCoreApiNodeHealth();
-        _maxAllowedStateVersionLagToBeConsideredSynced = nodeHealthConfig.MaxAllowedStateVersionLagToBeConsideredSynced;
 
         _usableStatusesFromBestToWorst = Enum.GetValues(typeof(CoreNodeStatus)).Cast<CoreNodeStatus>()
             .Where(status => !nodeHealthConfig.IgnoreNonSyncedNodes || status == CoreNodeStatus.HealthyAndSynced)
@@ -142,67 +120,31 @@ public class CoreNodesSupervisorService : ICoreNodesSupervisorService
 
     public async Task ReviseCoreNodesHealth(CancellationToken cancellationToken)
     {
-        var nodesStateVersionTasks =
-            _allEnabledCoreNodes.Select(n => GetCoreNodeStateVersion(n, cancellationToken));
+        var coreNodeHealthResult = await CheckCoreNodeHealth(cancellationToken);
+        _nodesInTheTopTierStatus = GetNodesInTopUsableTier(coreNodeHealthResult);
+    }
 
-        var nodesStateVersions = (await Task.WhenAll(nodesStateVersionTasks))
-            .ToDictionary(p => p.CoreApiNode, p => p.StateVersion);
+    private async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
+    {
+        // We create a scope to run the node health checker in - as it needs a reference to scoped/transient services
+        using var scope = _serviceProvider.CreateScope();
+        var coreNodeHealthChecker = scope.ServiceProvider.GetRequiredService<ICoreNodeHealthChecker>();
 
-        var topOfLedgerStateVersion = (await _ledgerStateQuerier.GetLedgerStatus()).TopOfLedgerStateVersion;
+        return await coreNodeHealthChecker.CheckCoreNodeHealth(cancellationToken);
+    }
 
-        var coreNodesByStatus = nodesStateVersions
-            .Select(kv => (CoreApiNode: kv.Key, Status: DetermineNodeStatus(kv.Value, topOfLedgerStateVersion)))
-            .ToLookup(p => p.Status);
+    private List<CoreApiNode> GetNodesInTopUsableTier(CoreNodeHealthResult coreNodeHealthResult)
+    {
+        var coreNodesByStatus = coreNodeHealthResult.CoreApiNodesByStatus;
 
         foreach (var status in _usableStatusesFromBestToWorst)
         {
             if (coreNodesByStatus.Contains(status))
             {
-                _nodesInTheTopTierStatus = coreNodesByStatus[status].Select(p => p.CoreApiNode).ToList();
-                return;
+                return coreNodesByStatus[status].ToList();
             }
         }
 
-        _nodesInTheTopTierStatus = new List<CoreApiNode>();
-    }
-
-    private CoreNodeStatus DetermineNodeStatus(long? maybeNodeStateVersion, long topOfLedgerStateVersion)
-    {
-        if (maybeNodeStateVersion == null)
-        {
-            return CoreNodeStatus.Unhealthy;
-        }
-
-        var syncedThreshold =
-            topOfLedgerStateVersion - _maxAllowedStateVersionLagToBeConsideredSynced;
-
-        return maybeNodeStateVersion >= syncedThreshold
-            ? CoreNodeStatus.HealthyAndSynced
-            : CoreNodeStatus.HealthyButLagging;
-    }
-
-    private async Task<(CoreApiNode CoreApiNode, long? StateVersion)> GetCoreNodeStateVersion(
-        CoreApiNode coreApiNode,
-        CancellationToken cancellationToken)
-    {
-        var coreApiProvider = new CoreApiProvider(coreApiNode, _httpClient);
-        try
-        {
-            var networkStatusResponse =
-                await coreApiProvider.NetworkApi.NetworkStatusPostAsync(
-                    new CoreApiModel.NetworkStatusRequest(_networkIdentifier), cancellationToken);
-            return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion);
-        }
-        catch (Exception ex)
-        {
-            if (ex.ShouldBeConsideredAppFatal())
-            {
-                _logger.LogError(ex, "An app-fatal error occurred. Rethrowing...");
-                throw;
-            }
-
-            // If, for any reason, the node can't be reached then it's considered Unhealthy
-            return (coreApiNode, null);
-        }
+        return new List<CoreApiNode>();
     }
 }

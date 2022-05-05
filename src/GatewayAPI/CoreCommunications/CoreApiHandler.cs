@@ -96,11 +96,11 @@ public class CoreApiHandler : ICoreApiHandler
 
     public CoreApiHandler(
         INetworkConfigurationProvider networkConfigurationProvider,
-        ICoreNodesSupervisorService coreNodesSupervisorService,
+        ICoreNodesSelectorService coreNodesSelectorService,
         HttpClient httpClient)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
-        _coreApiProvider = ChooseCoreApiProvider(coreNodesSupervisorService, httpClient);
+        _coreApiProvider = ChooseCoreApiProvider(coreNodesSelectorService, httpClient);
     }
 
     public NetworkIdentifier GetNetworkIdentifier()
@@ -139,9 +139,9 @@ public class CoreApiHandler : ICoreApiHandler
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(
-        ICoreNodesSupervisorService coreNodesSupervisorService,
+        ICoreNodesSelectorService coreNodesSelectorService,
         HttpClient httpClient)
     {
-        return new CoreApiProvider(coreNodesSupervisorService.GetRandomTopTierCoreNode(), httpClient);
+        return new CoreApiProvider(coreNodesSelectorService.GetRandomTopTierCoreNode(), httpClient);
     }
 }
