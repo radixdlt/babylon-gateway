@@ -89,6 +89,9 @@ public class DefaultKernel
         AddReadOnlyDatabaseContext(hostBuilderContext, services);
         AddReadWriteDatabaseContext(hostBuilderContext, services);
 
+        // Other scoped services
+        AddWorkerScopedServices(services);
+
         // Transient (pooled) services
         AddCoreApiHttpClient(services);
     }
@@ -105,7 +108,7 @@ public class DefaultKernel
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.AddSingleton<IActionInferrer, ActionInferrer>();
-        services.AddSingleton<ICoreNodesSupervisorService, CoreNodesSupervisorService>();
+        services.AddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
     }
 
     private void AddHostedServices(IServiceCollection services)
@@ -123,6 +126,11 @@ public class DefaultKernel
         services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
         services.AddScoped<ISubmissionTrackingService, SubmissionTrackingService>();
         services.AddScoped<IParsedTransactionMapper, ParsedTransactionMapper<GatewayReadWriteDbContext>>();
+    }
+
+    private void AddWorkerScopedServices(IServiceCollection services)
+    {
+        services.AddScoped<ICoreNodeHealthChecker, CoreNodeHealthChecker>();
     }
 
     private void AddCoreApiHttpClient(IServiceCollection services)

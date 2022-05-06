@@ -352,26 +352,44 @@ public class ValidatorQuerier : IValidatorQuerier
             .Where(a => validatorOwnerIds.Contains(a.Id) || validatorPreparedOwnerIds.Contains(a.Id))
             .ToDictionaryAsync(a => a.Id, a => a.Address);
 
+        var validatorSelfDefaultOwnerAddresses = validatorIds
+            .Where(validatorId =>
+            {
+                var dataSubstates = validatorDataSubstatesByValidatorId.GetValueOrDefault(validatorId);
+                return dataSubstates == null || !dataSubstates.ContainsKey(ValidatorDataSubstateType.ValidatorData);
+            })
+            .Select(validatorId => ValidatorData.GetDefaultOutputData(
+                _networkConfigurationProvider.GetAddressHrps(),
+                validatorsById[validatorId].PublicKey).OwnerAddress
+            )
+            .ToList();
+
+        var validatorSelfOwners = await _dbContext.Accounts
+            .Where(a => validatorSelfDefaultOwnerAddresses.Contains(a.Address))
+            .ToDictionaryAsync(a => a.Address, a => a.Id);
+
         var outDictionary = new Dictionary<long, PropertiesAndOwner>();
 
-        foreach (var (validatorId, validatorDataSubstates) in validatorDataSubstatesByValidatorId)
+        foreach (var validatorId in validatorIds)
         {
-            var validatorOutputData = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorData)?.Data.ValidatorData!.ToOutputData(ownerId => validatorOwnerAndPreparedOwnerAddresses[ownerId])
-                ?? ValidatorData.GetDefaultOutputData(_networkConfigurationProvider.GetAddressHrps(), validatorsById[validatorId].PublicKey);
-            var validatorMetadata = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorMetaData)?.Data.ValidatorMetaData
+            var validatorDataSubstates = validatorDataSubstatesByValidatorId.GetValueOrDefault(validatorId);
+            var validatorData = validatorDataSubstates?.GetValueOrDefault(ValidatorDataSubstateType.ValidatorData)?.Data.ValidatorData;
+            var validatorOutputData = validatorData?.ToOutputData(ownerId => validatorOwnerAndPreparedOwnerAddresses[ownerId])
+                                      ?? ValidatorData.GetDefaultOutputData(_networkConfigurationProvider.GetAddressHrps(), validatorsById[validatorId].PublicKey);
+            var validatorMetadata = validatorDataSubstates?.GetValueOrDefault(ValidatorDataSubstateType.ValidatorMetaData)?.Data.ValidatorMetaData
                                     ?? ValidatorMetadata.GetDefault();
-            var validatorAllowDelegation = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorAllowDelegation)?.Data.ValidatorAllowDelegation
+            var validatorAllowDelegation = validatorDataSubstates?.GetValueOrDefault(ValidatorDataSubstateType.ValidatorAllowDelegation)?.Data.ValidatorAllowDelegation
                                            ?? ValidatorAllowDelegation.GetDefault();
 
             var preparedOwner = PreparedValidatorOwner.GetIfActive(
-                validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.PreparedValidatorOwner)?.Data,
+                validatorDataSubstates?.GetValueOrDefault(ValidatorDataSubstateType.PreparedValidatorOwner)?.Data,
                 ownerId => validatorOwnerAndPreparedOwnerAddresses[ownerId]
             );
             var preparedFee = PreparedValidatorFee.GetIfActive(
-                validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.PreparedValidatorFee)?.Data
+                validatorDataSubstates?.GetValueOrDefault(ValidatorDataSubstateType.PreparedValidatorFee)?.Data
             );
             var preparedRegistered = PreparedValidatorRegistered.GetIfActive(
-                validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.PreparedValidatorRegistered)?.Data
+                validatorDataSubstates?.GetValueOrDefault(ValidatorDataSubstateType.PreparedValidatorRegistered)?.Data
             );
 
             var validatorProperties = GetValidatorPropertiesFromStates(
@@ -382,7 +400,19 @@ public class ValidatorQuerier : IValidatorQuerier
                 preparedFee,
                 preparedRegistered
             );
-            var ownerId = validatorDataSubstates.GetValueOrDefault(ValidatorDataSubstateType.ValidatorData)?.Data.ValidatorData!.OwnerId;
+
+            var ownerId = validatorData?.OwnerId;
+
+            if (ownerId == null)
+            {
+                // In this case, the ValidatorData is missing - so the validator is owned by itself.
+                // Let's try to look up its Account Id - if it's been seen on ledger as an account.
+                var validatorSelfOwnerAddress = validatorOutputData.OwnerAddress;
+                if (validatorSelfOwners.ContainsKey(validatorSelfOwnerAddress))
+                {
+                    ownerId = validatorSelfOwners[validatorSelfOwnerAddress];
+                }
+            }
 
             outDictionary.Add(validatorId, new PropertiesAndOwner(validatorProperties, ownerId));
         }
