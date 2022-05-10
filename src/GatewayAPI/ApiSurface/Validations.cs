@@ -231,15 +231,13 @@ public class Validations : IValidations
         {
             if (actionAmount.Value.Contains('.'))
             {
-                InvalidRequestException.FromOtherError(
-                    "Token amount value could not be parsed." +
+                throw InvalidRequestException.FromOtherError(
+                    "Token amount value could not be parsed. " +
                     "Note, that the value is denominated in attos (smallest unit of XRD, 1 XRD = 10^18 attos). " +
                     "Attos are indivisible and therefore the value can't contain a decimal point.");
             }
-            else
-            {
-                InvalidRequestException.FromOtherError("Token amount value could not be parsed");
-            }
+
+            throw InvalidRequestException.FromOtherError("Token amount value could not be parsed");
         }
 
         return new ValidatedTokenAmount(validatedResourceAddress.Rri, tokenAmount, validatedResourceAddress.ResourceAddress);
