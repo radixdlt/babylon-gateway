@@ -67,7 +67,6 @@ using Common.Extensions;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
-using Microsoft.VisualBasic.CompilerServices;
 using System.Globalization;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixGatewayApi.Generated.Model;
@@ -213,15 +212,28 @@ public class TransactionBuilder
     private Core.OperationGroup MapRegisterValidator(Gateway.RegisterValidator action)
     {
         var validator = _validations.ExtractValidValidatorAddress(action.Validator);
-
+        VerifyThatValidatorIsFeePayer(action, validator);
         return MapUpdateValidatorRegistration(validator, true);
     }
 
     private Core.OperationGroup MapUnregisterValidator(Gateway.UnregisterValidator action)
     {
         var validator = _validations.ExtractValidValidatorAddress(action.Validator);
-
+        VerifyThatValidatorIsFeePayer(action, validator);
         return MapUpdateValidatorRegistration(validator, false);
+    }
+
+    private void VerifyThatValidatorIsFeePayer(Gateway.Action action, ValidatedValidatorAddress validator)
+    {
+        var validatorCompressedPubKey = validator.ByteValidatorAddress.CompressedPublicKey;
+        var feePayerCompressedPubKey = _feePayer.ByteAccountAddress.CompressedPublicKey;
+
+        if (!validatorCompressedPubKey.SequenceEqual(feePayerCompressedPubKey))
+        {
+            throw new InvalidActionException(
+                action,
+                "Fee payer's public key must be the same as the public key of the validator being registered/unregistered");
+        }
     }
 
     private Core.OperationGroup MapUpdateValidatorRegistration(ValidatedValidatorAddress validator, bool registeredStatus)
@@ -515,8 +527,7 @@ public class TransactionBuilder
 
     private bool IsValidHttpOrHttpsUrl(string uncheckedUrl)
     {
-        Uri uriResult;
-        return Uri.TryCreate(uncheckedUrl, UriKind.Absolute, out uriResult) &&
+        return Uri.TryCreate(uncheckedUrl, UriKind.Absolute, out var uriResult) &&
             (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
