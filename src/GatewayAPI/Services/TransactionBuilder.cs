@@ -198,7 +198,7 @@ public class TransactionBuilder
             Gateway.MintTokens mintTokens => await MapMintTokens(mintTokens),
             Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
             Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
-            Gateway.CreateTokenDefinition createTokenDefinition => MapCreateTokenDefinition(createTokenDefinition),
+            Gateway.CreateTokenDefinition createTokenDefinition => await MapCreateTokenDefinition(createTokenDefinition),
             Gateway.RegisterValidator registerValidator => MapRegisterValidator(registerValidator),
             Gateway.UnregisterValidator unregisterValidator => MapUnregisterValidator(unregisterValidator),
             /* Users can supply a type which validates as an action (because it has a string type), but not as a type
@@ -457,7 +457,7 @@ public class TransactionBuilder
         return stakeUnitsToUnstake;
     }
 
-    private Core.OperationGroup MapCreateTokenDefinition(Gateway.CreateTokenDefinition action)
+    private async Task<Core.OperationGroup> MapCreateTokenDefinition(Gateway.CreateTokenDefinition action)
     {
         var validatedSymbol = _validations.ExtractValidTokenSymbol(action.TokenProperties.Symbol).AsString;
         var ownerOrRecipient = action.ToAccount != null
@@ -496,6 +496,11 @@ public class TransactionBuilder
         if (validatedTokenSupply.Rri != resourceAddress.Rri)
         {
             throw new InvalidActionException(action, $"The token supply of the resource was against the rri {validatedTokenSupply.Rri} when it should have been {resourceAddress.Rri}");
+        }
+
+        if (await _tokenQuerier.DoesTokenExist(resourceAddress.Rri, _ledgerState))
+        {
+            throw new InvalidActionException(action, $"The token of rri {resourceAddress.Rri} already exists");
         }
 
         return action.TokenProperties.IsSupplyMutable
