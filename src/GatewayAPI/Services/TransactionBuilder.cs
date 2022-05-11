@@ -198,7 +198,7 @@ public class TransactionBuilder
             Gateway.MintTokens mintTokens => await MapMintTokens(mintTokens),
             Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
             Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
-            Gateway.CreateTokenDefinition createTokenDefinition => MapCreateTokenDefinition(createTokenDefinition),
+            Gateway.CreateTokenDefinition createTokenDefinition => await MapCreateTokenDefinition(createTokenDefinition),
             Gateway.RegisterValidator registerValidator => MapRegisterValidator(registerValidator),
             Gateway.UnregisterValidator unregisterValidator => MapUnregisterValidator(unregisterValidator),
             /* Users can supply a type which validates as an action (because it has a string type), but not as a type
@@ -212,15 +212,28 @@ public class TransactionBuilder
     private Core.OperationGroup MapRegisterValidator(Gateway.RegisterValidator action)
     {
         var validator = _validations.ExtractValidValidatorAddress(action.Validator);
-
+        VerifyThatValidatorIsFeePayer(action, validator);
         return MapUpdateValidatorRegistration(validator, true);
     }
 
     private Core.OperationGroup MapUnregisterValidator(Gateway.UnregisterValidator action)
     {
         var validator = _validations.ExtractValidValidatorAddress(action.Validator);
-
+        VerifyThatValidatorIsFeePayer(action, validator);
         return MapUpdateValidatorRegistration(validator, false);
+    }
+
+    private void VerifyThatValidatorIsFeePayer(Gateway.Action action, ValidatedValidatorAddress validator)
+    {
+        var validatorCompressedPubKey = validator.ByteValidatorAddress.CompressedPublicKey;
+        var feePayerCompressedPubKey = _feePayer.ByteAccountAddress.CompressedPublicKey;
+
+        if (!validatorCompressedPubKey.SequenceEqual(feePayerCompressedPubKey))
+        {
+            throw new InvalidActionException(
+                action,
+                "Fee payer's public key must be the same as the public key of the validator being registered/unregistered");
+        }
     }
 
     private Core.OperationGroup MapUpdateValidatorRegistration(ValidatedValidatorAddress validator, bool registeredStatus)
@@ -444,7 +457,7 @@ public class TransactionBuilder
         return stakeUnitsToUnstake;
     }
 
-    private Core.OperationGroup MapCreateTokenDefinition(Gateway.CreateTokenDefinition action)
+    private async Task<Core.OperationGroup> MapCreateTokenDefinition(Gateway.CreateTokenDefinition action)
     {
         var validatedSymbol = _validations.ExtractValidTokenSymbol(action.TokenProperties.Symbol).AsString;
         var ownerOrRecipient = action.ToAccount != null
@@ -461,13 +474,21 @@ public class TransactionBuilder
 
         var resourceAddress = _validations.ExtractValidResourceAddress(new Gateway.TokenIdentifier(resourceAddressStr));
 
+        var validatedUrl = ExtractValidHttpOrHttpsUrlOrElseThrow(
+            action.TokenProperties.Url,
+            () => new InvalidActionException(action, "Token URL must be a valid http or https URL."));
+
+        var validatedIconUrl = ExtractValidHttpOrHttpsUrlOrElseThrow(
+            action.TokenProperties.IconUrl,
+            () => new InvalidActionException(action, "Token icon URL must be a valid http or https URL."));
+
         var tokenMetadata = new Core.TokenMetadata(
             symbol: validatedSymbol,
-            /* The following properties aren't currently validated, beyond the cost of the bytes required to create them */
+            /* Name and description aren't currently validated, beyond the cost of the bytes required to create them */
             name: action.TokenProperties.Name,
             description: action.TokenProperties.Description,
-            url: action.TokenProperties.Url,
-            iconUrl: action.TokenProperties.IconUrl
+            url: validatedUrl,
+            iconUrl: validatedIconUrl
         );
 
         var validatedTokenSupply = _validations.ExtractValidPositiveTokenAmount(action.TokenSupply);
@@ -475,6 +496,11 @@ public class TransactionBuilder
         if (validatedTokenSupply.Rri != resourceAddress.Rri)
         {
             throw new InvalidActionException(action, $"The token supply of the resource was against the rri {validatedTokenSupply.Rri} when it should have been {resourceAddress.Rri}");
+        }
+
+        if (await _tokenQuerier.DoesTokenExist(resourceAddress.Rri, _ledgerState))
+        {
+            throw new InvalidActionException(action, $"The token of rri {resourceAddress.Rri} already exists");
         }
 
         return action.TokenProperties.IsSupplyMutable
@@ -492,6 +518,22 @@ public class TransactionBuilder
         }
 
         return granularity;
+    }
+
+    private string ExtractValidHttpOrHttpsUrlOrElseThrow(string unverifiedUrl, Func<InvalidActionException> mkException)
+    {
+        if (!string.IsNullOrWhiteSpace(unverifiedUrl) && !IsValidHttpOrHttpsUrl(unverifiedUrl))
+        {
+            throw mkException.Invoke();
+        }
+
+        return unverifiedUrl;
+    }
+
+    private bool IsValidHttpOrHttpsUrl(string uncheckedUrl)
+    {
+        return Uri.TryCreate(uncheckedUrl, UriKind.Absolute, out var uriResult) &&
+            (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
     private Core.OperationGroup CreateMutableSupplyToken(

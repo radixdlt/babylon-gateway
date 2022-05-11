@@ -80,6 +80,8 @@ public interface ITokenQuerier
     Task<Gateway.Token> GetTokenInfoAtState(string tokenRri, Gateway.LedgerState ledgerState);
 
     Task<CreatedTokenData> GetCreatedTokenProperties(string tokenRri, LedgerOperationGroup operationGroup);
+
+    Task<bool> DoesTokenExist(string tokenRri, Gateway.LedgerState ledgerState);
 }
 
 public record CreatedTokenData(Gateway.TokenProperties TokenProperties, Gateway.TokenAmount TokenSupply);
@@ -142,6 +144,12 @@ public class TokenQuerier : ITokenQuerier
             : (await GetFixedTokenMintInOperationGroup(tokenRri, operationGroup)).AsGatewayTokenAmount(tokenRri);
 
         return new CreatedTokenData(tokenProperties, tokenSupplyAmount);
+    }
+
+    public async Task<bool> DoesTokenExist(string tokenRri, Gateway.LedgerState ledgerState)
+    {
+        var resource = await _dbContext.Resource(tokenRri, ledgerState._Version).SingleOrDefaultAsync();
+        return resource != null;
     }
 
     private async Task<TokenAmount> GetFixedTokenMintInOperationGroup(string tokenRri, LedgerOperationGroup operationGroup)
