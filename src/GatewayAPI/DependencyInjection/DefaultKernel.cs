@@ -144,6 +144,13 @@ public class DefaultKernel
                 "DisableCoreApiHttpsCertificateChecks",
                 "CoreApiHttpProxyAddress"
             ));
+        services.AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
+            .UseHttpClientMetrics()
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
+                serviceProvider,
+                "DisableCoreApiHttpsCertificateChecks",
+                "CoreApiHttpProxyAddress"
+            ));
     }
 
     private void AddReadOnlyDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
