@@ -139,9 +139,9 @@ public class CoreNodesSelectorService : ICoreNodesSelectorService
 
         foreach (var status in _usableStatusesFromBestToWorst)
         {
-            if (coreNodesByStatus.Contains(status))
+            if (coreNodesByStatus.ContainsKey(status))
             {
-                return coreNodesByStatus[status].ToList();
+                return coreNodesByStatus[status];
             }
         }
 
