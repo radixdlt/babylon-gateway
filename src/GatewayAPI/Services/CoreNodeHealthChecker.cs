@@ -67,7 +67,7 @@ using GatewayAPI.Configuration;
 using GatewayAPI.Configuration.Models;
 using GatewayAPI.CoreCommunications;
 using GatewayAPI.Database;
-using GatewayAPI.Exceptions;
+using Prometheus;
 using CoreApiModel = RadixCoreApi.Generated.Model;
 
 namespace GatewayAPI.Services;
@@ -77,7 +77,7 @@ public interface ICoreNodeHealthChecker
     Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken);
 }
 
-public record CoreNodeHealthResult(ILookup<CoreNodeStatus, CoreApiNode> CoreApiNodesByStatus);
+public record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<CoreApiNode>> CoreApiNodesByStatus);
 
 // Using explicit integers for enum values
 // because they're used for ordering the nodes (from best to worst).
@@ -95,6 +95,20 @@ public enum CoreNodeStatus
 /// </summary>
 public class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
+    private static readonly Gauge _healthCheckStatusByNode = Metrics
+        .CreateGauge(
+            "ng_node_gateway_health_check_status",
+            "The health check status of an individual node. 1 if healthy and synced, 0.5 if health but lagging, 0 if unhealthy",
+            new GaugeConfiguration { LabelNames = new[] { "node" } }
+        );
+
+    private static readonly Gauge _healthCheckCountsAcrossAllNodes = Metrics
+        .CreateGauge(
+            "ng_nodes_gateway_health_check_node_statuses",
+            "The health check status of all nodes. Statuses are HEALTHY_AND_SYNCED, HEALTHY_BUT_LAGGING, UNHEALTHY",
+            new GaugeConfiguration { LabelNames = new[] { "status" } }
+        );
+
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
@@ -114,6 +128,16 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
     {
+        var enabledCoreNodes = _configuration.GetCoreNodes()
+            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
+            .ToList();
+
+        if (!enabledCoreNodes.Any())
+        {
+            _logger.LogError("No Core API Nodes have been defined as enabled");
+            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<CoreApiNode>>());
+        }
+
         var enabledCoreNodeStateVersionLookupTasks = _configuration.GetCoreNodes()
             .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, cancellationToken));
@@ -121,56 +145,120 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
         var ledgerStateVersionTask = _ledgerStateQuerier.GetLedgerStatus();
 
         var nodesStateVersions = (await Task.WhenAll(enabledCoreNodeStateVersionLookupTasks))
-            .ToDictionary(p => p.CoreApiNode, p => p.StateVersion);
+            .ToDictionary(p => p.CoreApiNode, p => (p.CoreApiNode, p.StateVersion, p.Exception));
 
         var topOfLedgerStateVersion = (await ledgerStateVersionTask).TopOfLedgerStateVersion;
 
         var coreNodesByStatus = nodesStateVersions
             .Select(kv => (CoreApiNode: kv.Key, Status: DetermineNodeStatus(kv.Value, topOfLedgerStateVersion)))
-            .ToLookup(p => p.Status, p => p.CoreApiNode);
+            .ToLookup(p => p.Status, p => p.CoreApiNode)
+            .ToDictionary(p => p.Key, p => p.ToList());
+
+        var healthyAndSyncedCount = coreNodesByStatus.GetValueOrDefault(CoreNodeStatus.HealthyAndSynced)?.Count ?? 0;
+        var healthyButLaggingCount = coreNodesByStatus.GetValueOrDefault(CoreNodeStatus.HealthyButLagging)?.Count ?? 0;
+        var unhealthyCount = coreNodesByStatus.GetValueOrDefault(CoreNodeStatus.Unhealthy)?.Count ?? 0;
+
+        // If a substantial number of nodes are not up, then report as ERROR
+        var reportResultLogLevel = (healthyAndSyncedCount <= enabledCoreNodes.Count / 2)
+            ? LogLevel.Error
+            : LogLevel.Information;
+
+        _logger.Log(
+            reportResultLogLevel,
+            "Core API health check count by status: HealthyAndSynced={HealthyAndSyncedCount}, HealthyButLagging={HealthyButLaggingCount}, Unhealthy={UnhealthyCount}",
+            healthyAndSyncedCount,
+            healthyButLaggingCount,
+            unhealthyCount
+        );
+        _healthCheckCountsAcrossAllNodes.WithLabels("HEALTHY_AND_SYNCED").Set(healthyAndSyncedCount);
+        _healthCheckCountsAcrossAllNodes.WithLabels("HEALTHY_BUT_LAGGING").Set(healthyButLaggingCount);
+        _healthCheckCountsAcrossAllNodes.WithLabels("UNHEALTHY").Set(unhealthyCount);
 
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
 
-    private CoreNodeStatus DetermineNodeStatus(long? maybeNodeStateVersion, long topOfLedgerStateVersion)
+    private CoreNodeStatus DetermineNodeStatus((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
     {
-        if (maybeNodeStateVersion == null)
+        if (healthCheckData.NodeStateVersion == null)
         {
+            _logger.LogWarning(
+                healthCheckData.Exception,
+                "Exception connecting to {CoreNode} ({CoreNodeAddress}), will be marked as unhealthy",
+                healthCheckData.CoreApiNode.Name,
+                healthCheckData.CoreApiNode.CoreApiAddress
+            );
+            _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0);
             return CoreNodeStatus.Unhealthy;
         }
 
-        var syncedThreshold =
-            topOfLedgerStateVersion - _configuration.GetCoreApiNodeHealth().MaxAllowedStateVersionLagToBeConsideredSynced;
+        var maxAcceptableLag = _configuration.GetCoreApiNodeHealth().MaxAllowedStateVersionLagToBeConsideredSynced;
+        var syncedThreshold = topOfLedgerStateVersion - maxAcceptableLag;
 
-        return maybeNodeStateVersion >= syncedThreshold
-            ? CoreNodeStatus.HealthyAndSynced
-            : CoreNodeStatus.HealthyButLagging;
+        if (healthCheckData.NodeStateVersion < syncedThreshold)
+        {
+            _logger.LogInformation(
+                "{CoreNode} ({CoreNodeAddress}) is at state version {NodeStateVersion}, more then {MaxAcceptableLag} below {DbLedgerStateVersion}, so will be marked as healthy but lagging",
+                healthCheckData.CoreApiNode.Name,
+                healthCheckData.CoreApiNode.CoreApiAddress,
+                healthCheckData.NodeStateVersion,
+                maxAcceptableLag,
+                topOfLedgerStateVersion
+            );
+            _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0.5);
+            return CoreNodeStatus.HealthyButLagging;
+        }
+
+        _logger.LogDebug(
+            "{CoreNode} ({CoreNodeAddress}) is at state version {NodeStateVersion}, within {MaxAcceptableLag} of the DB's state version {DbLedgerStateVersion}, so will be marked as healthy and synced",
+            healthCheckData.CoreApiNode,
+            healthCheckData.CoreApiNode.CoreApiAddress,
+            healthCheckData.NodeStateVersion,
+            maxAcceptableLag,
+            topOfLedgerStateVersion
+        );
+        _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
+        return CoreNodeStatus.HealthyAndSynced;
     }
 
-    private async Task<(CoreApiNode CoreApiNode, long? StateVersion)> GetCoreNodeStateVersion(
+    private async Task<(CoreApiNode CoreApiNode, long? StateVersion, Exception? Exception)> GetCoreNodeStateVersion(
         CoreApiNode coreApiNode,
         CancellationToken cancellationToken)
     {
         var coreApiProvider = new CoreApiProvider(coreApiNode, _httpClient);
+        var timeoutSeconds = 5;
         try
         {
+            var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            using var sharedCancellationTokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken,
+                    timeoutCancellationTokenSource.Token
+                );
+
             var networkStatusResponse =
                 await coreApiProvider.NetworkApi.NetworkStatusPostAsync(
-                    new CoreApiModel.NetworkStatusRequest(new CoreApiModel.NetworkIdentifier(_configuration.GetNetworkName())),
-                    cancellationToken
+                    new CoreApiModel.NetworkStatusRequest(
+                        new CoreApiModel.NetworkIdentifier(_configuration.GetNetworkName())),
+                    sharedCancellationTokenSource.Token
                 );
-            return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion);
+
+            return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion, null);
+        }
+        catch (TaskCanceledException)
+        {
+            // The timeout above expired
+            return (coreApiNode, null, new TimeoutException($"Failed to connect or receive response within {timeoutSeconds} seconds"));
         }
         catch (Exception ex)
         {
             if (ex.ShouldBeConsideredAppFatal())
             {
-                _logger.LogError(ex, "An app-fatal error occurred. Rethrowing...");
+                _logger.LogError(ex, "An app-fatal error occurred connecting to {CoreNode}. Rethrowing...", coreApiNode.Name);
                 throw;
             }
 
             // If, for any reason, the node can't be reached then it's considered Unhealthy
-            return (coreApiNode, null);
+            return (coreApiNode, null, ex);
         }
     }
 }
