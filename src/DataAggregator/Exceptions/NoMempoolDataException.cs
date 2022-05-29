@@ -62,55 +62,16 @@
  * permissions under this License.
  */
 
-using Common.Utilities;
-using Common.Workers;
-using DataAggregator.Exceptions;
-using DataAggregator.GlobalServices;
-
-namespace DataAggregator.Workers.GlobalWorkers;
+namespace DataAggregator.Exceptions;
 
 /// <summary>
-/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// An Exception thrown when we try to commit a transaction, but we detect an inconsistency.
+/// This suggests an error with the Ledger state itself.
 /// </summary>
-public class MempoolTrackerWorker : GlobalWorker
+public class NoMempoolDataException : Exception
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(500),
-            TimeSpan.FromMilliseconds(500));
-
-    private static readonly LogLimiter _noMempoolDataLogLimiter = new(TimeSpan.FromSeconds(30), LogLevel.Warning, LogLevel.Debug);
-
-    private readonly ILogger<MempoolTrackerWorker> _logger;
-    private readonly IMempoolTrackerService _mempoolTrackerService;
-
-    public MempoolTrackerWorker(
-        ILogger<MempoolTrackerWorker> logger,
-        IMempoolTrackerService mempoolTrackerService
-    )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+    public NoMempoolDataException(string message)
+        : base(message)
     {
-        _logger = logger;
-        _mempoolTrackerService = mempoolTrackerService;
-    }
-
-    protected override async Task OnStart(CancellationToken cancellationToken, bool isCurrentlyEnabled)
-    {
-        // Wait on start-up for nodes to load to allow some time for the nodes to populate their mempools
-        await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
-        await base.OnStart(cancellationToken, isCurrentlyEnabled);
-    }
-
-    protected override async Task DoWork(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await _mempoolTrackerService.HandleMempoolChanges(cancellationToken);
-        }
-        catch (NoMempoolDataException ex)
-        {
-            // We swallow this exception, which is known/expected if the service is slow to startup.
-            _logger.Log(_noMempoolDataLogLimiter.GetLogLevel(), "{ExceptionMessage}", ex.Message);
-        }
     }
 }

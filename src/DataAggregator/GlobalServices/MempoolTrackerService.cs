@@ -69,6 +69,7 @@ using Common.Utilities;
 using DataAggregator.Configuration;
 using DataAggregator.Configuration.Models;
 using DataAggregator.DependencyInjection;
+using DataAggregator.Exceptions;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
@@ -250,8 +251,8 @@ public class MempoolTrackerService : IMempoolTrackerService
 
         if (nodeMempoolsToConsider.Count == 0)
         {
-            throw new Exception(
-                $"Don't have any recent mempool data from nodes within {mempoolConfiguration.ExcludeNodeMempoolsFromUnionIfStaleFor.FormatSecondsHumanReadable()}"
+            throw new NoMempoolDataException(
+                $"Don't have any recent mempool data from nodes within {mempoolConfiguration.ExcludeNodeMempoolsFromUnionIfStaleFor.FormatSecondsHumanReadable()}. This may be because the service has yet to connect to the node/s."
             );
         }
 
