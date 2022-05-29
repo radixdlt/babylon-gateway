@@ -9,7 +9,7 @@ generation/
 .idea-run-configurations/
 .pgadmin-dev/
 .postgresdata/
-.postgresdata_backup/
+.postgresdata_backup*/
 .run
 deployment/
 **/*.user
