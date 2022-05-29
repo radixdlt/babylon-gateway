@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.1.2
+  version: 1.1.4
   title: Radix Gateway API
   license:
     name: The Radix License, Version 1.0
@@ -419,6 +419,33 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/TransactionRulesResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/transaction/recent":
+    post:
+      summary: Get Recent Transactions
+      description: |
+        Returns user-initiated transactions which have been succesfully committed to the ledger.
+        The transactions are returned in a paginated format, ordered by most recent.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/RecentTransactionsRequest"
+      responses:
+        '200':
+          description: A page of the most recent transactions
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/RecentTransactionsResponse"
         '500':
           description: Gateway Error
           content:
@@ -874,6 +901,42 @@ components:
           type: integer
         minimum_stake:
           "$ref": "#/components/schemas/TokenAmount"
+    RecentTransactionsRequest:
+      type: object
+      required:
+        - network_identifier
+        - account_identifier
+      properties:
+        network_identifier:
+          $ref: "#/components/schemas/NetworkIdentifier"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+        limit:
+          description: The page size requested. The maximum value is 30 at present.
+          type: integer
+      example:
+        network_identifier:
+          network: mainnet
+        limit: 10
+    RecentTransactionsResponse:
+      type: object
+      required:
+        - ledger_state
+        - transactions
+      properties:
+        ledger_state:
+          $ref: "#/components/schemas/LedgerState"
+        next_cursor:
+          description: The cursor to be provided for the next page of results. If missing, this is the last page of results.
+          type: string
+        transactions:
+          description: The page of user transactions.
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionInfo"
     TransactionBuildRequest:
       type: object
       required:
