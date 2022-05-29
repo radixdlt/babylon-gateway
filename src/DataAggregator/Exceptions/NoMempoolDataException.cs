@@ -65,8 +65,8 @@
 namespace DataAggregator.Exceptions;
 
 /// <summary>
-/// An Exception thrown when we try to commit a transaction, but we detect an inconsistency.
-/// This suggests an error with the Ledger state itself.
+/// This exception is thrown when we haven't managed to recently synced any mempool data from any Core API nodes.
+/// It is typically thrown if the aggregator is struggling to connect to a full node.
 /// </summary>
 public class NoMempoolDataException : Exception
 {
