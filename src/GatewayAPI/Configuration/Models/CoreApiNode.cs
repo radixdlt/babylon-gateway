@@ -100,6 +100,11 @@ public record CoreApiNode
 
     public void AssertValid()
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(Name))
         {
             throw new InvalidConfigurationException("A node's Name cannot be empty");
