@@ -66,6 +66,7 @@
 #pragma warning disable SA1516
 
 using Common.Database;
+using Common.Extensions;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Database;
 using GatewayAPI.DependencyInjection;
@@ -205,6 +206,11 @@ async Task LoadNetworkConfiguration(WebApplication webApplication)
         }
         catch (Exception exception)
         {
+            if (exception.ShouldBeConsideredAppFatal())
+            {
+                throw;
+            }
+
             programLogger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
             await Task.Delay(2000);
         }
