@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataAggregator.Migrations
 {
-    [DbContext(typeof(AggregatorDbContext))]
+    [DbContext(typeof(MigrationsDbContext))]
     [Migration("20211222163306_AddLedgerStatusEntity")]
     partial class AddLedgerStatusEntity
     {

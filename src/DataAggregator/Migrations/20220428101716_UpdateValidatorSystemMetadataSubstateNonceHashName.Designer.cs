@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataAggregator.Migrations
 {
-    [DbContext(typeof(AggregatorDbContext))]
+    [DbContext(typeof(MigrationsDbContext))]
     [Migration("20220428101716_UpdateValidatorSystemMetadataSubstateNonceHashName")]
     partial class UpdateValidatorSystemMetadataSubstateNonceHashName
     {

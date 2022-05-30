@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataAggregator.Migrations
 {
-    [DbContext(typeof(AggregatorDbContext))]
+    [DbContext(typeof(MigrationsDbContext))]
     [Migration("20220427122411_AddValidatorSystemMetadataSubstates")]
     partial class AddValidatorSystemMetadataSubstates
     {
