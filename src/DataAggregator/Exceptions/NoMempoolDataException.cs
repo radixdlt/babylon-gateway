@@ -62,57 +62,16 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
+namespace DataAggregator.Exceptions;
 
-namespace GatewayAPI.Configuration.Models;
-
-public record CoreApiNode
+/// <summary>
+/// This exception is thrown when we haven't managed to recently synced any mempool data from any Core API nodes.
+/// It is typically thrown if the aggregator is struggling to connect to a full node.
+/// </summary>
+public class NoMempoolDataException : Exception
 {
-    /// <summary>
-    /// A unique name identifying this node - used as the node's id.
-    /// </summary>
-    [ConfigurationKeyName("Name")]
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Address of the node's Core API.
-    /// </summary>
-    [ConfigurationKeyName("CoreApiAddress")]
-    public string CoreApiAddress { get; set; } = string.Empty;
-
-    /// <summary>
-    /// AuthorizationHeader - if set, can allow for basic auth.
-    /// </summary>
-    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
-    public string? CoreApiAuthorizationHeader { get; set; } = null;
-
-    /// <summary>
-    /// Relative weighting of the node.
-    /// </summary>
-    [ConfigurationKeyName("RequestWeighting")]
-    public decimal RequestWeighting { get; set; } = 1;
-
-    /// <summary>
-    /// Whether the node's core API should be used to read from (defaults to true).
-    /// </summary>
-    [ConfigurationKeyName("Enabled")]
-    public bool IsEnabled { get; set; } = true;
-
-    public void AssertValid()
+    public NoMempoolDataException(string message)
+        : base(message)
     {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        if (string.IsNullOrEmpty(Name))
-        {
-            throw new InvalidConfigurationException("A node's Name cannot be empty");
-        }
-
-        if (string.IsNullOrEmpty(CoreApiAddress))
-        {
-            throw new InvalidConfigurationException("A node's CoreApiAddress cannot be empty");
-        }
     }
 }

@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using Common.Utilities;
 using Common.Workers;
+using DataAggregator.Exceptions;
 using DataAggregator.GlobalServices;
 
 namespace DataAggregator.Workers.GlobalWorkers;
@@ -77,6 +79,9 @@ public class MempoolTrackerWorker : GlobalWorker
             TimeSpan.FromMilliseconds(500),
             TimeSpan.FromMilliseconds(500));
 
+    private static readonly LogLimiter _noMempoolDataLogLimiter = new(TimeSpan.FromSeconds(30), LogLevel.Warning, LogLevel.Debug);
+
+    private readonly ILogger<MempoolTrackerWorker> _logger;
     private readonly IMempoolTrackerService _mempoolTrackerService;
 
     public MempoolTrackerWorker(
@@ -85,6 +90,7 @@ public class MempoolTrackerWorker : GlobalWorker
     )
         : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
+        _logger = logger;
         _mempoolTrackerService = mempoolTrackerService;
     }
 
@@ -97,6 +103,14 @@ public class MempoolTrackerWorker : GlobalWorker
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _mempoolTrackerService.HandleMempoolChanges(cancellationToken);
+        try
+        {
+            await _mempoolTrackerService.HandleMempoolChanges(cancellationToken);
+        }
+        catch (NoMempoolDataException ex)
+        {
+            // We swallow this exception, which is known/expected if the service is slow to startup.
+            _logger.Log(_noMempoolDataLogLimiter.GetLogLevel(), "{ExceptionMessage}", ex.Message);
+        }
     }
 }
