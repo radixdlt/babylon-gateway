@@ -63,6 +63,7 @@
  */
 
 using GatewayAPI.ApiSurface;
+using GatewayAPI.Configuration;
 using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
@@ -80,13 +81,15 @@ public class TransactionController : ControllerBase
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
 
     public TransactionController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
         IConstructionAndSubmissionService constructionAndSubmissionService,
-        INetworkConfigurationProvider networkConfigurationProvider
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IGatewayApiConfiguration gatewayApiConfiguration
     )
     {
         _validations = validations;
@@ -94,6 +97,7 @@ public class TransactionController : ControllerBase
         _transactionQuerier = transactionQuerier;
         _constructionAndSubmissionService = constructionAndSubmissionService;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _gatewayApiConfiguration = gatewayApiConfiguration;
     }
 
     [HttpPost("rules")]
@@ -108,6 +112,33 @@ public class TransactionController : ControllerBase
                 minimumStake: TransactionBuilding.MinimumStake
                     .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
             )
+        );
+    }
+
+    [HttpPost("recent")]
+    public async Task<RecentTransactionsResponse> GetRecentTransactions(RecentTransactionsRequest request)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.NetworkIdentifier, request.AtStateIdentifier);
+
+        var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
+
+        var transactionsPageRequest = new RecentTransactionPageRequest(
+            Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
+            PageSize: _validations.ExtractValidIntInBoundInclusive(
+                "Page size",
+                unvalidatedLimit,
+                1,
+                _gatewayApiConfiguration.GetMaxPageSize()
+            )
+        );
+
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, ledgerState);
+
+        // NB - We don't return a total here as we don't have an index on user transactions
+        return new RecentTransactionsResponse(
+            ledgerState,
+            nextCursor: results.NextPageCursor?.ToCursorString(),
+            results.Transactions
         );
     }
 

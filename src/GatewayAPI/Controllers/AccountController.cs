@@ -146,7 +146,7 @@ public class AccountController : ControllerBase
 
         var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
 
-        var transactionsPageRequest = new TransactionPageRequest(
+        var transactionsPageRequest = new AccountTransactionPageRequest(
             accountAddress,
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
             PageSize: _validations.ExtractValidIntInBoundInclusive(
