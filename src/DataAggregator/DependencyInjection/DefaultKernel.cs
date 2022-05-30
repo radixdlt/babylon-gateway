@@ -122,9 +122,45 @@ public class DefaultKernel
 
     private void AddDatabaseContext(HostBuilderContext hostContext, IServiceCollection services)
     {
+        // Useful links:
+        // https://www.npgsql.org/efcore/index.html
+        // https://www.npgsql.org/doc/connection-string-parameters.html
+
+        // First - Migration Context
+        var migrationsDbConnectionString = hostContext.Configuration.GetConnectionString("MigrationsDbContext");
+        var aggregatorDbConnectionString = hostContext.Configuration.GetConnectionString("AggregatorDbContext");
+
+        if (migrationsDbConnectionString != null)
+        {
+            services.AddDbContextFactory<MigrationsDbContext>(options =>
+            {
+                options.UseNpgsql(
+                    migrationsDbConnectionString,
+                    o => o.NonBrokenUseNodaTime()
+                );
+            });
+        }
+        else
+        {
+            // If no MigrationsDbContext was provided, we use the default AggregatorDbContext, but
+            //   overrides the default 30 second CommandTimeout on migrations (which causes long migrations to rollback)
+            //   We override the timeout with 15 minutes.
+            // Note that it is still not advised to use the migrate-on-startup strategy in production.
+            //   We recommend following the guidance here:
+            //   https://docs.radixdlt.com/main/node-and-gateway/network-gateway-releasing.html
+            // If a Gateway runner wishes to add that back, they can explicitly configure their own MigrationsDbContext.
+            services.AddDbContextFactory<MigrationsDbContext>(options =>
+            {
+                options.UseNpgsql(
+                    aggregatorDbConnectionString,
+                    o => o.NonBrokenUseNodaTime()
+                        .CommandTimeout(900) // 15 minutes
+                );
+            });
+        }
+
         services.AddDbContextFactory<AggregatorDbContext>(options =>
         {
-            // https://www.npgsql.org/efcore/index.html
             options.UseNpgsql(
                 hostContext.Configuration.GetConnectionString("AggregatorDbContext"),
                 o => o.NonBrokenUseNodaTime()

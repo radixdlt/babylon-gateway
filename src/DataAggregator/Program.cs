@@ -138,7 +138,7 @@ var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
 
 if (shouldWipeDatabaseInsteadOfStart)
 {
-    await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (_, logger, dbContext) =>
+    await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
     {
         logger.LogInformation("Connecting to database - if it exists");
 
@@ -157,7 +157,7 @@ if (shouldWipeDatabaseInsteadOfStart)
 
 // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
 // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-await ConnectionHelpers.PerformScopedDbAction<AggregatorDbContext>(services, async (scope, logger, dbContext) =>
+await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (scope, logger, dbContext) =>
 {
     logger.LogInformation("Starting database migrations if required");
 
