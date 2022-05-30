@@ -16,7 +16,7 @@ fi
 # Check it builds
 dotnet build src/DataAggregator
 
-dotnet ef migrations add "$MigrationName" --project src/DataAggregator
+dotnet ef migrations add "$MigrationName" --project src/DataAggregator --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
 ./generation/regenerate-idempotent-sql-script.sh

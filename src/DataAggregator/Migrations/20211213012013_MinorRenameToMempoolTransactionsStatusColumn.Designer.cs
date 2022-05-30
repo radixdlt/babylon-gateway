@@ -77,7 +77,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataAggregator.Migrations
 {
-    [DbContext(typeof(AggregatorDbContext))]
+    [DbContext(typeof(MigrationsDbContext))]
     [Migration("20211213012013_MinorRenameToMempoolTransactionsStatusColumn")]
     partial class MinorRenameToMempoolTransactionsStatusColumn
     {

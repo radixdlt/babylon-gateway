@@ -13,6 +13,6 @@ dotnet build src/DataAggregator
 
 # Remove existing migrations
 find "src/DataAggregator/Migrations" -name \*.cs -exec rm {} \;
-dotnet ef migrations add InitialCreate --project src/DataAggregator
+dotnet ef migrations add InitialCreate --project src/DataAggregator --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
