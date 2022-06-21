@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using NodaTime;
+
 namespace DataAggregator.Configuration.Models;
 
 public record LedgerConfirmationConfiguration
@@ -94,7 +96,29 @@ public record LedgerConfirmationConfiguration
     /// The maximum batch to send to the ledger extension service for committing.
     /// </summary>
     [ConfigurationKeyName("MaxCommitBatchSize")]
-    public long MaxCommitBatchSize { get; set; } = 1000;
+    public long MaxCommitBatchSize { get; set; } = 300;
+
+    /// <summary>
+    /// Gets or sets LargeBatchSizeToAddDelay.
+    /// LargeBatchSizeToAddDelay determines if the DelayBetweenLargeBatchesMilliseconds should be added.
+    /// This is only relevant if a DelayBetweenLargeBatchesMilliseconds is configured.
+    /// This property essentially determines if the syncing is in large batches (catch-up syncing) or small batches
+    /// (likely realtime syncing, where resource use isn't full and adding a delay isn't so necessary).
+    /// The delay is only added when the ingested batch size exceeds this threshold. This should be set to be less than
+    /// or equal to MaxCommitBatchSize.
+    /// </summary>
+    [ConfigurationKeyName("LargeBatchSizeToAddDelay")]
+    public long LargeBatchSizeToAddDelay { get; set; } = 100;
+
+    /// <summary>
+    /// Gets or sets DelayBetweenLargeBatchesMilliseconds.
+    /// This delay allows for a simple means to limit the resource usage of the Gateway / DB during syncing.
+    /// See also LargeBatchSizeToAddDelay.
+    /// </summary>
+    [ConfigurationKeyName("DelayBetweenLargeBatchesMilliseconds")]
+    public long DelayBetweenLargeBatchesMilliseconds { get; set; } = 0;
+
+    public Duration DelayBetweenLargeBatches => Duration.FromMilliseconds(DelayBetweenLargeBatchesMilliseconds);
 
     /// <summary>
     /// Gets or sets MaxTransactionPipelineSizePerNode.
