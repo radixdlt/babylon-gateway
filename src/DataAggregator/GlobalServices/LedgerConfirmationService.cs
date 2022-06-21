@@ -275,6 +275,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         );
 
         HandleLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
+
+        await DelayBetweenIngestionBatchesIfRequested(commitReport);
     }
 
     /// <summary>
@@ -474,6 +476,23 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         // NB - this must come after UpdateTopOfLedgerVariable so that the nodes don't try to fill the gap that's
         //      created when we remove the transactions below it
         StopTrackingTransactionsUpToStateVersion(commitReport.FinalTransaction.StateVersion);
+    }
+
+    private async Task DelayBetweenIngestionBatchesIfRequested(CommitTransactionsReport commitReport)
+    {
+        var isDelayEnabled = Config.DelayBetweenLargeBatches.TotalMilliseconds > 0;
+        var isLargeBatch = commitReport.TransactionsCommittedCount >= Config.LargeBatchSizeToAddDelay;
+
+        if (!isDelayEnabled || !isLargeBatch)
+        {
+            return;
+        }
+
+        _logger.LogInformation(
+            "Enforcing delay of {DelayMs}ms due to the size of the ingestion batch",
+            Config.DelayBetweenLargeBatches.TotalMilliseconds
+        );
+        await Task.Delay(Config.DelayBetweenLargeBatches.ToTimeSpan());
     }
 
     private void ReportOnLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
