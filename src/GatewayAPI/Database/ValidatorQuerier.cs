@@ -65,6 +65,7 @@
 using Common.Database;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Substates;
+using Common.Extensions;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.Exceptions;
 using GatewayAPI.Services;
@@ -239,6 +240,7 @@ public class ValidatorQuerier : IValidatorQuerier
         var validatorStakeSnapshots = await GetValidatorStakes(validatorIds, ledgerState);
         var validatorProperties = await GetValidatorPropertiesByValidatorIdAtState(validators, ledgerState);
         var validatorUptimes = await GetUptimeByValidatorIdAtState(validatorIds, ledgerState);
+        var validatorLastForkSignals = await GetLastForkSignalsByValidatorIdAtState(validatorIds, ledgerState);
 
         var validatorAndOwnerIds = validatorIds
             .Where(id => validatorProperties[id].OwnerId.HasValue)
@@ -274,7 +276,8 @@ public class ValidatorQuerier : IValidatorQuerier
                     validatorOwnerStakeXrd.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
                     validatorUptime
                 ),
-                properties
+                properties,
+                validatorLastForkSignals.GetValueOrDefault(validator.Id)
             );
         })
         .ToList();
@@ -525,5 +528,39 @@ public class ValidatorQuerier : IValidatorQuerier
             proposalsMissed: 0,
             proposalsCompleted: 0
         );
+    }
+
+    private async Task<Dictionary<long, Gateway.ValidatorForkSignal>> GetLastForkSignalsByValidatorIdAtState(
+        List<long> validatorIds,
+        Gateway.LedgerState ledgerState
+    )
+    {
+        return await _dbContext.ValidatorSystemMetadataSubstates
+            .UpAtVersion(ledgerState._Version)
+            .Where(s => validatorIds.Contains(s.ValidatorId))
+            .Include(s => s.UpOperationGroup)
+            .ThenInclude(g => g.LedgerTransaction)
+            .Select(g => new
+            {
+                g.ValidatorId,
+                g.UpOperationGroup.LedgerTransaction.ResultantStateVersion,
+                g.UpOperationGroup.LedgerTransaction.RoundTimestamp,
+                g.UpOperationGroup.LedgerTransaction.Epoch,
+                g.UpOperationGroup.LedgerTransaction.RoundInEpoch,
+                g.ValidatorCandidateForkVote,
+            })
+            .ToDictionaryAsync(
+                g => g.ValidatorId,
+                g => new Gateway.ValidatorForkSignal(
+                    new Gateway.LedgerState(
+                        g.ResultantStateVersion,
+                        g.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+                        g.Epoch,
+                        g.RoundInEpoch
+                    ),
+                    g.ValidatorCandidateForkVote?.ForkId?.ToHex(),
+                    g.ValidatorCandidateForkVote?.ForkName
+                )
+            );
     }
 }

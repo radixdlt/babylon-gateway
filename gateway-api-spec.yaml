@@ -1437,6 +1437,11 @@ components:
           "$ref": "#/components/schemas/ValidatorInfo"
         properties:
           "$ref": "#/components/schemas/ValidatorProperties"
+        latest_fork_readiness_signal:
+          description: |
+            The latest fork readiness signal that the validator has set.
+            If the validator has never set or reset a fork readiness signal, this field is empty.
+          "$ref": "#/components/schemas/ValidatorForkSignal"
       example:
         validator_identifier:
           address: rv1qf2x63qx4jdaxj83kkw2yytehvvmu6r2xll5gcp6c9rancmrfsgfwttnczx
@@ -1464,6 +1469,24 @@ components:
             uptime_percentage: 100
             proposals_missed: 0
             proposals_completed: 108320
+    ValidatorForkSignal:
+      type: object
+      required:
+        - signalled_at
+      properties:
+        signalled_at:
+          "$ref": "#/components/schemas/LedgerState"
+          description: |
+            When the validator fork signal appeared on ledger
+        fork_id:
+          type: string
+          description: |
+            The logical fork id, which is used for counting votes. The logical id encodes the name, as well as the
+            thresholds when the fork would activate. If a signal is cleared, this field may be empty.
+        fork_name:
+          type: string
+          description: |
+            The human-readable fork name. If a signal is cleared, this field may be empty.
     ValidatorProperties:
       type: object
       required:
