@@ -40,7 +40,7 @@ jobs:
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./data-aggregator.zip
-          asset_name: data-aggregator-${{ github.event.release.tag_name }}.zip
+          asset_name: data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
           asset_content_type: application/zip
       - name: Upload GatewayAPI zip
         uses: actions/upload-release-asset@v1
@@ -49,7 +49,7 @@ jobs:
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./gateway-api.zip
-          asset_name: gateway-api-${{ github.event.release.tag_name }}.zip
+          asset_name: gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
           asset_content_type: application/zip
 
   publish-docker:
