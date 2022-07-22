@@ -24,7 +24,7 @@ jobs:
       - name: Build linux binaries
         run: |
           cd src/DataAggregator
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
+          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../GatewayAPI
           echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
@@ -40,7 +40,7 @@ jobs:
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./data-aggregator.zip
-          asset_name: data-aggregator-${{ github.event.release.tag_name }}.zip
+          asset_name: data-aggregator-${{ github.event.release.tag_name }}-linux-x64.zip
           asset_content_type: application/zip
       - name: Upload GatewayAPI zip
         uses: actions/upload-release-asset@v1
@@ -49,7 +49,7 @@ jobs:
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./gateway-api.zip
-          asset_name: gateway-api-${{ github.event.release.tag_name }}.zip
+          asset_name: gateway-api-${{ github.event.release.tag_name }}-linux-x64.zip
           asset_content_type: application/zip
 
   publish-docker:
@@ -62,6 +62,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Login to Dockerhub (release)
         uses: docker/login-action@v1
@@ -76,20 +82,27 @@ jobs:
           github_event_name: ${{ github.event_name }}
           github_action_name: ${{ github.event.action}}
 
+      - name: Setup application version
+        run: |
+          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' src/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
+          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' src/GatewayAPI/appsettings.json )" > src/GatewayAPI/appsettings.json
+
       - name: Docker build and push DataAggregator
         uses: docker/build-push-action@v2
         with:
           file: ./src/DataAggregator/Dockerfile
-          TAGS: |
+          tags: |
             ${{ steps.setup_tags.outputs.data_aggregator_tags }}
           push: true
+          platforms: linux/amd64,linux/arm64
           context: ./
 
       - name: Docker build and push Gateway API
         uses: docker/build-push-action@v2
         with:
           file: ./src/GatewayAPI/Dockerfile
-          TAGS: |
+          tags: |
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
+          platforms: linux/amd64,linux/arm64
           context: ./
