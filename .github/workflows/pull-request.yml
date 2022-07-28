@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
@@ -26,7 +26,7 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
 
   publish-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
       gateway-api-tag: ${{ steps.setup_tags.outputs.gateway-api-tag }}
@@ -72,7 +72,7 @@ jobs:
 
   # TODO: Only radixdlt members to trigger these events
   deploy-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: publish-docker
     steps:
       - name: setup "namespace_postfix"
