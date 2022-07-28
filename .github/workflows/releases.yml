@@ -4,7 +4,7 @@ on:
     types: [published]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
@@ -53,7 +53,7 @@ jobs:
           asset_content_type: application/zip
 
   publish-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: release
     steps:
       - name: Dump context
@@ -86,6 +86,12 @@ jobs:
         run: |
           echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' src/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
           echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' src/GatewayAPI/appsettings.json )" > src/GatewayAPI/appsettings.json
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Docker build and push DataAggregator
         uses: docker/build-push-action@v2
