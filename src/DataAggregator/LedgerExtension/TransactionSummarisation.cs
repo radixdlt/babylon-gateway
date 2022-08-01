@@ -82,7 +82,6 @@ public record TransactionSummary(
     long Epoch,
     long IndexInEpoch,
     long RoundInEpoch,
-    bool IsOnlyRoundChange,
     bool IsStartOfEpoch,
     bool IsStartOfRound,
     byte[] TransactionIdentifierHash,
@@ -106,7 +105,6 @@ public static class TransactionSummarisation
             Epoch: lastTransaction.Epoch,
             IndexInEpoch: lastTransaction.IndexInEpoch,
             RoundInEpoch: lastTransaction.RoundInEpoch,
-            IsOnlyRoundChange: lastTransaction.IsOnlyRoundChange,
             IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
             IsStartOfRound: lastTransaction.IsStartOfRound,
             TransactionIdentifierHash: lastTransaction.TransactionIdentifierHash,
@@ -124,17 +122,11 @@ public static class TransactionSummarisation
         long? newEpoch = null;
         long? newRoundInEpoch = null;
         Instant? newRoundTimestamp = null;
-        var isOnlyRoundChange = true;
 
         foreach (var operationGroup in transaction.OperationGroups)
         {
             foreach (var operation in operationGroup.Operations)
             {
-                if (operation.IsNotRoundDataOrValidatorBftData())
-                {
-                    isOnlyRoundChange = false;
-                }
-
                 if (operation.IsCreateOf<EpochData>(out var epochData))
                 {
                     newEpoch = epochData.Epoch;
@@ -173,7 +165,6 @@ public static class TransactionSummarisation
             Epoch: newEpoch ?? lastTransaction.Epoch,
             IndexInEpoch: isStartOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
             RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
-            IsOnlyRoundChange: isOnlyRoundChange,
             IsStartOfEpoch: isStartOfEpoch,
             IsStartOfRound: isStartOfRound,
             TransactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
@@ -192,7 +183,6 @@ public static class TransactionSummarisation
             Epoch: 0,
             IndexInEpoch: 0,
             RoundInEpoch: 0,
-            IsOnlyRoundChange: false,
             IsStartOfEpoch: false,
             IsStartOfRound: false,
             TransactionIdentifierHash: Array.Empty<byte>(), // Unused

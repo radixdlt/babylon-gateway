@@ -63,12 +63,10 @@
  */
 
 using Common.CoreCommunications;
-using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Joins;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
-using Common.Database.Models.Ledger.Substates;
 using Common.Extensions;
 using Common.Utilities;
 using DataAggregator.Configuration.Models;
@@ -141,7 +139,6 @@ public class DbActionsPlanner
     /** Local DB Context indexes **/
     /* Initially I used DbSet<X>.Local, but it's too slow as it's unindexed - so store our own local indexes.
      * These should be null until they're created in the LoadDependencies step. */
-    private readonly Dictionary<Type, Dictionary<byte[], SubstateBase>?> _localSubstates = new();
     private Dictionary<string, Resource>? _resourceLookupByRri;
     private Dictionary<string, Account>? _accountLookupByAddress;
     private Dictionary<string, Validator>? _validatorLookupByAddress;
@@ -166,33 +163,6 @@ public class DbActionsPlanner
     public void AddDbAction(Action action)
     {
         _dbActions.Add(action);
-    }
-
-    public void UpSubstate<TSubstate>(
-        TransactionOpLocator transactionOpLocator,
-        byte[] identifier,
-        Func<TSubstate> createNewSubstate,
-        LedgerOperationGroup upOperationGroup,
-        int upOperationIndexInGroup
-    )
-        where TSubstate : SubstateBase
-    {
-        MarkSubstateToLoadIfExists<TSubstate>(identifier);
-        _dbActions.Add(() => UpSubstateFutureAction(transactionOpLocator, identifier, createNewSubstate, upOperationGroup, upOperationIndexInGroup));
-    }
-
-    public void DownSubstate<TSubstate>(
-        TransactionOpLocator transactionOpLocator,
-        byte[] identifier,
-        Func<TSubstate> createNewSubstateIfVirtual,
-        Func<TSubstate, bool> verifySubstateMatches,
-        LedgerOperationGroup downOperationGroup,
-        int downOperationIndexInGroup
-    )
-        where TSubstate : SubstateBase
-    {
-        MarkSubstateToLoadIfExists<TSubstate>(identifier);
-        _dbActions.Add(() => DownSubstateFutureAction(transactionOpLocator, identifier, createNewSubstateIfVirtual, verifySubstateMatches, downOperationGroup, downOperationIndexInGroup));
     }
 
     /// <summary>
@@ -269,8 +239,8 @@ public class DbActionsPlanner
 
     public void AddAccountTransactions(
         HashSet<string> accountAddresses,
-        Func<Account?> resolveFeePayer,
-        string? signerAccountAddress,
+        Func<IReadOnlySet<Account>> resolveFeePayerAccounts,
+        bool isUserTransaction,
         long transactionStateVersion
     )
     {
@@ -282,14 +252,14 @@ public class DbActionsPlanner
         accountAddresses.ToList().ForEach(accountAddress => EnsureAccountLoaded(accountAddress, transactionStateVersion));
         _dbActions.Add(() =>
         {
-            var feePayer = resolveFeePayer();
+            var feePayerAccounts = resolveFeePayerAccounts();
             _dbContext.AccountTransactions.AddRange(accountAddresses.Select(
                 accountAddress => new AccountTransaction
                 {
                     Account = GetLoadedAccount(accountAddress),
                     ResultantStateVersion = transactionStateVersion,
-                    IsFeePayer = feePayer == GetLoadedAccount(accountAddress),
-                    IsSigner = signerAccountAddress == accountAddress,
+                    IsUserTransaction = isUserTransaction,
+                    IsFeePayer = feePayerAccounts.Contains(GetLoadedAccount(accountAddress)),
                 }
             ));
         });
@@ -451,13 +421,6 @@ public class DbActionsPlanner
         await LoadOrCreateResources();
         await LoadOrCreateAccounts();
         await LoadOrCreateValidators();
-        await LoadSubstatesOfType<AccountResourceBalanceSubstate>();
-        await LoadSubstatesOfType<AccountStakeUnitBalanceSubstate>();
-        await LoadSubstatesOfType<AccountXrdStakeBalanceSubstate>();
-        await LoadSubstatesOfType<ValidatorStakeBalanceSubstate>();
-        await LoadSubstatesOfType<ResourceDataSubstate>();
-        await LoadSubstatesOfType<ValidatorDataSubstate>();
-        await LoadSubstatesOfType<ValidatorSystemMetadataSubstate>();
         await LoadAccountResourceBalanceHistoryEntries();
         await LoadResourceSupplyHistoryEntries();
         await LoadValidatorStakeHistoryEntries();
@@ -471,124 +434,6 @@ public class DbActionsPlanner
         {
             action();
         }
-    }
-
-    private void MarkSubstateToLoadIfExists<TSubstate>(byte[] identifier)
-        where TSubstate : SubstateBase
-    {
-        var substateIdentifiers = _substatesToLoad.GetOrCreate(typeof(TSubstate), () => new HashSet<byte[]>());
-        substateIdentifiers.Add(identifier);
-    }
-
-    private void UpSubstateFutureAction<TSubstate>(
-        TransactionOpLocator transactionOpLocator,
-        byte[] identifier,
-        Func<TSubstate> createNewSubstate,
-        LedgerOperationGroup upOperationGroup,
-        int upOperationIndexInGroup
-    )
-        where TSubstate : SubstateBase
-    {
-        var substates = _dbContext.Set<TSubstate>();
-        var localSubstatesOfType = _localSubstates[typeof(TSubstate)]!;
-
-        // Could rely on the database to check this constraint at commit time, but this gives us a clearer error
-        var existingSubstate = localSubstatesOfType.GetValueOrDefault(identifier);
-        if (existingSubstate != null)
-        {
-            throw new InvalidTransactionException(
-                transactionOpLocator,
-                $"{typeof(TSubstate).FullName} with identifier {identifier.ToHex()} can't be upped, as a substate of type {existingSubstate.GetType().Name} with that identifier already already exists in the database"
-            );
-        }
-
-        var newSubstate = createNewSubstate();
-
-        newSubstate.SubstateIdentifier = identifier;
-        newSubstate.UpOperationGroup = upOperationGroup;
-        newSubstate.UpOperationIndexInGroup = upOperationIndexInGroup;
-
-        substates.Add(newSubstate);
-        localSubstatesOfType.Add(identifier, newSubstate);
-    }
-
-    private void DownSubstateFutureAction<TSubstate>(
-        TransactionOpLocator transactionOpLocator,
-        byte[] identifier,
-        Func<TSubstate> recreateDownedSubstate,
-        Func<TSubstate, bool> verifySubstateMatches,
-        LedgerOperationGroup downOperationGroup,
-        int downOperationIndexInGroup
-    )
-        where TSubstate : SubstateBase
-    {
-        var substates = _dbContext.Set<TSubstate>();
-        var localSubstatesOfType = _localSubstates[typeof(TSubstate)]!;
-
-        var untypedSubstate = localSubstatesOfType.GetValueOrDefault(identifier);
-        if (untypedSubstate == null)
-        {
-            // We permit downs of previously untracked substates in two cases:
-            //
-            // * Virtual substates - because these can be downed in the Core API without being previously upped
-            //
-            // * Newly tracked substates, where we are happy to potentially track incomplete history
-            //   Certain substates are introduced to the Gateway after launch (eg ValidatorSystemMetadata tracking
-            //   validator fork votes). We wish to allow Gateway runners to update late, without needing to resync
-            //   their database. So we permit substate downs without previous ups in these cases.
-
-            var permitDownOfPreviouslyUntrackedSubstate =
-                SubstateBase.IsVirtualIdentifier(identifier) ||
-                _configuration.SubstateTypesWhichAreAllowedToHaveIncompleteHistory.Contains(typeof(TSubstate).Name);
-
-            if (permitDownOfPreviouslyUntrackedSubstate)
-            {
-                var newSubstate = recreateDownedSubstate();
-                newSubstate.SubstateIdentifier = identifier;
-                newSubstate.UpOperationGroup = downOperationGroup;
-                newSubstate.UpOperationIndexInGroup = downOperationIndexInGroup;
-                newSubstate.DownOperationGroup = downOperationGroup;
-                newSubstate.DownOperationIndexInGroup = downOperationIndexInGroup;
-                substates.Add(newSubstate);
-                localSubstatesOfType.Add(identifier, newSubstate);
-                return;
-            }
-
-            throw new InvalidTransactionException(
-                transactionOpLocator,
-                $"Non-virtual {typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as it did not exist in the database"
-            );
-        }
-
-        if (untypedSubstate is not TSubstate substate)
-        {
-            throw new InvalidTransactionException(
-                transactionOpLocator,
-                $"{typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as a substate of type {untypedSubstate.GetType().Name} was found with that identifier."
-            );
-        }
-
-        if (substate.State == SubstateState.Down)
-        {
-            throw new InvalidTransactionException(
-                transactionOpLocator,
-                $"{typeof(TSubstate).Name} with identifier {identifier.ToHex()} could not be downed as it was already down"
-            );
-        }
-
-        if (
-            _configuration.AssertDownedSubstatesMatchDownFromCoreApi
-            && !verifySubstateMatches(substate)
-        )
-        {
-            throw new InvalidTransactionException(
-                transactionOpLocator,
-                $"{typeof(TSubstate).Name} with identifier {identifier.ToHex()} was downed, but the substate contents appear not to match at downing time"
-            );
-        }
-
-        substate.DownOperationGroup = downOperationGroup;
-        substate.DownOperationIndexInGroup = downOperationIndexInGroup;
     }
 
     private void AddNewHistoryEntryFutureAction<THistoryKey, THistory>(
@@ -723,28 +568,6 @@ public class DbActionsPlanner
             };
             _dbContext.Set<Validator>().Add(validator);
             _validatorLookupByAddress.Add(validatorAddress, validator);
-        }
-    }
-
-    private async Task LoadSubstatesOfType<TSubstate>()
-        where TSubstate : SubstateBase
-    {
-        if (!_substatesToLoad.TryGetValue(typeof(TSubstate), out var identifiersToLoad))
-        {
-            return;
-        }
-
-        // TODO:NG-49 - If we hit limits - instead of doing a large "IN", we could consider using a Temporary Table for these loads
-        //              For example - following in the footsteps of FromMultiDimensionalVirtualJoin
-        var substates = await _dbContext.Set<TSubstate>()
-            .Where(s => identifiersToLoad.Contains(s.SubstateIdentifier))
-            .ToListAsync(_cancellationToken);
-
-        var theseLocalSubstates = new Dictionary<byte[], SubstateBase>(ByteArrayEqualityComparer.Default);
-        _localSubstates.Add(typeof(TSubstate), theseLocalSubstates);
-        foreach (var substate in substates)
-        {
-            theseLocalSubstates.Add(substate.SubstateIdentifier, substate);
         }
     }
 

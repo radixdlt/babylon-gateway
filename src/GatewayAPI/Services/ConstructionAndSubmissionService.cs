@@ -68,7 +68,6 @@ using Common.Extensions;
 using Common.StaticHelpers;
 using GatewayAPI.ApiSurface;
 using GatewayAPI.CoreCommunications;
-using GatewayAPI.Database;
 using GatewayAPI.Exceptions;
 using NodaTime;
 using Prometheus;
@@ -88,6 +87,8 @@ public interface IConstructionAndSubmissionService
 
 public class ConstructionAndSubmissionService : IConstructionAndSubmissionService
 {
+    private static readonly int MaximumMessageLengthInBytes = 255;
+
     /* Metrics */
     private static readonly Counter _transactionBuildRequestCount = Metrics
         .CreateCounter(
@@ -152,9 +153,6 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
     /* Dependencies */
     private readonly IValidations _validations;
-    private readonly IAccountQuerier _accountQuerier;
-    private readonly IValidatorQuerier _validatorQuerier;
-    private readonly ITokenQuerier _tokenQuerier;
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISubmissionTrackingService _submissionTrackingService;
@@ -162,9 +160,6 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
     public ConstructionAndSubmissionService(
         IValidations validations,
-        IAccountQuerier accountQuerier,
-        IValidatorQuerier validatorQuerier,
-        ITokenQuerier tokenQuerier,
         ICoreApiHandler coreApiHandler,
         INetworkConfigurationProvider networkConfigurationProvider,
         ISubmissionTrackingService submissionTrackingService,
@@ -172,9 +167,6 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     )
     {
         _validations = validations;
-        _accountQuerier = accountQuerier;
-        _validatorQuerier = validatorQuerier;
-        _tokenQuerier = tokenQuerier;
         _coreApiHandler = coreApiHandler;
         _networkConfigurationProvider = networkConfigurationProvider;
         _submissionTrackingService = submissionTrackingService;
@@ -314,16 +306,13 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         var feePayer = _validations.ExtractValidAccountAddress(request.FeePayer);
         var validatedMessage = _validations.ExtractOptionalValidHexOrNull("Message", request.Message);
 
-        if (validatedMessage != null && validatedMessage.Bytes.Length > TransactionBuilding.MaximumMessageLength)
+        if (validatedMessage != null && validatedMessage.Bytes.Length > MaximumMessageLengthInBytes)
         {
-            throw new MessageTooLongException(TransactionBuilding.MaximumMessageLength, validatedMessage.Bytes.Length);
+            throw new MessageTooLongException(MaximumMessageLengthInBytes, validatedMessage.Bytes.Length);
         }
 
         var transactionBuilder = new TransactionBuilder(
             _validations,
-            _accountQuerier,
-            _validatorQuerier,
-            _tokenQuerier,
             _networkConfigurationProvider,
             ledgerState,
             feePayer
@@ -333,65 +322,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         // funds for a given action. However -- it doesn't know how much fees will be at this point.
         var mappedTransaction = await transactionBuilder.MapAndValidateActions(request.Actions);
 
-        var coreBuildRequest = new Core.ConstructionBuildRequest(
-            _coreApiHandler.GetNetworkIdentifier(),
-            mappedTransaction.OperationGroups,
-            feePayer: feePayer.ToEntityIdentifier(),
-            message: validatedMessage?.AsString,
-            disableResourceAllocateAndDestroy: request.DisableTokenMintAndBurn
-        );
-
-        /* The Core API, when building / analysing a transaction, removes the fee first, and then tries to
-         * perform the rest of the transaction.
-         *
-         * - A NotEnoughNativeTokensForFeesError fires if there is not enough XRD during the initial fee step
-         * - A NotEnoughResourcesError fires if there are not enough resources during a transaction step
-         *
-         * So, if we view a fee coming out "at the end", as a human would, "not enough fees" can actually be
-         * represented by either exception from the API.
-         */
-        try
-        {
-            return await _coreApiHandler.BuildTransaction(coreBuildRequest);
-        }
-        catch (WrappedCoreApiException<Core.NotEnoughResourcesError> ex)
-        {
-            var xrdAddress = _networkConfigurationProvider.GetXrdAddress();
-            var isXrd = (ex.Error.AttemptedToTake.ResourceIdentifier as Core.TokenResourceIdentifier)?.Rri ==
-                        xrdAddress;
-
-            if (!isXrd)
-            {
-                // We should have already detected the overspend at MapAndValidateActions time - but we didn't :(
-                // Perhaps because our ledger state is a few seconds behind. We don't have a suitable exception type
-                // to throw - so let this exception bubble up and we can return a 500.
-                throw;
-            }
-
-            var xrdAfterTransaction = mappedTransaction.BeforeBalances.GetValueOrDefault(xrdAddress) +
-                                      mappedTransaction.BalanceChanges.GetValueOrDefault(xrdAddress);
-            throw new NotEnoughNativeTokensForFeeException(
-                ex.Error.Fee.AsGatewayTokenAmount(),
-                xrdAfterTransaction.AsGatewayTokenAmount(xrdAddress)
-            );
-        }
-        catch (WrappedCoreApiException<Core.NotEnoughNativeTokensForFeesError> ex)
-        {
-            // It's possible that a fee is (say) 10XRD, but a user tries to send 5XRD, and only has 9XRD in their account.
-            // In this case, the Core.NotEnoughNativeTokensForFeesError will report an Available of 9XRD (as the Fee
-            // is taken at the start of the transaction) - but really, it would make more sense to show the user 4XRD.
-            // So we recalculate the available amount in the Gateway service.
-
-            var xrdAddress = _networkConfigurationProvider.GetXrdAddress();
-
-            var xrdAfterTransaction = mappedTransaction.BeforeBalances.GetValueOrDefault(xrdAddress) +
-                                      mappedTransaction.BalanceChanges.GetValueOrDefault(xrdAddress);
-
-            throw new NotEnoughNativeTokensForFeeException(
-                ex.Error.FeeEstimate.AsGatewayTokenAmount(),
-                xrdAfterTransaction.AsGatewayTokenAmount(xrdAddress)
-            );
-        }
+        return new Core.ConstructionBuildResponse(); // TODO - Work out what to do to support legacy build
     }
 
     private async Task<Core.ConstructionFinalizeResponse> HandleCoreFinalizeRequest(

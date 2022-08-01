@@ -132,19 +132,16 @@ public record RecentTransactionPageRequest(
 public class TransactionQuerier : ITransactionQuerier
 {
     private readonly GatewayReadOnlyDbContext _dbContext;
-    private readonly ITokenQuerier _tokenQuerier;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISubmissionTrackingService _submissionTrackingService;
 
     public TransactionQuerier(
         GatewayReadOnlyDbContext dbContext,
-        ITokenQuerier tokenQuerier,
         INetworkConfigurationProvider networkConfigurationProvider,
         ISubmissionTrackingService submissionTrackingService
     )
     {
         _dbContext = dbContext;
-        _tokenQuerier = tokenQuerier;
         _networkConfigurationProvider = networkConfigurationProvider;
         _submissionTrackingService = submissionTrackingService;
     }
@@ -230,7 +227,7 @@ public class TransactionQuerier : ITransactionQuerier
         return new Gateway.TransactionInfo(
             status,
             new Gateway.TransactionIdentifier(mempoolTransaction.TransactionIdentifierHash.ToHex()),
-            transactionContents.Actions,
+            new List<Gateway.Action>(),
             feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
                 hex: mempoolTransaction.Payload.ToHex(),
@@ -257,8 +254,7 @@ public class TransactionQuerier : ITransactionQuerier
         return await _dbContext.LedgerTransactions
             .Where(lt =>
                 lt.ResultantStateVersion <= stateVersionUpperBound
-                && !lt.IsStartOfEpoch
-                && !lt.IsStartOfRound
+                && lt.IsUserTransaction
             )
             .OrderByDescending(at => at.ResultantStateVersion)
             .Take(request.PageSize + 1)
@@ -274,7 +270,7 @@ public class TransactionQuerier : ITransactionQuerier
             .Where(at =>
                 at.Account.Address == request.AccountAddress.Address
                 && at.ResultantStateVersion <= stateVersionUpperBound
-                && !at.LedgerTransaction.IsStartOfEpoch
+                && at.IsUserTransaction
             )
             .OrderByDescending(at => at.ResultantStateVersion)
             .Take(request.PageSize + 1)
@@ -286,41 +282,19 @@ public class TransactionQuerier : ITransactionQuerier
     {
         var transactionWithOperationGroups = await _dbContext.LedgerTransactions
             .Where(t => transactionStateVersions.Contains(t.ResultantStateVersion))
-            .Include(t => t.SubstantiveOperationGroups)
-            .ThenInclude(op => op.InferredAction!.Resource)
-            .Include(t => t.SubstantiveOperationGroups) // https://stackoverflow.com/a/50898208
-            .ThenInclude(op => op.InferredAction!.Validator)
-            .Include(t => t.SubstantiveOperationGroups) // https://stackoverflow.com/a/50898208
-            .ThenInclude(op => op.InferredAction!.FromAccount)
-            .Include(t => t.SubstantiveOperationGroups) // https://stackoverflow.com/a/50898208
-            .ThenInclude(op => op.InferredAction!.ToAccount)
-            .Include(t => t.RawTransaction)
-            .OrderByDescending(lt => lt.ResultantStateVersion)
-            .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
             .ToListAsync();
 
         var gatewayTransactions = new List<Gateway.TransactionInfo>();
         foreach (var ledgerTransaction in transactionWithOperationGroups)
         {
-            gatewayTransactions.Add(await MapToGatewayAccountTransaction(ledgerTransaction));
+            gatewayTransactions.Add(MapToGatewayAccountTransaction(ledgerTransaction));
         }
 
         return gatewayTransactions;
     }
 
-    private async Task<Gateway.TransactionInfo> MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
+    private Gateway.TransactionInfo MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
     {
-        var gatewayActions = new List<Gateway.Action>();
-
-        foreach (var operationGroup in ledgerTransaction.SubstantiveOperationGroups)
-        {
-            var action = await GetAction(ledgerTransaction, operationGroup);
-            if (action != null)
-            {
-                gatewayActions.Add(action);
-            }
-        }
-
         return new Gateway.TransactionInfo(
             new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
@@ -328,77 +302,12 @@ public class TransactionQuerier : ITransactionQuerier
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
             ledgerTransaction.TransactionIdentifierHash.AsGatewayTransactionIdentifier(),
-            gatewayActions,
+            new List<Gateway.Action>(), // TODO: Remove
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
                 hex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
                 message: ledgerTransaction.Message?.ToHex()
             )
         );
-    }
-
-    private async Task<Gateway.Action?> GetAction(LedgerTransaction ledgerTransaction, LedgerOperationGroup operationGroup)
-    {
-        var inferredAction = operationGroup.InferredAction;
-        if (inferredAction?.Type == null)
-        {
-            return null;
-        }
-
-        // If necessary, we can improve this to prevent N+1 issues - but we expect CreatedTokenDefinitions to be rare
-        async Task<Gateway.CreateTokenDefinition> GenerateCreateTokenDefinitionAction()
-        {
-            var createdTokenProperties = await _tokenQuerier.GetCreatedTokenProperties(inferredAction.Resource!.ResourceIdentifier, operationGroup);
-            return new Gateway.CreateTokenDefinition(
-                tokenProperties: createdTokenProperties.TokenProperties,
-                tokenSupply: createdTokenProperties.TokenSupply,
-                toAccount: inferredAction.ToAccount?.AsGatewayAccountIdentifier()
-            );
-        }
-
-        return inferredAction.Type switch
-        {
-            InferredActionType.CreateTokenDefinition => await GenerateCreateTokenDefinitionAction(),
-            InferredActionType.SelfTransfer => new Gateway.TransferTokens(
-                fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.SimpleTransfer => new Gateway.TransferTokens(
-                fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.StakeTokens => new Gateway.StakeTokens(
-                fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                toValidator: inferredAction.Validator!.AsGatewayValidatorIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.UnstakeTokens => new Gateway.UnstakeTokens(
-                fromValidator: inferredAction.Validator!.AsGatewayValidatorIdentifier(),
-                toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.MintTokens => new Gateway.MintTokens(
-                toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.BurnTokens => new Gateway.BurnTokens(
-                fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.MintXrd => new Gateway.MintTokens(
-                toAccount: inferredAction.ToAccount!.AsGatewayAccountIdentifier(),
-                amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-            ),
-            InferredActionType.PayXrd => inferredAction.Amount!.Value == ledgerTransaction.FeePaid
-                ? null // Filter out fee payments
-                : new Gateway.BurnTokens(
-                    fromAccount: inferredAction.FromAccount!.AsGatewayAccountIdentifier(),
-                    amount: inferredAction.Amount!.Value.AsGatewayTokenAmount(inferredAction.Resource!)
-                ),
-            InferredActionType.Complex => null,
-            _ => throw new ArgumentOutOfRangeException(),
-        };
     }
 }

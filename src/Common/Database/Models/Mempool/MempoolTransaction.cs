@@ -135,9 +135,6 @@ public class MempoolTransactionFailureReasonValueConverter : EnumTypeValueConver
 [DataContract(Name = "TransactionContents")]
 public record GatewayTransactionContents
 {
-    [DataMember(Name = "actions", EmitDefaultValue = false)]
-    public List<Gateway.Action> Actions { get; set; }
-
     [DataMember(Name = "fee", EmitDefaultValue = false)]
     public string FeePaidSubunits { get; set; }
 
@@ -152,7 +149,7 @@ public record GatewayTransactionContents
 
     public static GatewayTransactionContents Default()
     {
-        return new GatewayTransactionContents { Actions = new List<Gateway.Action>(), FeePaidSubunits = string.Empty };
+        return new GatewayTransactionContents { FeePaidSubunits = string.Empty };
     }
 }
 

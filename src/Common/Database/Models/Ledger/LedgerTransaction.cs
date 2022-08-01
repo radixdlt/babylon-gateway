@@ -79,7 +79,7 @@ namespace Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isOnlyRoundChange, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedRoundTimestamp)
+    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedRoundTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
         TransactionIdentifierHash = transactionIdentifierHash;
@@ -89,7 +89,7 @@ public class LedgerTransaction
         Epoch = epoch;
         IndexInEpoch = indexInEpoch;
         RoundInEpoch = roundInEpoch;
-        IsOnlyRoundChange = isOnlyRoundChange;
+        IsUserTransaction = feePaid.IsZero();
         IsStartOfEpoch = isStartOfEpoch;
         IsStartOfRound = isStartOfRound;
         RoundTimestamp = roundTimestamp;
@@ -133,14 +133,10 @@ public class LedgerTransaction
     public long RoundInEpoch { get; set; }
 
     /// <summary>
-    /// For now, Round/View changes happen in their own transaction (or along with epoch changes).
-    /// They are system-generated transactions with just a RoundData and ValidatorBftData update.
-    /// At the moment IsOnlyRoundChange is equivalent to (FeePaid = 0 AND NOT IsEpochChange) or (IsStartOfRound)
-    /// But in case this changes, let's calculate whether a transaction only contains RoundData and ValidatorBftData
-    /// and store this in the database.
+    /// Currently equivalent to FeePaid = 0, but easier to filter on.
     /// </summary>
-    [Column("is_only_round_change")]
-    public bool IsOnlyRoundChange { get; set; }
+    [Column(name: "is_user_transaction")]
+    public bool IsUserTransaction { get; set; }
 
     [Column(name: "is_start_of_epoch")]
     public bool IsStartOfEpoch { get; set; }
@@ -149,8 +145,9 @@ public class LedgerTransaction
     public bool IsStartOfRound { get; set; }
 
     /// <summary>
-    /// The round timestamp is derived as the median of the timestamp of all the validators performing consensus.
-    /// As a consequence of this, it is not guaranteed to be increasing.
+    /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the
+    /// votes on the vertex's QC to its parent vertex. These votes come from a subset of validators performing
+    /// consensus. As a consequence of this, the round timestamp is not guaranteed to be increasing.
     /// </summary>
     [Column(name: "round_timestamp")]
     public Instant RoundTimestamp { get; set; }
@@ -162,17 +159,12 @@ public class LedgerTransaction
     public Instant CreatedTimestamp { get; set; }
 
     /// <summary>
-    /// This timestamp attempts to be "sensible" - ie increasing and semi-resistant to byzantine attacks.
-    /// If calculates itself by clamping RoundTimestamp between the previous NormalizedTimestamp and CreatedTimestamp.
+    /// This timestamp attempts to be "sensible" - ie increasing and semi-resistant to network time attacks.
+    /// It calculates itself by clamping RoundTimestamp between the previous NormalizedTimestamp and CreatedTimestamp.
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
     [Column(name: "normalized_timestamp")]
     public Instant NormalizedRoundTimestamp { get; set; }
 
-    [InverseProperty(nameof(LedgerOperationGroup.LedgerTransaction))]
-    public ICollection<LedgerOperationGroup> SubstantiveOperationGroups { get; set; }
-
-    public bool IsUserTransaction => FeePaid.IsPositive();
-
-    public bool IsSystemTransaction => FeePaid.IsZero();
+    public bool IsSystemTransaction => !IsUserTransaction;
 }

@@ -147,7 +147,6 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
-    private readonly IActionInferrer _actionInferrer;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
     private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
@@ -155,13 +154,11 @@ public class MempoolTrackerService : IMempoolTrackerService
     public MempoolTrackerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IAggregatorConfiguration aggregatorConfiguration,
-        IActionInferrer actionInferrer,
         ILogger<MempoolTrackerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
         _aggregatorConfiguration = aggregatorConfiguration;
-        _actionInferrer = actionInferrer;
         _logger = logger;
         _recentFullTransactionsFetched = new ConcurrentLruCache<byte[], FullTransactionData>(
             _aggregatorConfiguration.GetMempoolConfiguration().RecentFetchedUnknownTransactionsCacheSize,
@@ -334,7 +331,6 @@ public class MempoolTrackerService : IMempoolTrackerService
         }
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        IParsedTransactionMapper parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
 
         // Gather the transaction contents if we've loaded them from a node recently.
         // If we don't have the transaction contents, either these transactions are already in our MempoolTransactions
@@ -375,16 +371,11 @@ public class MempoolTrackerService : IMempoolTrackerService
             return;
         }
 
-        var gatewayTransactionDetails = await parsedTransactionMapper.MapToGatewayTransactionContents(
-            transactionsToAdd.Select(nt => nt.Transaction).ToList(),
-            token
-        );
-
         var newDbMempoolTransactions = transactionsToAdd
             .Select((transactionData, index) => MempoolTransaction.NewFirstSeenInMempool(
                 transactionData.Id,
                 transactionData.Payload,
-                gatewayTransactionDetails[index],
+                GatewayTransactionContents.Default(), // TODO - Changed to Default to get Babylon Repo working
                 transactionData.SeenAt
             ));
 

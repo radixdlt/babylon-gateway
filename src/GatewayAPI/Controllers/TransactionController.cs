@@ -100,21 +100,6 @@ public class TransactionController : ControllerBase
         _gatewayApiConfiguration = gatewayApiConfiguration;
     }
 
-    [HttpPost("rules")]
-    public async Task<TransactionRulesResponse> GetTransactionRules(TransactionRulesRequest request)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.NetworkIdentifier, request.AtStateIdentifier);
-        return new TransactionRulesResponse(
-            ledgerState,
-            /* TODO:NG-57 - Output from Engine Configuration Fork at given state version */
-            new TransactionRules(
-                maximumMessageLength: TransactionBuilding.MaximumMessageLength,
-                minimumStake: TransactionBuilding.MinimumStake
-                    .AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
-            )
-        );
-    }
-
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> GetRecentTransactions(RecentTransactionsRequest request)
     {

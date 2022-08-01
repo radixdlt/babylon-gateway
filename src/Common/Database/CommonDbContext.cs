@@ -62,13 +62,11 @@
  * permissions under this License.
  */
 
-using Common.Database.Models;
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Joins;
 using Common.Database.Models.Ledger.Normalization;
 using Common.Database.Models.Ledger.Records;
-using Common.Database.Models.Ledger.Substates;
 using Common.Database.Models.Mempool;
 using Common.Database.Models.SingleEntries;
 using Common.Database.ValueConverters;
@@ -85,8 +83,6 @@ namespace Common.Database;
 /// </summary>
 public class CommonDbContext : DbContext
 {
-    public DbSet<Node> Nodes => Set<Node>();
-
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
     public DbSet<RawTransaction> RawTransactions => Set<RawTransaction>();
@@ -94,22 +90,6 @@ public class CommonDbContext : DbContext
     public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
-
-    public DbSet<LedgerOperationGroup> OperationGroups => Set<LedgerOperationGroup>();
-
-    public DbSet<AccountResourceBalanceSubstate> AccountResourceBalanceSubstates => Set<AccountResourceBalanceSubstate>();
-
-    public DbSet<AccountXrdStakeBalanceSubstate> AccountXrdStakeBalanceSubstates => Set<AccountXrdStakeBalanceSubstate>();
-
-    public DbSet<AccountStakeUnitBalanceSubstate> AccountStakeUnitBalanceSubstates => Set<AccountStakeUnitBalanceSubstate>();
-
-    public DbSet<ValidatorStakeBalanceSubstate> ValidatorStakeBalanceSubstates => Set<ValidatorStakeBalanceSubstate>();
-
-    public DbSet<ResourceDataSubstate> ResourceDataSubstates => Set<ResourceDataSubstate>();
-
-    public DbSet<ValidatorDataSubstate> ValidatorDataSubstates => Set<ValidatorDataSubstate>();
-
-    public DbSet<ValidatorSystemMetadataSubstate> ValidatorSystemMetadataSubstates => Set<ValidatorSystemMetadataSubstate>();
 
     public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
 
@@ -143,9 +123,7 @@ public class CommonDbContext : DbContext
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupMempoolTransactions(modelBuilder);
-        HookupLedgerOperationGroups(modelBuilder);
         HookupNormalizedEntities(modelBuilder);
-        HookupSubstates(modelBuilder);
         HookupHistory(modelBuilder);
         HookupRecords(modelBuilder);
         HookupJoinTables(modelBuilder);
@@ -157,21 +135,6 @@ public class CommonDbContext : DbContext
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
             .HavePrecision(1000, 0);
-
-        configurationBuilder.Properties<InferredActionType>()
-            .HaveConversion<InferredActionTypeValueConverter>();
-
-        configurationBuilder.Properties<AccountStakeUnitBalanceSubstateType>()
-            .HaveConversion<AccountStakeUnitBalanceSubstateTypeValueConverter>();
-
-        configurationBuilder.Properties<AccountXrdStakeBalanceSubstateType>()
-            .HaveConversion<AccountXrdStakeBalanceSubstateTypeValueConverter>();
-
-        configurationBuilder.Properties<ResourceDataSubstateType>()
-            .HaveConversion<ResourceDataSubstateTypeValueConverter>();
-
-        configurationBuilder.Properties<ValidatorDataSubstateType>()
-            .HaveConversion<ValidatorDataSubstateTypeValueConverter>();
 
         configurationBuilder.Properties<MempoolTransactionStatus>()
             .HaveConversion<MempoolTransactionStatusValueConverter>();
@@ -198,38 +161,42 @@ public class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);
 
-        // Because NormalizedTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear history of the table,
-        // we could consider defining them as a BRIN index, using .HasMethod("brin")
+        // Because ResultantStateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
+        // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")
         // This is a lighter (lossy) index where the indexed data is correlated with the linear order of the table
         // See also https://www.postgresql.org/docs/current/indexes-types.html
 
+        // Fast filter for just user transactions
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => new { lt.ResultantStateVersion })
+            .IsUnique()
+            .HasFilter("is_user_transaction = true")
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_user_transactions");
+
         // This index lets you quickly translate Time => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.RoundTimestamp);
+            .HasIndex(lt => lt.RoundTimestamp)
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_round_timestamp");
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
-            .HasFilter("is_start_of_round = true");
+            .HasFilter("is_start_of_round = true")
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_round_starts");
 
         // This index allows us to use the LedgerTransactions as an Epoch table, to look up the start of each epoch
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch })
             .IsUnique()
-            .HasFilter("is_start_of_epoch = true");
+            .HasFilter("is_start_of_epoch = true")
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_epoch_starts");
     }
 
     private static void HookupMempoolTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MempoolTransaction>()
             .HasIndex(lt => lt.Status);
-    }
-
-    private static void HookupLedgerOperationGroups(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<LedgerOperationGroup>()
-            .HasKey(og => new { og.ResultantStateVersion, og.OperationGroupIndex });
     }
 
     private static void HookupNormalizedEntities(ModelBuilder modelBuilder)
@@ -251,26 +218,6 @@ public class CommonDbContext : DbContext
             .HasIndex(r => r.Address)
             .IncludeProperties(r => r.Id)
             .IsUnique();
-    }
-
-    private static void HookupSubstates(ModelBuilder modelBuilder)
-    {
-        // Balance substates
-        HookUpSubstate<AccountResourceBalanceSubstate>(modelBuilder);
-        modelBuilder.Entity<AccountResourceBalanceSubstate>()
-            .HasIndex(s => new { s.AccountId, s.ResourceId, s.Amount })
-            .IncludeProperties(s => new { s.SubstateIdentifier })
-            .HasFilter("down_state_version is null")
-            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceSubstate).ToSnakeCase()}_current_unspent_utxos");
-
-        HookUpSubstate<AccountXrdStakeBalanceSubstate>(modelBuilder);
-        HookUpSubstate<AccountStakeUnitBalanceSubstate>(modelBuilder);
-        HookUpSubstate<ValidatorStakeBalanceSubstate>(modelBuilder);
-
-        // Data substates
-        HookUpSubstate<ResourceDataSubstate>(modelBuilder);
-        HookUpSubstate<ValidatorDataSubstate>(modelBuilder);
-        HookUpSubstate<ValidatorSystemMetadataSubstate>(modelBuilder);
     }
 
     private static void HookupHistory(ModelBuilder modelBuilder)
@@ -376,40 +323,13 @@ public class CommonDbContext : DbContext
     {
         modelBuilder.Entity<AccountTransaction>()
             .HasKey(at => new { at.AccountId, at.ResultantStateVersion });
-    }
 
-    private static void HookUpSubstate<TSubstate>(ModelBuilder modelBuilder)
-        where TSubstate : SubstateBase
-    {
-        var substateNameSnakeCase = typeof(TSubstate).Name.ToSnakeCase();
-
-        modelBuilder.Entity<TSubstate>()
-            .HasKey(s => new { s.UpStateVersion, s.UpOperationGroupIndex, s.UpOperationIndexInGroup });
-
-        modelBuilder.Entity<TSubstate>()
-            .HasAlternateKey(s => s.SubstateIdentifier);
-
-        modelBuilder.Entity<TSubstate>()
-            .HasOne(s => s.UpOperationGroup)
-            .WithMany()
-            .HasForeignKey(s => new
-            {
-                ResultantStateVersion = s.UpStateVersion,
-                OperationGroupIndex = s.UpOperationGroupIndex,
-            })
-            .OnDelete(DeleteBehavior.Cascade) // Deletes Substate if OperationGroup deleted
-            .HasConstraintName($"FK_{substateNameSnakeCase}_up_operation_group");
-
-        modelBuilder.Entity<TSubstate>()
-            .HasOne(s => s.DownOperationGroup)
-            .WithMany()
-            .HasForeignKey(s => new
-            {
-                ResultantStateVersion = s.DownStateVersion,
-                OperationGroupIndex = s.DownOperationGroupIndex,
-            })
-            .OnDelete(DeleteBehavior.Restrict) // Null out FKs if OperationGroup deleted (all such dependents need to be loaded by EF Core at the time of deletion!)
-            .HasConstraintName($"FK_{substateNameSnakeCase}_down_operation_group");
+        // Fast filter for just user transactions
+        modelBuilder.Entity<AccountTransaction>()
+            .HasIndex(at => new { at.AccountId, at.ResultantStateVersion })
+            .IsUnique()
+            .HasFilter("is_user_transaction = true")
+            .HasDatabaseName($"IX_{nameof(AccountTransaction).ToSnakeCase()}_user_transactions");
     }
 
     private static void HookupHistoryOf<THistory>(ModelBuilder modelBuilder)

@@ -87,9 +87,9 @@ public class AccountTransaction
     [ForeignKey(nameof(ResultantStateVersion))]
     public LedgerTransaction LedgerTransaction { get; set; }
 
+    [Column(name: "is_user_transaction")]
+    public bool IsUserTransaction { get; set; }
+
     [Column(name: "is_fee_payer")]
     public bool IsFeePayer { get; set; }
-
-    [Column(name: "is_signer")]
-    public bool IsSigner { get; set; }
 }

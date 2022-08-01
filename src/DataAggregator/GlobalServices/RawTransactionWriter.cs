@@ -112,7 +112,7 @@ public class RawTransactionWriter : IRawTransactionWriter
     public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
     {
         var transactionsById = transactionData
-            .Where(td => !td.TransactionSummary.IsOnlyRoundChange)
+            .Where(td => !td.TransactionSummary.IsStartOfRound)
             .ToDictionary(
                 rt => rt.TransactionSummary.TransactionIdentifierHash,
                 ByteArrayEqualityComparer.Default

@@ -89,7 +89,6 @@ public static class TransactionMapping
             epoch: summary.Epoch,
             indexInEpoch: summary.IndexInEpoch,
             roundInEpoch: summary.RoundInEpoch,
-            isOnlyRoundChange: summary.IsOnlyRoundChange,
             isStartOfEpoch: summary.IsStartOfEpoch,
             isStartOfRound: summary.IsStartOfRound,
             roundTimestamp: summary.RoundTimestamp,

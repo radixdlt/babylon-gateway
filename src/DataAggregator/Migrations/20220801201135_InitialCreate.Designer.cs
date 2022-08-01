@@ -78,14 +78,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20211213173329_UseRoundTimestampOverNormalizedTimestamp")]
-    partial class UseRoundTimestampOverNormalizedTimestamp
+    [Migration("20220801201135_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -240,30 +240,20 @@ namespace DataAggregator.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_fee_payer");
 
-                    b.Property<bool>("IsSigner")
+                    b.Property<bool>("IsUserTransaction")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_signer");
+                        .HasColumnName("is_user_transaction");
 
                     b.HasKey("AccountId", "ResultantStateVersion");
 
                     b.HasIndex("ResultantStateVersion");
 
+                    b.HasIndex("AccountId", "ResultantStateVersion")
+                        .IsUnique()
+                        .HasDatabaseName("IX_account_transaction_user_transactions")
+                        .HasFilter("is_user_transaction = true");
+
                     b.ToTable("account_transactions");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
-                {
-                    b.Property<long>("ResultantStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("state_version");
-
-                    b.Property<int>("OperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("operation_group_index");
-
-                    b.HasKey("ResultantStateVersion", "OperationGroupIndex");
-
-                    b.ToTable("operation_groups");
                 });
 
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
@@ -289,10 +279,6 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_epoch");
 
-                    b.Property<bool>("IsOnlyRoundChange")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_only_round_change");
-
                     b.Property<bool>("IsStartOfEpoch")
                         .HasColumnType("boolean")
                         .HasColumnName("is_start_of_epoch");
@@ -301,11 +287,15 @@ namespace DataAggregator.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_start_of_round");
 
+                    b.Property<bool>("IsUserTransaction")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_user_transaction");
+
                     b.Property<byte[]>("Message")
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
-                    b.Property<Instant>("NormalizedTimestamp")
+                    b.Property<Instant>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_timestamp");
 
@@ -333,10 +323,22 @@ namespace DataAggregator.Migrations
 
                     b.HasAlternateKey("TransactionIdentifierHash");
 
-                    b.HasIndex("RoundTimestamp");
+                    b.HasIndex("Epoch")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ledger_transaction_epoch_starts")
+                        .HasFilter("is_start_of_epoch = true");
+
+                    b.HasIndex("ResultantStateVersion")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ledger_transaction_user_transactions")
+                        .HasFilter("is_user_transaction = true");
+
+                    b.HasIndex("RoundTimestamp")
+                        .HasDatabaseName("IX_ledger_transaction_round_timestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
+                        .HasDatabaseName("IX_ledger_transaction_round_starts")
                         .HasFilter("is_start_of_round = true");
 
                     b.ToTable("ledger_transactions");
@@ -486,367 +488,6 @@ namespace DataAggregator.Migrations
                     b.ToTable("validator_proposal_records");
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
-                {
-                    b.Property<long>("UpStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("up_state_version");
-
-                    b.Property<int>("UpOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_group_index");
-
-                    b.Property<int>("UpOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_index_in_group");
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<BigInteger>("Amount")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("amount");
-
-                    b.Property<int?>("DownOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_group_index");
-
-                    b.Property<int?>("DownOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_index_in_group");
-
-                    b.Property<long?>("DownStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("down_state_version");
-
-                    b.Property<long>("ResourceId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("resource_id");
-
-                    b.Property<byte[]>("SubstateIdentifier")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("substate_identifier");
-
-                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
-
-                    b.HasAlternateKey("SubstateIdentifier");
-
-                    b.HasIndex("AccountId", "ResourceId");
-
-                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
-
-                    b.HasIndex("ResourceId", "AccountId");
-
-                    b.HasIndex("AccountId", "ResourceId", "Amount")
-                        .HasDatabaseName("IX_account_resource_balance_substate_current_unspent_utxos")
-                        .HasFilter("down_state_version is null");
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("AccountId", "ResourceId", "Amount"), new[] { "SubstateIdentifier" });
-
-                    b.ToTable("account_resource_balance_substates");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeUnitBalanceSubstate", b =>
-                {
-                    b.Property<long>("UpStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("up_state_version");
-
-                    b.Property<int>("UpOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_group_index");
-
-                    b.Property<int>("UpOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_index_in_group");
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<BigInteger>("Amount")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("amount");
-
-                    b.Property<int?>("DownOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_group_index");
-
-                    b.Property<int?>("DownOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_index_in_group");
-
-                    b.Property<long?>("DownStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("down_state_version");
-
-                    b.Property<byte[]>("SubstateIdentifier")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("substate_identifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
-
-                    b.HasAlternateKey("SubstateIdentifier");
-
-                    b.HasIndex("AccountId", "ValidatorId");
-
-                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
-
-                    b.HasIndex("ValidatorId", "AccountId");
-
-                    b.ToTable("account_stake_unit_balance_substates");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountXrdStakeBalanceSubstate", b =>
-                {
-                    b.Property<long>("UpStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("up_state_version");
-
-                    b.Property<int>("UpOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_group_index");
-
-                    b.Property<int>("UpOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_index_in_group");
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<BigInteger>("Amount")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("amount");
-
-                    b.Property<int?>("DownOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_group_index");
-
-                    b.Property<int?>("DownOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_index_in_group");
-
-                    b.Property<long?>("DownStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("down_state_version");
-
-                    b.Property<byte[]>("SubstateIdentifier")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("substate_identifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.Property<long?>("UnlockEpoch")
-                        .HasColumnType("bigint")
-                        .HasColumnName("unlock_epoch");
-
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
-
-                    b.HasAlternateKey("SubstateIdentifier");
-
-                    b.HasIndex("AccountId", "ValidatorId");
-
-                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
-
-                    b.HasIndex("ValidatorId", "AccountId");
-
-                    b.ToTable("account_xrd_stake_balance_substates");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ResourceDataSubstate", b =>
-                {
-                    b.Property<long>("UpStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("up_state_version");
-
-                    b.Property<int>("UpOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_group_index");
-
-                    b.Property<int>("UpOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_index_in_group");
-
-                    b.Property<int?>("DownOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_group_index");
-
-                    b.Property<int?>("DownOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_index_in_group");
-
-                    b.Property<long?>("DownStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("down_state_version");
-
-                    b.Property<long>("ResourceId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("resource_id");
-
-                    b.Property<byte[]>("SubstateIdentifier")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("substate_identifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
-
-                    b.HasAlternateKey("SubstateIdentifier");
-
-                    b.HasIndex("ResourceId");
-
-                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
-
-                    b.ToTable("resource_data_substates");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorDataSubstate", b =>
-                {
-                    b.Property<long>("UpStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("up_state_version");
-
-                    b.Property<int>("UpOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_group_index");
-
-                    b.Property<int>("UpOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_index_in_group");
-
-                    b.Property<int?>("DownOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_group_index");
-
-                    b.Property<int?>("DownOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_index_in_group");
-
-                    b.Property<long?>("DownStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("down_state_version");
-
-                    b.Property<long?>("EffectiveEpoch")
-                        .HasColumnType("bigint")
-                        .HasColumnName("effective_epoch");
-
-                    b.Property<byte[]>("SubstateIdentifier")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("substate_identifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
-
-                    b.HasAlternateKey("SubstateIdentifier");
-
-                    b.HasIndex("ValidatorId");
-
-                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
-
-                    b.ToTable("validator_data_substates");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorStakeBalanceSubstate", b =>
-                {
-                    b.Property<long>("UpStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("up_state_version");
-
-                    b.Property<int>("UpOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_group_index");
-
-                    b.Property<int>("UpOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("up_operation_index_in_group");
-
-                    b.Property<BigInteger>("Amount")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("amount");
-
-                    b.Property<int?>("DownOperationGroupIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_group_index");
-
-                    b.Property<int?>("DownOperationIndexInGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("down_operation_index_in_group");
-
-                    b.Property<long?>("DownStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("down_state_version");
-
-                    b.Property<long>("EndOfEpoch")
-                        .HasColumnType("bigint")
-                        .HasColumnName("epoch");
-
-                    b.Property<byte[]>("SubstateIdentifier")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("substate_identifier");
-
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.HasKey("UpStateVersion", "UpOperationGroupIndex", "UpOperationIndexInGroup");
-
-                    b.HasAlternateKey("SubstateIdentifier");
-
-                    b.HasIndex("ValidatorId");
-
-                    b.HasIndex("DownStateVersion", "DownOperationGroupIndex");
-
-                    b.HasIndex("EndOfEpoch", "ValidatorId")
-                        .IsUnique();
-
-                    b.ToTable("validator_stake_balance_substates");
-                });
-
             modelBuilder.Entity("Common.Database.Models.Mempool.MempoolTransaction", b =>
                 {
                     b.Property<byte[]>("TransactionIdentifierHash")
@@ -899,6 +540,7 @@ namespace DataAggregator.Migrations
                         .HasColumnName("payload");
 
                     b.Property<string>("Status")
+                        .IsConcurrencyToken()
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
@@ -918,31 +560,31 @@ namespace DataAggregator.Migrations
 
                     b.HasKey("TransactionIdentifierHash");
 
+                    b.HasIndex("Status");
+
                     b.ToTable("mempool_transactions");
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Node", b =>
+            modelBuilder.Entity("Common.Database.Models.SingleEntries.LedgerStatus", b =>
                 {
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("address");
+                    b.Property<Instant>("LastUpdated")
+                        .IsConcurrencyToken()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated");
 
-                    b.Property<bool>("EnabledForIndexing")
-                        .HasColumnType("boolean")
-                        .HasColumnName("enabled_for_indexing");
+                    b.Property<long>("TopOfLedgerStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("top_of_ledger_state_version");
 
-                    b.Property<decimal>("TrustWeighting")
-                        .HasColumnType("numeric")
-                        .HasColumnName("trust_weighting");
+                    b.HasKey("Id");
 
-                    b.HasKey("Name");
+                    b.HasIndex("TopOfLedgerStateVersion");
 
-                    b.ToTable("nodes");
+                    b.ToTable("ledger_status");
                 });
 
             modelBuilder.Entity("Common.Database.Models.SingleEntries.NetworkConfiguration", b =>
@@ -968,7 +610,8 @@ namespace DataAggregator.Migrations
                         .WithMany()
                         .HasForeignKey("FromStateVersion")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_account_resource_balance_history_from_transaction");
 
                     b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
                         .WithMany()
@@ -978,7 +621,9 @@ namespace DataAggregator.Migrations
 
                     b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "ToLedgerTransaction")
                         .WithMany()
-                        .HasForeignKey("ToStateVersion");
+                        .HasForeignKey("ToStateVersion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_account_resource_balance_history_to_transaction");
 
                     b.OwnsOne("Common.Database.Models.Ledger.History.BalanceEntry", "BalanceEntry", b1 =>
                         {
@@ -1247,93 +892,6 @@ namespace DataAggregator.Migrations
                     b.Navigation("LedgerTransaction");
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerOperationGroup", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "LedgerTransaction")
-                        .WithMany("SubstantiveOperationGroups")
-                        .HasForeignKey("ResultantStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("Common.Database.Models.Ledger.InferredAction", "InferredAction", b1 =>
-                        {
-                            b1.Property<long>("LedgerOperationGroupResultantStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("LedgerOperationGroupOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<BigInteger?>("Amount")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("inferred_action_amount");
-
-                            b1.Property<long?>("FromAccountId")
-                                .HasColumnType("bigint")
-                                .HasColumnName("inferred_action_from_account_id");
-
-                            b1.Property<long?>("ResourceId")
-                                .HasColumnType("bigint")
-                                .HasColumnName("inferred_action_resource_id");
-
-                            b1.Property<long?>("ToAccountId")
-                                .HasColumnType("bigint")
-                                .HasColumnName("inferred_action_to_account_id");
-
-                            b1.Property<string>("Type")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("inferred_action_type");
-
-                            b1.Property<long?>("ValidatorId")
-                                .HasColumnType("bigint")
-                                .HasColumnName("inferred_action_validator_id");
-
-                            b1.HasKey("LedgerOperationGroupResultantStateVersion", "LedgerOperationGroupOperationGroupIndex");
-
-                            b1.HasIndex("FromAccountId");
-
-                            b1.HasIndex("ResourceId");
-
-                            b1.HasIndex("ToAccountId");
-
-                            b1.HasIndex("ValidatorId");
-
-                            b1.ToTable("operation_groups");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "FromAccount")
-                                .WithMany()
-                                .HasForeignKey("FromAccountId");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
-                                .WithMany()
-                                .HasForeignKey("ResourceId");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "ToAccount")
-                                .WithMany()
-                                .HasForeignKey("ToAccountId");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
-                                .WithMany()
-                                .HasForeignKey("ValidatorId");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LedgerOperationGroupResultantStateVersion", "LedgerOperationGroupOperationGroupIndex");
-
-                            b1.Navigation("FromAccount");
-
-                            b1.Navigation("Resource");
-
-                            b1.Navigation("ToAccount");
-
-                            b1.Navigation("Validator");
-                        });
-
-                    b.Navigation("InferredAction");
-
-                    b.Navigation("LedgerTransaction");
-                });
-
             modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
                 {
                     b.HasOne("Common.Database.Models.Ledger.RawTransaction", "RawTransaction")
@@ -1428,468 +986,36 @@ namespace DataAggregator.Migrations
                     b.Navigation("Validator");
                 });
 
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountResourceBalanceSubstate", b =>
+            modelBuilder.Entity("Common.Database.Models.SingleEntries.LedgerStatus", b =>
                 {
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Account")
+                    b.HasOne("Common.Database.Models.Ledger.LedgerTransaction", "TopOfLedgerTransaction")
                         .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_account_resource_balance_substate_down_operation_group");
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("TopOfLedgerStateVersion")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_account_resource_balance_substate_up_operation_group");
+                        .HasConstraintName("FK_ledger_status_top_transactions_state_version");
 
-                    b.Navigation("Account");
-
-                    b.Navigation("DownOperationGroup");
-
-                    b.Navigation("Resource");
-
-                    b.Navigation("UpOperationGroup");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountStakeUnitBalanceSubstate", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_account_stake_unit_balance_substate_down_operation_group");
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_account_stake_unit_balance_substate_up_operation_group");
-
-                    b.Navigation("Account");
-
-                    b.Navigation("DownOperationGroup");
-
-                    b.Navigation("UpOperationGroup");
-
-                    b.Navigation("Validator");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.AccountXrdStakeBalanceSubstate", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_account_xrd_stake_balance_substate_down_operation_group");
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_account_xrd_stake_balance_substate_up_operation_group");
-
-                    b.Navigation("Account");
-
-                    b.Navigation("DownOperationGroup");
-
-                    b.Navigation("UpOperationGroup");
-
-                    b.Navigation("Validator");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ResourceDataSubstate", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_resource_data_substate_down_operation_group");
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_resource_data_substate_up_operation_group");
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.TokenData", "TokenData", b1 =>
+                    b.OwnsOne("Common.Database.Models.SingleEntries.SyncTarget", "SyncTarget", b1 =>
                         {
-                            b1.Property<long>("ResourceDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ResourceDataSubstateUpOperationGroupIndex")
+                            b1.Property<int>("LedgerStatusId")
                                 .HasColumnType("integer");
 
-                            b1.Property<int>("ResourceDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<BigInteger>("Granularity")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("granularity");
-
-                            b1.Property<bool>("IsMutable")
-                                .HasColumnType("boolean")
-                                .HasColumnName("is_mutable");
-
-                            b1.Property<long?>("OwnerId")
+                            b1.Property<long>("TargetStateVersion")
                                 .HasColumnType("bigint")
-                                .HasColumnName("owner_id");
+                                .HasColumnName("sync_status_target_state_version");
 
-                            b1.HasKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
+                            b1.HasKey("LedgerStatusId");
 
-                            b1.HasIndex("OwnerId");
-
-                            b1.ToTable("resource_data_substates");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Owner")
-                                .WithMany()
-                                .HasForeignKey("OwnerId");
+                            b1.ToTable("ledger_status");
 
                             b1.WithOwner()
-                                .HasForeignKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
-
-                            b1.Navigation("Owner");
+                                .HasForeignKey("LedgerStatusId");
                         });
 
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.TokenMetadata", "TokenMetadata", b1 =>
-                        {
-                            b1.Property<long>("ResourceDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ResourceDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ResourceDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("description");
-
-                            b1.Property<string>("IconUrl")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("icon_url");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("name");
-
-                            b1.Property<string>("Symbol")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("symbol");
-
-                            b1.Property<string>("Url")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("url");
-
-                            b1.HasKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
-
-                            b1.ToTable("resource_data_substates");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ResourceDataSubstateUpStateVersion", "ResourceDataSubstateUpOperationGroupIndex", "ResourceDataSubstateUpOperationIndexInGroup");
-                        });
-
-                    b.Navigation("DownOperationGroup");
-
-                    b.Navigation("Resource");
-
-                    b.Navigation("TokenData");
-
-                    b.Navigation("TokenMetadata");
-
-                    b.Navigation("UpOperationGroup");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorDataSubstate", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.Navigation("SyncTarget")
                         .IsRequired();
 
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_validator_data_substate_down_operation_group");
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_validator_data_substate_up_operation_group");
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.PreparedValidatorFee", "PreparedValidatorFee", b1 =>
-                        {
-                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<decimal>("PreparedFeePercentage")
-                                .HasColumnType("numeric")
-                                .HasColumnName("prepared_fee_percentage");
-
-                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.ToTable("validator_data_substates");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-                        });
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.PreparedValidatorOwner", "PreparedValidatorOwner", b1 =>
-                        {
-                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<long>("PreparedOwnerId")
-                                .HasColumnType("bigint")
-                                .HasColumnName("prepared_owner_id");
-
-                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.HasIndex("PreparedOwnerId");
-
-                            b1.ToTable("validator_data_substates");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "PreparedOwner")
-                                .WithMany()
-                                .HasForeignKey("PreparedOwnerId")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired();
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.Navigation("PreparedOwner");
-                        });
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.PreparedValidatorRegistered", "PreparedValidatorRegistered", b1 =>
-                        {
-                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<bool>("PreparedIsRegistered")
-                                .HasColumnType("boolean")
-                                .HasColumnName("prepared_is_registered");
-
-                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.ToTable("validator_data_substates");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-                        });
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorAllowDelegation", "ValidatorAllowDelegation", b1 =>
-                        {
-                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<bool>("AllowDelegation")
-                                .HasColumnType("boolean")
-                                .HasColumnName("allow_delegation");
-
-                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.ToTable("validator_data_substates");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-                        });
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorData", "ValidatorData", b1 =>
-                        {
-                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<decimal>("FeePercentage")
-                                .HasColumnType("numeric")
-                                .HasColumnName("fee_percentage");
-
-                            b1.Property<bool>("IsRegistered")
-                                .HasColumnType("boolean")
-                                .HasColumnName("is_registered");
-
-                            b1.Property<long>("OwnerId")
-                                .HasColumnType("bigint")
-                                .HasColumnName("owner_id");
-
-                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.HasIndex("OwnerId");
-
-                            b1.ToTable("validator_data_substates");
-
-                            b1.HasOne("Common.Database.Models.Ledger.Normalization.Account", "Owner")
-                                .WithMany()
-                                .HasForeignKey("OwnerId")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired();
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.Navigation("Owner");
-                        });
-
-                    b.OwnsOne("Common.Database.Models.Ledger.Substates.ValidatorMetadata", "ValidatorMetaData", b1 =>
-                        {
-                            b1.Property<long>("ValidatorDataSubstateUpStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationGroupIndex")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("ValidatorDataSubstateUpOperationIndexInGroup")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("name");
-
-                            b1.Property<string>("Url")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("url");
-
-                            b1.HasKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-
-                            b1.ToTable("validator_data_substates");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorDataSubstateUpStateVersion", "ValidatorDataSubstateUpOperationGroupIndex", "ValidatorDataSubstateUpOperationIndexInGroup");
-                        });
-
-                    b.Navigation("DownOperationGroup");
-
-                    b.Navigation("PreparedValidatorFee");
-
-                    b.Navigation("PreparedValidatorOwner");
-
-                    b.Navigation("PreparedValidatorRegistered");
-
-                    b.Navigation("UpOperationGroup");
-
-                    b.Navigation("Validator");
-
-                    b.Navigation("ValidatorAllowDelegation");
-
-                    b.Navigation("ValidatorData");
-
-                    b.Navigation("ValidatorMetaData");
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.Substates.ValidatorStakeBalanceSubstate", b =>
-                {
-                    b.HasOne("Common.Database.Models.Ledger.Normalization.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "DownOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("DownStateVersion", "DownOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_validator_stake_balance_substate_down_operation_group");
-
-                    b.HasOne("Common.Database.Models.Ledger.LedgerOperationGroup", "UpOperationGroup")
-                        .WithMany()
-                        .HasForeignKey("UpStateVersion", "UpOperationGroupIndex")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_validator_stake_balance_substate_up_operation_group");
-
-                    b.Navigation("DownOperationGroup");
-
-                    b.Navigation("UpOperationGroup");
-
-                    b.Navigation("Validator");
+                    b.Navigation("TopOfLedgerTransaction");
                 });
 
             modelBuilder.Entity("Common.Database.Models.SingleEntries.NetworkConfiguration", b =>
@@ -1971,11 +1097,6 @@ namespace DataAggregator.Migrations
 
                     b.Navigation("WellKnownAddresses")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Common.Database.Models.Ledger.LedgerTransaction", b =>
-                {
-                    b.Navigation("SubstantiveOperationGroups");
                 });
 #pragma warning restore 612, 618
         }
