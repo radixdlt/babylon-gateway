@@ -80,7 +80,8 @@ namespace DataAggregator.Migrations
                 name: "mempool_transactions",
                 columns: table => new
                 {
-                    transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     payload = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_contents = table.Column<string>(type: "jsonb", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
@@ -99,7 +100,8 @@ namespace DataAggregator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_mempool_transactions", x => x.transaction_id);
+                    table.PrimaryKey("PK_mempool_transactions", x => x.payload_hash);
+                    table.UniqueConstraint("AK_mempool_transactions_intent_hash", x => x.intent_hash);
                 });
 
             migrationBuilder.CreateTable(
@@ -123,12 +125,12 @@ namespace DataAggregator.Migrations
                 name: "raw_transactions",
                 columns: table => new
                 {
-                    transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
+                    transaction_payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     payload = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_raw_transactions", x => x.transaction_id);
+                    table.PrimaryKey("PK_raw_transactions", x => x.transaction_payload_hash);
                 });
 
             migrationBuilder.CreateTable(
@@ -136,7 +138,9 @@ namespace DataAggregator.Migrations
                 columns: table => new
                 {
                     state_version = table.Column<long>(type: "bigint", nullable: false),
-                    transaction_id = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    signed_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
@@ -153,13 +157,15 @@ namespace DataAggregator.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
+                    table.UniqueConstraint("AK_ledger_transactions_intent_hash", x => x.intent_hash);
+                    table.UniqueConstraint("AK_ledger_transactions_payload_hash", x => x.payload_hash);
+                    table.UniqueConstraint("AK_ledger_transactions_signed_hash", x => x.signed_hash);
                     table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
-                    table.UniqueConstraint("AK_ledger_transactions_transaction_id", x => x.transaction_id);
                     table.ForeignKey(
-                        name: "FK_ledger_transactions_raw_transactions_transaction_id",
-                        column: x => x.transaction_id,
+                        name: "FK_ledger_transactions_raw_transactions_payload_hash",
+                        column: x => x.payload_hash,
                         principalTable: "raw_transactions",
-                        principalColumn: "transaction_id",
+                        principalColumn: "transaction_payload_hash",
                         onDelete: ReferentialAction.Cascade);
                 });
 

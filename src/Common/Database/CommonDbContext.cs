@@ -156,7 +156,11 @@ public class CommonDbContext : DbContext
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.TransactionIdentifierHash);
+            .HasAlternateKey(lt => lt.PayloadHash);
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasAlternateKey(lt => lt.IntentHash);
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasAlternateKey(lt => lt.SignedTransactionHash);
 
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);
@@ -196,7 +200,12 @@ public class CommonDbContext : DbContext
     private static void HookupMempoolTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MempoolTransaction>()
+            .HasAlternateKey(lt => lt.IntentHash);
+
+        modelBuilder.Entity<MempoolTransaction>()
             .HasIndex(lt => lt.Status);
+
+        // TODO - We should improve these indices to match the queries we actually need to make here
     }
 
     private static void HookupNormalizedEntities(ModelBuilder modelBuilder)

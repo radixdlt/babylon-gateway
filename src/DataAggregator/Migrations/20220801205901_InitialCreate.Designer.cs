@@ -78,14 +78,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAggregator.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20220801201135_InitialCreate")]
+    [Migration("20220801205901_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.1")
+                .HasAnnotation("ProductVersion", "6.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -279,6 +279,11 @@ namespace DataAggregator.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_epoch");
 
+                    b.Property<byte[]>("IntentHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("intent_hash");
+
                     b.Property<bool>("IsStartOfEpoch")
                         .HasColumnType("boolean")
                         .HasColumnName("is_start_of_epoch");
@@ -299,6 +304,11 @@ namespace DataAggregator.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_timestamp");
 
+                    b.Property<byte[]>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload_hash");
+
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")
                         .HasColumnName("round_in_epoch");
@@ -307,21 +317,25 @@ namespace DataAggregator.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
+                    b.Property<byte[]>("SignedTransactionHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("signed_hash");
+
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_accumulator");
 
-                    b.Property<byte[]>("TransactionIdentifierHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("transaction_id");
-
                     b.HasKey("ResultantStateVersion");
 
-                    b.HasAlternateKey("TransactionAccumulator");
+                    b.HasAlternateKey("IntentHash");
 
-                    b.HasAlternateKey("TransactionIdentifierHash");
+                    b.HasAlternateKey("PayloadHash");
+
+                    b.HasAlternateKey("SignedTransactionHash");
+
+                    b.HasAlternateKey("TransactionAccumulator");
 
                     b.HasIndex("Epoch")
                         .IsUnique()
@@ -451,16 +465,16 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Ledger.RawTransaction", b =>
                 {
-                    b.Property<byte[]>("TransactionIdentifierHash")
+                    b.Property<byte[]>("TransactionPayloadHash")
                         .HasColumnType("bytea")
-                        .HasColumnName("transaction_id");
+                        .HasColumnName("transaction_payload_hash");
 
                     b.Property<byte[]>("Payload")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("payload");
 
-                    b.HasKey("TransactionIdentifierHash");
+                    b.HasKey("TransactionPayloadHash");
 
                     b.ToTable("raw_transactions");
                 });
@@ -490,9 +504,9 @@ namespace DataAggregator.Migrations
 
             modelBuilder.Entity("Common.Database.Models.Mempool.MempoolTransaction", b =>
                 {
-                    b.Property<byte[]>("TransactionIdentifierHash")
+                    b.Property<byte[]>("PayloadHash")
                         .HasColumnType("bytea")
-                        .HasColumnName("transaction_id");
+                        .HasColumnName("payload_hash");
 
                     b.Property<Instant?>("CommitTimestamp")
                         .HasColumnType("timestamp with time zone")
@@ -517,6 +531,11 @@ namespace DataAggregator.Migrations
                     b.Property<Instant?>("FirstSubmittedToGatewayTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_submitted_to_gateway_timestamp");
+
+                    b.Property<byte[]>("IntentHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("intent_hash");
 
                     b.Property<Instant?>("LastDroppedOutOfMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
@@ -558,7 +577,9 @@ namespace DataAggregator.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("transaction_contents");
 
-                    b.HasKey("TransactionIdentifierHash");
+                    b.HasKey("PayloadHash");
+
+                    b.HasAlternateKey("IntentHash");
 
                     b.HasIndex("Status");
 
@@ -896,7 +917,7 @@ namespace DataAggregator.Migrations
                 {
                     b.HasOne("Common.Database.Models.Ledger.RawTransaction", "RawTransaction")
                         .WithMany()
-                        .HasForeignKey("TransactionIdentifierHash")
+                        .HasForeignKey("PayloadHash")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

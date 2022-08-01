@@ -162,9 +162,10 @@ public class MempoolTransaction
     private static readonly JsonSerializerSettings _transactionContentsSerializerSettings = new JsonSerializerSettings()
         .ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 
-    private MempoolTransaction(byte[] transactionIdentifierHash, byte[] payload, GatewayTransactionContents transactionContents)
+    private MempoolTransaction(byte[] payloadHash, byte[] payload, GatewayTransactionContents transactionContents)
     {
-        TransactionIdentifierHash = transactionIdentifierHash;
+        PayloadHash = payloadHash;
+        IntentHash = new byte[32]; // TODO - Fix me!
         Payload = payload;
         SetTransactionContents(transactionContents);
     }
@@ -175,10 +176,15 @@ public class MempoolTransaction
     }
 
     [Key]
-    [Column(name: "transaction_id")]
+    [Column(name: "payload_hash")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
-    public byte[] TransactionIdentifierHash { get; private set; }
+    public byte[] PayloadHash { get; private set; }
+
+    [Column(name: "intent_hash")]
+    // OnModelCreating: Add intent_hash as alternate key.
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
+    public byte[] IntentHash { get; private set; }
 
     /// <summary>
     /// The payload of the transaction.
@@ -257,26 +263,26 @@ public class MempoolTransaction
     public Instant? FailureTimestamp { get; private set; }
 
     public static MempoolTransaction NewFirstSeenInMempool(
-        byte[] transactionIdentifierHash,
+        byte[] payloadHash,
         byte[] payload,
         GatewayTransactionContents transactionContents,
         Instant? firstSeenAt = null
     )
     {
-        var mempoolTransaction = new MempoolTransaction(transactionIdentifierHash, payload, transactionContents);
+        var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
         mempoolTransaction.MarkAsSeenInAMempool(firstSeenAt);
         return mempoolTransaction;
     }
 
     public static MempoolTransaction NewAsSubmittedForFirstTimeByGateway(
-        byte[] transactionIdentifierHash,
+        byte[] payloadHash,
         byte[] payload,
         string submittedToNodeName,
         GatewayTransactionContents transactionContents,
         Instant? submittedTimestamp = null
     )
     {
-        var mempoolTransaction = new MempoolTransaction(transactionIdentifierHash, payload, transactionContents);
+        var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
 
         submittedTimestamp ??= SystemClock.Instance.GetCurrentInstant();
         mempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);

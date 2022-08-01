@@ -183,7 +183,11 @@ public class TransactionQuerier : ITransactionQuerier
         var stateVersion = await _dbContext.LedgerTransactions
             .Where(lt =>
                 lt.ResultantStateVersion <= ledgerState._Version
-                && lt.TransactionIdentifierHash == transactionIdentifier.Bytes
+                && (
+                    lt.PayloadHash == transactionIdentifier.Bytes
+                    || lt.SignedTransactionHash == transactionIdentifier.Bytes
+                    || lt.IntentHash == transactionIdentifier.Bytes
+                )
             )
             .Select(lt => lt.ResultantStateVersion)
             .SingleOrDefaultAsync();
@@ -226,7 +230,7 @@ public class TransactionQuerier : ITransactionQuerier
 
         return new Gateway.TransactionInfo(
             status,
-            new Gateway.TransactionIdentifier(mempoolTransaction.TransactionIdentifierHash.ToHex()),
+            new Gateway.TransactionIdentifier(mempoolTransaction.PayloadHash.ToHex()),
             new List<Gateway.Action>(),
             feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
@@ -301,7 +305,7 @@ public class TransactionQuerier : ITransactionQuerier
                 confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
-            ledgerTransaction.TransactionIdentifierHash.AsGatewayTransactionIdentifier(),
+            ledgerTransaction.PayloadHash.AsGatewayTransactionIdentifier(),
             new List<Gateway.Action>(), // TODO: Remove
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(

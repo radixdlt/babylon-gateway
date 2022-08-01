@@ -120,7 +120,7 @@ public class SubmissionTrackingService : ISubmissionTrackingService
     public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
     {
         return await _dbContext.MempoolTransactions
-            .Where(t => t.TransactionIdentifierHash == transactionIdentifierHash)
+            .Where(t => t.PayloadHash == transactionIdentifierHash)
             .SingleOrDefaultAsync();
     }
 

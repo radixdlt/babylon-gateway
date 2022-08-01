@@ -114,14 +114,14 @@ public class RawTransactionWriter : IRawTransactionWriter
         var transactionsById = transactionData
             .Where(td => !td.TransactionSummary.IsStartOfRound)
             .ToDictionary(
-                rt => rt.TransactionSummary.TransactionIdentifierHash,
+                rt => rt.TransactionSummary.PayloadHash,
                 ByteArrayEqualityComparer.Default
             );
 
         var transactionIdList = transactionsById.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 
         var toUpdate = await context.MempoolTransactions
-            .Where(mt => mt.Status != MempoolTransactionStatus.Committed && transactionIdList.Contains(mt.TransactionIdentifierHash))
+            .Where(mt => mt.Status != MempoolTransactionStatus.Committed && transactionIdList.Contains(mt.PayloadHash))
             .ToListAsync(token);
 
         if (toUpdate.Count == 0)
@@ -136,7 +136,7 @@ public class RawTransactionWriter : IRawTransactionWriter
                 _transactionsMarkedCommittedWhichWereFailedCount.Inc();
                 _logger.LogError(
                     "Transaction with id {TransactionId} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
-                    mempoolTransaction.TransactionIdentifierHash.ToHex(),
+                    mempoolTransaction.PayloadHash.ToHex(),
                     mempoolTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     mempoolTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
                     mempoolTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
@@ -146,7 +146,7 @@ public class RawTransactionWriter : IRawTransactionWriter
                 );
             }
 
-            var transactionSummary = transactionsById[mempoolTransaction.TransactionIdentifierHash].TransactionSummary;
+            var transactionSummary = transactionsById[mempoolTransaction.PayloadHash].TransactionSummary;
             mempoolTransaction.MarkAsCommitted(
                 transactionSummary.StateVersion,
                 transactionSummary.NormalizedRoundTimestamp

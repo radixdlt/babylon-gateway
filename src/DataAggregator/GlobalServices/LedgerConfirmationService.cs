@@ -630,7 +630,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
                 var summary = TransactionSummarisation.GenerateSummary(currentParentSummary, transaction);
                 var contents = transaction.Metadata.Hex.ConvertFromHex();
 
-                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.TransactionIdentifierHash);
+                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
                 TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
 
                 transactionData.Add(new CommittedTransactionData(transaction, summary, contents));

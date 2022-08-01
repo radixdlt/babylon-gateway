@@ -207,7 +207,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         }
 
         var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
-            td.TransactionSummary.TransactionIdentifierHash,
+            td.TransactionSummary.PayloadHash,
             td.TransactionContents
         )).ToList();
 

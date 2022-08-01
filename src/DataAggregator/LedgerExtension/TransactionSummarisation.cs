@@ -84,7 +84,9 @@ public record TransactionSummary(
     long RoundInEpoch,
     bool IsStartOfEpoch,
     bool IsStartOfRound,
-    byte[] TransactionIdentifierHash,
+    byte[] PayloadHash,
+    byte[] IntentHash,
+    byte[] SignedTransactionHash,
     byte[] TransactionAccumulator,
     Instant RoundTimestamp,
     Instant CreatedTimestamp,
@@ -107,7 +109,9 @@ public static class TransactionSummarisation
             RoundInEpoch: lastTransaction.RoundInEpoch,
             IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
             IsStartOfRound: lastTransaction.IsStartOfRound,
-            TransactionIdentifierHash: lastTransaction.TransactionIdentifierHash,
+            PayloadHash: lastTransaction.PayloadHash,
+            IntentHash: lastTransaction.IntentHash,
+            SignedTransactionHash: lastTransaction.SignedTransactionHash,
             TransactionAccumulator: lastTransaction.TransactionAccumulator,
             RoundTimestamp: lastTransaction.RoundTimestamp,
             CreatedTimestamp: lastTransaction.CreatedTimestamp,
@@ -167,7 +171,9 @@ public static class TransactionSummarisation
             RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
             IsStartOfEpoch: isStartOfEpoch,
             IsStartOfRound: isStartOfRound,
-            TransactionIdentifierHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
+            PayloadHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
+            IntentHash: new byte[32], // TODO - Fix me when we read this from the Core API
+            SignedTransactionHash: new byte[32], // TODO - Fix me when we read this from the Core API
             TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
@@ -185,7 +191,9 @@ public static class TransactionSummarisation
             RoundInEpoch: 0,
             IsStartOfEpoch: false,
             IsStartOfRound: false,
-            TransactionIdentifierHash: Array.Empty<byte>(), // Unused
+            PayloadHash: Array.Empty<byte>(), // Unused
+            IntentHash: Array.Empty<byte>(), // Unused
+            SignedTransactionHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
             RoundTimestamp: Instant.FromUnixTimeSeconds(0),
             CreatedTimestamp: SystemClock.Instance.GetCurrentInstant(),

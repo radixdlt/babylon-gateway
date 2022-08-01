@@ -72,17 +72,19 @@ namespace Common.Database.Models.Ledger;
 /// <summary>
 /// A transaction committed onto the radix ledger.
 /// This table forms a shell, to which other properties are connected.
-/// The signer (where relevant) is stored in the AccountTransaction table.
 /// </summary>
 [Table("ledger_transactions")]
+// OnModelCreating: We also define an index by state version, filtered to user transactions.
 // OnModelCreating: We also define an index on Timestamp.
-// OnModelCreating: We also define a composite index on (Epoch, EndOfView [Not Null]) which includes timestamp - to easily query when views happened.
+// OnModelCreating: We also define a composite index on (Epoch, StartOfRound [Not Null]) - to easily query when rounds happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] transactionIdentifierHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedRoundTimestamp)
+    public LedgerTransaction(long resultantStateVersion, byte[] payloadHash, byte[] intentHash, byte[] signedTransactionHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedRoundTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
-        TransactionIdentifierHash = transactionIdentifierHash;
+        PayloadHash = payloadHash;
+        IntentHash = intentHash;
+        SignedTransactionHash = signedTransactionHash;
         TransactionAccumulator = transactionAccumulator;
         Message = message;
         FeePaid = feePaid;
@@ -106,11 +108,30 @@ public class LedgerTransaction
     [Column(name: "state_version")]
     public long ResultantStateVersion { get; set; }
 
-    [Column(name: "transaction_id")]
+    /// <summary>
+    /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
+    /// This shouldn't be used for user transaction tracking, because it could be mutated in transit.
+    /// The intent hash should be used for tracking of user transactions.
+    /// </summary>
+    [Column(name: "payload_hash")]
     // OnModelCreating: Also defined as an alternate key
-    public byte[] TransactionIdentifierHash { get; set; }
+    public byte[] PayloadHash { get; set; }
 
-    [ForeignKey(nameof(TransactionIdentifierHash))]
+    /// <summary>
+    /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
+    /// </summary>
+    [Column(name: "intent_hash")]
+    // OnModelCreating: Also defined as an alternate key
+    public byte[] IntentHash { get; set; }
+
+    /// <summary>
+    /// The hash of the signed transaction, which is what the notary signs.
+    /// </summary>
+    [Column(name: "signed_hash")]
+    // OnModelCreating: Also defined as an alternate key
+    public byte[] SignedTransactionHash { get; set; }
+
+    [ForeignKey(nameof(PayloadHash))]
     public RawTransaction? RawTransaction { get; set; }
 
     [Column(name: "transaction_accumulator")]
