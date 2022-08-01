@@ -103,7 +103,7 @@ public class TransactionController : ControllerBase
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> GetRecentTransactions(RecentTransactionsRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.NetworkIdentifier, request.AtStateIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
 
         var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
 
@@ -131,7 +131,7 @@ public class TransactionController : ControllerBase
     public async Task<TransactionStatusResponse> GetTransactionStatus(TransactionStatusRequest request)
     {
         var transactionIdentifier = _validations.ExtractValidTransactionIdentifier(request.TransactionIdentifier);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.NetworkIdentifier, request.AtStateIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);
 
@@ -153,7 +153,7 @@ public class TransactionController : ControllerBase
     [HttpPost("build")]
     public async Task<TransactionBuildResponse> BuildTransaction(TransactionBuildRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.NetworkIdentifier, request.AtStateIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier);
         return new TransactionBuildResponse(
             await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState)
         );
@@ -162,14 +162,12 @@ public class TransactionController : ControllerBase
     [HttpPost("finalize")]
     public async Task<TransactionFinalizeResponse> FinalizeTransaction(TransactionFinalizeRequest request)
     {
-        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
         return await _constructionAndSubmissionService.HandleFinalizeRequest(request);
     }
 
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> SubmitTransaction(TransactionSubmitRequest request)
     {
-        _ledgerStateQuerier.AssertMatchingNetwork(request.NetworkIdentifier);
         return await _constructionAndSubmissionService.HandleSubmitRequest(request);
     }
 }

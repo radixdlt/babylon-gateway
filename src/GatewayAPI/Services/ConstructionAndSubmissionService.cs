@@ -275,7 +275,6 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         {
             await HandleSubmitRequest(
                 new Gateway.TransactionSubmitRequest(
-                    networkIdentifier: request.NetworkIdentifier,
                     signedTransaction: coreFinalizeResponse.SignedTransaction
                 )
             );
