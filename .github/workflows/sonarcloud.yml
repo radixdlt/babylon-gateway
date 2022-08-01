@@ -18,8 +18,8 @@ jobs:
       - name: SonarScanner for .NET 6
         uses: highbyte/sonarscan-dotnet@v2.1.2
         with:
-          sonarProjectKey: radixdlt_radixdlt-network-gateway
-          sonarProjectName: radixdlt-network-gateway
+          sonarProjectKey: radixdlt_babylon-gateway
+          sonarProjectName: babylon-gateway
           sonarOrganization: radixdlt-github
           dotnetTestArguments: --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"

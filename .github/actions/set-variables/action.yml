@@ -32,13 +32,13 @@ runs:
         GIT_COMMIT=$(git log -1 --format=%h )
         DOCKER_TAG=${GIT_BRANCH}-${GIT_COMMIT}
         if [[ ! -z $GH_EVENT_NAME ]] && [[ "$GH_EVENT_NAME" == "release" ]] ;then
-            DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/ng-data-aggregator"
-            DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/ng-gateway-api"
+            DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
+            DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
 
             case "${GH_EVENT_NAME}" in
                 release)
-                    DOCKER_REPO_DATA_AGGREGATOR="radixdlt/ng-data-aggregator"
-                    DOCKER_REPO_GATEWAY_API="radixdlt/ng-gateway-api"
+                    DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-data-aggregator"
+                    DOCKER_REPO_GATEWAY_API="radixdlt/babylon-ng-gateway-api"
                     DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${{ github.event.release.tag_name }}"
                     GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${{ github.event.release.tag_name }}"
                 ;;
@@ -57,8 +57,8 @@ runs:
             echo "::set-output name=gateway-api-tag::$DOCKER_TAG"
 
         else
-            DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/ng-data-aggregator"
-            DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/ng-gateway-api"
+            DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
+            DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
 
             DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${DOCKER_TAG}"
             GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${DOCKER_TAG}"
