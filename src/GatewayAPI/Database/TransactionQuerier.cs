@@ -284,12 +284,15 @@ public class TransactionQuerier : ITransactionQuerier
 
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions)
     {
-        var transactionWithOperationGroups = await _dbContext.LedgerTransactions
-            .Where(t => transactionStateVersions.Contains(t.ResultantStateVersion))
+        var transactions = await _dbContext.LedgerTransactions
+            .Where(lt => transactionStateVersions.Contains(lt.ResultantStateVersion))
+            .Include(lt => lt.RawTransaction)
+            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
             .ToListAsync();
 
         var gatewayTransactions = new List<Gateway.TransactionInfo>();
-        foreach (var ledgerTransaction in transactionWithOperationGroups)
+        foreach (var ledgerTransaction in transactions)
         {
             gatewayTransactions.Add(MapToGatewayAccountTransaction(ledgerTransaction));
         }

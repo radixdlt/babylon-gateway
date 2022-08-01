@@ -172,8 +172,8 @@ public static class TransactionSummarisation
             IsStartOfEpoch: isStartOfEpoch,
             IsStartOfRound: isStartOfRound,
             PayloadHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
-            IntentHash: new byte[32], // TODO - Fix me when we read this from the Core API
-            SignedTransactionHash: new byte[32], // TODO - Fix me when we read this from the Core API
+            IntentHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(), // TODO - Fix me when we read this from the Core API
+            SignedTransactionHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(), // TODO - Fix me when we read this from the Core API
             TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
