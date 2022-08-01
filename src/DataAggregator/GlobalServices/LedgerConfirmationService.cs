@@ -692,8 +692,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             ? sufficientlySyncedUpNodesTrustWeighting
             : trustWeightingAcrossAllNodes;
 
-        var trustWeightingForQuorum = Config.QuorumRequiresTrustProportion * trustWeightingTotalUsedForQuorumCalculation;
-        var trustWeightingForQuorumIfAllSyncedUp = Config.QuorumRequiresTrustProportion * trustWeightingAcrossAllNodes;
+        var trustWeightingForQuorum = Config.CommitRequiresNodeQuorumTrustProportion * trustWeightingTotalUsedForQuorumCalculation;
+        var trustWeightingForQuorumIfAllSyncedUp = Config.CommitRequiresNodeQuorumTrustProportion * trustWeightingAcrossAllNodes;
 
         _ledgerNodeTrustWeightingRequiredForQuorum.Set((double)trustWeightingForQuorum);
         _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)trustWeightingForQuorumIfAllSyncedUp);

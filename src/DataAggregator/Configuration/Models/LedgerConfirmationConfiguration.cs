@@ -69,11 +69,11 @@ namespace DataAggregator.Configuration.Models;
 public record LedgerConfirmationConfiguration
 {
     /// <summary>
-    /// Gets or sets QuorumRequiresTrustProportion.
+    /// Gets or sets CommitRequiresNodeQuorumTrustProportion.
     /// Requires at least this proportion of enabled nodes to commit (by trust weighting).
     /// </summary>
-    [ConfigurationKeyName("QuorumRequiresTrustProportion")]
-    public decimal QuorumRequiresTrustProportion { get; set; } = 0.51m;
+    [ConfigurationKeyName("CommitRequiresNodeQuorumTrustProportion")]
+    public decimal CommitRequiresNodeQuorumTrustProportion { get; set; } = 0.51m;
 
     /// <summary>
     /// Gets or sets OnlyUseSufficientlySyncedUpNodesForQuorumCalculation.
