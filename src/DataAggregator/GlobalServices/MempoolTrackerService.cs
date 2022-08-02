@@ -147,7 +147,6 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IAggregatorConfiguration _aggregatorConfiguration;
-    private readonly IActionInferrer _actionInferrer;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
     private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
@@ -155,13 +154,11 @@ public class MempoolTrackerService : IMempoolTrackerService
     public MempoolTrackerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IAggregatorConfiguration aggregatorConfiguration,
-        IActionInferrer actionInferrer,
         ILogger<MempoolTrackerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
         _aggregatorConfiguration = aggregatorConfiguration;
-        _actionInferrer = actionInferrer;
         _logger = logger;
         _recentFullTransactionsFetched = new ConcurrentLruCache<byte[], FullTransactionData>(
             _aggregatorConfiguration.GetMempoolConfiguration().RecentFetchedUnknownTransactionsCacheSize,
@@ -196,8 +193,8 @@ public class MempoolTrackerService : IMempoolTrackerService
         }
 
         var unfetchedTransactionsAlreadyInDatabase = await dbContext.MempoolTransactions
-            .Where(lt => idsInMempoolNotRecentlyFetched.Contains(lt.TransactionIdentifierHash))
-            .Select(lt => lt.TransactionIdentifierHash)
+            .Where(lt => idsInMempoolNotRecentlyFetched.Contains(lt.PayloadHash))
+            .Select(lt => lt.PayloadHash)
             .ToListAsync(cancellationToken);
 
         var transactionIdsToFetch = idsInMempoolNotRecentlyFetched
@@ -294,7 +291,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         var mempoolTransactionIds = combinedMempoolWithLastSeen.Keys.ToList(); // Npgsql optimizes List<> Contains
 
         var reappearedTransactions = await dbContext.MempoolTransactions
-            .Where(mt => mempoolTransactionIds.Contains(mt.TransactionIdentifierHash))
+            .Where(mt => mempoolTransactionIds.Contains(mt.PayloadHash))
             .Where(mt => mt.Status == MempoolTransactionStatus.Missing)
             .ToListAsync(token);
 
@@ -334,7 +331,6 @@ public class MempoolTrackerService : IMempoolTrackerService
         }
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        IParsedTransactionMapper parsedTransactionMapper = new ParsedTransactionMapper<AggregatorDbContext>(dbContext, _actionInferrer);
 
         // Gather the transaction contents if we've loaded them from a node recently.
         // If we don't have the transaction contents, either these transactions are already in our MempoolTransactions
@@ -353,13 +349,13 @@ public class MempoolTrackerService : IMempoolTrackerService
         // If a node mempool gets really far behind, it could include committed transactions we've already pruned
         // from our MempoolTransactions table due to being committed - so let's ensure these don't get re-added.
         var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = await dbContext.MempoolTransactions
-            .Where(lt => transactionIdsWhichMightNeedAdding.Contains(lt.TransactionIdentifierHash))
-            .Select(et => et.TransactionIdentifierHash)
+            .Where(mt => transactionIdsWhichMightNeedAdding.Contains(mt.PayloadHash))
+            .Select(mt => mt.PayloadHash)
             .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
 
         var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = await dbContext.LedgerTransactions
-            .Where(lt => transactionIdsWhichMightNeedAdding.Contains(lt.TransactionIdentifierHash))
-            .Select(lt => lt.TransactionIdentifierHash)
+            .Where(lt => transactionIdsWhichMightNeedAdding.Contains(lt.PayloadHash))
+            .Select(lt => lt.PayloadHash)
             .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
 
         var transactionsToAdd = transactionsWhichMightNeedAdding
@@ -375,16 +371,11 @@ public class MempoolTrackerService : IMempoolTrackerService
             return;
         }
 
-        var gatewayTransactionDetails = await parsedTransactionMapper.MapToGatewayTransactionContents(
-            transactionsToAdd.Select(nt => nt.Transaction).ToList(),
-            token
-        );
-
         var newDbMempoolTransactions = transactionsToAdd
             .Select((transactionData, index) => MempoolTransaction.NewFirstSeenInMempool(
                 transactionData.Id,
                 transactionData.Payload,
-                gatewayTransactionDetails[index],
+                GatewayTransactionContents.Default(), // TODO - Changed to Default to get Babylon Repo working
                 transactionData.SeenAt
             ));
 
@@ -428,7 +419,7 @@ public class MempoolTrackerService : IMempoolTrackerService
                     || mt.LastSubmittedToNodeTimestamp < submissionGracePeriodCutOff
                 ))
             )
-            .Where(mempoolItem => !seenTransactionIds.Contains(mempoolItem.TransactionIdentifierHash))
+            .Where(mempoolItem => !seenTransactionIds.Contains(mempoolItem.PayloadHash))
             .ToListAsync(token);
 
         if (previouslyTrackedTransactionsNowMissingFromNodeMempools.Count == 0)

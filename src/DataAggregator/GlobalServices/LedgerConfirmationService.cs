@@ -630,7 +630,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
                 var summary = TransactionSummarisation.GenerateSummary(currentParentSummary, transaction);
                 var contents = transaction.Metadata.Hex.ConvertFromHex();
 
-                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.TransactionIdentifierHash);
+                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
                 TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
 
                 transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
@@ -692,8 +692,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             ? sufficientlySyncedUpNodesTrustWeighting
             : trustWeightingAcrossAllNodes;
 
-        var trustWeightingForQuorum = Config.QuorumRequiresTrustProportion * trustWeightingTotalUsedForQuorumCalculation;
-        var trustWeightingForQuorumIfAllSyncedUp = Config.QuorumRequiresTrustProportion * trustWeightingAcrossAllNodes;
+        var trustWeightingForQuorum = Config.CommitRequiresNodeQuorumTrustProportion * trustWeightingTotalUsedForQuorumCalculation;
+        var trustWeightingForQuorumIfAllSyncedUp = Config.CommitRequiresNodeQuorumTrustProportion * trustWeightingAcrossAllNodes;
 
         _ledgerNodeTrustWeightingRequiredForQuorum.Set((double)trustWeightingForQuorum);
         _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)trustWeightingForQuorumIfAllSyncedUp);

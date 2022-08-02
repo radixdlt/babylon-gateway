@@ -81,11 +81,9 @@ public interface ILedgerStateQuerier
 {
     Task<GatewayResponse> GetGatewayState();
 
-    Task<LedgerState> GetValidLedgerStateForReadRequest(NetworkIdentifier networkIdentifier, PartialLedgerStateIdentifier? atLedgerStateIdentifier);
+    Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
-    Task<LedgerState> GetValidLedgerStateForConstructionRequest(NetworkIdentifier networkIdentifier, PartialLedgerStateIdentifier? atLedgerStateIdentifier);
-
-    void AssertMatchingNetwork(NetworkIdentifier networkIdentifier);
+    Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
     Task<LedgerStatus> GetLedgerStatus();
 }
@@ -123,12 +121,12 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     {
         var ledgerStatus = await GetLedgerStatus();
         return new GatewayResponse(
-            _networkConfigurationProvider.GetNetworkName().AsNetworkIdentifier(),
             new GatewayApiVersions(
                 _networkConfigurationProvider.GetGatewayApiVersion(),
                 _networkConfigurationProvider.GetGatewayApiSchemaVersion()
             ),
             new LedgerState(
+                _networkConfigurationProvider.GetNetworkName(),
                 ledgerStatus.TopOfLedgerTransaction.ResultantStateVersion,
                 ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
@@ -139,9 +137,9 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     }
 
     // So that we don't forget to check the network name, add the assertion in here.
-    public async Task<LedgerState> GetValidLedgerStateForReadRequest(NetworkIdentifier networkIdentifier, PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    public async Task<LedgerState> GetValidLedgerStateForReadRequest(
+        PartialLedgerStateIdentifier? atLedgerStateIdentifier)
     {
-        AssertMatchingNetwork(networkIdentifier);
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
         var ledgerState = ledgerStateReport.LedgerState;
 
@@ -177,9 +175,9 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(NetworkIdentifier networkIdentifier, PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(
+        PartialLedgerStateIdentifier? atLedgerStateIdentifier)
     {
-        AssertMatchingNetwork(networkIdentifier);
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
         var ledgerState = ledgerStateReport.LedgerState;
 
@@ -213,16 +211,6 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         );
 
         return ledgerState;
-    }
-
-    public void AssertMatchingNetwork(NetworkIdentifier networkIdentifier)
-    {
-        var ledgerNetworkName = _networkConfigurationProvider.GetNetworkName();
-
-        if (networkIdentifier.Network != ledgerNetworkName)
-        {
-            throw new NetworkNotSupportedException(ledgerNetworkName);
-        }
     }
 
     public async Task<LedgerStatus> GetLedgerStatus()
@@ -330,6 +318,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         return lt == null ? null : new LedgerStateReport(
             new LedgerState(
+                _networkConfigurationProvider.GetNetworkName(),
                 lt.ResultantStateVersion,
                 lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 lt.Epoch,

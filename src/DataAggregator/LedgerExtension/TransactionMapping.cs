@@ -62,11 +62,9 @@
  * permissions under this License.
  */
 
-using Common.Database.Models;
 using Common.Database.Models.Ledger;
 using Common.Extensions;
 using Common.Numerics;
-using RadixCoreApi.Generated.Model;
 
 namespace DataAggregator.LedgerExtension;
 
@@ -82,14 +80,15 @@ public static class TransactionMapping
 
         return new LedgerTransaction(
             resultantStateVersion: summary.StateVersion,
-            transactionIdentifierHash: summary.TransactionIdentifierHash,
+            payloadHash: summary.PayloadHash,
+            intentHash: summary.IntentHash,
+            signedTransactionHash: summary.SignedTransactionHash,
             transactionAccumulator: summary.TransactionAccumulator,
             message: transaction.Metadata.Message?.ConvertFromHex(),
             feePaid: fee,
             epoch: summary.Epoch,
             indexInEpoch: summary.IndexInEpoch,
             roundInEpoch: summary.RoundInEpoch,
-            isOnlyRoundChange: summary.IsOnlyRoundChange,
             isStartOfEpoch: summary.IsStartOfEpoch,
             isStartOfRound: summary.IsStartOfRound,
             roundTimestamp: summary.RoundTimestamp,

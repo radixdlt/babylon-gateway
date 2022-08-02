@@ -36,5 +36,7 @@ Global
 		File = .idea-run-configurations\Postgres.run.xml
 		File = .idea-run-configurations\WipeDatabase.run.xml
 		File = .idea-run-configurations\GatewayAPI.run.xml
+		File = .idea-run-configurations\Data Aggregator (Production).run.xml
+		File = .idea-run-configurations\Gateway API (Production).run.xml
 	EndGlobalSection
 EndGlobal

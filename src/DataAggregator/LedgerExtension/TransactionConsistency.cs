@@ -82,16 +82,16 @@ public static class TransactionConsistency
 
         if (!RadixHashing.IsValidAccumulator(
                 parent.TransactionAccumulator,
-                child.TransactionIdentifierHash,
+                child.PayloadHash,
                 child.TransactionAccumulator
             ))
         {
             throw new InconsistentLedgerException(
                 $"Failure to commit a child transaction with resultant state version {child.StateVersion}." +
                 $" The parent (with resultant state version {parent.StateVersion}) has accumulator {parent.TransactionAccumulator.ToHex()}" +
-                $" and the child has transaction id hash {child.TransactionIdentifierHash.ToHex()}" +
+                $" and the child has transaction id hash {child.PayloadHash.ToHex()}" +
                 " which should result in an accumulator of" +
-                $" {RadixHashing.CreateNewAccumulator(parent.TransactionAccumulator, child.TransactionIdentifierHash).ToHex()}" +
+                $" {RadixHashing.CreateNewAccumulator(parent.TransactionAccumulator, child.PayloadHash).ToHex()}" +
                 $" but the child reports an inconsistent accumulator of {child.TransactionAccumulator.ToHex()}."
             );
         }

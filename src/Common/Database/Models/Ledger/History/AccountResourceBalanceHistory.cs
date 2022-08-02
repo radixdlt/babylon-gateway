@@ -63,13 +63,14 @@
  */
 
 using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
 using Common.Numerics;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 
 namespace Common.Database.Models.Ledger.History;
+
+public record struct AccountResourceDenormalized(string AccountAddress, string Rri);
+public record struct AccountResource(Account Account, Resource Resource);
 
 /// <summary>
 /// Tracks Account Resource Balances over time.

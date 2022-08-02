@@ -107,7 +107,6 @@ public class DefaultKernel
         services.AddSingleton<IExceptionHandler, ExceptionHandler>();
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-        services.AddSingleton<IActionInferrer, ActionInferrer>();
         services.AddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
     }
 
@@ -119,13 +118,9 @@ public class DefaultKernel
     private void AddRequestScopedServices(IServiceCollection services)
     {
         services.AddScoped<ILedgerStateQuerier, LedgerStateQuerier>();
-        services.AddScoped<IAccountQuerier, AccountQuerier>();
-        services.AddScoped<ITokenQuerier, TokenQuerier>();
-        services.AddScoped<IValidatorQuerier, ValidatorQuerier>();
         services.AddScoped<ITransactionQuerier, TransactionQuerier>();
         services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
         services.AddScoped<ISubmissionTrackingService, SubmissionTrackingService>();
-        services.AddScoped<IParsedTransactionMapper, ParsedTransactionMapper<GatewayReadWriteDbContext>>();
     }
 
     private void AddWorkerScopedServices(IServiceCollection services)

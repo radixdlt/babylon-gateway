@@ -73,9 +73,9 @@ namespace Common.Database.Models.Ledger;
 [Table("raw_transactions")]
 public class RawTransaction
 {
-    public RawTransaction(byte[] transactionIdentifierHash, byte[] payload)
+    public RawTransaction(byte[] transactionPayloadHash, byte[] payload)
     {
-        TransactionIdentifierHash = transactionIdentifierHash;
+        TransactionPayloadHash = transactionPayloadHash;
         Payload = payload;
     }
 
@@ -85,9 +85,9 @@ public class RawTransaction
     }
 
     [Key]
-    [Column(name: "transaction_id")]
+    [Column(name: "transaction_payload_hash")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public byte[] TransactionIdentifierHash { get; set; }
+    public byte[] TransactionPayloadHash { get; set; }
 
     /// <summary>
     /// The payload of the transaction.

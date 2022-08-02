@@ -65,7 +65,6 @@
 using Common.Database.Models.Ledger;
 using Common.Database.Models.Ledger.History;
 using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Substates;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
@@ -141,18 +140,6 @@ public static class DbQueryExtensions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch <= round && lt.IsStartOfRound)
             .OrderByDescending(lt => lt.ResultantStateVersion)
             .Take(1);
-    }
-
-    public static IQueryable<TSubstate> UpAtVersion<TSubstate>(
-        this DbSet<TSubstate> dbSet,
-        long stateVersion
-    )
-        where TSubstate : SubstateBase
-    {
-        // This could be re-written to take the top upStateVersion based on some key; which might make better use
-        // of the indices
-        return dbSet.
-            Where(s => s.UpStateVersion <= stateVersion && (s.DownStateVersion == null || s.DownStateVersion > stateVersion));
     }
 
     public static IQueryable<AccountResourceBalanceHistory> AccountResourceBalanceHistoryForAccountIdAtVersion<TDbContext>(

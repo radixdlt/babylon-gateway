@@ -270,6 +270,8 @@ dotnet_diagnostic.SA1009.severity = none # SA1009ClosingParenthesisMustBeSpacedC
 dotnet_diagnostic.SA1117.severity = none # SA1117ParametersMustBeOnSameLineOrSeparateLines - Structured log messages benefit from being across 2 lines - one for message, one for parameters
 dotnet_diagnostic.SA1512.severity = none # SA1512SingleLineCommentsMustNotBeFollowedByBlankLine - As it fights with // ReSharper disable comments
 dotnet_diagnostic.SA1515.severity = none # SA1515SingleLineCommentMustBePrecededByBlankLine - As it fights with // ReSharper disable comments
+dotnet_diagnostic.SA1402.severity = none # SA1402FileMayOnlyContainASingleType - it insists a file contains only one top-level class, contrary to a number of places in the codebase, where auxiliary classes are included
+dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName - it insists the main type comes first in the file, contrary to a number of places in the codebase
 
 # > Inherited from other projects
 dotnet_diagnostic.SA0001.severity = none # SA0001XmlCommentAnalysisDisabled

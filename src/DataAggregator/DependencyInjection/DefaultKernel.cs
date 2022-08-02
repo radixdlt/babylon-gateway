@@ -104,7 +104,6 @@ public class DefaultKernel
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-        services.AddSingleton<IActionInferrer, ActionInferrer>();
         services.AddSingleton<ISystemStatusService, SystemStatusService>();
         services.AddSingleton<IMempoolTrackerService, MempoolTrackerService>();
         services.AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>();

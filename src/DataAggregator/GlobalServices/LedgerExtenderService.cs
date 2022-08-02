@@ -110,7 +110,6 @@ public class LedgerExtenderService : ILedgerExtenderService
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
-    private readonly IActionInferrer _actionInferrer;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
     private record ProcessTransactionReport(
@@ -126,7 +125,6 @@ public class LedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer,
-        IActionInferrer actionInferrer,
         INetworkConfigurationProvider networkConfigurationProvider
     )
     {
@@ -135,7 +133,6 @@ public class LedgerExtenderService : ILedgerExtenderService
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
         _entityDeterminer = entityDeterminer;
-        _actionInferrer = actionInferrer;
         _networkConfigurationProvider = networkConfigurationProvider;
     }
 
@@ -210,7 +207,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         }
 
         var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
-            td.TransactionSummary.TransactionIdentifierHash,
+            td.TransactionSummary.PayloadHash,
             td.TransactionContents
         )).ToList();
 
@@ -308,7 +305,7 @@ public class LedgerExtenderService : ILedgerExtenderService
             var dbTransaction = TransactionMapping.CreateLedgerTransaction(transactionData);
             dbContext.LedgerTransactions.Add(dbTransaction);
 
-            var transactionContentProcessor = new TransactionContentProcessor(dbContext, dbActionsPlanner, _entityDeterminer, _actionInferrer);
+            var transactionContentProcessor = new TransactionContentProcessor(dbActionsPlanner, _entityDeterminer);
             transactionContentProcessor.ProcessTransactionContents(transactionData.CommittedTransaction, dbTransaction, transactionData.TransactionSummary);
         }
     }

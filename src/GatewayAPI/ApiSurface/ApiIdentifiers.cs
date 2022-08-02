@@ -73,11 +73,6 @@ namespace GatewayAPI.ApiSurface;
 
 public static class ApiIdentifiers
 {
-    public static Gateway.NetworkIdentifier AsNetworkIdentifier(this string networkName)
-    {
-        return new Gateway.NetworkIdentifier(networkName);
-    }
-
     public static Gateway.TokenAmount AsGatewayTokenAmount(this ValidatedTokenAmount tokenAmount)
     {
         return new Gateway.TokenAmount(tokenAmount.Amount.ToSubUnitString(), tokenAmount.Rri.AsGatewayTokenIdentifier());
