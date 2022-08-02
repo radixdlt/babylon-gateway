@@ -20,7 +20,8 @@ public static class ServiceCollectionExtensions
     public static void AddNetworkGatewayApi(this IServiceCollection services)
     {
         services
-            .AddScoped<GatewayEndpoint>();
+            .AddScoped<GatewayEndpoint>()
+            .AddScoped<TransactionEndpoint>();
 
         services
             .AddOptions<ApiOptions>()

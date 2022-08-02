@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Dat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Api", "src\RadixDlt.NetworkGateway.Api\RadixDlt.NetworkGateway.Api.csproj", "{5074A173-06C2-4792-B147-DAD76646EDA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Contracts", "src\RadixDlt.NetworkGateway.Contracts\RadixDlt.NetworkGateway.Contracts.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{5074A173-06C2-4792-B147-DAD76646EDA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5074A173-06C2-4792-B147-DAD76646EDA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5074A173-06C2-4792-B147-DAD76646EDA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = .idea-run-configurations\DataAggregator.run.xml

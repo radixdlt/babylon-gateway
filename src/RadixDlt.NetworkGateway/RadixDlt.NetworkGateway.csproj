@@ -7,10 +7,9 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
     </ItemGroup>
-  
-    <!-- TODO: those will be removed in place of ProjectReference -->
+    
     <ItemGroup>
-      <PackageReference Include="RadixGatewayApi.Generated" />
+        <ProjectReference Include="..\RadixDlt.NetworkGateway.Contracts\RadixDlt.NetworkGateway.Contracts.csproj" />
     </ItemGroup>
   
 </Project>

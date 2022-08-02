@@ -1,4 +1,4 @@
-using RadixGatewayApi.Generated.Model;
+using RadixDlt.NetworkGateway.Contracts.Api.Model;
 
 namespace RadixDlt.NetworkGateway.Endpoints;
 
