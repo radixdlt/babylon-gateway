@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  
+    <ItemGroup>
+        <ProjectReference Include="..\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
+    </ItemGroup>
+  
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+    </ItemGroup>
+  
+</Project>

@@ -12,9 +12,9 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageName='RadixDlt.NetworkGateway.Contracts.Api'
+packageName='RadixDlt.NetworkGateway.FrontendSdk'
 outputDirectory="../generated-dependencies"
-specLocation='../src/RadixDlt.NetworkGateway/gateway-api-spec.yaml'
+specLocation='../src/RadixDlt.NetworkGateway.Frontend/gateway-api-spec.yaml'
 
 patchVersion="$1" # Patch version override as first command line parameter
 
@@ -65,7 +65,7 @@ java -jar ./openapi-generator-cli-PR13049.jar \
     --library httpclient \
     --additional-properties=packageName=$packageName,targetFramework=net6.0,packageVersion=$packageVersion,nullableReferenceTypes=true
 
-cp -R "${dummyApiDirectory}src/${packageName}/" "../src/RadixDlt.NetworkGateway.Contracts/Api/generated/"
-rm "../src/RadixDlt.NetworkGateway.Contracts/Api/generated/${packageName}.csproj"
+cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
+rm "../src/${packageName}/generated/${packageName}.csproj"
 
 echo "Done"

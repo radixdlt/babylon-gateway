@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+        <PackageReference Include="RadixCoreApi.Generated" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\RadixDlt.NetworkGateway.FrontendSdk\RadixDlt.NetworkGateway.FrontendSdk.csproj" />
+        <ProjectReference Include="..\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
+    </ItemGroup>
+  
+</Project>
