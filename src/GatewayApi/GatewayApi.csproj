@@ -3,6 +3,7 @@
     <!-- NB - Shared PropertyGroup contents live in Directory.Build.props -->
     <PropertyGroup>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <RootNamespace>GatewayAPI</RootNamespace>
     </PropertyGroup>
 
     <!-- NB - PackageReference versions are overridden centrally in Directory.Packages.props -->
