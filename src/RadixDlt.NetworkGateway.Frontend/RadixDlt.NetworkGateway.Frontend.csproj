@@ -13,5 +13,9 @@
         <ProjectReference Include="..\RadixDlt.NetworkGateway.FrontendSdk\RadixDlt.NetworkGateway.FrontendSdk.csproj" />
         <ProjectReference Include="..\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <EditorConfigFiles Include="Configuration\Models\TODO_RENAME.editorconfig" />
+    </ItemGroup>
   
 </Project>

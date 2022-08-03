@@ -7,10 +7,13 @@ public class NetworkGatewayFrontendOptions : IValidatableObject
 {
     [Required]
     [ConfigurationKeyName("NetworkName")]
-    public string NetworkName { get; set; }
+    public string NetworkName { get; set; } = null!;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        yield break;
+        if (string.IsNullOrWhiteSpace(NetworkName))
+        {
+            yield return new ValidationResult("Cannot be empty.", new[] { nameof(NetworkName) });
+        }
     }
 }

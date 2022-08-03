@@ -12,8 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Fro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.DataAggregatorApplication", "src\RadixDlt.NetworkGateway.DataAggregatorApplication\RadixDlt.NetworkGateway.DataAggregatorApplication.csproj", "{C46FF8C0-81FA-4B9F-BF77-1D5D8437D71F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.FrontendApplication", "src\RadixDlt.NetworkGateway.FrontendApplication\RadixDlt.NetworkGateway.FrontendApplication.csproj", "{5074A173-06C2-4792-B147-DAD76646EDA6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.FrontendSdk", "src\RadixDlt.NetworkGateway.FrontendSdk\RadixDlt.NetworkGateway.FrontendSdk.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7B572DCA-9792-48BE-A53D-3F8B87D71372}"
@@ -54,10 +52,6 @@ Global
 		{C46FF8C0-81FA-4B9F-BF77-1D5D8437D71F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C46FF8C0-81FA-4B9F-BF77-1D5D8437D71F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C46FF8C0-81FA-4B9F-BF77-1D5D8437D71F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5074A173-06C2-4792-B147-DAD76646EDA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5074A173-06C2-4792-B147-DAD76646EDA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5074A173-06C2-4792-B147-DAD76646EDA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5074A173-06C2-4792-B147-DAD76646EDA6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU

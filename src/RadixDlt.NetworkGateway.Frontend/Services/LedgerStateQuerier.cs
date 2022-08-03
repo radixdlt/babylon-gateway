@@ -64,24 +64,26 @@
 
 using Common.Database;
 using Common.Database.Models.Ledger;
+using Common.Database.Models.SingleEntries;
 using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 
 public interface ILedgerStateQuerier
 {
-    // Task<GatewayResponse> GetGatewayState();
+    Task<GatewayResponse> GetGatewayState();
 
     Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
-    // Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
-    //
-    // Task<LedgerStatus> GetLedgerStatus();
+    Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
+
+    Task<LedgerStatus> GetLedgerStatus();
 }
 
 public class LedgerStateQuerier : ILedgerStateQuerier
@@ -92,52 +94,45 @@ public class LedgerStateQuerier : ILedgerStateQuerier
             "The delay measured between the Gateway API clock and the round timestamp at last request to the top of the ledger (in seconds, to millisecond precision)."
         );
 
-    private readonly GatewayReadOnlyDbContext _dbContext;
     private readonly ILogger<LedgerStateQuerier> _logger;
+    private readonly GatewayReadOnlyDbContext _dbContext;
+    private readonly IValidations _validations;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
 
-    public LedgerStateQuerier(GatewayReadOnlyDbContext dbContext, ILogger<LedgerStateQuerier> logger)
+    public LedgerStateQuerier(
+        ILogger<LedgerStateQuerier> logger,
+        GatewayReadOnlyDbContext dbContext,
+        IValidations validations,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IGatewayApiConfiguration gatewayApiConfiguration
+    )
     {
-        _dbContext = dbContext;
         _logger = logger;
+        _dbContext = dbContext;
+        _validations = validations;
+        _networkConfigurationProvider = networkConfigurationProvider;
+        _gatewayApiConfiguration = gatewayApiConfiguration;
     }
 
-    // private readonly IValidations _validations;
-    // private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    // private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
-    //
-    // public LedgerStateQuerier(
-    //     ILogger<LedgerStateQuerier> logger,
-    //     GatewayReadOnlyDbContext dbContext,
-    //     IValidations validations,
-    //     INetworkConfigurationProvider networkConfigurationProvider,
-    //     IGatewayApiConfiguration gatewayApiConfiguration
-    // )
-    // {
-    //     _logger = logger;
-    //     _dbContext = dbContext;
-    //     _validations = validations;
-    //     _networkConfigurationProvider = networkConfigurationProvider;
-    //     _gatewayApiConfiguration = gatewayApiConfiguration;
-    // }
-
-    // public async Task<GatewayResponse> GetGatewayState()
-    // {
-    //     var ledgerStatus = await GetLedgerStatus();
-    //     return new GatewayResponse(
-    //         new GatewayApiVersions(
-    //             _networkConfigurationProvider.GetGatewayApiVersion(),
-    //             _networkConfigurationProvider.GetGatewayApiSchemaVersion()
-    //         ),
-    //         new LedgerState(
-    //             _networkConfigurationProvider.GetNetworkName(),
-    //             ledgerStatus.TopOfLedgerTransaction.ResultantStateVersion,
-    //             ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-    //             ledgerStatus.TopOfLedgerTransaction.Epoch,
-    //             ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
-    //         ),
-    //         new TargetLedgerState(ledgerStatus.SyncTarget.TargetStateVersion)
-    //     );
-    // }
+    public async Task<GatewayResponse> GetGatewayState()
+    {
+        var ledgerStatus = await GetLedgerStatus();
+        return new GatewayResponse(
+            new GatewayApiVersions(
+                _networkConfigurationProvider.GetGatewayApiVersion(),
+                _networkConfigurationProvider.GetGatewayApiSchemaVersion()
+            ),
+            new LedgerState(
+                _networkConfigurationProvider.GetNetworkName(),
+                ledgerStatus.TopOfLedgerTransaction.ResultantStateVersion,
+                ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
+                ledgerStatus.TopOfLedgerTransaction.Epoch,
+                ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
+            ),
+            new TargetLedgerState(ledgerStatus.SyncTarget.TargetStateVersion)
+        );
+    }
 
     // So that we don't forget to check the network name, add the assertion in here.
     public async Task<LedgerState> GetValidLedgerStateForReadRequest(
@@ -151,25 +146,24 @@ public class LedgerStateQuerier : ILedgerStateQuerier
             return ledgerState;
         }
 
-        // var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
+        var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
         _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
 
-        // if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds)
-        // {
-        //     return ledgerState;
-        // }
+        if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds)
+        {
+            return ledgerState;
+        }
 
-        // if (acceptableLedgerLag.PreventReadRequestsIfDbLedgerIsBehind)
-        // {
-        //     throw new Exception("bleh");
-        //     /*throw NotSyncedUpException.FromRequest(
-        //         NotSyncedUpRequestType.Read,
-        //         timestampDiff,
-        //         acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds
-        //     );*/
-        // }
+        if (acceptableLedgerLag.PreventReadRequestsIfDbLedgerIsBehind)
+        {
+            throw NotSyncedUpException.FromRequest(
+                NotSyncedUpRequestType.Read,
+                timestampDiff,
+                acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds
+            );
+        }
 
         _logger.LogWarning(
             "The DB ledger is currently {HumanReadableDelay} behind, so the read query will not be up to date with the current ledger",
@@ -179,57 +173,57 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    // public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(
-    //     PartialLedgerStateIdentifier? atLedgerStateIdentifier)
-    // {
-    //     var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
-    //     var ledgerState = ledgerStateReport.LedgerState;
-    //
-    //     if (!ResolvesToTopOfLedger(atLedgerStateIdentifier))
-    //     {
-    //         return ledgerState;
-    //     }
-    //
-    //     var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
-    //     var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
-    //
-    //     _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
-    //
-    //     if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds)
-    //     {
-    //         return ledgerState;
-    //     }
-    //
-    //     if (acceptableLedgerLag.PreventConstructionRequestsIfDbLedgerIsBehind)
-    //     {
-    //         throw NotSyncedUpException.FromRequest(
-    //             NotSyncedUpRequestType.Construction,
-    //             timestampDiff,
-    //             acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds
-    //         );
-    //     }
-    //
-    //     _logger.LogWarning(
-    //         "The DB ledger is currently {HumanReadableDelay} behind, so the construction query may be validated incorrectly (or built incorrectly using historic stake records for unstake calculations)",
-    //         timestampDiff.FormatPositiveDurationHumanReadable()
-    //     );
-    //
-    //     return ledgerState;
-    // }
-    //
-    // public async Task<LedgerStatus> GetLedgerStatus()
-    // {
-    //     var ledgerStatus = await _dbContext.LedgerStatus
-    //         .Include(ls => ls.TopOfLedgerTransaction)
-    //         .SingleOrDefaultAsync();
-    //
-    //     if (ledgerStatus == null)
-    //     {
-    //         throw new InvalidStateException("There are no transactions in the database");
-    //     }
-    //
-    //     return ledgerStatus;
-    // }
+    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(
+        PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    {
+        var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
+        var ledgerState = ledgerStateReport.LedgerState;
+
+        if (!ResolvesToTopOfLedger(atLedgerStateIdentifier))
+        {
+            return ledgerState;
+        }
+
+        var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
+        var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+
+        _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
+
+        if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds)
+        {
+            return ledgerState;
+        }
+
+        if (acceptableLedgerLag.PreventConstructionRequestsIfDbLedgerIsBehind)
+        {
+            throw NotSyncedUpException.FromRequest(
+                NotSyncedUpRequestType.Construction,
+                timestampDiff,
+                acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds
+            );
+        }
+
+        _logger.LogWarning(
+            "The DB ledger is currently {HumanReadableDelay} behind, so the construction query may be validated incorrectly (or built incorrectly using historic stake records for unstake calculations)",
+            timestampDiff.FormatPositiveDurationHumanReadable()
+        );
+
+        return ledgerState;
+    }
+
+    public async Task<LedgerStatus> GetLedgerStatus()
+    {
+        var ledgerStatus = await _dbContext.LedgerStatus
+            .Include(ls => ls.TopOfLedgerTransaction)
+            .SingleOrDefaultAsync();
+
+        if (ledgerStatus == null)
+        {
+            throw new InvalidStateException("There are no transactions in the database");
+        }
+
+        return ledgerStatus;
+    }
 
     private record LedgerStateReport(LedgerState LedgerState, Instant RoundTimestamp);
 
@@ -241,7 +235,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
             { _Version: > 0, Timestamp: null, Epoch: 0, Round: 0 } => await GetLedgerStateBeforeStateVersion(at._Version),
             { _Version: 0, Timestamp: { }, Epoch: 0, Round: 0 } => await GetLedgerStateBeforeTimestamp(at.Timestamp),
             { _Version: 0, Timestamp: null, Epoch: > 0, Round: >= 0 } => await GetLedgerStateAtEpochAndRound(at.Epoch, at.Round),
-            _ => throw new Exception( // throw InvalidRequestException.FromOtherError(
+            _ => throw InvalidRequestException.FromOtherError(
                 "The at_state_identifier was not either (A) missing (B) with only a state_version; (C) with only a Timestamp; (D) with only an Epoch; or (E) with only an Epoch and Round"
             ),
         };
@@ -259,7 +253,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         if (ledgerState == null)
         {
-            throw new Exception("bleh"); // throw new InvalidStateException("There are no transactions in the database");
+            throw new InvalidStateException("There are no transactions in the database");
         }
 
         return ledgerState;
@@ -271,7 +265,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         if (ledgerState == null)
         {
-            throw new Exception("bleh"); // throw new InvalidStateException("There are no transactions in the database");
+            throw new InvalidStateException("There are no transactions in the database");
         }
 
         return ledgerState;
@@ -279,18 +273,18 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(string timestamp)
     {
-        var validatedTimestamp = Instant.FromDateTimeOffset(DateTimeOffset.Parse(timestamp)); // _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
+        var validatedTimestamp = _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
 
         if (validatedTimestamp > SystemClock.Instance.GetCurrentInstant())
         {
-            throw new Exception("bleh"); // throw InvalidRequestException.FromOtherError("Timestamp is in the future");
+            throw InvalidRequestException.FromOtherError("Timestamp is in the future");
         }
 
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(validatedTimestamp));
 
         if (ledgerState == null)
         {
-            throw new Exception("bleh"); // throw InvalidRequestException.FromOtherError("Timestamp was before the start of the ledger");
+            throw InvalidRequestException.FromOtherError("Timestamp was before the start of the ledger");
         }
 
         return ledgerState;
@@ -302,7 +296,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         if (ledgerState == null)
         {
-            throw new Exception("bleh"); // throw InvalidRequestException.FromOtherError($"Epoch {epoch} is beyond the end of the known ledger");
+            throw InvalidRequestException.FromOtherError($"Epoch {epoch} is beyond the end of the known ledger");
         }
 
         return ledgerState;
@@ -322,7 +316,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
         return lt == null ? null : new LedgerStateReport(
             new LedgerState(
-                "my_network", // _networkConfigurationProvider.GetNetworkName(),
+                _networkConfigurationProvider.GetNetworkName(),
                 lt.ResultantStateVersion,
                 lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 lt.Epoch,

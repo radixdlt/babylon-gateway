@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Gateway API (Production)" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
-    <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/src/GatewayAPI/GatewayAPI.csproj" />
+    <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/samples/GatewayApi/GatewayApi.csproj" />
     <option name="LAUNCH_PROFILE_TFM" value="net6.0" />
     <option name="LAUNCH_PROFILE_NAME" value="Gateway API (Production)" />
     <option name="USE_EXTERNAL_CONSOLE" value="0" />

@@ -63,12 +63,12 @@
  */
 
 using Common.Database.Models.Ledger;
+using Common.Database.Models.Mempool;
 using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.Runtime.Serialization;
-using System.Text;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
+using TokenAmount = Common.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 
@@ -76,16 +76,16 @@ public interface ITransactionQuerier
 {
     Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState ledgerState);
 
-    // Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
-    //
-    // Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
-    //     ValidatedTransactionIdentifier transactionIdentifier,
-    //     Gateway.LedgerState ledgerState
-    // );
-    //
-    // Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-    //     ValidatedTransactionIdentifier transactionIdentifier
-    // );
+    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
+
+    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.LedgerState ledgerState
+    );
+
+    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier
+    );
 }
 
 [DataContract]
@@ -105,22 +105,22 @@ public record CommittedTransactionPaginationCursor(long? NextPageAtAndBelowState
     }
 }
 
-// public record TransactionPageWithTotal(
-//     long TotalRecords,
-//     CommittedTransactionPaginationCursor? NextPageCursor,
-//     List<Gateway.TransactionInfo> Transactions
-// );
+public record TransactionPageWithTotal(
+    long TotalRecords,
+    CommittedTransactionPaginationCursor? NextPageCursor,
+    List<Gateway.TransactionInfo> Transactions
+);
 
 public record TransactionPageWithoutTotal(
     CommittedTransactionPaginationCursor? NextPageCursor,
     List<Gateway.TransactionInfo> Transactions
 );
 
-// public record AccountTransactionPageRequest(
-//     ValidatedAccountAddress AccountAddress,
-//     CommittedTransactionPaginationCursor? Cursor,
-//     int PageSize
-// );
+public record AccountTransactionPageRequest(
+    ValidatedAccountAddress AccountAddress,
+    CommittedTransactionPaginationCursor? Cursor,
+    int PageSize
+);
 
 public record RecentTransactionPageRequest(
     CommittedTransactionPaginationCursor? Cursor,
@@ -130,18 +130,18 @@ public record RecentTransactionPageRequest(
 public class TransactionQuerier : ITransactionQuerier
 {
     private readonly GatewayReadOnlyDbContext _dbContext;
-    // private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    // private readonly ISubmissionTrackingService _submissionTrackingService;
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly ISubmissionTrackingService _submissionTrackingService;
 
     public TransactionQuerier(
-        GatewayReadOnlyDbContext dbContext
-        // INetworkConfigurationProvider networkConfigurationProvider,
-        // ISubmissionTrackingService submissionTrackingService
+        GatewayReadOnlyDbContext dbContext,
+        INetworkConfigurationProvider networkConfigurationProvider,
+        ISubmissionTrackingService submissionTrackingService
     )
     {
         _dbContext = dbContext;
-        // _networkConfigurationProvider = networkConfigurationProvider;
-        // _submissionTrackingService = submissionTrackingService;
+        _networkConfigurationProvider = networkConfigurationProvider;
+        _submissionTrackingService = submissionTrackingService;
     }
 
     public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState ledgerState)
@@ -158,96 +158,96 @@ public class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    // public async Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
-    // {
-    //     var totalCount = await CountAccountTransactions(request.AccountAddress, ledgerState);
-    //     var transactionStateVersionsAndOneMore = await GetAccountTransactionStateVersions(request, ledgerState);
-    //     var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
-    //         ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
-    //         : null;
-    //
-    //     var transactions = await GetTransactions(
-    //         transactionStateVersionsAndOneMore.Take(request.PageSize).ToList()
-    //     );
-    //
-    //     return new TransactionPageWithTotal(totalCount, nextCursor, transactions);
-    // }
-    //
-    // public async Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
-    //     ValidatedTransactionIdentifier transactionIdentifier,
-    //     Gateway.LedgerState ledgerState
-    // )
-    // {
-    //     var stateVersion = await _dbContext.LedgerTransactions
-    //         .Where(lt =>
-    //             lt.ResultantStateVersion <= ledgerState._Version
-    //             && (
-    //                 lt.PayloadHash == transactionIdentifier.Bytes
-    //                 || lt.SignedTransactionHash == transactionIdentifier.Bytes
-    //                 || lt.IntentHash == transactionIdentifier.Bytes
-    //             )
-    //         )
-    //         .Select(lt => lt.ResultantStateVersion)
-    //         .SingleOrDefaultAsync();
-    //
-    //     return stateVersion == 0
-    //         ? null :
-    //         (await GetTransactions(new List<long> { stateVersion })).First();
-    // }
-    //
-    // public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-    //     ValidatedTransactionIdentifier transactionIdentifier
-    // )
-    // {
-    //     // We lookup the mempool transaction using the _submissionTrackingService which is bound to the
-    //     // ReadWriteDbContext so that it gets the most recent details -- to ensure that submitted transactions
-    //     // are immediately shown as pending.
-    //     var mempoolTransaction = await _submissionTrackingService.GetMempoolTransaction(transactionIdentifier.Bytes);
-    //
-    //     if (mempoolTransaction is null)
-    //     {
-    //         return null;
-    //     }
-    //
-    //     var transactionContents = mempoolTransaction.GetTransactionContents();
-    //
-    //     var status = mempoolTransaction.Status switch
-    //     {
-    //         // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
-    //         MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(
-    //             Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-    //             transactionContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
-    //             transactionContents.LedgerStateVersion ?? 0
-    //         ),
-    //         MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-    //         MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-    //         MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-    //         MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
-    //         _ => throw new ArgumentOutOfRangeException(),
-    //     };
-    //
-    //     return new Gateway.TransactionInfo(
-    //         status,
-    //         new Gateway.TransactionIdentifier(mempoolTransaction.PayloadHash.ToHex()),
-    //         new List<Gateway.Action>(),
-    //         feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-    //         new Gateway.TransactionMetadata(
-    //             hex: mempoolTransaction.Payload.ToHex(),
-    //             message: transactionContents.MessageHex
-    //         )
-    //     );
-    // }
-    //
-    // private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState)
-    // {
-    //     return await _dbContext.AccountTransactions
-    //         .Where(at =>
-    //             at.Account.Address == accountAddress.Address
-    //             && at.ResultantStateVersion <= ledgerState._Version
-    //             && !at.LedgerTransaction.IsStartOfEpoch
-    //         )
-    //         .CountAsync();
-    // }
+    public async Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
+    {
+        var totalCount = await CountAccountTransactions(request.AccountAddress, ledgerState);
+        var transactionStateVersionsAndOneMore = await GetAccountTransactionStateVersions(request, ledgerState);
+        var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
+            ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
+            : null;
+
+        var transactions = await GetTransactions(
+            transactionStateVersionsAndOneMore.Take(request.PageSize).ToList()
+        );
+
+        return new TransactionPageWithTotal(totalCount, nextCursor, transactions);
+    }
+
+    public async Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.LedgerState ledgerState
+    )
+    {
+        var stateVersion = await _dbContext.LedgerTransactions
+            .Where(lt =>
+                lt.ResultantStateVersion <= ledgerState._Version
+                && (
+                    lt.PayloadHash == transactionIdentifier.Bytes
+                    || lt.SignedTransactionHash == transactionIdentifier.Bytes
+                    || lt.IntentHash == transactionIdentifier.Bytes
+                )
+            )
+            .Select(lt => lt.ResultantStateVersion)
+            .SingleOrDefaultAsync();
+
+        return stateVersion == 0
+            ? null :
+            (await GetTransactions(new List<long> { stateVersion })).First();
+    }
+
+    public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier
+    )
+    {
+        // We lookup the mempool transaction using the _submissionTrackingService which is bound to the
+        // ReadWriteDbContext so that it gets the most recent details -- to ensure that submitted transactions
+        // are immediately shown as pending.
+        var mempoolTransaction = await _submissionTrackingService.GetMempoolTransaction(transactionIdentifier.Bytes);
+
+        if (mempoolTransaction is null)
+        {
+            return null;
+        }
+
+        var transactionContents = mempoolTransaction.GetTransactionContents();
+
+        var status = mempoolTransaction.Status switch
+        {
+            // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
+            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(
+                Gateway.TransactionStatus.StatusEnum.CONFIRMED,
+                transactionContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
+                transactionContents.LedgerStateVersion ?? 0
+            ),
+            MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
+            MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        return new Gateway.TransactionInfo(
+            status,
+            new Gateway.TransactionIdentifier(mempoolTransaction.PayloadHash.ToHex()),
+            new List<Gateway.Action>(),
+            feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+            new Gateway.TransactionMetadata(
+                hex: mempoolTransaction.Payload.ToHex(),
+                message: transactionContents.MessageHex
+            )
+        );
+    }
+
+    private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState)
+    {
+        return await _dbContext.AccountTransactions
+            .Where(at =>
+                at.Account.Address == accountAddress.Address
+                && at.ResultantStateVersion <= ledgerState._Version
+                && !at.LedgerTransaction.IsStartOfEpoch
+            )
+            .CountAsync();
+    }
 
     private async Task<List<long>> GetRecentUserTransactionStateVersions(RecentTransactionPageRequest request, Gateway.LedgerState ledgerState)
     {
@@ -264,21 +264,21 @@ public class TransactionQuerier : ITransactionQuerier
             .ToListAsync();
     }
 
-    // private async Task<List<long>> GetAccountTransactionStateVersions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
-    // {
-    //     var stateVersionUpperBound = request.Cursor?.NextPageAtAndBelowStateVersion ?? ledgerState._Version;
-    //
-    //     return await _dbContext.AccountTransactions
-    //         .Where(at =>
-    //             at.Account.Address == request.AccountAddress.Address
-    //             && at.ResultantStateVersion <= stateVersionUpperBound
-    //             && at.IsUserTransaction
-    //         )
-    //         .OrderByDescending(at => at.ResultantStateVersion)
-    //         .Take(request.PageSize + 1)
-    //         .Select(at => at.ResultantStateVersion)
-    //         .ToListAsync();
-    // }
+    private async Task<List<long>> GetAccountTransactionStateVersions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
+    {
+        var stateVersionUpperBound = request.Cursor?.NextPageAtAndBelowStateVersion ?? ledgerState._Version;
+
+        return await _dbContext.AccountTransactions
+            .Where(at =>
+                at.Account.Address == request.AccountAddress.Address
+                && at.ResultantStateVersion <= stateVersionUpperBound
+                && at.IsUserTransaction
+            )
+            .OrderByDescending(at => at.ResultantStateVersion)
+            .Take(request.PageSize + 1)
+            .Select(at => at.ResultantStateVersion)
+            .ToListAsync();
+    }
 
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions)
     {
@@ -306,39 +306,13 @@ public class TransactionQuerier : ITransactionQuerier
                 confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
-            new Gateway.TransactionIdentifier(ledgerTransaction.PayloadHash.ToHex()), // ledgerTransaction.PayloadHash.AsGatewayTransactionIdentifier(),
+            ledgerTransaction.PayloadHash.AsGatewayTransactionIdentifier(),
             new List<Gateway.Action>(), // TODO: Remove
-            new Gateway.TokenAmount("123", new Gateway.TokenIdentifier("some_rri")), // ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+            ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(
                 hex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
                 message: ledgerTransaction.Message?.ToHex()
             )
         );
-    }
-}
-
-public static class Serializations
-{
-    public static string AsBase64Json<T>(T input)
-    {
-        var json = JsonConvert.SerializeObject(input);
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
-    }
-
-    public static T? FromBase64JsonOrDefault<T>(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return default;
-        }
-
-        try
-        {
-            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(Convert.FromBase64String(input)));
-        }
-        catch (Exception)
-        {
-            return default;
-        }
     }
 }
