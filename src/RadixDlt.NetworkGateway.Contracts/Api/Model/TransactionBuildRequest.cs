@@ -1,3 +1,5 @@
+using System;
+
 namespace RadixDlt.NetworkGateway.Contracts.Api.Model;
 
 public partial class TransactionBuildRequest

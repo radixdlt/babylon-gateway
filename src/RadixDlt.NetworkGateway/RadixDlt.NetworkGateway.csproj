@@ -6,9 +6,11 @@
     
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+        <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
     
     <ItemGroup>
+        <ProjectReference Include="..\Common\Common.csproj" />
         <ProjectReference Include="..\RadixDlt.NetworkGateway.Contracts\RadixDlt.NetworkGateway.Contracts.csproj" />
     </ItemGroup>
   

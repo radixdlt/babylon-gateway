@@ -13,9 +13,8 @@ public static class EndpointRouteBuilderExtensions
         // TODO make endpoints configurable?
         // TODO or maybe use fully-fledged MVC controllers and actions due to their superior capabilities?
 
-        endpoints.MapPost("/test1", () => "test1");
-        endpoints.MapPost("/test2", (GatewayEndpoint ge, [FromBody] TransactionBuildRequest request) => ge.Status(request));
-        endpoints.MapPost("/test3", (GatewayEndpoint ge, [FromQuery] int? myInt, CancellationToken token) => ge.Status(myInt, token));
+        endpoints.MapPost("/transaction/recent", (TransactionEndpoint te, [FromBody] RecentTransactionsRequest request, CancellationToken token) => te.Recent(request, token));
         endpoints.MapPost("/test4", (TransactionEndpoint te, [FromBody] TransactionBuildRequest request, CancellationToken token) => te.Build(request, token));
+        endpoints.MapPost("/gateway", (GatewayEndpoint ge, [FromQuery] int? myInt, CancellationToken token) => ge.Status(token));
     }
 }
