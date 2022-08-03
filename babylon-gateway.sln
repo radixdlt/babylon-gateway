@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAggregator", "src\DataAggregator\DataAggregator.csproj", "{66911552-ED43-4EEB-BD8E-CFE30552248B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAggregator", "samples\DataAggregator\DataAggregator.csproj", "{66911552-ED43-4EEB-BD8E-CFE30552248B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "src\Common\Common.csproj", "{FC26063F-82F1-4FB0-A338-2953FED731B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "src\Tests\Tests.csproj", "{61B3A18D-9987-4E05-9ABE-44C8E1119D98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayAPI", "src\GatewayAPI\GatewayAPI.csproj", "{4335C252-9F00-40EF-BAFD-38891B0F9947}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayApi", "samples\GatewayApi\GatewayApi.csproj", "{4335C252-9F00-40EF-BAFD-38891B0F9947}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway", "src\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj", "{2A8ECCEC-56AE-4A0B-9936-C707FB8B53D2}"
 EndProject
@@ -15,6 +15,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Api", "src\RadixDlt.NetworkGateway.Api\RadixDlt.NetworkGateway.Api.csproj", "{5074A173-06C2-4792-B147-DAD76646EDA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Contracts", "src\RadixDlt.NetworkGateway.Contracts\RadixDlt.NetworkGateway.Contracts.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7B572DCA-9792-48BE-A53D-3F8B87D71372}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,5 +64,9 @@ Global
 		File = .idea-run-configurations\GatewayAPI.run.xml
 		File = .idea-run-configurations\Data Aggregator (Production).run.xml
 		File = .idea-run-configurations\Gateway API (Production).run.xml
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4335C252-9F00-40EF-BAFD-38891B0F9947} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
+		{66911552-ED43-4EEB-BD8E-CFE30552248B} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
 	EndGlobalSection
 EndGlobal
