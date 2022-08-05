@@ -15,7 +15,7 @@ namespace RadixDlt.NetworkGateway.Frontend.Configuration;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNetworkGatewayFrontend(this IServiceCollection services)
+    public static void AddNetworkGatewayFrontend(this IServiceCollection services)
     {
         services
             .AddOptions<NetworkGatewayFrontendOptions>()
@@ -40,8 +40,6 @@ public static class ServiceCollectionExtensions
 
         // Transient (pooled) services
         AddCoreApiHttpClient(services);
-
-        return services;
     }
 
     private static void AddInitializers(IServiceCollection services)

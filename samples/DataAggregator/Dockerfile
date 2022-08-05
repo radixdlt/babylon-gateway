@@ -10,16 +10,15 @@ EXPOSE 1235
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet tool install --global dotnet-ef
-RUN PATH="$PATH:$HOME/.dotnet/tools" dotnet ef migrations bundle --project src/DataAggregator --context MigrationsDbContext --verbose
-RUN dotnet restore "src/DataAggregator/DataAggregator.csproj"
-RUN dotnet build "src/DataAggregator/DataAggregator.csproj" -c Release -o /app/build
+RUN dotnet restore "samples/DataAggregator/DataAggregator.csproj"
+RUN dotnet build "samples/DataAggregator/DataAggregator.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "src/DataAggregator/DataAggregator.csproj" -c Release -o /app/publish
+RUN dotnet publish "samples/DataAggregator/DataAggregator.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY --from=build /src/efbundle .
 ENTRYPOINT ["dotnet", "DataAggregator.dll"]
+
+# TODO use local paths and adjust context for CI/CD

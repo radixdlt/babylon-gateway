@@ -5,7 +5,6 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
         <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
     

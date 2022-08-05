@@ -14,9 +14,8 @@ if [ -z "$MigrationName" ]; then
 fi
 
 # Check it builds
-dotnet build src/DataAggregator
-
-dotnet ef migrations add "$MigrationName" --project src/DataAggregator --context MigrationsDbContext
+# TODO make sure MigrationsDbContext is accessible
+dotnet ef migrations add "$MigrationName" --project samples/DatabaseMigrations --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
 ./generation/regenerate-idempotent-sql-script.sh

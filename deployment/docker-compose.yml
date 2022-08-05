@@ -159,7 +159,7 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./src/DataAggregator/Dockerfile"
+      dockerfile: "./samples/DataAggregator/Dockerfile"
 
   gateway_api_built:
     extends:
@@ -167,4 +167,4 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./src/GatewayAPI/Dockerfile"
+      dockerfile: "./samples/GatewayAPI/Dockerfile"
