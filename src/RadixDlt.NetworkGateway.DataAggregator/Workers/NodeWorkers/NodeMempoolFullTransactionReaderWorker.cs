@@ -70,10 +70,11 @@ using Common.Workers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -105,7 +106,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
     private readonly ILogger<NodeMempoolFullTransactionReaderWorker> _logger;
     private readonly IServiceProvider _services;
-    private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IMempoolTrackerService _mempoolTrackerService;
@@ -116,17 +117,17 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     public NodeMempoolFullTransactionReaderWorker(
         ILogger<NodeMempoolFullTransactionReaderWorker> logger,
         IServiceProvider services,
-        IAggregatorConfiguration aggregatorConfiguration,
+        IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;
-        _aggregatorConfiguration = aggregatorConfiguration;
+        _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContextFactory = dbContextFactory;
         _mempoolTrackerService = mempoolTrackerService;
@@ -135,10 +136,10 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
     public override bool IsEnabledByNodeConfiguration()
     {
-        return _nodeConfig.NodeAppSettings.Enabled
-               && !_nodeConfig.NodeAppSettings.DisabledForMempool
-               && !_nodeConfig.NodeAppSettings.DisabledForMempoolUnknownTransactionFetching
-               && _aggregatorConfiguration.GetMempoolConfiguration().TrackTransactionsNotSubmittedByThisGateway;
+        return _nodeConfig.CoreApiNode.Enabled
+               && !_nodeConfig.CoreApiNode.DisabledForMempool
+               && !_nodeConfig.CoreApiNode.DisabledForMempoolUnknownTransactionFetching
+               && _mempoolOptionsMonitor.CurrentValue.TrackTransactionsNotSubmittedByThisGateway;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
@@ -148,7 +149,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
     private async Task FetchAndShareUnknownFullTransactions(CancellationToken cancellationToken)
     {
-        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+        var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -192,7 +193,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private record FetchAndSubmissionReport(int NonDuplicateCount, int DuplicateCount);
 
     private async Task<FetchAndSubmissionReport> FetchAndSubmitEachTransactionContents(
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         ICoreApiProvider coreApiProvider,
         HashSet<byte[]> transactionsToFetch,
         CancellationToken cancellationToken
@@ -205,7 +206,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
             transactionsToFetch,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = mempoolConfiguration.FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode,
+                MaxDegreeOfParallelism = mempoolOptions.FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode,
                 CancellationToken = cancellationToken,
             },
             async (transactionId, token) =>
@@ -220,7 +221,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 if (transactionData != null)
                 {
                     var wasDuplicate = !_mempoolTrackerService.SubmitTransactionContents(transactionData);
-                    _fullTransactionsFetchedCount.WithLabels(_nodeConfig.NodeAppSettings.Name, wasDuplicate ? "true" : "false").Inc();
+                    _fullTransactionsFetchedCount.WithLabels(_nodeConfig.CoreApiNode.Name, wasDuplicate ? "true" : "false").Inc();
 
                     if (wasDuplicate)
                     {

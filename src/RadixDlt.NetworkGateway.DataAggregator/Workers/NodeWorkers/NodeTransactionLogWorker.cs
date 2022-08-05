@@ -115,7 +115,7 @@ public class NodeTransactionLogWorker : NodeWorker
     private readonly Histogram.Child _totalFetchTimeSeconds;
 
     /* Properties */
-    private string NodeName => _nodeConfigProvider.NodeAppSettings.Name;
+    private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
 
     // NB - So that we can get new transient dependencies (such as HttpClients) each iteration,
     //      we create these dependencies directly from the service provider each loop.
@@ -125,7 +125,7 @@ public class NodeTransactionLogWorker : NodeWorker
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services
     )
-        : base(logger, nodeConfigProvider.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
@@ -137,7 +137,7 @@ public class NodeTransactionLogWorker : NodeWorker
 
     public override bool IsEnabledByNodeConfiguration()
     {
-        return _nodeConfigProvider.NodeAppSettings.Enabled && !_nodeConfigProvider.NodeAppSettings.DisabledForTransactionIndexing;
+        return _nodeConfigProvider.CoreApiNode.Enabled && !_nodeConfigProvider.CoreApiNode.DisabledForTransactionIndexing;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)

@@ -92,7 +92,7 @@ public class NetworkStatusReader : INetworkStatusReader
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _networkApi = coreApiProvider.NetworkApi;
-        _failedNetworkStatusFetchCounter = _failedNetworkStatusFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
+        _failedNetworkStatusFetchCounter = _failedNetworkStatusFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)

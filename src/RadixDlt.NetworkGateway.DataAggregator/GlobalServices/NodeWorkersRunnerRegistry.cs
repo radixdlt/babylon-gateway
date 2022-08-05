@@ -64,7 +64,7 @@
 
 using Common.Extensions;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 
 public interface INodeWorkersRunnerRegistry
 {
-    Task EnsureCorrectNodeServicesRunning(List<NodeAppSettings> nodes, CancellationToken cancellationToken);
+    Task EnsureCorrectNodeServicesRunning(List<CoreApiNode> nodes, CancellationToken cancellationToken);
 
     Task StopAllWorkers(CancellationToken cancellationToken = default);
 }
@@ -83,7 +83,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 
     private readonly ILogger<INodeWorkersRunnerRegistry> _logger;
     private readonly INodeWorkersRunnerFactory _nodeWorkersRunnerFactory;
-    private readonly Dictionary<NodeAppSettings, NodeWorkersRunner> _servicesMap = new();
+    private readonly Dictionary<CoreApiNode, NodeWorkersRunner> _servicesMap = new();
     private readonly Dictionary<string, Task> _startupBlocklist = new();
     private readonly object _servicesMapLock = new();
 
@@ -93,7 +93,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         _nodeWorkersRunnerFactory = nodeWorkersRunnerFactory;
     }
 
-    public async Task EnsureCorrectNodeServicesRunning(List<NodeAppSettings> enabledNodes, CancellationToken cancellationToken)
+    public async Task EnsureCorrectNodeServicesRunning(List<CoreApiNode> enabledNodes, CancellationToken cancellationToken)
     {
         var startTask = StartNodeWorkersForNodes(GetWorkersToStart(enabledNodes), cancellationToken);
         var endTask = StopNodeWorkersForNodes(GetWorkersToStop(enabledNodes), cancellationToken);
@@ -106,7 +106,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         await StopNodeWorkersForNodes(GetAllWorkers(), cancellationToken);
     }
 
-    private List<NodeAppSettings> GetWorkersToStart(List<NodeAppSettings> enabledNodesSettings)
+    private List<CoreApiNode> GetWorkersToStart(List<CoreApiNode> enabledNodesSettings)
     {
         lock (_servicesMapLock)
         {
@@ -117,7 +117,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         }
     }
 
-    private List<NodeAppSettings> GetWorkersToStop(List<NodeAppSettings> enabledNodesSettings)
+    private List<CoreApiNode> GetWorkersToStop(List<CoreApiNode> enabledNodesSettings)
     {
         lock (_servicesMapLock)
         {
@@ -138,7 +138,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         }
     }
 
-    private List<NodeAppSettings> GetAllWorkers()
+    private List<CoreApiNode> GetAllWorkers()
     {
         lock (_servicesMapLock)
         {
@@ -146,86 +146,86 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
         }
     }
 
-    private Task StartNodeWorkersForNodes(IEnumerable<NodeAppSettings> nodes, CancellationToken cancellationToken)
+    private Task StartNodeWorkersForNodes(IEnumerable<CoreApiNode> nodes, CancellationToken cancellationToken)
     {
         return Task.WhenAll(nodes.Select(n => CreateAndStartNodeWorkersIfNotExists(n, cancellationToken)));
     }
 
-    private async Task CreateAndStartNodeWorkersIfNotExists(NodeAppSettings node, CancellationToken cancellationToken)
+    private async Task CreateAndStartNodeWorkersIfNotExists(CoreApiNode coreApiNode, CancellationToken cancellationToken)
     {
         NodeWorkersRunner nodeWorkersRunner;
         lock (_servicesMapLock)
         {
-            if (_servicesMap.ContainsKey(node))
+            if (_servicesMap.ContainsKey(coreApiNode))
             {
                 return;
             }
 
-            nodeWorkersRunner = _nodeWorkersRunnerFactory.CreateWorkersForNode(node);
-            _servicesMap.Add(node, nodeWorkersRunner);
+            nodeWorkersRunner = _nodeWorkersRunnerFactory.CreateWorkersForNode(coreApiNode);
+            _servicesMap.Add(coreApiNode, nodeWorkersRunner);
         }
 
         try
         {
-            _logger.LogInformation("Initializing for node: {NodeName}", node.Name);
+            _logger.LogInformation("Initializing for node: {NodeName}", coreApiNode.Name);
             await nodeWorkersRunner.Initialize(cancellationToken);
-            _logger.LogInformation("Starting workers for node: {NodeName}", node.Name);
+            _logger.LogInformation("Starting workers for node: {NodeName}", coreApiNode.Name);
             await nodeWorkersRunner.StartWorkers(cancellationToken);
-            _logger.LogInformation("Workers for node started successfully: {NodeName}", node.Name);
+            _logger.LogInformation("Workers for node started successfully: {NodeName}", coreApiNode.Name);
         }
         catch (Exception ex)
         {
             if (ex.ShouldBeConsideredAppFatal())
             {
-                _logger.LogError(ex, "Unexpected app-fatal error initializing or starting up services for node: {NodeName}. Re-throwing", node.Name);
+                _logger.LogError(ex, "Unexpected app-fatal error initializing or starting up services for node: {NodeName}. Re-throwing", coreApiNode.Name);
                 throw;
             }
 
             _logger.LogError(
                 ex,
                 "Error initializing or starting up services for node: {NodeName}. We won't try again for {ErrorStartupBlockTimeSeconds} seconds. Now clearing up...",
-                node.Name,
+                coreApiNode.Name,
                 ErrorStartupBlockTimeSeconds
             );
 
             lock (_servicesMapLock)
             {
-                _startupBlocklist[node.Name] = Task.Delay(TimeSpan.FromSeconds(ErrorStartupBlockTimeSeconds), cancellationToken);
+                _startupBlocklist[coreApiNode.Name] = Task.Delay(TimeSpan.FromSeconds(ErrorStartupBlockTimeSeconds), cancellationToken);
             }
 
-            await StopNodeWorkers(node, cancellationToken);
+            await StopNodeWorkers(coreApiNode, cancellationToken);
         }
     }
 
-    private Task StopNodeWorkersForNodes(IEnumerable<NodeAppSettings> nodes, CancellationToken cancellationToken)
+    private Task StopNodeWorkersForNodes(IEnumerable<CoreApiNode> nodes, CancellationToken cancellationToken)
     {
         return Task.WhenAll(nodes.Select(n => StopNodeWorkers(n, cancellationToken)));
     }
 
-    private async Task StopNodeWorkers(NodeAppSettings node, CancellationToken nonGracefulShutdownToken)
+    private async Task StopNodeWorkers(CoreApiNode coreApiNode, CancellationToken nonGracefulShutdownToken)
     {
-        if (!_servicesMap.TryGetValue(node, out var nodeWorkersRunner))
+        if (!_servicesMap.TryGetValue(coreApiNode, out var nodeWorkersRunner))
         {
             // It's already been stopped/removed
             return;
         }
 
-        _logger.LogInformation("Sending instruction to stop workers for node {NodeName}", node.Name);
+        _logger.LogInformation("Sending instruction to stop workers for node {NodeName}", coreApiNode.Name);
 
         try
         {
             await nodeWorkersRunner.StopAllSafe(nonGracefulShutdownToken);
-            _logger.LogInformation("Node workers stopped successfully for node {NodeName}", node.Name);
+            _logger.LogInformation("Node workers stopped successfully for node {NodeName}", coreApiNode.Name);
         }
         catch (Exception ex)
         {
             if (ex.ShouldBeConsideredAppFatal())
             {
-                _logger.LogError(ex, "Unexpected app-fatal error stopping services for node: {NodeName}. Re-throwing", node.Name);
+                _logger.LogError(ex, "Unexpected app-fatal error stopping services for node: {NodeName}. Re-throwing", coreApiNode.Name);
                 throw;
             }
 
-            _logger.LogError(ex, "Unexpected error stopping services for node: {NodeName}. Now clearing up regardless", node.Name);
+            _logger.LogError(ex, "Unexpected error stopping services for node: {NodeName}. Now clearing up regardless", coreApiNode.Name);
         }
         finally
         {
@@ -234,7 +234,7 @@ public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 
         lock (_servicesMapLock)
         {
-            _servicesMap.Remove(node);
+            _servicesMap.Remove(coreApiNode);
         }
     }
 }

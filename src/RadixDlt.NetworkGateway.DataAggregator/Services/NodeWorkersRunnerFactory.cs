@@ -64,14 +64,14 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface INodeWorkersRunnerFactory
 {
-    NodeWorkersRunner CreateWorkersForNode(NodeAppSettings initialNodeAppSettings);
+    NodeWorkersRunner CreateWorkersForNode(CoreApiNode initialCoreApiNode);
 }
 
 /// <summary>
@@ -90,11 +90,11 @@ public class NodeWorkersRunnerFactory : INodeWorkersRunnerFactory
         _services = services;
     }
 
-    public NodeWorkersRunner CreateWorkersForNode(NodeAppSettings initialNodeAppSettings)
+    public NodeWorkersRunner CreateWorkersForNode(CoreApiNode initialCoreApiNode)
     {
         var nodeScope = _services.CreateScope();
-        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().NodeAppSettings = initialNodeAppSettings;
-        var logScope = _logger.BeginScope($"[NODE: {initialNodeAppSettings.Name}]");
+        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = initialCoreApiNode;
+        var logScope = _logger.BeginScope($"[NODE: {initialCoreApiNode.Name}]");
         return new NodeWorkersRunner(_logger, nodeScope, logScope);
     }
 }

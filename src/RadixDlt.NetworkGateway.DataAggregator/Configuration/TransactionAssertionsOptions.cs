@@ -62,88 +62,55 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
+using RadixDlt.NetworkGateway.Configuration;
+using System.Collections.Immutable;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public record NodeAppSettings
+public record TransactionAssertionsOptions
 {
     /// <summary>
-    /// A unique name identifying this node - used as the node's id.
+    /// Due to changes of parsing certain Core API responses by the Open API library between before/after the 1.1.1
+    /// release, we disable this matching check by default. This can be re-enabled if re-syncing from scratch.
     /// </summary>
-    [ConfigurationKeyName("Name")]
-    public string Name { get; set; } = string.Empty;
+    [ConfigurationKeyName("AssertDownedSubstatesMatchDownFromCoreApi")]
+    public bool AssertDownedSubstatesMatchDownFromCoreApi { get; set; }
 
     /// <summary>
-    /// Address of the node's Core API.
+    /// Some releases of the Gateway API have included tracking of new substates.
+    /// This configuration option allows Gateway runners to upgrade late to these releases without breaking.
+    /// Specifically, this option allows substates to be DOWN'd without having seen the substate previously been UP'd.
+    /// Use the value "" to override this default configuration to not permit any inaccurate substate history.
+    ///
+    /// Note - we use a comma separated string instead of a list as it can be overriden better.
+    /// DotNet configuration of enumerables only supports merging which we don't want... (and empty arrays count as
+    /// "null") - see also https://github.com/dotnet/runtime/issues/36384.
     /// </summary>
-    [ConfigurationKeyName("CoreApiAddress")]
-    public string CoreApiAddress { get; set; } = string.Empty;
+    [ConfigurationKeyName("SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated")]
+    public string SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated { get; set; } = "ValidatorSystemMetadataSubstate";
 
-    /// <summary>
-    /// AuthorizationHeader - if set, can allow for basic auth.
-    /// </summary>
-    [ConfigurationKeyName("CoreApiAuthorizationHeader")]
-    public string? CoreApiAuthorizationHeader { get; set; } = null;
+    private IReadOnlyList<string>? _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory;
 
-    /// <summary>
-    /// Relative weighting of the node.
-    /// </summary>
-    [ConfigurationKeyName("TrustWeighting")]
-    public decimal TrustWeighting { get; set; } = 1;
+    // This gets cached when called for the first time
+    public IReadOnlyList<string> SubstateTypesWhichAreAllowedToHaveIncompleteHistory =>
+        _cachedSubstateTypesWhichAreAllowedToHaveIncompleteHistory ??=
+            SplitCommaSeparatedList(SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated);
 
-    /// <summary>
-    /// Relative weighting of the node.
-    /// </summary>
-    [ConfigurationKeyName("RequestWeighting")]
-    public decimal RequestWeighting { get; set; } = 1;
-
-    /// <summary>
-    /// If false, the node should not be used.
-    /// </summary>
-    [ConfigurationKeyName("Enabled")]
-    public bool? ConfigEnabled { get; set; }
-
-    /// <summary>
-    /// If false, the node should not be used. [Deprecated].
-    /// </summary>
-    [ConfigurationKeyName("EnabledForIndexing")]
-    public bool? ConfigEnabledForIndexing { get; set; }
-
-    // Note -- this is to support the legacy EnabledForIndexing property
-    public bool Enabled => ConfigEnabled ?? ConfigEnabledForIndexing ?? false;
-
-    [ConfigurationKeyName("DisabledForTransactionIndexing")]
-    public bool DisabledForTransactionIndexing { get; set; } = false;
-
-    [ConfigurationKeyName("DisabledForTopOfTransactionReadingIfNotFullySynced")]
-    public bool DisabledForTopOfTransactionReadingIfNotFullySynced { get; set; } = false;
-
-    [ConfigurationKeyName("DisabledForMempool")]
-    public bool DisabledForMempool { get; set; } = false;
-
-    [ConfigurationKeyName("DisabledForMempoolUnknownTransactionFetching")]
-    public bool DisabledForMempoolUnknownTransactionFetching { get; set; } = false;
-
-    [ConfigurationKeyName("DisabledForConstruction")]
-    public bool DisabledForConstruction { get; set; } = false;
-
-    public void AssertValid()
+    private IReadOnlyList<string> SplitCommaSeparatedList(string list)
     {
-        if (!Enabled)
-        {
-            return;
-        }
+        return list.Split(",")
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToImmutableList();
+    }
+}
 
-        if (string.IsNullOrEmpty(Name))
-        {
-            throw new InvalidConfigurationException("An enabled node's name cannot be empty");
-        }
-
-        if (string.IsNullOrEmpty(CoreApiAddress))
-        {
-            throw new InvalidConfigurationException("A enabled node's address cannot be empty");
-        }
+internal class TransactionAssertionsOptionsValidator : AbstractOptionsValidator<TransactionAssertionsOptions>
+{
+    public TransactionAssertionsOptionsValidator()
+    {
+        RuleFor(x => x.SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated).NotNull();
     }
 }

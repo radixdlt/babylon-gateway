@@ -68,9 +68,10 @@ using Common.Utilities;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System.Collections.Concurrent;
@@ -145,22 +146,22 @@ public class MempoolTrackerService : IMempoolTrackerService
         );
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
-    private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
     private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
 
     public MempoolTrackerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
-        IAggregatorConfiguration aggregatorConfiguration,
+        IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ILogger<MempoolTrackerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
-        _aggregatorConfiguration = aggregatorConfiguration;
+        _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _logger = logger;
         _recentFullTransactionsFetched = new ConcurrentLruCache<byte[], FullTransactionData>(
-            _aggregatorConfiguration.GetMempoolConfiguration().RecentFetchedUnknownTransactionsCacheSize,
+            mempoolOptionsMonitor.CurrentValue.RecentFetchedUnknownTransactionsCacheSize,
             ByteArrayEqualityComparer.Default
         );
     }
@@ -228,7 +229,7 @@ public class MempoolTrackerService : IMempoolTrackerService
     public async Task HandleMempoolChanges(CancellationToken token)
     {
         var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
-        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+        var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var combinedMempool = CombineNodeMempools(mempoolConfiguration);
 
@@ -239,16 +240,16 @@ public class MempoolTrackerService : IMempoolTrackerService
         );
     }
 
-    private Dictionary<byte[], Instant> CombineNodeMempools(MempoolConfiguration mempoolConfiguration)
+    private Dictionary<byte[], Instant> CombineNodeMempools(MempoolOptions mempoolOptions)
     {
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
-            .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(mempoolConfiguration.ExcludeNodeMempoolsFromUnionIfStaleFor))
+            .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(mempoolOptions.ExcludeNodeMempoolsFromUnionIfStaleFor))
             .ToList();
 
         if (nodeMempoolsToConsider.Count == 0)
         {
             throw new NoMempoolDataException(
-                $"Don't have any recent mempool data from nodes within {mempoolConfiguration.ExcludeNodeMempoolsFromUnionIfStaleFor.FormatSecondsHumanReadable()}. This may be because the service has yet to connect to the node/s."
+                $"Don't have any recent mempool data from nodes within {mempoolOptions.ExcludeNodeMempoolsFromUnionIfStaleFor.FormatSecondsHumanReadable()}. This may be because the service has yet to connect to the node/s."
             );
         }
 
@@ -319,12 +320,12 @@ public class MempoolTrackerService : IMempoolTrackerService
     }
 
     private async Task CreateMempoolTransactionsFromNewTransactionsDiscoveredInCombinedMempool(
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
-        if (!mempoolConfiguration.TrackTransactionsNotSubmittedByThisGateway)
+        if (!mempoolOptions.TrackTransactionsNotSubmittedByThisGateway)
         {
             return;
         }
@@ -396,7 +397,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private async Task MarkRelevantMempoolTransactionsNotInCombinedMempoolAsMissing(
         Instant currentTimestamp,
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
         CancellationToken token
     )
@@ -406,7 +407,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var submissionGracePeriodCutOff = currentTimestamp - mempoolConfiguration.PostSubmissionGracePeriodBeforeCanBeMarkedMissing;
+        var submissionGracePeriodCutOff = currentTimestamp - mempoolOptions.PostSubmissionGracePeriodBeforeCanBeMarkedMissing;
 
         var previouslyTrackedTransactionsNowMissingFromNodeMempools = await dbContext.MempoolTransactions
             .Where(mt => mt.Status == MempoolTransactionStatus.SubmittedOrKnownInNodeMempool)

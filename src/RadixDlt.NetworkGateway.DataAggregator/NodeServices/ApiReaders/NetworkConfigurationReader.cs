@@ -89,7 +89,7 @@ public class NetworkConfigurationReader : INetworkConfigurationReader
     public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
     {
         _networkApi = coreApiProvider.NetworkApi;
-        _failedNetworkConfigurationFetchCounter = _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
+        _failedNetworkConfigurationFetchCounter = _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)

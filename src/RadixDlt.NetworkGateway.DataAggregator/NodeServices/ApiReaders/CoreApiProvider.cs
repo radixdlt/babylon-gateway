@@ -90,14 +90,14 @@ public class CoreApiProvider : ICoreApiProvider
 
     public CoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
-        if (!string.IsNullOrWhiteSpace(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader))
+        if (!string.IsNullOrWhiteSpace(nodeConfig.CoreApiNode.CoreApiAuthorizationHeader))
         {
-            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.NodeAppSettings.CoreApiAuthorizationHeader);
+            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.CoreApiNode.CoreApiAuthorizationHeader);
         }
 
-        ConstructionApi = new ConstructionApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
-        TransactionsApi = new TransactionsApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
-        MempoolApi = new MempoolApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
-        NetworkApi = new NetworkApi(httpClient, nodeConfig.NodeAppSettings.CoreApiAddress);
+        ConstructionApi = new ConstructionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        TransactionsApi = new TransactionsApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        MempoolApi = new MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        NetworkApi = new NetworkApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
     }
 }

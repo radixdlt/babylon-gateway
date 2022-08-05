@@ -66,10 +66,11 @@ using Common.Database.Models.SingleEntries;
 using Common.Extensions;
 using Common.Utilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
@@ -219,7 +220,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
     /* Dependencies */
     private readonly ILogger<LedgerConfirmationService> _logger;
-    private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IOptionsMonitor<LedgerConfirmationOptions> _ledgerConfirmationOptionsMonitor;
+    private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILedgerExtenderService _ledgerExtenderService;
 
@@ -229,26 +231,28 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;
 
-    private IList<NodeAppSettings> TransactionNodes { get; set; } = new List<NodeAppSettings>();
+    private IList<CoreApiNode> TransactionNodes { get; set; } = new List<CoreApiNode>();
 
-    private LedgerConfirmationConfiguration Config { get; set; }
+    private LedgerConfirmationOptions Config { get; set; }
 
     public LedgerConfirmationService(
         ILogger<LedgerConfirmationService> logger,
-        IAggregatorConfiguration aggregatorConfiguration,
+        IOptionsMonitor<LedgerConfirmationOptions> ledgerConfirmationOptionsMonitor,
+        IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILedgerExtenderService ledgerExtenderService
     )
     {
         _logger = logger;
-        _aggregatorConfiguration = aggregatorConfiguration;
+        _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
+        _networkOptionsMonitor = networkOptionsMonitor;
         _systemStatusService = systemStatusService;
         _ledgerExtenderService = ledgerExtenderService;
 
         _quorumExistsStatus.SetStatus(MetricStatus.Unknown);
         _quorumExtensionConsistentStatus.SetStatus(MetricStatus.Unknown);
 
-        Config = _aggregatorConfiguration.GetLedgerConfirmationConfiguration();
+        Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
     /// <summary>
@@ -363,11 +367,11 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         // We persist these to avoid excessive config load allocations;
         // but update them at the start of each loop in case the config has changed
-        TransactionNodes = _aggregatorConfiguration.GetNodes()
+        TransactionNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes
             .Where(n => n.Enabled && !n.DisabledForTransactionIndexing)
             .ToList();
 
-        Config = _aggregatorConfiguration.GetLedgerConfirmationConfiguration();
+        Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
     private List<CommittedTransaction> ConstructQuorumLedgerExtension()

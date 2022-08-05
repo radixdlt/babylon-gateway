@@ -64,8 +64,9 @@
 
 using Common.Workers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
@@ -81,18 +82,17 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
 
     private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
     private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
-    private readonly IAggregatorConfiguration _configuration;
+    private readonly IOptionsMonitor<NetworkOptions> _networkOptions;
 
     public NodeConfigurationMonitorWorker(
         ILogger<NodeConfigurationMonitorWorker> logger,
-        IAggregatorConfiguration configuration,
-        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry
-    )
+        INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
+        IOptionsMonitor<NetworkOptions> networkOptions)
         : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
-        _configuration = configuration;
         _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
+        _networkOptions = networkOptions;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
@@ -115,7 +115,7 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
 
     private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
     {
-        var nodeConfiguration = _configuration.GetNodes();
+        var nodeConfiguration = _networkOptions.CurrentValue.CoreApiNodes;
 
         var enabledNodes = nodeConfiguration
             .Where(n => n.Enabled)

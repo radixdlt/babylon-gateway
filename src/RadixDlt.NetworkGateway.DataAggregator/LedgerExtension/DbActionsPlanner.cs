@@ -70,7 +70,7 @@ using Common.Database.Models.Ledger.Records;
 using Common.Extensions;
 using Common.Utilities;
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
@@ -111,7 +111,7 @@ public record ActionsPlannerReport(
 /// </summary>
 public class DbActionsPlanner
 {
-    private readonly TransactionAssertionConfiguration _configuration;
+    private readonly TransactionAssertionsOptions _options;
     private readonly AggregatorDbContext _dbContext;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly CancellationToken _cancellationToken;
@@ -146,13 +146,13 @@ public class DbActionsPlanner
     private Dictionary<AccountValidator, AccountValidatorStakeHistory>? _latestAccountValidatorStakeHistory;
 
     public DbActionsPlanner(
-        TransactionAssertionConfiguration configuration,
+        TransactionAssertionsOptions options,
         AggregatorDbContext dbContext,
         IEntityDeterminer entityDeterminer,
         CancellationToken cancellationToken
     )
     {
-        _configuration = configuration;
+        _options = options;
         _dbContext = dbContext;
         _entityDeterminer = entityDeterminer;
         _cancellationToken = cancellationToken;

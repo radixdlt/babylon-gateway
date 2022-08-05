@@ -62,12 +62,14 @@
  * permissions under this License.
  */
 
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using NodaTime;
+using RadixDlt.NetworkGateway.Configuration;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public record MempoolConfiguration
+public record MempoolOptions
 {
     // If enabling this option, you should note the following:
     //   Transactions not submitted by this gateway will never be marked as failed
@@ -151,4 +153,24 @@ public record MempoolConfiguration
     public long PruneRequiresMissingFromMempoolForSeconds { get; set; } = 60;
 
     public Duration PruneRequiresMissingFromMempoolFor => Duration.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
+}
+
+internal class MempoolOptionsValidator : AbstractOptionsValidator<MempoolOptions>
+{
+    public MempoolOptionsValidator()
+    {
+        RuleFor(x => x.FetchUnknownTransactionFromMempoolDegreeOfParallelizationPerNode).GreaterThan(0);
+        RuleFor(x => x.RecentFetchedUnknownTransactionsCacheSize).GreaterThan(0);
+        RuleFor(x => x.ExcludeNodeMempoolsFromUnionIfStaleForSeconds).GreaterThan(0);
+        RuleFor(x => x.PruneCommittedAfterSeconds).GreaterThan(0);
+        RuleFor(x => x.PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds).GreaterThan(0);
+        RuleFor(x => x.ResubmissionNodeRequestTimeoutMilliseconds).GreaterThan(0);
+        RuleFor(x => x.AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds).GreaterThan(0);
+        RuleFor(x => x.MinDelayBetweenResubmissionsSeconds).GreaterThan(0);
+        RuleFor(x => x.MinDelayBetweenMissingFromMempoolAndResubmissionSeconds).GreaterThan(0);
+        RuleFor(x => x.StopResubmittingAfterSeconds).GreaterThan(0);
+        RuleFor(x => x.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds).GreaterThan(0);
+        RuleFor(x => x.PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds).GreaterThan(0);
+        RuleFor(x => x.PruneRequiresMissingFromMempoolForSeconds).GreaterThan(0);
+    }
 }

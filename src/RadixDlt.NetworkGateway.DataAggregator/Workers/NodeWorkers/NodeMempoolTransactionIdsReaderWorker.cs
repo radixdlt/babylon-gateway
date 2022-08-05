@@ -127,7 +127,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
-        : base(logger, nodeConfig.NodeAppSettings.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
     {
         _logger = logger;
         _services = services;
@@ -139,7 +139,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
     public override bool IsEnabledByNodeConfiguration()
     {
         var nodeConfig = _services.GetRequiredService<INodeConfigProvider>();
-        return nodeConfig.NodeAppSettings.Enabled && !nodeConfig.NodeAppSettings.DisabledForMempool;
+        return nodeConfig.CoreApiNode.Enabled && !nodeConfig.CoreApiNode.DisabledForMempool;
     }
 
     protected override async Task DoWork(CancellationToken cancellationToken)
@@ -160,7 +160,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             ))
         );
 
-        _mempoolSizeUnScoped.WithLabels(_nodeConfig.NodeAppSettings.Name).Set(mempoolContents.TransactionIdentifiers.Count);
+        _mempoolSizeUnScoped.WithLabels(_nodeConfig.CoreApiNode.Name).Set(mempoolContents.TransactionIdentifiers.Count);
 
         var latestMempoolHashes = mempoolContents.TransactionIdentifiers
             .Select(ti => ti.Hash.ConvertFromHex())
@@ -177,8 +177,8 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             .ExceptInSet(previousMempoolHashes)
             .Count();
 
-        _mempoolItemsAddedUnScoped.WithLabels(_nodeConfig.NodeAppSettings.Name).Inc(transactionIdsAddedCount);
-        _mempoolItemsRemovedUnScoped.WithLabels(_nodeConfig.NodeAppSettings.Name).Inc(transactionIdsRemovedCount);
+        _mempoolItemsAddedUnScoped.WithLabels(_nodeConfig.CoreApiNode.Name).Inc(transactionIdsAddedCount);
+        _mempoolItemsRemovedUnScoped.WithLabels(_nodeConfig.CoreApiNode.Name).Inc(transactionIdsRemovedCount);
 
         if (transactionIdsAddedCount > 0 || transactionIdsRemovedCount > 0)
         {
@@ -190,6 +190,6 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             );
         }
 
-        _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.NodeAppSettings.Name, new NodeMempoolHashes(_latestTransactionHashes));
+        _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.CoreApiNode.Name, new NodeMempoolHashes(_latestTransactionHashes));
     }
 }

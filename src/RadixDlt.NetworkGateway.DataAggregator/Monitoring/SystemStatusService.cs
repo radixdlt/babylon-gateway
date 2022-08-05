@@ -63,9 +63,10 @@
  */
 
 using Common.Extensions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
@@ -100,17 +101,17 @@ public class SystemStatusService : ISystemStatusService
             "1 if primary, 0 if secondary."
         );
 
-    private readonly IConfiguration _configuration;
+    private readonly IOptionsMonitor<MonitoringOptions> _configuration;
 
     private Instant? _lastTransactionCommitment;
     private bool _isPrimary;
     private TransactionSummary? _topOfLedger;
 
-    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("StartupGracePeriodSeconds") ?? 10);
+    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
 
-    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.GetSection("Monitoring").GetValue<int?>("UnhealthyCommitmentGapSeconds") ?? 20);
+    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
 
-    public SystemStatusService(IConfiguration configuration)
+    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration)
     {
         _configuration = configuration;
         SetIsPrimary(true);

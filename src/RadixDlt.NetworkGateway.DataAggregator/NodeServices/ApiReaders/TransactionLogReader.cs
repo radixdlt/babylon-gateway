@@ -92,7 +92,7 @@ public class TransactionLogReader : ITransactionLogReader
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _transactionsApi = coreApiProvider.TransactionsApi;
-        _failedTransactionsFetchCounter = _failedTransactionsFetchCounterUnScoped.WithLabels(nodeConfigProvider.NodeAppSettings.Name);
+        _failedTransactionsFetchCounter = _failedTransactionsFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)

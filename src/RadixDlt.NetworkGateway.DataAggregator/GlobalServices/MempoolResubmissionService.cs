@@ -70,10 +70,11 @@ using Common.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -147,7 +148,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     private readonly IServiceProvider _services;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
-    private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
+    private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolResubmissionService> _logger;
@@ -155,7 +157,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     public MempoolResubmissionService(
         IServiceProvider services,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
-        IAggregatorConfiguration aggregatorConfiguration,
+        IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
+        IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
         ISystemStatusService systemStatusService,
         ILogger<MempoolResubmissionService> logger
@@ -163,7 +166,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     {
         _services = services;
         _dbContextFactory = dbContextFactory;
-        _aggregatorConfiguration = aggregatorConfiguration;
+        _mempoolOptionsMonitor = mempoolOptionsMonitor;
+        _networkOptionsMonitor = networkOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
         _systemStatusService = systemStatusService;
         _logger = logger;
@@ -176,7 +180,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         const int BatchSize = 30;
 
         var instantForTransactionChoosing = SystemClock.Instance.GetCurrentInstant();
-        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+        var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
 
@@ -205,20 +209,20 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private async Task<List<MempoolTransaction>> SelectTransactionsToResubmit(
         AggregatorDbContext dbContext,
         Instant instantForTransactionChoosing,
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         int batchSize,
         CancellationToken token
     )
     {
         var transactionsToResubmit =
-            await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolConfiguration, dbContext)
+            await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
                 .OrderBy(mt => mt.LastSubmittedToNodeTimestamp)
                 .Take(batchSize)
                 .ToListAsync(token);
 
         var totalTransactionsNeedingResubmission = transactionsToResubmit.Count < batchSize
             ? transactionsToResubmit.Count
-            : await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolConfiguration, dbContext)
+            : await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
                 .CountAsync(token);
 
         _resubmissionQueueSize.Set(totalTransactionsNeedingResubmission);
@@ -247,7 +251,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     }
 
     private List<MempoolTransactionWithChosenNode> MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         List<MempoolTransaction> transactionsWantingResubmission,
         Instant submittedAt
     )
@@ -256,7 +260,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         foreach (var transaction in transactionsWantingResubmission)
         {
-            var resubmissionLimit = transaction.LastSubmittedToGatewayTimestamp!.Value + mempoolConfiguration.StopResubmittingAfter;
+            var resubmissionLimit = transaction.LastSubmittedToGatewayTimestamp!.Value + mempoolOptions.StopResubmittingAfter;
 
             var canResubmit = submittedAt <= resubmissionLimit;
 
@@ -280,17 +284,17 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         return transactionsToResubmitWithNodes;
     }
 
-    private record MempoolTransactionWithChosenNode(MempoolTransaction MempoolTransaction, NodeAppSettings Node);
+    private record MempoolTransactionWithChosenNode(MempoolTransaction MempoolTransaction, CoreApiNode CoreApiNode);
 
     private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(
         Instant currentTimestamp,
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         AggregatorDbContext dbContext
     )
     {
-        var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolConfiguration.MinDelayBetweenResubmissions;
+        var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
 
-        var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolConfiguration.MinDelayBetweenMissingFromMempoolAndResubmission;
+        var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
 
         var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration.FromSeconds(60));
 
@@ -311,7 +315,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     }
 
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
-        MempoolConfiguration mempoolConfiguration,
+        MempoolOptions mempoolOptions,
         List<MempoolTransactionWithChosenNode> transactionsToResubmitWithNodes,
         Instant submittedAt,
         CancellationToken token
@@ -329,7 +333,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             var isDoubleSpendWhichCouldBeItself =
                 failureReason!.Value == MempoolTransactionFailureReason.DoubleSpend
                 && !_systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
-                    mempoolConfiguration.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,
+                    mempoolOptions.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,
                     transaction.LastDroppedOutOfMempoolTimestamp!.Value
                 );
 
@@ -368,9 +372,9 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     {
         _transactionResubmissionAttemptCount.Inc();
         var transaction = transactionWithNode.MempoolTransaction;
-        var chosenNode = transactionWithNode.Node;
+        var chosenNode = transactionWithNode.CoreApiNode;
         using var nodeScope = _services.CreateScope();
-        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().NodeAppSettings = chosenNode;
+        nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 
         var submitRequest = new ConstructionSubmitRequest(
@@ -429,9 +433,9 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         }
     }
 
-    private NodeAppSettings GetRandomCoreApi()
+    private CoreApiNode GetRandomCoreApi()
     {
-        return _aggregatorConfiguration.GetNodes()
+        return _networkOptionsMonitor.CurrentValue.CoreApiNodes
             .Where(n => n.Enabled && !n.DisabledForConstruction)
             .GetRandomBy(n => (double)n.RequestWeighting);
     }

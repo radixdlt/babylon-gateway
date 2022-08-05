@@ -65,8 +65,10 @@
 using Common.Database.Models.Mempool;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -93,19 +95,19 @@ public class MempoolPrunerService : IMempoolPrunerService
         );
 
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
-    private readonly IAggregatorConfiguration _aggregatorConfiguration;
+    private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolPrunerService> _logger;
 
     public MempoolPrunerService(
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
-        IAggregatorConfiguration aggregatorConfiguration,
+        IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILogger<MempoolPrunerService> logger
     )
     {
         _dbContextFactory = dbContextFactory;
-        _aggregatorConfiguration = aggregatorConfiguration;
+        _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _systemStatusService = systemStatusService;
         _logger = logger;
     }
@@ -116,7 +118,7 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         await UpdateSizeMetrics(dbContext, token);
 
-        var mempoolConfiguration = _aggregatorConfiguration.GetMempoolConfiguration();
+        var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var currTime = SystemClock.Instance.GetCurrentInstant();
 

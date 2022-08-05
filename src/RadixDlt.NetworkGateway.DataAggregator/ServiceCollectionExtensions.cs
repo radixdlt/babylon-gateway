@@ -1,9 +1,11 @@
 using Common.CoreCommunications;
 using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Prometheus;
+using RadixDlt.NetworkGateway.Configuration;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -13,22 +15,23 @@ using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 using System.Net;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
+namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayDataAggregator(this IServiceCollection services)
+    public static void AddNetworkGatewayDataAggregator(this IServiceCollection services, string connectionString)
     {
         services
-            .AddOptions<NetworkGatewayDataAggregatorOptions>()
-            .ValidateDataAnnotations()
-            .ValidateOnStart()
-            .BindConfiguration("DataAggregator"); // TODO is this how we want to Bind configuration by default?
+            .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator")
+            .AddValidatableOptionsAtSection<MonitoringOptions, MonitoringOptionsValidator>("DataAggregator:Monitoring")
+            .AddValidatableOptionsAtSection<MempoolOptions, MempoolOptionsValidator>("DataAggregator:MempoolOptions")
+            .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation")
+            .AddValidatableOptionsAtSection<TransactionAssertionsOptions, TransactionAssertionsOptionsValidator>("DataAggregator:TransactionAssertions");
 
         // Globally-Scoped services
         AddGlobalScopedServices(services);
         AddGlobalHostedServices(services);
-        AddDatabaseContext(services);
+        AddDatabaseContext(services, connectionString);
 
         // Node-Scoped services
         AddNodeScopedServices(services);
@@ -39,7 +42,6 @@ public static class ServiceCollectionExtensions
 
     private static void AddGlobalScopedServices(IServiceCollection services)
     {
-        services.AddSingleton<IAggregatorConfiguration, AggregatorConfiguration>();
         services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
@@ -63,52 +65,14 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<MempoolPrunerWorker>();
     }
 
-    private static void AddDatabaseContext(IServiceCollection services)
+    private static void AddDatabaseContext(IServiceCollection services, string connectionString)
     {
         // Useful links:
         // https://www.npgsql.org/efcore/index.html
         // https://www.npgsql.org/doc/connection-string-parameters.html
-
-/*
-        // First - Migration Context
-        var migrationsDbConnectionString = hostContext.Configuration.GetConnectionString("MigrationsDbContext");
-        var aggregatorDbConnectionString = hostContext.Configuration.GetConnectionString("AggregatorDbContext");
-
-        if (migrationsDbConnectionString != null)
-        {
-            services.AddDbContextFactory<MigrationsDbContext>(options =>
-            {
-                options.UseNpgsql(
-                    migrationsDbConnectionString,
-                    o => o.NonBrokenUseNodaTime()
-                );
-            });
-        }
-        else
-        {
-            // If no MigrationsDbContext was provided, we use the default AggregatorDbContext, but
-            //   overrides the default 30 second CommandTimeout on migrations (which causes long migrations to rollback)
-            //   We override the timeout with 15 minutes.
-            // Note that it is still not advised to use the migrate-on-startup strategy in production.
-            //   We recommend following the guidance here:
-            //   https://docs.radixdlt.com/main/node-and-gateway/network-gateway-releasing.html
-            // If a Gateway runner wishes to add that back, they can explicitly configure their own MigrationsDbContext.
-            services.AddDbContextFactory<MigrationsDbContext>(options =>
-            {
-                options.UseNpgsql(
-                    aggregatorDbConnectionString,
-                    o => o.NonBrokenUseNodaTime()
-                        .CommandTimeout(900) // 15 minutes
-                );
-            });
-        }
-*/
         services.AddDbContextFactory<AggregatorDbContext>(options =>
         {
-            options.UseNpgsql(
-                "Host=localhost:5532;Database=babylon_stokenet;Username=db_superuser;Password=db_password;Include Error Detail=true", // hostContext.Configuration.GetConnectionString("AggregatorDbContext"),
-                o => o.NonBrokenUseNodaTime()
-            );
+            options.UseNpgsql(connectionString, o => o.NonBrokenUseNodaTime());
         });
     }
 
@@ -123,11 +87,7 @@ public static class ServiceCollectionExtensions
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
             .UseHttpClientMetrics()
-            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
-                serviceProvider,
-                "DisableCoreApiHttpsCertificateChecks",
-                "CoreApiHttpProxyAddress"
-            ));
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
 
         // We can mock these out in tests
         // These should be transient so that they don't capture a transient HttpClient
@@ -150,26 +110,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }
 
-    private static HttpClientHandler ConfigureHttpClientHandler(
-        IServiceProvider serviceProvider,
-        string disableApiChecksConfigParameterName,
-        string httpProxyAddressConfigParameterName
-    )
+    private static HttpClientHandler ConfigureHttpClientHandler(IOptions<NetworkOptions> options)
     {
+        var o = options.Value;
         var httpClientHandler = new HttpClientHandler();
 
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        var disableCertificateChecks = configuration.GetValue<bool>(disableApiChecksConfigParameterName);
-        var httpProxyAddress = configuration.GetValue<string?>(httpProxyAddressConfigParameterName);
-
-        if (disableCertificateChecks)
+        if (o.DisableCoreApiHttpsCertificateChecks)
         {
             httpClientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
         }
 
-        if (!string.IsNullOrWhiteSpace(httpProxyAddress))
+        if (!string.IsNullOrWhiteSpace(o.CoreApiHttpProxyAddress))
         {
-            httpClientHandler.Proxy = new WebProxy(httpProxyAddress);
+            httpClientHandler.Proxy = new WebProxy(o.CoreApiHttpProxyAddress);
         }
 
         return httpClientHandler;

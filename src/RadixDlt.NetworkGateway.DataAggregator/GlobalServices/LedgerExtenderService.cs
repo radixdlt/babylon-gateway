@@ -68,7 +68,9 @@ using Common.Database.Models.SingleEntries;
 using Common.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -105,7 +107,7 @@ public record CommitTransactionsReport(
 
 public class LedgerExtenderService : ILedgerExtenderService
 {
-    private readonly IAggregatorConfiguration _configuration;
+    private readonly IOptionsMonitor<TransactionAssertionsOptions> _transactionAssertionsOptionsMonitor;
     private readonly ILogger<LedgerExtenderService> _logger;
     private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
@@ -120,7 +122,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     );
 
     public LedgerExtenderService(
-        IAggregatorConfiguration configuration,
+        IOptionsMonitor<TransactionAssertionsOptions> transactionAssertionsOptionsMonitor,
         ILogger<LedgerExtenderService> logger,
         IDbContextFactory<AggregatorDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
@@ -128,7 +130,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         INetworkConfigurationProvider networkConfigurationProvider
     )
     {
-        _configuration = configuration;
+        _transactionAssertionsOptionsMonitor = transactionAssertionsOptionsMonitor;
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
@@ -278,7 +280,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     )
     {
         var dbActionsPlanner = new DbActionsPlanner(
-            _configuration.GetTransactionAssertionConfiguration(),
+            _transactionAssertionsOptionsMonitor.CurrentValue,
             dbContext,
             _entityDeterminer,
             cancellationToken

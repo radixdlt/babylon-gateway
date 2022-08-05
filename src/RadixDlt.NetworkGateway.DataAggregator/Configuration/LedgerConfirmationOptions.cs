@@ -62,12 +62,15 @@
  * permissions under this License.
  */
 
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using NodaTime;
+using RadixDlt.NetworkGateway.Configuration;
+using System.Data;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Configuration.Models;
+namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public record LedgerConfirmationConfiguration
+public record LedgerConfirmationOptions
 {
     /// <summary>
     /// Gets or sets CommitRequiresNodeQuorumTrustProportion.
@@ -128,4 +131,16 @@ public record LedgerConfirmationConfiguration
     /// </summary>
     [ConfigurationKeyName("MaxTransactionPipelineSizePerNode")]
     public long MaxTransactionPipelineSizePerNode { get; set; } = 3000;
+}
+
+internal class LedgerConfirmationOptionsValidator : AbstractOptionsValidator<LedgerConfirmationOptions>
+{
+    public LedgerConfirmationOptionsValidator()
+    {
+        RuleFor(x => x.CommitRequiresNodeQuorumTrustProportion).GreaterThan(0);
+        RuleFor(x => x.SufficientlySyncedStateVersionThreshold).GreaterThan(0);
+        RuleFor(x => x.MaxCommitBatchSize).GreaterThan(0);
+        RuleFor(x => x.LargeBatchSizeToAddDelay).GreaterThan(0);
+        RuleFor(x => x.MaxTransactionPipelineSizePerNode).GreaterThan(0);
+    }
 }

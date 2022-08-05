@@ -7,9 +7,9 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers;
 public class LedgerSynchronizationWorker : BackgroundService
 {
     private readonly DistributedLockService _distributedLockService;
-    private readonly IOptionsMonitor<NetworkGatewayDataAggregatorOptions> _optionsMonitor;
+    private readonly IOptionsMonitor<NetworkOptions> _optionsMonitor;
 
-    public LedgerSynchronizationWorker(DistributedLockService distributedLockService, IOptionsMonitor<NetworkGatewayDataAggregatorOptions> optionsMonitor)
+    public LedgerSynchronizationWorker(DistributedLockService distributedLockService, IOptionsMonitor<NetworkOptions> optionsMonitor)
     {
         _distributedLockService = distributedLockService;
         _optionsMonitor = optionsMonitor;

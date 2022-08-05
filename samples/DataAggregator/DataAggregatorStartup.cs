@@ -1,5 +1,5 @@
 using Prometheus;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -7,10 +7,19 @@ namespace DataAggregator;
 
 public class DataAggregatorStartup
 {
+    private readonly string _connectionString;
+    private readonly int _prometheusMetricsPort;
+
+    public DataAggregatorStartup(IConfiguration configuration)
+    {
+        _connectionString = configuration.GetConnectionString("AggregatorDbContext");
+        _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
+    }
+
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayDataAggregator();
+            .AddNetworkGatewayDataAggregator(_connectionString);
 
         services
             .AddEndpointsApiExplorer();
@@ -27,7 +36,7 @@ public class DataAggregatorStartup
             .ForwardToPrometheus();
     }
 
-    public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<DataAggregatorStartup> logger)
+    public void Configure(IApplicationBuilder application, ILogger<DataAggregatorStartup> logger)
     {
         application
             .UseAuthentication()
@@ -41,18 +50,16 @@ public class DataAggregatorStartup
                 endpoints.MapControllers();
             });
 
-        StartMetricServer(configuration, logger);
+        StartMetricServer(logger);
     }
 
-    private void StartMetricServer(IConfiguration configuration, ILogger logger)
+    private void StartMetricServer(ILogger logger)
     {
-        var metricPort = configuration.GetValue<int>("PrometheusMetricsPort");
-
-        if (metricPort != 0)
+        if (_prometheusMetricsPort != 0)
         {
-            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", metricPort);
+            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", _prometheusMetricsPort);
 
-            new KestrelMetricServer(port: metricPort).Start();
+            new KestrelMetricServer(port: _prometheusMetricsPort).Start();
         }
         else
         {

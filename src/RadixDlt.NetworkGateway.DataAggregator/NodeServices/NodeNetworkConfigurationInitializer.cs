@@ -65,31 +65,32 @@
 using Common.Addressing;
 using Common.Database.Models.SingleEntries;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
 public class NodeNetworkConfigurationInitializer : NodeInitializer
 {
-    private readonly IAggregatorConfiguration _configuration;
+    private readonly IOptionsMonitor<NetworkOptions> _networkGatewayDataAggregatorOptionsMonitor;
     private readonly INetworkConfigurationReader _networkConfigurationReader;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ILogger<NodeNetworkConfigurationInitializer> _logger;
 
     public NodeNetworkConfigurationInitializer(
         INodeConfigProvider nodeConfigProvider,
-        IAggregatorConfiguration configuration,
+        IOptionsMonitor<NetworkOptions> networkGatewayDataAggregatorOptionsMonitor,
         INetworkConfigurationReader networkConfigurationReader,
         INetworkConfigurationProvider networkConfigurationProvider,
         ILogger<NodeNetworkConfigurationInitializer> logger
     )
-        : base(nodeConfigProvider.NodeAppSettings.Name)
+        : base(nodeConfigProvider.CoreApiNode.Name)
     {
-        _configuration = configuration;
+        _networkGatewayDataAggregatorOptionsMonitor = networkGatewayDataAggregatorOptionsMonitor;
         _networkConfigurationReader = networkConfigurationReader;
         _networkConfigurationProvider = networkConfigurationProvider;
         _logger = logger;
@@ -99,10 +100,10 @@ public class NodeNetworkConfigurationInitializer : NodeInitializer
     {
         var networkConfiguration = await ReadNetworkConfigurationFromNode(token);
 
-        if (_configuration.GetNetworkName() != networkConfiguration.NetworkIdentifier.Network)
+        if (_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName != networkConfiguration.NetworkIdentifier.Network)
         {
             throw new NodeInitializationException(
-            $"The node's network name is {networkConfiguration.NetworkIdentifier.Network}, not {_configuration.GetNetworkName()}"
+            $"The node's network name is {networkConfiguration.NetworkIdentifier.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
             );
         }
 
