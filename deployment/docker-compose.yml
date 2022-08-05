@@ -44,6 +44,17 @@ services:
       POSTGRES_USER: "${POSTGRES_SUPERUSER}"
       POSTGRES_PASSWORD: "${POSTGRES_SUPERUSER_PASSWORD}"
       POSTGRES_DB: "${POSTGRES_DB_NAME}"
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_SUPERUSER} -d ${POSTGRES_DB_NAME}
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  database_migrations: # This is the base -- the _image and _built containers are defined below
+    image: radixdlt/babylon-ng-data-aggregator:1.1.6 # TODO use actual image
+    profiles: ["NONE"]
+    environment:
+      RADIX_NG_MIGRATIONS__ConnectionStrings__MigrationsDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
 
   data_aggregator: # This is the base -- the _image and _built containers are defined below
     image: radixdlt/babylon-ng-data-aggregator:1.1.6
@@ -141,17 +152,41 @@ services:
     volumes:
       - ./gateway-api-fixed-configuration.json:/home/radixdlt/network-gateway/config.json
 
+  database_migrations_image:
+    # NB - image: is defined in the base data_aggregator
+    extends:
+      service: database_migrations
+    profiles: ["network-gateway-image"]
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
+  database_migrations_built:
+    # NB - image: is defined in the base gateway_api
+    extends:
+      service: database_migrations
+    profiles: ["network-gateway-built"]
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
   data_aggregator_image:
     # NB - image: is defined in the base data_aggregator
     extends:
       service: data_aggregator
     profiles: ["network-gateway-image"]
+    depends_on:
+      database_migrations_image:
+        condition: service_completed_successfully
 
   gateway_api_image:
     # NB - image: is defined in the base gateway_api
     extends:
       service: gateway_api
     profiles: ["network-gateway-image"]
+    depends_on:
+      database_migrations_image:
+        condition: service_completed_successfully
 
   data_aggregator_built:
     extends:
@@ -160,6 +195,9 @@ services:
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
       dockerfile: "./samples/DataAggregator/Dockerfile"
+    depends_on:
+      database_migrations_built:
+        condition: service_completed_successfully
 
   gateway_api_built:
     extends:
@@ -168,3 +206,6 @@ services:
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
       dockerfile: "./samples/GatewayAPI/Dockerfile"
+    depends_on:
+      database_migrations_built:
+        condition: service_completed_successfully

@@ -16,14 +16,6 @@
             "environmentVariables": {
                 "DOTNET_ENVIRONMENT": "Production"
             }
-        },
-        "Wipe Database": {
-            "commandName": "Project",
-            "dotnetRunMessages": true,
-            "environmentVariables": {
-                "DOTNET_ENVIRONMENT": "Development",
-                "RADIX_NG_AGGREGATOR__WIPE_DATABASE": "true"
-            }
         }
     }
 }

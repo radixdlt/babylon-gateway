@@ -62,59 +62,99 @@
  * permissions under this License.
  */
 
-// StyleCop getting confused with flat Program.cs
-#pragma warning disable SA1516
-
 using Common.Database;
 using Common.Extensions;
-using DatabaseMigrations;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
-var servicesBuilder = builder.Services;
+namespace DatabaseMigrations;
 
-servicesBuilder.AddDbContextFactory<MigrationsDbContext>(options =>
+public static class Program
 {
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("MigrationsDbContext"),
-        o => o.NonBrokenUseNodaTime()
-    );
-});
-
-var app = builder.Build();
-var services = app.Services;
-
-var configuration = services.GetRequiredService<IConfiguration>();
-
-var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
-var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
-
-if (shouldWipeDatabaseInsteadOfStart)
-{
-    await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
+    public static async Task Main(string[] args)
     {
-        logger.LogInformation("Connecting to database - if it exists");
+        using var host = CreateHostBuilder(args).Build();
 
-        await ConnectionHelpers.TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
+        await host.StartAsync();
 
-        logger.LogInformation("Starting database wipe");
+        try
+        {
+            var services = host.Services;
+            var configuration = services.GetRequiredService<IConfiguration>();
+            var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
+            var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
 
-        await dbContext.Database.EnsureDeletedAsync();
+            if (shouldWipeDatabaseInsteadOfStart)
+            {
+                await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
+                {
+                    logger.LogInformation("Connecting to database - if it exists");
 
-        logger.LogInformation("Database wipe completed. Now stopping...");
-    });
+                    await ConnectionHelpers.TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
 
-    // Stop the program
-    return;
+                    logger.LogInformation("Starting database wipe");
+
+                    await dbContext.Database.EnsureDeletedAsync();
+
+                    logger.LogInformation("Database wipe completed. Now stopping...");
+                });
+
+                return;
+            }
+
+            // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
+            // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
+            await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
+            {
+                logger.LogInformation("Starting database migrations if required");
+
+                await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
+
+                logger.LogInformation("Database migrations (if required) were completed");
+            });
+        }
+        finally
+        {
+            await host.StopAsync();
+        }
+    }
+
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddEnvironmentVariables("RADIX_NG_MIGRATIONS__");
+                config.AddEnvironmentVariables("RADIX_NG_MIGRATIONS:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
+                if (args is { Length: > 0 })
+                {
+                    config.AddCommandLine(args);
+                }
+
+                if (context.HostingEnvironment.IsDevelopment())
+                {
+                    // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
+                    config.AddJsonFile("appsettings.DevelopmentOverrides.json", optional: true, reloadOnChange: true);
+                }
+                else
+                {
+                    config.AddJsonFile("appsettings.ProductionOverrides.json", optional: true, reloadOnChange: true);
+                }
+
+                var customConfigurationPath = config.Build()
+                    .GetValue<string?>("CustomJsonConfigurationFilePath", null);
+
+                if (customConfigurationPath != null)
+                {
+                    config.AddJsonFile(customConfigurationPath, false, true);
+                }
+            })
+            .ConfigureServices((host, services) =>
+            {
+                services.AddDbContextFactory<MigrationsDbContext>(options =>
+                {
+                    options.UseNpgsql(
+                        host.Configuration.GetConnectionString("MigrationsDbContext"),
+                        o => o.NonBrokenUseNodaTime()
+                    );
+                });
+            });
 }
-
-// TODO:NG-14 - Change to manage migrations more safely outside service boot-up
-// TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
-{
-    logger.LogInformation("Starting database migrations if required");
-
-    await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
-
-    logger.LogInformation("Database migrations (if required) were completed");
-});
