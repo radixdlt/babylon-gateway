@@ -72,9 +72,8 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderService
 {

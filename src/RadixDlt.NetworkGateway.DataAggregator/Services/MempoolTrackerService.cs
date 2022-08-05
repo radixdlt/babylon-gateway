@@ -73,11 +73,10 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System.Collections.Concurrent;
 using Core = RadixCoreApi.Generated.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public record FullTransactionData(byte[] Id, Instant SeenAt, byte[] Payload, Core.Transaction Transaction);
 

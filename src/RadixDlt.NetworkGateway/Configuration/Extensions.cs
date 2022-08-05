@@ -1,8 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Configuration;
 
-namespace RadixDlt.NetworkGateway;
+namespace RadixDlt.NetworkGateway.Configuration;
 
 internal static class Extensions
 {

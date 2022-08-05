@@ -74,10 +74,9 @@ using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System.Collections.Concurrent;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerConfirmationService
 {

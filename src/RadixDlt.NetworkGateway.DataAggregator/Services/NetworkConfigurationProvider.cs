@@ -68,9 +68,8 @@ using Common.Database.Models.SingleEntries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {

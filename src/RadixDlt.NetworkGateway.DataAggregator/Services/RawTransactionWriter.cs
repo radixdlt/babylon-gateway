@@ -70,9 +70,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface IRawTransactionWriter
 {

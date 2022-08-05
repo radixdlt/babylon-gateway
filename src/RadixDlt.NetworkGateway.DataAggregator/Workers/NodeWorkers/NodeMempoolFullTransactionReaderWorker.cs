@@ -75,7 +75,6 @@ using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;

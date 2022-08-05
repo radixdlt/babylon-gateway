@@ -64,7 +64,7 @@
 
 using Common.Workers;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 

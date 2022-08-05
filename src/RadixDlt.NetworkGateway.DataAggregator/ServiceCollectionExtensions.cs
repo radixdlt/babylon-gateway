@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using Prometheus;
 using RadixDlt.NetworkGateway.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;

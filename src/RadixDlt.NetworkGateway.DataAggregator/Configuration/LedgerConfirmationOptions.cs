@@ -66,7 +66,6 @@ using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using NodaTime;
 using RadixDlt.NetworkGateway.Configuration;
-using System.Data;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 

@@ -66,7 +66,7 @@ using Common.CoreCommunications;
 using Prometheus;
 using RadixCoreApi.Generated.Api;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 

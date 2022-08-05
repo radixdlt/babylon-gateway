@@ -70,9 +70,8 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface IMempoolPrunerService
 {

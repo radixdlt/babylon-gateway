@@ -70,9 +70,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.DataAggregator.GlobalServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
