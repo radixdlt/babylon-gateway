@@ -62,16 +62,16 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using Common.Database.Models.Ledger.History;
-using Common.Database.Models.Ledger.Joins;
-using Common.Database.Models.Ledger.Normalization;
-using Common.Database.Models.Ledger.Records;
-using Common.Extensions;
-using Common.Utilities;
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Database.Models.Ledger.History;
+using RadixDlt.NetworkGateway.Database.Models.Ledger.Joins;
+using RadixDlt.NetworkGateway.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.Database.Models.Ledger.Records;
+using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Utilities;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

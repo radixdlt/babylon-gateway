@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using Common.Addressing;
-using Common.CoreCommunications;
-using Common.Database;
-using Common.Database.Models.SingleEntries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using RadixDlt.NetworkGateway.Addressing;
+using RadixDlt.NetworkGateway.CoreCommunications;
+using RadixDlt.NetworkGateway.Database;
+using RadixDlt.NetworkGateway.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
 using Core = RadixCoreApi.Generated.Model;
 

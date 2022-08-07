@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+using RadixDlt.NetworkGateway.Extensions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 

@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
 using Prometheus;
 using RadixCoreApi.Generated.Api;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;

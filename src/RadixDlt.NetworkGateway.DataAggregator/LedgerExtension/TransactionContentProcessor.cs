@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using Common.Database.Models.Ledger;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.CoreCommunications;
+using RadixDlt.NetworkGateway.Database.Models.Ledger;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

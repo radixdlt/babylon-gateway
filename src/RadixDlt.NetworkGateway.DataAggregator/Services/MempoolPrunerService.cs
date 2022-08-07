@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -70,6 +69,7 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using RadixDlt.NetworkGateway.Database.Models.Mempool;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 

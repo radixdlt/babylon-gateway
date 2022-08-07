@@ -62,15 +62,15 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
-using Common.Exceptions;
-using Common.Extensions;
-using Common.StaticHelpers;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Exceptions;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
+using RadixDlt.NetworkGateway.StaticHelpers;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
 

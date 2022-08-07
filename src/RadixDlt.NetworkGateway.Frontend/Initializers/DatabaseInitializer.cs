@@ -1,6 +1,6 @@
-using Common.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using RadixDlt.NetworkGateway.Database;
 using RadixDlt.NetworkGateway.Frontend.Services;
 
 namespace RadixDlt.NetworkGateway.Frontend.Initializers;

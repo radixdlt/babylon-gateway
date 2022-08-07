@@ -18,8 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Common\Common.csproj" />
-      <ProjectReference Include="..\DataAggregator\DataAggregator.csproj" />
+      <ProjectReference Include="..\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
     </ItemGroup>
 
 </Project>

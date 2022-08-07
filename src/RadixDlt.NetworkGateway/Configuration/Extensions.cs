@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace RadixDlt.NetworkGateway.Configuration;
 
-internal static class Extensions
+public static class Extensions
 {
     public static IServiceCollection AddValidatableOptionsAtSection<TOptions, TValidator>(this IServiceCollection services, string configSectionPath)
         where TOptions : class

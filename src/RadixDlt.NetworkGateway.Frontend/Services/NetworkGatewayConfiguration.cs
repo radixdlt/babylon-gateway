@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Exceptions;
 using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;

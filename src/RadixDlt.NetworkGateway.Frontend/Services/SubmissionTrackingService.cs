@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
 using Prometheus;
+using RadixDlt.NetworkGateway.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Extensions;
 using Core = RadixCoreApi.Generated.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;

@@ -62,16 +62,16 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using Common.Database.Models.Ledger;
-using Common.Database.Models.SingleEntries;
-using Common.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+using RadixDlt.NetworkGateway.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Utilities;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 

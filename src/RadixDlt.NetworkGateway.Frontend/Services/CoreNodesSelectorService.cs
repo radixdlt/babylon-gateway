@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 

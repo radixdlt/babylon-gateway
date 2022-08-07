@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using Common.Utilities;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using RadixDlt.NetworkGateway.Utilities;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 

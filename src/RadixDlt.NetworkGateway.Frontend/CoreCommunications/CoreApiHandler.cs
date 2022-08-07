@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
 using RadixDlt.NetworkGateway.Frontend.Services;
 

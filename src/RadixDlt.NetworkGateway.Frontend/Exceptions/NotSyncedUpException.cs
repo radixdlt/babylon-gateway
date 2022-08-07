@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using NodaTime;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Exceptions;

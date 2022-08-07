@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using Common.Database;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Database;
+using RadixDlt.NetworkGateway.Extensions;
 
 namespace DatabaseMigrations;
 

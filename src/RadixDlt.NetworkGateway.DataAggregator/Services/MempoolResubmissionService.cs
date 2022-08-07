@@ -62,11 +62,6 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using Common.Database.Models.Mempool;
-using Common.Exceptions;
-using Common.Extensions;
-using Common.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -74,10 +69,15 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
+using RadixDlt.NetworkGateway.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Exceptions;
+using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Utilities;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 

@@ -1,10 +1,9 @@
-using Common.CoreCommunications;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using RadixDlt.NetworkGateway.Configuration;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -12,6 +11,7 @@ using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
+using RadixDlt.NetworkGateway.Extensions;
 using System.Net;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;

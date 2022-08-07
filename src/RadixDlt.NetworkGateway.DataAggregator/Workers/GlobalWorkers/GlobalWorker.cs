@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
-using Common.Workers;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Workers;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 

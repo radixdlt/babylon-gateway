@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
-using Common.Database;
-using Common.Database.Models.Ledger;
-using Common.Database.Models.SingleEntries;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.Database;
+using RadixDlt.NetworkGateway.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
 

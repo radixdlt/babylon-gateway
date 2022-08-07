@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using CoreApiModel = RadixCoreApi.Generated.Model;

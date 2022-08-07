@@ -62,9 +62,6 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Mempool;
-using Common.Extensions;
-using Common.Utilities;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -73,6 +70,9 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using RadixDlt.NetworkGateway.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Utilities;
 using System.Collections.Concurrent;
 using Core = RadixCoreApi.Generated.Model;
 

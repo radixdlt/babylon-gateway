@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
-using Common.Database.Models.Ledger;
-using Common.Database.Models.Mempool;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Extensions;
 using System.Runtime.Serialization;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
-using TokenAmount = Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 

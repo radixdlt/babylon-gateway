@@ -65,7 +65,7 @@
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using Core = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
-using TokenAmount = Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 

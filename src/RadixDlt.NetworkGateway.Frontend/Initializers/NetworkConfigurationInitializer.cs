@@ -1,7 +1,7 @@
-using Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Services;
 
 namespace RadixDlt.NetworkGateway.Frontend.Initializers;

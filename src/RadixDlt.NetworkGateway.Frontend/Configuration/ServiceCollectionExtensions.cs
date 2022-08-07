@@ -1,9 +1,9 @@
-using Common.CoreCommunications;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using RadixDlt.NetworkGateway.CoreCommunications;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using RadixDlt.NetworkGateway.Frontend.Endpoints;
 using RadixDlt.NetworkGateway.Frontend.Initializers;

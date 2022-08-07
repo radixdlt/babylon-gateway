@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using Common.Extensions;
 using Prometheus;
+using RadixDlt.NetworkGateway.Extensions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 

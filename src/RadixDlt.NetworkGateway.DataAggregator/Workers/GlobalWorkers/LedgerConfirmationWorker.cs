@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using Common.Workers;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Workers;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 

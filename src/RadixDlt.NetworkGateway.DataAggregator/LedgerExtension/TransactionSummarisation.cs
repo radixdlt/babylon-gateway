@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using Common.CoreCommunications;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Extensions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

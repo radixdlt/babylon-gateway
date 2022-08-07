@@ -3,18 +3,14 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\RadixDlt.NetworkGateway.FrontendSdk\RadixDlt.NetworkGateway.FrontendSdk.csproj" />
         <ProjectReference Include="..\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <EditorConfigFiles Include="Configuration\Models\TODO_RENAME.editorconfig" />
-    </ItemGroup>
-  
+
 </Project>

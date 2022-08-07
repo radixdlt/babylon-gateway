@@ -8,8 +8,4 @@
         <ProjectReference Include="..\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
     </ItemGroup>
   
-    <ItemGroup>
-      <EditorConfigFiles Include="Configuration\TODO_RENAME.editorconfig" />
-    </ItemGroup>
-  
 </Project>

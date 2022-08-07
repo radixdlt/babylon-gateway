@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using Common.Exceptions;
-using Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using RadixDlt.NetworkGateway.Exceptions;
+using RadixDlt.NetworkGateway.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using System.Globalization;
 using Core = RadixCoreApi.Generated.Model;

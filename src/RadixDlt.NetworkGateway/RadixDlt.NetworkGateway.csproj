@@ -1,11 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <ProjectReference Include="..\Common\Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="FluentValidation" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="NodaTime" />
+        <PackageReference Include="NodaTime.Serialization.JsonNet" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
+        <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
+        <PackageReference Include="prometheus-net" />
+    </ItemGroup>
+  
+    <ItemGroup>
+        <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
 
 </Project>

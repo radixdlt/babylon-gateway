@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using Common.Database;
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Database;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
