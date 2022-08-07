@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
     public static void AddNetworkGatewayDataAggregator(this IServiceCollection services, string connectionString)
     {
         services
-            .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator")
+            .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator:Network")
             .AddValidatableOptionsAtSection<MonitoringOptions, MonitoringOptionsValidator>("DataAggregator:Monitoring")
             .AddValidatableOptionsAtSection<MempoolOptions, MempoolOptionsValidator>("DataAggregator:MempoolOptions")
             .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation")
