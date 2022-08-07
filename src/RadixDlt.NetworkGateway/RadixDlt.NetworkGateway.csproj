@@ -2,7 +2,7 @@
 
     <ItemGroup>
         <PackageReference Include="FluentValidation" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" /> <!-- can't use .Abstractions as we rely on .ValidateOnStart() -->
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
