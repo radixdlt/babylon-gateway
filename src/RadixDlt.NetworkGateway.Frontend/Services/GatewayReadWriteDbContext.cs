@@ -63,7 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Database;
+using RadixDlt.NetworkGateway.Core.Database;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 

@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Core.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.Extensions;
-using RadixDlt.NetworkGateway.StaticHelpers;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

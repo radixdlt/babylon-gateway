@@ -63,9 +63,9 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
-using RadixDlt.NetworkGateway.Extensions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 

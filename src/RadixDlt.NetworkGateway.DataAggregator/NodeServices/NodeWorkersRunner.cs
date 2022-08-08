@@ -65,9 +65,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NodaTime;
+using RadixDlt.NetworkGateway.Core.Exceptions;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
-using RadixDlt.NetworkGateway.Exceptions;
-using RadixDlt.NetworkGateway.Extensions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 

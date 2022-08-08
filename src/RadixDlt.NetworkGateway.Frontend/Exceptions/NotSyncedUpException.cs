@@ -63,7 +63,7 @@
  */
 
 using NodaTime;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Exceptions;

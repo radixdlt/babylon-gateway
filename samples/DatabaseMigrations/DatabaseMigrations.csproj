@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   
     <ItemGroup>
-        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
+        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Core\RadixDlt.NetworkGateway.Core.csproj" />
     </ItemGroup>
   
 </Project>

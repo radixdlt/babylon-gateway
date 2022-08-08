@@ -68,17 +68,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Core.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Extensions;
-using RadixDlt.NetworkGateway.Utilities;
 using System.Collections.Concurrent;
-using Core = RadixCoreApi.Generated.Model;
+using CoreApi = RadixCoreApi.Generated.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public record FullTransactionData(byte[] Id, Instant SeenAt, byte[] Payload, Core.Transaction Transaction);
+public record FullTransactionData(byte[] Id, Instant SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
 
 public record NodeMempoolHashes
 {

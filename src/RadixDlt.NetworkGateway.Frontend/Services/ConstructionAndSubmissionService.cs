@@ -65,13 +65,14 @@
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using Prometheus;
-using RadixDlt.NetworkGateway.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Exceptions;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Core.Exceptions;
+using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Core.StaticHelpers;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
-using RadixDlt.NetworkGateway.StaticHelpers;
-using Core = RadixCoreApi.Generated.Model;
+using CoreModel = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
@@ -229,14 +230,14 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     {
         var coreBuildResponse = await BuildTransaction(request, ledgerState);
 
-        var coreParseResponse = await _coreApiHandler.ParseTransaction(new Core.ConstructionParseRequest(
+        var coreParseResponse = await _coreApiHandler.ParseTransaction(new CoreModel.ConstructionParseRequest(
             networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
             transaction: coreBuildResponse.UnsignedTransaction,
             signed: false
         ));
 
-        var unsignedTransactionPayload = coreBuildResponse.UnsignedTransaction.ConvertFromHex();
-        var payloadToSign = coreBuildResponse.PayloadToSign.ConvertFromHex();
+        var unsignedTransactionPayload = StringExtensions.ConvertFromHex(coreBuildResponse.UnsignedTransaction);
+        var payloadToSign = StringExtensions.ConvertFromHex(coreBuildResponse.PayloadToSign);
 
         if (!RadixHashing.IsValidPayloadToSign(unsignedTransactionPayload, payloadToSign))
         {
@@ -256,11 +257,11 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
     private async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeAndCreateResponse(Gateway.TransactionFinalizeRequest request)
     {
-        var coreFinalizeResponse = await HandleCoreFinalizeRequest(request, new Core.ConstructionFinalizeRequest(
+        var coreFinalizeResponse = await HandleCoreFinalizeRequest(request, new CoreModel.ConstructionFinalizeRequest(
             _coreApiHandler.GetNetworkIdentifier(),
             unsignedTransaction: _validations.ExtractValidHex("Unsigned transaction", request.UnsignedTransaction).AsString,
-            signature: new Core.Signature(
-                publicKey: new Core.PublicKey(
+            signature: new CoreModel.Signature(
+                publicKey: new CoreModel.PublicKey(
                     _validations.ExtractValidPublicKey(request.Signature.PublicKey).AsString
                 ),
                 bytes: _validations.ExtractValidHex("Signature Bytes", request.Signature.Bytes).AsString
@@ -268,7 +269,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         ));
 
         var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
-            coreFinalizeResponse.SignedTransaction.ConvertFromHex()
+            StringExtensions.ConvertFromHex(coreFinalizeResponse.SignedTransaction)
         );
 
         if (request.Submit)
@@ -300,7 +301,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         );
     }
 
-    private async Task<Core.ConstructionBuildResponse> BuildTransaction(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
+    private async Task<CoreModel.ConstructionBuildResponse> BuildTransaction(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
     {
         var feePayer = _validations.ExtractValidAccountAddress(request.FeePayer);
         var validatedMessage = _validations.ExtractOptionalValidHexOrNull("Message", request.Message);
@@ -321,37 +322,37 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         // funds for a given action. However -- it doesn't know how much fees will be at this point.
         var mappedTransaction = await transactionBuilder.MapAndValidateActions(request.Actions);
 
-        return new Core.ConstructionBuildResponse(); // TODO - Work out what to do to support legacy build
+        return new CoreModel.ConstructionBuildResponse(); // TODO - Work out what to do to support legacy build
     }
 
-    private async Task<Core.ConstructionFinalizeResponse> HandleCoreFinalizeRequest(
+    private async Task<CoreModel.ConstructionFinalizeResponse> HandleCoreFinalizeRequest(
         Gateway.TransactionFinalizeRequest gatewayRequest,
-        Core.ConstructionFinalizeRequest request
+        CoreModel.ConstructionFinalizeRequest request
     )
     {
         try
         {
             return await _coreApiHandler.FinalizeTransaction(request);
         }
-        catch (WrappedCoreApiException<Core.InvalidSignatureError>)
+        catch (WrappedCoreApiException<InvalidSignatureError>)
         {
             throw new InvalidSignatureException(gatewayRequest.Signature);
         }
     }
 
-    private async Task<Core.ConstructionParseResponse> HandlePreSubmissionParseSignedTransaction(
+    private async Task<CoreModel.ConstructionParseResponse> HandlePreSubmissionParseSignedTransaction(
         ValidatedHex signedTransaction
     )
     {
         try
         {
-            return await _coreApiHandler.ParseTransaction(new Core.ConstructionParseRequest(
+            return await _coreApiHandler.ParseTransaction(new CoreModel.ConstructionParseRequest(
                 networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
                 transaction: signedTransaction.AsString,
                 signed: true
             ));
         }
-        catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
+        catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
             _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
@@ -405,7 +406,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         try
         {
             var result = await _coreApiHandler.SubmitTransaction(
-                new Core.ConstructionSubmitRequest(
+                new CoreModel.ConstructionSubmitRequest(
                     _coreApiHandler.GetNetworkIdentifier(),
                     signedTransaction.AsString
                 ),
@@ -421,7 +422,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
                 _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
             }
         }
-        catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
+        catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
             _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
             await _submissionTrackingService.MarkAsFailed(

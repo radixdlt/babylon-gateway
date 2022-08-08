@@ -65,7 +65,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Prometheus;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using CoreApiModel = RadixCoreApi.Generated.Model;

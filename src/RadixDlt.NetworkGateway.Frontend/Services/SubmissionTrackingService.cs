@@ -66,9 +66,9 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
 using Prometheus;
-using RadixDlt.NetworkGateway.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Extensions;
-using Core = RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Core.Extensions;
+using CoreModel = RadixCoreApi.Generated.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 
@@ -81,7 +81,7 @@ public interface ISubmissionTrackingService
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        Core.ConstructionParseResponse parseResponse
+        CoreModel.ConstructionParseResponse parseResponse
     );
 
     Task MarkAsFailed(
@@ -126,7 +126,7 @@ public class SubmissionTrackingService : ISubmissionTrackingService
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        Core.ConstructionParseResponse parseResponse
+        CoreModel.ConstructionParseResponse parseResponse
     )
     {
         var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);

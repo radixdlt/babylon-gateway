@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Database.Models.Ledger.Normalization;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using RadixDlt.NetworkGateway.Frontend.Services;
-using Core = RadixCoreApi.Generated.Model;
+using CoreModel = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Numerics.TokenAmount;
-using Validator = RadixDlt.NetworkGateway.Database.Models.Ledger.Normalization.Validator;
+using TokenAmount = RadixDlt.NetworkGateway.Core.Numerics.TokenAmount;
+using Validator = RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization.Validator;
 
 namespace RadixDlt.NetworkGateway.Frontend;
 
@@ -102,9 +102,9 @@ public static class ApiIdentifiers
             : $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this Core.ResourceAmount resourceAmount)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this CoreModel.ResourceAmount resourceAmount)
     {
-        if (resourceAmount.ResourceIdentifier is not Core.TokenResourceIdentifier tokenResourceIdentifier)
+        if (resourceAmount.ResourceIdentifier is not CoreModel.TokenResourceIdentifier tokenResourceIdentifier)
         {
             throw new InvalidCoreApiResponseException(
                 "Expected a response from the core API to have a tokenResourceIdentifier but it was another kind of resourceIdentifier"
@@ -164,7 +164,7 @@ public static class ApiIdentifiers
         return new Gateway.TransactionIdentifier(hexTransactionId);
     }
 
-    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this Core.TransactionIdentifier transactionIdentifier)
+    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this CoreModel.TransactionIdentifier transactionIdentifier)
     {
         return new Gateway.TransactionIdentifier(transactionIdentifier.Hash);
     }

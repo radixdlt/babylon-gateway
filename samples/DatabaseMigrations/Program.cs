@@ -63,8 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Database;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Core.Database;
+using RadixDlt.NetworkGateway.Core.Extensions;
 
 namespace DatabaseMigrations;
 

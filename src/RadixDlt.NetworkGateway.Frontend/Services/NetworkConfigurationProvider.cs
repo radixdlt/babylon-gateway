@@ -63,12 +63,12 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Addressing;
-using RadixDlt.NetworkGateway.CoreCommunications;
-using RadixDlt.NetworkGateway.Database;
-using RadixDlt.NetworkGateway.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Core.Addressing;
+using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
+using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
-using Core = RadixCoreApi.Generated.Model;
+using CoreModel = RadixCoreApi.Generated.Model;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 
@@ -78,7 +78,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 
     string GetNetworkName();
 
-    Core.NetworkIdentifier GetCoreNetworkIdentifier();
+    CoreModel.NetworkIdentifier GetCoreNetworkIdentifier();
 
     TokenIdentifier GetXrdTokenIdentifier();
 }
@@ -91,7 +91,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
     private record CapturedConfig(
         NetworkConfiguration NetworkConfiguration,
         AddressHrps AddressHrps,
-        Core.NetworkIdentifier CoreNetworkIdentifier,
+        CoreModel.NetworkIdentifier CoreNetworkIdentifier,
         TokenIdentifier XrdTokenIdentifier
     );
 
@@ -111,7 +111,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkConfiguration.NetworkDefinition.NetworkName;
     }
 
-    public Core.NetworkIdentifier GetCoreNetworkIdentifier()
+    public CoreModel.NetworkIdentifier GetCoreNetworkIdentifier()
     {
         return GetCapturedConfig().CoreNetworkIdentifier;
     }
@@ -148,7 +148,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
             _capturedConfig = new CapturedConfig(
                 inputNetworkConfiguration,
                 inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-                new Core.NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName),
+                new CoreModel.NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName),
                 new TokenIdentifier(inputNetworkConfiguration.WellKnownAddresses.XrdAddress)
             );
         }

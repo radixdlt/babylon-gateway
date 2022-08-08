@@ -63,8 +63,8 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Core.Workers;
 using RadixDlt.NetworkGateway.Frontend.Services;
-using RadixDlt.NetworkGateway.Workers;
 
 namespace RadixDlt.NetworkGateway.Frontend.Workers;
 

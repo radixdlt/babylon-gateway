@@ -63,8 +63,8 @@
  */
 
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.CoreCommunications;
-using RadixDlt.NetworkGateway.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

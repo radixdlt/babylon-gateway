@@ -67,13 +67,13 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Core.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.Database.Models.SingleEntries;
-using RadixDlt.NetworkGateway.Extensions;
-using RadixDlt.NetworkGateway.Utilities;
 using System.Collections.Concurrent;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;

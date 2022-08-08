@@ -63,9 +63,9 @@
  */
 
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
-using Core = RadixCoreApi.Generated.Model;
+using CoreModel = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Core.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 
@@ -116,7 +116,7 @@ public class TransactionBuilder
         return new MappedTransaction(fakeManifest, _feePayerBeforeBalances, _feePayerBalanceChanges);
     }
 
-    private async Task<Core.OperationGroup> MapAction(Gateway.Action action)
+    private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action)
     {
         await Task.Delay(1); // Fix for compile warning in this placeholder method
         return action switch

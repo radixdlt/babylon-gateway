@@ -63,7 +63,7 @@
  */
 
 using Prometheus;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Core.Extensions;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 

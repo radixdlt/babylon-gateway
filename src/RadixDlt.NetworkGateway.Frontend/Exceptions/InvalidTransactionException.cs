@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Exceptions;
-using Core = RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Core.Exceptions;
+using CoreModel = RadixCoreApi.Generated.Model;
 using InvalidTransactionError = RadixDlt.NetworkGateway.FrontendSdk.Model.InvalidTransactionError;
 
 namespace RadixDlt.NetworkGateway.Frontend.Exceptions;
@@ -98,7 +98,7 @@ public class InvalidTransactionException : ValidationException
 
     public static InvalidTransactionException FromSubstateDependencyNotFoundError(
         string invalidTransactionHex,
-        Core.SubstateDependencyNotFoundError error
+        CoreModel.SubstateDependencyNotFoundError error
     )
     {
         return new InvalidTransactionException(

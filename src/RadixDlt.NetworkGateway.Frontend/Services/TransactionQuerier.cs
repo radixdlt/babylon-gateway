@@ -63,12 +63,12 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using System.Runtime.Serialization;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Core.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
 

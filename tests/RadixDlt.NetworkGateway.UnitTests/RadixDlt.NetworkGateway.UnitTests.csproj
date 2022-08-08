@@ -20,7 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
         <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Frontend\RadixDlt.NetworkGateway.Frontend.csproj" />
-        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway\RadixDlt.NetworkGateway.csproj" />
+        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Core\RadixDlt.NetworkGateway.Core.csproj" />
     </ItemGroup>
 
 </Project>

@@ -66,11 +66,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
-using RadixDlt.NetworkGateway.Exceptions;
-using RadixDlt.NetworkGateway.Extensions;
+using RadixCoreApi.Generated.Model;
+using RadixDlt.NetworkGateway.Core.Exceptions;
+using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using System.Globalization;
-using Core = RadixCoreApi.Generated.Model;
+using CoreModel = RadixCoreApi.Generated.Model;
 using CoreClient = RadixCoreApi.Generated.Client;
 using Gateway = RadixDlt.NetworkGateway.FrontendSdk.Model;
 
@@ -270,27 +271,27 @@ public class ExceptionHandler : IExceptionHandler
          */
         return wrappedCoreApiException switch
         {
-            WrappedCoreApiException<Core.AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
+            WrappedCoreApiException<AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
                 $"You attempted to increase validator fee by {ex.Error.AttemptedValidatorFeeIncrease}, larger than the maximum of {ex.Error.MaximumValidatorFeeIncrease}"
             ),
-            WrappedCoreApiException<Core.BelowMinimumStakeError> ex => new BelowMinimumStakeException(
+            WrappedCoreApiException<BelowMinimumStakeError> ex => new BelowMinimumStakeException(
                 requestedAmount: ex.Error.MinimumStake.AsGatewayTokenAmount(),
                 minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
             ),
-            WrappedCoreApiException<Core.FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
-            WrappedCoreApiException<Core.InvalidPublicKeyError> ex => new InvalidPublicKeyException(
+            WrappedCoreApiException<FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
+            WrappedCoreApiException<InvalidPublicKeyError> ex => new InvalidPublicKeyException(
                 new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
                 "Invalid public key"
             ),
-            WrappedCoreApiException<Core.MessageTooLongError> ex => new MessageTooLongException(
+            WrappedCoreApiException<MessageTooLongError> ex => new MessageTooLongException(
                 ex.Error.MaximumMessageLength,
                 ex.Error.AttemptedMessageLength
             ),
-            WrappedCoreApiException<Core.PublicKeyNotSupportedError> ex => new InvalidPublicKeyException(
+            WrappedCoreApiException<PublicKeyNotSupportedError> ex => new InvalidPublicKeyException(
                 new Gateway.PublicKey(ex.Error.UnsupportedPublicKey.Hex),
                 "Public key is not supported"
             ),
-            WrappedCoreApiException<Core.TransactionNotFoundError> ex => new TransactionNotFoundException(
+            WrappedCoreApiException<TransactionNotFoundError> ex => new TransactionNotFoundException(
                 new Gateway.TransactionIdentifier(ex.Error.TransactionIdentifier.Hash)
             ),
             _ => null,

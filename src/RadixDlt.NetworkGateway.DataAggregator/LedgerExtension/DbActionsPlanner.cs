@@ -63,15 +63,15 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.History;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Joins;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Records;
+using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Core.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.Database.Models.Ledger.History;
-using RadixDlt.NetworkGateway.Database.Models.Ledger.Joins;
-using RadixDlt.NetworkGateway.Database.Models.Ledger.Normalization;
-using RadixDlt.NetworkGateway.Database.Models.Ledger.Records;
-using RadixDlt.NetworkGateway.Extensions;
-using RadixDlt.NetworkGateway.Utilities;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

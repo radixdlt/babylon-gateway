@@ -65,7 +65,7 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Prometheus;
-using RadixDlt.NetworkGateway.Utilities;
+using RadixDlt.NetworkGateway.Core.Utilities;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
