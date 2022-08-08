@@ -74,9 +74,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DatabaseMigrations.Migrations
+namespace RadixDlt.NetworkGateway.Migrations
 {
-    [DbContext(typeof(MigrationsDbContext))]
     [Migration("20220801205901_InitialCreate")]
     partial class InitialCreate
     {

@@ -19,5 +19,9 @@
     <ItemGroup>
         <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
+  
+    <ItemGroup>
+      <EditorConfigFiles Include="Migrations\TODO_RENAME.editorconfig" />
+    </ItemGroup>
 
 </Project>

@@ -70,7 +70,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DatabaseMigrations.Migrations
+namespace RadixDlt.NetworkGateway.Migrations
 {
     public partial class InitialCreate : Migration
     {

@@ -153,7 +153,11 @@ public static class Program
                 {
                     options.UseNpgsql(
                         host.Configuration.GetConnectionString("MigrationsDbContext"),
-                        o => o.NonBrokenUseNodaTime()
+                        o =>
+                        {
+                            o.NonBrokenUseNodaTime();
+                            o.MigrationsAssembly(typeof(CommonDbContext).Assembly.FullName);
+                        }
                     );
                 });
             });
