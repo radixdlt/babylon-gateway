@@ -63,8 +63,8 @@
  */
 
 using Prometheus;
-using RadixDlt.NetworkGateway.Frontend;
-using RadixDlt.NetworkGateway.Frontend.Services;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace GatewayApi;
 
@@ -86,7 +86,7 @@ public class GatewayApiStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayFrontend(_roConnectionString, _rwConnectionString);
+            .AddNetworkGatewayApi(_roConnectionString, _rwConnectionString);
 
         if (_enableSwagger)
         {

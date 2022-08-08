@@ -4,9 +4,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAggregator", "samples\D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayApi", "samples\GatewayApi\GatewayApi.csproj", "{4335C252-9F00-40EF-BAFD-38891B0F9947}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Frontend", "src\RadixDlt.NetworkGateway.Frontend\RadixDlt.NetworkGateway.Frontend.csproj", "{2A8ECCEC-56AE-4A0B-9936-C707FB8B53D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.GatewayApi", "src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj", "{2A8ECCEC-56AE-4A0B-9936-C707FB8B53D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.FrontendSdk", "src\RadixDlt.NetworkGateway.FrontendSdk\RadixDlt.NetworkGateway.FrontendSdk.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.GatewayApiSdk", "src\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7B572DCA-9792-48BE-A53D-3F8B87D71372}"
 EndProject

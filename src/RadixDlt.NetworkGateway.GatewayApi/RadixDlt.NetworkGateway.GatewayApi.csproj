@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="RadixCoreApi.Generated" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj" />
+        <ProjectReference Include="..\RadixDlt.NetworkGateway.Core\RadixDlt.NetworkGateway.Core.csproj" />
+    </ItemGroup>
+
+</Project>

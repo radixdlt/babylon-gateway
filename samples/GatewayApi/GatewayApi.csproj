@@ -19,6 +19,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Frontend\RadixDlt.NetworkGateway.Frontend.csproj" />
+        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
     </ItemGroup>
 </Project>

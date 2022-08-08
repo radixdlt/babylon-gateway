@@ -12,9 +12,9 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageName='RadixDlt.NetworkGateway.FrontendSdk'
+packageName='RadixDlt.NetworkGateway.GatewayApiSdk'
 outputDirectory="../generated-dependencies"
-specLocation='../src/RadixDlt.NetworkGateway.Frontend/gateway-api-spec.yaml'
+specLocation='../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml'
 
 patchVersion="$1" # Patch version override as first command line parameter
 
