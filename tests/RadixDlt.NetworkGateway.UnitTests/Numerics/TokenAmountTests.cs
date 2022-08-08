@@ -67,7 +67,7 @@ using System.Numerics;
 using System.Text;
 using Xunit;
 
-namespace Tests.MiniUnitTests.RadixDlt.NetworkGateway.Numerics;
+namespace RadixDlt.NetworkGateway.UnitTests.Numerics;
 
 public class TokenAmountTests
 {
