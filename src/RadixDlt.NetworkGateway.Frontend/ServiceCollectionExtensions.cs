@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Prometheus;
+using RadixDlt.NetworkGateway.Configuration;
 using RadixDlt.NetworkGateway.CoreCommunications;
 using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using RadixDlt.NetworkGateway.Frontend.Endpoints;
 using RadixDlt.NetworkGateway.Frontend.Initializers;
@@ -11,14 +13,19 @@ using RadixDlt.NetworkGateway.Frontend.Services;
 using RadixDlt.NetworkGateway.Frontend.Workers;
 using System.Net;
 
-namespace RadixDlt.NetworkGateway.Frontend.Configuration;
+namespace RadixDlt.NetworkGateway.Frontend;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayFrontend(this IServiceCollection services)
+    public static void AddNetworkGatewayFrontend(this IServiceCollection services, string roConnectionString, string rwConnectionString)
     {
         services
-            .AddOptions<NetworkGatewayFrontendOptions>()
+            .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
+            .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
+            .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");
+
+        services
+            .AddOptions<NetworkOptions>()
             .ValidateDataAnnotations()
             .ValidateOnStart()
             .BindConfiguration("Api"); // TODO is this how we want to Bind configuration by default?
@@ -32,8 +39,8 @@ public static class ServiceCollectionExtensions
 
         // Request scoped services
         AddRequestScopedServices(services);
-        AddReadOnlyDatabaseContext(services);
-        AddReadWriteDatabaseContext(services);
+        AddReadOnlyDatabaseContext(services, roConnectionString);
+        AddReadWriteDatabaseContext(services, rwConnectionString);
 
         // Other scoped services
         AddWorkerScopedServices(services);
@@ -45,7 +52,6 @@ public static class ServiceCollectionExtensions
     private static void AddInitializers(IServiceCollection services)
     {
         services
-            .AddHostedService<DatabaseInitializer>()
             .AddHostedService<NetworkConfigurationInitializer>();
     }
 
@@ -53,7 +59,6 @@ public static class ServiceCollectionExtensions
     {
         // Should only contain services without any DBContext or HttpClient - as these both need to be recycled
         // semi-regularly
-        services.AddSingleton<IGatewayApiConfiguration, GatewayApiConfiguration>();
         services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IValidations, Validations>();
@@ -85,66 +90,48 @@ public static class ServiceCollectionExtensions
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        services.AddHttpClient<ICoreApiHandler, CoreApiHandler>()
+        services
+            .AddHttpClient<ICoreApiHandler, CoreApiHandler>()
             .UseHttpClientMetrics()
-            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
-                serviceProvider,
-                "DisableCoreApiHttpsCertificateChecks",
-                "CoreApiHttpProxyAddress"
-            ));
-        services.AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
+
+        services
+            .AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
             .UseHttpClientMetrics()
-            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(
-                serviceProvider,
-                "DisableCoreApiHttpsCertificateChecks",
-                "CoreApiHttpProxyAddress"
-            ));
+            .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
     }
 
-    private static void AddReadOnlyDatabaseContext(IServiceCollection services)
+    private static void AddReadOnlyDatabaseContext(IServiceCollection services, string roConnectionString)
     {
         services.AddDbContext<GatewayReadOnlyDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(
-                "Host=localhost:5532;Database=babylon_stokenet;Username=db_superuser;Password=db_password;Include Error Detail=true", // hostContext.Configuration.GetConnectionString("ReadOnlyDbContext"),
-                o => o.NonBrokenUseNodaTime()
-            );
+            options.UseNpgsql(roConnectionString, o => o.NonBrokenUseNodaTime());
         });
     }
 
-    private static void AddReadWriteDatabaseContext(IServiceCollection services)
+    private static void AddReadWriteDatabaseContext(IServiceCollection services, string rwConnectionString)
     {
         services.AddDbContext<GatewayReadWriteDbContext>(options =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(
-                "Host=localhost:5532;Database=babylon_stokenet;Username=db_superuser;Password=db_password;Include Error Detail=true", // hostContext.Configuration.GetConnectionString("ReadWriteDbContext"),
-                o => o.NonBrokenUseNodaTime()
-            );
+            options.UseNpgsql(rwConnectionString, o => o.NonBrokenUseNodaTime());
         });
     }
 
-    private static HttpClientHandler ConfigureHttpClientHandler(
-        IServiceProvider serviceProvider,
-        string disableApiChecksConfigParameterName,
-        string httpProxyAddressConfigParameterName
-    )
+    private static HttpClientHandler ConfigureHttpClientHandler(IOptions<NetworkOptions> options)
     {
+        var o = options.Value;
         var httpClientHandler = new HttpClientHandler();
 
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        var disableCertificateChecks = configuration.GetValue<bool>(disableApiChecksConfigParameterName);
-        var httpProxyAddress = configuration.GetValue<string?>(httpProxyAddressConfigParameterName);
-
-        if (disableCertificateChecks)
+        if (o.DisableCoreApiHttpsCertificateChecks)
         {
             httpClientHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
         }
 
-        if (!string.IsNullOrWhiteSpace(httpProxyAddress))
+        if (!string.IsNullOrWhiteSpace(o.CoreApiHttpProxyAddress))
         {
-            httpClientHandler.Proxy = new WebProxy(httpProxyAddress);
+            httpClientHandler.Proxy = new WebProxy(o.CoreApiHttpProxyAddress);
         }
 
         return httpClientHandler;

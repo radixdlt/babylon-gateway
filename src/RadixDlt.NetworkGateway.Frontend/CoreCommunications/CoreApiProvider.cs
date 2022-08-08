@@ -63,7 +63,7 @@
  */
 
 using RadixCoreApi.Generated.Api;
-using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using System.Net.Http.Headers;
 
 namespace RadixDlt.NetworkGateway.Frontend.CoreCommunications;

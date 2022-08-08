@@ -23,21 +23,4 @@ public class GatewayController : ControllerBase
     {
         return await _ledgerStateQuerier.GetGatewayState();
     }
-
-    [HttpPost("do-x")]
-    public async Task<GatewayResponse> DoX([FromBody] MyReq req, [FromQuery] bool? t = false)
-    {
-        if (t == true)
-        {
-            throw new Exception("xxx");
-        }
-
-        return await _ledgerStateQuerier.GetGatewayState();
-    }
-}
-
-public class MyReq
-{
-    [Required]
-    public string SomeString { get; set; }
 }

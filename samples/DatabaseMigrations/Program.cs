@@ -122,8 +122,8 @@ public static class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                config.AddEnvironmentVariables("RADIX_NG_MIGRATIONS__");
-                config.AddEnvironmentVariables("RADIX_NG_MIGRATIONS:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
+                config.AddEnvironmentVariables("APP__");
+                config.AddEnvironmentVariables("APP:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
                 if (args is { Length: > 0 })
                 {
                     config.AddCommandLine(args);

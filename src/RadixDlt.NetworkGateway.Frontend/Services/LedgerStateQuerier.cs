@@ -64,12 +64,14 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.Database;
 using RadixDlt.NetworkGateway.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.Extensions;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
 
@@ -98,21 +100,23 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     private readonly GatewayReadOnlyDbContext _dbContext;
     private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
+    private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
+    private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
         GatewayReadOnlyDbContext dbContext,
         IValidations validations,
         INetworkConfigurationProvider networkConfigurationProvider,
-        IGatewayApiConfiguration gatewayApiConfiguration
-    )
+        IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
+        IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor)
     {
         _logger = logger;
         _dbContext = dbContext;
         _validations = validations;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _gatewayApiConfiguration = gatewayApiConfiguration;
+        _endpointOptionsMonitor = endpointOptionsMonitor;
+        _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
     }
 
     public async Task<GatewayResponse> GetGatewayState()
@@ -120,8 +124,8 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         var ledgerStatus = await GetLedgerStatus();
         return new GatewayResponse(
             new GatewayApiVersions(
-                _networkConfigurationProvider.GetGatewayApiVersion(),
-                _networkConfigurationProvider.GetGatewayApiSchemaVersion()
+                _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion,
+                _endpointOptionsMonitor.CurrentValue.GatewayApiVersion
             ),
             new LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
@@ -146,7 +150,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
             return ledgerState;
         }
 
-        var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
+        var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
         _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
@@ -184,7 +188,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
             return ledgerState;
         }
 
-        var acceptableLedgerLag = _gatewayApiConfiguration.GetAcceptableLedgerLag();
+        var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
         _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);

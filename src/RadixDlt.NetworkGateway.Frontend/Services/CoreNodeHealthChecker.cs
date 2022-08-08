@@ -63,9 +63,10 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Prometheus;
 using RadixDlt.NetworkGateway.Extensions;
-using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.CoreCommunications;
 using CoreApiModel = RadixCoreApi.Generated.Model;
 
@@ -76,7 +77,7 @@ public interface ICoreNodeHealthChecker
     Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken);
 }
 
-public record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.Models.CoreApiNode>> CoreApiNodesByStatus);
+public record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
 
 // Using explicit integers for enum values
 // because they're used for ordering the nodes (from best to worst).
@@ -111,34 +112,35 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IGatewayApiConfiguration _configuration;
+    private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
 
     public CoreNodeHealthChecker(
         ILogger<CoreNodesSelectorService> logger,
         HttpClient httpClient,
         ILedgerStateQuerier ledgerStateQuerier,
-        IGatewayApiConfiguration configuration)
+        IOptionsMonitor<NetworkOptions> networkOptionsMonitor)
     {
         _logger = logger;
         _httpClient = httpClient;
         _ledgerStateQuerier = ledgerStateQuerier;
-        _configuration = configuration;
+        _networkOptionsMonitor = networkOptionsMonitor;
     }
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
     {
-        var enabledCoreNodes = _configuration.GetCoreNodes()
-            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
+        var coreNodes = _networkOptionsMonitor.CurrentValue.CoreApiNodes;
+        var enabledCoreNodes = coreNodes
+            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .ToList();
 
         if (!enabledCoreNodes.Any())
         {
             _logger.LogError("No Core API Nodes have been defined as enabled");
-            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<Configuration.Models.CoreApiNode>>());
+            return new CoreNodeHealthResult(new Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>>());
         }
 
-        var enabledCoreNodeStateVersionLookupTasks = _configuration.GetCoreNodes()
-            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
+        var enabledCoreNodeStateVersionLookupTasks = coreNodes
+            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, cancellationToken));
 
         var ledgerStateVersionTask = _ledgerStateQuerier.GetLedgerStatus();
@@ -176,7 +178,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
 
-    private CoreNodeStatus DetermineNodeStatus((Configuration.Models.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
+    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
     {
         if (healthCheckData.NodeStateVersion == null)
         {
@@ -190,7 +192,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             return CoreNodeStatus.Unhealthy;
         }
 
-        var maxAcceptableLag = _configuration.GetCoreApiNodeHealth().MaxAllowedStateVersionLagToBeConsideredSynced;
+        var maxAcceptableLag = _networkOptionsMonitor.CurrentValue.MaxAllowedStateVersionLagToBeConsideredSynced;
         var syncedThreshold = topOfLedgerStateVersion - maxAcceptableLag;
 
         if (healthCheckData.NodeStateVersion < syncedThreshold)
@@ -237,7 +239,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             var networkStatusResponse =
                 await coreApiProvider.NetworkApi.NetworkStatusPostAsync(
                     new CoreApiModel.NetworkStatusRequest(
-                        new CoreApiModel.NetworkIdentifier(_configuration.GetNetworkName())),
+                        new CoreApiModel.NetworkIdentifier(_networkOptionsMonitor.CurrentValue.NetworkName)),
                     sharedCancellationTokenSource.Token
                 );
 

@@ -62,15 +62,32 @@
  * permissions under this License.
  */
 
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
+using RadixDlt.NetworkGateway.Configuration;
 
-namespace RadixDlt.NetworkGateway.Frontend.Configuration.Models;
+namespace RadixDlt.NetworkGateway.Frontend.Configuration;
 
-public record CoreApiNodeHealth
+public record AcceptableLedgerLagOptions
 {
-    [ConfigurationKeyName("MaxAllowedStateVersionLagToBeConsideredSynced")]
-    public long MaxAllowedStateVersionLagToBeConsideredSynced { get; set; } = 100;
+    [ConfigurationKeyName("PreventReadRequestsIfDbLedgerIsBehind")]
+    public bool PreventReadRequestsIfDbLedgerIsBehind { get; set; } = true;
 
-    [ConfigurationKeyName("IgnoreNonSyncedNodes")]
-    public bool IgnoreNonSyncedNodes { get; set; } = true;
+    [ConfigurationKeyName("ReadRequestAcceptableDbLedgerLagSeconds")]
+    public long ReadRequestAcceptableDbLedgerLagSeconds { get; set; } = 30;
+
+    [ConfigurationKeyName("PreventConstructionRequestsIfDbLedgerIsBehind")]
+    public bool PreventConstructionRequestsIfDbLedgerIsBehind { get; set; } = true;
+
+    [ConfigurationKeyName("ConstructionRequestsAcceptableDbLedgerLagSeconds")]
+    public long ConstructionRequestsAcceptableDbLedgerLagSeconds { get; set; } = 30;
+}
+
+internal class AcceptableLedgerLagOptionsValidator : AbstractOptionsValidator<AcceptableLedgerLagOptions>
+{
+    public AcceptableLedgerLagOptionsValidator()
+    {
+        RuleFor(x => x.ReadRequestAcceptableDbLedgerLagSeconds).GreaterThan(0);
+        RuleFor(x => x.ConstructionRequestsAcceptableDbLedgerLagSeconds).GreaterThan(0);
+    }
 }

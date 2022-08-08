@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 using RadixDlt.NetworkGateway.Frontend.Services;
 using RadixDlt.NetworkGateway.FrontendSdk.Model;
@@ -15,24 +17,21 @@ public class TransactionController
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IGatewayApiConfiguration _gatewayApiConfiguration;
+    private readonly EndpointOptions _endpointOptions;
 
     public TransactionController(
         IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
         IConstructionAndSubmissionService constructionAndSubmissionService,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IGatewayApiConfiguration gatewayApiConfiguration
+        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot
     )
     {
         _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
         _constructionAndSubmissionService = constructionAndSubmissionService;
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _gatewayApiConfiguration = gatewayApiConfiguration;
+        _endpointOptions = endpointOptionsSnapshot.Value;
     }
 
     [HttpPost("recent")]
@@ -48,7 +47,7 @@ public class TransactionController
                 "Page size",
                 unvalidatedLimit,
                 1,
-                _gatewayApiConfiguration.GetMaxPageSize()
+                _endpointOptions.MaxPageSize
             )
         );
 

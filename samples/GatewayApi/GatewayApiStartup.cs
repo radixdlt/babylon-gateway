@@ -1,20 +1,38 @@
 using Prometheus;
-using RadixDlt.NetworkGateway.Frontend.Configuration;
+using RadixDlt.NetworkGateway.Frontend;
 using RadixDlt.NetworkGateway.Frontend.Services;
 
 namespace GatewayApi;
 
 public class GatewayApiStartup
 {
+    private readonly string _roConnectionString;
+    private readonly string _rwConnectionString;
+    private readonly int _prometheusMetricsPort;
+    private readonly bool _enableSwagger;
+
+    public GatewayApiStartup(IConfiguration configuration)
+    {
+        _roConnectionString = configuration.GetConnectionString("ReadOnlyDbContext");
+        _rwConnectionString = configuration.GetConnectionString("ReadWriteDbContext");
+        _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
+        _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
+    }
+
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayFrontend();
+            .AddNetworkGatewayFrontend(_roConnectionString, _rwConnectionString);
+
+        if (_enableSwagger)
+        {
+            services
+                .AddSwaggerGen()
+                .AddSwaggerGenNewtonsoftSupport();
+        }
 
         services
             .AddEndpointsApiExplorer()
-            .AddSwaggerGen()
-            .AddSwaggerGenNewtonsoftSupport()
             .AddCors(options =>
             {
                 options.AddDefaultPolicy(corsPolicyBuilder =>
@@ -37,9 +55,7 @@ public class GatewayApiStartup
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
-        var isSwaggerEnabled = configuration.GetValue<bool>("EnableSwagger");
-
-        if (isSwaggerEnabled)
+        if (_enableSwagger)
         {
             application
                 .UseSwagger()
@@ -58,18 +74,16 @@ public class GatewayApiStartup
                 endpoints.MapControllers();
             });
 
-        StartMetricServer(configuration, logger);
+        StartMetricServer(logger);
     }
 
-    private void StartMetricServer(IConfiguration configuration, ILogger logger)
+    private void StartMetricServer(ILogger logger)
     {
-        var metricPort = configuration.GetValue<int>("PrometheusMetricsPort");
-
-        if (metricPort != 0)
+        if (_prometheusMetricsPort != 0)
         {
-            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", metricPort);
+            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", _prometheusMetricsPort);
 
-            new KestrelMetricServer(port: metricPort).Start();
+            new KestrelMetricServer(port: _prometheusMetricsPort).Start();
         }
         else
         {

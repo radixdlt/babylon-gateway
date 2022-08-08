@@ -64,7 +64,7 @@
 
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.CoreCommunications;
-using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.Services;
 
 namespace RadixDlt.NetworkGateway.Frontend.CoreCommunications;

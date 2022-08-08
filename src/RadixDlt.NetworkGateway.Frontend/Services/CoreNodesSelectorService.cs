@@ -63,8 +63,9 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Extensions;
-using RadixDlt.NetworkGateway.Frontend.Configuration.Models;
+using RadixDlt.NetworkGateway.Frontend.Configuration;
 using RadixDlt.NetworkGateway.Frontend.Exceptions;
 
 namespace RadixDlt.NetworkGateway.Frontend.Services;
@@ -85,18 +86,18 @@ public class CoreNodesSelectorService : ICoreNodesSelectorService
 
     public CoreNodesSelectorService(
         IServiceProvider serviceProvider,
-        IGatewayApiConfiguration configuration)
+        IOptionsMonitor<NetworkOptions> networkOptionsMonitor)
     {
         _serviceProvider = serviceProvider;
 
-        var nodeHealthConfig = configuration.GetCoreApiNodeHealth();
+        var networkOptions = networkOptionsMonitor.CurrentValue;
 
         _usableStatusesFromBestToWorst = Enum.GetValues(typeof(CoreNodeStatus)).Cast<CoreNodeStatus>()
-            .Where(status => !nodeHealthConfig.IgnoreNonSyncedNodes || status == CoreNodeStatus.HealthyAndSynced)
+            .Where(status => !networkOptions.IgnoreNonSyncedNodes || status == CoreNodeStatus.HealthyAndSynced)
             .OrderBy(s => s);
 
-        _allEnabledCoreNodes = configuration.GetCoreNodes()
-            .Where(n => n.IsEnabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
+        _allEnabledCoreNodes = networkOptions.CoreApiNodes
+            .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .ToList();
 
         _nodesInTheTopTierStatus = new List<CoreApiNode>(_allEnabledCoreNodes);
