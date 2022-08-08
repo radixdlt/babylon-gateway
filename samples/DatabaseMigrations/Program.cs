@@ -156,7 +156,7 @@ public static class Program
                         o =>
                         {
                             o.NonBrokenUseNodaTime();
-                            o.MigrationsAssembly(typeof(CommonDbContext).Assembly.FullName);
+                            o.MigrationsAssembly(typeof(CommonDbContext).Assembly.GetName().Name);
                         }
                     );
                 });

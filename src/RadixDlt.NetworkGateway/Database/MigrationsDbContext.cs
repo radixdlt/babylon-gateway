@@ -63,9 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Database;
 
-namespace DatabaseMigrations;
+namespace RadixDlt.NetworkGateway.Database;
 
 public class MigrationsDbContext : CommonDbContext
 {

@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
- using System;
+﻿using System;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NodaTime;

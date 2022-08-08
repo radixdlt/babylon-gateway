@@ -13,9 +13,7 @@ if [ -z "$MigrationName" ]; then
     exit 1;
 fi
 
-# Check it builds
-# TODO make sure MigrationsDbContext is accessible
-dotnet ef migrations add "$MigrationName" --project samples/DatabaseMigrations --context MigrationsDbContext
+dotnet ef migrations add "$MigrationName" --project src/RadixDlt.NetworkGateway --startup-project samples/DatabaseMigrations --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
 ./generation/regenerate-idempotent-sql-script.sh

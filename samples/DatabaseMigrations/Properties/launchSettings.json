@@ -1,0 +1,19 @@
+{
+      "$schema": "http://json.schemastore.org/launchsettings.json",
+      "profiles": {
+            "DatabaseMigrations": {
+                "commandName": "Project",
+                "environmentVariables": {
+                    "DOTNET_ENVIRONMENT": "Development"
+                }
+            },
+            "Wipe Database": {
+                "commandName": "Project",
+                "dotnetRunMessages": true,
+                "environmentVariables": {
+                    "DOTNET_ENVIRONMENT": "Development",
+                    "APP__WIPE_DATABASE": "true"
+                }
+            }
+      }
+}
