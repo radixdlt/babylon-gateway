@@ -62,10 +62,11 @@
  * permissions under this License.
  */
 
+using FluentAssertions;
 using RadixDlt.NetworkGateway.Core.Addressing;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.UnitTests.Addressing;
+namespace RadixDlt.NetworkGateway.UnitTests.Core.Addressing;
 
 public class RadixBech32Tests
 {
@@ -78,9 +79,9 @@ public class RadixBech32Tests
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeAndReencodeIsIdentity(string encodedString)
     {
         var decodedData = RadixBech32.Decode(encodedString);
-
         var reEncodedString = RadixBech32.Bech32EncodeRawAddressData(decodedData.Hrp, decodedData.Data, decodedData.Variant);
-        Assert.Equal(encodedString.ToLowerInvariant(), reEncodedString);
+
+        reEncodedString.Should().Be(encodedString.ToLowerInvariant());
     }
 
     [Theory]
@@ -92,7 +93,9 @@ public class RadixBech32Tests
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeGivesAddress(string encodedString, string expectedAddress)
     {
         var decodedData = RadixBech32.Decode(encodedString);
-        Assert.Equal(expectedAddress, Convert.ToHexString(decodedData.Data));
+        var decodedHex = Convert.ToHexString(decodedData.Data);
+
+        decodedHex.Should().Be(expectedAddress);
     }
 
     public static IEnumerable<object[]> Invalid_Bech32Strings => new List<object[]>
@@ -115,6 +118,8 @@ public class RadixBech32Tests
     [MemberData(nameof(Invalid_Bech32Strings))]
     public void WhenGiven_InvalidEncodedString_DecodeThrows(string encodedString)
     {
-        Assert.Throws<AddressException>(() => Bech32.DecodeToRawData(encodedString));
+        var act = () => Bech32.DecodeToRawData(encodedString);
+
+        act.Should().Throw<AddressException>();
     }
 }

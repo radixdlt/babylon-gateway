@@ -1,3 +1,4 @@
+using FluentAssertions;
 using RadixDlt.NetworkGateway.GatewayApi;
 using Xunit;
 
@@ -15,6 +16,6 @@ public class SerializationsTests
         var base64json = Serializations.AsBase64Json(_input);
         var output = Serializations.FromBase64JsonOrDefault<InputType>(base64json);
 
-        Assert.StrictEqual(_input, output);
+        output.Should().BeEquivalentTo(_input);
     }
 }

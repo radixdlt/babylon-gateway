@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,8 +42,8 @@ public class GatewayEndpointTests
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
         var payload = await response.Content.ReadFromJsonAsync<GatewayResponse>();
 
-        Assert.NotNull(payload);
-        Assert.NotNull(payload.GatewayApi);
-        Assert.Equal("2.0.0", payload.GatewayApi.OpenApiSchemaVersion);
+        payload.Should().NotBeNull();
+        payload.GatewayApi.Should().NotBeNull();
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("2.0.0");
     }
 }

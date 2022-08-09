@@ -62,10 +62,11 @@
  * permissions under this License.
  */
 
+using FluentAssertions;
 using RadixDlt.NetworkGateway.Core.Workers;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.UnitTests.Workers;
+namespace RadixDlt.NetworkGateway.UnitTests.Core.Workers;
 
 public class ExponentialBackoffDelayBetweenLoopsStrategyTests
 {
@@ -96,8 +97,8 @@ public class ExponentialBackoffDelayBetweenLoopsStrategyTests
             rate,
             TimeSpan.FromMilliseconds(maxDelayAfterErrorMs));
 
-        Assert.Equal(
-            TimeSpan.FromMilliseconds(expectedMs),
-            exponentialDelay.DelayAfterError(TimeSpan.Zero, numErrors));
+        var delay = exponentialDelay.DelayAfterError(TimeSpan.Zero, numErrors);
+
+        delay.Should().Be(TimeSpan.FromMilliseconds(expectedMs));
     }
 }

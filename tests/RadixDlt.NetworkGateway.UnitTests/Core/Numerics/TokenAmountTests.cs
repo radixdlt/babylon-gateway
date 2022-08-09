@@ -62,12 +62,13 @@
  * permissions under this License.
  */
 
+using FluentAssertions;
 using RadixDlt.NetworkGateway.Core.Numerics;
 using System.Numerics;
 using System.Text;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.UnitTests.Numerics;
+namespace RadixDlt.NetworkGateway.UnitTests.Core.Numerics;
 
 public class TokenAmountTests
 {
@@ -88,7 +89,9 @@ public class TokenAmountTests
     [InlineData(false, "12", "-3", "NaN")] // Invalid call
     public void Create_TokenAmountFromStringParts_ReadsCorrectly(bool isNegative, string wholePart, string fractionalPart, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromStringParts(isNegative, wholePart, fractionalPart).ToString());
+        var tokenAmount = TokenAmount.FromStringParts(isNegative, wholePart, fractionalPart).ToString();
+
+        tokenAmount.Should().Be(expected);
     }
 
     [Theory]
@@ -110,7 +113,9 @@ public class TokenAmountTests
     [InlineData("-0.0000000000000000007", "0")] // Does not hold 19 dp, truncates and removes decimal point
     public void Create_FromString_ToStringReadsCorrectly(string decimalString, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromDecimalString(decimalString).ToString());
+        var tokenAmount = TokenAmount.FromDecimalString(decimalString).ToString();
+
+        tokenAmount.Should().Be(expected);
     }
 
     [Theory]
@@ -123,7 +128,9 @@ public class TokenAmountTests
     [InlineData("-1234567890012345678", "-1.234567890012345678")]
     public void Create_FromSubUnitsString_ReadsCorrectlyAtFullPrecision(string subUnitsStr, string expected)
     {
-        Assert.Equal(expected, TokenAmount.FromSubUnitsString(subUnitsStr).ToStringFullPrecision());
+        var tokenAmount = TokenAmount.FromSubUnitsString(subUnitsStr).ToStringFullPrecision();
+
+        tokenAmount.Should().Be(expected);
     }
 
     [Fact]
@@ -131,38 +138,61 @@ public class TokenAmountTests
     {
         // This agrees with https://docs.microsoft.com/en-us/dotnet/api/system.double.nan?view=net-5.0
         // (it's just the operators such as == that return false)
-        Assert.Equal(TokenAmount.NaN, TokenAmount.NaN);
+
+        var a = TokenAmount.NaN;
+        var b = TokenAmount.NaN;
+
+        a.Should().Be(b);
+        b.Should().Be(a);
     }
 
     [Fact]
     public void Equate_SameTokenAmount_ReturnsTrue()
     {
-        Assert.Equal(TokenAmount.FromDecimalString("123"), TokenAmount.FromDecimalString("123"));
+        var a = TokenAmount.FromDecimalString("123");
+        var b = TokenAmount.FromDecimalString("123");
+
+        a.Should().Be(b);
+        b.Should().Be(a);
     }
 
     [Fact]
     public void Equate_DifferentTokenAmount_ReturnsFalse()
     {
-        Assert.NotEqual(TokenAmount.FromDecimalString("123"), TokenAmount.FromDecimalString("1234"));
+        var a = TokenAmount.FromDecimalString("123");
+        var b = TokenAmount.FromDecimalString("1234");
+
+        a.Should().NotBe(b);
+        b.Should().NotBe(a);
     }
 
     [Fact]
     public void Equate_NaNWithNoneNaN_ReturnsFalse()
     {
-        Assert.NotEqual(TokenAmount.FromDecimalString("1"), TokenAmount.NaN);
+        var a = TokenAmount.FromDecimalString("1");
+        var b = TokenAmount.NaN;
+
+        a.Should().NotBe(b);
+        b.Should().NotBe(a);
     }
 
     [Fact]
     public void Equate_SameAmountCreatedTwoDifferentWays_ReturnsTrue()
     {
-        Assert.Equal(TokenAmount.FromDecimalString("123"), TokenAmount.FromSubUnitsString("123000000000000000000"));
+        var a = TokenAmount.FromDecimalString("123");
+        var b = TokenAmount.FromSubUnitsString("123000000000000000000");
+
+        a.Should().Be(b);
+        b.Should().Be(a);
     }
 
     [Fact]
     public void GivenANumberTooLargeForPostgres_WhenConvertedToPostgresDecimal_ReturnsNaN()
     {
         var tokenAmount = TokenAmount.FromSubUnits(BigInteger.Pow(10, 1000));
-        Assert.Equal("NaN", tokenAmount.ToPostgresDecimal());
+        var postgresDecimal = tokenAmount.ToPostgresDecimal();
+
+        postgresDecimal.Should().Be("NaN");
     }
 
     [Fact]
@@ -175,13 +205,15 @@ public class TokenAmountTests
             .Append('1').Append(Enumerable.Range(0, 977).Select(_ => '0').ToArray()) // 1000000... with 977 digits of 0
             .ToString();
 
-        Assert.Equal(expected, postgresDecimal);
+        postgresDecimal.Should().Be(expected);
     }
 
     [Fact]
     public void GivenNaN_SubunitsIsZero()
     {
-        Assert.Throws<ArithmeticException>(() => TokenAmount.NaN.GetSubUnits());
+        var act = () => TokenAmount.NaN.GetSubUnits();
+
+        act.Should().Throw<ArithmeticException>();
     }
 
     public static IEnumerable<object[]> IsNaN_Data => new List<object[]>
@@ -201,6 +233,6 @@ public class TokenAmountTests
     [MemberData(nameof(IsNaN_Data))]
     public void GivenTokenAmount_IsNaN_ReturnsCorrectly(TokenAmount tokenAmount, bool expectedIsNaN)
     {
-        Assert.Equal(expectedIsNaN, tokenAmount.IsNaN());
+        tokenAmount.IsNaN().Should().Be(expectedIsNaN);
     }
 }
