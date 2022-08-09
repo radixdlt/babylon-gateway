@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Core.Extensions;
@@ -75,9 +76,9 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface IRawTransactionWriter
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
+    Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
 
-    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
+    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
 }
 
 public class RawTransactionWriter : IRawTransactionWriter
@@ -101,7 +102,7 @@ public class RawTransactionWriter : IRawTransactionWriter
         _logger = logger;
     }
 
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(AggregatorDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
     {
         // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
         return await context.RawTransactions
@@ -109,7 +110,7 @@ public class RawTransactionWriter : IRawTransactionWriter
             .RunAsync(token);
     }
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(AggregatorDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
+    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
     {
         var transactionsById = transactionData
             .Where(td => !td.TransactionSummary.IsStartOfRound)

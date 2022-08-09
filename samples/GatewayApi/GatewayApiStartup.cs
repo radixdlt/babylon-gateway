@@ -63,22 +63,18 @@
  */
 
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace GatewayApi;
 
 public class GatewayApiStartup
 {
-    private readonly string _roConnectionString;
-    private readonly string _rwConnectionString;
     private readonly int _prometheusMetricsPort;
     private readonly bool _enableSwagger;
 
     public GatewayApiStartup(IConfiguration configuration)
     {
-        _roConnectionString = configuration.GetConnectionString("ReadOnlyDbContext");
-        _rwConnectionString = configuration.GetConnectionString("ReadWriteDbContext");
         _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
         _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
     }
@@ -86,7 +82,7 @@ public class GatewayApiStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayApi(_roConnectionString, _rwConnectionString);
+            .AddNetworkGatewayApi();
 
         if (_enableSwagger)
         {
@@ -112,8 +108,8 @@ public class GatewayApiStartup
 
         services
             .AddHealthChecks()
-            .AddDbContextCheck<GatewayReadOnlyDbContext>("readonly_database_connection_check")
-            .AddDbContextCheck<GatewayReadWriteDbContext>("readwrite_database_connection_check")
+            .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
+            .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check")
             .ForwardToPrometheus();
     }
 

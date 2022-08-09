@@ -65,6 +65,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -93,7 +94,7 @@ public class NetworkConfigurationInitializer : BackgroundService
             {
                 await networkConfigurationProvider
                     .LoadNetworkConfigurationFromDatabase(
-                        scope.ServiceProvider.GetRequiredService<GatewayReadOnlyDbContext>(),
+                        scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>(),
                         stoppingToken
                     );
                 break;

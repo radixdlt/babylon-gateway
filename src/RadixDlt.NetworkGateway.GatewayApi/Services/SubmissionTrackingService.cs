@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using CoreModel = RadixCoreApi.Generated.Model;
@@ -107,9 +108,9 @@ public class SubmissionTrackingService : ISubmissionTrackingService
             "Number of mempool transactions marked as failed during initial submission to a node"
         );
 
-    private readonly GatewayReadWriteDbContext _dbContext;
+    private readonly ReadWriteDbContext _dbContext;
 
-    public SubmissionTrackingService(GatewayReadWriteDbContext dbContext)
+    public SubmissionTrackingService(ReadWriteDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -70,6 +70,7 @@ using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Exceptions;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Core.Utilities;
@@ -107,7 +108,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private readonly IServiceProvider _services;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
 
@@ -118,7 +119,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IServiceProvider services,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
-        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )

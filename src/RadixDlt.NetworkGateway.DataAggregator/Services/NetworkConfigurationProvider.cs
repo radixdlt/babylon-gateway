@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.Addressing;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -91,7 +92,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 /// </summary>
 public class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
-    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly ILogger<NetworkConfigurationProvider> _logger;
 
     private readonly object _writeLock = new();
@@ -104,7 +105,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
     );
 
     public NetworkConfigurationProvider(
-        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         ILogger<NetworkConfigurationProvider> logger
     )
     {

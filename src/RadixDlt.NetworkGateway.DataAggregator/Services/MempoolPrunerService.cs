@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
@@ -93,13 +94,13 @@ public class MempoolPrunerService : IMempoolPrunerService
             "Count of mempool transactions pruned from the DB"
         );
 
-    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolPrunerService> _logger;
 
     public MempoolPrunerService(
-        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILogger<MempoolPrunerService> logger
@@ -171,7 +172,7 @@ public class MempoolPrunerService : IMempoolPrunerService
         }
     }
 
-    private async Task UpdateSizeMetrics(AggregatorDbContext dbContext, CancellationToken token)
+    private async Task UpdateSizeMetrics(ReadWriteDbContext dbContext, CancellationToken token)
     {
         var counts = await dbContext.MempoolTransactions
             .GroupBy(t => t.Status)

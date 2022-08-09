@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -95,7 +96,7 @@ public record TransactionSummary(
 
 public static class TransactionSummarisation
 {
-    public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(AggregatorDbContext dbContext, CancellationToken token)
+    public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
     {
         var lastTransaction = await dbContext.LedgerTransactions
             .AsNoTracking()

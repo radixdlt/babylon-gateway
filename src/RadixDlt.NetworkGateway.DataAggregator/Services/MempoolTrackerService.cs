@@ -68,6 +68,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Core.Utilities;
@@ -144,14 +145,14 @@ public class MempoolTrackerService : IMempoolTrackerService
             "Number of mempool transactions in the DB which were marked as missing but now appear in a mempool again"
         );
 
-    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
     private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
 
     public MempoolTrackerService(
-        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ILogger<MempoolTrackerService> logger
     )

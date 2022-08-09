@@ -54,7 +54,7 @@ services:
     image: radixdlt/babylon-ng-postgres-migrations:2.0.0 # TODO use actual image
     profiles: ["NONE"]
     environment:
-      APP__ConnectionStrings__MigrationsDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__ConnectionStrings__NetworkGatewayMigrations: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
 
   data_aggregator: # This is the base -- the _image and _built containers are defined below
     image: radixdlt/babylon-ng-data-aggregator:2.0.0
@@ -71,7 +71,7 @@ services:
       APP__CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
       APP__PrometheusMetricsPort: "1234"
       APP__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
-      APP__ConnectionStrings__AggregatorDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__ConnectionStrings__NetworkGatewayReadWrite: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
       APP__DataAggregator__Network__NetworkName: "${NETWORK_NAME}"
       APP__DataAggregator__Network__DisableCoreApiHttpsCertificateChecks: "${DISABLE_CORE_API_CERTIFICATE_CHECKS}"
       APP__DataAggregator__Network__CoreApiNodes__0__Name: "${NODE_0_NAME}"
@@ -117,8 +117,8 @@ services:
       APP__PrometheusMetricsPort: "1235"
       APP__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
       APP__EnableSwagger: "${ENABLE_SWAGGER}"
-      APP__ConnectionStrings__ReadOnlyDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
-      APP__ConnectionStrings__ReadWriteDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__ConnectionStrings__NetworkGatewayReadOnly: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__ConnectionStrings__NetworkGatewayReadWrite: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
       APP__GatewayApi__Endpoints_MaxPageSize: "${MAX_PAGE_SIZE}"
       APP__GatewayApi__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind: "${PREVENT_OUTDATED_READ_REQUESTS}"
       APP__GatewayApi__AcceptableLedgerLag__PreventConstructionRequestsIfDbLedgerIsBehind: "${PREVENT_OUTDATED_CONSTRUCTION_REQUESTS}"

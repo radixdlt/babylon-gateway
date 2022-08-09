@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.History;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Joins;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization;
@@ -112,7 +113,7 @@ public record ActionsPlannerReport(
 public class DbActionsPlanner
 {
     private readonly TransactionAssertionsOptions _options;
-    private readonly AggregatorDbContext _dbContext;
+    private readonly ReadWriteDbContext _dbContext;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly CancellationToken _cancellationToken;
 
@@ -147,7 +148,7 @@ public class DbActionsPlanner
 
     public DbActionsPlanner(
         TransactionAssertionsOptions options,
-        AggregatorDbContext dbContext,
+        ReadWriteDbContext dbContext,
         IEntityDeterminer entityDeterminer,
         CancellationToken cancellationToken
     )

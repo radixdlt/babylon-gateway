@@ -63,27 +63,25 @@
  */
 
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace DataAggregator;
 
 public class DataAggregatorStartup
 {
-    private readonly string _connectionString;
     private readonly int _prometheusMetricsPort;
 
     public DataAggregatorStartup(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("AggregatorDbContext");
         _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayDataAggregator(_connectionString);
+            .AddNetworkGatewayDataAggregator();
 
         services
             .AddEndpointsApiExplorer();
@@ -96,7 +94,7 @@ public class DataAggregatorStartup
         services
             .AddHealthChecks()
             .AddCheck<AggregatorHealthCheck>("aggregator_health_check")
-            .AddDbContextCheck<AggregatorDbContext>("database_connection_check")
+            .AddDbContextCheck<ReadWriteDbContext>("database_connection_check")
             .ForwardToPrometheus();
     }
 

@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Core.Extensions;
@@ -129,12 +130,12 @@ public record RecentTransactionPageRequest(
 
 public class TransactionQuerier : ITransactionQuerier
 {
-    private readonly GatewayReadOnlyDbContext _dbContext;
+    private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISubmissionTrackingService _submissionTrackingService;
 
     public TransactionQuerier(
-        GatewayReadOnlyDbContext dbContext,
+        ReadOnlyDbContext dbContext,
         INetworkConfigurationProvider networkConfigurationProvider,
         ISubmissionTrackingService submissionTrackingService
     )

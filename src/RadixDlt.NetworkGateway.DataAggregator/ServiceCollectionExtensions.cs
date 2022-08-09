@@ -63,11 +63,14 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core;
 using RadixDlt.NetworkGateway.Core.Configuration;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
@@ -82,7 +85,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayDataAggregator(this IServiceCollection services, string connectionString)
+    public static void AddNetworkGatewayDataAggregator(this IServiceCollection services)
     {
         services
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator:Network")
@@ -94,7 +97,7 @@ public static class ServiceCollectionExtensions
         // Globally-Scoped services
         AddGlobalScopedServices(services);
         AddGlobalHostedServices(services);
-        AddDatabaseContext(services, connectionString);
+        AddDatabaseContext(services);
 
         // Node-Scoped services
         AddNodeScopedServices(services);
@@ -128,14 +131,14 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<MempoolPrunerWorker>();
     }
 
-    private static void AddDatabaseContext(IServiceCollection services, string connectionString)
+    private static void AddDatabaseContext(IServiceCollection services)
     {
         // Useful links:
         // https://www.npgsql.org/efcore/index.html
         // https://www.npgsql.org/doc/connection-string-parameters.html
-        services.AddDbContextFactory<AggregatorDbContext>(options =>
+        services.AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
         {
-            options.UseNpgsql(connectionString, o => o.NonBrokenUseNodaTime());
+            options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName), o => o.NonBrokenUseNodaTime());
         });
     }
 

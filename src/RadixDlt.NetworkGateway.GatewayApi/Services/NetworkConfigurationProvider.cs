@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
-    Task LoadNetworkConfigurationFromDatabase(GatewayReadOnlyDbContext dbContext, CancellationToken token);
+    Task LoadNetworkConfigurationFromDatabase(ReadOnlyDbContext dbContext, CancellationToken token);
 
     string GetNetworkName();
 
@@ -95,7 +95,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
         TokenIdentifier XrdTokenIdentifier
     );
 
-    public async Task LoadNetworkConfigurationFromDatabase(GatewayReadOnlyDbContext dbContext, CancellationToken token)
+    public async Task LoadNetworkConfigurationFromDatabase(ReadOnlyDbContext dbContext, CancellationToken token)
     {
         var networkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(dbContext, token);
         if (networkConfiguration == null)

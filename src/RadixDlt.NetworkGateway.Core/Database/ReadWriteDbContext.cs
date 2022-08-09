@@ -63,20 +63,13 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Core.Database;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.Core.Database;
 
-public class GatewayReadOnlyDbContext : CommonDbContext
+public class ReadWriteDbContext : CommonDbContext
 {
-    public GatewayReadOnlyDbContext(DbContextOptions<GatewayReadOnlyDbContext> options)
+    public ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options)
         : base(options)
     {
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 }

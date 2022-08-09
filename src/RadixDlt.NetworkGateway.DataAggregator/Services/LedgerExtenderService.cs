@@ -67,6 +67,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.Core.Utilities;
@@ -108,7 +109,7 @@ public class LedgerExtenderService : ILedgerExtenderService
 {
     private readonly IOptionsMonitor<TransactionAssertionsOptions> _transactionAssertionsOptionsMonitor;
     private readonly ILogger<LedgerExtenderService> _logger;
-    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -123,7 +124,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     public LedgerExtenderService(
         IOptionsMonitor<TransactionAssertionsOptions> transactionAssertionsOptionsMonitor,
         ILogger<LedgerExtenderService> logger,
-        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer,
         INetworkConfigurationProvider networkConfigurationProvider
@@ -273,7 +274,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     }
 
     private async Task<ProcessTransactionReport> BulkProcessTransactionDependenciesAndEntityCreation(
-        AggregatorDbContext dbContext,
+        ReadWriteDbContext dbContext,
         List<CommittedTransactionData> transactions,
         CancellationToken cancellationToken
     )
@@ -299,7 +300,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         );
     }
 
-    private void ProcessTransactions(AggregatorDbContext dbContext, DbActionsPlanner dbActionsPlanner, List<CommittedTransactionData> transactions)
+    private void ProcessTransactions(ReadWriteDbContext dbContext, DbActionsPlanner dbActionsPlanner, List<CommittedTransactionData> transactions)
     {
         foreach (var transactionData in transactions)
         {
@@ -312,7 +313,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     }
 
     private async Task CreateOrUpdateLedgerStatus(
-        AggregatorDbContext dbContext,
+        ReadWriteDbContext dbContext,
         TransactionSummary finalTransactionSummary,
         SyncTarget latestSyncTarget,
         CancellationToken token

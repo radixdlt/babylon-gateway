@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Core;
 using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Extensions;
 
@@ -152,11 +153,11 @@ public static class Program
                 services.AddDbContextFactory<MigrationsDbContext>(options =>
                 {
                     options.UseNpgsql(
-                        host.Configuration.GetConnectionString("MigrationsDbContext"),
+                        host.Configuration.GetConnectionString(NetworkGatewayConstants.Database.MigrationsConnectionStringName),
                         o =>
                         {
                             o.NonBrokenUseNodaTime();
-                            o.MigrationsAssembly(typeof(CommonDbContext).Assembly.GetName().Name);
+                            o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name);
                         }
                     );
                 });

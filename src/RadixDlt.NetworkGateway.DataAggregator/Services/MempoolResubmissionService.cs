@@ -70,6 +70,7 @@ using NodaTime;
 using Prometheus;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Core.Exceptions;
 using RadixDlt.NetworkGateway.Core.Extensions;
@@ -146,7 +147,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         );
 
     private readonly IServiceProvider _services;
-    private readonly IDbContextFactory<AggregatorDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -155,7 +156,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     public MempoolResubmissionService(
         IServiceProvider services,
-        IDbContextFactory<AggregatorDbContext> dbContextFactory,
+        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
@@ -206,7 +207,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     }
 
     private async Task<List<MempoolTransaction>> SelectTransactionsToResubmit(
-        AggregatorDbContext dbContext,
+        ReadWriteDbContext dbContext,
         Instant instantForTransactionChoosing,
         MempoolOptions mempoolOptions,
         int batchSize,
@@ -288,7 +289,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(
         Instant currentTimestamp,
         MempoolOptions mempoolOptions,
-        AggregatorDbContext dbContext
+        ReadWriteDbContext dbContext
     )
     {
         var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;

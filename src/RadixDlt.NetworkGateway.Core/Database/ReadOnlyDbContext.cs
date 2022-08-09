@@ -63,14 +63,19 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Core.Database;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.Core.Database;
 
-public class AggregatorDbContext : CommonDbContext
+public class ReadOnlyDbContext : CommonDbContext
 {
-    public AggregatorDbContext(DbContextOptions<AggregatorDbContext> options)
+    public ReadOnlyDbContext(DbContextOptions<ReadOnlyDbContext> options)
         : base(options)
     {
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 }

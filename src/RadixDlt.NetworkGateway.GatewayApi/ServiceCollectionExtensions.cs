@@ -63,11 +63,14 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core;
 using RadixDlt.NetworkGateway.Core.Configuration;
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -81,7 +84,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayApi(this IServiceCollection services, string roConnectionString, string rwConnectionString)
+    public static void AddNetworkGatewayApi(this IServiceCollection services)
     {
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
@@ -97,8 +100,7 @@ public static class ServiceCollectionExtensions
 
         // Request scoped services
         AddRequestScopedServices(services);
-        AddReadOnlyDatabaseContext(services, roConnectionString);
-        AddReadWriteDatabaseContext(services, rwConnectionString);
+        AddDatabaseContextServices(services);
 
         // Other scoped services
         AddWorkerScopedServices(services);
@@ -159,21 +161,18 @@ public static class ServiceCollectionExtensions
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
     }
 
-    private static void AddReadOnlyDatabaseContext(IServiceCollection services, string roConnectionString)
+    private static void AddDatabaseContextServices(IServiceCollection services)
     {
-        services.AddDbContext<GatewayReadOnlyDbContext>(options =>
+        services.AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(roConnectionString, o => o.NonBrokenUseNodaTime());
+            options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName), o => o.NonBrokenUseNodaTime());
         });
-    }
 
-    private static void AddReadWriteDatabaseContext(IServiceCollection services, string rwConnectionString)
-    {
-        services.AddDbContext<GatewayReadWriteDbContext>(options =>
+        services.AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
         {
             // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(rwConnectionString, o => o.NonBrokenUseNodaTime());
+            options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName), o => o.NonBrokenUseNodaTime());
         });
     }
 

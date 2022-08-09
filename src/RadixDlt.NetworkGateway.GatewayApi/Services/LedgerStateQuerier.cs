@@ -97,7 +97,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         );
 
     private readonly ILogger<LedgerStateQuerier> _logger;
-    private readonly GatewayReadOnlyDbContext _dbContext;
+    private readonly ReadOnlyDbContext _dbContext;
     private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
@@ -105,7 +105,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
-        GatewayReadOnlyDbContext dbContext,
+        ReadOnlyDbContext dbContext,
         IValidations validations,
         INetworkConfigurationProvider networkConfigurationProvider,
         IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
