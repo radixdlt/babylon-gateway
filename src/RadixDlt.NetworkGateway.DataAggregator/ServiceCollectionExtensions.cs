@@ -94,6 +94,11 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation")
             .AddValidatableOptionsAtSection<TransactionAssertionsOptions, TransactionAssertionsOptionsValidator>("DataAggregator:TransactionAssertions");
 
+        services
+            .AddHealthChecks()
+            .AddCheck<AggregatorHealthCheck>("network_gateway_data_aggregator")
+            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_data_aggregator_database_readwrite_connection");
+
         // Globally-Scoped services
         AddGlobalScopedServices(services);
         AddGlobalHostedServices(services);

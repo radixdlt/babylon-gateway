@@ -15,7 +15,7 @@ public class GatewayEndpointTests
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddNetworkGatewayApi("unused", "unused");
+                .AddNetworkGatewayApi();
 
             services
                 .AddControllers();

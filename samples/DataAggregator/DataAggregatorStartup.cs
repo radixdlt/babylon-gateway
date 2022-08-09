@@ -63,9 +63,7 @@
  */
 
 using Prometheus;
-using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.DataAggregator;
-using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 namespace DataAggregator;
 
@@ -93,8 +91,6 @@ public class DataAggregatorStartup
 
         services
             .AddHealthChecks()
-            .AddCheck<AggregatorHealthCheck>("aggregator_health_check")
-            .AddDbContextCheck<ReadWriteDbContext>("database_connection_check")
             .ForwardToPrometheus();
     }
 

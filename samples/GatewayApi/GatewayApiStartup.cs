@@ -63,7 +63,6 @@
  */
 
 using Prometheus;
-using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.GatewayApi;
 
 namespace GatewayApi;
@@ -108,8 +107,6 @@ public class GatewayApiStartup
 
         services
             .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
-            .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check")
             .ForwardToPrometheus();
     }
 
