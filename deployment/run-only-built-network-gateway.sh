@@ -6,4 +6,4 @@ cd "$SCRIPT_DIR"
 ./scripts/ensure-env-exists.sh
 
 docker-compose --profile network-gateway-built build
-docker-compose --profile network-gateway-built up --abort-on-container-exit
+docker-compose --profile network-gateway-built up
