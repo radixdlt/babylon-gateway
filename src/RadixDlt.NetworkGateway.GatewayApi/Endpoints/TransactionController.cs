@@ -105,11 +105,9 @@ public class TransactionController
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
         var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier);
 
-        var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
-
         var transactionsPageRequest = new RecentTransactionPageRequest(
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
-            PageSize: _validations.ExtractValidIntInBoundInclusive("Page size", unvalidatedLimit, 1, _endpointOptions.MaxPageSize)
+            PageSize: request.Limit ?? 10
         );
 
         var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState);
