@@ -62,14 +62,27 @@
  * permissions under this License.
  */
 
-using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class TransactionBuildRequest
+public partial class PartialLedgerStateIdentifier
 {
-    public void DoSth()
-    {
-        Console.WriteLine("hello!");
-    }
+    [IgnoreDataMember]
+    [MemberNotNullWhen(true, nameof(StateVersion))]
+    public bool HasStateVersion => StateVersion != null;
+
+    [IgnoreDataMember]
+    [MemberNotNullWhen(true, nameof(Timestamp))]
+    public bool HasTimestamp => Timestamp != null;
+
+    [IgnoreDataMember]
+    [MemberNotNullWhen(true, nameof(Epoch))]
+    public bool HasEpoch => Epoch != null;
+
+    [IgnoreDataMember]
+    [MemberNotNullWhen(true, nameof(Epoch))]
+    [MemberNotNullWhen(true, nameof(Round))]
+    public bool HasEpochAndRound => Epoch != null && Round != null;
 }
