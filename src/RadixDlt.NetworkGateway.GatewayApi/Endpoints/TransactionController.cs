@@ -102,25 +102,21 @@ public class TransactionController
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier);
 
         var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
-            PageSize: _validations.ExtractValidIntInBoundInclusive(
-                "Page size",
-                unvalidatedLimit,
-                1,
-                _endpointOptions.MaxPageSize
-            )
+            PageSize: _validations.ExtractValidIntInBoundInclusive("Page size", unvalidatedLimit, 1, _endpointOptions.MaxPageSize)
         );
 
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, ledgerState);
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState);
 
         // NB - We don't return a total here as we don't have an index on user transactions
         return new RecentTransactionsResponse(
-            ledgerState,
+            atLedgerState,
             nextCursor: results.NextPageCursor?.ToCursorString(),
             results.Transactions
         );
