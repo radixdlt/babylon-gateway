@@ -79,7 +79,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionQuerier
 {
-    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState ledgerState);
+    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState);
 
     Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
 
@@ -94,10 +94,10 @@ public interface ITransactionQuerier
 }
 
 [DataContract]
-public record CommittedTransactionPaginationCursor(long? NextPageAtAndBelowStateVersion)
+public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
 {
-    [DataMember(EmitDefaultValue = false, Name = "v")]
-    public long? NextPageAtAndBelowStateVersion { get; set; } = NextPageAtAndBelowStateVersion;
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
 
     public static CommittedTransactionPaginationCursor? FromCursorString(string? cursorString)
     {
@@ -149,9 +149,9 @@ public class TransactionQuerier : ITransactionQuerier
         _submissionTrackingService = submissionTrackingService;
     }
 
-    public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState ledgerState)
+    public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState)
     {
-        var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, ledgerState);
+        var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, atLedgerState, fromLedgerState);
         var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
             ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
             : null;
@@ -159,6 +159,11 @@ public class TransactionQuerier : ITransactionQuerier
         var transactions = await GetTransactions(
             transactionStateVersionsAndOneMore.Take(request.PageSize).ToList()
         );
+
+        if (fromLedgerState != null)
+        {
+            transactions.Reverse();
+        }
 
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
@@ -254,24 +259,43 @@ public class TransactionQuerier : ITransactionQuerier
             .CountAsync();
     }
 
-    private async Task<List<long>> GetRecentUserTransactionStateVersions(RecentTransactionPageRequest request, Gateway.LedgerState ledgerState)
+    private async Task<List<long>> GetRecentUserTransactionStateVersions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState)
     {
-        var stateVersionUpperBound = request.Cursor?.NextPageAtAndBelowStateVersion ?? ledgerState._Version;
+        if (fromLedgerState != null)
+        {
+            var bottomStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? fromLedgerState._Version;
+            var topStateVersionBoundary = atLedgerState._Version;
 
-        return await _dbContext.LedgerTransactions
-            .Where(lt =>
-                lt.ResultantStateVersion <= stateVersionUpperBound
-                && lt.IsUserTransaction
-            )
-            .OrderByDescending(at => at.ResultantStateVersion)
-            .Take(request.PageSize + 1)
-            .Select(at => at.ResultantStateVersion)
-            .ToListAsync();
+            return await _dbContext.LedgerTransactions
+                .Where(lt =>
+                    lt.ResultantStateVersion >= bottomStateVersionBoundary && lt.ResultantStateVersion <= topStateVersionBoundary
+                    && !lt.IsStartOfEpoch
+                    && !lt.IsStartOfRound
+                )
+                .OrderBy(at => at.ResultantStateVersion)
+                .Take(request.PageSize + 1)
+                .Select(at => at.ResultantStateVersion)
+                .ToListAsync();
+        }
+        else
+        {
+            var topStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? atLedgerState._Version;
+
+            return await _dbContext.LedgerTransactions
+                .Where(lt =>
+                    lt.ResultantStateVersion <= topStateVersionBoundary
+                    && lt.IsUserTransaction
+                )
+                .OrderByDescending(at => at.ResultantStateVersion)
+                .Take(request.PageSize + 1)
+                .Select(at => at.ResultantStateVersion)
+                .ToListAsync();
+        }
     }
 
     private async Task<List<long>> GetAccountTransactionStateVersions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
     {
-        var stateVersionUpperBound = request.Cursor?.NextPageAtAndBelowStateVersion ?? ledgerState._Version;
+        var stateVersionUpperBound = request.Cursor?.StateVersionBoundary ?? ledgerState._Version;
 
         return await _dbContext.AccountTransactions
             .Where(at =>

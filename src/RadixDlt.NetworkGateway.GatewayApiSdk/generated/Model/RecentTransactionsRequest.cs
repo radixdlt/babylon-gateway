@@ -36,11 +36,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="RecentTransactionsRequest" /> class.
         /// </summary>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested. The maximum value is 30 at present..</param>
-        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int limit = default(int))
+        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int limit = default(int))
         {
             this.AtStateIdentifier = atStateIdentifier;
+            this.FromStateIdentifier = fromStateIdentifier;
             this.Cursor = cursor;
             this.Limit = limit;
         }
@@ -50,6 +52,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
         public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FromStateIdentifier
+        /// </summary>
+        [DataMember(Name = "from_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier FromStateIdentifier { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -74,6 +82,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class RecentTransactionsRequest {\n");
             sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("  FromStateIdentifier: ").Append(FromStateIdentifier).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
@@ -117,6 +126,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 ) && 
                 (
+                    this.FromStateIdentifier == input.FromStateIdentifier ||
+                    (this.FromStateIdentifier != null &&
+                    this.FromStateIdentifier.Equals(input.FromStateIdentifier))
+                ) && 
+                (
                     this.Cursor == input.Cursor ||
                     (this.Cursor != null &&
                     this.Cursor.Equals(input.Cursor))
@@ -139,6 +153,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.AtStateIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                }
+                if (this.FromStateIdentifier != null)
+                {
+                    hashCode = (hashCode * 59) + this.FromStateIdentifier.GetHashCode();
                 }
                 if (this.Cursor != null)
                 {

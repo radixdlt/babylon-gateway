@@ -84,6 +84,7 @@ public interface ILedgerStateQuerier
     Task<GatewayResponse> GetGatewayState();
 
     Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
+    Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier);
 
     Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
@@ -177,6 +178,19 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         );
 
         return ledgerState;
+    }
+
+    public async Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier)
+    {
+        var ledgerStateReport = fromLedgerStateIdentifier switch
+        {
+            { _Version: > 0, Timestamp: null, Epoch: 0, Round: 0 } => await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier._Version),
+            { _Version: 0, Timestamp: { }, Epoch: 0, Round: 0 } => await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp),
+            { _Version: 0, Timestamp: null, Epoch: > 0, Round: >= 0 } => await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch, fromLedgerStateIdentifier.Round),
+            _ => null,
+        };
+
+        return ledgerStateReport?.LedgerState;
     }
 
     public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(
@@ -277,6 +291,18 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
+    private async Task<LedgerStateReport> GetLedgerStateAfterStateVersion(long stateVersion)
+    {
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterStateVersion(stateVersion));
+
+        if (ledgerState == null)
+        {
+            throw new InvalidStateException("There are no transactions in the database");
+        }
+
+        return ledgerState;
+    }
+
     private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(string timestamp)
     {
         var validatedTimestamp = _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
@@ -296,9 +322,40 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
+    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(string timestamp)
+    {
+        var validatedTimestamp = _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
+
+        if (validatedTimestamp > SystemClock.Instance.GetCurrentInstant())
+        {
+            throw InvalidRequestException.FromOtherError("Timestamp is in the future");
+        }
+
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(validatedTimestamp));
+
+        if (ledgerState == null)
+        {
+            throw InvalidRequestException.FromOtherError("Timestamp is beyond the end of the known ledger");
+        }
+
+        return ledgerState;
+    }
+
     private async Task<LedgerStateReport> GetLedgerStateAtEpochAndRound(long epoch, long round)
     {
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionAtEpochRound(epoch, round));
+
+        if (ledgerState == null)
+        {
+            throw InvalidRequestException.FromOtherError($"Epoch {epoch} is beyond the end of the known ledger");
+        }
+
+        return ledgerState;
+    }
+
+    private async Task<LedgerStateReport> GetLedgerStateAfterEpochAndRound(long epoch, long round)
+    {
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAtEpochRound(epoch, round));
 
         if (ledgerState == null)
         {
