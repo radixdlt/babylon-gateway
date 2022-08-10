@@ -63,6 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Core.Database.ValueConverters;
 

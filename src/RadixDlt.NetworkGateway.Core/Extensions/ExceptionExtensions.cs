@@ -64,6 +64,8 @@
 
 using RadixDlt.NetworkGateway.Core.CoreCommunications;
 using RadixDlt.NetworkGateway.Core.Exceptions;
+using System;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Core.Extensions;
 

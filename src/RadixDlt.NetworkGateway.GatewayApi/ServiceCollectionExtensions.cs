@@ -79,6 +79,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Initializers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Workers;
 using System.Net;
+using System.Net.Http;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 

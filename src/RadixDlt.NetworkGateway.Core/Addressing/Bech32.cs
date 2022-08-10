@@ -67,6 +67,8 @@
 // ReSharper disable IdentifierTypo
 // Fix for ReShaper not liking the work "Bech"
 
+using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace RadixDlt.NetworkGateway.Core.Addressing;

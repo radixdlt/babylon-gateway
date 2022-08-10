@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace RadixDlt.NetworkGateway.Core.Utilities;
 

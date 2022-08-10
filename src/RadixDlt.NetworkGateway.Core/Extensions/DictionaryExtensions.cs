@@ -63,6 +63,9 @@
  */
 
 using RadixDlt.NetworkGateway.Core.Numerics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Core.Extensions;
 

@@ -70,9 +70,12 @@ using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.Exceptions;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
-using CoreModel = RadixCoreApi.Generated.Model;
+using System.Net.Http;
 using CoreClient = RadixCoreApi.Generated.Client;
+using CoreModel = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;

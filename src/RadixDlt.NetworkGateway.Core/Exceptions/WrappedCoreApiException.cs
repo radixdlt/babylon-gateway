@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System;
 using CoreClient = RadixCoreApi.Generated.Client;
 
 namespace RadixDlt.NetworkGateway.Core.Exceptions;

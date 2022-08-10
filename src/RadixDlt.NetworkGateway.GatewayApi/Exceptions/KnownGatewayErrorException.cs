@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 

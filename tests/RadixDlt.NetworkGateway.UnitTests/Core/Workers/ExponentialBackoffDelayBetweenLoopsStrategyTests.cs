@@ -64,6 +64,7 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.Core.Workers;
+using System;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.Core.Workers;

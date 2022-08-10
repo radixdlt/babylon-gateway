@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using System;
+
 namespace RadixDlt.NetworkGateway.Core.StaticHelpers;
 
 public static class RadixHashing

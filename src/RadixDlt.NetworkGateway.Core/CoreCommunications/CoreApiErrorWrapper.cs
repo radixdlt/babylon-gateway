@@ -66,6 +66,8 @@ using Newtonsoft.Json;
 using RadixCoreApi.Generated.Client;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.Exceptions;
+using System;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.Core.CoreCommunications;
 

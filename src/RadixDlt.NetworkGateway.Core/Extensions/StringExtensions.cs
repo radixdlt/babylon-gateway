@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System;
 using System.Text;
 
 namespace RadixDlt.NetworkGateway.Core.Extensions;

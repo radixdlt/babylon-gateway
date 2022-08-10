@@ -63,6 +63,7 @@
  */
 
 using NodaTime;
+using System;
 using System.Text;
 
 namespace RadixDlt.NetworkGateway.Core.Extensions;

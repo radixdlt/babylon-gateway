@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.Core.Extensions;
+using System;
 using System.Numerics;
 
 namespace RadixDlt.NetworkGateway.Core.Numerics;

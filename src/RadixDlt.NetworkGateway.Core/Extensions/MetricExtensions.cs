@@ -63,6 +63,7 @@
  */
 
 using Prometheus;
+using System;
 
 namespace RadixDlt.NetworkGateway.Core.Extensions;
 

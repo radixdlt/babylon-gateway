@@ -64,8 +64,9 @@
 
 using NodaTime;
 using RadixDlt.NetworkGateway.Core.Addressing;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

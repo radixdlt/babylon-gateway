@@ -71,9 +71,11 @@ using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

@@ -69,6 +69,8 @@ using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.History;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Core.Database;
 

@@ -63,6 +63,7 @@
  */
 
 using RadixCoreApi.Generated.Api;
+using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;

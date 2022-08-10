@@ -62,6 +62,11 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
+
 namespace DataAggregator;
 
 public static class Program

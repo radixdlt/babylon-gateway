@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
