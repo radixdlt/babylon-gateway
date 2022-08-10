@@ -64,6 +64,7 @@
 
 using RadixCoreApi.Generated.Model;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.Core.CoreCommunications;
 

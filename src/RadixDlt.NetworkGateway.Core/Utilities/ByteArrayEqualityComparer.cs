@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using System.Collections.Generic;
+
 namespace RadixDlt.NetworkGateway.Core.Utilities;
 
 public sealed class ByteArrayEqualityComparer : IEqualityComparer<byte[]>

@@ -68,6 +68,8 @@
 /* The above is a fix for ReShaper not liking the work "Bech" */
 
 using RadixDlt.NetworkGateway.Core.StaticHelpers;
+using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 

@@ -65,6 +65,7 @@
 using Microsoft.Extensions.Logging;
 using RadixCoreApi.Generated.Model;
 using RadixDlt.NetworkGateway.Core.Addressing;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.Core.CoreCommunications;

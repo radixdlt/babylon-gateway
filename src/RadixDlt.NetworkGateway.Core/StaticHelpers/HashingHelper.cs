@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using System;
 using System.Security.Cryptography;
 
 namespace RadixDlt.NetworkGateway.Core.StaticHelpers;

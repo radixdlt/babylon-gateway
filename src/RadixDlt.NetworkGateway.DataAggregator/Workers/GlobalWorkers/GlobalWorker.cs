@@ -66,6 +66,7 @@ using Microsoft.Extensions.Logging;
 using Prometheus;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Core.Workers;
+using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 

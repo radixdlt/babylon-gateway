@@ -68,6 +68,12 @@ using Prometheus;
 using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using CoreApiModel = RadixCoreApi.Generated.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -178,7 +184,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
 
-    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
+    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, System.Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
     {
         if (healthCheckData.NodeStateVersion == null)
         {

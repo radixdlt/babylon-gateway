@@ -63,9 +63,11 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 

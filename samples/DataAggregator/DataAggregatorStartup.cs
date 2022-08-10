@@ -62,6 +62,10 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator;
 

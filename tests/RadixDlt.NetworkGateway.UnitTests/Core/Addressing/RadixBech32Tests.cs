@@ -64,6 +64,8 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.Core.Addressing;
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.Core.Addressing;

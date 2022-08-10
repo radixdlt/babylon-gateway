@@ -80,6 +80,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 using System.Net;
+using System.Net.Http;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
 

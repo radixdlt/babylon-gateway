@@ -62,6 +62,9 @@
  * permissions under this License.
  */
 
+using System;
+using System.Collections.Generic;
+
 namespace RadixDlt.NetworkGateway.Core.Utilities;
 
 /// <summary>
