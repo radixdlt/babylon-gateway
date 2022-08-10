@@ -89,6 +89,9 @@ public static class ServiceCollectionExtensions
     public static void AddNetworkGatewayDataAggregator(this IServiceCollection services)
     {
         services
+            .AddNetworkGatewayCore();
+
+        services
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("DataAggregator:Network")
             .AddValidatableOptionsAtSection<MonitoringOptions, MonitoringOptionsValidator>("DataAggregator:Monitoring")
             .AddValidatableOptionsAtSection<MempoolOptions, MempoolOptionsValidator>("DataAggregator:MempoolOptions")

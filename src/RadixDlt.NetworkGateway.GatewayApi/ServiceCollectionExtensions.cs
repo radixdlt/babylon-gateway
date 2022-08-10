@@ -88,13 +88,15 @@ public static class ServiceCollectionExtensions
     public static void AddNetworkGatewayApi(this IServiceCollection services)
     {
         services
+            .AddNetworkGatewayCore();
+
+        services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");
 
         services
             .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api")
             .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
             .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
 

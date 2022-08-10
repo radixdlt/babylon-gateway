@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -84,6 +85,7 @@ public interface ILedgerStateQuerier
     Task<GatewayResponse> GetGatewayState();
 
     Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
+
     Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier);
 
     Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
@@ -101,7 +103,6 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly ReadOnlyDbContext _dbContext;
-    private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
@@ -109,14 +110,12 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
         ReadOnlyDbContext dbContext,
-        IValidations validations,
         INetworkConfigurationProvider networkConfigurationProvider,
         IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
         IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor)
     {
         _logger = logger;
         _dbContext = dbContext;
-        _validations = validations;
         _networkConfigurationProvider = networkConfigurationProvider;
         _endpointOptionsMonitor = endpointOptionsMonitor;
         _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
@@ -142,13 +141,12 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     }
 
     // So that we don't forget to check the network name, add the assertion in here.
-    public async Task<LedgerState> GetValidLedgerStateForReadRequest(
-        PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    public async Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier)
     {
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
         var ledgerState = ledgerStateReport.LedgerState;
 
-        if (!ResolvesToTopOfLedger(atLedgerStateIdentifier))
+        if (atLedgerStateIdentifier == null)
         {
             return ledgerState;
         }
@@ -182,24 +180,30 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     public async Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier)
     {
-        var ledgerStateReport = fromLedgerStateIdentifier switch
+        LedgerStateReport? ledgerStateReport = null;
+
+        if (fromLedgerStateIdentifier?.HasStateVersion == true)
         {
-            { _Version: > 0, Timestamp: null, Epoch: 0, Round: 0 } => await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier._Version),
-            { _Version: 0, Timestamp: { }, Epoch: 0, Round: 0 } => await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp),
-            { _Version: 0, Timestamp: null, Epoch: > 0, Round: >= 0 } => await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch, fromLedgerStateIdentifier.Round),
-            _ => null,
-        };
+            ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value);
+        }
+        else if (fromLedgerStateIdentifier?.HasTimestamp == true)
+        {
+            ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value);
+        }
+        else if (fromLedgerStateIdentifier?.HasEpoch == true)
+        {
+            ledgerStateReport = await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 0);
+        }
 
         return ledgerStateReport?.LedgerState;
     }
 
-    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(
-        PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier)
     {
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
         var ledgerState = ledgerStateReport.LedgerState;
 
-        if (!ResolvesToTopOfLedger(atLedgerStateIdentifier))
+        if (atLedgerStateIdentifier == null)
         {
             return ledgerState;
         }
@@ -249,22 +253,26 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerState(PartialLedgerStateIdentifier? at = null)
     {
-        return at switch
-        {
-            null or { _Version: 0, Timestamp: null, Epoch: 0, Round: 0 } => await GetTopOfLedgerStateReport(), // Duplicates line in ResolvesToTopOfLedger below - change both together!
-            { _Version: > 0, Timestamp: null, Epoch: 0, Round: 0 } => await GetLedgerStateBeforeStateVersion(at._Version),
-            { _Version: 0, Timestamp: { }, Epoch: 0, Round: 0 } => await GetLedgerStateBeforeTimestamp(at.Timestamp),
-            { _Version: 0, Timestamp: null, Epoch: > 0, Round: >= 0 } => await GetLedgerStateAtEpochAndRound(at.Epoch, at.Round),
-            _ => throw InvalidRequestException.FromOtherError(
-                "The at_state_identifier was not either (A) missing (B) with only a state_version; (C) with only a Timestamp; (D) with only an Epoch; or (E) with only an Epoch and Round"
-            ),
-        };
-    }
+        LedgerStateReport result;
 
-    private bool ResolvesToTopOfLedger(PartialLedgerStateIdentifier? at = null)
-    {
-        // Duplicates line in switch above - change both together!
-        return at is null or { _Version: 0, Timestamp: null, Epoch: 0, Round: 0 };
+        if (at?.HasStateVersion == true)
+        {
+            result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value);
+        }
+        else if (at?.HasTimestamp == true)
+        {
+            result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value);
+        }
+        else if (at?.HasEpoch == true)
+        {
+            result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 0);
+        }
+        else
+        {
+            result = await GetTopOfLedgerStateReport(); // Duplicates line in ResolvesToTopOfLedger below - change both together!;
+        }
+
+        return result;
     }
 
     private async Task<LedgerStateReport> GetTopOfLedgerStateReport()
@@ -303,14 +311,9 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(string timestamp)
+    private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
-
-        if (validatedTimestamp > SystemClock.Instance.GetCurrentInstant())
-        {
-            throw InvalidRequestException.FromOtherError("Timestamp is in the future");
-        }
+        var validatedTimestamp = Instant.FromDateTimeOffset(timestamp);
 
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(validatedTimestamp));
 
@@ -322,14 +325,9 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(string timestamp)
+    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = _validations.ExtractValidTimestamp("The ledger state timestamp", timestamp);
-
-        if (validatedTimestamp > SystemClock.Instance.GetCurrentInstant())
-        {
-            throw InvalidRequestException.FromOtherError("Timestamp is in the future");
-        }
+        var validatedTimestamp = Instant.FromDateTimeOffset(timestamp);
 
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(validatedTimestamp));
 

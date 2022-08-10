@@ -39,7 +39,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested. The maximum value is 30 at present..</param>
-        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int limit = default(int))
+        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
         {
             this.AtStateIdentifier = atStateIdentifier;
             this.FromStateIdentifier = fromStateIdentifier;
@@ -63,15 +63,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
         /// </summary>
         /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = false)]
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
         public string Cursor { get; set; }
 
         /// <summary>
         /// The page size requested. The maximum value is 30 at present.
         /// </summary>
         /// <value>The page size requested. The maximum value is 30 at present.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = false)]
-        public int Limit { get; set; }
+        [DataMember(Name = "limit", EmitDefaultValue = true)]
+        public int? Limit { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,7 +137,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.Limit == input.Limit ||
-                    this.Limit.Equals(input.Limit)
+                    (this.Limit != null &&
+                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -162,7 +163,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                if (this.Limit != null)
+                {
+                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                }
                 return hashCode;
             }
         }
