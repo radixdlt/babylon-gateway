@@ -113,7 +113,7 @@ public class GatewayApiStartup
 
         services
             .AddValidatorsFromAssembly(typeof(RadixDlt.NetworkGateway.GatewayApi.ServiceCollectionExtensions).Assembly)
-            .AddFluentValidationAutoValidation();
+            .AddFluentValidationAutoValidation(o => o.DisableDataAnnotationsValidation = true);
 
         services
             .AddHealthChecks()
