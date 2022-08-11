@@ -64,13 +64,9 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
         protected override IWebHostBuilder CreateWebHostBuilder()
         {
             var hostBuilder = new WebHostBuilder()
-            //.UseKestrel()
             .UseContentRoot(Directory.GetCurrentDirectory())
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
-                config.AddEnvironmentVariables("APP__");
-                config.AddEnvironmentVariables("APP:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
-
                 config.AddJsonFile(@"appsettings.Development.json", optional: false, reloadOnChange: true);
 
                 config.AddEnvironmentVariables();

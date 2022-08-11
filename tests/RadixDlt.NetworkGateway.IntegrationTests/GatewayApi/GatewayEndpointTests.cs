@@ -1,14 +1,8 @@
 using FluentAssertions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
@@ -26,9 +20,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
     public async Task TestSchemaVersion()
     {
         // Arrange
-        var client = _factory
-            .WithWebHostBuilder(builder => builder.UseSolutionRelativeContentRoot(@"tests/RadixDlt.NetworkGateway.IntegrationTests"))
-            .CreateClient();
+        var client = _factory.CreateClient();
 
         // Act
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));

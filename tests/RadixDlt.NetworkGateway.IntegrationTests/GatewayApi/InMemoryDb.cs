@@ -2,7 +2,6 @@ using NodaTime.Text;
 using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
-using RadixDlt.NetworkGateway.Core.Extensions;
 using RadixDlt.NetworkGateway.Core.Numerics;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
