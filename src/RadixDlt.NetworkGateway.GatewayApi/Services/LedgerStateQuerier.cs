@@ -269,7 +269,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         }
         else
         {
-            result = await GetTopOfLedgerStateReport(); // Duplicates line in ResolvesToTopOfLedger below - change both together!;
+            result = await GetTopOfLedgerStateReport();
         }
 
         return result;

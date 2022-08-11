@@ -63,8 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -78,25 +76,19 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 [TypeFilter(typeof(InvalidModelStateFilter))]
 public class TransactionController
 {
-    private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
-    private readonly EndpointOptions _endpointOptions;
 
     public TransactionController(
-        IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
-        IConstructionAndSubmissionService constructionAndSubmissionService,
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot
+        IConstructionAndSubmissionService constructionAndSubmissionService
     )
     {
-        _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
         _constructionAndSubmissionService = constructionAndSubmissionService;
-        _endpointOptions = endpointOptionsSnapshot.Value;
     }
 
     [HttpPost("recent")]
@@ -123,7 +115,7 @@ public class TransactionController
     [HttpPost("status")]
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request)
     {
-        var transactionIdentifier = _validations.ExtractValidTransactionIdentifier(request.TransactionIdentifier);
+        var transactionIdentifier = request.TransactionIdentifier.Hash.ToTransactionIdentifier();
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);
