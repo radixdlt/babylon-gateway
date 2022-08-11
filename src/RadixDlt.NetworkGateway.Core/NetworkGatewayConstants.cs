@@ -8,4 +8,9 @@ public static class NetworkGatewayConstants
         public const string ReadOnlyConnectionStringName = "NetworkGatewayReadOnly";
         public const string ReadWriteConnectionStringName = "NetworkGatewayReadWrite";
     }
+
+    public static class Transaction
+    {
+        public const int IdentifierByteLength = 32;
+    }
 }
