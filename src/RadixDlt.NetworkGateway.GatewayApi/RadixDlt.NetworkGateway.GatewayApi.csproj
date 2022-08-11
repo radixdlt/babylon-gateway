@@ -5,6 +5,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentValidation.AspNetCore" />
         <PackageReference Include="RadixCoreApi.Generated" />
     </ItemGroup>
 
