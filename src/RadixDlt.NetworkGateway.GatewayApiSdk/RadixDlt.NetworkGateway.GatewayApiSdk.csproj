@@ -11,4 +11,7 @@
         <PackageReference Include="Polly" />
     </ItemGroup>
   
+    <ItemGroup>
+        <InternalsVisibleTo Include ="tests/RadixDlt.NetworkGateway.IntegrationTests"/>
+    </ItemGroup>
   </Project>

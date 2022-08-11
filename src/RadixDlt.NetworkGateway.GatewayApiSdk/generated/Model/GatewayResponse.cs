@@ -37,6 +37,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [JsonConstructorAttribute]
         protected GatewayResponse() { }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="GatewayResponse" /> class.
         /// </summary>

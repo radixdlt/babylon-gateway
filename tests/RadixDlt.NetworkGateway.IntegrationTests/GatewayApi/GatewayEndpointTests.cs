@@ -1,49 +1,46 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests
+public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 {
-    private class Startup
+    private readonly TestApplicationFactory _factory;
+
+    public GatewayEndpointTests(TestApplicationFactory factory)
     {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddNetworkGatewayApi();
-
-            services
-                .AddControllers();
-        }
-
-        public void Configure(IApplicationBuilder application)
-        {
-            application
-                .UseRouting()
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
-        }
+        _factory = factory;
     }
 
     [Fact]
-    public async Task Test()
+    public async Task TestSchemaVersion()
     {
-        var waf = new WebApplicationFactory<Startup>();
-        var client = waf.CreateClient();
+        // Arrange
+        var client = _factory
+            .WithWebHostBuilder(builder => builder.UseSolutionRelativeContentRoot(@"tests/RadixDlt.NetworkGateway.IntegrationTests"))
+            .CreateClient();
 
+        // Act
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-        var payload = await response.Content.ReadFromJsonAsync<GatewayResponse>();
 
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        string json = await response.Content.ReadAsStringAsync();
+        var payload = JsonConvert.DeserializeObject<GatewayResponse>(json);
+
+        // Assert
         payload.Should().NotBeNull();
         payload.GatewayApi.Should().NotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("2.0.0");
+        payload.GatewayApi._Version.Should().Be("2.0.0");
     }
 }

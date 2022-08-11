@@ -62,7 +62,10 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Prometheus;
+using RadixDlt.NetworkGateway.Core.Database;
 using RadixDlt.NetworkGateway.GatewayApi;
 
 namespace GatewayApi;
@@ -99,6 +102,8 @@ public class GatewayApiStartup
                     corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
+        services.AddDbContext<ReadOnlyDbContext>(options => options.UseInMemoryDatabase("InMemoryReadOnlyDb"));
 
         services
             .AddControllers()
