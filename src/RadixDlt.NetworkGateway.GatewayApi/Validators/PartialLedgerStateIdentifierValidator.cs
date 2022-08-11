@@ -1,7 +1,6 @@
 using FluentValidation;
 using RadixDlt.NetworkGateway.Core;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
@@ -9,7 +8,6 @@ public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLe
 {
     public PartialLedgerStateIdentifierValidator(ISystemClock systemClock)
     {
-        ClassLevelCascadeMode = CascadeMode.Stop;
         RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x)
