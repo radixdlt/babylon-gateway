@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -99,6 +101,10 @@ public static class ServiceCollectionExtensions
             .AddHealthChecks()
             .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
             .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+
+        services
+            .AddValidatorsFromAssembly(typeof(ServiceCollectionExtensions).Assembly)
+            .AddFluentValidationAutoValidation(o => o.DisableDataAnnotationsValidation = true);
 
         // Initializers
         AddInitializers(services);

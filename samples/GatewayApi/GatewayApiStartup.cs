@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -110,10 +108,6 @@ public class GatewayApiStartup
             .AddControllers()
             .AddControllersAsServices()
             .AddNewtonsoftJson();
-
-        services
-            .AddValidatorsFromAssembly(typeof(RadixDlt.NetworkGateway.GatewayApi.ServiceCollectionExtensions).Assembly)
-            .AddFluentValidationAutoValidation(o => o.DisableDataAnnotationsValidation = true);
 
         services
             .AddHealthChecks()

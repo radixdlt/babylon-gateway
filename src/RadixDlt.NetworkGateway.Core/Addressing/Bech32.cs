@@ -69,6 +69,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace RadixDlt.NetworkGateway.Core.Addressing;
@@ -244,6 +245,52 @@ public static class Bech32
         return new Bech32RawData(hrp, encodedData.ToArray(), variant);
     }
 
+    public static bool IsBech32StringValid(string str, [MaybeNullWhen(true)] out string error)
+    {
+        error = null;
+
+        switch (str.Length)
+        {
+            case < 8:
+                error = $"Bech32 string too short: {str.Length} < 8";
+                return false;
+            case > 90:
+                error = $"Bech32 string too long: {str.Length} > 90";
+                return false;
+        }
+
+        var isLowerCase = false;
+        var isUpperCase = false;
+
+        for (int i = 0; i < str.Length; i++)
+        {
+            char c = str[i];
+            if (c < 33 || c > 126)
+            {
+                error = $"Bech32 string has invalid character {c} at position {i}";
+                return false;
+            }
+
+            switch (c)
+            {
+                case >= 'a' and <= 'z' when isUpperCase:
+                    error = $"Bech32 string has invalid casing. It was upper case until {c} at position {i}";
+                    return false;
+                case >= 'a' and <= 'z':
+                    isLowerCase = true;
+                    break;
+                case >= 'A' and <= 'Z' when isLowerCase:
+                    error = $"Bech32 string has invalid casing. It was lower case until {c} at position {i}";
+                    return false;
+                case >= 'A' and <= 'Z':
+                    isUpperCase = true;
+                    break;
+            }
+        }
+
+        return true;
+    }
+
     private static int CalculatePolymod(ReadOnlySpan<byte> values)
     {
         int checkSum = 1;
@@ -344,37 +391,9 @@ public static class Bech32
 
     private static void AssertBech32StringValid(string str)
     {
-        switch (str.Length)
+        if (!IsBech32StringValid(str, out var error))
         {
-            case < 8:
-                throw new AddressException($"Bech32 string too short: {str.Length} < 8");
-            case > 90:
-                throw new AddressException($"Bech32 string too long: {str.Length} > 90");
-        }
-
-        var isLowerCase = false;
-        var isUpperCase = false;
-        for (int i = 0; i < str.Length; i++)
-        {
-            char c = str[i];
-            if (c < 33 || c > 126)
-            {
-                throw new AddressException($"Bech32 string has invalid character {c} at position {i}");
-            }
-
-            switch (c)
-            {
-                case >= 'a' and <= 'z' when isUpperCase:
-                    throw new AddressException($"Bech32 string has invalid casing. It was upper case until {c} at position {i}");
-                case >= 'a' and <= 'z':
-                    isLowerCase = true;
-                    break;
-                case >= 'A' and <= 'Z' when isLowerCase:
-                    throw new AddressException($"Bech32 string has invalid casing. It was lower case until {c} at position {i}");
-                case >= 'A' and <= 'Z':
-                    isUpperCase = true;
-                    break;
-            }
+            throw new AddressException(error);
         }
     }
 }
