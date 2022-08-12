@@ -24,15 +24,14 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         var client = _factory.CreateClient();
 
         // Act
-        using HttpResponseMessage response = await client.PostAsync("/gateway",
-            JsonContent.Create(new object()));
+        using HttpResponseMessage response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        // Assert
+        EnsureSuccessStatusCodeAndJsonFormat(response);
 
         string json = await response.Content.ReadAsStringAsync();
         var payload = JsonConvert.DeserializeObject<GatewayResponse>(json);
 
-        // Assert
         payload.Should().NotBeNull();
         payload.GatewayApi.Should().NotBeNull();
         payload.GatewayApi._Version.Should().Be("2.0.0");
@@ -75,12 +74,12 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 
         HttpResponseMessage response = await client.PostAsync("/transaction/status", content);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        // Assert
+        EnsureSuccessStatusCodeAndJsonFormat(response);
 
         json = await response.Content.ReadAsStringAsync();
         var payload = JsonConvert.DeserializeObject<TransactionStatusResponse>(json);
 
-        // Assert
         payload.Should().NotBeNull();
         payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(64);
         payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
@@ -92,7 +91,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         using HttpResponseMessage response = await client.PostAsync("/transaction/recent",
             JsonContent.Create(new RecentTransactionsRequest()));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        EnsureSuccessStatusCodeAndJsonFormat(response);
 
         string json = await response.Content.ReadAsStringAsync();
         var payload = JsonConvert.DeserializeObject<RecentTransactionsResponse>(json);
@@ -101,5 +100,11 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         payload.Transactions.Should().NotBeNull();
 
         return payload;
+    }
+
+    private void EnsureSuccessStatusCodeAndJsonFormat(HttpResponseMessage response)
+    {
+        response.EnsureSuccessStatusCode(); // Status Code 200-299
+        Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
     }
 }
