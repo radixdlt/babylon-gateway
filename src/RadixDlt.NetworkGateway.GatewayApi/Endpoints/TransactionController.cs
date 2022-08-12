@@ -101,7 +101,7 @@ public class TransactionController
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
 
         var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
 
