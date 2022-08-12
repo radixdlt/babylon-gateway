@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Xunit;
@@ -86,9 +86,17 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
+    [Fact]
+    public void TestValidateOpenApiSchema()
+    {
+        // validate TransactionController
+        GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
+    }
+
     private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
     {
-        using HttpResponseMessage response = await client.PostAsync("/transaction/recent",
+        using HttpResponseMessage response = await client.PostAsync(
+            "/transaction/recent",
             JsonContent.Create(new RecentTransactionsRequest()));
 
         EnsureSuccessStatusCodeAndJsonFormat(response);

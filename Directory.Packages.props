@@ -21,6 +21,12 @@
     <PackageVersion Include="FluentValidation" Version="11.1.0" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.1.0" />
     <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
+    <PackageVersion Include="Microsoft.OpenApi">
+      <Version>1.3.2</Version>
+    </PackageVersion>
+    <PackageVersion Include="Microsoft.OpenApi.Readers">
+      <Version>1.3.2</Version>
+    </PackageVersion>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="NodaTime" Version="3.1.0" />
