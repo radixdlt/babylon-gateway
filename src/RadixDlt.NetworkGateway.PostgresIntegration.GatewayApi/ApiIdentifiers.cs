@@ -62,81 +62,38 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using Validator = RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization.Validator;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi;
 
-public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
+public static class ApiIdentifiers
 {
-    Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
-
-    string GetNetworkName();
-
-    CoreModel.NetworkIdentifier GetCoreNetworkIdentifier();
-
-    TokenIdentifier GetXrdTokenIdentifier();
-}
-
-public record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
-
-public interface ICapturedConfigProvider
-{
-    Task<CapturedConfig> CaptureConfiguration();
-}
-
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
-{
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
-
-    public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
     {
-        var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
-
-        lock (_writeLock)
-        {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
-
-            _capturedConfig = capturedConfig;
-        }
+        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), resource.ResourceIdentifier.AsGatewayTokenIdentifier());
     }
 
-    public string GetNetworkName()
+    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this Validator validator)
     {
-        return GetCapturedConfig().NetworkName;
+        return new Gateway.ValidatorIdentifier(validator.Address);
     }
 
-    public CoreModel.NetworkIdentifier GetCoreNetworkIdentifier()
+    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this Resource resource)
     {
-        return GetCapturedConfig().CoreNetworkIdentifier;
+        return new Gateway.TokenIdentifier(resource.ResourceIdentifier);
     }
 
-    public AddressHrps GetAddressHrps()
+    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this Account account)
     {
-        return GetCapturedConfig().AddressHrps;
+        return new Gateway.AccountIdentifier(account.Address);
     }
 
-    public string GetXrdAddress()
+    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this Account? account)
     {
-        return GetCapturedConfig().XrdAddress;
-    }
-
-    public TokenIdentifier GetXrdTokenIdentifier()
-    {
-        return GetCapturedConfig().XrdTokenIdentifier;
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
+        return account == null ? null : new Gateway.AccountIdentifier(account.Address);
     }
 }

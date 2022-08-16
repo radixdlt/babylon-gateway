@@ -66,6 +66,7 @@ using Newtonsoft.Json;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
 using RadixDlt.NetworkGateway.Common.Database.ValueConverters;
+using RadixDlt.NetworkGateway.Common.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -74,20 +75,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
 namespace RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
-
-public enum MempoolTransactionStatus
-{
-    SubmittedOrKnownInNodeMempool, // We believe the transaction is in at least one node mempool, or will hopefully (just) be entering one, or has entered one
-    Missing,       // A transaction which was previously SubmittedOrKnownInNodeMempool, but at last check, was past its
-                   // post-submission grace period, and no longer seen in any mempool.
-                   // After transitioning to Missing, we wait for a further delay before attempting resubmission, to allow the
-                   // Gateway DB time to sync and mark it committed
-    ResolvedButUnknownTillSyncedUp, // A transaction has been marked as substate not found by a node at resubmission, but we've yet to see it on ledger
-                                    // because the aggregator service is not sufficiently synced up - so we don't know if it's been committed
-                                    // and detected itself, or clashed with another transaction.
-    Failed,        // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (eg substate clash)
-    Committed,     // A transaction which we know got committed to the ledger
-}
 
 public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
 {
@@ -105,14 +92,6 @@ public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase
         : base(Conversion, Invert(Conversion))
     {
     }
-}
-
-public enum MempoolTransactionFailureReason
-{
-    DoubleSpend,
-    Timeout,
-    Unknown,
-    // Invalid shouldn't be possible, because they shouldn't make it to this table in the first place - mark as Unknown
 }
 
 public class MempoolTransactionFailureReasonValueConverter : EnumTypeValueConverterBase<MempoolTransactionFailureReason>

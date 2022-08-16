@@ -80,19 +80,6 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface ILedgerStateQuerier
-{
-    Task<GatewayResponse> GetGatewayState();
-
-    Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
-
-    Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier);
-
-    Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
-
-    Task<LedgerStatus> GetLedgerStatus();
-}
-
 public class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Gauge _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds = Metrics
@@ -235,7 +222,14 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    public async Task<LedgerStatus> GetLedgerStatus()
+    public async Task<long> GetTopOfLedgerStateVersion()
+    {
+        var ledgerStatus = await GetLedgerStatus();
+
+        return ledgerStatus.TopOfLedgerStateVersion;
+    }
+
+    private async Task<LedgerStatus> GetLedgerStatus()
     {
         var ledgerStatus = await _dbContext.LedgerStatus
             .Include(ls => ls.TopOfLedgerTransaction)

@@ -62,81 +62,53 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common.Database;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi.Initializers;
 
-public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
+public class NetworkConfigurationInitializer : BackgroundService
 {
-    Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _logger;
 
-    string GetNetworkName();
-
-    CoreModel.NetworkIdentifier GetCoreNetworkIdentifier();
-
-    TokenIdentifier GetXrdTokenIdentifier();
-}
-
-public record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
-
-public interface ICapturedConfigProvider
-{
-    Task<CapturedConfig> CaptureConfiguration();
-}
-
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
-{
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
-
-    public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
+    public NetworkConfigurationInitializer(IServiceProvider serviceProvider, ILogger<NetworkConfigurationInitializer> logger)
     {
-        var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
 
-        lock (_writeLock)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        using var scope = _serviceProvider.CreateScope();
+
+        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+
+        while (!stoppingToken.IsCancellationRequested)
         {
-            if (_capturedConfig != null)
+            try
             {
-                return;
+                await networkConfigurationProvider.Initialize(scope.ServiceProvider.GetRequiredService<ICapturedConfigProvider>(), stoppingToken);
+                break;
             }
+            catch (Exception exception)
+            {
+                if (exception.ShouldBeConsideredAppFatal())
+                {
+                    throw;
+                }
 
-            _capturedConfig = capturedConfig;
+                _logger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
+
+                await Task.Delay(2000, stoppingToken);
+            }
         }
-    }
-
-    public string GetNetworkName()
-    {
-        return GetCapturedConfig().NetworkName;
-    }
-
-    public CoreModel.NetworkIdentifier GetCoreNetworkIdentifier()
-    {
-        return GetCapturedConfig().CoreNetworkIdentifier;
-    }
-
-    public AddressHrps GetAddressHrps()
-    {
-        return GetCapturedConfig().AddressHrps;
-    }
-
-    public string GetXrdAddress()
-    {
-        return GetCapturedConfig().XrdAddress;
-    }
-
-    public TokenIdentifier GetXrdTokenIdentifier()
-    {
-        return GetCapturedConfig().XrdTokenIdentifier;
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
     }
 }

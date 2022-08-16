@@ -62,81 +62,65 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
-using System.Threading;
+
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
+public interface ITransactionQuerier
 {
-    Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
+    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState);
 
-    string GetNetworkName();
+    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
 
-    CoreModel.NetworkIdentifier GetCoreNetworkIdentifier();
+    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.LedgerState ledgerState
+    );
 
-    TokenIdentifier GetXrdTokenIdentifier();
+    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier
+    );
 }
 
-public record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
-
-public interface ICapturedConfigProvider
+[DataContract]
+public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
 {
-    Task<CapturedConfig> CaptureConfiguration();
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+
+    public static CommittedTransactionPaginationCursor? FromCursorString(string? cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<CommittedTransactionPaginationCursor>(cursorString);
+    }
+
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
 }
 
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
-{
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
+public record TransactionPageWithTotal(
+    long TotalRecords,
+    CommittedTransactionPaginationCursor? NextPageCursor,
+    List<Gateway.TransactionInfo> Transactions
+);
 
-    public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
-    {
-        var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
+public record TransactionPageWithoutTotal(
+    CommittedTransactionPaginationCursor? NextPageCursor,
+    List<Gateway.TransactionInfo> Transactions
+);
 
-        lock (_writeLock)
-        {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
+public record AccountTransactionPageRequest(
+    ValidatedAccountAddress AccountAddress,
+    CommittedTransactionPaginationCursor? Cursor,
+    int PageSize
+);
 
-            _capturedConfig = capturedConfig;
-        }
-    }
-
-    public string GetNetworkName()
-    {
-        return GetCapturedConfig().NetworkName;
-    }
-
-    public CoreModel.NetworkIdentifier GetCoreNetworkIdentifier()
-    {
-        return GetCapturedConfig().CoreNetworkIdentifier;
-    }
-
-    public AddressHrps GetAddressHrps()
-    {
-        return GetCapturedConfig().AddressHrps;
-    }
-
-    public string GetXrdAddress()
-    {
-        return GetCapturedConfig().XrdAddress;
-    }
-
-    public TokenIdentifier GetXrdTokenIdentifier()
-    {
-        return GetCapturedConfig().XrdTokenIdentifier;
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
-    }
-}
+public record RecentTransactionPageRequest(
+    CommittedTransactionPaginationCursor? Cursor,
+    int PageSize
+);

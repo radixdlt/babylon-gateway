@@ -65,88 +65,32 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface ITransactionQuerier
-{
-    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState);
-
-    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
-
-    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier,
-        Gateway.LedgerState ledgerState
-    );
-
-    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier
-    );
-}
-
-[DataContract]
-public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
-{
-    [DataMember(Name = "v", EmitDefaultValue = false)]
-    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
-
-    public static CommittedTransactionPaginationCursor? FromCursorString(string? cursorString)
-    {
-        return Serializations.FromBase64JsonOrDefault<CommittedTransactionPaginationCursor>(cursorString);
-    }
-
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
-    }
-}
-
-public record TransactionPageWithTotal(
-    long TotalRecords,
-    CommittedTransactionPaginationCursor? NextPageCursor,
-    List<Gateway.TransactionInfo> Transactions
-);
-
-public record TransactionPageWithoutTotal(
-    CommittedTransactionPaginationCursor? NextPageCursor,
-    List<Gateway.TransactionInfo> Transactions
-);
-
-public record AccountTransactionPageRequest(
-    ValidatedAccountAddress AccountAddress,
-    CommittedTransactionPaginationCursor? Cursor,
-    int PageSize
-);
-
-public record RecentTransactionPageRequest(
-    CommittedTransactionPaginationCursor? Cursor,
-    int PageSize
-);
-
 public class TransactionQuerier : ITransactionQuerier
 {
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly ISubmissionTrackingService _submissionTrackingService;
+    private readonly IMempoolQuerier _mempoolQuerier;
 
     public TransactionQuerier(
         ReadOnlyDbContext dbContext,
         INetworkConfigurationProvider networkConfigurationProvider,
-        ISubmissionTrackingService submissionTrackingService
+        IMempoolQuerier mempoolQuerier
     )
     {
         _dbContext = dbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _submissionTrackingService = submissionTrackingService;
+        _mempoolQuerier = mempoolQuerier;
     }
 
     public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState)
@@ -212,7 +156,7 @@ public class TransactionQuerier : ITransactionQuerier
         // We lookup the mempool transaction using the _submissionTrackingService which is bound to the
         // ReadWriteDbContext so that it gets the most recent details -- to ensure that submitted transactions
         // are immediately shown as pending.
-        var mempoolTransaction = await _submissionTrackingService.GetMempoolTransaction(transactionIdentifier.Bytes);
+        var mempoolTransaction = await _mempoolQuerier.GetMempoolTransaction(transactionIdentifier.Bytes);
 
         if (mempoolTransaction is null)
         {
