@@ -99,7 +99,7 @@ public enum CoreNodeStatus
 /// and a LedgerStateQuerier (which is a scoped service, as it contains a DataContext) - this service should thus be
 /// scoped to a unit of work.
 /// </summary>
-public class CoreNodeHealthChecker : ICoreNodeHealthChecker
+internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
     private static readonly Gauge _healthCheckStatusByNode = Metrics
         .CreateGauge(

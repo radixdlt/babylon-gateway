@@ -93,7 +93,7 @@ public interface ILedgerStateQuerier
     Task<LedgerStatus> GetLedgerStatus();
 }
 
-public class LedgerStateQuerier : ILedgerStateQuerier
+internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private static readonly Gauge _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds = Metrics
         .CreateGauge(

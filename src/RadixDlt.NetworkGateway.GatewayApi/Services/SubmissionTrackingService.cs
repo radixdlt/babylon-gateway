@@ -97,7 +97,7 @@ public interface ISubmissionTrackingService
 
 public record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
 
-public class SubmissionTrackingService : ISubmissionTrackingService
+internal class SubmissionTrackingService : ISubmissionTrackingService
 {
     private static readonly Counter _dbMempoolTransactionsAddedDueToSubmissionCount = Metrics
         .CreateCounter(

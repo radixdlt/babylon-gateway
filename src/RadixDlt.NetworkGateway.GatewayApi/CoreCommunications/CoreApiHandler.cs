@@ -93,7 +93,7 @@ public interface ICoreApiHandler
 /// This should be Scoped to the request, so it picks up a fresh HttpClient per request.
 /// By default, this selects a random healthy Core API to handle the request.
 /// </summary>
-public class CoreApiHandler : ICoreApiHandler
+internal class CoreApiHandler : ICoreApiHandler
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiProvider _coreApiProvider;

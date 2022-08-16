@@ -108,7 +108,7 @@ public record ValidatedPublicKey(string AsString, byte[] Bytes);
 public record ValidatedHex(string AsString, byte[] Bytes);
 public record ValidatedSymbol(string AsString);
 
-public class Validations : IValidations
+internal class Validations : IValidations
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 

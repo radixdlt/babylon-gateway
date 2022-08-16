@@ -73,7 +73,7 @@ using Validator = RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalizat
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
-public static class ApiIdentifiers
+internal static class ApiIdentifiers
 {
     public static Gateway.TokenAmount AsGatewayTokenAmount(this ValidatedTokenAmount tokenAmount)
     {

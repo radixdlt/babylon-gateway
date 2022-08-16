@@ -74,7 +74,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Initializers;
 
-public class NetworkConfigurationInitializer : BackgroundService
+internal class NetworkConfigurationInitializer : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;

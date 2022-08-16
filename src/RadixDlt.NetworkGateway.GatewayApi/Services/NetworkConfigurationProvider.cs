@@ -86,7 +86,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
+internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private readonly object _writeLock = new();
     private CapturedConfig? _capturedConfig;

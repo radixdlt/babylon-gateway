@@ -85,7 +85,7 @@ public interface IExceptionHandler
     ActionResult CreateAndLogApiResultFromException(ActionContext actionContext, Exception exception, string traceId);
 }
 
-public class ExceptionHandler : IExceptionHandler
+internal class ExceptionHandler : IExceptionHandler
 {
     private static readonly Counter _apiResponseErrorCount = Metrics
         .CreateCounter(

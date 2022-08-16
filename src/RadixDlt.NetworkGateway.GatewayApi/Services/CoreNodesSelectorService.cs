@@ -82,7 +82,7 @@ public interface ICoreNodesSelectorService
     Task ReviseCoreNodesHealth(CancellationToken cancellationToken);
 }
 
-public class CoreNodesSelectorService : ICoreNodesSelectorService
+internal class CoreNodesSelectorService : ICoreNodesSelectorService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<CoreNodeStatus> _usableStatusesFromBestToWorst;

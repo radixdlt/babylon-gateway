@@ -82,7 +82,7 @@ public record MappedTransaction(
 /// <summary>
 /// A stateful class for building a transaction and checking it's valid against the current version of state.
 /// </summary>
-public class TransactionBuilder
+internal class TransactionBuilder
 {
     private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;

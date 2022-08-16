@@ -132,7 +132,7 @@ public record RecentTransactionPageRequest(
     int PageSize
 );
 
-public class TransactionQuerier : ITransactionQuerier
+internal class TransactionQuerier : ITransactionQuerier
 {
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
