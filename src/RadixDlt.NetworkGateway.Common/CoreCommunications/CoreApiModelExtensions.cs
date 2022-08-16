@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.Generated.Model;
+using RadixDlt.CoreApiSdk.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 

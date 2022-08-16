@@ -4,11 +4,11 @@
         <!-- restore once OAS generator suppport is added -->
         <Nullable>disable</Nullable>
     </PropertyGroup>
-  
+
     <ItemGroup>
         <PackageReference Include="JsonSubTypes" />
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="Polly" />
     </ItemGroup>
-  
-  </Project>
+
+</Project>

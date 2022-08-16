@@ -64,7 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using RadixCoreApi.Generated.Model;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Extensions;

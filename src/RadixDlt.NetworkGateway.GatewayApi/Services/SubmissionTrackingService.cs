@@ -72,7 +72,7 @@ using RadixDlt.NetworkGateway.Common.Extensions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

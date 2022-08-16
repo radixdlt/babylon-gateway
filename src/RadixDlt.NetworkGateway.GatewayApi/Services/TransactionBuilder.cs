@@ -67,7 +67,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
 

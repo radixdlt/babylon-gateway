@@ -17,7 +17,6 @@
         <PackageReference Include="NodaTime" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
-        <PackageReference Include="RadixCoreApi.Generated" />
         <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
         <PackageReference Include="prometheus-net" />
         <PackageReference Include="prometheus-net.AspNetCore" />
