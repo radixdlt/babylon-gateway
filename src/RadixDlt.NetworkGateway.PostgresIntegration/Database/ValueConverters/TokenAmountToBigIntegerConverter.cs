@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
 using System.Numerics;
 
