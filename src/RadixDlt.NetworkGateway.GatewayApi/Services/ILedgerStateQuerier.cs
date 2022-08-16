@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading.Tasks;
 

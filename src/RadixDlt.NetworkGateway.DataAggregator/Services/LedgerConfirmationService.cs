@@ -67,7 +67,6 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
@@ -277,7 +276,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var ledgerExtension = GenerateConsistentLedgerExtension(transactions);
-        var latestSyncStatus = new SyncTarget { TargetStateVersion = GetTargetStateVersion() };
+        var latestSyncStatus = new SyncTargetCarrier(GetTargetStateVersion());
 
         var (commitReport, totalCommitMs) = await CodeStopwatch.TimeInMs(
             () => _ledgerExtenderService.CommitTransactions(ledgerExtension, latestSyncStatus, token)
@@ -559,7 +558,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         _knownTopOfCommittedLedger = topOfLedger;
         RecordTopOfDbLedgerMetrics(topOfLedger);
-        _systemStatusService.SetTopOfDbLedger(topOfLedger);
+        _systemStatusService.SetTopOfDbLedgerNormalizedRoundTimestamp(topOfLedger.NormalizedRoundTimestamp);
     }
 
     private void RecordTopOfDbLedgerMetrics(TransactionSummary topOfLedger)
@@ -636,7 +635,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         {
             foreach (var transaction in transactions)
             {
-                var summary = TransactionSummarisation.GenerateSummary(currentParentSummary, transaction);
+                var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction);
                 var contents = transaction.Metadata.Hex.ConvertFromHex();
 
                 TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);

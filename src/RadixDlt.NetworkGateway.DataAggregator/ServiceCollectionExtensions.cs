@@ -62,16 +62,12 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Configuration;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
@@ -100,13 +96,11 @@ public static class ServiceCollectionExtensions
 
         services
             .AddHealthChecks()
-            .AddCheck<AggregatorHealthCheck>("network_gateway_data_aggregator")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_data_aggregator_database_readwrite_connection");
+            .AddCheck<AggregatorHealthCheck>("network_gateway_data_aggregator");
 
         // Globally-Scoped services
         AddGlobalScopedServices(services);
         AddGlobalHostedServices(services);
-        AddDatabaseContext(services);
 
         // Node-Scoped services
         AddNodeScopedServices(services);
@@ -119,16 +113,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
         services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
-        services.AddSingleton<IRawTransactionWriter, RawTransactionWriter>();
         services.AddSingleton<ILedgerConfirmationService, LedgerConfirmationService>();
-        services.AddSingleton<ILedgerExtenderService, LedgerExtenderService>();
-        services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.AddSingleton<ISystemStatusService, SystemStatusService>();
-        services.AddSingleton<IMempoolTrackerService, MempoolTrackerService>();
-        services.AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>();
-        services.AddSingleton<IMempoolPrunerService, MempoolPrunerService>();
     }
 
     private static void AddGlobalHostedServices(IServiceCollection services)
@@ -138,17 +126,6 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<MempoolTrackerWorker>();
         services.AddHostedService<MempoolResubmissionWorker>();
         services.AddHostedService<MempoolPrunerWorker>();
-    }
-
-    private static void AddDatabaseContext(IServiceCollection services)
-    {
-        // Useful links:
-        // https://www.npgsql.org/efcore/index.html
-        // https://www.npgsql.org/doc/connection-string-parameters.html
-        services.AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
-        {
-            options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName), o => o.NonBrokenUseNodaTime());
-        });
     }
 
     private static void AddNodeScopedServices(IServiceCollection services)

@@ -71,6 +71,7 @@ using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
@@ -83,44 +84,6 @@ using System.Threading.Tasks;
 using CoreApi = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
-
-public record FullTransactionData(byte[] Id, Instant SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
-
-public record NodeMempoolHashes
-{
-    public HashSet<byte[]> TransactionHashes { get; }
-
-    public Instant AtTime { get; }
-
-    public NodeMempoolHashes(HashSet<byte[]> transactionHashes)
-    {
-        TransactionHashes = transactionHashes;
-        AtTime = SystemClock.Instance.GetCurrentInstant();
-    }
-}
-
-public interface IMempoolTrackerService
-{
-    void RegisterNodeMempoolHashes(string nodeName, NodeMempoolHashes nodeMempoolHashes);
-
-    Task HandleMempoolChanges(CancellationToken token);
-
-    /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
-    /// contents actually need fetching.
-    /// </summary>
-    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> transactionIdentifiers, CancellationToken cancellationToken);
-
-    bool SubmitTransactionContents(FullTransactionData fullTransactionData);
-
-    /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
-    /// identifier still needs fetching. This is to try to not make a call if we've already got the transaction contents
-    /// from another node in the mean-time.
-    /// </summary>
-    /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(byte[] transactionIdentifier);
-}
 
 public class MempoolTrackerService : IMempoolTrackerService
 {

@@ -65,8 +65,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -110,37 +108,12 @@ public class NodeNetworkConfigurationInitializer : NodeInitializer
             );
         }
 
-        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(
-            MapNetworkConfigurationResponse(networkConfiguration),
-            token
-        );
+        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(networkConfiguration, token);
 
         _logger.LogInformation(
             "The node has network name {NodeNetworkName}, with matching config to db ledger and/or any other nodes",
             networkConfiguration.NetworkIdentifier.Network
         );
-    }
-
-    private static NetworkConfiguration MapNetworkConfigurationResponse(
-        NetworkConfigurationResponse networkConfiguration
-    )
-    {
-        var hrps = networkConfiguration.Bech32HumanReadableParts;
-        return new NetworkConfiguration
-        {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
-            NetworkAddressHrps = new NetworkAddressHrps
-            {
-                AccountHrp = hrps.AccountHrp,
-                ResourceHrpSuffix = hrps.ResourceHrpSuffix,
-                ValidatorHrp = hrps.ValidatorHrp,
-                NodeHrp = hrps.NodeHrp,
-            },
-            WellKnownAddresses = new WellKnownAddresses
-            {
-                XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
-            },
-        };
     }
 
     private async Task<NetworkConfigurationResponse> ReadNetworkConfigurationFromNode(CancellationToken token)

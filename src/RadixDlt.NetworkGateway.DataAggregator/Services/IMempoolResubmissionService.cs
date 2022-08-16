@@ -62,38 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public static class TransactionMapping
+public interface IMempoolResubmissionService
 {
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
-    {
-        var (transaction, summary, _) = transactionData;
-
-        var fee = transaction.Metadata.Fee == null
-            ? TokenAmount.Zero
-            : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-
-        return new LedgerTransaction(
-            resultantStateVersion: summary.StateVersion,
-            payloadHash: summary.PayloadHash,
-            intentHash: summary.IntentHash,
-            signedTransactionHash: summary.SignedTransactionHash,
-            transactionAccumulator: summary.TransactionAccumulator,
-            message: transaction.Metadata.Message?.ConvertFromHex(),
-            feePaid: fee,
-            epoch: summary.Epoch,
-            indexInEpoch: summary.IndexInEpoch,
-            roundInEpoch: summary.RoundInEpoch,
-            isStartOfEpoch: summary.IsStartOfEpoch,
-            isStartOfRound: summary.IsStartOfRound,
-            roundTimestamp: summary.RoundTimestamp,
-            createdTimestamp: summary.CreatedTimestamp,
-            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
-        );
-    }
+    Task RunBatchOfResubmissions(CancellationToken token = default);
 }

@@ -62,56 +62,39 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 
-/// <summary>
-/// A stateful class for processing the content of a transaction, and determining how the database should be updated.
-/// The class is short-lived, lasting to process one transaction.
-///
-/// It works in tandem with the DbActionsPlanner, which is another stateful class, which lasts across the whole
-/// batch of transactions, and is designed to enable performant bulk transaction processing.
-///
-/// Roughly, the process proceeds as follows:
-/// * TransactionContentProcessor runs for each transaction, performing initial processing, which:
-///   - Marks which dependencies need to be loaded / resolved
-///   - Adds deferred "DbActions" against the DbActionsPlanner which will create/update entities on the DbContext
-/// * DbActionsPlanner - Bulk load dependencies
-/// * DbActionsPlanner - Process deferred actions in order
-/// * DbContext is saved
-///
-/// See the DbActionsPlanner class doc for a detailed description on how this process should work.
-/// </summary>
-public class TransactionContentProcessor
+public static class TransactionMapping
 {
-    /* Dependencies */
-    private readonly DbActionsPlanner _dbActionsPlanner;
-    private readonly IEntityDeterminer _entityDeterminer;
-
-    /* Mutable Class State */
-    /* > These simply help us avoid passing tons of references down the call stack.
-    /* > These will all not be null at the time of use in the Handle methods. */
-    private CommittedTransaction? _transaction;
-    private TransactionSummary? _transactionSummary;
-    private LedgerTransaction? _dbTransaction;
-
-    public TransactionContentProcessor(
-        DbActionsPlanner dbActionsPlanner,
-        IEntityDeterminer entityDeterminer
-    )
+    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
     {
-        _dbActionsPlanner = dbActionsPlanner;
-        _entityDeterminer = entityDeterminer;
-    }
+        var (transaction, summary, _) = transactionData;
 
-    public void ProcessTransactionContents(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary transactionSummary)
-    {
-        _transaction = transaction;
-        _transactionSummary = transactionSummary;
-        _dbTransaction = dbTransaction;
-        // TBC - see Olympia TransactionContentProcessor
+        var fee = transaction.Metadata.Fee == null
+            ? TokenAmount.Zero
+            : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
+
+        return new LedgerTransaction(
+            resultantStateVersion: summary.StateVersion,
+            payloadHash: summary.PayloadHash,
+            intentHash: summary.IntentHash,
+            signedTransactionHash: summary.SignedTransactionHash,
+            transactionAccumulator: summary.TransactionAccumulator,
+            message: transaction.Metadata.Message?.ConvertFromHex(),
+            feePaid: fee,
+            epoch: summary.Epoch,
+            indexInEpoch: summary.IndexInEpoch,
+            roundInEpoch: summary.RoundInEpoch,
+            isStartOfEpoch: summary.IsStartOfEpoch,
+            isStartOfRound: summary.IsStartOfRound,
+            roundTimestamp: summary.RoundTimestamp,
+            createdTimestamp: summary.CreatedTimestamp,
+            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
+        );
     }
 }

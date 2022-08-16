@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;

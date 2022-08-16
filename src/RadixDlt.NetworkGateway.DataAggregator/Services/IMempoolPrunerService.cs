@@ -62,64 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Exceptions;
-using RadixDlt.NetworkGateway.Common.Model;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using InvalidTransactionError = RadixDlt.NetworkGateway.GatewayApiSdk.Model.InvalidTransactionError;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public class InvalidTransactionException : ValidationException
+public interface IMempoolPrunerService
 {
-    public WrappedCoreApiException? WrappedCoreApiException { get; }
-
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
-    {
-    }
-
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, WrappedCoreApiException? wrappedCoreApiException = null)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
-    {
-        WrappedCoreApiException = wrappedCoreApiException;
-    }
-
-    public static InvalidTransactionException FromInvalidTransactionDueToCoreApiException(
-        string invalidTransactionHex,
-        WrappedCoreApiException wrappedCoreApiException
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "Transaction is invalid",
-            wrappedCoreApiException
-        );
-    }
-
-    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
-        string invalidTransactionHex,
-        CoreModel.SubstateDependencyNotFoundError error
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "The transaction clashes with a previous transaction",
-            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
-        );
-    }
-
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(
-        string invalidTransactionHex,
-        MempoolTransactionFailureReason previousFailureReason
-    )
-    {
-        var userFacingMessage = previousFailureReason == MempoolTransactionFailureReason.DoubleSpend
-            ? "The transaction submission has already failed as it clashes with a previous transaction"
-            : "The transaction submission has already failed";
-
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            userFacingMessage
-        );
-    }
+    Task PruneMempool(CancellationToken token = default);
 }

@@ -81,35 +81,6 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface ILedgerExtenderService
-{
-    Task<CommitTransactionsReport> CommitTransactions(
-        ConsistentLedgerExtension ledgerExtension,
-        SyncTarget latestSyncTarget,
-        CancellationToken token
-    );
-
-    Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
-}
-
-public record ConsistentLedgerExtension(
-    TransactionSummary ParentSummary,
-    List<CommittedTransactionData> TransactionData
-);
-
-public record CommitTransactionsReport(
-    int TransactionsCommittedCount,
-    TransactionSummary FinalTransaction,
-    long RawTxnPersistenceMs,
-    long MempoolTransactionUpdateMs,
-    long TransactionContentHandlingMs,
-    long DbDependenciesLoadingMs,
-    int TransactionContentDbActionsCount,
-    long LocalDbContextActionsMs,
-    long DbPersistanceMs,
-    int DbEntriesWritten
-);
-
 public class LedgerExtenderService : ILedgerExtenderService
 {
     private readonly IOptionsMonitor<TransactionAssertionsOptions> _transactionAssertionsOptionsMonitor;
@@ -151,13 +122,13 @@ public class LedgerExtenderService : ILedgerExtenderService
 
     public async Task<CommitTransactionsReport> CommitTransactions(
         ConsistentLedgerExtension ledgerExtension,
-        SyncTarget latestSyncTarget,
+        SyncTargetCarrier latestSyncTarget,
         CancellationToken token
     )
     {
         var preparationReport = await PrepareForLedgerExtension(ledgerExtension, token);
 
-        var ledgerExtensionReport = await ExtendLedger(ledgerExtension, latestSyncTarget, token);
+        var ledgerExtensionReport = await ExtendLedger(ledgerExtension, new SyncTarget { TargetStateVersion = latestSyncTarget.TargetStateVersion }, token);
         var processTransactionReport = ledgerExtensionReport.ProcessTransactionReport;
 
         var dbEntriesWritten =
