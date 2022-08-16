@@ -15,8 +15,6 @@ cd "$SCRIPT_DIR"
 packageName='RadixDlt.NetworkGateway.GatewayApiSdk'
 specLocation='../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml'
 
-patchVersion="$1" # Patch version override as first command line parameter
-
 ################
 # CALCULATIONS #
 ################
@@ -64,6 +62,7 @@ java -jar ./openapi-generator-cli-PR13049.jar \
     --library httpclient \
     --additional-properties=packageName=$packageName,targetFramework=net6.0,nullableReferenceTypes=true,useDateTimeOffset=true
 
+rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
 rm "../src/${packageName}/generated/${packageName}.csproj"
 

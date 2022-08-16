@@ -15,8 +15,6 @@ cd "$SCRIPT_DIR"
 packageName='RadixDlt.CoreApiSdk'
 specLocation='../src/RadixDlt.CoreApiSdk/core-api-spec-copy.yaml'
 
-patchVersion="$1" # Patch version override as first command line parameter
-
 ################
 # CALCULATIONS #
 ################
@@ -70,34 +68,7 @@ java -jar ./openapi-generator-cli-PR13049.jar \
     --library httpclient \
     --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,nullableReferenceTypes=false,useDateTimeOffset=true
 
-## Fix various issues in the generated code
-#for f in `find $dummyApiDirectory -name '*.cs'`; do
-#  if (grep -q "in BaseValidate(" $f) && [[ $f != *"/obj/"* ]]; then
-#    awk '{sub(/in BaseValidate/,"in base.BaseValidate"); print}' $f > $f.out
-#    mv $f.out $f
-#    echo "$f - Performed BaseValidate fix to source code"
-#  fi
-#  if (grep -q "long EpochUnlock" $f) && [[ $f != *"/obj/"* ]]; then
-#    awk '{sub(/long EpochUnlock/,"long? EpochUnlock"); print}' $f > $f.out
-#    mv $f.out $f
-#    awk '{sub(/long epochUnlock = default\(long\)/,"long? epochUnlock = default(long?)"); print}' $f > $f.out
-#    mv $f.out $f
-#    echo "$f - Performed long EpochUnlock fix to source code (to make it nullable for requests)"
-#  fi
-#  if (grep -q "long Epoch" $f) && [[ $f != *"/obj/"* ]] && [[ $f == *"Prepared"* ]]; then
-#    awk '{sub(/long Epoch/,"long? Epoch"); print}' $f > $f.out
-#    mv $f.out $f
-#    awk '{sub(/long epoch = default\(long\)/,"long? epoch = default(long?)"); print}' $f > $f.out
-#    mv $f.out $f
-#    echo "$f - Performed long Epoch fix to source code (to make it nullable for requests)"
-#  fi
-#  if (grep -q "CreateLinkedTokenSource" $f) && [[ $f != *"/obj/"* ]]; then
-#    awk '{sub(/finalToken = CancellationTokenSource\.CreateLinkedTokenSource\(finalToken, tokenSource.Token\)\.Token;/,""); print}' $f > $f.out
-#    mv $f.out $f
-#    echo "$f - Performed CreateLinkedTokenSource memory leak fix to source code"
-#  fi
-#done
-
+rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
 rm "../src/${packageName}/generated/${packageName}.csproj"
 

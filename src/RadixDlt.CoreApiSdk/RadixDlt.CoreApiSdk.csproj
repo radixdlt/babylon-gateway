@@ -11,8 +11,4 @@
         <PackageReference Include="Polly" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="generated" />
-    </ItemGroup>
-
 </Project>
