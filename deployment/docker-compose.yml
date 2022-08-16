@@ -44,9 +44,20 @@ services:
       POSTGRES_USER: "${POSTGRES_SUPERUSER}"
       POSTGRES_PASSWORD: "${POSTGRES_SUPERUSER_PASSWORD}"
       POSTGRES_DB: "${POSTGRES_DB_NAME}"
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_SUPERUSER} -d ${POSTGRES_DB_NAME}
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  database_migrations: # This is the base -- the _image and _built containers are defined below
+    image: radixdlt/babylon-ng-postgres-migrations:2.0.0 # TODO use actual image
+    profiles: ["NONE"]
+    environment:
+      APP__ConnectionStrings__NetworkGatewayMigrations: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
 
   data_aggregator: # This is the base -- the _image and _built containers are defined below
-    image: radixdlt/babylon-ng-data-aggregator:1.1.6
+    image: radixdlt/babylon-ng-data-aggregator:2.0.0
     profiles: ["NONE"]
     deploy:
       restart_policy:
@@ -57,42 +68,42 @@ services:
     environment:
       # WIPE_DATABASE: "true"
       ASPNETCORE_URLS: "http://*:80" # Binds to 80 on all interfaces
-      RADIX_NG_AGGREGATOR__CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
-      RADIX_NG_AGGREGATOR__PrometheusMetricsPort: "1234"
-      RADIX_NG_AGGREGATOR__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
-      RADIX_NG_AGGREGATOR__DisableCoreApiHttpsCertificateChecks: "${DISABLE_CORE_API_CERTIFICATE_CHECKS}"
-      RADIX_NG_AGGREGATOR__NetworkName: "${NETWORK_NAME}"
-      RADIX_NG_AGGREGATOR__ConnectionStrings__AggregatorDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__0__Name: "${NODE_0_NAME}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__0__CoreApiAddress: "${NODE_0_CORE_API_ADDRESS}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__0__CoreApiAuthorizationHeader: "${NODE_0_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__0__TrustWeighting: "1"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__0__Enabled: "${NODE_0_ENABLED}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__1__Name: "${NODE_1_NAME}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__1__CoreApiAddress: "${NODE_1_CORE_API_ADDRESS}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__1__CoreApiAuthorizationHeader: "${NODE_1_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__1__TrustWeighting: "1"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__1__Enabled: "${NODE_1_ENABLED}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__2__Name: "${NODE_2_NAME}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__2__CoreApiAddress: "${NODE_2_CORE_API_ADDRESS}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__2__CoreApiAuthorizationHeader: "${NODE_2_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__2__TrustWeighting: "1"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__2__Enabled: "${NODE_2_ENABLED}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__3__Name: "${NODE_3_NAME}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__3__CoreApiAddress: "${NODE_3_CORE_API_ADDRESS}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__3__CoreApiAuthorizationHeader: "${NODE_3_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__3__TrustWeighting: "1"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__3__Enabled: "${NODE_3_ENABLED}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__4__Name: "${NODE_4_NAME}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__4__CoreApiAddress: "${NODE_4_CORE_API_ADDRESS}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__4__TrustWeighting: "1"
-      RADIX_NG_AGGREGATOR__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
+      APP__CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
+      APP__PrometheusMetricsPort: "1234"
+      APP__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
+      APP__ConnectionStrings__NetworkGatewayReadWrite: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__DataAggregator__Network__NetworkName: "${NETWORK_NAME}"
+      APP__DataAggregator__Network__DisableCoreApiHttpsCertificateChecks: "${DISABLE_CORE_API_CERTIFICATE_CHECKS}"
+      APP__DataAggregator__Network__CoreApiNodes__0__Name: "${NODE_0_NAME}"
+      APP__DataAggregator__Network__CoreApiNodes__0__CoreApiAddress: "${NODE_0_CORE_API_ADDRESS}"
+      APP__DataAggregator__Network__CoreApiNodes__0__CoreApiAuthorizationHeader: "${NODE_0_CORE_API_AUTHORIZATION_HEADER}"
+      APP__DataAggregator__Network__CoreApiNodes__0__TrustWeighting: "1"
+      APP__DataAggregator__Network__CoreApiNodes__0__Enabled: "${NODE_0_ENABLED}"
+      APP__DataAggregator__Network__CoreApiNodes__1__Name: "${NODE_1_NAME}"
+      APP__DataAggregator__Network__CoreApiNodes__1__CoreApiAddress: "${NODE_1_CORE_API_ADDRESS}"
+      APP__DataAggregator__Network__CoreApiNodes__1__CoreApiAuthorizationHeader: "${NODE_1_CORE_API_AUTHORIZATION_HEADER}"
+      APP__DataAggregator__Network__CoreApiNodes__1__TrustWeighting: "1"
+      APP__DataAggregator__Network__CoreApiNodes__1__Enabled: "${NODE_1_ENABLED}"
+      APP__DataAggregator__Network__CoreApiNodes__2__Name: "${NODE_2_NAME}"
+      APP__DataAggregator__Network__CoreApiNodes__2__CoreApiAddress: "${NODE_2_CORE_API_ADDRESS}"
+      APP__DataAggregator__Network__CoreApiNodes__2__CoreApiAuthorizationHeader: "${NODE_2_CORE_API_AUTHORIZATION_HEADER}"
+      APP__DataAggregator__Network__CoreApiNodes__2__TrustWeighting: "1"
+      APP__DataAggregator__Network__CoreApiNodes__2__Enabled: "${NODE_2_ENABLED}"
+      APP__DataAggregator__Network__CoreApiNodes__3__Name: "${NODE_3_NAME}"
+      APP__DataAggregator__Network__CoreApiNodes__3__CoreApiAddress: "${NODE_3_CORE_API_ADDRESS}"
+      APP__DataAggregator__Network__CoreApiNodes__3__CoreApiAuthorizationHeader: "${NODE_3_CORE_API_AUTHORIZATION_HEADER}"
+      APP__DataAggregator__Network__CoreApiNodes__3__TrustWeighting: "1"
+      APP__DataAggregator__Network__CoreApiNodes__3__Enabled: "${NODE_3_ENABLED}"
+      APP__DataAggregator__Network__CoreApiNodes__4__Name: "${NODE_4_NAME}"
+      APP__DataAggregator__Network__CoreApiNodes__4__CoreApiAddress: "${NODE_4_CORE_API_ADDRESS}"
+      APP__DataAggregator__Network__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
+      APP__DataAggregator__Network__CoreApiNodes__4__TrustWeighting: "1"
+      APP__DataAggregator__Network__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
     volumes:
       - ./data-aggregator-fixed-configuration.json:/home/radixdlt/network-gateway/config.json
 
   gateway_api: # This is the base -- the _image and _built containers are defined below
-    image: radixdlt/babylon-ng-gateway-api:1.1.6
+    image: radixdlt/babylon-ng-gateway-api:2.0.0
     profiles: ["NONE"]
     ports:
       - "127.0.0.1:5308:80" # This allows you to connect to the API at http://localhost:5308
@@ -102,56 +113,83 @@ services:
         condition: on-failure
     environment:
       ASPNETCORE_URLS: "http://*:80" # Binds to 80 on all interfaces
-      RADIX_NG_API__CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
-      RADIX_NG_API__PrometheusMetricsPort: "1235"
-      RADIX_NG_API__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
-      RADIX_NG_API__DisableCoreApiHttpsCertificateChecks: "${DISABLE_CORE_API_CERTIFICATE_CHECKS}"
-      RADIX_NG_API__NetworkName: "${NETWORK_NAME}"
-      RADIX_NG_API__EnableSwagger: "${ENABLE_SWAGGER}"
-      RADIX_NG_API__MaxPageSize: "${MAX_PAGE_SIZE}"
-      RADIX_NG_API__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind: "${PREVENT_OUTDATED_READ_REQUESTS}"
-      RADIX_NG_API__AcceptableLedgerLag__PreventConstructionRequestsIfDbLedgerIsBehind: "${PREVENT_OUTDATED_CONSTRUCTION_REQUESTS}"
-      RADIX_NG_API__ConnectionStrings__ReadOnlyDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
-      RADIX_NG_API__ConnectionStrings__ReadWriteDbContext: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
-      RADIX_NG_API__CoreApiNodes__0__Name: "${NODE_0_NAME}"
-      RADIX_NG_API__CoreApiNodes__0__CoreApiAddress: "${NODE_0_CORE_API_ADDRESS}"
-      RADIX_NG_API__CoreApiNodes__0__CoreApiAuthorizationHeader: "${NODE_0_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_API__CoreApiNodes__0__RequestWeighting: "1"
-      RADIX_NG_API__CoreApiNodes__0__Enabled: "${NODE_0_ENABLED}"
-      RADIX_NG_API__CoreApiNodes__1__Name: "${NODE_1_NAME}"
-      RADIX_NG_API__CoreApiNodes__1__CoreApiAddress: "${NODE_1_CORE_API_ADDRESS}"
-      RADIX_NG_API__CoreApiNodes__1__CoreApiAuthorizationHeader: "${NODE_1_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_API__CoreApiNodes__1__RequestWeighting: "1"
-      RADIX_NG_API__CoreApiNodes__1__Enabled: "${NODE_1_ENABLED}"
-      RADIX_NG_API__CoreApiNodes__2__Name: "${NODE_2_NAME}"
-      RADIX_NG_API__CoreApiNodes__2__CoreApiAddress: "${NODE_2_CORE_API_ADDRESS}"
-      RADIX_NG_API__CoreApiNodes__2__CoreApiAuthorizationHeader: "${NODE_2_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_API__CoreApiNodes__2__RequestWeighting: "1"
-      RADIX_NG_API__CoreApiNodes__2__Enabled: "${NODE_2_ENABLED}"
-      RADIX_NG_API__CoreApiNodes__3__Name: "${NODE_3_NAME}"
-      RADIX_NG_API__CoreApiNodes__3__CoreApiAddress: "${NODE_3_CORE_API_ADDRESS}"
-      RADIX_NG_API__CoreApiNodes__3__CoreApiAuthorizationHeader: "${NODE_3_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_API__CoreApiNodes__3__RequestWeighting: "1"
-      RADIX_NG_API__CoreApiNodes__3__Enabled: "${NODE_3_ENABLED}"
-      RADIX_NG_API__CoreApiNodes__4__Name: "${NODE_4_NAME}"
-      RADIX_NG_API__CoreApiNodes__4__CoreApiAddress: "${NODE_4_CORE_API_ADDRESS}"
-      RADIX_NG_API__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
-      RADIX_NG_API__CoreApiNodes__4__RequestWeighting: "1"
-      RADIX_NG_API__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
+      APP__CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
+      APP__PrometheusMetricsPort: "1235"
+      APP__MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
+      APP__EnableSwagger: "${ENABLE_SWAGGER}"
+      APP__ConnectionStrings__NetworkGatewayReadOnly: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__ConnectionStrings__NetworkGatewayReadWrite: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
+      APP__GatewayApi__Endpoints_MaxPageSize: "${MAX_PAGE_SIZE}"
+      APP__GatewayApi__AcceptableLedgerLag__PreventReadRequestsIfDbLedgerIsBehind: "${PREVENT_OUTDATED_READ_REQUESTS}"
+      APP__GatewayApi__AcceptableLedgerLag__PreventConstructionRequestsIfDbLedgerIsBehind: "${PREVENT_OUTDATED_CONSTRUCTION_REQUESTS}"
+      APP__GatewayApi__Network__NetworkName: "${NETWORK_NAME}"
+      APP__GatewayApi__Network__DisableCoreApiHttpsCertificateChecks: "${DISABLE_CORE_API_CERTIFICATE_CHECKS}"
+      APP__GatewayApi__Network__CoreApiNodes__0__Name: "${NODE_0_NAME}"
+      APP__GatewayApi__Network__CoreApiNodes__0__CoreApiAddress: "${NODE_0_CORE_API_ADDRESS}"
+      APP__GatewayApi__Network__CoreApiNodes__0__CoreApiAuthorizationHeader: "${NODE_0_CORE_API_AUTHORIZATION_HEADER}"
+      APP__GatewayApi__Network__CoreApiNodes__0__RequestWeighting: "1"
+      APP__GatewayApi__Network__CoreApiNodes__0__Enabled: "${NODE_0_ENABLED}"
+      APP__GatewayApi__Network__CoreApiNodes__1__Name: "${NODE_1_NAME}"
+      APP__GatewayApi__Network__CoreApiNodes__1__CoreApiAddress: "${NODE_1_CORE_API_ADDRESS}"
+      APP__GatewayApi__Network__CoreApiNodes__1__CoreApiAuthorizationHeader: "${NODE_1_CORE_API_AUTHORIZATION_HEADER}"
+      APP__GatewayApi__Network__CoreApiNodes__1__RequestWeighting: "1"
+      APP__GatewayApi__Network__CoreApiNodes__1__Enabled: "${NODE_1_ENABLED}"
+      APP__GatewayApi__Network__CoreApiNodes__2__Name: "${NODE_2_NAME}"
+      APP__GatewayApi__Network__CoreApiNodes__2__CoreApiAddress: "${NODE_2_CORE_API_ADDRESS}"
+      APP__GatewayApi__Network__CoreApiNodes__2__CoreApiAuthorizationHeader: "${NODE_2_CORE_API_AUTHORIZATION_HEADER}"
+      APP__GatewayApi__Network__CoreApiNodes__2__RequestWeighting: "1"
+      APP__GatewayApi__Network__CoreApiNodes__2__Enabled: "${NODE_2_ENABLED}"
+      APP__GatewayApi__Network__CoreApiNodes__3__Name: "${NODE_3_NAME}"
+      APP__GatewayApi__Network__CoreApiNodes__3__CoreApiAddress: "${NODE_3_CORE_API_ADDRESS}"
+      APP__GatewayApi__Network__CoreApiNodes__3__CoreApiAuthorizationHeader: "${NODE_3_CORE_API_AUTHORIZATION_HEADER}"
+      APP__GatewayApi__Network__CoreApiNodes__3__RequestWeighting: "1"
+      APP__GatewayApi__Network__CoreApiNodes__3__Enabled: "${NODE_3_ENABLED}"
+      APP__GatewayApi__Network__CoreApiNodes__4__Name: "${NODE_4_NAME}"
+      APP__GatewayApi__Network__CoreApiNodes__4__CoreApiAddress: "${NODE_4_CORE_API_ADDRESS}"
+      APP__GatewayApi__Network__CoreApiNodes__4__CoreApiAuthorizationHeader: "${NODE_4_CORE_API_AUTHORIZATION_HEADER}"
+      APP__GatewayApi__Network__CoreApiNodes__4__RequestWeighting: "1"
+      APP__GatewayApi__Network__CoreApiNodes__4__Enabled: "${NODE_4_ENABLED}"
     volumes:
       - ./gateway-api-fixed-configuration.json:/home/radixdlt/network-gateway/config.json
+
+  database_migrations_image:
+    # NB - image: is defined in the base data_aggregator
+    extends:
+      service: database_migrations
+    profiles: ["network-gateway-image"]
+    depends_on:
+      postgres_db:
+        condition: service_healthy
 
   data_aggregator_image:
     # NB - image: is defined in the base data_aggregator
     extends:
       service: data_aggregator
     profiles: ["network-gateway-image"]
+    depends_on:
+      database_migrations_image:
+        condition: service_completed_successfully
 
   gateway_api_image:
     # NB - image: is defined in the base gateway_api
     extends:
       service: gateway_api
     profiles: ["network-gateway-image"]
+    depends_on:
+      database_migrations_image:
+        condition: service_completed_successfully
+
+  database_migrations_built:
+    # NB - image: is defined in the base gateway_api
+    extends:
+      service: database_migrations
+    profiles: ["network-gateway-built"]
+    build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
+      context: "../"
+      dockerfile: "./samples/DatabaseMigrations/Dockerfile"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
 
   data_aggregator_built:
     extends:
@@ -159,7 +197,10 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./src/DataAggregator/Dockerfile"
+      dockerfile: "./samples/DataAggregator/Dockerfile"
+    depends_on:
+      database_migrations_built:
+        condition: service_completed_successfully
 
   gateway_api_built:
     extends:
@@ -167,4 +208,7 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./src/GatewayAPI/Dockerfile"
+      dockerfile: "./samples/GatewayAPI/Dockerfile"
+    depends_on:
+      database_migrations_built:
+        condition: service_completed_successfully

@@ -1,0 +1,21 @@
+﻿{
+    "$schema": "https://json.schemastore.org/launchsettings.json",
+    "profiles": {
+        "Data Aggregator": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "applicationUrl": "https://localhost:7214;http://localhost:5207",
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        "Data Aggregator (Production)": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "applicationUrl": "https://localhost:7214;http://localhost:5207",
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Production"
+            }
+        }
+    }
+}

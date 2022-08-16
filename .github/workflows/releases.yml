@@ -23,16 +23,16 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Build linux binaries
         run: |
-          cd src/DataAggregator
+          cd samples/DataAggregator
           echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
-          cd ../GatewayAPI
+          cd ../GatewayApi
           echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../..
 
-          zip -r data-aggregator.zip src/DataAggregator/output/
-          zip -r gateway-api.zip src/GatewayAPI/output/
+          zip -r data-aggregator.zip samples/DataAggregator/output/
+          zip -r gateway-api.zip samples/GatewayApi/output/
       - name: Upload DataAggreagtor zip
         uses: actions/upload-release-asset@v1
         env:
@@ -84,8 +84,8 @@ jobs:
 
       - name: Setup application version
         run: |
-          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' src/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' src/GatewayAPI/appsettings.json )" > src/GatewayAPI/appsettings.json
+          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' samples/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
+          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' samples/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -96,7 +96,7 @@ jobs:
       - name: Docker build and push DataAggregator
         uses: docker/build-push-action@v2
         with:
-          file: ./src/DataAggregator/Dockerfile
+          file: ./samples/DataAggregator/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.data_aggregator_tags }}
           push: true
@@ -106,7 +106,7 @@ jobs:
       - name: Docker build and push Gateway API
         uses: docker/build-push-action@v2
         with:
-          file: ./src/GatewayAPI/Dockerfile
+          file: ./samples/GatewayApi/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
