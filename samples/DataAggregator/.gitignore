@@ -1,5 +1,0 @@
-appsettings.DevelopmentOverrides.json
-appsettings.ProductionOverrides.json
-
-# Old name for DevelopmentOverrides - kept to ensure that it doesn't get source controlled by accident
-appsettings.PersonalOverrides.json

@@ -12,7 +12,7 @@
                 "dotnetRunMessages": true,
                 "environmentVariables": {
                     "DOTNET_ENVIRONMENT": "Development",
-                    "APP__WIPE_DATABASE": "true"
+                    "WIPE_DATABASE": "true"
                 }
             }
       }
