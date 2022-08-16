@@ -1,10 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="FluentValidation.AspNetCore" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
         <PackageReference Include="prometheus-net" />
@@ -18,5 +14,5 @@
         <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
         <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi.csproj" />
     </ItemGroup>
-  
+
 </Project>
