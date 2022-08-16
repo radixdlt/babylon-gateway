@@ -80,7 +80,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayApi(this IServiceCollection services)
+    public static GatewayApiBuilder AddNetworkGatewayApi(this IServiceCollection services)
     {
         services
             .AddNetworkGatewayCore();
@@ -102,6 +102,8 @@ public static class ServiceCollectionExtensions
 
         // Transient (pooled) services
         AddCoreApiHttpClient(services);
+
+        return new GatewayApiBuilder(services);
     }
 
     private static void AddSingletonServices(IServiceCollection services)

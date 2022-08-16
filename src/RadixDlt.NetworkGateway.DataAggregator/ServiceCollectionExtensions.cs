@@ -82,7 +82,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddNetworkGatewayDataAggregator(this IServiceCollection services)
+    public static DataAggregatorBuilder AddNetworkGatewayDataAggregator(this IServiceCollection services)
     {
         services
             .AddNetworkGatewayCore();
@@ -107,6 +107,8 @@ public static class ServiceCollectionExtensions
         AddTransientApiReaders(services);
         AddNodeInitializers(services);
         AddNodeWorkers(services);
+
+        return new DataAggregatorBuilder(services);
     }
 
     private static void AddGlobalScopedServices(IServiceCollection services)

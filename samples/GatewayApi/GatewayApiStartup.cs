@@ -86,10 +86,8 @@ public class GatewayApiStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayApi();
-
-        services
-            .TmpAddPostgresGatewayApi();
+            .AddNetworkGatewayApi()
+            .UsePostgresPersistence();
 
         if (_enableSwagger)
         {
