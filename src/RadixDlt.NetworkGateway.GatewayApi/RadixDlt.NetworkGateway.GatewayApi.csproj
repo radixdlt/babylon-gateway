@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj" />
-        <ProjectReference Include="..\RadixDlt.NetworkGateway.Core\RadixDlt.NetworkGateway.Core.csproj" />
+        <ProjectReference Include="..\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
     </ItemGroup>
 
 </Project>

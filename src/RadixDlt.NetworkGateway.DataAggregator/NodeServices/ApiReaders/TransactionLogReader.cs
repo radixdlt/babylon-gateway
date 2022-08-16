@@ -65,7 +65,7 @@
 using Prometheus;
 using RadixCoreApi.Generated.Api;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System.Threading;
 using System.Threading.Tasks;

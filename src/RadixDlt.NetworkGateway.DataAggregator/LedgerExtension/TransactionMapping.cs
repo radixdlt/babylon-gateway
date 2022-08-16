@@ -62,9 +62,9 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.Core.Numerics;
+using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Numerics;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

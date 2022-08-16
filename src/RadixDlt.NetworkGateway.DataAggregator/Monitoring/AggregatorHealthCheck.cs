@@ -65,7 +65,7 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Prometheus;
-using RadixDlt.NetworkGateway.Core.Utilities;
+using RadixDlt.NetworkGateway.Common.Utilities;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

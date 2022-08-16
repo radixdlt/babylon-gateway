@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Core.Exceptions;
+using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Common.Exceptions;
 using CoreModel = RadixCoreApi.Generated.Model;
 using InvalidTransactionError = RadixDlt.NetworkGateway.GatewayApiSdk.Model.InvalidTransactionError;
 

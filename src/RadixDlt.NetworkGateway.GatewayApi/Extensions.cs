@@ -1,4 +1,4 @@
-using RadixDlt.NetworkGateway.Core;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 

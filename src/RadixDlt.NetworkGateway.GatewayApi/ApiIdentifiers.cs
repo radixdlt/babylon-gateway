@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using CoreModel = RadixCoreApi.Generated.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Core.Numerics.TokenAmount;
-using Validator = RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization.Validator;
+using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using Validator = RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization.Validator;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
