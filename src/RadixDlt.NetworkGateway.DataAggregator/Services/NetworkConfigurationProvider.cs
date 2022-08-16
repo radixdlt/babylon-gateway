@@ -65,10 +65,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.Addressing;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
-using RadixDlt.NetworkGateway.Core.Database;
-using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Common.Addressing;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Database;
+using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

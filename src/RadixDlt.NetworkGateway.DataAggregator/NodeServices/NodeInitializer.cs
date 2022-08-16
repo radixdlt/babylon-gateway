@@ -63,7 +63,7 @@
  */
 
 using Prometheus;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

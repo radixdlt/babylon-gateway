@@ -65,11 +65,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Prometheus;
-using RadixDlt.NetworkGateway.Core.Database;
-using RadixDlt.NetworkGateway.Core.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Core.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.Core.Utilities;
+using RadixDlt.NetworkGateway.Common.Database;
+using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using System.Collections.Generic;
 using System.Linq;

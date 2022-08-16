@@ -65,8 +65,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.Addressing;
-using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Common.Addressing;
+using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;

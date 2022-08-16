@@ -65,7 +65,7 @@
 using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 

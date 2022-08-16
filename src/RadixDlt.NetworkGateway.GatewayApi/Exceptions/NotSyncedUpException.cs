@@ -63,7 +63,7 @@
  */
 
 using NodaTime;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 
