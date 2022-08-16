@@ -63,7 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixCoreApi.Generated.Model;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Addressing;
 using System;
 using System.Diagnostics.CodeAnalysis;

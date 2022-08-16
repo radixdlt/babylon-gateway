@@ -66,7 +66,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using Prometheus;
-using RadixCoreApi.Generated.Model;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;

@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.Generated.Api;
+using RadixDlt.CoreApiSdk.Api;
 using System.Net.Http;
 using System.Net.Http.Headers;
 

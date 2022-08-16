@@ -65,7 +65,7 @@
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using Prometheus;
-using RadixCoreApi.Generated.Model;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -75,7 +75,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;

@@ -15,9 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		docker-compose.yml = docker-compose.yml
-		gateway-api-spec.yaml = gateway-api-spec.yaml
 		LICENSE = LICENSE
-		nuget.config = nuget.config
 		README.md = README.md
 		stylecop.json = stylecop.json
 		.dockerignore = .dockerignore
@@ -36,6 +34,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.UnitTests", "tests\RadixDlt.NetworkGateway.UnitTests\RadixDlt.NetworkGateway.UnitTests.csproj", "{17988C9B-C9F0-489D-A6C6-7CDA12AC6AE1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.IntegrationTests", "tests\RadixDlt.NetworkGateway.IntegrationTests\RadixDlt.NetworkGateway.IntegrationTests.csproj", "{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.CoreApiSdk", "src\RadixDlt.CoreApiSdk\RadixDlt.CoreApiSdk.csproj", "{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +79,10 @@ Global
 		{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = .idea-run-configurations\DataAggregator.run.xml

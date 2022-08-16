@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
 using Validator = RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization.Validator;

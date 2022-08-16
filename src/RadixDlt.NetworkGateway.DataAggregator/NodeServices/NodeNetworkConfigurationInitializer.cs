@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixCoreApi.Generated.Model;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Addressing;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;

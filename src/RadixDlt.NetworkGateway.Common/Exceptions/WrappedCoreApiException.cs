@@ -63,7 +63,7 @@
  */
 
 using System;
-using CoreClient = RadixCoreApi.Generated.Client;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 
 namespace RadixDlt.NetworkGateway.Common.Exceptions;
 
@@ -87,7 +87,7 @@ public class CoreApiErrorProperties
 /// </summary>
 /// <typeparam name="T">The type of the core error.</typeparam>
 public class WrappedCoreApiException<T> : WrappedCoreApiException
-    where T : RadixCoreApi.Generated.Model.CoreError
+    where T : RadixDlt.CoreApiSdk.Model.CoreError
 {
     public override T Error { get; }
 
@@ -100,7 +100,7 @@ public class WrappedCoreApiException<T> : WrappedCoreApiException
 
 public abstract class WrappedCoreApiException : Exception
 {
-    public abstract RadixCoreApi.Generated.Model.CoreError Error { get; }
+    public abstract RadixDlt.CoreApiSdk.Model.CoreError Error { get; }
 
     public CoreClient.ApiException ApiException { get; }
 
@@ -114,7 +114,7 @@ public abstract class WrappedCoreApiException : Exception
     }
 
     public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error, CoreApiErrorProperties? properties = null)
-        where T : RadixCoreApi.Generated.Model.CoreError
+        where T : RadixDlt.CoreApiSdk.Model.CoreError
     {
         return new WrappedCoreApiException<T>(apiException, error, properties);
     }

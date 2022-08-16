@@ -11,7 +11,6 @@
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
-        <PackageReference Include="RadixGatewayApi.Generated" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
         <PackageReference Include="prometheus-net" />
         <PackageReference Include="prometheus-net.AspNetCore" />

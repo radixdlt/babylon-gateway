@@ -71,7 +71,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

@@ -64,7 +64,7 @@
 
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Exceptions;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using InvalidTransactionError = RadixDlt.NetworkGateway.GatewayApiSdk.Model.InvalidTransactionError;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
