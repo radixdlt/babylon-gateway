@@ -70,11 +70,10 @@ namespace RadixDlt.NetworkGateway.Common.Numerics;
 
 public readonly record struct TokenAmount : IComparable<TokenAmount>
 {
-    private const string StringForNaN = "NaN";
-    private const int DecimalPrecision = 18;
-    private const int MaxPostgresPrecision = 1000;
+    public const string StringForNaN = "NaN";
 
-    private static readonly int _safeByteLengthLimitBeforePostgresError;
+    private const int DecimalPrecision = 18;
+
     private static readonly BigInteger _divisor;
 
     public static readonly TokenAmount Zero;
@@ -83,8 +82,6 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
 
     static TokenAmount()
     {
-        // We under-estimate this so that we're definitely safe
-        _safeByteLengthLimitBeforePostgresError = (int)Math.Floor(MaxPostgresPrecision * Math.Log(10, 256));
         _divisor = BigInteger.Pow(10, DecimalPrecision);
 
         Zero = new TokenAmount(0);
@@ -195,18 +192,6 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
         _isNaN = isNaN;
     }
 
-    /// <summary>
-    /// Calculates the corresponding string for postgres handling, assuming decimal(1000, 18).
-    /// If the number is too large, we return NaN so that we can still ingest the transaction.
-    /// See <a href="https://www.postgresql.org/docs/14/datatype-numeric.html">the Postgres Numeric docs</a>.
-    ///
-    /// Unfortunately, NPGSQL is yet to support NaN in their BigInteger numeric fields.
-    /// </summary>
-    public string ToPostgresDecimal()
-    {
-        return _isNaN || IsUnsafeSizeForPostgres() ? StringForNaN : ToString();
-    }
-
     public string ToSubUnitString()
     {
         return _isNaN ? StringForNaN : _subUnits.ToString();
@@ -277,29 +262,6 @@ public readonly record struct TokenAmount : IComparable<TokenAmount>
         }
 
         return _subUnits;
-    }
-
-    public BigInteger GetSubUnitsSafeForPostgres()
-    {
-        if (_isNaN)
-        {
-            throw new ArithmeticException("TokenAmount is NaN, cannot get SubUnits.");
-        }
-
-        if (IsUnsafeSizeForPostgres())
-        {
-            throw new ArithmeticException("TokenAmount is too large to persist to PostGres.");
-        }
-
-        return _subUnits;
-    }
-
-    /// <summary>
-    /// Calculates whether the string is certainly safe for postgres handling, assuming decimal(1000, 18).
-    /// </summary>
-    private bool IsUnsafeSizeForPostgres()
-    {
-        return _subUnits.GetByteCount(isUnsigned: false) >= _safeByteLengthLimitBeforePostgresError;
     }
 
     public int CompareTo(TokenAmount other)
