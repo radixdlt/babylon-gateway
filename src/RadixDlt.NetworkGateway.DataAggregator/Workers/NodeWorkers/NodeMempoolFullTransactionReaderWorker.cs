@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -70,7 +69,6 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
@@ -113,7 +111,6 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private readonly IServiceProvider _services;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
 
@@ -124,7 +121,6 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IServiceProvider services,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
-        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig
     )
@@ -134,7 +130,6 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         _services = services;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _dbContextFactory = dbContextFactory;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
     }
@@ -156,7 +151,6 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     {
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // We duplicate this call from the TransactionIdsReader for simplicity, to mean the workers don't need
         // to sync up. This should be a cheap call to the Core API.

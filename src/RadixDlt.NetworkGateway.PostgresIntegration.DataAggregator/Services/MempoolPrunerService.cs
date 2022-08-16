@@ -69,6 +69,7 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using System.Collections.Generic;
@@ -77,11 +78,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
-
-public interface IMempoolPrunerService
-{
-    Task PruneMempool(CancellationToken token = default);
-}
 
 public class MempoolPrunerService : IMempoolPrunerService
 {

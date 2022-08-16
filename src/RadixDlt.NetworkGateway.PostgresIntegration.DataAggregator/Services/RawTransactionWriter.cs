@@ -69,6 +69,7 @@ using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using System.Collections.Generic;

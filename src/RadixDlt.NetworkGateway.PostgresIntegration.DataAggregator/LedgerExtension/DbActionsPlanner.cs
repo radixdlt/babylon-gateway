@@ -72,7 +72,6 @@ using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Records;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;

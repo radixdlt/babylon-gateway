@@ -67,13 +67,12 @@ using NodaTime;
 using Prometheus;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void SetTopOfDbLedger(TransactionSummary topOfLedger);
+    void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp);
 
     void RecordTransactionsCommitted();
 
@@ -105,7 +104,7 @@ public class SystemStatusService : ISystemStatusService
 
     private Instant? _lastTransactionCommitment;
     private bool _isPrimary;
-    private TransactionSummary? _topOfLedger;
+    private Instant? _topOfLedgerNormalizedRoundTimestamp;
 
     private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
 
@@ -122,9 +121,9 @@ public class SystemStatusService : ISystemStatusService
         _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
     }
 
-    public void SetTopOfDbLedger(TransactionSummary topOfLedger)
+    public void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp)
     {
-        _topOfLedger = topOfLedger;
+        _topOfLedgerNormalizedRoundTimestamp = topOfLedgerNormalizedRoundTimestamp;
     }
 
     public void SetIsPrimary(bool isPrimary)
@@ -135,14 +134,14 @@ public class SystemStatusService : ISystemStatusService
 
     public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
     {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp.WithinPeriodOfNow(duration);
+        return _topOfLedgerNormalizedRoundTimestamp.HasValue
+               && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration);
     }
 
     public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant)
     {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp + assumedBoundOnClockDrift >= instant;
+        return _topOfLedgerNormalizedRoundTimestamp.HasValue
+               && _topOfLedgerNormalizedRoundTimestamp.Value + assumedBoundOnClockDrift >= instant;
     }
 
     public bool IsPrimary()

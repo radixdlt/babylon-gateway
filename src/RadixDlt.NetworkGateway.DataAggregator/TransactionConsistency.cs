@@ -62,64 +62,51 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Exceptions;
-using RadixDlt.NetworkGateway.Common.Model;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using InvalidTransactionError = RadixDlt.NetworkGateway.GatewayApiSdk.Model.InvalidTransactionError;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.StaticHelpers;
+using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 
-public class InvalidTransactionException : ValidationException
+public static class TransactionConsistency
 {
-    public WrappedCoreApiException? WrappedCoreApiException { get; }
-
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
+    public static void AssertChildTransactionConsistent(TransactionSummary parent, TransactionSummary child)
     {
+        if (child.StateVersion != parent.StateVersion + 1)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with state version {child.StateVersion}" +
+                $" on top of transaction with state version {parent.StateVersion}"
+            );
+        }
+
+        if (!RadixHashing.IsValidAccumulator(
+                parent.TransactionAccumulator,
+                child.PayloadHash,
+                child.TransactionAccumulator
+            ))
+        {
+            throw new InconsistentLedgerException(
+                $"Failure to commit a child transaction with resultant state version {child.StateVersion}." +
+                $" The parent (with resultant state version {parent.StateVersion}) has accumulator {parent.TransactionAccumulator.ToHex()}" +
+                $" and the child has transaction id hash {child.PayloadHash.ToHex()}" +
+                " which should result in an accumulator of" +
+                $" {RadixHashing.CreateNewAccumulator(parent.TransactionAccumulator, child.PayloadHash).ToHex()}" +
+                $" but the child reports an inconsistent accumulator of {child.TransactionAccumulator.ToHex()}."
+            );
+        }
     }
 
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, WrappedCoreApiException? wrappedCoreApiException = null)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
+    public static void AssertTransactionHashCorrect(byte[] payload, byte[] transactionIdentifierHash)
     {
-        WrappedCoreApiException = wrappedCoreApiException;
-    }
-
-    public static InvalidTransactionException FromInvalidTransactionDueToCoreApiException(
-        string invalidTransactionHex,
-        WrappedCoreApiException wrappedCoreApiException
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "Transaction is invalid",
-            wrappedCoreApiException
-        );
-    }
-
-    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
-        string invalidTransactionHex,
-        CoreModel.SubstateDependencyNotFoundError error
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "The transaction clashes with a previous transaction",
-            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
-        );
-    }
-
-    public static InvalidTransactionException FromPreviouslyFailedTransactionError(
-        string invalidTransactionHex,
-        MempoolTransactionFailureReason previousFailureReason
-    )
-    {
-        var userFacingMessage = previousFailureReason == MempoolTransactionFailureReason.DoubleSpend
-            ? "The transaction submission has already failed as it clashes with a previous transaction"
-            : "The transaction submission has already failed";
-
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            userFacingMessage
-        );
+        if (!RadixHashing.IsValidTransactionHashIdentifier(payload, transactionIdentifierHash))
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with claimed identifier hash {transactionIdentifierHash.ToHex()} " +
+                $"but it was calculated to have identifier {RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(payload).ToHex()} " +
+                $"(transaction contents: {payload.ToHex()})"
+            );
+        }
     }
 }

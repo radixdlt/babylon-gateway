@@ -62,50 +62,48 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.StaticHelpers;
-using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using NodaTime;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreApi = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public static class TransactionConsistency
+public record FullTransactionData(byte[] Id, Instant SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
+
+public record NodeMempoolHashes
 {
-    public static void AssertChildTransactionConsistent(TransactionSummary parent, TransactionSummary child)
-    {
-        if (child.StateVersion != parent.StateVersion + 1)
-        {
-            throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with state version {child.StateVersion}" +
-                $" on top of transaction with state version {parent.StateVersion}"
-            );
-        }
+    public HashSet<byte[]> TransactionHashes { get; }
 
-        if (!RadixHashing.IsValidAccumulator(
-                parent.TransactionAccumulator,
-                child.PayloadHash,
-                child.TransactionAccumulator
-            ))
-        {
-            throw new InconsistentLedgerException(
-                $"Failure to commit a child transaction with resultant state version {child.StateVersion}." +
-                $" The parent (with resultant state version {parent.StateVersion}) has accumulator {parent.TransactionAccumulator.ToHex()}" +
-                $" and the child has transaction id hash {child.PayloadHash.ToHex()}" +
-                " which should result in an accumulator of" +
-                $" {RadixHashing.CreateNewAccumulator(parent.TransactionAccumulator, child.PayloadHash).ToHex()}" +
-                $" but the child reports an inconsistent accumulator of {child.TransactionAccumulator.ToHex()}."
-            );
-        }
-    }
+    public Instant AtTime { get; }
 
-    public static void AssertTransactionHashCorrect(byte[] payload, byte[] transactionIdentifierHash)
+    public NodeMempoolHashes(HashSet<byte[]> transactionHashes)
     {
-        if (!RadixHashing.IsValidTransactionHashIdentifier(payload, transactionIdentifierHash))
-        {
-            throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with claimed identifier hash {transactionIdentifierHash.ToHex()} " +
-                $"but it was calculated to have identifier {RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(payload).ToHex()} " +
-                $"(transaction contents: {payload.ToHex()})"
-            );
-        }
+        TransactionHashes = transactionHashes;
+        AtTime = SystemClock.Instance.GetCurrentInstant();
     }
+}
+
+public interface IMempoolTrackerService
+{
+    void RegisterNodeMempoolHashes(string nodeName, NodeMempoolHashes nodeMempoolHashes);
+
+    Task HandleMempoolChanges(CancellationToken token);
+
+    /// <summary>
+    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
+    /// contents actually need fetching.
+    /// </summary>
+    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> transactionIdentifiers, CancellationToken cancellationToken);
+
+    bool SubmitTransactionContents(FullTransactionData fullTransactionData);
+
+    /// <summary>
+    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
+    /// identifier still needs fetching. This is to try to not make a call if we've already got the transaction contents
+    /// from another node in the mean-time.
+    /// </summary>
+    /// <returns>If the transaction was first seen (true) or (false).</returns>
+    bool TransactionContentsStillNeedFetching(byte[] transactionIdentifier);
 }

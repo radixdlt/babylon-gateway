@@ -62,14 +62,8 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.Addressing;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,7 +71,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
-    Task SetNetworkConfigurationOrAssertMatching(NetworkConfiguration inputNetworkConfiguration, CancellationToken token);
+    Task SetNetworkConfigurationOrAssertMatching(NetworkConfigurationResponse inputNetworkConfiguration, CancellationToken token);
 
     Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default);
 
@@ -86,135 +80,4 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     string GetNetworkName();
 
     NetworkIdentifier GetNetworkIdentifierForApiRequests();
-}
-
-/// <summary>
-/// This captures the NetworkConfiguration for the DataAggregator - typically from a node, but it can also pull it
-/// from the database.
-/// It persists a local copy of it for the duration of the DataAggregator's uptime.
-/// </summary>
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
-{
-    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
-    private readonly ILogger<NetworkConfigurationProvider> _logger;
-
-    private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
-
-    private record CapturedConfig(
-        NetworkConfiguration NetworkConfiguration,
-        AddressHrps AddressHrps,
-        NetworkIdentifier NetworkIdentifier
-    );
-
-    public NetworkConfigurationProvider(
-        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
-        ILogger<NetworkConfigurationProvider> logger
-    )
-    {
-        _dbContextFactory = dbContextFactory;
-        _logger = logger;
-    }
-
-    public async Task SetNetworkConfigurationOrAssertMatching(NetworkConfiguration inputNetworkConfiguration, CancellationToken token)
-    {
-        var existingNetworkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
-        EnsureNetworkConfigurationCaptured(inputNetworkConfiguration);
-
-        if (existingNetworkConfiguration != null)
-        {
-            if (!existingNetworkConfiguration.HasEqualConfiguration(inputNetworkConfiguration))
-            {
-                throw new Exception("Network configuration does does not match those stored in the database.");
-            }
-        }
-
-        if (!GetCapturedConfig().NetworkConfiguration.HasEqualConfiguration(inputNetworkConfiguration))
-        {
-            throw new Exception("Network configuration does does not match those stored from other nodes.");
-        }
-    }
-
-    public async Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(
-        CancellationToken token = default
-    )
-    {
-        var currentConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
-        if (currentConfiguration != null)
-        {
-            EnsureNetworkConfigurationCaptured(currentConfiguration);
-
-            _logger.LogInformation(
-                "Network configuration for network {NetworkName} loaded from database",
-                currentConfiguration.NetworkDefinition.NetworkName
-            );
-
-            return currentConfiguration.NetworkDefinition.NetworkName;
-        }
-
-        _logger.LogInformation("Network configuration not loaded from database (db ledger likely empty)");
-
-        return null;
-    }
-
-    public async Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token)
-    {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        if (await dbContext.NetworkConfiguration.AsNoTracking().AnyAsync(token))
-        {
-            return false;
-        }
-
-        dbContext.Add(GetCapturedConfig().NetworkConfiguration);
-        await dbContext.SaveChangesAsync(token);
-        return true;
-    }
-
-    public string GetNetworkName()
-    {
-        return GetCapturedConfig().NetworkConfiguration.NetworkDefinition.NetworkName;
-    }
-
-    public NetworkIdentifier GetNetworkIdentifierForApiRequests()
-    {
-        return GetCapturedConfig().NetworkIdentifier;
-    }
-
-    public AddressHrps GetAddressHrps()
-    {
-        return GetCapturedConfig().AddressHrps;
-    }
-
-    public string GetXrdAddress()
-    {
-        return GetCapturedConfig().NetworkConfiguration.WellKnownAddresses.XrdAddress;
-    }
-
-    private CapturedConfig GetCapturedConfig()
-    {
-        return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
-    }
-
-    private void EnsureNetworkConfigurationCaptured(NetworkConfiguration inputNetworkConfiguration)
-    {
-        lock (_writeLock)
-        {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
-
-            _capturedConfig = new CapturedConfig(
-                inputNetworkConfiguration,
-                inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-                new NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName)
-            );
-        }
-    }
-
-    private async Task<NetworkConfiguration?> GetCurrentLedgerNetworkConfigurationFromDb(CancellationToken token)
-    {
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        return await dbContext.NetworkConfiguration.AsNoTracking().SingleOrDefaultAsync(token);
-    }
 }
