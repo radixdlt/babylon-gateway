@@ -4,24 +4,25 @@ using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Initializers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
 
-public static class ServiceCollectionExtensions
+public static class GatewayApiBuilderExtensions
 {
-    public static void TmpAddPostgresGatewayApi(this IServiceCollection services)
+    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
     {
-        services
+        builder.Services
             .AddHealthChecks()
             .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
             .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
 
-        services
+        builder.Services
             .AddHostedService<NetworkConfigurationInitializer>();
 
-        services
+        builder.Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
             .AddScoped<SubmissionTrackingService>()
@@ -29,7 +30,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
             .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
 
-        services
+        builder.Services
             .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
             {
                 // https://www.npgsql.org/efcore/index.html
@@ -40,5 +41,7 @@ public static class ServiceCollectionExtensions
                 // https://www.npgsql.org/efcore/index.html
                 options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName), o => o.NonBrokenUseNodaTime());
             });
+
+        return builder;
     }
 }

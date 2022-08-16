@@ -84,10 +84,8 @@ public class DataAggregatorStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayDataAggregator();
-
-        services
-            .TmpAddNetworkGatewayDataAggregator();
+            .AddNetworkGatewayDataAggregator()
+            .UsePostgresPersistence();
 
         services
             .AddEndpointsApiExplorer();
