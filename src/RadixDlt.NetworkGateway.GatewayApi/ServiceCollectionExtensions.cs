@@ -62,22 +62,16 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Configuration;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
-using RadixDlt.NetworkGateway.GatewayApi.Initializers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Workers;
 using System.Net;
@@ -97,37 +91,18 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");
 
-        services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
-
-        services
-            .AddValidatorsFromAssembly(typeof(ServiceCollectionExtensions).Assembly)
-            .AddFluentValidationAutoValidation(o => o.DisableDataAnnotationsValidation = true);
-
-        // Initializers
-        AddInitializers(services);
-
         // Singleton-Scoped services
         AddSingletonServices(services);
         AddHostedServices(services);
 
         // Request scoped services
         AddRequestScopedServices(services);
-        AddDatabaseContextServices(services);
 
         // Other scoped services
         AddWorkerScopedServices(services);
 
         // Transient (pooled) services
         AddCoreApiHttpClient(services);
-    }
-
-    private static void AddInitializers(IServiceCollection services)
-    {
-        services
-            .AddHostedService<NetworkConfigurationInitializer>();
     }
 
     private static void AddSingletonServices(IServiceCollection services)
@@ -150,10 +125,7 @@ public static class ServiceCollectionExtensions
 
     private static void AddRequestScopedServices(IServiceCollection services)
     {
-        services.AddScoped<ILedgerStateQuerier, LedgerStateQuerier>();
-        services.AddScoped<ITransactionQuerier, TransactionQuerier>();
         services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
-        services.AddScoped<ISubmissionTrackingService, SubmissionTrackingService>();
     }
 
     private static void AddWorkerScopedServices(IServiceCollection services)
@@ -174,21 +146,6 @@ public static class ServiceCollectionExtensions
             .AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
             .UseHttpClientMetrics()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
-    }
-
-    private static void AddDatabaseContextServices(IServiceCollection services)
-    {
-        services.AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-        {
-            // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName), o => o.NonBrokenUseNodaTime());
-        });
-
-        services.AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-        {
-            // https://www.npgsql.org/efcore/index.html
-            options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName), o => o.NonBrokenUseNodaTime());
-        });
     }
 
     private static HttpClientHandler ConfigureHttpClientHandler(IOptions<NetworkOptions> options)

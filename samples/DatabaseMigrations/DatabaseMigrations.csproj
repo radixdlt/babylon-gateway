@@ -2,6 +2,7 @@
   
     <ItemGroup>
         <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
+        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj" />
     </ItemGroup>
   
 </Project>

@@ -62,97 +62,38 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
+using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
+using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using Validator = RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization.Validator;
 
-namespace GatewayApi;
+namespace RadixDlt.NetworkGateway.GatewayApi;
 
-public class GatewayApiStartup
+public static class ApiIdentifiers
 {
-    private readonly int _prometheusMetricsPort;
-    private readonly bool _enableSwagger;
-
-    public GatewayApiStartup(IConfiguration configuration)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
     {
-        _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
-        _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
+        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), resource.ResourceIdentifier.AsGatewayTokenIdentifier());
     }
 
-    public void ConfigureServices(IServiceCollection services)
+    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this Validator validator)
     {
-        services
-            .AddNetworkGatewayApi();
-
-        services
-            .TmpAddPostgresGatewayApi();
-
-        if (_enableSwagger)
-        {
-            services
-                .AddSwaggerGen()
-                .AddSwaggerGenNewtonsoftSupport();
-        }
-
-        services
-            .AddEndpointsApiExplorer()
-            .AddCors(options =>
-            {
-                options.AddDefaultPolicy(corsPolicyBuilder =>
-                {
-                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                });
-            });
-
-        services
-            .AddControllers()
-            .AddControllersAsServices()
-            .AddNewtonsoftJson();
-
-        services
-            .AddHealthChecks()
-            .ForwardToPrometheus();
+        return new Gateway.ValidatorIdentifier(validator.Address);
     }
 
-    public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
+    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this Resource resource)
     {
-        if (_enableSwagger)
-        {
-            application
-                .UseSwagger()
-                .UseSwaggerUI();
-        }
-
-        application
-            .UseAuthentication()
-            .UseAuthorization()
-            .UseCors()
-            .UseHttpMetrics()
-            .UseRouting()
-            .UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/health");
-                endpoints.MapControllers();
-            });
-
-        StartMetricServer(logger);
+        return new Gateway.TokenIdentifier(resource.ResourceIdentifier);
     }
 
-    private void StartMetricServer(ILogger logger)
+    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this Account account)
     {
-        if (_prometheusMetricsPort != 0)
-        {
-            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", _prometheusMetricsPort);
+        return new Gateway.AccountIdentifier(account.Address);
+    }
 
-            new KestrelMetricServer(port: _prometheusMetricsPort).Start();
-        }
-        else
-        {
-            logger.LogInformation("PrometheusMetricsPort not configured - not starting metric server");
-        }
+    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this Account? account)
+    {
+        return account == null ? null : new Gateway.AccountIdentifier(account.Address);
     }
 }

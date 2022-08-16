@@ -62,97 +62,65 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
 
-namespace GatewayApi;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public class GatewayApiStartup
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+
+public interface ITransactionQuerier
 {
-    private readonly int _prometheusMetricsPort;
-    private readonly bool _enableSwagger;
+    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState);
 
-    public GatewayApiStartup(IConfiguration configuration)
+    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
+
+    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.LedgerState ledgerState
+    );
+
+    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
+        ValidatedTransactionIdentifier transactionIdentifier
+    );
+}
+
+[DataContract]
+public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
+{
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+
+    public static CommittedTransactionPaginationCursor? FromCursorString(string? cursorString)
     {
-        _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
-        _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
+        return Serializations.FromBase64JsonOrDefault<CommittedTransactionPaginationCursor>(cursorString);
     }
 
-    public void ConfigureServices(IServiceCollection services)
+    public string ToCursorString()
     {
-        services
-            .AddNetworkGatewayApi();
-
-        services
-            .TmpAddPostgresGatewayApi();
-
-        if (_enableSwagger)
-        {
-            services
-                .AddSwaggerGen()
-                .AddSwaggerGenNewtonsoftSupport();
-        }
-
-        services
-            .AddEndpointsApiExplorer()
-            .AddCors(options =>
-            {
-                options.AddDefaultPolicy(corsPolicyBuilder =>
-                {
-                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                });
-            });
-
-        services
-            .AddControllers()
-            .AddControllersAsServices()
-            .AddNewtonsoftJson();
-
-        services
-            .AddHealthChecks()
-            .ForwardToPrometheus();
-    }
-
-    public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
-    {
-        if (_enableSwagger)
-        {
-            application
-                .UseSwagger()
-                .UseSwaggerUI();
-        }
-
-        application
-            .UseAuthentication()
-            .UseAuthorization()
-            .UseCors()
-            .UseHttpMetrics()
-            .UseRouting()
-            .UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/health");
-                endpoints.MapControllers();
-            });
-
-        StartMetricServer(logger);
-    }
-
-    private void StartMetricServer(ILogger logger)
-    {
-        if (_prometheusMetricsPort != 0)
-        {
-            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", _prometheusMetricsPort);
-
-            new KestrelMetricServer(port: _prometheusMetricsPort).Start();
-        }
-        else
-        {
-            logger.LogInformation("PrometheusMetricsPort not configured - not starting metric server");
-        }
+        return Serializations.AsBase64Json(this);
     }
 }
+
+public record TransactionPageWithTotal(
+    long TotalRecords,
+    CommittedTransactionPaginationCursor? NextPageCursor,
+    List<Gateway.TransactionInfo> Transactions
+);
+
+public record TransactionPageWithoutTotal(
+    CommittedTransactionPaginationCursor? NextPageCursor,
+    List<Gateway.TransactionInfo> Transactions
+);
+
+public record AccountTransactionPageRequest(
+    ValidatedAccountAddress AccountAddress,
+    CommittedTransactionPaginationCursor? Cursor,
+    int PageSize
+);
+
+public record RecentTransactionPageRequest(
+    CommittedTransactionPaginationCursor? Cursor,
+    int PageSize
+);

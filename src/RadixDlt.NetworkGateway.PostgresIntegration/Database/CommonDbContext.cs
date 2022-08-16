@@ -72,6 +72,7 @@ using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
 using RadixDlt.NetworkGateway.Common.Database.ValueConverters;
 using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.Common.Numerics;
 
 namespace RadixDlt.NetworkGateway.Common.Database;

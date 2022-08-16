@@ -62,97 +62,53 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
+using RadixDlt.NetworkGateway.Common.Database;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace GatewayApi;
+namespace RadixDlt.NetworkGateway.GatewayApi.Initializers;
 
-public class GatewayApiStartup
+public class NetworkConfigurationInitializer : BackgroundService
 {
-    private readonly int _prometheusMetricsPort;
-    private readonly bool _enableSwagger;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _logger;
 
-    public GatewayApiStartup(IConfiguration configuration)
+    public NetworkConfigurationInitializer(IServiceProvider serviceProvider, ILogger<NetworkConfigurationInitializer> logger)
     {
-        _prometheusMetricsPort = configuration.GetValue<int>("PrometheusMetricsPort");
-        _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
-    public void ConfigureServices(IServiceCollection services)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        services
-            .AddNetworkGatewayApi();
+        using var scope = _serviceProvider.CreateScope();
 
-        services
-            .TmpAddPostgresGatewayApi();
+        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
 
-        if (_enableSwagger)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            services
-                .AddSwaggerGen()
-                .AddSwaggerGenNewtonsoftSupport();
-        }
-
-        services
-            .AddEndpointsApiExplorer()
-            .AddCors(options =>
+            try
             {
-                options.AddDefaultPolicy(corsPolicyBuilder =>
+                await networkConfigurationProvider.Initialize(scope.ServiceProvider.GetRequiredService<ICapturedConfigProvider>(), stoppingToken);
+                break;
+            }
+            catch (Exception exception)
+            {
+                if (exception.ShouldBeConsideredAppFatal())
                 {
-                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                });
-            });
+                    throw;
+                }
 
-        services
-            .AddControllers()
-            .AddControllersAsServices()
-            .AddNewtonsoftJson();
+                _logger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
 
-        services
-            .AddHealthChecks()
-            .ForwardToPrometheus();
-    }
-
-    public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
-    {
-        if (_enableSwagger)
-        {
-            application
-                .UseSwagger()
-                .UseSwaggerUI();
-        }
-
-        application
-            .UseAuthentication()
-            .UseAuthorization()
-            .UseCors()
-            .UseHttpMetrics()
-            .UseRouting()
-            .UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/health");
-                endpoints.MapControllers();
-            });
-
-        StartMetricServer(logger);
-    }
-
-    private void StartMetricServer(ILogger logger)
-    {
-        if (_prometheusMetricsPort != 0)
-        {
-            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", _prometheusMetricsPort);
-
-            new KestrelMetricServer(port: _prometheusMetricsPort).Start();
-        }
-        else
-        {
-            logger.LogInformation("PrometheusMetricsPort not configured - not starting metric server");
+                await Task.Delay(2000, stoppingToken);
+            }
         }
     }
 }

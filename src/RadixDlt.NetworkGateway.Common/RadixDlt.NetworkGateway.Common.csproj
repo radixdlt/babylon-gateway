@@ -4,16 +4,9 @@
         <PackageReference Include="FluentValidation" />
         <PackageReference Include="Microsoft.Extensions.Hosting" /> <!-- can't use .Abstractions as we rely on .ValidateOnStart() -->
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="NodaTime" />
         <PackageReference Include="NodaTime.Serialization.JsonNet" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
-        <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
         <PackageReference Include="prometheus-net" />
     </ItemGroup>
 

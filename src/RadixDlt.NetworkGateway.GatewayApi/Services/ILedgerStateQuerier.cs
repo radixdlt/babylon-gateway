@@ -62,57 +62,21 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System;
-using System.Threading;
+
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Initializers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public class NetworkConfigurationInitializer : BackgroundService
+public interface ILedgerStateQuerier
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger _logger;
+    Task<GatewayResponse> GetGatewayState();
 
-    public NetworkConfigurationInitializer(IServiceProvider serviceProvider, ILogger<NetworkConfigurationInitializer> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
+    Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        using var scope = _serviceProvider.CreateScope();
+    Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier);
 
-        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+    Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await networkConfigurationProvider
-                    .LoadNetworkConfigurationFromDatabase(
-                        scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>(),
-                        stoppingToken
-                    );
-                break;
-            }
-            catch (Exception exception)
-            {
-                if (exception.ShouldBeConsideredAppFatal())
-                {
-                    throw;
-                }
-
-                _logger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
-
-                await Task.Delay(2000, stoppingToken);
-            }
-        }
-    }
+    Task<long> GetTopOfLedgerStateVersion();
 }

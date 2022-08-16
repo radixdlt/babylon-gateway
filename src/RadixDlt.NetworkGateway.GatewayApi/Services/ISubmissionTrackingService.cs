@@ -62,15 +62,8 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using Npgsql;
-using Prometheus;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using System;
-using System.Linq;
+using RadixDlt.NetworkGateway.Common.Model;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -78,8 +71,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionTrackingService
 {
-    Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
-
     Task<MempoolTrackGuidance> TrackInitialSubmission(
         Instant submittedTimestamp,
         byte[] signedTransaction,
@@ -96,101 +87,3 @@ public interface ISubmissionTrackingService
 }
 
 public record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
-
-public class SubmissionTrackingService : ISubmissionTrackingService
-{
-    private static readonly Counter _dbMempoolTransactionsAddedDueToSubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_added_from_gateway_submission_count",
-            "Number of mempool transactions added to the DB due to being submitted to the gateway"
-        );
-
-    private static readonly Counter _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_failed_from_initial_submission_count",
-            "Number of mempool transactions marked as failed during initial submission to a node"
-        );
-
-    private readonly ReadWriteDbContext _dbContext;
-
-    public SubmissionTrackingService(ReadWriteDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
-    public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
-    {
-        return await _dbContext.MempoolTransactions
-            .Where(t => t.PayloadHash == transactionIdentifierHash)
-            .SingleOrDefaultAsync();
-    }
-
-    public async Task<MempoolTrackGuidance> TrackInitialSubmission(
-        Instant submittedTimestamp,
-        byte[] signedTransaction,
-        byte[] transactionIdentifierHash,
-        string submittedToNodeName,
-        CoreModel.ConstructionParseResponse parseResponse
-    )
-    {
-        var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
-
-        if (existingMempoolTransaction != null)
-        {
-            if (existingMempoolTransaction.Status == MempoolTransactionStatus.Failed)
-            {
-                return new MempoolTrackGuidance(ShouldSubmitToNode: false, TransactionAlreadyFailedReason: existingMempoolTransaction.FailureReason);
-            }
-
-            existingMempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
-            await _dbContext.SaveChangesAsync();
-
-            // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
-            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
-        }
-
-        var mempoolTransaction = MempoolTransaction.NewAsSubmittedForFirstTimeByGateway(
-            transactionIdentifierHash,
-            signedTransaction,
-            submittedToNodeName,
-            GatewayTransactionContents.Default(), // TODO - Need to fix for Babylon
-            submittedTimestamp
-        );
-
-        _dbContext.MempoolTransactions.Add(mempoolTransaction);
-
-        // We now try saving to the DB - but catch duplicates - if we get a duplicate reported, the gateway which saved
-        // it successfully should then submit it to the node -- and the one that reports a duplicate should return a
-        // generic success, but not resubmit.
-        // NB - 23 is Integrity Constraint Violation: https://www.postgresql.org/docs/current/errcodes-appendix.html)
-        try
-        {
-            await _dbContext.SaveChangesAsync();
-            _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
-            return new MempoolTrackGuidance(ShouldSubmitToNode: true);
-        }
-        catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
-        {
-            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
-        }
-    }
-
-    public async Task MarkAsFailed(
-        byte[] transactionIdentifierHash,
-        MempoolTransactionFailureReason failureReason,
-        string failureExplanation
-    )
-    {
-        var mempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
-
-        if (mempoolTransaction == null)
-        {
-            throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
-        }
-
-        _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount.Inc();
-        mempoolTransaction.MarkAsFailed(failureReason, failureExplanation);
-
-        await _dbContext.SaveChangesAsync();
-    }
-}

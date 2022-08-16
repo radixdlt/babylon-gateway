@@ -149,12 +149,12 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, cancellationToken));
 
-        var ledgerStateVersionTask = _ledgerStateQuerier.GetLedgerStatus();
+        var topOfLedgerStateVersionTask = _ledgerStateQuerier.GetTopOfLedgerStateVersion();
 
         var nodesStateVersions = (await Task.WhenAll(enabledCoreNodeStateVersionLookupTasks))
             .ToDictionary(p => p.CoreApiNode, p => (p.CoreApiNode, p.StateVersion, p.Exception));
 
-        var topOfLedgerStateVersion = (await ledgerStateVersionTask).TopOfLedgerStateVersion;
+        var topOfLedgerStateVersion = await topOfLedgerStateVersionTask;
 
         var coreNodesByStatus = nodesStateVersions
             .Select(kv => (CoreApiNode: kv.Key, Status: DetermineNodeStatus(kv.Value, topOfLedgerStateVersion)))
