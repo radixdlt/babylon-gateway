@@ -50,7 +50,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                 {
                     // GET/POST/PUT/DELETE
                     var openApiOpCode = op.Key.ToString();
-                   
+
                     // check if the route exists in the code
                     var endpoint = methodInfos.Where(m => m.CustomAttributes
                         .FirstOrDefault(ca =>
