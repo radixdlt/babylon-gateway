@@ -103,8 +103,6 @@ public class GatewayApiStartup
                 });
             });
 
-        services.AddDbContext<ReadOnlyDbContext>(options => options.UseInMemoryDatabase("InMemoryReadOnlyDb"));
-
         services
             .AddControllers()
             .AddControllersAsServices()

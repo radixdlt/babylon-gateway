@@ -21,11 +21,6 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
                 services.Remove(descriptor);
 
-                services.AddDbContext<ReadOnlyDbContext>(options =>
-                {
-                    options.UseInMemoryDatabase("InMemoryReadOnlyDb");
-                });
-
                 var sp = services.BuildServiceProvider();
 
                 using (var scope = sp.CreateScope())
