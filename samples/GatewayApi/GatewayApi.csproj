@@ -21,4 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
 </Project>
