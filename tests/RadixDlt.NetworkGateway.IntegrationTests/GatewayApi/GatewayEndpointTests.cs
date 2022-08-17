@@ -48,7 +48,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 
         // Assert
         response.LedgerState.Should().NotBeNull();
-        response.LedgerState.Network = InMemoryDb.NETWORK_NAME;
+        response.LedgerState.Network = TestApplicationFactory.NETWORK_NAME;
         response.LedgerState._Version.Should().Be(1);
 
         response.Transactions.Count.Should().BeGreaterThan(0);
