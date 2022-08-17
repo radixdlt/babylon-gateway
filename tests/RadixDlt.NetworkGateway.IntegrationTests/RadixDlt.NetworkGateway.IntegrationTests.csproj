@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FluentAssertions" />
@@ -10,7 +10,6 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Microsoft.OpenApi" />
         <PackageReference Include="Microsoft.OpenApi.Readers" />
-        <PackageReference Include="Moq" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,8 +23,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\samples\GatewayApi\GatewayApi.csproj" />
-      <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
       <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
       <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
     </ItemGroup>
+
 </Project>

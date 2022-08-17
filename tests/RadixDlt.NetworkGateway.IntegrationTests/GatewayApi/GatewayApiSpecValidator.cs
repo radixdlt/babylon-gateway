@@ -1,8 +1,5 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
-using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -10,7 +7,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 {
     internal static class GatewayApiSpecValidator
     {
-        private static readonly string _openApiFileName = "../../../../../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml";
+        private static readonly string _openApiFileName = "../../../../../gateway-api-spec.yaml";
 
         private static OpenApiDocument? _openApiDocument = null;
 
@@ -53,11 +50,10 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                 {
                     // GET/POST/PUT/DELETE
                     var openApiOpCode = op.Key.ToString();
-
+                   
                     // check if the route exists in the code
                     var endpoint = methodInfos.Where(m => m.CustomAttributes
-                        .FirstOrDefault(
-                            ca =>
+                        .FirstOrDefault(ca =>
                                 ca.AttributeType.Name == $"Http{openApiOpCode}Attribute" &&
                                 ca.ConstructorArguments[0].ArgumentType == typeof(string) &&
                                 openApiItemUrl.EndsWith(ca.ConstructorArguments[0].Value.ToString())) != null).ToList();
