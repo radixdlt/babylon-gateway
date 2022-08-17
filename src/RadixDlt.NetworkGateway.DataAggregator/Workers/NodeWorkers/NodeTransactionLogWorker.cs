@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -93,30 +92,12 @@ public class NodeTransactionLogWorker : NodeWorker
             delayAfterErrorExponentialRate: 2,
             maxDelayAfterError: TimeSpan.FromSeconds(30));
 
-    private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
-        .CreateCounter(
-            "ng_node_fetch_transaction_batch_loop_error_total",
-            "Number of fetch loop errors that failed.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Histogram _totalFetchTimeSecondsUnlabeled = Metrics
-        .CreateHistogram(
-            "ng_node_fetch_transaction_batch_time_seconds",
-            "Total time to fetch a batch of transactions.",
-            new HistogramConfiguration
-            {
-                LabelNames = new[] { "node" },
-            }
-        );
-
     /* Dependencies */
     private readonly ILogger<NodeTransactionLogWorker> _logger;
     private readonly ILedgerConfirmationService _ledgerConfirmationService;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IServiceProvider _services;
-    private readonly Counter.Child _failedFetchLoops;
-    private readonly Histogram.Child _totalFetchTimeSeconds;
+    private readonly INodeTransactionLogWorkerObserver? _observer;
 
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
@@ -127,16 +108,17 @@ public class NodeTransactionLogWorker : NodeWorker
         ILogger<NodeTransactionLogWorker> logger,
         ILedgerConfirmationService ledgerConfirmationService,
         INodeConfigProvider nodeConfigProvider,
-        IServiceProvider services
+        IServiceProvider services,
+        INodeTransactionLogWorkerObserver? observer,
+        INodeWorkerObserver? nodeWorkerObserver
     )
-        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObserver)
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
         _nodeConfigProvider = nodeConfigProvider;
         _services = services;
-        _failedFetchLoops = _failedFetchLoopsUnlabeled.WithLabels(NodeName);
-        _totalFetchTimeSeconds = _totalFetchTimeSecondsUnlabeled.WithLabels(NodeName);
+        _observer = observer;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -146,7 +128,19 @@ public class NodeTransactionLogWorker : NodeWorker
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _failedFetchLoops.CountExceptionsAsync(() => FetchAndSubmitTransactions(cancellationToken));
+        try
+        {
+            await FetchAndSubmitTransactions(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            if (_observer != null)
+            {
+                await _observer.DoWorkFailed(NodeName, ex);
+            }
+
+            throw;
+        }
     }
 
     private async Task FetchAndSubmitTransactions(CancellationToken cancellationToken)
@@ -216,7 +210,10 @@ public class NodeTransactionLogWorker : NodeWorker
             () => FetchTransactionsOrEmptyList(fromStateVersion, transactionsToPull, cancellationToken)
         );
 
-        _totalFetchTimeSeconds.Observe(fetchTransactionsMs / 1000D);
+        if (_observer != null)
+        {
+            await _observer.TransactionsFetched(NodeName, transactions, fetchTransactionsMs);
+        }
 
         if (transactions.Count > 0)
         {

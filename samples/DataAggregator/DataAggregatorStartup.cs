@@ -69,6 +69,7 @@ using Microsoft.Extensions.Logging;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator;
+using RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator;
 
 namespace DataAggregator;
 
@@ -85,7 +86,8 @@ public class DataAggregatorStartup
     {
         services
             .AddNetworkGatewayDataAggregator()
-            .UsePostgresPersistence();
+            .UsePostgresPersistence()
+            .UsePrometheusMetrics();
 
         services
             .AddEndpointsApiExplorer();

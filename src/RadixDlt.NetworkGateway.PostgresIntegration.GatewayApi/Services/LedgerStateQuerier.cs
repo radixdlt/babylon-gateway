@@ -66,7 +66,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
@@ -82,30 +81,27 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public class LedgerStateQuerier : ILedgerStateQuerier
 {
-    private static readonly Gauge _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds = Metrics
-        .CreateGauge(
-            "ng_gateway_ledger_tip_round_timestamp_gateway_api_clock_lag_at_last_request_seconds",
-            "The delay measured between the Gateway API clock and the round timestamp at last request to the top of the ledger (in seconds, to millisecond precision)."
-        );
-
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
+    private readonly ILedgerStateQuerierObserver? _observer;
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
         ReadOnlyDbContext dbContext,
         INetworkConfigurationProvider networkConfigurationProvider,
         IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
-        IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor)
+        IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor,
+        ILedgerStateQuerierObserver? observer)
     {
         _logger = logger;
         _dbContext = dbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
         _endpointOptionsMonitor = endpointOptionsMonitor;
         _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
+        _observer = observer;
     }
 
     public async Task<GatewayResponse> GetGatewayState()
@@ -141,7 +137,10 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
-        _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
+        if (_observer != null)
+        {
+            await _observer.LedgerRoundTimestampClockSkew(timestampDiff);
+        }
 
         if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds)
         {
@@ -198,7 +197,10 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
-        _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(timestampDiff.TotalSeconds);
+        if (_observer != null)
+        {
+            await _observer.LedgerRoundTimestampClockSkew(timestampDiff);
+        }
 
         if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds)
         {

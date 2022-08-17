@@ -85,9 +85,10 @@ public class LedgerConfirmationWorker : GlobalWorker
 
     public LedgerConfirmationWorker(
         ILogger<LedgerConfirmationWorker> logger,
-        ILedgerConfirmationService ledgerConfirmationService
+        ILedgerConfirmationService ledgerConfirmationService,
+        IGlobalWorkerObserver? observer
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30), observer)
     {
         _ledgerConfirmationService = ledgerConfirmationService;
     }

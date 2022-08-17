@@ -67,7 +67,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
@@ -92,61 +91,6 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 {
     private static readonly LogLimiter _emptyResubmissionQueueLogLimiter = new(TimeSpan.FromSeconds(60), LogLevel.Information, LogLevel.Debug);
 
-    private static readonly Gauge _resubmissionQueueSize = Metrics
-        .CreateGauge(
-            "ng_db_mempool_transactions_needing_resubmission_total",
-            "Current number of transactions which have dropped out of mempools and need resubmitting."
-        );
-
-    private static readonly Counter _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_resolved_but_unknown_status_count",
-            "Number of mempool transactions marked as resolved but with an as-yet-unknown status during resubmission"
-        );
-
-    private static readonly Counter _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_failed_during_resubmission_count",
-            "Number of mempool transactions marked as failed due to error during resubmission"
-        );
-
-    private static readonly Counter _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_assumed_in_node_mempool_after_resubmission_count",
-            "Number of mempool transactions marked as InNodeMempool after resubmission"
-        );
-
-    private static readonly Counter _dbTransactionsMarkedAsFailedForTimeoutCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_as_failed_for_timeout_count",
-            "Number of mempool transactions in the DB marked as failed due to timeout as they won't be resubmitted"
-        );
-
-    private static readonly Counter _transactionResubmissionAttemptCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_resubmission_attempt_count",
-            "Number of transaction resubmission attempts"
-        );
-
-    private static readonly Counter _transactionResubmissionSuccessCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_resubmission_success_count",
-            "Number of transaction resubmission successes"
-        );
-
-    private static readonly Counter _transactionResubmissionErrorCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_resubmission_error_count",
-            "Number of transaction resubmission errors"
-        );
-
-    private static readonly Counter _transactionResubmissionResolutionByResultCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_resubmission_resolution_count",
-            "Number of various resolutions of transaction resubmissions",
-            new CounterConfiguration { LabelNames = new[] { "result" } }
-        );
-
     private readonly IServiceProvider _services;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
@@ -154,6 +98,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolResubmissionService> _logger;
+    private readonly IMempoolResubmissionServiceObserver? _observer;
 
     public MempoolResubmissionService(
         IServiceProvider services,
@@ -162,8 +107,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
         ISystemStatusService systemStatusService,
-        ILogger<MempoolResubmissionService> logger
-    )
+        ILogger<MempoolResubmissionService> logger,
+        IMempoolResubmissionServiceObserver? observer)
     {
         _services = services;
         _dbContextFactory = dbContextFactory;
@@ -172,6 +117,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         _networkConfigurationProvider = networkConfigurationProvider;
         _systemStatusService = systemStatusService;
         _logger = logger;
+        _observer = observer;
     }
 
     public async Task RunBatchOfResubmissions(CancellationToken token = default)
@@ -226,7 +172,10 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             : await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
                 .CountAsync(token);
 
-        _resubmissionQueueSize.Set(totalTransactionsNeedingResubmission);
+        if (_observer != null)
+        {
+            await _observer.TransactionsSelected(totalTransactionsNeedingResubmission);
+        }
 
         if (totalTransactionsNeedingResubmission == 0)
         {
@@ -268,13 +217,16 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             if (canResubmit)
             {
                 var nodeToSubmitTo = GetRandomCoreApi();
-                _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount.Inc();
+
+                _observer?.TransactionMarkedAsAssumedSuccessfullySubmittedToNode();
+
                 transaction.MarkAsAssumedSuccessfullySubmittedToNode(nodeToSubmitTo.Name, submittedAt);
                 transactionsToResubmitWithNodes.Add(new MempoolTransactionWithChosenNode(transaction, nodeToSubmitTo));
             }
             else
             {
-                _dbTransactionsMarkedAsFailedForTimeoutCount.Inc();
+                _observer?.TransactionMarkedAsFailed();
+
                 transaction.MarkAsFailed(
                     MempoolTransactionFailureReason.Timeout,
                     "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
@@ -344,12 +296,20 @@ public class MempoolResubmissionService : IMempoolResubmissionService
                 // transaction itself having already hit the ledger! Let's just assume it submitted correctly and
                 // resubmit.
 
-                _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount.Inc();
+                if (_observer != null)
+                {
+                    await _observer.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode();
+                }
+
                 transaction.MarkAsResolvedButUnknownAfterSubmittedToNode(nodeName, submittedAt);
             }
             else
             {
-                _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount.Inc();
+                if (_observer != null)
+                {
+                    await _observer.TransactionMarkedAsFailedAfterSubmittedToNode();
+                }
+
                 transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt);
             }
         }
@@ -371,16 +331,22 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     // NB - The error handling here should mirror the resubmission in ConstructionAndSubmissionService
     private async Task<SubmissionResult> Resubmit(MempoolTransactionWithChosenNode transactionWithNode, CancellationToken cancellationToken)
     {
-        _transactionResubmissionAttemptCount.Inc();
         var transaction = transactionWithNode.MempoolTransaction;
         var chosenNode = transactionWithNode.CoreApiNode;
+        var signedTransaction = transaction.Payload.ToHex();
+
+        if (_observer != null)
+        {
+            await _observer.PreResubmit(signedTransaction);
+        }
+
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
         var coreApiProvider = nodeScope.ServiceProvider.GetRequiredService<ICoreApiProvider>();
 
         var submitRequest = new ConstructionSubmitRequest(
             _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-            transaction.Payload.ToHex()
+            signedTransaction
         );
 
         try
@@ -388,48 +354,71 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             var result = await CoreApiErrorWrapper.ExtractCoreApiErrors(async () => await
                 coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(submitRequest, cancellationToken)
             );
-            _transactionResubmissionSuccessCount.Inc();
+
+            if (_observer != null)
+            {
+                await _observer.PostResubmit(signedTransaction);
+            }
+
             if (result.Duplicate)
             {
-                _transactionResubmissionResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+                if (_observer != null)
+                {
+                    await _observer.PostResubmitDuplicate(signedTransaction);
+                }
             }
             else
             {
-                _transactionResubmissionResolutionByResultCount.WithLabels("success").Inc();
+                if (_observer != null)
+                {
+                    await _observer.PostResubmitSucceeded(signedTransaction);
+                }
             }
 
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
-            _transactionResubmissionErrorCount.Inc();
-            _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
+            if (_observer != null)
+            {
+                await _observer.ResubmitFailedSubstateNotFound(signedTransaction, ex);
+            }
+
             _logger.LogDebug(
                 "Dropping transaction because a substate identifier it used is missing or already downed - possibly it's already been committed. Substate Identifier: {Substate}",
                 ex.Error.SubstateIdentifierNotFound.Identifier
             );
-            var failureExplanation = "Double spend on resubmission";
-            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.DoubleSpend, failureExplanation, chosenNode.Name);
+
+            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.DoubleSpend, "Double spend on resubmission", chosenNode.Name);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
-            _transactionResubmissionErrorCount.Inc();
-            _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
-            var failureExplanation = $"Core API Exception: {ex.Error.GetType().Name} on resubmission";
-            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, failureExplanation, chosenNode.Name);
+            if (_observer != null)
+            {
+                await _observer.ResubmitFailedPermanently(signedTransaction, ex);
+            }
+
+            return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, $"Core API Exception: {ex.Error.GetType().Name} on resubmission", chosenNode.Name);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            _transactionResubmissionErrorCount.Inc();
-            _transactionResubmissionResolutionByResultCount.WithLabels("request_timeout").Inc();
+            if (_observer != null)
+            {
+                await _observer.ResubmitFailedTimeout(signedTransaction, ex);
+            }
+
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Unsure of what the problem is -- it could be that the connection died or there was an internal server error
             // We have to assume the submission may have succeeded and wait for resubmission if not.
-            _transactionResubmissionErrorCount.Inc();
-            _transactionResubmissionResolutionByResultCount.WithLabels("unknown_error").Inc();
+
+            if (_observer != null)
+            {
+                await _observer.ResubmitFailedUnknown(signedTransaction, ex);
+            }
+
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
     }

@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -94,32 +93,12 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             delayAfterErrorExponentialRate: 2,
             maxDelayAfterError: TimeSpan.FromSeconds(30));
 
-    private static readonly Gauge _mempoolSizeUnScoped = Metrics
-        .CreateGauge(
-            "ng_node_mempool_size_total",
-            "Current size of node mempool.",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Counter _mempoolItemsAddedUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_mempool_added_count",
-            "Transactions added to node mempool.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Counter _mempoolItemsRemovedUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_mempool_removed_count",
-            "Transactions removed from node mempool.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private readonly ILogger<NodeMempoolTransactionIdsReaderWorker> _logger;
     private readonly IServiceProvider _services;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
+    private readonly INodeMempoolTransactionIdsReaderWorkerObserver? _observer;
 
     private HashSet<byte[]> _latestTransactionHashes = new(ByteArrayEqualityComparer.Default);
 
@@ -130,15 +109,17 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         IServiceProvider services,
         INetworkConfigurationProvider networkConfigurationProvider,
         IMempoolTrackerService mempoolTrackerService,
-        INodeConfigProvider nodeConfig
-    )
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        INodeConfigProvider nodeConfig,
+        INodeMempoolTransactionIdsReaderWorkerObserver? observer,
+        INodeWorkerObserver? nodeWorkerObserver)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObserver)
     {
         _logger = logger;
         _services = services;
         _networkConfigurationProvider = networkConfigurationProvider;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
+        _observer = observer;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -165,7 +146,10 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             ))
         );
 
-        _mempoolSizeUnScoped.WithLabels(_nodeConfig.CoreApiNode.Name).Set(mempoolContents.TransactionIdentifiers.Count);
+        if (_observer != null)
+        {
+            await _observer.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolContents.TransactionIdentifiers.Count);
+        }
 
         var latestMempoolHashes = mempoolContents.TransactionIdentifiers
             .Select(ti => ti.Hash.ConvertFromHex())
@@ -182,8 +166,10 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             .ExceptInSet(previousMempoolHashes)
             .Count();
 
-        _mempoolItemsAddedUnScoped.WithLabels(_nodeConfig.CoreApiNode.Name).Inc(transactionIdsAddedCount);
-        _mempoolItemsRemovedUnScoped.WithLabels(_nodeConfig.CoreApiNode.Name).Inc(transactionIdsRemovedCount);
+        if (_observer != null)
+        {
+            await _observer.MempoolItemsChange(_nodeConfig.CoreApiNode.Name, transactionIdsAddedCount, transactionIdsRemovedCount);
+        }
 
         if (transactionIdsAddedCount > 0 || transactionIdsRemovedCount > 0)
         {

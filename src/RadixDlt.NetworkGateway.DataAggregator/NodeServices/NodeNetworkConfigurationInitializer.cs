@@ -87,9 +87,10 @@ public class NodeNetworkConfigurationInitializer : NodeInitializer
         IOptionsMonitor<NetworkOptions> networkGatewayDataAggregatorOptionsMonitor,
         INetworkConfigurationReader networkConfigurationReader,
         INetworkConfigurationProvider networkConfigurationProvider,
-        ILogger<NodeNetworkConfigurationInitializer> logger
+        ILogger<NodeNetworkConfigurationInitializer> logger,
+        INodeInitializerObserver? observer
     )
-        : base(nodeConfigProvider.CoreApiNode.Name)
+        : base(nodeConfigProvider.CoreApiNode.Name, observer)
     {
         _networkGatewayDataAggregatorOptionsMonitor = networkGatewayDataAggregatorOptionsMonitor;
         _networkConfigurationReader = networkConfigurationReader;

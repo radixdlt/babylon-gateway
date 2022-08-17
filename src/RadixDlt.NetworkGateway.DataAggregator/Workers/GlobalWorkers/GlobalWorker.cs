@@ -63,8 +63,6 @@
  */
 
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Workers;
 using System;
 
@@ -72,28 +70,23 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
 public abstract class GlobalWorker : LoopedWorkerBase
 {
-    private static readonly Counter _globalWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_global_error_count",
-            "Number of errors in global workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
-        );
+    private readonly IGlobalWorkerObserver? _observer;
 
-    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
+    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs, IGlobalWorkerObserver? observer)
         // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
         // crash the application so that it can be automatically restarted.
         : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
+        _observer = observer;
     }
 
     protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+        _observer?.TrackNonFaultingExceptionInWorkLoop(GetType(), ex);
     }
 
     protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        _observer?.TrackWorkerFaultedException(GetType(), ex, isStopRequested);
     }
 }

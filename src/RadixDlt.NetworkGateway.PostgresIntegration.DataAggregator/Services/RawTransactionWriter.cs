@@ -64,14 +64,11 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.Common.Utilities;
-using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -88,23 +85,13 @@ public interface IRawTransactionWriter
 
 public class RawTransactionWriter : IRawTransactionWriter
 {
-    private static readonly Counter _transactionsMarkedCommittedCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_committed_count",
-            "Number of mempool transactions which are marked committed"
-        );
-
-    private static readonly Counter _transactionsMarkedCommittedWhichWereFailedCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_committed_which_were_failed_count",
-            "Number of mempool transactions which are marked committed which were previously marked as failed"
-        );
-
     private readonly ILogger<RawTransactionWriter> _logger;
+    private readonly IRawTransactionWriterObserver? _observer;
 
-    public RawTransactionWriter(ILogger<RawTransactionWriter> logger)
+    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IRawTransactionWriterObserver? observer)
     {
         _logger = logger;
+        _observer = observer;
     }
 
     public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
@@ -139,7 +126,11 @@ public class RawTransactionWriter : IRawTransactionWriter
         {
             if (mempoolTransaction.Status == MempoolTransactionStatus.Failed)
             {
-                _transactionsMarkedCommittedWhichWereFailedCount.Inc();
+                if (_observer != null)
+                {
+                    await _observer.TransactionsMarkedCommittedWhichWasFailed();
+                }
+
                 _logger.LogError(
                     "Transaction with id {TransactionId} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
                     mempoolTransaction.PayloadHash.ToHex(),
@@ -163,7 +154,10 @@ public class RawTransactionWriter : IRawTransactionWriter
         // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
         var result = await context.SaveChangesAsync(token);
 
-        _transactionsMarkedCommittedCount.Inc(toUpdate.Count);
+        if (_observer != null)
+        {
+            await _observer.TransactionsMarkedCommittedCount(toUpdate.Count);
+        }
 
         return result;
     }

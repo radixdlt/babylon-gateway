@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -89,45 +88,24 @@ public class MempoolTrackerService : IMempoolTrackerService
 {
     private static readonly LogLimiter _combineMempoolsInfoLogLimiter = new(TimeSpan.FromSeconds(10), LogLevel.Information, LogLevel.Debug);
 
-    private static readonly Gauge _combinedMempoolCurrentSizeTotal = Metrics
-        .CreateGauge(
-            "ng_node_mempool_combined_current_size_total",
-            "Number of transactions seen currently in any node mempool."
-        );
-
-    private static readonly Counter _dbTransactionsAddedDueToNodeMempoolAppearanceCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_added_from_node_mempool_count",
-            "Number of mempool transactions added to the DB due to appearing in a node mempool"
-        );
-
-    private static readonly Counter _dbTransactionsMarkedAsMissingCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_as_missing_count",
-            "Number of mempool transactions in the DB marked as missing"
-        );
-
-    private static readonly Counter _dbTransactionsReappearedCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_reappeared_count",
-            "Number of mempool transactions in the DB which were marked as missing but now appear in a mempool again"
-        );
-
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ILogger<MempoolTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
     private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
+    private readonly IMempoolTrackerServiceObserver? _observer;
 
     public MempoolTrackerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
-        ILogger<MempoolTrackerService> logger
-    )
+        ILogger<MempoolTrackerService> logger,
+        IMempoolTrackerServiceObserver? observer)
     {
         _dbContextFactory = dbContextFactory;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _logger = logger;
+        _observer = observer;
+
         _recentFullTransactionsFetched = new ConcurrentLruCache<byte[], FullTransactionData>(
             mempoolOptionsMonitor.CurrentValue.RecentFetchedUnknownTransactionsCacheSize,
             ByteArrayEqualityComparer.Default
@@ -244,7 +222,8 @@ public class MempoolTrackerService : IMempoolTrackerService
             combinedMempoolByLatestSeen.Count,
             nodeMempoolsToConsider.Select(kvp => kvp.Key).Humanize()
         );
-        _combinedMempoolCurrentSizeTotal.Set(combinedMempoolByLatestSeen.Count);
+
+        _observer?.CombinedMempoolCurrentSizeCount(combinedMempoolByLatestSeen.Count);
 
         return combinedMempoolByLatestSeen;
     }
@@ -274,7 +253,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         }
 
         // If save changes partially succeeds, we might double-count these metrics
-        _dbTransactionsReappearedCount.Inc(reappearedTransactions.Count);
+        _observer?.TransactionsReappearedCount(reappearedTransactions.Count);
 
         var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
             async () => await dbContext.SaveChangesAsync(token)
@@ -350,7 +329,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         dbContext.MempoolTransactions.AddRange(newDbMempoolTransactions);
 
         // If save changes partially succeeds, we might double-count these metrics
-        _dbTransactionsAddedDueToNodeMempoolAppearanceCount.Inc(transactionsToAdd.Count);
+        _observer?.TransactionsAddedDueToNodeMempoolAppearanceCount(transactionsToAdd.Count);
 
         var (_, dbUpdateMs) = await CodeStopwatch.TimeInMs(
             async () => await dbContext.SaveChangesAsync(token)
@@ -397,7 +376,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
         foreach (var mempoolItem in previouslyTrackedTransactionsNowMissingFromNodeMempools)
         {
-            _dbTransactionsMarkedAsMissingCount.Inc();
+            _observer?.TransactionsMarkedAsMissing();
             mempoolItem.MarkAsMissing();
         }
 

@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using Prometheus;
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -78,29 +78,34 @@ public interface INetworkConfigurationReader
 
 public class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private static readonly Counter _failedNetworkConfigurationFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_fetch_network_configuration_error_count",
-            "Number of errors fetching the node's network configuration.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private readonly NetworkApi _networkApi;
-    private readonly Counter.Child _failedNetworkConfigurationFetchCounter;
+    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly INetworkConfigurationReaderObserver? _observer;
 
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, INetworkConfigurationReaderObserver? observer)
     {
+        _observer = observer;
+        _nodeConfigProvider = nodeConfigProvider;
         _networkApi = coreApiProvider.NetworkApi;
-        _failedNetworkConfigurationFetchCounter = _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return await _failedNetworkConfigurationFetchCounter.CountExceptionsAsync(() =>
-            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+        try
+        {
+            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _networkApi
                     .NetworkConfigurationPostAsync(new object(), token)
-            )
-        );
+            );
+        }
+        catch (Exception ex)
+        {
+            if (_observer != null)
+            {
+                await _observer.GetNetworkConfigurationFailed(_nodeConfigProvider.CoreApiNode.Name, ex);
+            }
+
+            throw;
+        }
     }
 }

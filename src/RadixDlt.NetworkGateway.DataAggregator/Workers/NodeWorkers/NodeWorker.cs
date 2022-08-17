@@ -63,8 +63,6 @@
  */
 
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Workers;
 using System;
 
@@ -83,20 +81,15 @@ public interface INodeWorker : ILoopedWorkerBase
 /// </summary>
 public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 {
-    private static readonly Counter _nodeWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_node_error_count",
-            "Number of errors in node workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
-        );
-
+    private readonly INodeWorkerObserver? _observer;
     private readonly string _nodeName;
 
-    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
+    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs, INodeWorkerObserver? observer)
         // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
         : base(logger, BehaviourOnFault.Nothing, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
         _nodeName = nodeName;
+        _observer = observer;
     }
 
     public abstract bool IsEnabledByNodeConfiguration();
@@ -108,12 +101,11 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 
     protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+        _observer?.TrackNonFaultingExceptionInWorkLoop(GetType(), _nodeName, ex);
     }
 
     protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        _observer?.TrackWorkerFaultedException(GetType(), _nodeName, ex, isStopRequested);
     }
 }

@@ -7,7 +7,6 @@
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="NodaTime" />
         <PackageReference Include="NodaTime.Serialization.JsonNet" />
-        <PackageReference Include="prometheus-net" />
     </ItemGroup>
 
     <ItemGroup>

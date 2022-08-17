@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Logging;
 using NodaTime;
-using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -93,138 +92,113 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 {
     private static readonly int MaximumMessageLengthInBytes = 255;
 
-    /* Metrics */
-    private static readonly Counter _transactionBuildRequestCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_build_request_count",
-            "Number of transaction build requests"
-        );
-
-    private static readonly Counter _transactionBuildSuccessCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_build_success_count",
-            "Number of transaction build successes"
-        );
-
-    private static readonly Counter _transactionBuildErrorCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_build_error_count",
-            "Number of transaction build errors"
-        );
-
-    private static readonly Counter _transactionFinalizeRequestCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_finalize_request_count",
-            "Number of transaction finalize requests"
-        );
-
-    private static readonly Counter _transactionFinalizeSuccessCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_finalize_success_count",
-            "Number of transaction finalize successes"
-        );
-
-    private static readonly Counter _transactionFinalizeErrorCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_finalize_error_count",
-            "Number of transaction finalize errors"
-        );
-
-    private static readonly Counter _transactionSubmitRequestCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_submission_request_count",
-            "Number of transaction submission requests (including as part of a finalize request)"
-        );
-
-    private static readonly Counter _transactionSubmitSuccessCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_submission_success_count",
-            "Number of transaction submission successes (including as part of a finalize request)"
-        );
-
-    private static readonly Counter _transactionSubmitErrorCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_submission_error_count",
-            "Number of transaction submission errors (including as part of a finalize request)"
-        );
-
-    private static readonly Counter _transactionSubmitResolutionByResultCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_submission_resolution_count",
-            "Number of various resolutions at transaction submission time",
-            new CounterConfiguration { LabelNames = new[] { "result" } }
-        );
-
     /* Dependencies */
     private readonly IValidations _validations;
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly ILogger<ConstructionAndSubmissionService> _logger;
+    private readonly IConstructionAndSubmissionServiceObserver? _observer;
 
     public ConstructionAndSubmissionService(
         IValidations validations,
         ICoreApiHandler coreApiHandler,
         INetworkConfigurationProvider networkConfigurationProvider,
         ISubmissionTrackingService submissionTrackingService,
-        ILogger<ConstructionAndSubmissionService> logger
-    )
+        ILogger<ConstructionAndSubmissionService> logger,
+        IConstructionAndSubmissionServiceObserver? observer = null)
     {
         _validations = validations;
         _coreApiHandler = coreApiHandler;
         _networkConfigurationProvider = networkConfigurationProvider;
         _submissionTrackingService = submissionTrackingService;
         _logger = logger;
+        _observer = observer;
     }
 
     public async Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
     {
-        _transactionBuildRequestCount.Inc();
+        if (_observer != null)
+        {
+            await _observer.PreHandleBuildRequest(request, ledgerState);
+        }
+
         try
         {
             var response = await HandleBuildAndCreateResponse(request, ledgerState);
-            _transactionBuildSuccessCount.Inc();
+
+            if (_observer != null)
+            {
+                await _observer.PostHandleBuildRequest(request, ledgerState, response);
+            }
+
             return response;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _transactionBuildErrorCount.Inc();
+            if (_observer != null)
+            {
+                await _observer.HandleBuildRequestFailed(request, ledgerState, ex);
+            }
+
             throw;
         }
     }
 
-    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(
-        Gateway.TransactionFinalizeRequest request
-    )
+    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request)
     {
-        _transactionFinalizeRequestCount.Inc();
+        if (_observer != null)
+        {
+            await _observer.PreHandleFinalizeRequest(request);
+        }
+
         try
         {
             var response = await HandleFinalizeAndCreateResponse(request);
-            _transactionFinalizeSuccessCount.Inc();
+
+            if (_observer != null)
+            {
+                await _observer.PostHandleFinalizeRequest(request, response);
+            }
+
             return response;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _transactionFinalizeErrorCount.Inc();
+            if (_observer != null)
+            {
+                await _observer.HandleFinalizeRequestFailed(request, ex);
+            }
+
             throw;
         }
     }
 
-    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(
-        Gateway.TransactionSubmitRequest request
-    )
+    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request)
     {
-        _transactionSubmitRequestCount.Inc();
+        if (_observer != null)
+        {
+            await _observer.PreHandleSubmitRequest(request);
+        }
+
         try
         {
             var response = await HandleSubmitAndCreateResponse(request);
-            _transactionSubmitSuccessCount.Inc();
+
+            if (_observer != null)
+            {
+                await _observer.PostHandleSubmitRequest(request, response);
+            }
+
             return response;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _transactionSubmitErrorCount.Inc();
+            if (_observer != null)
+            {
+                await _observer.HandleSubmitRequestFailed(request, ex);
+            }
+
             throw;
         }
     }
@@ -357,17 +331,29 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
+            if (_observer != null)
+            {
+                await _observer.ParseTransactionFailedSubstateNotFound(signedTransaction, ex);
+            }
+
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
+            if (_observer != null)
+            {
+                await _observer.ParseTransactionFailedInvalidTransaction(signedTransaction, ex);
+            }
+
             throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_unknown_error").Inc();
+            if (_observer != null)
+            {
+                await _observer.ParseTransactionFailedUnknown(signedTransaction, ex);
+            }
+
             throw;
         }
     }
@@ -393,7 +379,11 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         if (mempoolTrackGuidance.TransactionAlreadyFailedReason != null)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("already_failed").Inc();
+            if (_observer != null)
+            {
+                await _observer.SubmissionAlreadyFailed(signedTransaction, mempoolTrackGuidance);
+            }
+
             throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
                 signedTransaction.AsString,
                 mempoolTrackGuidance.TransactionAlreadyFailedReason.Value
@@ -402,7 +392,11 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         if (!mempoolTrackGuidance.ShouldSubmitToNode)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("already_submitted").Inc();
+            if (_observer != null)
+            {
+                await _observer.SubmissionAlreadySubmitted(signedTransaction, mempoolTrackGuidance);
+            }
+
             return;
         }
 
@@ -418,47 +412,73 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
             if (result.Duplicate)
             {
-                _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+                if (_observer != null)
+                {
+                    await _observer.SubmissionDuplicate(signedTransaction, result);
+                }
             }
             else
             {
-                _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
+                if (_observer != null)
+                {
+                    await _observer.SubmissionSucceeded(signedTransaction, result);
+                }
             }
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
+            if (_observer != null)
+            {
+                await _observer.HandleSubmissionFailedSubstateNotFound(signedTransaction, ex);
+            }
+
             await _submissionTrackingService.MarkAsFailed(
                 transactionIdentifierHash,
                 MempoolTransactionFailureReason.DoubleSpend,
                 "A substate identifier the transaction uses is missing or already downed"
             );
+
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("invalid_transaction").Inc();
+            if (_observer != null)
+            {
+                await _observer.HandleSubmissionFailedInvalidTransaction(signedTransaction, ex);
+            }
+
             await _submissionTrackingService.MarkAsFailed(
                 transactionIdentifierHash,
                 MempoolTransactionFailureReason.Unknown,
                 $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission"
             );
+
             throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
             // Any other known Core exception which can't result in the transaction being submitted
-            _transactionSubmitResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
+
+            if (_observer != null)
+            {
+                await _observer.HandleSubmissionFailedPermanently(signedTransaction, ex);
+            }
+
             await _submissionTrackingService.MarkAsFailed(
                 transactionIdentifierHash,
                 MempoolTransactionFailureReason.Unknown,
                 $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission"
             );
+
             throw;
         }
         catch (OperationCanceledException ex)
         {
-            _transactionSubmitResolutionByResultCount.WithLabels("request_timeout").Inc();
+            if (_observer != null)
+            {
+                await _observer.HandleSubmissionFailedTimeout(signedTransaction, ex);
+            }
+
             _logger.LogWarning(
                 ex,
                 "Request timeout submitting transaction with hash {TransactionHash}",
@@ -471,7 +491,12 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             // In theory, the transaction could have been submitted -- so we return success and
             // if it wasn't submitted successfully, it'll be retried automatically by the resubmission service in
             // any case.
-            _transactionSubmitResolutionByResultCount.WithLabels("unknown_error").Inc();
+
+            if (_observer != null)
+            {
+                await _observer.HandleSubmissionFailedUnknown(signedTransaction, ex);
+            }
+
             _logger.LogWarning(
                 ex,
                 "Unknown error submitting transaction with hash {TransactionHash}",

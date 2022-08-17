@@ -69,6 +69,7 @@ using Microsoft.Extensions.Logging;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
+using RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi;
 
 namespace GatewayApi;
 
@@ -87,7 +88,8 @@ public class GatewayApiStartup
     {
         services
             .AddNetworkGatewayApi()
-            .UsePostgresPersistence();
+            .UsePostgresPersistence()
+            .UsePrometheusMetrics();
 
         if (_enableSwagger)
         {

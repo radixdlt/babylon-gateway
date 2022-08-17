@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -79,23 +78,13 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQuerier
 {
-    private static readonly Counter _dbMempoolTransactionsAddedDueToSubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_added_from_gateway_submission_count",
-            "Number of mempool transactions added to the DB due to being submitted to the gateway"
-        );
-
-    private static readonly Counter _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_transactions_marked_failed_from_initial_submission_count",
-            "Number of mempool transactions marked as failed during initial submission to a node"
-        );
-
     private readonly ReadWriteDbContext _dbContext;
+    private readonly ISubmissionTrackingServiceObserver? _observer;
 
-    public SubmissionTrackingService(ReadWriteDbContext dbContext)
+    public SubmissionTrackingService(ReadWriteDbContext dbContext, ISubmissionTrackingServiceObserver? observer)
     {
         _dbContext = dbContext;
+        _observer = observer;
     }
 
     public async Task<MempoolTrackGuidance> TrackInitialSubmission(
@@ -139,7 +128,12 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
         try
         {
             await _dbContext.SaveChangesAsync();
-            _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
+
+            if (_observer != null)
+            {
+                await _observer.PostMempoolTransactionAdded();
+            }
+
             return new MempoolTrackGuidance(ShouldSubmitToNode: true);
         }
         catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
@@ -161,7 +155,11 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
             throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
         }
 
-        _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount.Inc();
+        if (_observer != null)
+        {
+            await _observer.PostMempoolTransactionMarkedAsFailed();
+        }
+
         mempoolTransaction.MarkAsFailed(failureReason, failureExplanation);
 
         await _dbContext.SaveChangesAsync();

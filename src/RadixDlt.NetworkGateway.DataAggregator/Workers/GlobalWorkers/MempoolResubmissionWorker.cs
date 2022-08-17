@@ -85,9 +85,10 @@ public class MempoolResubmissionWorker : GlobalWorker
 
     public MempoolResubmissionWorker(
         ILogger<MempoolResubmissionWorker> logger,
-        IMempoolResubmissionService mempoolResubmissionService
+        IMempoolResubmissionService mempoolResubmissionService,
+        IGlobalWorkerObserver? observer
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observer)
     {
         _mempoolResubmissionService = mempoolResubmissionService;
     }

@@ -90,9 +90,10 @@ public class MempoolTrackerWorker : GlobalWorker
 
     public MempoolTrackerWorker(
         ILogger<MempoolTrackerWorker> logger,
-        IMempoolTrackerService mempoolTrackerService
+        IMempoolTrackerService mempoolTrackerService,
+        IGlobalWorkerObserver? observer
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observer)
     {
         _logger = logger;
         _mempoolTrackerService = mempoolTrackerService;

@@ -66,7 +66,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Exceptions;
@@ -100,19 +99,13 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
             delayAfterErrorExponentialRate: 2,
             maxDelayAfterError: TimeSpan.FromSeconds(30));
 
-    private static readonly Counter _fullTransactionsFetchedCount = Metrics
-        .CreateCounter(
-            "ng_node_mempool_full_transactions_fetched_count",
-            "Count of transaction contents fetched from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node", "is_duplicate" } }
-        );
-
     private readonly ILogger<NodeMempoolFullTransactionReaderWorker> _logger;
     private readonly IServiceProvider _services;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
+    private readonly INodeMempoolFullTransactionReaderWorkerObserver? _observer;
 
     // NB - So that we can get new transient dependencies each iteration (such as the HttpClients)
     //      we create such dependencies from the service provider.
@@ -122,9 +115,10 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
         IMempoolTrackerService mempoolTrackerService,
-        INodeConfigProvider nodeConfig
-    )
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        INodeConfigProvider nodeConfig,
+        INodeMempoolFullTransactionReaderWorkerObserver? observer,
+        INodeWorkerObserver? nodeWorkerObserver)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObserver)
     {
         _logger = logger;
         _services = services;
@@ -132,6 +126,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         _networkConfigurationProvider = networkConfigurationProvider;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
+        _observer = observer;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -220,7 +215,11 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 if (transactionData != null)
                 {
                     var wasDuplicate = !_mempoolTrackerService.SubmitTransactionContents(transactionData);
-                    _fullTransactionsFetchedCount.WithLabels(_nodeConfig.CoreApiNode.Name, wasDuplicate ? "true" : "false").Inc();
+
+                    if (_observer != null)
+                    {
+                        await _observer.FullTransactionsFetchedCount(_nodeConfig.CoreApiNode.Name, wasDuplicate);
+                    }
 
                     if (wasDuplicate)
                     {

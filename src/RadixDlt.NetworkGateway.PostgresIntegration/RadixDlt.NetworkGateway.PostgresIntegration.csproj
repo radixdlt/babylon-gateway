@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    
+
     <ItemGroup>
         <ProjectReference Include="..\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
     </ItemGroup>
@@ -15,7 +15,6 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
         <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
-        <PackageReference Include="prometheus-net" />
     </ItemGroup>
-  
+
 </Project>

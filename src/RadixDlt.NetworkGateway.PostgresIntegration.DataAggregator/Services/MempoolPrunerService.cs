@@ -66,7 +66,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Model;
@@ -81,42 +80,39 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public class MempoolPrunerService : IMempoolPrunerService
 {
-    private static readonly Gauge _mempoolDbSizeByStatus = Metrics
-        .CreateGauge(
-            "ng_db_mempool_size_by_status_total",
-            "Number of transactions currently tracked in the MempoolTransaction table, by status.",
-            new GaugeConfiguration { LabelNames = new[] { "status" } }
-        );
-
-    private static readonly Counter _mempoolTransactionsPrunedCount = Metrics
-        .CreateCounter(
-            "ng_db_mempool_pruned_transactions_count",
-            "Count of mempool transactions pruned from the DB"
-        );
-
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolPrunerService> _logger;
+    private readonly IMempoolPrunerServiceObserver? _observer;
 
     public MempoolPrunerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ISystemStatusService systemStatusService,
-        ILogger<MempoolPrunerService> logger
-    )
+        ILogger<MempoolPrunerService> logger,
+        IMempoolPrunerServiceObserver? observer)
     {
         _dbContextFactory = dbContextFactory;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _systemStatusService = systemStatusService;
         _logger = logger;
+        _observer = observer;
     }
 
     public async Task PruneMempool(CancellationToken token = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        await UpdateSizeMetrics(dbContext, token);
+        var mempoolCountByStatus = await dbContext.MempoolTransactions
+            .GroupBy(t => t.Status)
+            .Select(g => new MempoolStatusCount(MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(g.Key) ?? "UNKNOWN", g.Count()))
+            .ToListAsync(token);
+
+        if (_observer != null)
+        {
+            await _observer.PreMempoolPrune(mempoolCountByStatus);
+        }
 
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
@@ -160,39 +156,19 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         if (transactionsToPrune.Count > 0)
         {
-            _mempoolTransactionsPrunedCount.Inc(transactionsToPrune.Count);
             _logger.LogInformation(
                 "Pruning {PrunedCount} transactions from the mempool, of which {PrunedCommittedCount} were committed",
                 transactionsToPrune.Count,
                 transactionsToPrune.Count(t => t.Status == MempoolTransactionStatus.Committed)
             );
 
+            if (_observer != null)
+            {
+                await _observer.PreMempoolTransactionPruned(transactionsToPrune.Count);
+            }
+
             dbContext.MempoolTransactions.RemoveRange(transactionsToPrune);
             await dbContext.SaveChangesAsync(token);
-        }
-    }
-
-    private async Task UpdateSizeMetrics(ReadWriteDbContext dbContext, CancellationToken token)
-    {
-        var counts = await dbContext.MempoolTransactions
-            .GroupBy(t => t.Status)
-            .Select(g => new { Status = g.Key, Count = g.Count() })
-            .ToListAsync(token);
-
-        var existingStatusLabelsNeedingUpdating = _mempoolDbSizeByStatus.GetAllLabelValues().SelectMany(x => x).ToHashSet();
-
-        foreach (var countByStatus in counts)
-        {
-            var statusName =
-                MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(countByStatus.Status) ?? "UNKNOWN";
-            _mempoolDbSizeByStatus.WithLabels(statusName).Set(countByStatus.Count);
-            existingStatusLabelsNeedingUpdating.Remove(statusName);
-        }
-
-        // If a known status doesn't appear in the database, it should be set to 0.
-        foreach (var statusName in existingStatusLabelsNeedingUpdating)
-        {
-            _mempoolDbSizeByStatus.WithLabels(statusName).Set(0);
         }
     }
 }

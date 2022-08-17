@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
@@ -94,13 +93,8 @@ public class SystemStatusService : ISystemStatusService
 {
     private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
 
-    private static readonly Gauge _isPrimaryStatus = Metrics
-        .CreateGauge(
-            "ng_aggregator_is_primary_status",
-            "1 if primary, 0 if secondary."
-        );
-
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
+    private readonly ISystemStatusServiceObserver? _observer;
 
     private Instant? _lastTransactionCommitment;
     private bool _isPrimary;
@@ -110,9 +104,11 @@ public class SystemStatusService : ISystemStatusService
 
     private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
 
-    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration)
+    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, ISystemStatusServiceObserver? observer)
     {
         _configuration = configuration;
+        _observer = observer;
+
         SetIsPrimary(true);
     }
 
@@ -129,7 +125,8 @@ public class SystemStatusService : ISystemStatusService
     public void SetIsPrimary(bool isPrimary)
     {
         _isPrimary = isPrimary;
-        _isPrimaryStatus.SetStatus(isPrimary);
+
+        _observer?.SetIsPrimary(isPrimary);
     }
 
     public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)

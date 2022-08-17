@@ -91,8 +91,9 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
     public NodeConfigurationMonitorWorker(
         ILogger<NodeConfigurationMonitorWorker> logger,
         INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
-        IOptionsMonitor<NetworkOptions> networkOptions)
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        IOptionsMonitor<NetworkOptions> networkOptions,
+        IGlobalWorkerObserver? observer)
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observer)
     {
         _logger = logger;
         _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;

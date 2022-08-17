@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using Prometheus;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,20 +81,13 @@ public interface INodeInitializer
 /// </summary>
 public abstract class NodeInitializer : INodeInitializer
 {
-    // NB - The namespace and choice of tag "worker" is so that it fits into the same metric namespace, and
-    // aligns with the metrics in NodeWorker and GlobalWorker
-    private static readonly Counter _nodeInitializersErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_node_initializers_error_count",
-            "Number of errors in node initializers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
-        );
-
     private readonly string _nodeName;
+    private readonly INodeInitializerObserver? _observer;
 
-    protected NodeInitializer(string nodeName)
+    protected NodeInitializer(string nodeName, INodeInitializerObserver? observer)
     {
         _nodeName = nodeName;
+        _observer = observer;
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -116,7 +107,6 @@ public abstract class NodeInitializer : INodeInitializer
 
     protected void TrackInitializerFaultedException(bool isStopRequested, Exception ex)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _nodeInitializersErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        _observer?.TrackInitializerFaultedException(GetType(), _nodeName, isStopRequested, ex);
     }
 }

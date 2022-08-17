@@ -85,9 +85,10 @@ public class MempoolPrunerWorker : GlobalWorker
 
     public MempoolPrunerWorker(
         ILogger<MempoolPrunerWorker> logger,
-        IMempoolPrunerService mempoolPrunerService
+        IMempoolPrunerService mempoolPrunerService,
+        IGlobalWorkerObserver? observer
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observer)
     {
         _mempoolPrunerService = mempoolPrunerService;
     }

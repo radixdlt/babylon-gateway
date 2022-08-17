@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Configuration;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
@@ -101,9 +100,9 @@ public static class ServiceCollectionExtensions
         AddWorkerScopedServices(services);
 
         // Transient (pooled) services
-        AddCoreApiHttpClient(services);
+        AddCoreApiHttpClient(services, out var coreApiHttpClientBuilder, out var coreNodeHealthCheckerClientBuilder);
 
-        return new GatewayApiBuilder(services);
+        return new GatewayApiBuilder(services, coreApiHttpClientBuilder, coreNodeHealthCheckerClientBuilder);
     }
 
     private static void AddSingletonServices(IServiceCollection services)
@@ -134,18 +133,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICoreNodeHealthChecker, CoreNodeHealthChecker>();
     }
 
-    private static void AddCoreApiHttpClient(IServiceCollection services)
+    private static void AddCoreApiHttpClient(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder, out IHttpClientBuilder coreNodeHealthCheckerClientBuilder)
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        services
+        coreApiHttpClientBuilder = services
             .AddHttpClient<ICoreApiHandler, CoreApiHandler>()
-            .UseHttpClientMetrics()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
 
-        services
+        coreNodeHealthCheckerClientBuilder = services
             .AddHttpClient<ICoreNodeHealthChecker, CoreNodeHealthChecker>()
-            .UseHttpClientMetrics()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
     }
 
