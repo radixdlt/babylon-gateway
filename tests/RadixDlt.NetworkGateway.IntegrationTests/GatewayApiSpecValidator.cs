@@ -71,6 +71,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                             $"Error in '{openApiItemUrl}'. The return parameter '{openApiResponseParameter}' is not equal to '{codeResponseParameter}'.");
 
                         // verify request parameters
+
+                        // code request parameters
                         var codeRequestParameters = endpoint[0].GetParameters().Select(p => p.ParameterType.Name);
 
                         // schema request parameters
