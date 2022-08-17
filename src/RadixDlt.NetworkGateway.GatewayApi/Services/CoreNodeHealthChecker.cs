@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -101,35 +100,24 @@ public enum CoreNodeStatus
 /// </summary>
 public class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
-    private static readonly Gauge _healthCheckStatusByNode = Metrics
-        .CreateGauge(
-            "ng_node_gateway_health_check_status",
-            "The health check status of an individual node. 1 if healthy and synced, 0.5 if health but lagging, 0 if unhealthy",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Gauge _healthCheckCountsAcrossAllNodes = Metrics
-        .CreateGauge(
-            "ng_nodes_gateway_health_check_node_statuses",
-            "The health check status of all nodes. Statuses are HEALTHY_AND_SYNCED, HEALTHY_BUT_LAGGING, UNHEALTHY",
-            new GaugeConfiguration { LabelNames = new[] { "status" } }
-        );
-
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
+    private readonly ICoreNodeHealthCheckerObserver? _coreNodeHealthCheckerObserver;
 
     public CoreNodeHealthChecker(
         ILogger<CoreNodesSelectorService> logger,
         HttpClient httpClient,
         ILedgerStateQuerier ledgerStateQuerier,
-        IOptionsMonitor<NetworkOptions> networkOptionsMonitor)
+        IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
+        ICoreNodeHealthCheckerObserver? coreNodeHealthCheckerObserver)
     {
         _logger = logger;
         _httpClient = httpClient;
         _ledgerStateQuerier = ledgerStateQuerier;
         _networkOptionsMonitor = networkOptionsMonitor;
+        _coreNodeHealthCheckerObserver = coreNodeHealthCheckerObserver;
     }
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
@@ -177,9 +165,11 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             healthyButLaggingCount,
             unhealthyCount
         );
-        _healthCheckCountsAcrossAllNodes.WithLabels("HEALTHY_AND_SYNCED").Set(healthyAndSyncedCount);
-        _healthCheckCountsAcrossAllNodes.WithLabels("HEALTHY_BUT_LAGGING").Set(healthyButLaggingCount);
-        _healthCheckCountsAcrossAllNodes.WithLabels("UNHEALTHY").Set(unhealthyCount);
+
+        if (_coreNodeHealthCheckerObserver != null)
+        {
+            await _coreNodeHealthCheckerObserver.CountByStatus(healthyAndSyncedCount, healthyButLaggingCount, unhealthyCount);
+        }
 
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
@@ -194,7 +184,9 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 healthCheckData.CoreApiNode.Name,
                 healthCheckData.CoreApiNode.CoreApiAddress
             );
-            _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0);
+
+            _coreNodeHealthCheckerObserver?.NodeUnhealthy(healthCheckData);
+
             return CoreNodeStatus.Unhealthy;
         }
 
@@ -211,7 +203,9 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 maxAcceptableLag,
                 topOfLedgerStateVersion
             );
-            _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0.5);
+
+            _coreNodeHealthCheckerObserver?.NodeHealthyButLagging(healthCheckData);
+
             return CoreNodeStatus.HealthyButLagging;
         }
 
@@ -223,7 +217,9 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             maxAcceptableLag,
             topOfLedgerStateVersion
         );
-        _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
+
+        _coreNodeHealthCheckerObserver?.NodeHealthyAndSynced(healthCheckData);
+
         return CoreNodeStatus.HealthyAndSynced;
     }
 

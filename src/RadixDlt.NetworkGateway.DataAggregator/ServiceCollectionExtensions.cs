@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Prometheus;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Configuration;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
@@ -104,11 +103,11 @@ public static class ServiceCollectionExtensions
 
         // Node-Scoped services
         AddNodeScopedServices(services);
-        AddTransientApiReaders(services);
+        AddTransientApiReaders(services, out var coreApiHttpClientBuilder);
         AddNodeInitializers(services);
         AddNodeWorkers(services);
 
-        return new DataAggregatorBuilder(services);
+        return new DataAggregatorBuilder(services, coreApiHttpClientBuilder);
     }
 
     private static void AddGlobalScopedServices(IServiceCollection services)
@@ -135,12 +134,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
     }
 
-    private static void AddTransientApiReaders(IServiceCollection services)
+    private static void AddTransientApiReaders(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder)
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
-            .UseHttpClientMetrics()
+        coreApiHttpClientBuilder = services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
 
         // We can mock these out in tests
