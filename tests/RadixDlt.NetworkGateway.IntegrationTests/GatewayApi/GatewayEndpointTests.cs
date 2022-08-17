@@ -125,9 +125,6 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         var transactionidentifier = recentTransactions.Transactions[0].TransactionIdentifier;
 
         // Act
-        //HttpResponseMessage response = await _factory.CreateClient().PostAsync("/transaction/status",
-        //    JsonContent.Create(new TransactionStatusRequest(transactionidentifier)));
-
         string json = new TransactionStatusRequest(transactionidentifier).ToJson();
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
