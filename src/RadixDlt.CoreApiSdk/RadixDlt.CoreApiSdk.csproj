@@ -3,6 +3,10 @@
     <PropertyGroup>
         <!-- restore once OAS generator suppport is added -->
         <Nullable>disable</Nullable>
+      
+        <!-- auto-generated files are messy, not ideal but acceptable tradeoff -->
+        <RunAnalyzers>false</RunAnalyzers>
+        <NoWarn>CS0108,CS0618</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
