@@ -46,27 +46,14 @@ dummyApiDirectory="$TMPDIR/radix-api-generation/"
 rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
-## A note on settings used, and fixes:
-# - We use optionalEmitDefaultValues=true to ensure optional parameters set to 0 are included;
-#   to work around bugs in the generator (see https://github.com/OpenAPITools/openapi-generator/pull/11607).
-#   This means 0s and nulls are emitted. The latter isn't technically spec compliant, but the Java Core API doesn't mind.
-#   For situations where we need to _not_ emit 0s sometimes, the fields are explicitly set to null in
-#   grep fixes in later lines of this script.
-#   When we fix the generator to emit nullable reference types, it will be better.
-# - For fields where we have to send requests with missing fields (eg EpochUnlock, Epoch in Core API), we manually grep
-#   the fields to replace them with nullable fields.
-# - We perform other fixes as per NG-64
-# - nullableReferenceTypes is set to false, because it adds the assembly attribute without actually making non-required types nullable
-
-# Use the local forked generator - built from this PR: https://github.com/OpenAPITools/openapi-generator/pull/11607
-# TODO NG-64: This can be replaced by either templates (https://openapi-generator.tech/docs/templating) and/or upstream changes/fixes
+# We're using our own build/package as OpenAPITools hasn't released develop version with few critical bugfixes yet!
 java -jar ./openapi-generator-cli-PR13049.jar \
     generate \
     -i "$specLocation" \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,nullableReferenceTypes=false,useDateTimeOffset=true
+    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,nullableReferenceTypes=true,useDateTimeOffset=true
 
 rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"

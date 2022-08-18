@@ -77,14 +77,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Amount
         /// </summary>
-        [DataMember(Name = "amount", EmitDefaultValue = false)]
+        [DataMember(Name = "amount", EmitDefaultValue = true)]
         public TokenAmount Amount { get; set; }
 
         /// <summary>
         /// The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current active stake at the given LedgerState. To be explicit, the referenced active state does not include pending stake, pending unstake or locked unstake. 
         /// </summary>
         /// <value>The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current active stake at the given LedgerState. To be explicit, the referenced active state does not include pending stake, pending unstake or locked unstake. </value>
-        [DataMember(Name = "unstake_percentage", EmitDefaultValue = false)]
+        [DataMember(Name = "unstake_percentage", EmitDefaultValue = true)]
         public decimal UnstakePercentage { get; set; }
 
         /// <summary>

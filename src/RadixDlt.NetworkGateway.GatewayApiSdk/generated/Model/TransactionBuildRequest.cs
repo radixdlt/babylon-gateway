@@ -86,7 +86,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The hex-encoded message bytes.
         /// </summary>
         /// <value>The hex-encoded message bytes.</value>
-        [DataMember(Name = "message", EmitDefaultValue = false)]
+        [DataMember(Name = "message", EmitDefaultValue = true)]
         public string Message { get; set; }
 
         /// <summary>

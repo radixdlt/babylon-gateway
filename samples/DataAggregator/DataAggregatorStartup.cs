@@ -66,6 +66,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator;
@@ -95,7 +96,7 @@ public class DataAggregatorStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson();
+            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 
         services
             .AddHealthChecks()

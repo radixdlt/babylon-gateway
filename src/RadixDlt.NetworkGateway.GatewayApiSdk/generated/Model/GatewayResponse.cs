@@ -75,7 +75,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets TargetLedgerState
         /// </summary>
-        [DataMember(Name = "target_ledger_state", EmitDefaultValue = false)]
+        [DataMember(Name = "target_ledger_state", EmitDefaultValue = true)]
         public TargetLedgerState TargetLedgerState { get; set; }
 
         /// <summary>

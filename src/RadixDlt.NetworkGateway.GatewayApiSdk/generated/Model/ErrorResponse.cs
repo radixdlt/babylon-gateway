@@ -74,14 +74,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Details
         /// </summary>
-        [DataMember(Name = "details", EmitDefaultValue = false)]
+        [DataMember(Name = "details", EmitDefaultValue = true)]
         public GatewayError Details { get; set; }
 
         /// <summary>
         /// A GUID to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs.
         /// </summary>
         /// <value>A GUID to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs.</value>
-        [DataMember(Name = "trace_id", EmitDefaultValue = false)]
+        [DataMember(Name = "trace_id", EmitDefaultValue = true)]
         public string TraceId { get; set; }
 
         /// <summary>

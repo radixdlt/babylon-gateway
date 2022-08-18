@@ -27,7 +27,7 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Optional. Allows a client to request a response referencing an earlier ledger state. If defined only one of Version, Timestamp, Epoch or Epoch and Round pair MUST be defined.
+    /// Optional. Allows a client to request a response referencing an earlier (&#x60;at_*&#x60; properties) or later (&#x60;from_*&#x60; properties) ledger state.
     /// </summary>
     [DataContract(Name = "PartialLedgerStateIdentifier")]
     public partial class PartialLedgerStateIdentifier : IEquatable<PartialLedgerStateIdentifier>, IValidatableObject

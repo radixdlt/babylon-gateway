@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi;
 
-// TODO make all interfaces async and probably collection-like types
 public class MetricObserver :
     IExceptionObserver,
     ICoreNodeHealthCheckerObserver,

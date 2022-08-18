@@ -136,7 +136,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets Owner
         /// </summary>
-        [DataMember(Name = "owner", EmitDefaultValue = false)]
+        [DataMember(Name = "owner", EmitDefaultValue = true)]
         public AccountIdentifier Owner { get; set; }
 
         /// <summary>

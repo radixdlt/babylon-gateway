@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The validator address which was invalid. A descriptive reason is given in the main error message.
         /// </summary>
         /// <value>The validator address which was invalid. A descriptive reason is given in the main error message.</value>
-        [DataMember(Name = "invalid_account_address", EmitDefaultValue = false)]
+        [DataMember(Name = "invalid_account_address", EmitDefaultValue = true)]
         public string InvalidAccountAddress { get; set; }
 
         /// <summary>

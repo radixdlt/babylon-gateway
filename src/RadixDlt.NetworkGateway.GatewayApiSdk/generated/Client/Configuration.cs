@@ -32,7 +32,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Client
         /// Version of the package.
         /// </summary>
         /// <value>Version of the package.</value>
-        public const string Version = "";
+        public const string Version = "1.0.0";
 
         /// <summary>
         /// Identifier for ISO 8601 DateTime Format
@@ -114,7 +114,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Client
         public Configuration()
         {
             Proxy = null;
-            UserAgent = WebUtility.UrlEncode("OpenAPI-Generator//csharp");
+            UserAgent = WebUtility.UrlEncode("OpenAPI-Generator/1.0.0/csharp");
             BasePath = "http://localhost:5208";
             DefaultHeaders = new ConcurrentDictionary<string, string>();
             ApiKey = new ConcurrentDictionary<string, string>();
@@ -534,7 +534,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Client
             report += "    OS: " + System.Environment.OSVersion + "\n";
             report += "    .NET Framework Version: " + System.Environment.Version  + "\n";
             report += "    Version of the API: 2.0.0\n";
-            report += "    SDK Package Version: \n";
+            report += "    SDK Package Version: 1.0.0\n";
 
             return report;
         }

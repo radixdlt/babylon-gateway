@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The cursor to be provided for the next page of results. If missing, this is the last page of results.
         /// </summary>
         /// <value>The cursor to be provided for the next page of results. If missing, this is the last page of results.</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = false)]
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
         public string NextCursor { get; set; }
 
         /// <summary>

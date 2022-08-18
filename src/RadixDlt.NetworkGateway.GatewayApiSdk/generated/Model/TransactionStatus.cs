@@ -85,13 +85,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets ConfirmedTime
         /// </summary>
-        [DataMember(Name = "confirmed_time", EmitDefaultValue = false)]
+        [DataMember(Name = "confirmed_time", EmitDefaultValue = true)]
         public string ConfirmedTime { get; set; }
 
         /// <summary>
         /// Gets or Sets LedgerStateVersion
         /// </summary>
-        [DataMember(Name = "ledger_state_version", EmitDefaultValue = false)]
+        [DataMember(Name = "ledger_state_version", EmitDefaultValue = true)]
         public long LedgerStateVersion { get; set; }
 
         /// <summary>

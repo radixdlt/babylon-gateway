@@ -86,7 +86,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Gets or Sets ToAccount
         /// </summary>
-        [DataMember(Name = "to_account", EmitDefaultValue = false)]
+        [DataMember(Name = "to_account", EmitDefaultValue = true)]
         public AccountIdentifier ToAccount { get; set; }
 
         /// <summary>
