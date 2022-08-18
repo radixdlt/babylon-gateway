@@ -86,12 +86,12 @@ public interface IRawTransactionWriter
 public class RawTransactionWriter : IRawTransactionWriter
 {
     private readonly ILogger<RawTransactionWriter> _logger;
-    private readonly IRawTransactionWriterObserver? _observer;
+    private readonly IEnumerable<IRawTransactionWriterObserver> _observers;
 
-    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IRawTransactionWriterObserver? observer)
+    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IEnumerable<IRawTransactionWriterObserver> observers)
     {
         _logger = logger;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
@@ -126,10 +126,7 @@ public class RawTransactionWriter : IRawTransactionWriter
         {
             if (mempoolTransaction.Status == MempoolTransactionStatus.Failed)
             {
-                if (_observer != null)
-                {
-                    await _observer.TransactionsMarkedCommittedWhichWasFailed();
-                }
+                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
                 _logger.LogError(
                     "Transaction with id {TransactionId} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
@@ -154,10 +151,7 @@ public class RawTransactionWriter : IRawTransactionWriter
         // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
         var result = await context.SaveChangesAsync(token);
 
-        if (_observer != null)
-        {
-            await _observer.TransactionsMarkedCommittedCount(toUpdate.Count);
-        }
+        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(toUpdate.Count));
 
         return result;
     }

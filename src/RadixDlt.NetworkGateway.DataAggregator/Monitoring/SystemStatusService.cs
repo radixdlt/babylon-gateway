@@ -66,6 +66,7 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
@@ -94,7 +95,7 @@ public class SystemStatusService : ISystemStatusService
     private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
 
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
-    private readonly ISystemStatusServiceObserver? _observer;
+    private readonly IEnumerable<ISystemStatusServiceObserver> _observers;
 
     private Instant? _lastTransactionCommitment;
     private bool _isPrimary;
@@ -104,10 +105,10 @@ public class SystemStatusService : ISystemStatusService
 
     private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
 
-    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, ISystemStatusServiceObserver? observer)
+    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, IEnumerable<ISystemStatusServiceObserver> observers)
     {
         _configuration = configuration;
-        _observer = observer;
+        _observers = observers;
 
         SetIsPrimary(true);
     }
@@ -126,7 +127,7 @@ public class SystemStatusService : ISystemStatusService
     {
         _isPrimary = isPrimary;
 
-        _observer?.SetIsPrimary(isPrimary);
+        _observers.ForEach(x => x.SetIsPrimary(isPrimary));
     }
 
     public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)

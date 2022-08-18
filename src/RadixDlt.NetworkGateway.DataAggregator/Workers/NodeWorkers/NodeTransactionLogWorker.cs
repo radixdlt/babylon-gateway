@@ -97,7 +97,7 @@ public class NodeTransactionLogWorker : NodeWorker
     private readonly ILedgerConfirmationService _ledgerConfirmationService;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IServiceProvider _services;
-    private readonly INodeTransactionLogWorkerObserver? _observer;
+    private readonly IEnumerable<INodeTransactionLogWorkerObserver> _observers;
 
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
@@ -109,16 +109,16 @@ public class NodeTransactionLogWorker : NodeWorker
         ILedgerConfirmationService ledgerConfirmationService,
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services,
-        INodeTransactionLogWorkerObserver? observer,
-        INodeWorkerObserver? nodeWorkerObserver
+        IEnumerable<INodeTransactionLogWorkerObserver> observers,
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers
     )
-        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObserver)
+        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
         _nodeConfigProvider = nodeConfigProvider;
         _services = services;
-        _observer = observer;
+        _observers = observers;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -134,10 +134,7 @@ public class NodeTransactionLogWorker : NodeWorker
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.DoWorkFailed(NodeName, ex);
-            }
+            await _observers.ForEachAsync(x => x.DoWorkFailed(NodeName, ex));
 
             throw;
         }
@@ -210,10 +207,7 @@ public class NodeTransactionLogWorker : NodeWorker
             () => FetchTransactionsOrEmptyList(fromStateVersion, transactionsToPull, cancellationToken)
         );
 
-        if (_observer != null)
-        {
-            await _observer.TransactionsFetched(NodeName, transactions, fetchTransactionsMs);
-        }
+        await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
 
         if (transactions.Count > 0)
         {

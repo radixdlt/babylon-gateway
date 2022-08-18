@@ -98,7 +98,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
-    private readonly INodeMempoolTransactionIdsReaderWorkerObserver? _observer;
+    private readonly IEnumerable<INodeMempoolTransactionIdsReaderWorkerObserver> _observers;
 
     private HashSet<byte[]> _latestTransactionHashes = new(ByteArrayEqualityComparer.Default);
 
@@ -110,16 +110,16 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         INetworkConfigurationProvider networkConfigurationProvider,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig,
-        INodeMempoolTransactionIdsReaderWorkerObserver? observer,
-        INodeWorkerObserver? nodeWorkerObserver)
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObserver)
+        IEnumerable<INodeMempoolTransactionIdsReaderWorkerObserver> observers,
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
     {
         _logger = logger;
         _services = services;
         _networkConfigurationProvider = networkConfigurationProvider;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
-        _observer = observer;
+        _observers = observers;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -146,10 +146,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             ))
         );
 
-        if (_observer != null)
-        {
-            await _observer.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolContents.TransactionIdentifiers.Count);
-        }
+        await _observers.ForEachAsync(x => x.MempoolSize(_nodeConfig.CoreApiNode.Name, mempoolContents.TransactionIdentifiers.Count));
 
         var latestMempoolHashes = mempoolContents.TransactionIdentifiers
             .Select(ti => ti.Hash.ConvertFromHex())
@@ -166,10 +163,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             .ExceptInSet(previousMempoolHashes)
             .Count();
 
-        if (_observer != null)
-        {
-            await _observer.MempoolItemsChange(_nodeConfig.CoreApiNode.Name, transactionIdsAddedCount, transactionIdsRemovedCount);
-        }
+        await _observers.ForEachAsync(x => x.MempoolItemsChange(_nodeConfig.CoreApiNode.Name, transactionIdsAddedCount, transactionIdsRemovedCount));
 
         if (transactionIdsAddedCount > 0 || transactionIdsRemovedCount > 0)
         {

@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator;
 
-// TODO make all interfaces async and probably collection-like types
 public class MetricsObserver :
     IGlobalWorkerObserver,
     INodeWorkerObserver,

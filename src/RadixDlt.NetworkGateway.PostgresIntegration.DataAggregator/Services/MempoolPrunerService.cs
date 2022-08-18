@@ -68,6 +68,7 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
@@ -84,20 +85,20 @@ public class MempoolPrunerService : IMempoolPrunerService
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolPrunerService> _logger;
-    private readonly IMempoolPrunerServiceObserver? _observer;
+    private readonly IEnumerable<IMempoolPrunerServiceObserver> _observers;
 
     public MempoolPrunerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILogger<MempoolPrunerService> logger,
-        IMempoolPrunerServiceObserver? observer)
+        IEnumerable<IMempoolPrunerServiceObserver> observers)
     {
         _dbContextFactory = dbContextFactory;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _systemStatusService = systemStatusService;
         _logger = logger;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task PruneMempool(CancellationToken token = default)
@@ -109,10 +110,7 @@ public class MempoolPrunerService : IMempoolPrunerService
             .Select(g => new MempoolStatusCount(MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(g.Key) ?? "UNKNOWN", g.Count()))
             .ToListAsync(token);
 
-        if (_observer != null)
-        {
-            await _observer.PreMempoolPrune(mempoolCountByStatus);
-        }
+        await _observers.ForEachAsync(x => x.PreMempoolPrune(mempoolCountByStatus));
 
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
@@ -162,10 +160,7 @@ public class MempoolPrunerService : IMempoolPrunerService
                 transactionsToPrune.Count(t => t.Status == MempoolTransactionStatus.Committed)
             );
 
-            if (_observer != null)
-            {
-                await _observer.PreMempoolTransactionPruned(transactionsToPrune.Count);
-            }
+            await _observers.ForEachAsync(x => x.PreMempoolTransactionPruned(transactionsToPrune.Count));
 
             dbContext.MempoolTransactions.RemoveRange(transactionsToPrune);
             await dbContext.SaveChangesAsync(token);

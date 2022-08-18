@@ -98,7 +98,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolResubmissionService> _logger;
-    private readonly IMempoolResubmissionServiceObserver? _observer;
+    private readonly IEnumerable<IMempoolResubmissionServiceObserver> _observers;
 
     public MempoolResubmissionService(
         IServiceProvider services,
@@ -108,7 +108,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         INetworkConfigurationProvider networkConfigurationProvider,
         ISystemStatusService systemStatusService,
         ILogger<MempoolResubmissionService> logger,
-        IMempoolResubmissionServiceObserver? observer)
+        IEnumerable<IMempoolResubmissionServiceObserver> observers)
     {
         _services = services;
         _dbContextFactory = dbContextFactory;
@@ -117,7 +117,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         _networkConfigurationProvider = networkConfigurationProvider;
         _systemStatusService = systemStatusService;
         _logger = logger;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task RunBatchOfResubmissions(CancellationToken token = default)
@@ -172,10 +172,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             : await GetMempoolTransactionsNeedingResubmission(instantForTransactionChoosing, mempoolOptions, dbContext)
                 .CountAsync(token);
 
-        if (_observer != null)
-        {
-            await _observer.TransactionsSelected(totalTransactionsNeedingResubmission);
-        }
+        await _observers.ForEachAsync(x => x.TransactionsSelected(totalTransactionsNeedingResubmission));
 
         if (totalTransactionsNeedingResubmission == 0)
         {
@@ -218,14 +215,14 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             {
                 var nodeToSubmitTo = GetRandomCoreApi();
 
-                _observer?.TransactionMarkedAsAssumedSuccessfullySubmittedToNode();
+                _observers.ForEach(x => x.TransactionMarkedAsAssumedSuccessfullySubmittedToNode());
 
                 transaction.MarkAsAssumedSuccessfullySubmittedToNode(nodeToSubmitTo.Name, submittedAt);
                 transactionsToResubmitWithNodes.Add(new MempoolTransactionWithChosenNode(transaction, nodeToSubmitTo));
             }
             else
             {
-                _observer?.TransactionMarkedAsFailed();
+                _observers.ForEach(x => x.TransactionMarkedAsFailed());
 
                 transaction.MarkAsFailed(
                     MempoolTransactionFailureReason.Timeout,
@@ -296,19 +293,13 @@ public class MempoolResubmissionService : IMempoolResubmissionService
                 // transaction itself having already hit the ledger! Let's just assume it submitted correctly and
                 // resubmit.
 
-                if (_observer != null)
-                {
-                    await _observer.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode();
-                }
+                await _observers.ForEachAsync(x => x.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode());
 
                 transaction.MarkAsResolvedButUnknownAfterSubmittedToNode(nodeName, submittedAt);
             }
             else
             {
-                if (_observer != null)
-                {
-                    await _observer.TransactionMarkedAsFailedAfterSubmittedToNode();
-                }
+                await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
 
                 transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt);
             }
@@ -335,10 +326,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         var chosenNode = transactionWithNode.CoreApiNode;
         var signedTransaction = transaction.Payload.ToHex();
 
-        if (_observer != null)
-        {
-            await _observer.PreResubmit(signedTransaction);
-        }
+        await _observers.ForEachAsync(x => x.PreResubmit(signedTransaction));
 
         using var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = chosenNode;
@@ -355,34 +343,22 @@ public class MempoolResubmissionService : IMempoolResubmissionService
                 coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(submitRequest, cancellationToken)
             );
 
-            if (_observer != null)
-            {
-                await _observer.PostResubmit(signedTransaction);
-            }
+            await _observers.ForEachAsync(x => x.PostResubmit(signedTransaction));
 
             if (result.Duplicate)
             {
-                if (_observer != null)
-                {
-                    await _observer.PostResubmitDuplicate(signedTransaction);
-                }
+                await _observers.ForEachAsync(x => x.PostResubmitDuplicate(signedTransaction));
             }
             else
             {
-                if (_observer != null)
-                {
-                    await _observer.PostResubmitSucceeded(signedTransaction);
-                }
+                await _observers.ForEachAsync(x => x.PostResubmitSucceeded(signedTransaction));
             }
 
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
-            if (_observer != null)
-            {
-                await _observer.ResubmitFailedSubstateNotFound(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ResubmitFailedSubstateNotFound(signedTransaction, ex));
 
             _logger.LogDebug(
                 "Dropping transaction because a substate identifier it used is missing or already downed - possibly it's already been committed. Substate Identifier: {Substate}",
@@ -393,19 +369,13 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
-            if (_observer != null)
-            {
-                await _observer.ResubmitFailedPermanently(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ResubmitFailedPermanently(signedTransaction, ex));
 
             return new SubmissionResult(transaction, true, MempoolTransactionFailureReason.Unknown, $"Core API Exception: {ex.Error.GetType().Name} on resubmission", chosenNode.Name);
         }
         catch (OperationCanceledException ex)
         {
-            if (_observer != null)
-            {
-                await _observer.ResubmitFailedTimeout(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ResubmitFailedTimeout(signedTransaction, ex));
 
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }
@@ -413,11 +383,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         {
             // Unsure of what the problem is -- it could be that the connection died or there was an internal server error
             // We have to assume the submission may have succeeded and wait for resubmission if not.
-
-            if (_observer != null)
-            {
-                await _observer.ResubmitFailedUnknown(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ResubmitFailedUnknown(signedTransaction, ex));
 
             return new SubmissionResult(transaction, false, null, null, chosenNode.Name);
         }

@@ -65,8 +65,10 @@
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -87,13 +89,13 @@ public class NetworkStatusReader : INetworkStatusReader
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly NetworkApi _networkApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
-    private readonly INetworkStatusReaderObserver? _observer;
+    private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
-    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, INetworkStatusReaderObserver? observer)
+    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<INetworkStatusReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
-        _observer = observer;
+        _observers = observers;
         _networkApi = coreApiProvider.NetworkApi;
     }
 
@@ -113,10 +115,7 @@ public class NetworkStatusReader : INetworkStatusReader
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex);
-            }
+            await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
 
             throw;
         }

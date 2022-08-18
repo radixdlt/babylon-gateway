@@ -105,7 +105,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
-    private readonly INodeMempoolFullTransactionReaderWorkerObserver? _observer;
+    private readonly IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> _observers;
 
     // NB - So that we can get new transient dependencies each iteration (such as the HttpClients)
     //      we create such dependencies from the service provider.
@@ -116,9 +116,9 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         INetworkConfigurationProvider networkConfigurationProvider,
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig,
-        INodeMempoolFullTransactionReaderWorkerObserver? observer,
-        INodeWorkerObserver? nodeWorkerObserver)
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObserver)
+        IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> observers,
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
     {
         _logger = logger;
         _services = services;
@@ -126,7 +126,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         _networkConfigurationProvider = networkConfigurationProvider;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
-        _observer = observer;
+        _observers = observers;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -216,10 +216,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 {
                     var wasDuplicate = !_mempoolTrackerService.SubmitTransactionContents(transactionData);
 
-                    if (_observer != null)
-                    {
-                        await _observer.FullTransactionsFetchedCount(_nodeConfig.CoreApiNode.Name, wasDuplicate);
-                    }
+                    await _observers.ForEachAsync(x => x.FullTransactionsFetchedCount(_nodeConfig.CoreApiNode.Name, wasDuplicate));
 
                     if (wasDuplicate)
                     {

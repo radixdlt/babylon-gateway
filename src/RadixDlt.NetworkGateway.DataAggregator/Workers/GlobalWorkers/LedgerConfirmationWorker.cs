@@ -66,6 +66,7 @@ using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -86,9 +87,9 @@ public class LedgerConfirmationWorker : GlobalWorker
     public LedgerConfirmationWorker(
         ILogger<LedgerConfirmationWorker> logger,
         ILedgerConfirmationService ledgerConfirmationService,
-        IGlobalWorkerObserver? observer
+        IEnumerable<IGlobalWorkerObserver> observers
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30), observer)
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(30), observers)
     {
         _ledgerConfirmationService = ledgerConfirmationService;
     }

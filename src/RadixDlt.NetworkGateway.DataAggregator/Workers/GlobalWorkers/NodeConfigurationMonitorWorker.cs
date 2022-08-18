@@ -68,6 +68,7 @@ using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,8 +93,8 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
         ILogger<NodeConfigurationMonitorWorker> logger,
         INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
         IOptionsMonitor<NetworkOptions> networkOptions,
-        IGlobalWorkerObserver? observer)
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observer)
+        IEnumerable<IGlobalWorkerObserver> observers)
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers)
     {
         _logger = logger;
         _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;

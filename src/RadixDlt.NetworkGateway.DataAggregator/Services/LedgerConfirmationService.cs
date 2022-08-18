@@ -110,7 +110,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILedgerExtenderService _ledgerExtenderService;
-    private readonly ILedgerConfirmationServiceObserver? _observer;
+    private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
 
     /* Variables */
     private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
@@ -128,16 +128,16 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILedgerExtenderService ledgerExtenderService,
-        ILedgerConfirmationServiceObserver? observer)
+        IEnumerable<ILedgerConfirmationServiceObserver> observers)
     {
         _logger = logger;
         _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
         _networkOptionsMonitor = networkOptionsMonitor;
         _systemStatusService = systemStatusService;
         _ledgerExtenderService = ledgerExtenderService;
-        _observer = observer;
+        _observers = observers;
 
-        _observer?.ResetQuorum();
+        _observers.ForEach(x => x.ResetQuorum());
 
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
@@ -147,10 +147,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     /// </summary>
     public async Task HandleLedgerExtensionIfQuorum(CancellationToken token)
     {
-        if (_observer != null)
-        {
-            await _observer.PreHandleLedgerExtensionIfQuorum(SystemClock.Instance.GetCurrentInstant());
-        }
+        await _observers.ForEachAsync(x => x.PreHandleLedgerExtensionIfQuorum(SystemClock.Instance.GetCurrentInstant()));
 
         await LoadTopOfDbLedger(token);
 
@@ -184,7 +181,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         long targetStateVersion
     )
     {
-        _observer?.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion, targetStateVersion);
+        _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion, targetStateVersion));
 
         _latestLedgerTipByNode[nodeName] = ledgerTipStateVersion;
 
@@ -201,15 +198,15 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             // Ledger Tip is too far behind -- so don't report on consistency.
             // We could change this to do a database look-up in future to give a consistency check.
 
-            _observer?.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion, targetStateVersion);
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusUnknown(nodeName, ledgerTipStateVersion, targetStateVersion));
         }
         else if (cachedAccumulator.BytesAreEqual(ledgerTipAccumulator))
         {
-            _observer?.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion, targetStateVersion);
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusUpToDate(nodeName, ledgerTipStateVersion, targetStateVersion));
         }
         else
         {
-            _observer?.SubmitNodeNetworkStatusOutOfDate(nodeName, ledgerTipStateVersion, targetStateVersion);
+            _observers.ForEach(x => x.SubmitNodeNetworkStatusOutOfDate(nodeName, ledgerTipStateVersion, targetStateVersion));
         }
     }
 
@@ -295,12 +292,12 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             {
                 foreach (var inconsistentNodeName in inconsistentNodeNames)
                 {
-                    _observer?.LedgerTipInconsistentWithQuorumStatus(inconsistentNodeName);
+                    _observers.ForEach(x => x.LedgerTipInconsistentWithQuorumStatus(inconsistentNodeName));
                 }
 
                 foreach (var consistentNodeName in chosenTransaction!.NodeNames)
                 {
-                    _observer?.LedgerTipConsistentWithQuorumStatus(consistentNodeName);
+                    _observers.ForEach(x => x.LedgerTipConsistentWithQuorumStatus(consistentNodeName));
                 }
 
                 extension.Add(chosenTransaction.Transaction);
@@ -324,7 +321,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             {
                 // We can't make headway with all sufficiently synced up nodes - let's set this to Unknown until
                 // we get more nodes synced up...
-                _observer?.UnknownQuorumStatus();
+                _observers.ForEach(x => x.UnknownQuorumStatus());
             }
 
             var remainingTrustPossibleFromAllNodes =
@@ -336,7 +333,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             )
             {
                 // Even with all nodes synced up, we wouldn't reach a quorum - mark this as a critical alarm!
-                _observer?.QuorumLost();
+                _observers.ForEach(x => x.QuorumLost());
             }
 
             break;
@@ -344,7 +341,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         if (extension.Count > 0)
         {
-            _observer?.QuorumGained();
+            _observers.ForEach(x => x.QuorumGained());
         }
 
         return extension;
@@ -399,7 +396,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
 
-        _observer?.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount);
+        _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
@@ -444,7 +441,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     {
         _knownTopOfCommittedLedger = topOfLedger;
 
-        _observer?.RecordTopOfDbLedger(topOfLedger.StateVersion, topOfLedger.RoundTimestamp);
+        _observers.ForEach(x => x.RecordTopOfDbLedger(topOfLedger.StateVersion, topOfLedger.RoundTimestamp));
 
         _systemStatusService.SetTopOfDbLedgerNormalizedRoundTimestamp(topOfLedger.NormalizedRoundTimestamp);
     }
@@ -525,16 +522,16 @@ public class LedgerConfirmationService : ILedgerConfirmationService
                 currentParentSummary = summary;
             }
 
-            _observer?.QuorumExtensionConsistentGained();
+            _observers.ForEach(x => x.QuorumExtensionConsistentGained());
         }
         catch (InvalidLedgerCommitException)
         {
-            _observer?.QuorumExtensionConsistentLost();
+            _observers.ForEach(x => x.QuorumExtensionConsistentLost());
             throw;
         }
         catch (InconsistentLedgerException)
         {
-            _observer?.QuorumExtensionConsistentLost();
+            _observers.ForEach(x => x.QuorumExtensionConsistentLost());
             throw;
         }
 
@@ -587,7 +584,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum: trustWeightingForQuorumIfAllSyncedUp
         );
 
-        _observer?.TrustWeightingRequirementsComputed(report);
+        _observers.ForEach(x => x.TrustWeightingRequirementsComputed(report));
 
         return report;
     }

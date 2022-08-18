@@ -65,8 +65,10 @@
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -87,13 +89,13 @@ public class TransactionLogReader : ITransactionLogReader
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly TransactionsApi _transactionsApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
-    private readonly ITransactionLogReaderObserver? _observer;
+    private readonly IEnumerable<ITransactionLogReaderObserver> _observers;
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, ITransactionLogReaderObserver? observer)
+    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<ITransactionLogReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
-        _observer = observer;
+        _observers = observers;
         _transactionsApi = coreApiProvider.TransactionsApi;
     }
 
@@ -115,10 +117,7 @@ public class TransactionLogReader : ITransactionLogReader
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.GetTransactionsFailed(_nodeConfigProvider.CoreApiNode.Name, ex);
-            }
+            await _observers.ForEachAsync(x => x.GetTransactionsFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
 
             throw;
         }

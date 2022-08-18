@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -88,9 +89,9 @@ public class NodeNetworkConfigurationInitializer : NodeInitializer
         INetworkConfigurationReader networkConfigurationReader,
         INetworkConfigurationProvider networkConfigurationProvider,
         ILogger<NodeNetworkConfigurationInitializer> logger,
-        INodeInitializerObserver? observer
+        IEnumerable<INodeInitializerObserver> observers
     )
-        : base(nodeConfigProvider.CoreApiNode.Name, observer)
+        : base(nodeConfigProvider.CoreApiNode.Name, observers)
     {
         _networkGatewayDataAggregatorOptionsMonitor = networkGatewayDataAggregatorOptionsMonitor;
         _networkConfigurationReader = networkConfigurationReader;

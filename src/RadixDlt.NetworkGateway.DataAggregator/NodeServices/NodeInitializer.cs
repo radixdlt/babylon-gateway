@@ -62,7 +62,9 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Common.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -82,12 +84,12 @@ public interface INodeInitializer
 public abstract class NodeInitializer : INodeInitializer
 {
     private readonly string _nodeName;
-    private readonly INodeInitializerObserver? _observer;
+    private readonly IEnumerable<INodeInitializerObserver> _observers;
 
-    protected NodeInitializer(string nodeName, INodeInitializerObserver? observer)
+    protected NodeInitializer(string nodeName, IEnumerable<INodeInitializerObserver> observers)
     {
         _nodeName = nodeName;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -107,6 +109,6 @@ public abstract class NodeInitializer : INodeInitializer
 
     protected void TrackInitializerFaultedException(bool isStopRequested, Exception ex)
     {
-        _observer?.TrackInitializerFaultedException(GetType(), _nodeName, isStopRequested, ex);
+        _observers.ForEach(x => x.TrackInitializerFaultedException(GetType(), _nodeName, isStopRequested, ex));
     }
 }

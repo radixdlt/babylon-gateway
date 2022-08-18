@@ -68,6 +68,7 @@ using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -91,9 +92,9 @@ public class MempoolTrackerWorker : GlobalWorker
     public MempoolTrackerWorker(
         ILogger<MempoolTrackerWorker> logger,
         IMempoolTrackerService mempoolTrackerService,
-        IGlobalWorkerObserver? observer
+        IEnumerable<IGlobalWorkerObserver> observers
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observer)
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers)
     {
         _logger = logger;
         _mempoolTrackerService = mempoolTrackerService;

@@ -64,8 +64,10 @@
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,13 +79,13 @@ public class AggregatorHealthCheck : IHealthCheck
 
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<AggregatorHealthCheck> _logger;
-    private readonly IAggregatorHealthCheckObserver? _observer;
+    private readonly IEnumerable<IAggregatorHealthCheckObserver> _observers;
 
-    public AggregatorHealthCheck(ISystemStatusService systemStatusService, ILogger<AggregatorHealthCheck> logger, IAggregatorHealthCheckObserver? observer)
+    public AggregatorHealthCheck(ISystemStatusService systemStatusService, ILogger<AggregatorHealthCheck> logger, IEnumerable<IAggregatorHealthCheckObserver> observers)
     {
         _systemStatusService = systemStatusService;
         _logger = logger;
-        _observer = observer;
+        _observers = observers;
     }
 
     /// <summary>
@@ -93,10 +95,7 @@ public class AggregatorHealthCheck : IHealthCheck
     {
         var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
 
-        if (_observer != null)
-        {
-            await _observer.HealthReport(healthReport.IsHealthy, _systemStatusService.IsPrimary());
-        }
+        await _observers.ForEachAsync(x => x.HealthReport(healthReport.IsHealthy, _systemStatusService.IsPrimary()));
 
         if (healthReport.IsHealthy)
         {

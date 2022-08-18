@@ -65,7 +65,9 @@
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -80,11 +82,11 @@ public class NetworkConfigurationReader : INetworkConfigurationReader
 {
     private readonly NetworkApi _networkApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
-    private readonly INetworkConfigurationReaderObserver? _observer;
+    private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
 
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, INetworkConfigurationReaderObserver? observer)
+    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<INetworkConfigurationReaderObserver> observers)
     {
-        _observer = observer;
+        _observers = observers;
         _nodeConfigProvider = nodeConfigProvider;
         _networkApi = coreApiProvider.NetworkApi;
     }
@@ -100,10 +102,7 @@ public class NetworkConfigurationReader : INetworkConfigurationReader
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.GetNetworkConfigurationFailed(_nodeConfigProvider.CoreApiNode.Name, ex);
-            }
+            await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
 
             throw;
         }
