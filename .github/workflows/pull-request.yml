@@ -11,6 +11,15 @@ jobs:
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
+    services:
+      postgres:
+        image: postgres:12-alpine
+        env:
+          POSTGRES_DB: radixdlt_ledger
+          POSTGRES_PASSWORD: db_superuser   
+          POSTGRES_USER: "db_password
+        ports:
+          - 127.0.0.1:5532:5432 
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
