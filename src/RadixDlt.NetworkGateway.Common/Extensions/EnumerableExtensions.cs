@@ -140,21 +140,7 @@ public static class EnumerableExtensions
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(callback);
 
-        var array = source.ToArray();
-
-        if (array.Length == 0)
-        {
-            return;
-        }
-
-        if (array.Length == 1)
-        {
-            callback(array[0]);
-
-            return;
-        }
-
-        foreach (var x in array)
+        foreach (var x in source)
         {
             callback(x);
         }
@@ -165,20 +151,9 @@ public static class EnumerableExtensions
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(callback);
 
-        var array = source.ToArray();
-
-        if (array.Length == 0)
+        foreach (var x in source)
         {
-            return;
+            await callback(x);
         }
-
-        if (array.Length == 1)
-        {
-            await callback(array[0]);
-
-            return;
-        }
-
-        await Task.WhenAll(array.Select(x => callback(x).AsTask()).ToArray());
     }
 }
