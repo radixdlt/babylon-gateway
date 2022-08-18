@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_DB: radixdlt_ledger
           POSTGRES_PASSWORD: db_superuser   
-          POSTGRES_USER: "db_password
+          POSTGRES_USER: db_password
         ports:
           - 127.0.0.1:5532:5432 
     steps:
