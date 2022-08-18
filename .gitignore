@@ -2,6 +2,9 @@
 .postgresdata/
 .postgresdata_backup*/
 *.overrides.json
+*.PersonalOverrides.json
+*.DevelopmentOverrides.json
+*.ProductionOverrides.json
 
 # Rider gitignore
 
