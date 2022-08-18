@@ -264,7 +264,7 @@ public class MempoolTransaction
     {
         var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
 
-        submittedTimestamp ??= SystemClock.Instance.GetCurrentInstant();
+        submittedTimestamp ??= NodaTime.SystemClock.Instance.GetCurrentInstant();
         mempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
 
         // We assume it's been successfully submitted until we see an error and then mark it as an error then
@@ -292,12 +292,12 @@ public class MempoolTransaction
     public void MarkAsMissing(Instant? timestamp = null)
     {
         Status = MempoolTransactionStatus.Missing;
-        LastDroppedOutOfMempoolTimestamp = timestamp ?? SystemClock.Instance.GetCurrentInstant();
+        LastDroppedOutOfMempoolTimestamp = timestamp ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
     }
 
     public void MarkAsCommitted(long ledgerStateVersion, Instant ledgerCommitTimestamp)
     {
-        var commitToDbTimestamp = SystemClock.Instance.GetCurrentInstant();
+        var commitToDbTimestamp = NodaTime.SystemClock.Instance.GetCurrentInstant();
         Status = MempoolTransactionStatus.Committed;
         CommitTimestamp = commitToDbTimestamp;
 
@@ -311,7 +311,7 @@ public class MempoolTransaction
     public void MarkAsSeenInAMempool(Instant? timestamp = null)
     {
         Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
-        FirstSeenInMempoolTimestamp ??= timestamp ?? SystemClock.Instance.GetCurrentInstant();
+        FirstSeenInMempoolTimestamp ??= timestamp ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
     }
 
     public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? timestamp = null)
@@ -319,12 +319,12 @@ public class MempoolTransaction
         Status = MempoolTransactionStatus.Failed;
         FailureReason = failureReason;
         FailureExplanation = failureExplanation;
-        FailureTimestamp = timestamp ?? SystemClock.Instance.GetCurrentInstant();
+        FailureTimestamp = timestamp ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
     }
 
     public void MarkAsSubmittedToGateway(Instant? submittedAt = null)
     {
-        submittedAt ??= SystemClock.Instance.GetCurrentInstant();
+        submittedAt ??= NodaTime.SystemClock.Instance.GetCurrentInstant();
         SubmittedByThisGateway = true;
         FirstSubmittedToGatewayTimestamp ??= submittedAt;
         LastSubmittedToGatewayTimestamp = submittedAt;
@@ -350,7 +350,7 @@ public class MempoolTransaction
 
     private void RecordSubmission(string nodeSubmittedTo, Instant? submittedAt = null)
     {
-        LastSubmittedToNodeTimestamp = submittedAt ?? SystemClock.Instance.GetCurrentInstant();
+        LastSubmittedToNodeTimestamp = submittedAt ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
         LastSubmittedToNodeName = nodeSubmittedTo;
         SubmissionToNodesCount += 1;
     }

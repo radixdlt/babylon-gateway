@@ -87,7 +87,7 @@ public static class DateTimeExtensions
 
     public static Duration GetTimeAgo(this Instant instant)
     {
-        return SystemClock.Instance.GetCurrentInstant() - instant;
+        return NodaTime.SystemClock.Instance.GetCurrentInstant() - instant;
     }
 
     public static Duration Absolute(this Duration duration)
@@ -117,12 +117,12 @@ public static class DateTimeExtensions
 
     public static string FormatSecondsAgo(this Instant dateTime)
     {
-        return $"{(SystemClock.Instance.GetCurrentInstant() - dateTime).FormatSecondsHumanReadable()} ago";
+        return $"{(NodaTime.SystemClock.Instance.GetCurrentInstant() - dateTime).FormatSecondsHumanReadable()} ago";
     }
 
     public static string FormatSecondsAgo(this Instant? dateTime)
     {
-        return dateTime == null ? "never" : $"{(SystemClock.Instance.GetCurrentInstant() - dateTime.Value).FormatSecondsHumanReadable()} ago";
+        return dateTime == null ? "never" : $"{(NodaTime.SystemClock.Instance.GetCurrentInstant() - dateTime.Value).FormatSecondsHumanReadable()} ago";
     }
 
     public static string FormatPositiveDurationHumanReadable(this Duration? durationOrNull)

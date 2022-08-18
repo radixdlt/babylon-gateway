@@ -85,10 +85,10 @@ public class Base64ValidatorTests
     [InlineData("aGVsbG8=")]
     [InlineData("R0lGODlhAQABAAAAACw=")]
     [InlineData("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")]
-    public void WhenGiven_ValidValue_Succeeds(string hex)
+    public void WhenGiven_ValidValue_Succeeds(string base64)
     {
         var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).Base64());
-        var result = validator.TestValidate(new TestSubject { StringProperty = hex });
+        var result = validator.TestValidate(new TestSubject { StringProperty = base64 });
 
         result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
     }
@@ -99,10 +99,10 @@ public class Base64ValidatorTests
     [InlineData("aGVsbG8=", 5)]
     [InlineData("R0lGODlhAQABAAAAACw=", 14)]
     [InlineData("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", 68)]
-    public void WhenGiven_HexValueOfExpectedLength_Succeeds(string hex, int expectedLength)
+    public void WhenGiven_Base64ValueOfExpectedLength_Succeeds(string base64, int expectedLength)
     {
         var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).Base64(expectedLength));
-        var result = validator.TestValidate(new TestSubject { StringProperty = hex });
+        var result = validator.TestValidate(new TestSubject { StringProperty = base64 });
 
         result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
     }
@@ -111,10 +111,10 @@ public class Base64ValidatorTests
     [InlineData("YQ")]
     [InlineData("YQ=")]
     [InlineData("Yś==")]
-    public void WhenGiven_InvalidBase64Value_Fails(string hex)
+    public void WhenGiven_InvalidBase64Value_Fails(string base64)
     {
         var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).Base64());
-        var result = validator.TestValidate(new TestSubject { StringProperty = hex });
+        var result = validator.TestValidate(new TestSubject { StringProperty = base64 });
 
         result.ShouldHaveValidationErrorFor(x => x.StringProperty);
     }
