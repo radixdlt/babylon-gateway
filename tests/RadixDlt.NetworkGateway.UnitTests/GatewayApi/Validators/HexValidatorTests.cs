@@ -18,6 +18,7 @@ public class HexValidatorTests
     [Theory]
     [InlineData("")]
     [InlineData("ab")]
+    [InlineData("abCD")]
     [InlineData("0123456789abcdef")]
     [InlineData("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef")]
     public void WhenGiven_ValidValue_Succeeds(string hex)
@@ -31,6 +32,7 @@ public class HexValidatorTests
     [Theory]
     [InlineData("", 0)]
     [InlineData("ab", 1)]
+    [InlineData("abCD", 2)]
     [InlineData("0123456789abcdef", 8)]
     [InlineData("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", 40)]
     public void WhenGiven_ValidValueWithExpectedLength_Succeeds(string hex, int expectedLength)
@@ -44,7 +46,6 @@ public class HexValidatorTests
     [Theory]
     [InlineData("a")]
     [InlineData("abc")]
-    [InlineData("AB")]
     [InlineData("base64characters")]
     [InlineData("abcdefP")]
     public void WhenGiven_InvalidValue_Fails(string hex)

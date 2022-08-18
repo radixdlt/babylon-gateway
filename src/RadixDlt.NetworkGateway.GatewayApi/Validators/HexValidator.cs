@@ -25,9 +25,9 @@ public class HexValidator<T> : PropertyValidator<T, string?>
 
         context.MessageFormatter.AppendPropertyName(context.PropertyName);
 
-        if (!value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f') || value.Length % 2 == 1)
+        if (!value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F') || value.Length % 2 == 1)
         {
-            context.AddFailure("'{PropertyName}' must be lowercase HEX-encoded value.");
+            context.AddFailure("'{PropertyName}' must be HEX-encoded value.");
 
             return false;
         }
@@ -42,7 +42,7 @@ public class HexValidator<T> : PropertyValidator<T, string?>
                     .AppendArgument("ExpectedBytes", _expectedLength)
                     .AppendArgument("ActualBytes", actual.Length);
 
-                context.AddFailure("'{PropertyName}' must be lowercase HEX-encoded representation of {ExpectedBytes} bytes. You entered {ActualBytes} bytes.");
+                context.AddFailure("'{PropertyName}' must be HEX-encoded representation of {ExpectedBytes} bytes. You entered {ActualBytes} bytes.");
 
                 return false;
             }
