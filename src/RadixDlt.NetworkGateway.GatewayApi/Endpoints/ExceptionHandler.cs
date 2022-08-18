@@ -67,8 +67,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Exceptions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -85,12 +87,12 @@ public class ExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<ExceptionHandler> _logger;
     private readonly LogLevel _knownGatewayErrorLogLevel;
-    private readonly IExceptionObserver? _exceptionObserver;
+    private readonly IEnumerable<IExceptionObserver> _observers;
 
-    public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env, IExceptionObserver? exceptionObserver = null)
+    public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env, IEnumerable<IExceptionObserver> observers)
     {
         _logger = logger;
-        _exceptionObserver = exceptionObserver;
+        _observers = observers;
         _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
@@ -98,7 +100,7 @@ public class ExceptionHandler : IExceptionHandler
     {
         var gatewayErrorException = LogAndConvertToKnownGatewayErrorException(exception, traceId);
 
-        _exceptionObserver?.OnExceptionXxx(actionContext, exception, gatewayErrorException);
+        _observers.ForEach(x => x.OnException(actionContext, exception, gatewayErrorException));
 
         return new JsonResult(new Gateway.ErrorResponse(
             code: gatewayErrorException.StatusCode,

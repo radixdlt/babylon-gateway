@@ -6,5 +6,5 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 
 public interface IExceptionObserver
 {
-    void OnExceptionXxx(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException);
+    void OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException);
 }

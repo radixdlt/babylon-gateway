@@ -104,20 +104,20 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
     private readonly HttpClient _httpClient;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
-    private readonly ICoreNodeHealthCheckerObserver? _coreNodeHealthCheckerObserver;
+    private readonly IEnumerable<ICoreNodeHealthCheckerObserver> _observers;
 
     public CoreNodeHealthChecker(
         ILogger<CoreNodesSelectorService> logger,
         HttpClient httpClient,
         ILedgerStateQuerier ledgerStateQuerier,
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
-        ICoreNodeHealthCheckerObserver? coreNodeHealthCheckerObserver)
+        IEnumerable<ICoreNodeHealthCheckerObserver> observers)
     {
         _logger = logger;
         _httpClient = httpClient;
         _ledgerStateQuerier = ledgerStateQuerier;
         _networkOptionsMonitor = networkOptionsMonitor;
-        _coreNodeHealthCheckerObserver = coreNodeHealthCheckerObserver;
+        _observers = observers;
     }
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
@@ -166,10 +166,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             unhealthyCount
         );
 
-        if (_coreNodeHealthCheckerObserver != null)
-        {
-            await _coreNodeHealthCheckerObserver.CountByStatus(healthyAndSyncedCount, healthyButLaggingCount, unhealthyCount);
-        }
+        await _observers.ForEachAsync(x => x.CountByStatus(healthyAndSyncedCount, healthyButLaggingCount, unhealthyCount));
 
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
@@ -185,7 +182,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 healthCheckData.CoreApiNode.CoreApiAddress
             );
 
-            _coreNodeHealthCheckerObserver?.NodeUnhealthy(healthCheckData);
+            _observers.ForEach(x => x.NodeUnhealthy(healthCheckData));
 
             return CoreNodeStatus.Unhealthy;
         }
@@ -204,7 +201,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 topOfLedgerStateVersion
             );
 
-            _coreNodeHealthCheckerObserver?.NodeHealthyButLagging(healthCheckData);
+            _observers.ForEach(x => x.NodeHealthyButLagging(healthCheckData));
 
             return CoreNodeStatus.HealthyButLagging;
         }
@@ -218,7 +215,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             topOfLedgerStateVersion
         );
 
-        _coreNodeHealthCheckerObserver?.NodeHealthyAndSynced(healthCheckData);
+        _observers.ForEach(x => x.NodeHealthyAndSynced(healthCheckData));
 
         return CoreNodeStatus.HealthyAndSynced;
     }

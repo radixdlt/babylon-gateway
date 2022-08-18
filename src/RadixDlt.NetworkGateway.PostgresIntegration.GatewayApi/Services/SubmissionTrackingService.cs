@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -79,12 +80,12 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQuerier
 {
     private readonly ReadWriteDbContext _dbContext;
-    private readonly ISubmissionTrackingServiceObserver? _observer;
+    private readonly IEnumerable<ISubmissionTrackingServiceObserver> _observers;
 
-    public SubmissionTrackingService(ReadWriteDbContext dbContext, ISubmissionTrackingServiceObserver? observer)
+    public SubmissionTrackingService(ReadWriteDbContext dbContext, IEnumerable<ISubmissionTrackingServiceObserver> observers)
     {
         _dbContext = dbContext;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task<MempoolTrackGuidance> TrackInitialSubmission(
@@ -128,11 +129,7 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
         try
         {
             await _dbContext.SaveChangesAsync();
-
-            if (_observer != null)
-            {
-                await _observer.PostMempoolTransactionAdded();
-            }
+            await _observers.ForEachAsync(x => x.PostMempoolTransactionAdded());
 
             return new MempoolTrackGuidance(ShouldSubmitToNode: true);
         }
@@ -155,13 +152,9 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
             throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
         }
 
-        if (_observer != null)
-        {
-            await _observer.PostMempoolTransactionMarkedAsFailed();
-        }
-
         mempoolTransaction.MarkAsFailed(failureReason, failureExplanation);
 
+        await _observers.ForEachAsync(x => x.PostMempoolTransactionMarkedAsFailed());
         await _dbContext.SaveChangesAsync();
     }
 

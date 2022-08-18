@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -86,7 +87,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
-    private readonly ILedgerStateQuerierObserver? _observer;
+    private readonly IEnumerable<ILedgerStateQuerierObserver> _observers;
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
@@ -94,14 +95,14 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         INetworkConfigurationProvider networkConfigurationProvider,
         IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
         IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor,
-        ILedgerStateQuerierObserver? observer)
+        IEnumerable<ILedgerStateQuerierObserver> observers)
     {
         _logger = logger;
         _dbContext = dbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
         _endpointOptionsMonitor = endpointOptionsMonitor;
         _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task<GatewayResponse> GetGatewayState()
@@ -137,10 +138,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
-        if (_observer != null)
-        {
-            await _observer.LedgerRoundTimestampClockSkew(timestampDiff);
-        }
+        await _observers.ForEachAsync(x => x.LedgerRoundTimestampClockSkew(timestampDiff));
 
         if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ReadRequestAcceptableDbLedgerLagSeconds)
         {
@@ -197,10 +195,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
         var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
 
-        if (_observer != null)
-        {
-            await _observer.LedgerRoundTimestampClockSkew(timestampDiff);
-        }
+        await _observers.ForEachAsync(x => x.LedgerRoundTimestampClockSkew(timestampDiff));
 
         if (timestampDiff.TotalSeconds <= acceptableLedgerLag.ConstructionRequestsAcceptableDbLedgerLagSeconds)
         {

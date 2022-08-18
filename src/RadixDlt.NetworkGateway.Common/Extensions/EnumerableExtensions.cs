@@ -65,6 +65,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.Common.Extensions;
 
@@ -132,5 +133,52 @@ public static class EnumerableExtensions
             .OrderByDescending(x => x.Result)
             .Select(x => x.Item)
             .ToList();
+    }
+
+    public static void ForEach<T>(this IEnumerable<T> source, Action<T> callback)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(callback);
+
+        var array = source.ToArray();
+
+        if (array.Length == 0)
+        {
+            return;
+        }
+
+        if (array.Length == 1)
+        {
+            callback(array[0]);
+
+            return;
+        }
+
+        foreach (var x in array)
+        {
+            callback(x);
+        }
+    }
+
+    public static async ValueTask ForEachAsync<T>(this IEnumerable<T> source, Func<T, ValueTask> callback)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(callback);
+
+        var array = source.ToArray();
+
+        if (array.Length == 0)
+        {
+            return;
+        }
+
+        if (array.Length == 1)
+        {
+            await callback(array[0]);
+
+            return;
+        }
+
+        await Task.WhenAll(array.Select(x => callback(x).AsTask()).ToArray());
     }
 }

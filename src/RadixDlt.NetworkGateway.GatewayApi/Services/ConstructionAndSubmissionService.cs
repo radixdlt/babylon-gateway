@@ -72,6 +72,7 @@ using RadixDlt.NetworkGateway.Common.StaticHelpers;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -98,7 +99,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly ILogger<ConstructionAndSubmissionService> _logger;
-    private readonly IConstructionAndSubmissionServiceObserver? _observer;
+    private readonly IEnumerable<IConstructionAndSubmissionServiceObserver> _observers;
 
     public ConstructionAndSubmissionService(
         IValidations validations,
@@ -106,40 +107,31 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         INetworkConfigurationProvider networkConfigurationProvider,
         ISubmissionTrackingService submissionTrackingService,
         ILogger<ConstructionAndSubmissionService> logger,
-        IConstructionAndSubmissionServiceObserver? observer = null)
+        IEnumerable<IConstructionAndSubmissionServiceObserver> observers)
     {
         _validations = validations;
         _coreApiHandler = coreApiHandler;
         _networkConfigurationProvider = networkConfigurationProvider;
         _submissionTrackingService = submissionTrackingService;
         _logger = logger;
-        _observer = observer;
+        _observers = observers;
     }
 
     public async Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
     {
-        if (_observer != null)
-        {
-            await _observer.PreHandleBuildRequest(request, ledgerState);
-        }
+        await _observers.ForEachAsync(x => x.PreHandleBuildRequest(request, ledgerState));
 
         try
         {
             var response = await HandleBuildAndCreateResponse(request, ledgerState);
 
-            if (_observer != null)
-            {
-                await _observer.PostHandleBuildRequest(request, ledgerState, response);
-            }
+            await _observers.ForEachAsync(x => x.PostHandleBuildRequest(request, ledgerState, response));
 
             return response;
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.HandleBuildRequestFailed(request, ledgerState, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleBuildRequestFailed(request, ledgerState, ex));
 
             throw;
         }
@@ -147,28 +139,19 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
     public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request)
     {
-        if (_observer != null)
-        {
-            await _observer.PreHandleFinalizeRequest(request);
-        }
+        await _observers.ForEachAsync(x => x.PreHandleFinalizeRequest(request));
 
         try
         {
             var response = await HandleFinalizeAndCreateResponse(request);
 
-            if (_observer != null)
-            {
-                await _observer.PostHandleFinalizeRequest(request, response);
-            }
+            await _observers.ForEachAsync(x => x.PostHandleFinalizeRequest(request, response));
 
             return response;
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.HandleFinalizeRequestFailed(request, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleFinalizeRequestFailed(request, ex));
 
             throw;
         }
@@ -176,28 +159,19 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
     public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request)
     {
-        if (_observer != null)
-        {
-            await _observer.PreHandleSubmitRequest(request);
-        }
+        await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
 
         try
         {
             var response = await HandleSubmitAndCreateResponse(request);
 
-            if (_observer != null)
-            {
-                await _observer.PostHandleSubmitRequest(request, response);
-            }
+            await _observers.ForEachAsync(x => x.PostHandleSubmitRequest(request, response));
 
             return response;
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.HandleSubmitRequestFailed(request, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleSubmitRequestFailed(request, ex));
 
             throw;
         }
@@ -331,28 +305,19 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
-            if (_observer != null)
-            {
-                await _observer.ParseTransactionFailedSubstateNotFound(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedSubstateNotFound(signedTransaction, ex));
 
             throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
-            if (_observer != null)
-            {
-                await _observer.ParseTransactionFailedInvalidTransaction(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedInvalidTransaction(signedTransaction, ex));
 
             throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
         }
         catch (Exception ex)
         {
-            if (_observer != null)
-            {
-                await _observer.ParseTransactionFailedUnknown(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedUnknown(signedTransaction, ex));
 
             throw;
         }
@@ -379,10 +344,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         if (mempoolTrackGuidance.TransactionAlreadyFailedReason != null)
         {
-            if (_observer != null)
-            {
-                await _observer.SubmissionAlreadyFailed(signedTransaction, mempoolTrackGuidance);
-            }
+            await _observers.ForEachAsync(x => x.SubmissionAlreadyFailed(signedTransaction, mempoolTrackGuidance));
 
             throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
                 signedTransaction.AsString,
@@ -392,10 +354,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
         if (!mempoolTrackGuidance.ShouldSubmitToNode)
         {
-            if (_observer != null)
-            {
-                await _observer.SubmissionAlreadySubmitted(signedTransaction, mempoolTrackGuidance);
-            }
+            await _observers.ForEachAsync(x => x.SubmissionAlreadySubmitted(signedTransaction, mempoolTrackGuidance));
 
             return;
         }
@@ -412,25 +371,16 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
 
             if (result.Duplicate)
             {
-                if (_observer != null)
-                {
-                    await _observer.SubmissionDuplicate(signedTransaction, result);
-                }
+                await _observers.ForEachAsync(x => x.SubmissionDuplicate(signedTransaction, result));
             }
             else
             {
-                if (_observer != null)
-                {
-                    await _observer.SubmissionSucceeded(signedTransaction, result);
-                }
+                await _observers.ForEachAsync(x => x.SubmissionSucceeded(signedTransaction, result));
             }
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
-            if (_observer != null)
-            {
-                await _observer.HandleSubmissionFailedSubstateNotFound(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedSubstateNotFound(signedTransaction, ex));
 
             await _submissionTrackingService.MarkAsFailed(
                 transactionIdentifierHash,
@@ -442,10 +392,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
         {
-            if (_observer != null)
-            {
-                await _observer.HandleSubmissionFailedInvalidTransaction(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedInvalidTransaction(signedTransaction, ex));
 
             await _submissionTrackingService.MarkAsFailed(
                 transactionIdentifierHash,
@@ -458,11 +405,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
         {
             // Any other known Core exception which can't result in the transaction being submitted
-
-            if (_observer != null)
-            {
-                await _observer.HandleSubmissionFailedPermanently(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(signedTransaction, ex));
 
             await _submissionTrackingService.MarkAsFailed(
                 transactionIdentifierHash,
@@ -474,10 +417,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         }
         catch (OperationCanceledException ex)
         {
-            if (_observer != null)
-            {
-                await _observer.HandleSubmissionFailedTimeout(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(signedTransaction, ex));
 
             _logger.LogWarning(
                 ex,
@@ -491,11 +431,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
             // In theory, the transaction could have been submitted -- so we return success and
             // if it wasn't submitted successfully, it'll be retried automatically by the resubmission service in
             // any case.
-
-            if (_observer != null)
-            {
-                await _observer.HandleSubmissionFailedUnknown(signedTransaction, ex);
-            }
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedUnknown(signedTransaction, ex));
 
             _logger.LogWarning(
                 ex,

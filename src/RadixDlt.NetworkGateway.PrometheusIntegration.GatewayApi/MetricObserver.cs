@@ -124,7 +124,7 @@ public class MetricObserver :
             "Number of mempool transactions marked as failed during initial submission to a node"
         );
 
-    void IExceptionObserver.OnExceptionXxx(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException)
+    void IExceptionObserver.OnException(ActionContext actionContext, Exception exception, KnownGatewayErrorException gatewayErrorException)
     {
         // actionContext.HttpContext.Request.Method - GET or POST
         var routeValueDictionary = actionContext.RouteData.Values;
