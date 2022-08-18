@@ -62,6 +62,8 @@
  * permissions under this License.
  */
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Common;
@@ -88,6 +90,15 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
             .AddValidatableOptionsAtSection<NetworkOptions, NetworkOptionsValidator>("GatewayApi:Network")
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");
+
+        services
+            .AddValidatorsFromAssemblyContaining(typeof(ServiceCollectionExtensions))
+            .AddFluentValidationAutoValidation(o =>
+            {
+                // our own validators replicate all the basic rules defined by System.ComponentModel.DataAnnotations
+                // in order to avoid duplicated validation messages we disable this built-in mechanism
+                o.DisableDataAnnotationsValidation = true;
+            });
 
         // Singleton-Scoped services
         AddSingletonServices(services);

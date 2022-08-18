@@ -3,6 +3,10 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
+  
+    <ItemGroup>
+        <PackageReference Include="FluentValidation.AspNetCore" />  
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj" />
