@@ -1,11 +1,10 @@
 using GatewayApi;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Core.Database;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
@@ -35,6 +34,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
                 config.AddEnvironmentVariables();
+                config.AddJsonFile("appsettings.Development.json", false, true);
             })
             .UseStartup<GatewayApiStartup>();
 
