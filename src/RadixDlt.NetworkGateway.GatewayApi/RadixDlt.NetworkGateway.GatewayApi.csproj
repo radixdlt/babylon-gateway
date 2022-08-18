@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
   
-    <ItemGroup>
-        <PackageReference Include="FluentValidation.AspNetCore" />  
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" />  
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj" />
-        <ProjectReference Include="..\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj" />
+    <ProjectReference Include="..\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
+  </ItemGroup>
 
 </Project>

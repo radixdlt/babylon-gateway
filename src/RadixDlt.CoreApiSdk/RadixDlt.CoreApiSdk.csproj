@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <!-- restore once OAS generator suppport is added -->
-        <Nullable>disable</Nullable>
-      
-        <!-- auto-generated files are messy, not ideal but acceptable tradeoff -->
-        <RunAnalyzers>false</RunAnalyzers>
-        <NoWarn>CS0108,CS0618</NoWarn>
-    </PropertyGroup>
+  <PropertyGroup>
+    <!-- restore once OAS generator suppport is added -->
+    <Nullable>disable</Nullable>
+    
+    <!-- auto-generated files are messy, not ideal but acceptable tradeoff -->
+    <RunAnalyzers>false</RunAnalyzers>
+    <NoWarn>CS0108,CS0618</NoWarn>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="JsonSubTypes" />
-        <PackageReference Include="Newtonsoft.Json" />
-        <PackageReference Include="Polly" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="JsonSubTypes" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Polly" />
+  </ItemGroup>
 
 </Project>

@@ -1,48 +1,49 @@
 <Project>
-    <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
-    <ItemGroup>
-        <!-- PRODUCTION DEPENDENCIES -->
 
-        <!-- PUBLIC NUGET: Microsoft -->
-        <PackageVersion Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
-        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.7" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7" />
-        <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.7" />
-        <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.7" />
-        <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.7" />
+  <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
+  <ItemGroup>
+    <!-- PRODUCTION DEPENDENCIES -->
 
-        <!-- PUBLIC NUGET: Non-Microsoft -->
-        <PackageVersion Include="FluentAssertions" Version="6.7.0" />
-        <PackageVersion Include="FluentValidation" Version="11.1.0" />
-        <PackageVersion Include="FluentValidation.AspNetCore" Version="11.1.0" />
-        <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
-        <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageVersion Include="Polly" Version="7.2.3" />
-        <PackageVersion Include="NodaTime" Version="3.1.0" />
-        <PackageVersion Include="NodaTime.Serialization.JsonNet" Version="3.0.0" />
-        <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.5" />
-        <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="6.0.5" />
-        <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
-        <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-        <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
-        <PackageVersion Include="prometheus-net" Version="6.0.0" />
-        <PackageVersion Include="prometheus-net.AspNetCore" Version="6.0.0" />
-        <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
+    <!-- PUBLIC NUGET: Microsoft -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.7" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.7" />
 
-        <!-- NON-PRODUCTION DEPENDENCIES -->
+    <!-- PUBLIC NUGET: Non-Microsoft -->
+    <PackageVersion Include="FluentAssertions" Version="6.7.0" />
+    <PackageVersion Include="FluentValidation" Version="11.1.0" />
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.1.0" />
+    <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="Polly" Version="7.2.3" />
+    <PackageVersion Include="NodaTime" Version="3.1.0" />
+    <PackageVersion Include="NodaTime.Serialization.JsonNet" Version="3.0.0" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.5" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="6.0.5" />
+    <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
+    <PackageVersion Include="prometheus-net" Version="6.0.0" />
+    <PackageVersion Include="prometheus-net.AspNetCore" Version="6.0.0" />
+    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
 
-        <!-- PUBLIC NUGET: Microsoft -->
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-        <PackageVersion Include="xunit" Version="2.4.1" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
-        <PackageVersion Include="coverlet.collector" Version="3.1.2" />
+    <!-- NON-PRODUCTION DEPENDENCIES -->
 
-        <!-- PUBLIC NUGET: Non-Microsoft -->
-        <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
+    <!-- PUBLIC NUGET: Microsoft -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageVersion Include="xunit" Version="2.4.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="coverlet.collector" Version="3.1.2" />
 
-    </ItemGroup>
+    <!-- PUBLIC NUGET: Non-Microsoft -->
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
+  </ItemGroup>
+
 </Project>

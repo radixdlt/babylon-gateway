@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
-        <PackageReference Include="prometheus-net" />
-        <PackageReference Include="prometheus-net.AspNetCore" />
-        <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" />
-        <PackageReference Include="Swashbuckle.AspNetCore" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+    <PackageReference Include="prometheus-net" />
+    <PackageReference Include="prometheus-net.AspNetCore" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
-        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi.csproj" />
-        <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi.csproj" />
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi.csproj" />
+  </ItemGroup>
 
 </Project>

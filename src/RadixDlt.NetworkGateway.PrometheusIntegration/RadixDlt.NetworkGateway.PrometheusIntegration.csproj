@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <ItemGroup>
-        <PackageReference Include="prometheus-net" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="prometheus-net" />
+  </ItemGroup>
 
 </Project>
