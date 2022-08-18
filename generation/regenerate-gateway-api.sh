@@ -13,10 +13,7 @@ cd "$SCRIPT_DIR"
 #############
 
 packageName='RadixDlt.NetworkGateway.GatewayApiSdk'
-outputDirectory="../generated-dependencies"
 specLocation='../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml'
-
-patchVersion="$1" # Patch version override as first command line parameter
 
 ################
 # CALCULATIONS #
@@ -49,23 +46,19 @@ dummyApiDirectory="$TMPDIR/radix-api-generation/"
 rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
-## A note on settings used, and fixes:
-# - Unlike with the Core API (where we need to preserve 0s on our request objects)
-#   we need to not include nulls on our responses. So I've removed the additional option optionalEmitDefaultValues=true
-# - Instead, I've forked the generator to set EmitDefaultValues to true for required properties (https://github.com/OpenAPITools/openapi-generator/pull/11607).
-# - nullableReferenceTypes is set to false, because it adds the assembly attribute without actually making non-required types nullable
-
-# Use the local forked generator - built from this PR: https://github.com/OpenAPITools/openapi-generator/pull/11607
-# TODO NG-64: This can be replaced by either templates (https://openapi-generator.tech/docs/templating) and/or upstream changes / fixes
+# We're using our own build/package as OpenAPITools hasn't released develop version with few critical bugfixes yet!
 java -jar ./openapi-generator-cli-PR13049.jar \
     generate \
     -i "$specLocation" \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net6.0,packageVersion=$packageVersion,nullableReferenceTypes=true
+    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useDateTimeOffset=true
 
+rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
 rm "../src/${packageName}/generated/${packageName}.csproj"
+
+./ensure-license-headers.sh
 
 echo "Done"

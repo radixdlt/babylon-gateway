@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
   
-    <ItemGroup>
-        <ProjectReference Include="..\RadixDlt.NetworkGateway.Core\RadixDlt.NetworkGateway.Core.csproj" />
-    </ItemGroup>
-  
+  <ItemGroup>
+    <ProjectReference Include="..\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
+  </ItemGroup>
+
 </Project>

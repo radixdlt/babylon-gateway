@@ -64,13 +64,15 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.Addressing;
-using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
@@ -86,9 +88,10 @@ public class NodeNetworkConfigurationInitializer : NodeInitializer
         IOptionsMonitor<NetworkOptions> networkGatewayDataAggregatorOptionsMonitor,
         INetworkConfigurationReader networkConfigurationReader,
         INetworkConfigurationProvider networkConfigurationProvider,
-        ILogger<NodeNetworkConfigurationInitializer> logger
+        ILogger<NodeNetworkConfigurationInitializer> logger,
+        IEnumerable<INodeInitializerObserver> observers
     )
-        : base(nodeConfigProvider.CoreApiNode.Name)
+        : base(nodeConfigProvider.CoreApiNode.Name, observers)
     {
         _networkGatewayDataAggregatorOptionsMonitor = networkGatewayDataAggregatorOptionsMonitor;
         _networkConfigurationReader = networkConfigurationReader;
@@ -107,37 +110,12 @@ public class NodeNetworkConfigurationInitializer : NodeInitializer
             );
         }
 
-        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(
-            MapNetworkConfigurationResponse(networkConfiguration),
-            token
-        );
+        await _networkConfigurationProvider.SetNetworkConfigurationOrAssertMatching(networkConfiguration, token);
 
         _logger.LogInformation(
             "The node has network name {NodeNetworkName}, with matching config to db ledger and/or any other nodes",
             networkConfiguration.NetworkIdentifier.Network
         );
-    }
-
-    private static NetworkConfiguration MapNetworkConfigurationResponse(
-        NetworkConfigurationResponse networkConfiguration
-    )
-    {
-        var hrps = networkConfiguration.Bech32HumanReadableParts;
-        return new NetworkConfiguration
-        {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
-            NetworkAddressHrps = new NetworkAddressHrps
-            {
-                AccountHrp = hrps.AccountHrp,
-                ResourceHrpSuffix = hrps.ResourceHrpSuffix,
-                ValidatorHrp = hrps.ValidatorHrp,
-                NodeHrp = hrps.NodeHrp,
-            },
-            WellKnownAddresses = new WellKnownAddresses
-            {
-                XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
-            },
-        };
     }
 
     private async Task<NetworkConfigurationResponse> ReadNetworkConfigurationFromNode(CancellationToken token)

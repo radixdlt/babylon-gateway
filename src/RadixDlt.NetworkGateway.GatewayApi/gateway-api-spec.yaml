@@ -325,12 +325,16 @@ components:
       properties:
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        from_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
         cursor:
           description: This cursor allows forward pagination, by providing the cursor from the previous request.
           type: string
+          nullable: true
         limit:
           description: The page size requested. The maximum value is 30 at present.
           type: integer
+          nullable: true
       example:
         limit: 10
     RecentTransactionsResponse:
@@ -536,22 +540,27 @@ components:
           type: integer
           format: int64
     PartialLedgerStateIdentifier:
-      description: Optional. Allows a client to request a response referencing an earlier ledger state.
+      description: Optional. Allows a client to request a response referencing an earlier (`at_*` properties) or later (`from_*` properties) ledger state.
       type: object
       nullable: true
       properties:
-        version:
+        state_version:
           description: If the version is provided, the latest ledger state <= the given version is returned.
+          nullable: true
           type: integer
           format: int64
         timestamp:
           description: If a timestamp is provided, the latest ledger state <= the given timestamp is returned.
+          nullable: true
           type: string
+          format: date-time
         epoch:
           description: If an epoch is provided, the ledger state at the given epoch <= the given round (else round 0) is returned.
+          nullable: true
           type: integer
           format: int64
         round:
+          nullable: true
           type: integer
           format: int64
     TransactionStatusRequest:

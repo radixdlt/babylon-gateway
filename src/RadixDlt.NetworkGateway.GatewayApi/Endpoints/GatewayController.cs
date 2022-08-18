@@ -63,8 +63,9 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 

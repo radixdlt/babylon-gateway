@@ -62,23 +62,25 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
-using RadixDlt.NetworkGateway.Core.Database;
-using RadixDlt.NetworkGateway.Core.Exceptions;
-using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.Core.Utilities;
-using RadixDlt.NetworkGateway.Core.Workers;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Exceptions;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Utilities;
+using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
@@ -97,20 +99,13 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
             delayAfterErrorExponentialRate: 2,
             maxDelayAfterError: TimeSpan.FromSeconds(30));
 
-    private static readonly Counter _fullTransactionsFetchedCount = Metrics
-        .CreateCounter(
-            "ng_node_mempool_full_transactions_fetched_count",
-            "Count of transaction contents fetched from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node", "is_duplicate" } }
-        );
-
     private readonly ILogger<NodeMempoolFullTransactionReaderWorker> _logger;
     private readonly IServiceProvider _services;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
+    private readonly IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> _observers;
 
     // NB - So that we can get new transient dependencies each iteration (such as the HttpClients)
     //      we create such dependencies from the service provider.
@@ -119,19 +114,19 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IServiceProvider services,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         INetworkConfigurationProvider networkConfigurationProvider,
-        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IMempoolTrackerService mempoolTrackerService,
-        INodeConfigProvider nodeConfig
-    )
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        INodeConfigProvider nodeConfig,
+        IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> observers,
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
     {
         _logger = logger;
         _services = services;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _dbContextFactory = dbContextFactory;
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
+        _observers = observers;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -151,7 +146,6 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     {
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
-        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // We duplicate this call from the TransactionIdsReader for simplicity, to mean the workers don't need
         // to sync up. This should be a cheap call to the Core API.
@@ -221,7 +215,8 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
                 if (transactionData != null)
                 {
                     var wasDuplicate = !_mempoolTrackerService.SubmitTransactionContents(transactionData);
-                    _fullTransactionsFetchedCount.WithLabels(_nodeConfig.CoreApiNode.Name, wasDuplicate ? "true" : "false").Inc();
+
+                    await _observers.ForEachAsync(x => x.FullTransactionsFetchedCount(_nodeConfig.CoreApiNode.Name, wasDuplicate));
 
                     if (wasDuplicate)
                     {

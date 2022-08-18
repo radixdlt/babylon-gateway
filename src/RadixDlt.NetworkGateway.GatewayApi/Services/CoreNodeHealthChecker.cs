@@ -64,11 +64,16 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Prometheus;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
-using CoreApiModel = RadixCoreApi.Generated.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreApiModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -95,35 +100,24 @@ public enum CoreNodeStatus
 /// </summary>
 public class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
-    private static readonly Gauge _healthCheckStatusByNode = Metrics
-        .CreateGauge(
-            "ng_node_gateway_health_check_status",
-            "The health check status of an individual node. 1 if healthy and synced, 0.5 if health but lagging, 0 if unhealthy",
-            new GaugeConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Gauge _healthCheckCountsAcrossAllNodes = Metrics
-        .CreateGauge(
-            "ng_nodes_gateway_health_check_node_statuses",
-            "The health check status of all nodes. Statuses are HEALTHY_AND_SYNCED, HEALTHY_BUT_LAGGING, UNHEALTHY",
-            new GaugeConfiguration { LabelNames = new[] { "status" } }
-        );
-
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
+    private readonly IEnumerable<ICoreNodeHealthCheckerObserver> _observers;
 
     public CoreNodeHealthChecker(
         ILogger<CoreNodesSelectorService> logger,
         HttpClient httpClient,
         ILedgerStateQuerier ledgerStateQuerier,
-        IOptionsMonitor<NetworkOptions> networkOptionsMonitor)
+        IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
+        IEnumerable<ICoreNodeHealthCheckerObserver> observers)
     {
         _logger = logger;
         _httpClient = httpClient;
         _ledgerStateQuerier = ledgerStateQuerier;
         _networkOptionsMonitor = networkOptionsMonitor;
+        _observers = observers;
     }
 
     public async Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
@@ -143,12 +137,12 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
             .Select(n => GetCoreNodeStateVersion(n, cancellationToken));
 
-        var ledgerStateVersionTask = _ledgerStateQuerier.GetLedgerStatus();
+        var topOfLedgerStateVersionTask = _ledgerStateQuerier.GetTopOfLedgerStateVersion();
 
         var nodesStateVersions = (await Task.WhenAll(enabledCoreNodeStateVersionLookupTasks))
             .ToDictionary(p => p.CoreApiNode, p => (p.CoreApiNode, p.StateVersion, p.Exception));
 
-        var topOfLedgerStateVersion = (await ledgerStateVersionTask).TopOfLedgerStateVersion;
+        var topOfLedgerStateVersion = await topOfLedgerStateVersionTask;
 
         var coreNodesByStatus = nodesStateVersions
             .Select(kv => (CoreApiNode: kv.Key, Status: DetermineNodeStatus(kv.Value, topOfLedgerStateVersion)))
@@ -171,14 +165,13 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             healthyButLaggingCount,
             unhealthyCount
         );
-        _healthCheckCountsAcrossAllNodes.WithLabels("HEALTHY_AND_SYNCED").Set(healthyAndSyncedCount);
-        _healthCheckCountsAcrossAllNodes.WithLabels("HEALTHY_BUT_LAGGING").Set(healthyButLaggingCount);
-        _healthCheckCountsAcrossAllNodes.WithLabels("UNHEALTHY").Set(unhealthyCount);
+
+        await _observers.ForEachAsync(x => x.CountByStatus(healthyAndSyncedCount, healthyButLaggingCount, unhealthyCount));
 
         return new CoreNodeHealthResult(coreNodesByStatus);
     }
 
-    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
+    private CoreNodeStatus DetermineNodeStatus((Configuration.CoreApiNode CoreApiNode, long? NodeStateVersion, System.Exception? Exception) healthCheckData, long topOfLedgerStateVersion)
     {
         if (healthCheckData.NodeStateVersion == null)
         {
@@ -188,7 +181,9 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 healthCheckData.CoreApiNode.Name,
                 healthCheckData.CoreApiNode.CoreApiAddress
             );
-            _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0);
+
+            _observers.ForEach(x => x.NodeUnhealthy(healthCheckData));
+
             return CoreNodeStatus.Unhealthy;
         }
 
@@ -205,7 +200,9 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 maxAcceptableLag,
                 topOfLedgerStateVersion
             );
-            _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(0.5);
+
+            _observers.ForEach(x => x.NodeHealthyButLagging(healthCheckData));
+
             return CoreNodeStatus.HealthyButLagging;
         }
 
@@ -217,7 +214,9 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
             maxAcceptableLag,
             topOfLedgerStateVersion
         );
-        _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
+
+        _observers.ForEach(x => x.NodeHealthyAndSynced(healthCheckData));
+
         return CoreNodeStatus.HealthyAndSynced;
     }
 

@@ -64,15 +64,18 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.Exceptions;
-using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.Core.Utilities;
-using RadixDlt.NetworkGateway.Core.Workers;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common.Exceptions;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Utilities;
+using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
@@ -89,30 +92,12 @@ public class NodeTransactionLogWorker : NodeWorker
             delayAfterErrorExponentialRate: 2,
             maxDelayAfterError: TimeSpan.FromSeconds(30));
 
-    private static readonly Counter _failedFetchLoopsUnlabeled = Metrics
-        .CreateCounter(
-            "ng_node_fetch_transaction_batch_loop_error_total",
-            "Number of fetch loop errors that failed.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
-    private static readonly Histogram _totalFetchTimeSecondsUnlabeled = Metrics
-        .CreateHistogram(
-            "ng_node_fetch_transaction_batch_time_seconds",
-            "Total time to fetch a batch of transactions.",
-            new HistogramConfiguration
-            {
-                LabelNames = new[] { "node" },
-            }
-        );
-
     /* Dependencies */
     private readonly ILogger<NodeTransactionLogWorker> _logger;
     private readonly ILedgerConfirmationService _ledgerConfirmationService;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IServiceProvider _services;
-    private readonly Counter.Child _failedFetchLoops;
-    private readonly Histogram.Child _totalFetchTimeSeconds;
+    private readonly IEnumerable<INodeTransactionLogWorkerObserver> _observers;
 
     /* Properties */
     private string NodeName => _nodeConfigProvider.CoreApiNode.Name;
@@ -123,16 +108,17 @@ public class NodeTransactionLogWorker : NodeWorker
         ILogger<NodeTransactionLogWorker> logger,
         ILedgerConfirmationService ledgerConfirmationService,
         INodeConfigProvider nodeConfigProvider,
-        IServiceProvider services
+        IServiceProvider services,
+        IEnumerable<INodeTransactionLogWorkerObserver> observers,
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers
     )
-        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;
         _nodeConfigProvider = nodeConfigProvider;
         _services = services;
-        _failedFetchLoops = _failedFetchLoopsUnlabeled.WithLabels(NodeName);
-        _totalFetchTimeSeconds = _totalFetchTimeSecondsUnlabeled.WithLabels(NodeName);
+        _observers = observers;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -142,7 +128,16 @@ public class NodeTransactionLogWorker : NodeWorker
 
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await _failedFetchLoops.CountExceptionsAsync(() => FetchAndSubmitTransactions(cancellationToken));
+        try
+        {
+            await FetchAndSubmitTransactions(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.DoWorkFailed(NodeName, ex));
+
+            throw;
+        }
     }
 
     private async Task FetchAndSubmitTransactions(CancellationToken cancellationToken)
@@ -212,7 +207,7 @@ public class NodeTransactionLogWorker : NodeWorker
             () => FetchTransactionsOrEmptyList(fromStateVersion, transactionsToPull, cancellationToken)
         );
 
-        _totalFetchTimeSeconds.Observe(fetchTransactionsMs / 1000D);
+        await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
 
         if (transactions.Count > 0)
         {

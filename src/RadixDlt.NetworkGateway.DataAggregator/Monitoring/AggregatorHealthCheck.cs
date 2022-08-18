@@ -64,44 +64,38 @@
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.Core.Utilities;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 public class AggregatorHealthCheck : IHealthCheck
 {
-    private static readonly Gauge _aggregatorIsUnhealthy = Metrics
-        .CreateGauge(
-            "ng_aggregator_is_unhealthy_info",
-            "0 if the aggregator is healthy (has committed recently or is not the primary), 1 if it's unhealthy [as of the last health check]."
-        );
-
-    private static readonly Gauge _aggregatorIsPrimary = Metrics
-        .CreateGauge(
-            "ng_aggregator_is_primary_info",
-            "0 if the aggregator is not the write primary, 1 if it is the write primary [as of the last health check]."
-        );
-
     private static readonly LogLimiter _unhealthyLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<AggregatorHealthCheck> _logger;
+    private readonly IEnumerable<IAggregatorHealthCheckObserver> _observers;
 
-    public AggregatorHealthCheck(ISystemStatusService systemStatusService, ILogger<AggregatorHealthCheck> logger)
+    public AggregatorHealthCheck(ISystemStatusService systemStatusService, ILogger<AggregatorHealthCheck> logger, IEnumerable<IAggregatorHealthCheckObserver> observers)
     {
         _systemStatusService = systemStatusService;
         _logger = logger;
+        _observers = observers;
     }
 
     /// <summary>
     /// This is called whenever a client requests /health, or failing that, every 30 seconds (by the framework).
     /// </summary>
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
 
-        RecordHealthReport(healthReport.IsHealthy);
+        await _observers.ForEachAsync(x => x.HealthReport(healthReport.IsHealthy, _systemStatusService.IsPrimary()));
 
         if (healthReport.IsHealthy)
         {
@@ -116,18 +110,8 @@ public class AggregatorHealthCheck : IHealthCheck
             );
         }
 
-        return Task.FromResult(
-            healthReport.IsHealthy
+        return healthReport.IsHealthy
             ? HealthCheckResult.Healthy(healthReport.Reason)
-            : HealthCheckResult.Unhealthy(healthReport.Reason)
-        );
-    }
-
-    private void RecordHealthReport(bool isHealthy)
-    {
-        var isPrimary = _systemStatusService.IsPrimary();
-
-        _aggregatorIsUnhealthy.Set(!isHealthy ? 1 : 0);
-        _aggregatorIsPrimary.Set(isPrimary ? 1 : 0);
+            : HealthCheckResult.Unhealthy(healthReport.Reason);
     }
 }

@@ -1,7 +1,7 @@
 # Custom gitignore
 .postgresdata/
 .postgresdata_backup*/
-appsettings.DevelopmentOverrides.json
+*.overrides.json
 
 # Rider gitignore
 

@@ -62,19 +62,19 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Core.Addressing;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
-using RadixDlt.NetworkGateway.Core.Database;
-using RadixDlt.NetworkGateway.Core.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Common.Addressing;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using CoreModel = RadixCoreApi.Generated.Model;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
-    Task LoadNetworkConfigurationFromDatabase(ReadOnlyDbContext dbContext, CancellationToken token);
+    Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
 
     string GetNetworkName();
 
@@ -83,32 +83,36 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     TokenIdentifier GetXrdTokenIdentifier();
 }
 
+public record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
+
+public interface ICapturedConfigProvider
+{
+    Task<CapturedConfig> CaptureConfiguration();
+}
+
 public class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private readonly object _writeLock = new();
     private CapturedConfig? _capturedConfig;
 
-    private record CapturedConfig(
-        NetworkConfiguration NetworkConfiguration,
-        AddressHrps AddressHrps,
-        CoreModel.NetworkIdentifier CoreNetworkIdentifier,
-        TokenIdentifier XrdTokenIdentifier
-    );
-
-    public async Task LoadNetworkConfigurationFromDatabase(ReadOnlyDbContext dbContext, CancellationToken token)
+    public async Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token)
     {
-        var networkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(dbContext, token);
-        if (networkConfiguration == null)
-        {
-            throw new Exception("Can't set current configuration from database as it's not there");
-        }
+        var capturedConfig = await capturedConfigProvider.CaptureConfiguration();
 
-        EnsureNetworkConfigurationCaptured(networkConfiguration);
+        lock (_writeLock)
+        {
+            if (_capturedConfig != null)
+            {
+                return;
+            }
+
+            _capturedConfig = capturedConfig;
+        }
     }
 
     public string GetNetworkName()
     {
-        return GetCapturedConfig().NetworkConfiguration.NetworkDefinition.NetworkName;
+        return GetCapturedConfig().NetworkName;
     }
 
     public CoreModel.NetworkIdentifier GetCoreNetworkIdentifier()
@@ -123,7 +127,7 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     public string GetXrdAddress()
     {
-        return GetCapturedConfig().NetworkConfiguration.WellKnownAddresses.XrdAddress;
+        return GetCapturedConfig().XrdAddress;
     }
 
     public TokenIdentifier GetXrdTokenIdentifier()
@@ -134,28 +138,5 @@ public class NetworkConfigurationProvider : INetworkConfigurationProvider
     private CapturedConfig GetCapturedConfig()
     {
         return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
-    }
-
-    private void EnsureNetworkConfigurationCaptured(NetworkConfiguration inputNetworkConfiguration)
-    {
-        lock (_writeLock)
-        {
-            if (_capturedConfig != null)
-            {
-                return;
-            }
-
-            _capturedConfig = new CapturedConfig(
-                inputNetworkConfiguration,
-                inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-                new CoreModel.NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName),
-                new TokenIdentifier(inputNetworkConfiguration.WellKnownAddresses.XrdAddress)
-            );
-        }
-    }
-
-    private async Task<NetworkConfiguration?> GetCurrentLedgerNetworkConfigurationFromDb(CommonDbContext dbContext, CancellationToken token)
-    {
-        return await dbContext.NetworkConfiguration.AsNoTracking().SingleOrDefaultAsync(token);
     }
 }

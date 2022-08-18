@@ -63,9 +63,10 @@
  */
 
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.Core.Workers;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Workers;
+using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
@@ -82,20 +83,15 @@ public interface INodeWorker : ILoopedWorkerBase
 /// </summary>
 public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 {
-    private static readonly Counter _nodeWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_node_error_count",
-            "Number of errors in node workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "node", "error", "type" } }
-        );
-
+    private readonly IEnumerable<INodeWorkerObserver> _observers;
     private readonly string _nodeName;
 
-    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
+    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs, IEnumerable<INodeWorkerObserver> observers)
         // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
         : base(logger, BehaviourOnFault.Nothing, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
         _nodeName = nodeName;
+        _observers = observers;
     }
 
     public abstract bool IsEnabledByNodeConfiguration();
@@ -107,12 +103,11 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
 
     protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+        _observers.ForEach(x => x.TrackNonFaultingExceptionInWorkLoop(GetType(), _nodeName, ex));
     }
 
     protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _nodeWorkerErrorsCount.WithLabels(GetType().Name, _nodeName, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), _nodeName, ex, isStopRequested));
     }
 }

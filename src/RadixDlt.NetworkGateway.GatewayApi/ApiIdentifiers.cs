@@ -62,14 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using CoreModel = RadixCoreApi.Generated.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Core.Numerics.TokenAmount;
-using Validator = RadixDlt.NetworkGateway.Core.Database.Models.Ledger.Normalization.Validator;
+using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
@@ -83,11 +81,6 @@ public static class ApiIdentifiers
     public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Gateway.TokenIdentifier tokenIdentifier)
     {
         return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
-    }
-
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
-    {
-        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), resource.ResourceIdentifier.AsGatewayTokenIdentifier());
     }
 
     public static string AsXrdString(this Gateway.TokenAmount apiTokenAmount)
@@ -119,19 +112,9 @@ public static class ApiIdentifiers
         return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), rri.AsGatewayTokenIdentifier());
     }
 
-    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this Validator validator)
-    {
-        return new Gateway.ValidatorIdentifier(validator.Address);
-    }
-
     public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this string validatorAddress)
     {
         return new Gateway.ValidatorIdentifier(validatorAddress);
-    }
-
-    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this Resource resource)
-    {
-        return new Gateway.TokenIdentifier(resource.ResourceIdentifier);
     }
 
     public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this string rri)
@@ -139,19 +122,9 @@ public static class ApiIdentifiers
         return new Gateway.TokenIdentifier(rri);
     }
 
-    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this Account account)
-    {
-        return new Gateway.AccountIdentifier(account.Address);
-    }
-
     public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this string accountAddress)
     {
         return new Gateway.AccountIdentifier(accountAddress);
-    }
-
-    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this Account? account)
-    {
-        return account == null ? null : new Gateway.AccountIdentifier(account.Address);
     }
 
     public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this string? accountAddress)

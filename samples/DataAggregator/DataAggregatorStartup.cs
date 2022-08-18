@@ -62,8 +62,15 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator;
+using RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator;
+using RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator;
 
 namespace DataAggregator;
 
@@ -79,7 +86,9 @@ public class DataAggregatorStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayDataAggregator();
+            .AddNetworkGatewayDataAggregator()
+            .UsePostgresPersistence()
+            .UsePrometheusMetrics();
 
         services
             .AddEndpointsApiExplorer();
@@ -87,7 +96,7 @@ public class DataAggregatorStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson();
+            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 
         services
             .AddHealthChecks()

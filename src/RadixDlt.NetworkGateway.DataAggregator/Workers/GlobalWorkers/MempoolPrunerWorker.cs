@@ -63,8 +63,12 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Core.Workers;
+using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
@@ -82,9 +86,10 @@ public class MempoolPrunerWorker : GlobalWorker
 
     public MempoolPrunerWorker(
         ILogger<MempoolPrunerWorker> logger,
-        IMempoolPrunerService mempoolPrunerService
+        IMempoolPrunerService mempoolPrunerService,
+        IEnumerable<IGlobalWorkerObserver> observers
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers)
     {
         _mempoolPrunerService = mempoolPrunerService;
     }

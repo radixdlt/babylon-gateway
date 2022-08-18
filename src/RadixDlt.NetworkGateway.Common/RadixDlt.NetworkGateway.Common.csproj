@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" /> <!-- can't use .Abstractions as we rely on .ValidateOnStart() -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="NodaTime" />
+    <PackageReference Include="NodaTime.Serialization.JsonNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RadixDlt.CoreApiSdk\RadixDlt.CoreApiSdk.csproj" />
+  </ItemGroup>
+
+</Project>

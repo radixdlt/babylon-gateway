@@ -62,11 +62,15 @@
  * permissions under this License.
  */
 
-using Prometheus;
-using RadixCoreApi.Generated.Api;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
@@ -75,30 +79,31 @@ public interface ITransactionLogReader
     Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
 }
 
+public interface ITransactionLogReaderObserver
+{
+    ValueTask GetTransactionsFailed(string nodeName, Exception exception);
+}
+
 public class TransactionLogReader : ITransactionLogReader
 {
-    private static readonly Counter _failedTransactionsFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_fetch_transactions_error_count",
-            "Number of errors fetching transactions from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly TransactionsApi _transactionsApi;
-    private readonly Counter.Child _failedTransactionsFetchCounter;
+    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly IEnumerable<ITransactionLogReaderObserver> _observers;
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<ITransactionLogReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
+        _nodeConfigProvider = nodeConfigProvider;
+        _observers = observers;
         _transactionsApi = coreApiProvider.TransactionsApi;
-        _failedTransactionsFetchCounter = _failedTransactionsFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        return await _failedTransactionsFetchCounter.CountExceptionsAsync(() =>
-            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+        try
+        {
+            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _transactionsApi
                     .TransactionsPostAsync(
                         new CommittedTransactionsRequest(
@@ -108,7 +113,13 @@ public class TransactionLogReader : ITransactionLogReader
                         ),
                         token
                     )
-            )
-        );
+            );
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.GetTransactionsFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+
+            throw;
+        }
     }
 }

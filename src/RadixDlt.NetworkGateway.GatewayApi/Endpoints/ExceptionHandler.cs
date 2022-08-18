@@ -65,14 +65,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.Exceptions;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common.Exceptions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using System.Globalization;
-using CoreModel = RadixCoreApi.Generated.Model;
-using CoreClient = RadixCoreApi.Generated.Client;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
@@ -84,19 +85,14 @@ public interface IExceptionHandler
 
 public class ExceptionHandler : IExceptionHandler
 {
-    private static readonly Counter _apiResponseErrorCount = Metrics
-        .CreateCounter(
-            "ng_gateway_response_error_count",
-            "Count of response errors from the gateway.",
-            new CounterConfiguration { LabelNames = new[] { "method", "controller", "action", "exception", "gateway_error", "status_code" } }
-        );
-
     private readonly ILogger<ExceptionHandler> _logger;
     private readonly LogLevel _knownGatewayErrorLogLevel;
+    private readonly IEnumerable<IExceptionObserver> _observers;
 
-    public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env)
+    public ExceptionHandler(ILogger<ExceptionHandler> logger, IHostEnvironment env, IEnumerable<IExceptionObserver> observers)
     {
         _logger = logger;
+        _observers = observers;
         _knownGatewayErrorLogLevel = env.IsDevelopment() ? LogLevel.Information : LogLevel.Debug;
     }
 
@@ -104,7 +100,7 @@ public class ExceptionHandler : IExceptionHandler
     {
         var gatewayErrorException = LogAndConvertToKnownGatewayErrorException(exception, traceId);
 
-        IncrementErrorMetric(actionContext, exception, gatewayErrorException);
+        _observers.ForEach(x => x.OnException(actionContext, exception, gatewayErrorException));
 
         return new JsonResult(new Gateway.ErrorResponse(
             code: gatewayErrorException.StatusCode,
@@ -221,24 +217,6 @@ public class ExceptionHandler : IExceptionHandler
                 );
                 return InternalServerException.OfHiddenException(exception, traceId);
         }
-    }
-
-    private void IncrementErrorMetric(ActionContext actionContext, Exception originalException, KnownGatewayErrorException gatewayErrorException)
-    {
-        // actionContext.HttpContext.Request.Method - GET or POST
-        var routeValueDictionary = actionContext.RouteData.Values;
-
-        // This is a lot of labels, but the rest depend on the action and exception, so the cardinality isn't massive / worrying
-        // Method/Controller/Action align with the prometheus-net http metrics
-        // https://github.com/prometheus-net/prometheus-net/blob/master/Prometheus.AspNetCore/HttpMetrics/HttpRequestMiddlewareBase.cs
-        _apiResponseErrorCount.WithLabels(
-            actionContext.HttpContext.Request.Method, // method (GET or POST)
-            routeValueDictionary.GetValueOrDefault("Controller") as string ?? string.Empty, // controller
-            routeValueDictionary.GetValueOrDefault("Action") as string ?? string.Empty, // action
-            originalException.GetNameForMetricsOrLogging(), // exception
-            gatewayErrorException.GatewayError.GetType().Name, // gateway_error
-            gatewayErrorException.StatusCode.ToString(CultureInfo.InvariantCulture) // status_code
-        ).Inc();
     }
 
     private KnownGatewayErrorException? ExtractKnownGatewayExceptionFromWrappedCoreApiExceptionOrNull(WrappedCoreApiException? wrappedCoreApiException)

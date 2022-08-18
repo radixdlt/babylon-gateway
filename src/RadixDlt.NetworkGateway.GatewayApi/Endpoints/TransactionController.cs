@@ -63,11 +63,10 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 
@@ -77,49 +76,37 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 [TypeFilter(typeof(InvalidModelStateFilter))]
 public class TransactionController
 {
-    private readonly IValidations _validations;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
     private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
-    private readonly EndpointOptions _endpointOptions;
 
     public TransactionController(
-        IValidations validations,
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
-        IConstructionAndSubmissionService constructionAndSubmissionService,
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot
+        IConstructionAndSubmissionService constructionAndSubmissionService
     )
     {
-        _validations = validations;
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
         _constructionAndSubmissionService = constructionAndSubmissionService;
-        _endpointOptions = endpointOptionsSnapshot.Value;
     }
 
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
-
-        var unvalidatedLimit = request.Limit is default(int) ? 10 : request.Limit;
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier);
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
-            PageSize: _validations.ExtractValidIntInBoundInclusive(
-                "Page size",
-                unvalidatedLimit,
-                1,
-                _endpointOptions.MaxPageSize
-            )
+            PageSize: request.Limit ?? 10
         );
 
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, ledgerState);
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState);
 
         // NB - We don't return a total here as we don't have an index on user transactions
         return new RecentTransactionsResponse(
-            ledgerState,
+            atLedgerState,
             nextCursor: results.NextPageCursor?.ToCursorString(),
             results.Transactions
         );
@@ -128,7 +115,7 @@ public class TransactionController
     [HttpPost("status")]
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request)
     {
-        var transactionIdentifier = _validations.ExtractValidTransactionIdentifier(request.TransactionIdentifier);
+        var transactionIdentifier = request.TransactionIdentifier.Hash.ToTransactionIdentifier();
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
 
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);

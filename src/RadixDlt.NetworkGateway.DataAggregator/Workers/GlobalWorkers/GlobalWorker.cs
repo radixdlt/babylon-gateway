@@ -63,36 +63,32 @@
  */
 
 using Microsoft.Extensions.Logging;
-using Prometheus;
-using RadixDlt.NetworkGateway.Core.Extensions;
-using RadixDlt.NetworkGateway.Core.Workers;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Common.Workers;
+using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
 public abstract class GlobalWorker : LoopedWorkerBase
 {
-    private static readonly Counter _globalWorkerErrorsCount = Metrics
-        .CreateCounter(
-            "ng_workers_global_error_count",
-            "Number of errors in global workers.",
-            new CounterConfiguration { LabelNames = new[] { "worker", "error", "type" } }
-        );
+    private readonly IEnumerable<IGlobalWorkerObserver> _observers;
 
-    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs)
+    protected GlobalWorker(ILogger logger, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs, IEnumerable<IGlobalWorkerObserver> observers)
         // If a GlobalWorker run by ASP.NET Core AddHosted errors / faults it can't be restarted, so we need to
         // crash the application so that it can be automatically restarted.
         : base(logger, BehaviourOnFault.ApplicationExit, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
     {
+        _observers = observers;
     }
 
     protected override void TrackNonFaultingExceptionInWorkLoop(Exception ex)
     {
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), "non-faulting").Inc();
+        _observers.ForEach(x => x.TrackNonFaultingExceptionInWorkLoop(GetType(), ex));
     }
 
     protected override void TrackWorkerFaultedException(Exception ex, bool isStopRequested)
     {
-        var errorType = isStopRequested && ex is OperationCanceledException ? "stopped" : "faulting";
-        _globalWorkerErrorsCount.WithLabels(GetType().Name, ex.GetNameForMetricsOrLogging(), errorType).Inc();
+        _observers.ForEach(x => x.TrackWorkerFaultedException(GetType(), ex, isStopRequested));
     }
 }

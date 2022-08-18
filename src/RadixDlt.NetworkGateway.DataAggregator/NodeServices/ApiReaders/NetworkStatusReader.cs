@@ -62,11 +62,15 @@
  * permissions under this License.
  */
 
-using Prometheus;
-using RadixCoreApi.Generated.Api;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
@@ -75,30 +79,31 @@ public interface INetworkStatusReader
     Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
 }
 
+public interface INetworkStatusReaderObserver
+{
+    ValueTask GetNetworkStatusFailed(string nodeName, Exception exception);
+}
+
 public class NetworkStatusReader : INetworkStatusReader
 {
-    private static readonly Counter _failedNetworkStatusFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_fetch_network_status_error_count",
-            "Number of errors fetching network status from the node.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly NetworkApi _networkApi;
-    private readonly Counter.Child _failedNetworkStatusFetchCounter;
+    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
-    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    public NetworkStatusReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<INetworkStatusReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
+        _nodeConfigProvider = nodeConfigProvider;
+        _observers = observers;
         _networkApi = coreApiProvider.NetworkApi;
-        _failedNetworkStatusFetchCounter = _failedNetworkStatusFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-        return await _failedNetworkStatusFetchCounter.CountExceptionsAsync(() =>
-            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+        try
+        {
+            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _networkApi
                     .NetworkStatusPostAsync(
                         new NetworkStatusRequest(
@@ -106,7 +111,13 @@ public class NetworkStatusReader : INetworkStatusReader
                         ),
                         token
                     )
-            )
-        );
+            );
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+
+            throw;
+        }
     }
 }

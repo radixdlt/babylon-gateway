@@ -64,9 +64,14 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Core.Workers;
+using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
@@ -87,8 +92,9 @@ public class NodeConfigurationMonitorWorker : GlobalWorker
     public NodeConfigurationMonitorWorker(
         ILogger<NodeConfigurationMonitorWorker> logger,
         INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
-        IOptionsMonitor<NetworkOptions> networkOptions)
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        IOptionsMonitor<NetworkOptions> networkOptions,
+        IEnumerable<IGlobalWorkerObserver> observers)
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers)
     {
         _logger = logger;
         _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;

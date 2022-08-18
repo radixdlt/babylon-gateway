@@ -62,6 +62,11 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
+
 namespace GatewayApi;
 
 public static class Program
@@ -77,29 +82,17 @@ public static class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                config.AddEnvironmentVariables("APP__");
-                config.AddEnvironmentVariables("APP:"); // Remove this line once https://github.com/dotnet/runtime/issues/61577#issuecomment-1044959384 is fixed
-                if (args is { Length: > 0 })
-                {
-                    config.AddCommandLine(args);
-                }
+                var env = context.HostingEnvironment;
+                var customConfigurationPath = GetCustomJsonConfigurationValue(context);
+                var reloadOnChange = GetReloadConfigOnChangeValue(context);
 
-                if (context.HostingEnvironment.IsDevelopment())
-                {
-                    // As an easier alternative to developer secrets -- this file is in .gitignore to prevent source controlling
-                    config.AddJsonFile("appsettings.DevelopmentOverrides.json", optional: true, reloadOnChange: true);
-                }
-                else
-                {
-                    config.AddJsonFile("appsettings.ProductionOverrides.json", optional: true, reloadOnChange: true);
-                }
+                config
+                    .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
+                    .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
 
-                var customConfigurationPath = config.Build()
-                    .GetValue<string?>("CustomJsonConfigurationFilePath", null);
-
-                if (customConfigurationPath != null)
+                if (!string.IsNullOrWhiteSpace(customConfigurationPath))
                 {
-                    config.AddJsonFile(customConfigurationPath, false, true);
+                    config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
                 }
             })
             .ConfigureWebHostDefaults(webBuilder =>
@@ -111,4 +104,9 @@ public static class Program
                     })
                     .UseStartup<GatewayApiStartup>();
             });
+
+    // based on https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Hosting/src/HostingHostBuilderExtensions.cs
+    private static bool GetReloadConfigOnChangeValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue("hostBuilder:reloadConfigOnChange", defaultValue: true);
+
+    private static string? GetCustomJsonConfigurationValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue<string?>("CustomJsonConfigurationFilePath", defaultValue: null);
 }

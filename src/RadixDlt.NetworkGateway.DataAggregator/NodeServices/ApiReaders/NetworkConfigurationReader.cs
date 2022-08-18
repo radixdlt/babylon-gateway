@@ -62,10 +62,14 @@
  * permissions under this License.
  */
 
-using Prometheus;
-using RadixCoreApi.Generated.Api;
-using RadixCoreApi.Generated.Model;
-using RadixDlt.NetworkGateway.Core.CoreCommunications;
+using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
@@ -76,29 +80,31 @@ public interface INetworkConfigurationReader
 
 public class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private static readonly Counter _failedNetworkConfigurationFetchCounterUnScoped = Metrics
-        .CreateCounter(
-            "ng_node_fetch_network_configuration_error_count",
-            "Number of errors fetching the node's network configuration.",
-            new CounterConfiguration { LabelNames = new[] { "node" } }
-        );
-
     private readonly NetworkApi _networkApi;
-    private readonly Counter.Child _failedNetworkConfigurationFetchCounter;
+    private readonly INodeConfigProvider _nodeConfigProvider;
+    private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
 
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider)
+    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<INetworkConfigurationReaderObserver> observers)
     {
+        _observers = observers;
+        _nodeConfigProvider = nodeConfigProvider;
         _networkApi = coreApiProvider.NetworkApi;
-        _failedNetworkConfigurationFetchCounter = _failedNetworkConfigurationFetchCounterUnScoped.WithLabels(nodeConfigProvider.CoreApiNode.Name);
     }
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return await _failedNetworkConfigurationFetchCounter.CountExceptionsAsync(() =>
-            CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+        try
+        {
+            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _networkApi
                     .NetworkConfigurationPostAsync(new object(), token)
-            )
-        );
+            );
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.GetNetworkConfigurationFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+
+            throw;
+        }
     }
 }

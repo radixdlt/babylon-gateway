@@ -62,8 +62,15 @@
  * permissions under this License.
  */
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
+using RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi;
 
 namespace GatewayApi;
 
@@ -81,7 +88,9 @@ public class GatewayApiStartup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddNetworkGatewayApi();
+            .AddNetworkGatewayApi()
+            .UsePostgresPersistence()
+            .UsePrometheusMetrics();
 
         if (_enableSwagger)
         {
@@ -103,7 +112,7 @@ public class GatewayApiStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson();
+            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 
         services
             .AddHealthChecks()

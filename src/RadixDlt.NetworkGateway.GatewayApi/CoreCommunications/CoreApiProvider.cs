@@ -62,8 +62,9 @@
  * permissions under this License.
  */
 
-using RadixCoreApi.Generated.Api;
+using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;

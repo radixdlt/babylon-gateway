@@ -63,6 +63,7 @@
  */
 
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 

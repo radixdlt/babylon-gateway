@@ -12,12 +12,8 @@ cd "$SCRIPT_DIR"
 # VARIABLES #
 #############
 
-packageName='RadixCoreApi.Generated'
-outputDirectory="../generated-dependencies"
-packageVersionLocation="../Directory.Packages.props"
-specLocation='./core-api-spec-copy.yaml'
-
-patchVersion="$1" # Patch version override as first command line parameter
+packageName='RadixDlt.CoreApiSdk'
+specLocation='../src/RadixDlt.CoreApiSdk/core-api-spec-copy.yaml'
 
 ################
 # CALCULATIONS #
@@ -35,70 +31,6 @@ if [[ -z "$openApiSpecVersion" ]]; then
     exit 1
 fi
 
-openApiSpecVersionMajor="$(echo $openApiSpecVersion | cut -d"." -f 1)"
-openApiSpecVersionMinor="$(echo $openApiSpecVersion | cut -d"." -f 2)"
-openApiSpecVersionPatch="$(echo $openApiSpecVersion | cut -d"." -f 3)"
-
-if [[ -d "$outputDirectory" ]]; then
-    previousPackageVersion=`ls "$outputDirectory" | grep $packageName | sed "s/$packageName\.//" | sed "s/\.nupkg//"`
-fi
-
-if [[ ! -z "$previousPackageVersion" ]]; then
-    previousPackageVersionMajor="$(echo $previousPackageVersion | cut -d"." -f 1)"
-    previousPackageVersionMinor="$(echo $previousPackageVersion | cut -d"." -f 2)"
-    previousPackageVersionPatch="$(echo $previousPackageVersion | cut -d"." -f 3)"
-
-    packageVersionMajor=$openApiSpecVersionMajor
-    packageVersionMinor=$openApiSpecVersionMinor
-
-    if [[ "$packageVersionMajor" -lt "$previousPackageVersionMajor" ]]; then
-        echo "Version $packageVersionMajor.$packageVersionMinor.? must be larger than last version $previousPackageVersion"
-        echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
-        echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
-        echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
-        exit 1
-    fi
-    if [[ "$packageVersionMajor" -eq "$previousPackageVersionMajor" && "$packageVersionMinor" -lt "$previousPackageVersionMinor" ]]; then
-        echo "Version $packageVersionMajor.$packageVersionMinor.? must be larger than last version $previousPackageVersion"
-        echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
-        echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
-        echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
-        exit 1
-    fi
-    if [[ "$packageVersionMajor" -eq "$previousPackageVersionMajor" && "$packageVersionMinor" -eq "$previousPackageVersionMinor" ]]; then
-
-        if [[ -z "$patchVersion" ]]; then
-            patchVersion=$((previousPackageVersionPatch+1))
-        fi
-
-        if [[ "$patchVersion" -le "$previousPackageVersionPatch" ]]; then
-            echo "Version $packageVersionMajor.$packageVersionMinor.$patchVersion must be larger than last version $previousPackageVersion"
-            echo "Bump the API spec version or specify an increase in the patch version using the first command line parameter to this script."
-            echo "Ensuring we don't repeat versions is important so that NuGeT doesn't cache the previous version (which can interfere with your IDE)."
-            echo "If you wish to ignore this error, just delete the old package from the $outputDirectory folder."
-            exit 1
-        fi
-    fi
-
-    if [[ -z "$patchVersion" ]]; then
-        patchVersion="0"
-    fi
-
-    packageVersion="$openApiSpecVersionMajor.$openApiSpecVersionMinor.$patchVersion"
-
-    echo "Building generated client $packageName.$packageVersion.nupkg against open api spec version $openApiSpecVersion, replacing old $packageName.$previousPackageVersion.nupkg"
-    echo
-else
-    if [[ -z "$patchVersion" ]]; then
-        patchVersion="0"
-    fi
-
-    packageVersion="$openApiSpecVersionMajor.$openApiSpecVersionMinor.$patchVersion"
-
-    echo "Building generated client $packageName.$packageVersion.nupkg against open api spec version $openApiSpecVersion"
-    echo
-fi
-
 #########
 # REGEN #
 #########
@@ -114,84 +46,19 @@ dummyApiDirectory="$TMPDIR/radix-api-generation/"
 rm -rf "$dummyApiDirectory"
 mkdir "$dummyApiDirectory"
 
-## A note on settings used, and fixes:
-# - We use optionalEmitDefaultValues=true to ensure optional parameters set to 0 are included;
-#   to work around bugs in the generator (see https://github.com/OpenAPITools/openapi-generator/pull/11607).
-#   This means 0s and nulls are emitted. The latter isn't technically spec compliant, but the Java Core API doesn't mind.
-#   For situations where we need to _not_ emit 0s sometimes, the fields are explicitly set to null in
-#   grep fixes in later lines of this script.
-#   When we fix the generator to emit nullable reference types, it will be better.
-# - For fields where we have to send requests with missing fields (eg EpochUnlock, Epoch in Core API), we manually grep
-#   the fields to replace them with nullable fields.
-# - We perform other fixes as per NG-64
-# - nullableReferenceTypes is set to false, because it adds the assembly attribute without actually making non-required types nullable
-
-# Use the local forked generator - built from this PR: https://github.com/OpenAPITools/openapi-generator/pull/11607
-# TODO NG-64: This can be replaced by either templates (https://openapi-generator.tech/docs/templating) and/or upstream changes/fixes
-java -jar ./openapi-generator-cli.jar \
+# We're using our own build/package as OpenAPITools hasn't released develop version with few critical bugfixes yet!
+java -jar ./openapi-generator-cli-PR13049.jar \
     generate \
     -i "$specLocation" \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net6.0,packageVersion=$packageVersion,targetFramework=net6.0,packageVersion=$packageVersion,optionalEmitDefaultValues=true,nullableReferenceTypes=false
+    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useDateTimeOffset=true
 
-# Fix various issues in the generated code
-for f in `find $dummyApiDirectory -name '*.cs'`; do
-  if (grep -q "in BaseValidate(" $f) && [[ $f != *"/obj/"* ]]; then
-    awk '{sub(/in BaseValidate/,"in base.BaseValidate"); print}' $f > $f.out
-    mv $f.out $f
-    echo "$f - Performed BaseValidate fix to source code"
-  fi
-  if (grep -q "long EpochUnlock" $f) && [[ $f != *"/obj/"* ]]; then
-    awk '{sub(/long EpochUnlock/,"long? EpochUnlock"); print}' $f > $f.out
-    mv $f.out $f
-    awk '{sub(/long epochUnlock = default\(long\)/,"long? epochUnlock = default(long?)"); print}' $f > $f.out
-    mv $f.out $f
-    echo "$f - Performed long EpochUnlock fix to source code (to make it nullable for requests)"
-  fi
-  if (grep -q "long Epoch" $f) && [[ $f != *"/obj/"* ]] && [[ $f == *"Prepared"* ]]; then
-    awk '{sub(/long Epoch/,"long? Epoch"); print}' $f > $f.out
-    mv $f.out $f
-    awk '{sub(/long epoch = default\(long\)/,"long? epoch = default(long?)"); print}' $f > $f.out
-    mv $f.out $f
-    echo "$f - Performed long Epoch fix to source code (to make it nullable for requests)"
-  fi
-  if (grep -q "CreateLinkedTokenSource" $f) && [[ $f != *"/obj/"* ]]; then
-    awk '{sub(/finalToken = CancellationTokenSource\.CreateLinkedTokenSource\(finalToken, tokenSource.Token\)\.Token;/,""); print}' $f > $f.out
-    mv $f.out $f
-    echo "$f - Performed CreateLinkedTokenSource memory leak fix to source code"
-  fi
-done
+rm -rf "../src/${packageName}/generated"
+cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
+rm "../src/${packageName}/generated/${packageName}.csproj"
 
-# Uncomment these lines to see the code, to debug:
-# echo
-# echo "> Manual review step"
-# echo "Close VS Code when you're done, then press any key to continue in this prompt, and the generation process will continue."
-# code $dummyApiDirectory
-# read -n 1
+./ensure-license-headers.sh
 
-cd "$dummyApiDirectory"
-dotnet pack
-
-cd "$SCRIPT_DIR"
-mkdir -p "$outputDirectory"
-
-# Tidy up old versions
-find "$outputDirectory" -name "$packageName.*.nupkg" -exec rm {} \;
-
-# Create new versions
-find "$dummyApiDirectory/src/$packageName/bin/Debug" -name "*.nupkg" -exec cp {} "$outputDirectory" \;
-
-# Clear up generated api directory
-rm -rf "$dummyApiDirectory"
-
-echo
-echo "Successfully built client $packageName.$packageVersion.nupkg against open api spec version $openApiSpecVersion."
-
-# Update the version in the packages listing
-sed -i.bu -e "s/Include=\"$packageName\" Version=\"[^\"]*\"/Include=\"$packageName\" Version=\"$packageVersion\"/" "$packageVersionLocation"
-rm "$packageVersionLocation.bu" # Clear up the back up file from sed if it completes successfully
-
-echo
-echo "> And updated $packageVersionLocation to point to $packageName at version $packageVersion"
+echo "Done"

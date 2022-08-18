@@ -64,16 +64,15 @@
 
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Prometheus;
-using RadixDlt.NetworkGateway.Core.Extensions;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void SetTopOfDbLedger(TransactionSummary topOfLedger);
+    void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp);
 
     void RecordTransactionsCommitted();
 
@@ -95,25 +94,22 @@ public class SystemStatusService : ISystemStatusService
 {
     private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
 
-    private static readonly Gauge _isPrimaryStatus = Metrics
-        .CreateGauge(
-            "ng_aggregator_is_primary_status",
-            "1 if primary, 0 if secondary."
-        );
-
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
+    private readonly IEnumerable<ISystemStatusServiceObserver> _observers;
 
     private Instant? _lastTransactionCommitment;
     private bool _isPrimary;
-    private TransactionSummary? _topOfLedger;
+    private Instant? _topOfLedgerNormalizedRoundTimestamp;
 
     private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
 
     private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
 
-    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration)
+    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, IEnumerable<ISystemStatusServiceObserver> observers)
     {
         _configuration = configuration;
+        _observers = observers;
+
         SetIsPrimary(true);
     }
 
@@ -122,27 +118,28 @@ public class SystemStatusService : ISystemStatusService
         _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
     }
 
-    public void SetTopOfDbLedger(TransactionSummary topOfLedger)
+    public void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp)
     {
-        _topOfLedger = topOfLedger;
+        _topOfLedgerNormalizedRoundTimestamp = topOfLedgerNormalizedRoundTimestamp;
     }
 
     public void SetIsPrimary(bool isPrimary)
     {
         _isPrimary = isPrimary;
-        _isPrimaryStatus.SetStatus(isPrimary);
+
+        _observers.ForEach(x => x.SetIsPrimary(isPrimary));
     }
 
     public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
     {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp.WithinPeriodOfNow(duration);
+        return _topOfLedgerNormalizedRoundTimestamp.HasValue
+               && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration);
     }
 
     public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant)
     {
-        return _topOfLedger != null
-            && _topOfLedger.NormalizedRoundTimestamp + assumedBoundOnClockDrift >= instant;
+        return _topOfLedgerNormalizedRoundTimestamp.HasValue
+               && _topOfLedgerNormalizedRoundTimestamp.Value + assumedBoundOnClockDrift >= instant;
     }
 
     public bool IsPrimary()
