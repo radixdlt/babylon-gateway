@@ -53,10 +53,12 @@ java -jar ./openapi-generator-cli-PR13049.jar \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,nullableReferenceTypes=true,useDateTimeOffset=true
+    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useDateTimeOffset=true
 
 rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
 rm "../src/${packageName}/generated/${packageName}.csproj"
+
+./ensure-license-headers.sh
 
 echo "Done"
