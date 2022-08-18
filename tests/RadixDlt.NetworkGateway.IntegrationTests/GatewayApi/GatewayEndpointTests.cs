@@ -34,7 +34,7 @@ public class GatewayEndpointTests
         }
     }
 
-    [Fact]
+    [Fact(Skip = "just a sample/placeholder/mock")]
     public async Task Test()
     {
         var waf = new WebApplicationFactory<Startup>();
