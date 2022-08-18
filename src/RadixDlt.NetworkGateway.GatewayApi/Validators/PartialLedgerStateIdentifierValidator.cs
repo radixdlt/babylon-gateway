@@ -17,19 +17,23 @@ public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLe
             .GreaterThan(0)
             .DependentRules(() =>
             {
-                RuleFor(x => x.Timestamp).Null();
-                RuleFor(x => x.Epoch).Null();
-                RuleFor(x => x.Round).Null();
+                const string NullMessage = "'{PropertyName}' must be null when 'state_version' is defined.";
+
+                RuleFor(x => x.Timestamp).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Epoch).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Round).Null().WithMessage(NullMessage);
             })
             .When(x => x.StateVersion.HasValue);
 
         RuleFor(x => x.Timestamp)
-            .LessThanOrEqualTo(systemClock.UtcNow)
+            .LessThanOrEqualTo(systemClock.UtcNow).WithMessage("'{PropertyName}' must not be in future.")
             .DependentRules(() =>
             {
-                RuleFor(x => x.StateVersion).Null();
-                RuleFor(x => x.Epoch).Null();
-                RuleFor(x => x.Round).Null();
+                const string NullMessage = "'{PropertyName}' must be null when 'timestamp' is defined.";
+
+                RuleFor(x => x.StateVersion).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Epoch).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Round).Null().WithMessage(NullMessage);
             })
             .When(x => x.Timestamp.HasValue);
 
@@ -37,8 +41,10 @@ public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLe
             .GreaterThan(0)
             .DependentRules(() =>
             {
-                RuleFor(x => x.StateVersion).Null();
-                RuleFor(x => x.Timestamp).Null();
+                const string NullMessage = "'{PropertyName}' must be null when 'epoch' is defined.";
+
+                RuleFor(x => x.StateVersion).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Timestamp).Null().WithMessage(NullMessage);
             })
             .When(x => x.Epoch.HasValue);
 
@@ -46,9 +52,11 @@ public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLe
             .GreaterThan(0)
             .DependentRules(() =>
             {
-                RuleFor(x => x.StateVersion).Null();
-                RuleFor(x => x.Timestamp).Null();
-                RuleFor(x => x.Epoch).NotNull();
+                const string NullMessage = "'{PropertyName}' must be null when 'round' is defined.";
+
+                RuleFor(x => x.StateVersion).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Timestamp).Null().WithMessage(NullMessage);
+                RuleFor(x => x.Epoch).NotNull().WithMessage("'{PropertyName}' must not be null when 'round' is defined.");
             })
             .When(x => x.Round.HasValue);
     }
