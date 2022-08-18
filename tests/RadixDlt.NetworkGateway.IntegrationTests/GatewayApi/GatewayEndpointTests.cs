@@ -43,8 +43,8 @@ public class GatewayEndpointTests
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
         var payload = await response.Content.ReadFromJsonAsync<GatewayResponse>();
 
-        payload.Should().NotBeNull();
-        payload.GatewayApi.Should().NotBeNull();
+        payload.ShouldNotBeNull();
+        payload.GatewayApi.ShouldNotBeNull();
         payload.GatewayApi.OpenApiSchemaVersion.Should().Be("2.0.0");
     }
 }
