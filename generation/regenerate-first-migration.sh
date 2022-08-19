@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 dotnet build samples/DatabaseMigrations
 
 # Remove existing migrations
-find "src/RadixDlt.NetworkGateway/Migrations" -name \*.cs -exec rm {} \;
-dotnet ef migrations add InitialCreate --project src/RadixDlt.NetworkGateway --startup-project samples/DatabaseMigrations --context MigrationsDbContext
+find "src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations" -name \*.cs -exec rm {} \;
+dotnet ef migrations add InitialCreate --project src/RadixDlt.NetworkGateway.PostgresIntegration --startup-project samples/DatabaseMigrations --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
