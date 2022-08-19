@@ -65,7 +65,7 @@
 using RadixDlt.NetworkGateway.Common;
 using System;
 
-namespace RadixDlt.NetworkGateway.UnitTests.Common;
+namespace RadixDlt.NetworkGateway.UnitTests;
 
 public class FakeClock : ISystemClock
 {
@@ -73,7 +73,8 @@ public class FakeClock : ISystemClock
 
     public FakeClock()
     {
-        _clock = DateTimeOffset.UtcNow;
+        // arbitrary value, no special meaning behind it; just something that's constant across tests
+        _clock = new DateTimeOffset(2020, 6, 1, 12, 0, 0, TimeSpan.Zero);
     }
 
     public FakeClock(DateTimeOffset clock)
