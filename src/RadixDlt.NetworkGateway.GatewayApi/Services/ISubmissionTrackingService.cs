@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Model;
+using System;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 public interface ISubmissionTrackingService
 {
     Task<MempoolTrackGuidance> TrackInitialSubmission(
-        Instant submittedTimestamp,
+        DateTimeOffset submittedTimestamp,
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,

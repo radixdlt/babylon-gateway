@@ -63,7 +63,6 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
 using Npgsql;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
@@ -89,7 +88,7 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
     }
 
     public async Task<MempoolTrackGuidance> TrackInitialSubmission(
-        Instant submittedTimestamp,
+        DateTimeOffset submittedTimestamp,
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,

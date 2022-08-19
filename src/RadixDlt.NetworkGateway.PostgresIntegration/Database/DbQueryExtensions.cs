@@ -63,12 +63,12 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -134,7 +134,7 @@ public static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, Instant timestamp)
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
@@ -144,7 +144,7 @@ public static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, Instant timestamp)
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions

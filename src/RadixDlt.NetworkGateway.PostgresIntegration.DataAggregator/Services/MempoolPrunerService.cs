@@ -65,13 +65,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -114,13 +114,12 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
-        var currTime = SystemClock.Instance.GetCurrentInstant();
+        var currTime = DateTimeOffset.UtcNow;
 
-        var pruneIfCommittedBefore = currTime.Minus(mempoolConfiguration.PruneCommittedAfter);
-        var pruneIfLastGatewaySubmissionBefore = currTime.Minus(mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission);
-        var pruneIfFirstSeenBefore = currTime.Minus(mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceFirstSeen);
-
-        var pruneIfNotSeenSince = currTime.Minus(mempoolConfiguration.PruneRequiresMissingFromMempoolFor);
+        var pruneIfCommittedBefore = currTime - mempoolConfiguration.PruneCommittedAfter;
+        var pruneIfLastGatewaySubmissionBefore = currTime - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission;
+        var pruneIfFirstSeenBefore = currTime - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceFirstSeen;
+        var pruneIfNotSeenSince = currTime - mempoolConfiguration.PruneRequiresMissingFromMempoolFor;
 
         var aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions = _systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
             mempoolConfiguration.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,

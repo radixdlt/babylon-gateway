@@ -66,7 +66,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
@@ -126,16 +125,16 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         const int BatchSize = 30;
 
-        var instantForTransactionChoosing = SystemClock.Instance.GetCurrentInstant();
+        var instantForTransactionChoosing = DateTimeOffset.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
 
-        var submittedAt = SystemClock.Instance.GetCurrentInstant();
+        var submittedAt = DateTimeOffset.UtcNow;
 
         // The timeout should be relative to the submittedAt time we save to the DB, so needs to include the time for initial db saving (which should be very quick).
         using var ctsWithSubmissionTimeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-        ctsWithSubmissionTimeout.CancelAfter(mempoolConfiguration.ResubmissionNodeRequestTimeout.ToTimeSpan());
+        ctsWithSubmissionTimeout.CancelAfter(mempoolConfiguration.ResubmissionNodeRequestTimeout);
 
         var transactionsToResubmitWithNodes = MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
             mempoolConfiguration,
@@ -155,7 +154,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     private async Task<List<MempoolTransaction>> SelectTransactionsToResubmit(
         ReadWriteDbContext dbContext,
-        Instant instantForTransactionChoosing,
+        DateTimeOffset instantForTransactionChoosing,
         MempoolOptions mempoolOptions,
         int batchSize,
         CancellationToken token
@@ -200,7 +199,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private List<MempoolTransactionWithChosenNode> MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
         MempoolOptions mempoolOptions,
         List<MempoolTransaction> transactionsWantingResubmission,
-        Instant submittedAt
+        DateTimeOffset submittedAt
     )
     {
         var transactionsToResubmitWithNodes = new List<MempoolTransactionWithChosenNode>();
@@ -237,7 +236,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private record MempoolTransactionWithChosenNode(MempoolTransaction MempoolTransaction, CoreApiNode CoreApiNode);
 
     private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(
-        Instant currentTimestamp,
+        DateTimeOffset currentTimestamp,
         MempoolOptions mempoolOptions,
         ReadWriteDbContext dbContext
     )
@@ -246,7 +245,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
 
-        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration.FromSeconds(60));
+        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan.FromSeconds(60));
 
         return dbContext.MempoolTransactions
             .Where(mt =>
@@ -267,7 +266,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
         MempoolOptions mempoolOptions,
         List<MempoolTransactionWithChosenNode> transactionsToResubmitWithNodes,
-        Instant submittedAt,
+        DateTimeOffset submittedAt,
         CancellationToken token
     )
     {

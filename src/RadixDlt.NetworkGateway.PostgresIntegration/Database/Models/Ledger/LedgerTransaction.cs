@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -79,7 +79,7 @@ namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 // OnModelCreating: We also define a composite index on (Epoch, StartOfRound [Not Null]) - to easily query when rounds happened.
 public class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] payloadHash, byte[] intentHash, byte[] signedTransactionHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, Instant roundTimestamp, Instant createdTimestamp, Instant normalizedRoundTimestamp)
+    public LedgerTransaction(long resultantStateVersion, byte[] payloadHash, byte[] intentHash, byte[] signedTransactionHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, DateTimeOffset roundTimestamp, DateTimeOffset createdTimestamp, DateTimeOffset normalizedRoundTimestamp)
     {
         ResultantStateVersion = resultantStateVersion;
         PayloadHash = payloadHash;
@@ -171,13 +171,13 @@ public class LedgerTransaction
     /// consensus. As a consequence of this, the round timestamp is not guaranteed to be increasing.
     /// </summary>
     [Column(name: "round_timestamp")]
-    public Instant RoundTimestamp { get; set; }
+    public DateTimeOffset RoundTimestamp { get; set; }
 
     /// <summary>
     /// The time of the DataAggregator server when the LedgerTransaction was added to the service.
     /// </summary>
     [Column(name: "created_timestamp")]
-    public Instant CreatedTimestamp { get; set; }
+    public DateTimeOffset CreatedTimestamp { get; set; }
 
     /// <summary>
     /// This timestamp attempts to be "sensible" - ie increasing and semi-resistant to network time attacks.
@@ -185,7 +185,7 @@ public class LedgerTransaction
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
     [Column(name: "normalized_timestamp")]
-    public Instant NormalizedRoundTimestamp { get; set; }
+    public DateTimeOffset NormalizedRoundTimestamp { get; set; }
 
     public bool IsSystemTransaction => !IsUserTransaction;
 }

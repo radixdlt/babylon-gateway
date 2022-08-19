@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,18 +70,18 @@ using CoreApi = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public record FullTransactionData(byte[] Id, Instant SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
+public record FullTransactionData(byte[] Id, DateTimeOffset SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
 
 public record NodeMempoolHashes
 {
     public HashSet<byte[]> TransactionHashes { get; }
 
-    public Instant AtTime { get; }
+    public DateTimeOffset AtTime { get; }
 
     public NodeMempoolHashes(HashSet<byte[]> transactionHashes)
     {
         TransactionHashes = transactionHashes;
-        AtTime = SystemClock.Instance.GetCurrentInstant();
+        AtTime = DateTimeOffset.UtcNow; // TODO use ISystemClock
     }
 }
 

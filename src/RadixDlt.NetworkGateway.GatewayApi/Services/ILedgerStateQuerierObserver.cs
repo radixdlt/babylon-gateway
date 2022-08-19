@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using NodaTime;
+using System;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ILedgerStateQuerierObserver
 {
-    ValueTask LedgerRoundTimestampClockSkew(Duration difference);
+    ValueTask LedgerRoundTimestampClockSkew(TimeSpan difference);
 }

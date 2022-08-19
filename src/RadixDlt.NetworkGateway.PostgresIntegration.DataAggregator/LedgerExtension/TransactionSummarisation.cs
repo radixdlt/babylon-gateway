@@ -63,7 +63,6 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
@@ -118,9 +117,9 @@ public static class TransactionSummarisation
             IntentHash: Array.Empty<byte>(), // Unused
             SignedTransactionHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
-            RoundTimestamp: Instant.FromUnixTimeSeconds(0),
-            CreatedTimestamp: SystemClock.Instance.GetCurrentInstant(),
-            NormalizedRoundTimestamp: Instant.FromUnixTimeSeconds(0)
+            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            CreatedTimestamp: DateTimeOffset.UtcNow,
+            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0)
         );
     }
 }

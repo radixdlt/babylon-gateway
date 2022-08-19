@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
@@ -147,7 +146,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     /// </summary>
     public async Task HandleLedgerExtensionIfQuorum(CancellationToken token)
     {
-        await _observers.ForEachAsync(x => x.PreHandleLedgerExtensionIfQuorum(SystemClock.Instance.GetCurrentInstant()));
+        await _observers.ForEachAsync(x => x.PreHandleLedgerExtensionIfQuorum(DateTimeOffset.UtcNow)); // TODO use ISystemClock
 
         await LoadTopOfDbLedger(token);
 
@@ -385,7 +384,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
             "Enforcing delay of {DelayMs}ms due to the size of the ingestion batch",
             Config.DelayBetweenLargeBatches.TotalMilliseconds
         );
-        await Task.Delay(Config.DelayBetweenLargeBatches.ToTimeSpan());
+        await Task.Delay(Config.DelayBetweenLargeBatches);
     }
 
     private void ReportOnLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
@@ -394,7 +393,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         UpdateRecordsOfTopOfLedger(commitReport.FinalTransaction);
 
-        var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
+        var currentTimestamp = DateTimeOffset.UtcNow; // TODO use ISystemClock
 
         _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
 

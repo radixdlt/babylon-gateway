@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
@@ -303,7 +302,7 @@ public class LedgerExtenderService : ILedgerExtenderService
             dbContext.Add(ledgerStatus);
         }
 
-        ledgerStatus.LastUpdated = SystemClock.Instance.GetCurrentInstant();
+        ledgerStatus.LastUpdated = DateTimeOffset.UtcNow;
         ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
         ledgerStatus.SyncTarget = latestSyncTarget;
     }

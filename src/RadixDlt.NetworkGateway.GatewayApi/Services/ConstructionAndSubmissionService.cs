@@ -63,7 +63,6 @@
  */
 
 using Microsoft.Extensions.Logging;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -331,7 +330,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     {
         var parseResponse = await HandlePreSubmissionParseSignedTransaction(signedTransaction);
 
-        var submittedTimestamp = SystemClock.Instance.GetCurrentInstant();
+        var submittedTimestamp = DateTimeOffset.UtcNow;
         using var submissionTimeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(3000));
 
         var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(

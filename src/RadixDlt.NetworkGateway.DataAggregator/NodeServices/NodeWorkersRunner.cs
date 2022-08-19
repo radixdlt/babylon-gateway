@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
@@ -97,7 +96,7 @@ public class NodeWorkersRunner : IDisposable
         get => _status;
         private set
         {
-            _lastStatusChange = SystemClock.Instance.GetCurrentInstant();
+            _lastStatusChange = DateTimeOffset.UtcNow;
             _status = value;
         }
     }
@@ -112,7 +111,7 @@ public class NodeWorkersRunner : IDisposable
 
     private IServiceScope? _nodeDependencyInjectionScope;
 
-    private Instant _lastStatusChange;
+    private DateTimeOffset _lastStatusChange;
 
     // Items needing disposal
     private CancellationTokenSource? _cancellationTokenSource;
@@ -139,7 +138,7 @@ public class NodeWorkersRunner : IDisposable
     {
         const int GraceSecondsBeforeMarkingStalled = 10;
 
-        var isRunningOrNotStalled = Status == NodeWorkersRunnerStatus.Running || _lastStatusChange.WithinPeriodOfNow(Duration.FromSeconds(GraceSecondsBeforeMarkingStalled));
+        var isRunningOrNotStalled = Status == NodeWorkersRunnerStatus.Running || _lastStatusChange.WithinPeriodOfNow(TimeSpan.FromSeconds(GraceSecondsBeforeMarkingStalled));
         if (!isRunningOrNotStalled)
         {
             _logger.LogWarning(

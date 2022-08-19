@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
+using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -78,9 +78,9 @@ public record TransactionSummary(
     byte[] IntentHash,
     byte[] SignedTransactionHash,
     byte[] TransactionAccumulator,
-    Instant RoundTimestamp,
-    Instant CreatedTimestamp,
-    Instant NormalizedRoundTimestamp
+    DateTimeOffset RoundTimestamp,
+    DateTimeOffset CreatedTimestamp,
+    DateTimeOffset NormalizedRoundTimestamp
 );
 
 public record CommittedTransactionData(

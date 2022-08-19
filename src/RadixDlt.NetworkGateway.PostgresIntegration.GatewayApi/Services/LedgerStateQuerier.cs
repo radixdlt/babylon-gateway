@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
@@ -136,7 +135,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         }
 
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
-        var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+        var timestampDiff = DateTimeOffset.UtcNow - ledgerStateReport.RoundTimestamp;
 
         await _observers.ForEachAsync(x => x.LedgerRoundTimestampClockSkew(timestampDiff));
 
@@ -193,7 +192,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         }
 
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
-        var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+        var timestampDiff = DateTimeOffset.UtcNow - ledgerStateReport.RoundTimestamp;
 
         await _observers.ForEachAsync(x => x.LedgerRoundTimestampClockSkew(timestampDiff));
 
@@ -240,7 +239,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus;
     }
 
-    private record LedgerStateReport(LedgerState LedgerState, Instant RoundTimestamp);
+    private record LedgerStateReport(LedgerState LedgerState, DateTimeOffset RoundTimestamp);
 
     private async Task<LedgerStateReport> GetLedgerState(PartialLedgerStateIdentifier? at = null)
     {
@@ -304,7 +303,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = Instant.FromDateTimeOffset(timestamp);
+        var validatedTimestamp = timestamp;
 
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(validatedTimestamp));
 
@@ -318,7 +317,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = Instant.FromDateTimeOffset(timestamp);
+        var validatedTimestamp = timestamp;
 
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(validatedTimestamp));
 

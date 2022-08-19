@@ -65,7 +65,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Exceptions;
@@ -251,7 +250,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
             return new FullTransactionData(
                 transactionId,
-                SystemClock.Instance.GetCurrentInstant(),
+                DateTimeOffset.UtcNow,
                 response.Transaction.Metadata.Hex.ConvertFromHex(),
                 response.Transaction
             );

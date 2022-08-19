@@ -63,16 +63,16 @@
  */
 
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp);
+    void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTimeOffset topOfLedgerNormalizedRoundTimestamp);
 
     void RecordTransactionsCommitted();
 
@@ -82,28 +82,28 @@ public interface ISystemStatusService
 
     HealthReport GenerateTransactionCommitmentHealthReport();
 
-    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration);
+    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration);
 
-    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant);
+    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTimeOffset instant);
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, Instant StartUpTime);
+public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
 
 public class SystemStatusService : ISystemStatusService
 {
-    private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
+    private static readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
 
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
     private readonly IEnumerable<ISystemStatusServiceObserver> _observers;
 
-    private Instant? _lastTransactionCommitment;
+    private DateTimeOffset? _lastTransactionCommitment;
     private bool _isPrimary;
-    private Instant? _topOfLedgerNormalizedRoundTimestamp;
+    private DateTimeOffset? _topOfLedgerNormalizedRoundTimestamp;
 
-    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
+    private TimeSpan StartupGracePeriod => TimeSpan.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
 
-    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
+    private TimeSpan UnhealthyCommitmentGapSeconds => TimeSpan.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
 
     public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, IEnumerable<ISystemStatusServiceObserver> observers)
     {
@@ -115,10 +115,10 @@ public class SystemStatusService : ISystemStatusService
 
     public void RecordTransactionsCommitted()
     {
-        _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
+        _lastTransactionCommitment = DateTimeOffset.UtcNow;
     }
 
-    public void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp)
+    public void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTimeOffset topOfLedgerNormalizedRoundTimestamp)
     {
         _topOfLedgerNormalizedRoundTimestamp = topOfLedgerNormalizedRoundTimestamp;
     }
@@ -130,13 +130,13 @@ public class SystemStatusService : ISystemStatusService
         _observers.ForEach(x => x.SetIsPrimary(isPrimary));
     }
 
-    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
+    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration)
     {
         return _topOfLedgerNormalizedRoundTimestamp.HasValue
                && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration);
     }
 
-    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant)
+    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTimeOffset instant)
     {
         return _topOfLedgerNormalizedRoundTimestamp.HasValue
                && _topOfLedgerNormalizedRoundTimestamp.Value + assumedBoundOnClockDrift >= instant;

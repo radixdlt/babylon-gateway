@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using NodaTime;
+using System;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -73,7 +73,7 @@ public interface ILedgerConfirmationServiceObserver
 
     void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
 
-    ValueTask PreHandleLedgerExtensionIfQuorum(Instant timestamp);
+    ValueTask PreHandleLedgerExtensionIfQuorum(DateTimeOffset timestamp);
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, long targetStateVersion);
 
@@ -93,9 +93,9 @@ public interface ILedgerConfirmationServiceObserver
 
     void QuorumGained();
 
-    void ReportOnLedgerExtensionSuccess(Instant timestamp, Duration parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
+    void ReportOnLedgerExtensionSuccess(DateTimeOffset timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
 
-    void RecordTopOfDbLedger(long stateVersion, Instant roundTimestamp);
+    void RecordTopOfDbLedger(long stateVersion, DateTimeOffset roundTimestamp);
 
     void QuorumExtensionConsistentGained();
 

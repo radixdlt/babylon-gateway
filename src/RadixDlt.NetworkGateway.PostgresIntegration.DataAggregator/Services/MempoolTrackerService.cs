@@ -66,7 +66,6 @@ using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -174,7 +173,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     public async Task HandleMempoolChanges(CancellationToken token)
     {
-        var currentTimestamp = SystemClock.Instance.GetCurrentInstant();
+        var currentTimestamp = DateTimeOffset.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var combinedMempool = CombineNodeMempools(mempoolConfiguration);
@@ -186,7 +185,7 @@ public class MempoolTrackerService : IMempoolTrackerService
         );
     }
 
-    private Dictionary<byte[], Instant> CombineNodeMempools(MempoolOptions mempoolOptions)
+    private Dictionary<byte[], DateTimeOffset> CombineNodeMempools(MempoolOptions mempoolOptions)
     {
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
             .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(mempoolOptions.ExcludeNodeMempoolsFromUnionIfStaleFor))
@@ -199,7 +198,7 @@ public class MempoolTrackerService : IMempoolTrackerService
             );
         }
 
-        var combinedMempoolByLatestSeen = new Dictionary<byte[], Instant>(ByteArrayEqualityComparer.Default);
+        var combinedMempoolByLatestSeen = new Dictionary<byte[], DateTimeOffset>(ByteArrayEqualityComparer.Default);
 
         foreach (var (_, mempoolContents) in nodeMempoolsToConsider)
         {
@@ -229,7 +228,7 @@ public class MempoolTrackerService : IMempoolTrackerService
     }
 
     private async Task MarkRelevantMempoolTransactionsInCombinedMempoolAsReappeared(
-        Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
+        Dictionary<byte[], DateTimeOffset> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
@@ -268,7 +267,7 @@ public class MempoolTrackerService : IMempoolTrackerService
 
     private async Task CreateMempoolTransactionsFromNewTransactionsDiscoveredInCombinedMempool(
         MempoolOptions mempoolOptions,
-        Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
+        Dictionary<byte[], DateTimeOffset> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
@@ -343,9 +342,9 @@ public class MempoolTrackerService : IMempoolTrackerService
     }
 
     private async Task MarkRelevantMempoolTransactionsNotInCombinedMempoolAsMissing(
-        Instant currentTimestamp,
+        DateTimeOffset currentTimestamp,
         MempoolOptions mempoolOptions,
-        Dictionary<byte[], Instant> combinedMempoolWithLastSeen,
+        Dictionary<byte[], DateTimeOffset> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {

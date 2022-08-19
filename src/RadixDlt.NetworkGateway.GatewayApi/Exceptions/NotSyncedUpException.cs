@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
@@ -82,7 +81,7 @@ public class NotSyncedUpException : KnownGatewayErrorException
     {
     }
 
-    public static NotSyncedUpException FromRequest(NotSyncedUpRequestType requestType, Duration currentSyncDelay, long maxAllowedSyncDelaySeconds)
+    public static NotSyncedUpException FromRequest(NotSyncedUpRequestType requestType, TimeSpan currentSyncDelay, long maxAllowedSyncDelaySeconds)
     {
         return new NotSyncedUpException(
             new NotSyncedUpError(
