@@ -67,7 +67,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.UnitTests;
 
-public class FakeClock : ISystemClock
+public class FakeClock : IClock
 {
     private DateTimeOffset _clock;
 
