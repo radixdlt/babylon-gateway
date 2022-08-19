@@ -280,7 +280,7 @@ public class Validations : IValidations
     {
         if (!DateTimeOffset.TryParse(timestampString, out var dateTimeOffset))
         {
-            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} DateTime could not be parsed");
+            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} date-time could not be parsed");
         }
 
         return dateTimeOffset;

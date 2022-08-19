@@ -74,11 +74,6 @@ public static class DateTimeExtensions
         return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
     }
 
-    public static string AsUtcIsoDateWithMillisString(this DateTime dateTime)
-    {
-        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
-    }
-
     public static string AsUtcIsoDateToSecondsForLogs(this DateTimeOffset instant)
     {
         return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
@@ -119,9 +114,9 @@ public static class DateTimeExtensions
         return $"{(DateTimeOffset.UtcNow - dateTime).FormatSecondsHumanReadable()} ago";
     }
 
-    public static string FormatSecondsAgo(this DateTimeOffset? dateTime)
+    public static string FormatSecondsAgo(this DateTimeOffset? instant)
     {
-        return dateTime == null ? "never" : $"{(DateTimeOffset.UtcNow - dateTime.Value).FormatSecondsHumanReadable()} ago";
+        return instant == null ? "never" : $"{(DateTimeOffset.UtcNow - instant.Value).FormatSecondsHumanReadable()} ago";
     }
 
     public static string FormatPositiveDurationHumanReadable(this TimeSpan? durationOrNull)

@@ -76,7 +76,7 @@ public class LogLimiter
     private readonly LogLevel _occasionalLogLevel;
     private readonly LogLevel _noisyLogLevel;
     private readonly object _lock = new();
-    private DateTime? _notBefore;
+    private DateTimeOffset? _notBefore;
 
     public LogLimiter(TimeSpan timespan, LogLevel occasionalLogLevel, LogLevel noisyLogLevel)
     {
@@ -89,18 +89,18 @@ public class LogLimiter
     {
         lock (_lock)
         {
-            var currTime = DateTime.Now;
+            var currTime = DateTimeOffset.Now;
             if (LogShouldBeMarkedAsNoisy(currTime))
             {
                 return _noisyLogLevel;
             }
 
-            _notBefore = currTime.Add(_timespan);
+            _notBefore = currTime + _timespan;
             return _occasionalLogLevel;
         }
     }
 
-    private bool LogShouldBeMarkedAsNoisy(DateTime currTime)
+    private bool LogShouldBeMarkedAsNoisy(DateTimeOffset currTime)
     {
         // ReSharper disable once MergeSequentialChecks
         return _notBefore != null && currTime < _notBefore;
