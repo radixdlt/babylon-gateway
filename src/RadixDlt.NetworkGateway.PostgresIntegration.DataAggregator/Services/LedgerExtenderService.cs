@@ -65,6 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
@@ -88,6 +89,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IClock _clock;
 
     private record ProcessTransactionReport(
         long TransactionContentHandlingMs,
@@ -102,8 +104,8 @@ public class LedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer,
-        INetworkConfigurationProvider networkConfigurationProvider
-    )
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IClock clock)
     {
         _transactionAssertionsOptionsMonitor = transactionAssertionsOptionsMonitor;
         _logger = logger;
@@ -111,6 +113,7 @@ public class LedgerExtenderService : ILedgerExtenderService
         _rawTransactionWriter = rawTransactionWriter;
         _entityDeterminer = entityDeterminer;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _clock = clock;
     }
 
     public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
@@ -302,7 +305,7 @@ public class LedgerExtenderService : ILedgerExtenderService
             dbContext.Add(ledgerStatus);
         }
 
-        ledgerStatus.LastUpdated = DateTimeOffset.UtcNow;
+        ledgerStatus.LastUpdated = _clock.UtcNow;
         ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
         ledgerStatus.SyncTarget = latestSyncTarget;
     }

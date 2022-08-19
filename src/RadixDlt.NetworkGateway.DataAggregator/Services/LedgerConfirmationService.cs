@@ -65,6 +65,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
@@ -110,6 +111,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILedgerExtenderService _ledgerExtenderService;
     private readonly IEnumerable<ILedgerConfirmationServiceObserver> _observers;
+    private readonly IClock _clock;
 
     /* Variables */
     private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
@@ -127,7 +129,8 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         IOptionsMonitor<NetworkOptions> networkOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILedgerExtenderService ledgerExtenderService,
-        IEnumerable<ILedgerConfirmationServiceObserver> observers)
+        IEnumerable<ILedgerConfirmationServiceObserver> observers,
+        IClock clock)
     {
         _logger = logger;
         _ledgerConfirmationOptionsMonitor = ledgerConfirmationOptionsMonitor;
@@ -135,6 +138,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         _systemStatusService = systemStatusService;
         _ledgerExtenderService = ledgerExtenderService;
         _observers = observers;
+        _clock = clock;
 
         _observers.ForEach(x => x.ResetQuorum());
 
@@ -146,7 +150,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
     /// </summary>
     public async Task HandleLedgerExtensionIfQuorum(CancellationToken token)
     {
-        await _observers.ForEachAsync(x => x.PreHandleLedgerExtensionIfQuorum(DateTimeOffset.UtcNow)); // TODO use ISystemClock
+        await _observers.ForEachAsync(x => x.PreHandleLedgerExtensionIfQuorum(_clock.UtcNow));
 
         await LoadTopOfDbLedger(token);
 
@@ -393,7 +397,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
 
         UpdateRecordsOfTopOfLedger(commitReport.FinalTransaction);
 
-        var currentTimestamp = DateTimeOffset.UtcNow; // TODO use ISystemClock
+        var currentTimestamp = _clock.UtcNow;
 
         _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
 
@@ -511,7 +515,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         {
             foreach (var transaction in transactions)
             {
-                var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction);
+                var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction, _clock);
                 var contents = transaction.Metadata.Hex.ConvertFromHex();
 
                 TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);

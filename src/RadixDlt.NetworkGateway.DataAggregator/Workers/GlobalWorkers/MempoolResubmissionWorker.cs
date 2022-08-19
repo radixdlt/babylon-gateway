@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
@@ -87,9 +88,10 @@ public class MempoolResubmissionWorker : GlobalWorker
     public MempoolResubmissionWorker(
         ILogger<MempoolResubmissionWorker> logger,
         IMempoolResubmissionService mempoolResubmissionService,
-        IEnumerable<IGlobalWorkerObserver> observers
+        IEnumerable<IGlobalWorkerObserver> observers,
+        IClock clock
     )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers)
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
     {
         _mempoolResubmissionService = mempoolResubmissionService;
     }

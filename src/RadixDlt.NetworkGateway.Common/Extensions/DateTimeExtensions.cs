@@ -79,9 +79,9 @@ public static class DateTimeExtensions
         return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
     }
 
-    public static TimeSpan GetTimeAgo(this DateTimeOffset instant)
+    public static TimeSpan GetTimeAgo(this DateTimeOffset instant, IClock clock)
     {
-        return DateTimeOffset.UtcNow - instant;
+        return clock.UtcNow - instant;
     }
 
     public static TimeSpan Absolute(this TimeSpan duration)
@@ -89,9 +89,9 @@ public static class DateTimeExtensions
         return duration.Ticks >= 0 ? duration : -duration;
     }
 
-    public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan duration)
+    public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan duration, IClock clock)
     {
-        return dateTime.GetTimeAgo().Absolute() <= duration;
+        return dateTime.GetTimeAgo(clock).Absolute() <= duration;
     }
 
     public static DateTimeOffset LatestOf(DateTimeOffset a, DateTimeOffset b)
@@ -109,14 +109,14 @@ public static class DateTimeExtensions
         return $"{duration.Absolute().TotalSeconds:F3}s";
     }
 
-    public static string FormatSecondsAgo(this DateTimeOffset dateTime)
+    public static string FormatSecondsAgo(this DateTimeOffset instant, IClock clock)
     {
-        return $"{(DateTimeOffset.UtcNow - dateTime).FormatSecondsHumanReadable()} ago";
+        return $"{(clock.UtcNow - instant).FormatSecondsHumanReadable()} ago";
     }
 
-    public static string FormatSecondsAgo(this DateTimeOffset? instant)
+    public static string FormatSecondsAgo(this DateTimeOffset? instant, IClock clock)
     {
-        return instant == null ? "never" : $"{(DateTimeOffset.UtcNow - instant.Value).FormatSecondsHumanReadable()} ago";
+        return instant == null ? "never" : $"{(clock.UtcNow - instant.Value).FormatSecondsHumanReadable()} ago";
     }
 
     public static string FormatPositiveDurationHumanReadable(this TimeSpan? durationOrNull)

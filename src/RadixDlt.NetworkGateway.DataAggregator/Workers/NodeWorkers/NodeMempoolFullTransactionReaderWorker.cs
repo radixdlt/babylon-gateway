@@ -66,6 +66,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -116,8 +117,9 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig,
         IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> observers,
-        IEnumerable<INodeWorkerObserver> nodeWorkerObservers)
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
+        IClock clock)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
         _services = services;
@@ -250,7 +252,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
             return new FullTransactionData(
                 transactionId,
-                DateTimeOffset.UtcNow,
+                Clock.UtcNow,
                 response.Transaction.Metadata.Hex.ConvertFromHex(),
                 response.Transaction
             );

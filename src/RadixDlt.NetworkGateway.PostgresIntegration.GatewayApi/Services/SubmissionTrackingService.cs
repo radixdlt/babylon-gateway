@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -80,11 +81,16 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly IEnumerable<ISubmissionTrackingServiceObserver> _observers;
+    private readonly IClock _clock;
 
-    public SubmissionTrackingService(ReadWriteDbContext dbContext, IEnumerable<ISubmissionTrackingServiceObserver> observers)
+    public SubmissionTrackingService(
+        ReadWriteDbContext dbContext,
+        IEnumerable<ISubmissionTrackingServiceObserver> observers,
+        IClock clock)
     {
         _dbContext = dbContext;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task<MempoolTrackGuidance> TrackInitialSubmission(
@@ -151,7 +157,7 @@ public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQue
             throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
         }
 
-        mempoolTransaction.MarkAsFailed(failureReason, failureExplanation);
+        mempoolTransaction.MarkAsFailed(failureReason, failureExplanation, _clock.UtcNow);
 
         await _observers.ForEachAsync(x => x.PostMempoolTransactionMarkedAsFailed());
         await _dbContext.SaveChangesAsync();

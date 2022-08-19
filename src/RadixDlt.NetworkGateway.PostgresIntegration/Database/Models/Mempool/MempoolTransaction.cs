@@ -241,7 +241,7 @@ public class MempoolTransaction
         byte[] payloadHash,
         byte[] payload,
         GatewayTransactionContents transactionContents,
-        DateTimeOffset? firstSeenAt = null
+        DateTimeOffset firstSeenAt
     )
     {
         var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
@@ -254,12 +254,11 @@ public class MempoolTransaction
         byte[] payload,
         string submittedToNodeName,
         GatewayTransactionContents transactionContents,
-        DateTimeOffset? submittedTimestamp = null
+        DateTimeOffset submittedTimestamp
     )
     {
         var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
 
-        submittedTimestamp ??= DateTimeOffset.UtcNow; // TODO Use ISystemClock
         mempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
 
         // We assume it's been successfully submitted until we see an error and then mark it as an error then
@@ -281,15 +280,15 @@ public class MempoolTransaction
         }
     }
 
-    public void MarkAsMissing(DateTimeOffset? timestamp = null)
+    public void MarkAsMissing(DateTimeOffset timestamp)
     {
         Status = MempoolTransactionStatus.Missing;
-        LastDroppedOutOfMempoolTimestamp = timestamp ?? DateTimeOffset.UtcNow; // TODO use ISystemClock
+        LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
-    public void MarkAsCommitted(long ledgerStateVersion, DateTimeOffset ledgerCommitTimestamp)
+    public void MarkAsCommitted(long ledgerStateVersion, DateTimeOffset ledgerCommitTimestamp, IClock clock)
     {
-        var commitToDbTimestamp = DateTimeOffset.UtcNow; // TODO use ISystemClock
+        var commitToDbTimestamp = clock.UtcNow;
         Status = MempoolTransactionStatus.Committed;
         CommitTimestamp = commitToDbTimestamp;
 
@@ -300,49 +299,48 @@ public class MempoolTransaction
         SetTransactionContents(transactionContents);
     }
 
-    public void MarkAsSeenInAMempool(DateTimeOffset? timestamp = null)
+    public void MarkAsSeenInAMempool(DateTimeOffset timestamp)
     {
         Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
-        FirstSeenInMempoolTimestamp ??= timestamp ?? DateTimeOffset.UtcNow; // TODO use ISystemClock
+        FirstSeenInMempoolTimestamp ??= timestamp;
     }
 
-    public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset? timestamp = null)
+    public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset timestamp)
     {
         Status = MempoolTransactionStatus.Failed;
         FailureReason = failureReason;
         FailureExplanation = failureExplanation;
-        FailureTimestamp = timestamp ?? DateTimeOffset.UtcNow; // TODO use ISystemClock
+        FailureTimestamp = timestamp;
     }
 
-    public void MarkAsSubmittedToGateway(DateTimeOffset? submittedAt = null)
+    public void MarkAsSubmittedToGateway(DateTimeOffset submittedAt)
     {
-        submittedAt ??= DateTimeOffset.UtcNow; // TODO use ISystemClock
         SubmittedByThisGateway = true;
         FirstSubmittedToGatewayTimestamp ??= submittedAt;
         LastSubmittedToGatewayTimestamp = submittedAt;
     }
 
-    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, DateTimeOffset? submittedAt = null)
+    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
         Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset? submittedAt = null)
+    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset submittedAt, DateTimeOffset timestamp)
     {
-        MarkAsFailed(failureReason, failureExplanation);
+        MarkAsFailed(failureReason, failureExplanation, timestamp);
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTimeOffset? submittedAt = null)
+    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
         Status = MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    private void RecordSubmission(string nodeSubmittedTo, DateTimeOffset? submittedAt = null)
+    private void RecordSubmission(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
-        LastSubmittedToNodeTimestamp = submittedAt ?? DateTimeOffset.UtcNow; // TODO use ISystemClock
+        LastSubmittedToNodeTimestamp = submittedAt;
         LastSubmittedToNodeName = nodeSubmittedTo;
         SubmissionToNodesCount += 1;
     }

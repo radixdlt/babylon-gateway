@@ -100,6 +100,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
 
     public bool IsStoppedSuccessfully { get; private set; }
 
+    protected readonly IClock Clock;
     private readonly ILogger _logger;
     private readonly BehaviourOnFault _behaviourOnFault;
     private readonly LogLimiter _stillRunningLogLimiter;
@@ -113,12 +114,13 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         ILogger logger,
         BehaviourOnFault behaviourOnFault,
         IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
-        TimeSpan minDelayBetweenInfoLogs
-    )
+        TimeSpan minDelayBetweenInfoLogs,
+        IClock clock)
     {
         _logger = logger;
         _behaviourOnFault = behaviourOnFault;
         _delayBetweenLoopsStrategy = delayBetweenLoopsStrategy;
+        Clock = clock;
         _stillRunningLogLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
     }
 
@@ -221,7 +223,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         _logger.Log(
             _stillRunningLogLimiter.GetLogLevel(),
             "Start requested at: {Time}. Service enabled status: {EnabledStatus}",
-            DateTimeOffset.UtcNow.AsUtcIsoDateToSecondsForLogs(),
+            Clock.UtcNow.AsUtcIsoDateToSecondsForLogs(),
             isCurrentlyEnabled ? "ENABLED" : "DISABLED"
         );
         return Task.CompletedTask;
@@ -248,7 +250,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
             "{GracefulState} stop requested via {StopInstantiationMethod}. Stopping at: {Time}",
             nonGracefulShutdownCancellationToken.IsCancellationRequested ? "Non-graceful" : "Graceful",
             ExplicitStopRequested ? "an explicit StopAsync call" : "the cancellation of the token passed on start",
-            DateTimeOffset.UtcNow.AsUtcIsoDateToSecondsForLogs()
+            Clock.UtcNow.AsUtcIsoDateToSecondsForLogs()
         );
         return Task.CompletedTask;
     }
@@ -258,7 +260,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     /// </summary>
     protected virtual Task OnStoppedSuccessfully()
     {
-        _logger.LogInformation("Stopped successfully at: {Time}",  DateTimeOffset.UtcNow.AsUtcIsoDateToSecondsForLogs());
+        _logger.LogInformation("Stopped successfully at: {Time}",  Clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
         return Task.CompletedTask;
     }
 
@@ -332,17 +334,17 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         {
             if (wasLastEnabled == false)
             {
-                _logger.LogInformation("Detected as re-enabled at {Time}, service will start doing work in a loop again", DateTimeOffset.UtcNow.AsUtcIsoDateToSecondsForLogs());
+                _logger.LogInformation("Detected as re-enabled at {Time}, service will start doing work in a loop again", Clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             }
 
-            _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", DateTimeOffset.UtcNow.AsUtcIsoDateToSecondsForLogs());
+            _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", Clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             await DoWork(cancellationToken);
         }
         else
         {
             if (wasLastEnabled == true)
             {
-                _logger.LogInformation("Detected as disabled at {Time}. Service won't do work till re-enabled", DateTimeOffset.UtcNow.AsUtcIsoDateToSecondsForLogs());
+                _logger.LogInformation("Detected as disabled at {Time}. Service won't do work till re-enabled", Clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             }
         }
     }

@@ -67,6 +67,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
@@ -98,6 +99,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolResubmissionService> _logger;
     private readonly IEnumerable<IMempoolResubmissionServiceObserver> _observers;
+    private readonly IClock _clock;
 
     public MempoolResubmissionService(
         IServiceProvider services,
@@ -107,7 +109,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         INetworkConfigurationProvider networkConfigurationProvider,
         ISystemStatusService systemStatusService,
         ILogger<MempoolResubmissionService> logger,
-        IEnumerable<IMempoolResubmissionServiceObserver> observers)
+        IEnumerable<IMempoolResubmissionServiceObserver> observers,
+        IClock clock)
     {
         _services = services;
         _dbContextFactory = dbContextFactory;
@@ -117,6 +120,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         _systemStatusService = systemStatusService;
         _logger = logger;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task RunBatchOfResubmissions(CancellationToken token = default)
@@ -125,12 +129,12 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         const int BatchSize = 30;
 
-        var instantForTransactionChoosing = DateTimeOffset.UtcNow;
+        var instantForTransactionChoosing = _clock.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
 
-        var submittedAt = DateTimeOffset.UtcNow;
+        var submittedAt = _clock.UtcNow;
 
         // The timeout should be relative to the submittedAt time we save to the DB, so needs to include the time for initial db saving (which should be very quick).
         using var ctsWithSubmissionTimeout = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -225,7 +229,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
                 transaction.MarkAsFailed(
                     MempoolTransactionFailureReason.Timeout,
-                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
+                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it",
+                    _clock.UtcNow
                 );
             }
         }
@@ -300,7 +305,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             {
                 await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
 
-                transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt);
+                transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt, _clock.UtcNow);
             }
         }
     }

@@ -64,6 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
@@ -99,6 +100,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     private readonly ISubmissionTrackingService _submissionTrackingService;
     private readonly ILogger<ConstructionAndSubmissionService> _logger;
     private readonly IEnumerable<IConstructionAndSubmissionServiceObserver> _observers;
+    private readonly IClock _clock;
 
     public ConstructionAndSubmissionService(
         IValidations validations,
@@ -106,7 +108,8 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         INetworkConfigurationProvider networkConfigurationProvider,
         ISubmissionTrackingService submissionTrackingService,
         ILogger<ConstructionAndSubmissionService> logger,
-        IEnumerable<IConstructionAndSubmissionServiceObserver> observers)
+        IEnumerable<IConstructionAndSubmissionServiceObserver> observers,
+        IClock clock)
     {
         _validations = validations;
         _coreApiHandler = coreApiHandler;
@@ -114,6 +117,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
         _submissionTrackingService = submissionTrackingService;
         _logger = logger;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
@@ -330,7 +334,7 @@ public class ConstructionAndSubmissionService : IConstructionAndSubmissionServic
     {
         var parseResponse = await HandlePreSubmissionParseSignedTransaction(signedTransaction);
 
-        var submittedTimestamp = DateTimeOffset.UtcNow;
+        var submittedTimestamp = _clock.UtcNow;
         using var submissionTimeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(3000));
 
         var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(

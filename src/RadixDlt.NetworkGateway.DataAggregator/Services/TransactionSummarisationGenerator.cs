@@ -63,16 +63,16 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public static class TransactionSummarisationGenerator
 {
-    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction)
+    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction, IClock clock)
     {
         long? newEpoch = null;
         long? newRoundInEpoch = null;
@@ -109,7 +109,7 @@ public static class TransactionSummarisationGenerator
         var isStartOfRound = newRoundInEpoch != null;
 
         var roundTimestamp = newRoundTimestamp ?? lastTransaction.RoundTimestamp;
-        var createdTimestamp = DateTimeOffset.UtcNow;
+        var createdTimestamp = clock.UtcNow;
         var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
             roundTimestamp < lastTransaction.NormalizedRoundTimestamp ? lastTransaction.NormalizedRoundTimestamp
             : roundTimestamp > createdTimestamp ? createdTimestamp

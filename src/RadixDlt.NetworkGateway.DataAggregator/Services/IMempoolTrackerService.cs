@@ -78,10 +78,10 @@ public record NodeMempoolHashes
 
     public DateTimeOffset AtTime { get; }
 
-    public NodeMempoolHashes(HashSet<byte[]> transactionHashes)
+    public NodeMempoolHashes(HashSet<byte[]> transactionHashes, DateTimeOffset atTime)
     {
         TransactionHashes = transactionHashes;
-        AtTime = DateTimeOffset.UtcNow; // TODO use ISystemClock
+        AtTime = atTime;
     }
 }
 
