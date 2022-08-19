@@ -303,9 +303,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = timestamp;
-
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(validatedTimestamp));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(timestamp));
 
         if (ledgerState == null)
         {
@@ -317,9 +315,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = timestamp;
-
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(validatedTimestamp));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(timestamp));
 
         if (ledgerState == null)
         {
