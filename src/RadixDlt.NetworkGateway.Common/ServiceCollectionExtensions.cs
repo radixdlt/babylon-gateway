@@ -71,6 +71,6 @@ public static class ServiceCollectionExtensions
 {
     public static void AddNetworkGatewayCore(this IServiceCollection services)
     {
-        services.TryAddSingleton<IClock, Clock>();
+        services.TryAddSingleton<IClock, SystemClock>();
     }
 }
