@@ -90,10 +90,11 @@ public class RawTransactionWriter : IRawTransactionWriter
     private readonly IEnumerable<IRawTransactionWriterObserver> _observers;
     private readonly IClock _clock;
 
-    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IEnumerable<IRawTransactionWriterObserver> observers)
+    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IEnumerable<IRawTransactionWriterObserver> observers, IClock clock)
     {
         _logger = logger;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)

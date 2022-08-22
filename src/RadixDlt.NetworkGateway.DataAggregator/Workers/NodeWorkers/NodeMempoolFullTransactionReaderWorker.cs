@@ -106,6 +106,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
     private readonly IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> _observers;
+    private readonly IClock _clock;
 
     // NB - So that we can get new transient dependencies each iteration (such as the HttpClients)
     //      we create such dependencies from the service provider.
@@ -128,6 +129,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
         _observers = observers;
+        _clock = clock;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -252,7 +254,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
             return new FullTransactionData(
                 transactionId,
-                Clock.UtcNow,
+                _clock.UtcNow,
                 response.Transaction.Metadata.Hex.ConvertFromHex(),
                 response.Transaction
             );

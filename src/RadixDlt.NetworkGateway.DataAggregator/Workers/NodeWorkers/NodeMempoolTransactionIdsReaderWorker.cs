@@ -100,6 +100,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
     private readonly IEnumerable<INodeMempoolTransactionIdsReaderWorkerObserver> _observers;
+    private readonly IClock _clock;
 
     private HashSet<byte[]> _latestTransactionHashes = new(ByteArrayEqualityComparer.Default);
 
@@ -122,6 +123,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
         _observers = observers;
+        _clock = clock;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -177,6 +179,6 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             );
         }
 
-        _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.CoreApiNode.Name, new NodeMempoolHashes(_latestTransactionHashes, Clock.UtcNow));
+        _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.CoreApiNode.Name, new NodeMempoolHashes(_latestTransactionHashes, _clock.UtcNow));
     }
 }
