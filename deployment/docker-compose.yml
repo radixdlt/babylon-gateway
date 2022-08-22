@@ -27,7 +27,7 @@ services:
 
   postgres_db:
     # See https://hub.docker.com/_/postgres for details about configuration
-    image: "postgres:12-alpine"
+    image: "postgres:14.3-alpine"
     profiles: ["network-gateway-built", "network-gateway-image"]
     ports:
       - "127.0.0.1:5532:5432" # This allows you to connect to the database locally on port localhost:5532
