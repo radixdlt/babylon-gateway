@@ -93,7 +93,7 @@ public static class Program
                 // backwards compability with Olympia
                 config
                     .AddJsonFile($"appsettings.{env.EnvironmentName}Overrides.json", true, reloadOnChange)
-                    .AddJsonFile("appsettings.PersonalOverrides.json");
+                    .AddJsonFile("appsettings.PersonalOverrides.json", true);
 
                 if (!string.IsNullOrWhiteSpace(customConfigurationPath))
                 {
