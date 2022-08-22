@@ -93,8 +93,8 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         // Assert
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
-        payload.GatewayApi.Should().NotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
+        payload?.GatewayApi.Should().NotBeNull();
+        payload?.GatewayApi._Version.Should().Be("2.0.0");
     }
 
     [Fact]
@@ -107,11 +107,11 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         var response = await GetRecentTransactions(client);
 
         // Assert
-        response.LedgerState.Should().NotBeNull();
-        response.LedgerState.Network = TestApplicationFactory.NetworkName;
-        response.LedgerState._Version.Should().Be(1);
+        response?.LedgerState.Should().NotBeNull();
+        response?.LedgerState.Network.Should().Be(TestApplicationFactory.NetworkName);
+        response?.LedgerState._Version.Should().Be(1);
 
-        response.Transactions.Count.Should().BeGreaterThan(0);
+        response?.Transactions.Count.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 
         var recentTransactions = await GetRecentTransactions(client);
 
-        var transactionidentifier = recentTransactions.Transactions[0].TransactionIdentifier;
+        var transactionidentifier = recentTransactions?.Transactions[0].TransactionIdentifier;
 
         // Act
         string json = new TransactionStatusRequest(transactionidentifier).ToJson();
@@ -134,9 +134,9 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
 
-        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(64);
-        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
-        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+        payload?.Transaction.TransactionIdentifier.Hash.Length.Should().Be(64);
+        payload?.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
+        payload?.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 
-    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
+    private async Task<RecentTransactionsResponse?> GetRecentTransactions(HttpClient client)
     {
         using HttpResponseMessage response = await client.PostAsync(
             "/transaction/recent",
@@ -154,7 +154,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 
         var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
 
-        payload.Transactions.Should().NotBeNull();
+        payload?.Transactions.Should().NotBeNull();
 
         return payload;
     }
