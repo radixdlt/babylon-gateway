@@ -11,11 +11,11 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
     public static class TestJsonExtensions
     {
-        public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+        public static async Task<TResponse?> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
         {
             responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
 
-            Assert.Equal("application/json; charset=utf-8", responseMessage.Content.Headers.ContentType.ToString());
+            Assert.Equal("application/json; charset=utf-8", responseMessage.Content.Headers?.ContentType?.ToString());
 
             string json = await responseMessage.Content.ReadAsStringAsync();
 
