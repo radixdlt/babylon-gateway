@@ -73,29 +73,13 @@ using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
+public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
 {
     private readonly TestApplicationFactory _factory;
 
-    public GatewayEndpointTests(TestApplicationFactory factory)
+    public TransactionEndpointTests(TestApplicationFactory factory)
     {
         _factory = factory;
-    }
-
-    [Fact]
-    public async Task TestGatewayApiVersion()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        using HttpResponseMessage response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
-
-        payload?.GatewayApi.ShouldNotBeNull();
-        payload?.GatewayApi._Version.Should().Be("2.0.0");
     }
 
     [Fact]
