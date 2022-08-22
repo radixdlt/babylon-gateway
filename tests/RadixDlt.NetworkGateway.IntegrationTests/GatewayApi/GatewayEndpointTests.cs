@@ -83,7 +83,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
     }
 
     [Fact]
-    public async Task TestSchemaVersion()
+    public async Task TestGatewayApiVersion()
     {
         // Arrange
         var client = _factory.CreateClient();
