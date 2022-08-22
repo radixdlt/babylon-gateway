@@ -65,7 +65,7 @@
 using Prometheus;
 using System;
 
-namespace RadixDlt.NetworkGateway.Common.Extensions;
+namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
 public enum MetricStatus
 {
