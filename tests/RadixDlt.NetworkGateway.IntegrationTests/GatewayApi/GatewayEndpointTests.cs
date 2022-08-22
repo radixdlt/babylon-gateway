@@ -63,7 +63,6 @@
  */
 
 using FluentAssertions;
-using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Net.Http;
