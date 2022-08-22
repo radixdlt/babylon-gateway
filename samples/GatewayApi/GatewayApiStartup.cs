@@ -69,7 +69,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
 
 namespace GatewayApi;

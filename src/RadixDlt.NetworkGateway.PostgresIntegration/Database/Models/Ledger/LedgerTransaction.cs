@@ -67,7 +67,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 
 /// <summary>
 /// A transaction committed onto the radix ledger.

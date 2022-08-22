@@ -64,7 +64,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Records;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Records;
 
 /// <summary>
 /// A base class for Records tracked in the database, with explicit keys and data types.

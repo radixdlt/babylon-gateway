@@ -65,7 +65,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 
 /// <summary>
 /// Entity normalization means we can have FKs on longs instead of on long strings, to hopefully improve performance.

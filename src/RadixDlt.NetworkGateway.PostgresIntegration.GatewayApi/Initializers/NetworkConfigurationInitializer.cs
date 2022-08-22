@@ -65,14 +65,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Initializers;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Initializers;
 
 public class NetworkConfigurationInitializer : BackgroundService
 {

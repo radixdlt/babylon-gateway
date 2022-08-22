@@ -63,11 +63,11 @@
  */
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Extensions;
 using System.Numerics;
 
-namespace RadixDlt.NetworkGateway.Common.Database.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.ValueConverters;
 
 public class TokenAmountToBigIntegerConverter : ValueConverter<TokenAmount, BigInteger>
 {

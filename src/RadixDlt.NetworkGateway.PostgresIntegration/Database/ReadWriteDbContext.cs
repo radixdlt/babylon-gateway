@@ -64,7 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace RadixDlt.NetworkGateway.Common.Database;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database;
 
 public class ReadWriteDbContext : CommonDbContext
 {

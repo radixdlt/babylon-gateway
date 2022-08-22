@@ -63,8 +63,9 @@
  */
 
 using Newtonsoft.Json;
-using RadixDlt.NetworkGateway.Common.Database.ValueConverters;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Model;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -72,7 +73,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Mempool;
 
 public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
 {

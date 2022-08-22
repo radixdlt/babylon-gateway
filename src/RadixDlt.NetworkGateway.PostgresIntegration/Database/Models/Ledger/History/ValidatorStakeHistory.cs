@@ -63,11 +63,11 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.History;
 
 /// <summary>
 /// Tracks validator stake over time.

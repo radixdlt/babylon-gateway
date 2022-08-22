@@ -67,7 +67,7 @@ using System;
 using System.Linq;
 using System.Text;
 
-namespace RadixDlt.NetworkGateway.Common.Extensions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Extensions;
 
 public static class DbSetExtensions
 {

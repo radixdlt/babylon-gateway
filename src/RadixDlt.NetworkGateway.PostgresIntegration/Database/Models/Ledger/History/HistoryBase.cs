@@ -65,7 +65,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.History;
 
 /// <summary>
 /// A base class for History tracked in the database, with explicit keys and entry types.

@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Joins;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Joins;
 
 /// <summary>
 /// A join table for any transactions which involved an Account entity (or sub-entity).

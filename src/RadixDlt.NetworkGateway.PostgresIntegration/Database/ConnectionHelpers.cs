@@ -69,7 +69,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.Common.Database;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database;
 
 public static class ConnectionHelpers
 {

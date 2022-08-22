@@ -63,10 +63,12 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,7 +76,7 @@ using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public class TransactionQuerier : ITransactionQuerier
 {

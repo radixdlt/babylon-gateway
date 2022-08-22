@@ -68,7 +68,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Database;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database;
 using System.Threading.Tasks;
 
 namespace DatabaseMigrations;

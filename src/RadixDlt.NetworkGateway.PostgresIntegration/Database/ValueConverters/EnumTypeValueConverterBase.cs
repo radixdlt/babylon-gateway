@@ -66,7 +66,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RadixDlt.NetworkGateway.Common.Database.ValueConverters;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.ValueConverters;
 
 public class EnumTypeValueConverterBase<TEnum> : ValueConverter<TEnum, string>
     where TEnum : notnull

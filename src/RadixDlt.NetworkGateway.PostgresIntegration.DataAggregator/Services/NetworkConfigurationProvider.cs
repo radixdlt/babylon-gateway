@@ -66,13 +66,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.SingleEntries;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 /// <summary>
 /// This captures the NetworkConfiguration for the DataAggregator - typically from a node, but it can also pull it

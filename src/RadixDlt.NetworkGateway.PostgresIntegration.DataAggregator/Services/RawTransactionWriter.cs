@@ -65,17 +65,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.Common.Utilities;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public interface IRawTransactionWriter
 {

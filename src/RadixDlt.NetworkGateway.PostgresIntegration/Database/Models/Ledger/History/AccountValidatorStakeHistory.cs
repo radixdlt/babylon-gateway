@@ -63,11 +63,11 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.History;
 
 public record struct AccountValidator(Account Account, Validator Validator);
 public record struct AccountValidatorDenormalized(string AccountAddress, string ValidatorAddress);

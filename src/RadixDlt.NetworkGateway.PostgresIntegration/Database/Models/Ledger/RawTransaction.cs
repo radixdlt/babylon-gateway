@@ -65,7 +65,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 
 /// <summary>
 /// The raw transaction details and payload.

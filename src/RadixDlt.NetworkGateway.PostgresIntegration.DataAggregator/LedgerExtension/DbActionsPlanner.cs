@@ -64,21 +64,21 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Joins;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Records;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.History;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Joins;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Records;
+using RadixDlt.NetworkGateway.PostgresIntegration.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 public record ActionsPlannerReport(
     long DbDependenciesLoadingMs,

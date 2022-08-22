@@ -63,10 +63,10 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Records;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Records;
 
 public record ValidatorEpochDenormalized(string ValidatorAddress, long Epoch);
 public record ValidatorEpoch(Validator Validator, long Epoch);

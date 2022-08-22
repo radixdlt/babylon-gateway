@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.Common.Numerics;
 using System;
 using System.Numerics;
 
-namespace RadixDlt.NetworkGateway.Common.Extensions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Extensions;
 
 internal static class TokenAmountExtensions
 {

@@ -64,10 +64,10 @@
 
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 /// <summary>
 /// A stateful class for processing the content of a transaction, and determining how the database should be updated.

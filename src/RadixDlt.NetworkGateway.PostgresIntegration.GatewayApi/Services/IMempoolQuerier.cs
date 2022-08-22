@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Mempool;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 public interface IMempoolQuerier
 {

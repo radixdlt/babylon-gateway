@@ -68,7 +68,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.Common.Extensions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Extensions;
 
 public static class QueryableExtensions
 {

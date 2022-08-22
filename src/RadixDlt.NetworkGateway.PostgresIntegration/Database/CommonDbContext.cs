@@ -63,19 +63,19 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Joins;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Records;
-using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
-using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
-using RadixDlt.NetworkGateway.Common.Database.ValueConverters;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.History;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Joins;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Records;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Mempool;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.ValueConverters;
 
-namespace RadixDlt.NetworkGateway.Common.Database;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database;
 
 /// <summary>
 /// Common DB Context for the Network Gateway database.

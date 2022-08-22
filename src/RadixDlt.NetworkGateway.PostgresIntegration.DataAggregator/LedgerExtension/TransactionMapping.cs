@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 public static class TransactionMapping
 {

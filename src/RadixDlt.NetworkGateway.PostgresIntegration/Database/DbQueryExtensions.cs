@@ -65,14 +65,14 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.History;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.History;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RadixDlt.NetworkGateway.Common.Database;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database;
 
 public static class DbQueryExtensions
 {

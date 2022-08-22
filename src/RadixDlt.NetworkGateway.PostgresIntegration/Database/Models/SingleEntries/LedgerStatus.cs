@@ -63,12 +63,12 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.SingleEntries;
 
 /// <summary>
 /// This is designed to make it super-quick to look up the top of the synced ledger,

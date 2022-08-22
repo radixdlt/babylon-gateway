@@ -64,7 +64,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger.Normalization;
 
 /// <summary>
 /// Adds normalization to account addresses, to potentially increase DB performance.
