@@ -119,7 +119,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
+        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, _clock, token);
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(
@@ -171,7 +171,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     {
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, token);
+        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, _clock, token);
 
         if (ledgerExtension.ParentSummary.StateVersion != topOfLedgerSummary.StateVersion)
         {
