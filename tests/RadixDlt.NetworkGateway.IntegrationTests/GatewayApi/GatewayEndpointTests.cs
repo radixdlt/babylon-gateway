@@ -66,8 +66,10 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
@@ -93,7 +95,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         // Assert
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
-        payload?.GatewayApi.Should().NotBeNull();
+        payload?.GatewayApi.ShouldNotBeNull();
         payload?.GatewayApi._Version.Should().Be("2.0.0");
     }
 
@@ -107,7 +109,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         var response = await GetRecentTransactions(client);
 
         // Assert
-        response?.LedgerState.Should().NotBeNull();
+        response?.LedgerState.ShouldNotBeNull();
         response?.LedgerState.Network.Should().Be(TestApplicationFactory.NetworkName);
         response?.LedgerState._Version.Should().Be(1);
 
@@ -154,7 +156,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 
         var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
 
-        payload?.Transactions.Should().NotBeNull();
+        payload?.Transactions.ShouldNotBeNull();
 
         return payload;
     }
