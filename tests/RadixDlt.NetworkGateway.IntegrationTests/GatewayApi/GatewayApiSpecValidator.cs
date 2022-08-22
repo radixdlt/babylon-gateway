@@ -1,5 +1,8 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
+using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -7,7 +10,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 {
     internal static class GatewayApiSpecValidator
     {
-        private static readonly string _openApiFileName = "../../../../../gateway-api-spec.yaml";
+        private static readonly string _openApiFileName = "../../../../../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml";
 
         private static OpenApiDocument? _openApiDocument = null;
 

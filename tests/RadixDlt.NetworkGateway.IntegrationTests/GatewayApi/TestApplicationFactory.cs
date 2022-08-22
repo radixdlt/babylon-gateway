@@ -28,8 +28,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
                 config.AddEnvironmentVariables();
-                // config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", false, true);
-                config.AddJsonFile($"appsettings.development.json", false, true);
+                config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", false, true);
+                //config.AddJsonFile($"appsettings.development.json", false, true);
             });
 
             // builder.UseContentRoot("C:\\Work\\babylon-gateway\\samples\\GatewayApi");
