@@ -14,7 +14,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
     public class TestApplicationFactory : WebApplicationFactory<GatewayApiStartup>
     {
-        public static readonly string NetworkName = "localnet";
+        public static readonly string NetworkName = "integration_tests_net";
 
         private Mock<ICoreNodesSelectorService> _coreNodesSelectorServiceMock;
 
