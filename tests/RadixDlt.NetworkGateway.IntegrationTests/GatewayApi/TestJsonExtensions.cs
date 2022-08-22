@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,8 +17,14 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
         {
             responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
 
-            Assert.Equal("application/json; charset=utf-8", responseMessage.Content.Headers?.ContentType?.ToString());
+            MediaTypeHeaderValue.TryParse(responseMessage.Content.Headers.ContentType?.ToString(), out var mediaTypeHeader);
 
+            Assert.NotNull(mediaTypeHeader);
+
+            Assert.Equal(mediaTypeHeader?.MediaType, "application/json");
+
+            Assert.Equal(mediaTypeHeader?.CharSet, "utf-8");
+   
             string json = await responseMessage.Content.ReadAsStringAsync();
 
             var payload = JsonConvert.DeserializeObject<TResponse>(json);
