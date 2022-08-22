@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using Moq;
-using Microsoft.Extensions.Options;
-using System;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
@@ -16,10 +15,14 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
     {
         public static readonly string NetworkName = "integration_tests_net";
 
+        private Mock<INetworkConfigurationProvider> _networkConfigurationProviderMock;
         private Mock<ICoreNodesSelectorService> _coreNodesSelectorServiceMock;
 
         public TestApplicationFactory()
         {
+            _networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
+            _networkConfigurationProviderMock.Setup(x => x.GetNetworkName()).Returns(NetworkName);
+
             _coreNodesSelectorServiceMock = new Mock<ICoreNodesSelectorService>();
             _coreNodesSelectorServiceMock.Setup(x => x.GetRandomTopTierCoreNode()).Returns(
                 new CoreApiNode()
@@ -45,6 +48,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                 }
 
                 services.AddSingleton(_coreNodesSelectorServiceMock.Object);
+                services.AddSingleton(_networkConfigurationProviderMock.Object);
             })
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
