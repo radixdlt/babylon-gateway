@@ -63,46 +63,38 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
+using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class GatewayApiBuilderExtensions
+public class CapturedConfigProvider : ICapturedConfigProvider
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    private readonly ReadOnlyDbContext _dbContext;
+
+    public CapturedConfigProvider(ReadOnlyDbContext dbContext)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        _dbContext = dbContext;
+    }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+    public async Task<CapturedConfig> CaptureConfiguration()
+    {
+        var networkConfiguration = await _dbContext.NetworkConfiguration.AsNoTracking().SingleOrDefaultAsync();
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+        if (networkConfiguration == null)
+        {
+            throw new Exception("Can't set current configuration from database as it's not there");
+        }
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        return new CapturedConfig(
+            networkConfiguration.NetworkDefinition.NetworkName,
+            networkConfiguration.WellKnownAddresses.XrdAddress,
+            networkConfiguration.NetworkAddressHrps.ToAddressHrps(),
+            new CoreModel.NetworkIdentifier(networkConfiguration.NetworkDefinition.NetworkName),
+            new TokenIdentifier(networkConfiguration.WellKnownAddresses.XrdAddress)
+        );
     }
 }

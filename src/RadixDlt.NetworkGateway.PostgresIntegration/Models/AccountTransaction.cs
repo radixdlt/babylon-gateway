@@ -62,47 +62,33 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+/// <summary>
+/// A join table for any transactions which involved an Account entity (or sub-entity).
+/// You can filter out system transactions by joining onto the LedgerTransaction table.
+/// </summary>
+// OnModelCreating: Define key on (AccountId, ResultantStateVersion)
+[Table("account_transactions")]
+public class AccountTransaction
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    [Column(name: "state_version")]
+    public long ResultantStateVersion { get; set; }
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
+    [ForeignKey(nameof(ResultantStateVersion))]
+    public LedgerTransaction LedgerTransaction { get; set; }
 
-        return builder;
-    }
+    [Column(name: "is_user_transaction")]
+    public bool IsUserTransaction { get; set; }
+
+    [Column(name: "is_fee_payer")]
+    public bool IsFeePayer { get; set; }
 }

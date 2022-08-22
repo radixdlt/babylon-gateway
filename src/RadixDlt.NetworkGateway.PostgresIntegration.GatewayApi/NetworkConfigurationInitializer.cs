@@ -62,97 +62,52 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace DatabaseMigrations;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class Program
+public class NetworkConfigurationInitializer : BackgroundService
 {
-    public static async Task Main(string[] args)
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _logger;
+
+    public NetworkConfigurationInitializer(IServiceProvider serviceProvider, ILogger<NetworkConfigurationInitializer> logger)
     {
-        using var host = CreateHostBuilder(args).Build();
-
-        await host.StartAsync();
-
-        try
-        {
-            var services = host.Services;
-            var configuration = services.GetRequiredService<IConfiguration>();
-            var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
-            var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
-
-            if (shouldWipeDatabaseInsteadOfStart)
-            {
-                await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
-                {
-                    logger.LogInformation("Connecting to database - if it exists");
-
-                    await ConnectionHelpers.TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
-
-                    logger.LogInformation("Starting database wipe");
-
-                    await dbContext.Database.EnsureDeletedAsync();
-
-                    logger.LogInformation("Database wipe completed. Now stopping...");
-                });
-
-                return;
-            }
-
-            // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
-            // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-            await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
-            {
-                logger.LogInformation("Starting database migrations if required");
-
-                await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
-
-                logger.LogInformation("Database migrations (if required) were completed");
-            });
-        }
-        finally
-        {
-            await host.StopAsync();
-        }
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((context, config) =>
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        using var scope = _serviceProvider.CreateScope();
+
+        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
             {
-                var env = context.HostingEnvironment;
-                var customConfigurationPath = GetCustomJsonConfigurationValue(context);
-                var reloadOnChange = GetReloadConfigOnChangeValue(context);
-
-                config
-                    .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
-                    .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
-
-                if (!string.IsNullOrWhiteSpace(customConfigurationPath))
+                await networkConfigurationProvider.Initialize(scope.ServiceProvider.GetRequiredService<ICapturedConfigProvider>(), stoppingToken);
+                break;
+            }
+            catch (Exception exception)
+            {
+                if (exception.ShouldBeConsideredAppFatal())
                 {
-                    config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
+                    throw;
                 }
-            })
-            .ConfigureServices((host, services) =>
-            {
-                services.AddDbContextFactory<MigrationsDbContext>(options =>
-                {
-                    options.UseNpgsql(
-                        host.Configuration.GetConnectionString(NetworkGatewayConstants.Database.MigrationsConnectionStringName),
-                        o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name)
-                    );
-                });
-            });
 
-    // based on https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Hosting/src/HostingHostBuilderExtensions.cs
-    private static bool GetReloadConfigOnChangeValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue("hostBuilder:reloadConfigOnChange", defaultValue: true);
+                _logger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
 
-    private static string? GetCustomJsonConfigurationValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue<string?>("CustomJsonConfigurationFilePath", defaultValue: null);
+                await Task.Delay(2000, stoppingToken);
+            }
+        }
+    }
 }

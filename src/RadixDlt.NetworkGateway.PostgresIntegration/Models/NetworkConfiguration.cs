@@ -63,46 +63,67 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.Common.Addressing;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+[Table("network_configuration")]
+public class NetworkConfiguration : SingleEntryBase
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    // [Owned] below
+    public NetworkDefinition NetworkDefinition { get; set; }
+
+    // [Owned] below
+    public NetworkAddressHrps NetworkAddressHrps { get; set; }
+
+    // [Owned] below
+    public WellKnownAddresses WellKnownAddresses { get; set; }
+
+    public bool HasEqualConfiguration(NetworkConfiguration other)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
-
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        return NetworkDefinition == other.NetworkDefinition
+               && NetworkAddressHrps == other.NetworkAddressHrps
+               && WellKnownAddresses == other.WellKnownAddresses;
     }
+}
+
+[Owned]
+public record NetworkDefinition
+{
+    [Column("network_name")]
+    public string NetworkName { get; set; }
+}
+
+[Owned]
+public record NetworkAddressHrps
+{
+    [Column("account_hrp")]
+    public string AccountHrp { get; set; }
+
+    [Column("resource_hrp_suffix")]
+    public string ResourceHrpSuffix { get; set; }
+
+    [Column("validator_hrp")]
+    public string ValidatorHrp { get; set; }
+
+    [Column("node_hrp")]
+    public string NodeHrp { get; set; }
+
+    public AddressHrps ToAddressHrps()
+    {
+        return new AddressHrps(
+            AccountHrp,
+            ResourceHrpSuffix,
+            ValidatorHrp,
+            NodeHrp
+        );
+    }
+}
+
+[Owned]
+public record WellKnownAddresses
+{
+    [Column("xrd_address")]
+    public string XrdAddress { get; set; }
 }

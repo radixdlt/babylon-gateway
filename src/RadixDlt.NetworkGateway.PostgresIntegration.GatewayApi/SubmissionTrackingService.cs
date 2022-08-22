@@ -63,100 +63,110 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Npgsql;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
-using RadixDlt.NetworkGateway.Common.Utilities;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public interface IRawTransactionWriter
+public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQuerier
 {
-    Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
-
-    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
-}
-
-public class RawTransactionWriter : IRawTransactionWriter
-{
-    private readonly ILogger<RawTransactionWriter> _logger;
-    private readonly IEnumerable<IRawTransactionWriterObserver> _observers;
+    private readonly ReadWriteDbContext _dbContext;
+    private readonly IEnumerable<ISubmissionTrackingServiceObserver> _observers;
     private readonly IClock _clock;
 
-    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IEnumerable<IRawTransactionWriterObserver> observers, IClock clock)
+    public SubmissionTrackingService(
+        ReadWriteDbContext dbContext,
+        IEnumerable<ISubmissionTrackingServiceObserver> observers,
+        IClock clock)
     {
-        _logger = logger;
+        _dbContext = dbContext;
         _observers = observers;
         _clock = clock;
     }
 
-    public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
+    public async Task<MempoolTrackGuidance> TrackInitialSubmission(
+        DateTimeOffset submittedTimestamp,
+        byte[] signedTransaction,
+        byte[] transactionIdentifierHash,
+        string submittedToNodeName,
+        CoreModel.ConstructionParseResponse parseResponse
+    )
     {
-        // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        return await context.RawTransactions
-            .UpsertRange(rawTransactions)
-            .RunAsync(token);
-    }
+        var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
-    {
-        var transactionsById = transactionData
-            .Where(td => !td.TransactionSummary.IsStartOfRound)
-            .ToDictionary(
-                rt => rt.TransactionSummary.PayloadHash,
-                ByteArrayEqualityComparer.Default
-            );
-
-        var transactionIdList = transactionsById.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
-
-        var toUpdate = await context.MempoolTransactions
-            .Where(mt => mt.Status != MempoolTransactionStatus.Committed && transactionIdList.Contains(mt.PayloadHash))
-            .ToListAsync(token);
-
-        if (toUpdate.Count == 0)
+        if (existingMempoolTransaction != null)
         {
-            return 0;
-        }
-
-        foreach (var mempoolTransaction in toUpdate)
-        {
-            if (mempoolTransaction.Status == MempoolTransactionStatus.Failed)
+            if (existingMempoolTransaction.Status == MempoolTransactionStatus.Failed)
             {
-                await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
-
-                _logger.LogError(
-                    "Transaction with id {TransactionId} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
-                    mempoolTransaction.PayloadHash.ToHex(),
-                    mempoolTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.FailureReason?.ToString(),
-                    mempoolTransaction.FailureExplanation
-                );
+                return new MempoolTrackGuidance(ShouldSubmitToNode: false, TransactionAlreadyFailedReason: existingMempoolTransaction.FailureReason);
             }
 
-            var transactionSummary = transactionsById[mempoolTransaction.PayloadHash].TransactionSummary;
-            mempoolTransaction.MarkAsCommitted(
-                transactionSummary.StateVersion,
-                transactionSummary.NormalizedRoundTimestamp,
-                _clock
-            );
+            existingMempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+            await _dbContext.SaveChangesAsync();
+
+            // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
+            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
         }
 
-        // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
-        // something like: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
-        var result = await context.SaveChangesAsync(token);
+        var mempoolTransaction = MempoolTransaction.NewAsSubmittedForFirstTimeByGateway(
+            transactionIdentifierHash,
+            signedTransaction,
+            submittedToNodeName,
+            GatewayTransactionContents.Default(), // TODO - Need to fix for Babylon
+            submittedTimestamp
+        );
 
-        await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedCount(toUpdate.Count));
+        _dbContext.MempoolTransactions.Add(mempoolTransaction);
 
-        return result;
+        // We now try saving to the DB - but catch duplicates - if we get a duplicate reported, the gateway which saved
+        // it successfully should then submit it to the node -- and the one that reports a duplicate should return a
+        // generic success, but not resubmit.
+        // NB - 23 is Integrity Constraint Violation: https://www.postgresql.org/docs/current/errcodes-appendix.html)
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+            await _observers.ForEachAsync(x => x.PostMempoolTransactionAdded());
+
+            return new MempoolTrackGuidance(ShouldSubmitToNode: true);
+        }
+        catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
+        {
+            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
+        }
+    }
+
+    public async Task MarkAsFailed(
+        byte[] transactionIdentifierHash,
+        MempoolTransactionFailureReason failureReason,
+        string failureExplanation
+    )
+    {
+        var mempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
+
+        if (mempoolTransaction == null)
+        {
+            throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
+        }
+
+        mempoolTransaction.MarkAsFailed(failureReason, failureExplanation, _clock.UtcNow);
+
+        await _observers.ForEachAsync(x => x.PostMempoolTransactionMarkedAsFailed());
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
+    {
+        return await _dbContext.MempoolTransactions
+            .Where(t => t.PayloadHash == transactionIdentifierHash)
+            .SingleOrDefaultAsync();
     }
 }

@@ -62,47 +62,37 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using Xunit;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.UnitTests.PostgresIntegration;
 
-public static class GatewayApiBuilderExtensions
+public class TokenAmountExtensionsTests
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    [Fact]
+    public void GivenANumberTooLargeForPostgres_WhenConvertedToPostgresDecimal_ReturnsNaN()
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        var tokenAmount = TokenAmount.FromSubUnits(BigInteger.Pow(10, 1000));
+        var postgresDecimal = tokenAmount.ToPostgresDecimal();
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+        postgresDecimal.Should().Be("NaN");
+    }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    [Fact]
+    public void GivenANumberInsidePostgresLimit_WhenConvertedToPostgresDecimal_ReturnsNumberAsString()
+    {
+        // 10^(995 - 18) = 10^(977)
+        var tokenAmount = TokenAmount.FromSubUnits(BigInteger.Pow(10, 995));
+        var postgresDecimal = tokenAmount.ToPostgresDecimal();
+        var expected = new StringBuilder()
+            .Append('1').Append(Enumerable.Range(0, 977).Select(_ => '0').ToArray()) // 1000000... with 977 digits of 0
+            .ToString();
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        postgresDecimal.Should().Be(expected);
     }
 }

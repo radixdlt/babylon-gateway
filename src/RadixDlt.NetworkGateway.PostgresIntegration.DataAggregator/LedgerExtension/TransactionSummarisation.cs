@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Database;
 using System;
 using System.Linq;
 using System.Threading;

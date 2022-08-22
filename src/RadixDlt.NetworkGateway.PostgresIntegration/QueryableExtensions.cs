@@ -63,46 +63,27 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class GatewayApiBuilderExtensions
+public static class QueryableExtensions
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    public static async Task<HashSet<TSource>> ToHashSetAsync<TSource>(
+        this IQueryable<TSource> source,
+        IEqualityComparer<TSource> equalityComparer,
+        CancellationToken cancellationToken = default
+    )
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        var hashSet = new HashSet<TSource>(equalityComparer);
+        await foreach (var element in source.AsAsyncEnumerable().WithCancellation(cancellationToken))
+        {
+            hashSet.Add(element);
+        }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        return hashSet;
     }
 }

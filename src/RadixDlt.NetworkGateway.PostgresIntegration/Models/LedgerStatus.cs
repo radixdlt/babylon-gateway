@@ -63,46 +63,36 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+/// <summary>
+/// This is designed to make it super-quick to look up the top of the synced ledger,
+/// and to store any other fields we might want.
+/// </summary>
+[Table("ledger_status")]
+public class LedgerStatus : SingleEntryBase
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+    [Column("top_of_ledger_state_version")]
+    public long TopOfLedgerStateVersion { get; set; }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+    // FK Created in OnModelCreating to create an un-truncated name for the constraint
+    public LedgerTransaction TopOfLedgerTransaction { get; set; }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    // [Owned] below
+    public SyncTarget SyncTarget { get; set; }
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
+    [ConcurrencyCheck]
+    [Column("last_updated")]
+    public DateTimeOffset LastUpdated { get; set; }
+}
 
-        return builder;
-    }
+[Owned]
+public record SyncTarget
+{
+    [Column("sync_status_target_state_version")]
+    public long TargetStateVersion { get; set; }
 }

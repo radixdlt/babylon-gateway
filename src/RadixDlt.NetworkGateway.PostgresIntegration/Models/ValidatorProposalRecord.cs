@@ -63,46 +63,65 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+public record ValidatorEpochDenormalized(string ValidatorAddress, long Epoch);
+public record ValidatorEpoch(Validator Validator, long Epoch);
+
+/// <summary>
+/// A record of how many proposals a validator completed/missed in a given epoch.
+///
+/// This is kept up-to-date as transactions are ingested for a given epoch, but then left around for
+/// history in previous epochs.
+///
+/// If this exists for a validator in an epoch, it implies that validator was part of the validator set in that epoch.
+/// </summary>
+// OnModelCreating: Has composite key (epoch, validator_id)
+// OnModelCreating: Has index on (validator_id, epoch)
+[Table("validator_proposal_records")]
+public class ValidatorProposalRecord : RecordBase<ValidatorEpoch, ProposalRecord>
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    [Column(name: "validator_id")]
+    public long ValidatorId { get; set; }
+
+    [ForeignKey(nameof(ValidatorId))]
+    public Validator Validator { get; set; }
+
+    [Column(name: "epoch")]
+    public long Epoch { get; set; }
+
+    // [Owned] - see below
+    public ProposalRecord ProposalRecord { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidatorProposalRecord"/> class.
+    /// The StateVersions should be set separately.
+    /// </summary>
+    public ValidatorProposalRecord(ValidatorEpoch key, ProposalRecord data)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
-
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        Validator = key.Validator;
+        Epoch = key.Epoch;
+        ProposalRecord = data;
     }
+
+    private ValidatorProposalRecord()
+    {
+    }
+
+    public override void UpdateData(ProposalRecord latestData)
+    {
+        ProposalRecord = latestData;
+    }
+}
+
+[Owned]
+public record ProposalRecord
+{
+    [Column(name: "proposals_completed")]
+    public long ProposalsCompleted { get; set; }
+
+    [Column(name: "proposals_missed")]
+    public long ProposalsMissed { get; set; }
 }

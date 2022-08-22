@@ -62,47 +62,36 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+/// <summary>
+/// The raw transaction details and payload.
+/// </summary>
+[Table("raw_transactions")]
+public class RawTransaction
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    public RawTransaction(byte[] transactionPayloadHash, byte[] payload)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
-
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        TransactionPayloadHash = transactionPayloadHash;
+        Payload = payload;
     }
+
+    // Public empty constructor created for use with the Upsert library
+    public RawTransaction()
+    {
+    }
+
+    [Key]
+    [Column(name: "transaction_payload_hash")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public byte[] TransactionPayloadHash { get; set; }
+
+    /// <summary>
+    /// The payload of the transaction.
+    /// </summary>
+    [Column("payload")]
+    public byte[] Payload { get; set; }
 }

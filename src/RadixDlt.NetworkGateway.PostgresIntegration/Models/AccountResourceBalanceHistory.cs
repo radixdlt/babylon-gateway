@@ -63,46 +63,73 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.Common.Numerics;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+public record struct AccountResourceDenormalized(string AccountAddress, string Rri);
+public record struct AccountResource(Account Account, Resource Resource);
+
+/// <summary>
+/// Tracks Account Resource Balances over time.
+/// </summary>
+// OnModelCreating: Indexes defined there.
+// OnModelCreating: Composite primary key is defined there.
+[Table("account_resource_balance_history")]
+public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    [Column(name: "account_id")]
+    public long AccountId { get; set; }
+
+    [ForeignKey(nameof(AccountId))]
+    public Account Account { get; set; }
+
+    [Column(name: "resource_id")]
+    public long ResourceId { get; set; }
+
+    [ForeignKey(nameof(ResourceId))]
+    public Resource Resource { get; set; }
+
+    public BalanceEntry BalanceEntry { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AccountResourceBalanceHistory"/> class.
+    /// The StateVersions should be set separately.
+    /// </summary>
+    public AccountResourceBalanceHistory(AccountResource key, BalanceEntry balanceEntry)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        Account = key.Account;
+        Resource = key.Resource;
+        BalanceEntry = balanceEntry;
+    }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+    public static AccountResourceBalanceHistory FromPreviousEntry(
+        AccountResource key,
+        BalanceEntry? previousBalance,
+        TokenAmount balanceChange
+    )
+    {
+        var prev = previousBalance ?? BalanceEntry.GetDefault();
+        return new AccountResourceBalanceHistory(key, new BalanceEntry
+        {
+            Balance = prev.Balance + balanceChange,
+        });
+    }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    private AccountResourceBalanceHistory()
+    {
+    }
+}
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
+[Owned]
+public record BalanceEntry
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
 
-        return builder;
+    public static BalanceEntry GetDefault()
+    {
+        return new BalanceEntry(); // Balance is default(TokenAmount) = 0
     }
 }

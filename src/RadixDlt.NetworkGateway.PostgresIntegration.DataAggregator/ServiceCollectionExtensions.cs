@@ -68,7 +68,6 @@ using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Database;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;

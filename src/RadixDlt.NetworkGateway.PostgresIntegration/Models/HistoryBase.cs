@@ -62,47 +62,60 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+/// <summary>
+/// A base class for History tracked in the database, with explicit keys and entry types.
+///
+/// The Key and Entry types should together define the type, alongside the FromStateVersion and ToStateVersion fields.
+///
+/// Marking these allows for carefully considering the types to make history creation easier -- and to preempt
+/// static interfaces.
+/// </summary>
+/// <typeparam name="TKey">A record type indicating the grouping key which is used to aggregate history together.</typeparam>
+/// <typeparam name="TEntry">A record type indicating the history entry - these are the items which change over time.</typeparam>
+/// <typeparam name="TChange">A class which is used to aggregate a diff to the last history entry.</typeparam>
+public abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+}
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+/// <summary>
+/// A base class for History tracked in the database.
+///
+/// Current state is given by ToStateVersion = null - but generally speaking, you should be reading at a given
+/// already-committed state version, to ensure that the history you read is atomic against that stateVersion.
+/// (Or at least, it is atomic assuming the ledger isn't mid-reversion, but at that point, all bets are off).
+///
+/// There should be indexes with to_state_version null (to pull "latest") and against from_state_version
+/// (to easily pull history at a given state version). The former could/should be replaced with the latter with
+/// a little work.
+///
+/// You will likely also want to add a query in DbQueryExtensions to help with querying against a given state version.
+/// It may also be worthwhile to create a TableValuedFunction with this SQL to make direct-SQL-querying easier.
+/// </summary>
+public abstract class HistoryBase
+{
+    /// <summary>
+    /// The first state version where this version of history applied.
+    /// </summary>
+    [Column(name: "from_state_version")]
+    public long FromStateVersion { get; set; }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    [ForeignKey(nameof(FromStateVersion))]
+    public LedgerTransaction FromLedgerTransaction { get; set; }
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
+    /// <summary>
+    /// The last state version where this version of history applied. This endpoint is inclusive.
+    /// IE there should be a new History with New.FromStateVersion = Prev.ToStateVersion + 1.
+    /// </summary>
+    [Column(name: "to_state_version")]
+    [ConcurrencyCheck] // Ensure that the same history can't be updated by two different state versions somehow
+    public long? ToStateVersion { get; set; }
 
-        return builder;
-    }
+    // OnModelCreating: Further define relationship to LedgerTransaction (no cascade delete - needs careful clean-up on reversion)
+    [ForeignKey(nameof(ToStateVersion))]
+    public LedgerTransaction? ToLedgerTransaction { get; set; }
 }

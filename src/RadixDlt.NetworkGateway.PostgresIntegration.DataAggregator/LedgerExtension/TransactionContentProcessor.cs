@@ -65,7 +65,7 @@
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Database.Models.Ledger;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 

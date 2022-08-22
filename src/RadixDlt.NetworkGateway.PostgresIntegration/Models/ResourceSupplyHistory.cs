@@ -63,46 +63,114 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.Common.Numerics;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public static class GatewayApiBuilderExtensions
+/// <summary>
+/// Tracks total supply of a resource over time.
+/// </summary>
+// OnModelCreating: Indexes defined there.
+// OnModelCreating: Composite primary key is defined there.
+[Table("resource_supply_history")]
+public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, ResourceSupplyChange>
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    [Column(name: "resource_id")]
+    public long ResourceId { get; set; }
+
+    [ForeignKey(nameof(ResourceId))]
+    public Resource Resource { get; set; }
+
+    // [Owned] below
+    public ResourceSupply ResourceSupply { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ResourceSupplyHistory"/> class.
+    /// The StateVersions should be set separately.
+    /// </summary>
+    public ResourceSupplyHistory(Resource key, ResourceSupply resourceSupply)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        Resource = key;
+        ResourceSupply = resourceSupply;
+    }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+    public static ResourceSupplyHistory FromPreviousEntry(
+        Resource key,
+        ResourceSupply? previousSupply,
+        ResourceSupplyChange change
+    )
+    {
+        var prev = previousSupply ?? ResourceSupply.Default();
+        return new ResourceSupplyHistory(key, new ResourceSupply
+        {
+            TotalSupply = prev.TotalSupply + change.Minted - change.Burned,
+            TotalMinted = prev.TotalMinted + change.Minted,
+            TotalBurnt = prev.TotalBurnt + change.Burned,
+        });
+    }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    private ResourceSupplyHistory()
+    {
+    }
+}
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
-            });
+/// <summary>
+/// A mutable class to aggregate changes.
+/// </summary>
+public class ResourceSupplyChange
+{
+    public TokenAmount Minted { get; set; }
 
-        return builder;
+    public TokenAmount Burned { get; set; }
+
+    public static ResourceSupplyChange From(TokenAmount change)
+    {
+        var newVal = Default();
+        newVal.Aggregate(change);
+        return newVal;
+    }
+
+    public static ResourceSupplyChange Default()
+    {
+        return new ResourceSupplyChange();
+    }
+
+    public void Aggregate(TokenAmount change)
+    {
+        if (change.IsZero())
+        {
+            return;
+        }
+
+        if (change.IsPositive())
+        {
+            Minted += change;
+        }
+        else
+        {
+            Burned -= change;
+        }
+    }
+}
+
+[Owned]
+public record ResourceSupply
+{
+    [Column("total_supply")]
+    public TokenAmount TotalSupply { get; set; }
+
+    [Column("total_minted")]
+    public TokenAmount TotalMinted { get; set; }
+
+    [Column("total_burnt")]
+    public TokenAmount TotalBurnt { get; set; }
+
+    public static ResourceSupply Default()
+    {
+        return new ResourceSupply
+        {
+            TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurnt = TokenAmount.Zero,
+        };
     }
 }
