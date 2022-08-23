@@ -21,10 +21,10 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
             Assert.NotNull(mediaTypeHeader);
 
-            Assert.Equal(mediaTypeHeader?.MediaType, "application/json");
+            Assert.Equal("application/json", mediaTypeHeader?.MediaType);
 
-            Assert.Equal(mediaTypeHeader?.CharSet, "utf-8");
-   
+            Assert.Equal("utf-8", mediaTypeHeader?.CharSet);
+
             string json = await responseMessage.Content.ReadAsStringAsync();
 
             var payload = JsonConvert.DeserializeObject<TResponse>(json);
