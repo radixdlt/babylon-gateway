@@ -77,7 +77,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator;
+namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
 public class MetricsObserver :
     IGlobalWorkerObserver,

@@ -68,7 +68,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Database;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 using System.Threading.Tasks;
 
 namespace DatabaseMigrations;
@@ -134,6 +134,11 @@ public static class Program
                 config
                     .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
                     .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
+
+                // backwards compability with Olympia
+                config
+                    .AddJsonFile($"appsettings.{env.EnvironmentName}Overrides.json", true, reloadOnChange)
+                    .AddJsonFile("appsettings.PersonalOverrides.json", true, reloadOnChange);
 
                 if (!string.IsNullOrWhiteSpace(customConfigurationPath))
                 {

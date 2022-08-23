@@ -68,7 +68,7 @@ using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 
-namespace RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi;
+namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
 public static class GatewayApiBuilderExtensions
 {

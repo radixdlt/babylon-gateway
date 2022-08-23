@@ -66,12 +66,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Initializers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class GatewayApiBuilderExtensions
 {

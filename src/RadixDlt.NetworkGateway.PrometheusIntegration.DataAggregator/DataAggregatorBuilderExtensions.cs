@@ -72,7 +72,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
-namespace RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator;
+namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
 public static class DataAggregatorBuilderExtensions
 {

@@ -63,18 +63,14 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 public static class TransactionSummarisation
 {

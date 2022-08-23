@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
-using Validator = RadixDlt.NetworkGateway.Common.Database.Models.Ledger.Normalization.Validator;
+using Validator = RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator;
 
-namespace RadixDlt.NetworkGateway.GatewayApi;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class ApiIdentifiers
 {

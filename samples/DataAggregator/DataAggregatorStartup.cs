@@ -69,8 +69,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Prometheus;
 using RadixDlt.NetworkGateway.DataAggregator;
-using RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator;
-using RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator;
+using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PrometheusIntegration;
 
 namespace DataAggregator;
 

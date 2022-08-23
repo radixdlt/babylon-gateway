@@ -66,11 +66,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class ServiceCollectionExtensions
 {
