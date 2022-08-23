@@ -27,5 +27,6 @@
       <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj" />
       <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
       <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
+      <ProjectReference Include="..\RadixDlt.NetworkGateway.UnitTests\RadixDlt.NetworkGateway.UnitTests.csproj" />
     </ItemGroup>
 </Project>

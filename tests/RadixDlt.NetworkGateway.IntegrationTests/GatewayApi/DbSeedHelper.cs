@@ -2,6 +2,7 @@ using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.UnitTests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,9 +56,9 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     roundInEpoch: 0,
                     isStartOfEpoch: true,
                     isStartOfRound: true,
-                    roundTimestamp: DateTime.Now,
-                    createdTimestamp: DateTime.Now,
-                    normalizedRoundTimestamp: DateTime.Now)
+                    roundTimestamp: new FakeClock().UtcNow,
+                    createdTimestamp: new FakeClock().UtcNow,
+                    normalizedRoundTimestamp: new FakeClock().UtcNow)
                 {
                      RawTransaction = rawTransaction,
                 },
@@ -73,7 +74,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     Id = 1,
                     TopOfLedgerStateVersion = 1,
                     SyncTarget = new SyncTarget() { TargetStateVersion = 1 },
-                    LastUpdated = DateTime.Now,
+                    LastUpdated = new FakeClock().UtcNow,
                     TopOfLedgerTransaction = topTransaction,
                 },
             };
