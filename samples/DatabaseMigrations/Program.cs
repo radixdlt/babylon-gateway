@@ -135,6 +135,11 @@ public static class Program
                     .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
                     .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
 
+                // backwards compability with Olympia
+                config
+                    .AddJsonFile($"appsettings.{env.EnvironmentName}Overrides.json", true, reloadOnChange)
+                    .AddJsonFile("appsettings.PersonalOverrides.json", true, reloadOnChange);
+
                 if (!string.IsNullOrWhiteSpace(customConfigurationPath))
                 {
                     config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
