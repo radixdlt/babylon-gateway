@@ -93,7 +93,6 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         // Assert
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
-        payload.ShouldNotBeNull();
         payload.GatewayApi.ShouldNotBeNull();
         payload.GatewayApi._Version.Should().Be("2.0.0");
     }
