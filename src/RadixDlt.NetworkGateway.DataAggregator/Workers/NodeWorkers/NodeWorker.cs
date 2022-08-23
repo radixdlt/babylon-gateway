@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Workers;
 using System;
@@ -86,9 +87,15 @@ public abstract class NodeWorker : LoopedWorkerBase, INodeWorker
     private readonly IEnumerable<INodeWorkerObserver> _observers;
     private readonly string _nodeName;
 
-    protected NodeWorker(ILogger logger, string nodeName, IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy, TimeSpan minDelayBetweenInfoLogs, IEnumerable<INodeWorkerObserver> observers)
+    protected NodeWorker(
+            ILogger logger,
+            string nodeName,
+            IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
+            TimeSpan minDelayBetweenInfoLogs,
+            IEnumerable<INodeWorkerObserver> observers,
+            IClock clock)
         // On crash, the NodeWorkers will get restarted by the NodeWorkersRunner / Registry
-        : base(logger, BehaviourOnFault.Nothing, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs)
+        : base(logger, BehaviourOnFault.Nothing, delayBetweenLoopsStrategy, minDelayBetweenInfoLogs, clock)
     {
         _nodeName = nodeName;
         _observers = observers;

@@ -62,21 +62,21 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
+using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public static class TransactionSummarisationGenerator
 {
-    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction)
+    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction, IClock clock)
     {
         long? newEpoch = null;
         long? newRoundInEpoch = null;
-        Instant? newRoundTimestamp = null;
+        DateTimeOffset? newRoundTimestamp = null;
 
         foreach (var operationGroup in transaction.OperationGroups)
         {
@@ -94,7 +94,7 @@ public static class TransactionSummarisationGenerator
                     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
                     if (newRoundData.Timestamp != 0)
                     {
-                        newRoundTimestamp = Instant.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+                        newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
                     }
                 }
             }
@@ -109,7 +109,7 @@ public static class TransactionSummarisationGenerator
         var isStartOfRound = newRoundInEpoch != null;
 
         var roundTimestamp = newRoundTimestamp ?? lastTransaction.RoundTimestamp;
-        var createdTimestamp = SystemClock.Instance.GetCurrentInstant();
+        var createdTimestamp = clock.UtcNow;
         var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
             roundTimestamp < lastTransaction.NormalizedRoundTimestamp ? lastTransaction.NormalizedRoundTimestamp
             : roundTimestamp > createdTimestamp ? createdTimestamp

@@ -63,8 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -88,7 +88,7 @@ public class LedgerStatus : SingleEntryBase
 
     [ConcurrencyCheck]
     [Column("last_updated")]
-    public Instant LastUpdated { get; set; }
+    public DateTimeOffset LastUpdated { get; set; }
 }
 
 [Owned]

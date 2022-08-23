@@ -64,8 +64,8 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Configuration;
+using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
@@ -88,14 +88,14 @@ public record MempoolOptions
     [ConfigurationKeyName("ExcludeNodeMempoolsFromUnionIfStaleForSeconds")]
     public long ExcludeNodeMempoolsFromUnionIfStaleForSeconds { get; set; } = 10;
 
-    public Duration ExcludeNodeMempoolsFromUnionIfStaleFor => Duration.FromSeconds(ExcludeNodeMempoolsFromUnionIfStaleForSeconds);
+    public TimeSpan ExcludeNodeMempoolsFromUnionIfStaleFor => TimeSpan.FromSeconds(ExcludeNodeMempoolsFromUnionIfStaleForSeconds);
 
     // This should be above ExcludeNodeMempoolsFromUnionIfStaleFor ideally, as it provides defense in depth against
     // adding a mempool transaction back to the database if a node crashes and so its information is stale
     [ConfigurationKeyName("PruneCommittedAfterSeconds")]
     public long PruneCommittedAfterSeconds { get; set; } = 20;
 
-    public Duration PruneCommittedAfter => Duration.FromSeconds(PruneCommittedAfterSeconds);
+    public TimeSpan PruneCommittedAfter => TimeSpan.FromSeconds(PruneCommittedAfterSeconds);
 
     // This is designed to give time for:
     // * The request to be sent (ie the timeout on the submission request should be less than this)
@@ -107,22 +107,22 @@ public record MempoolOptions
     [ConfigurationKeyName("PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds")]
     public long PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds { get; set; } = 5000;
 
-    public Duration PostSubmissionGracePeriodBeforeCanBeMarkedMissing => Duration.FromMilliseconds(PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds);
+    public TimeSpan PostSubmissionGracePeriodBeforeCanBeMarkedMissing => TimeSpan.FromMilliseconds(PostSubmissionGracePeriodBeforeCanBeMarkedMissingMilliseconds);
 
     [ConfigurationKeyName("ResubmissionNodeRequestTimeoutMilliseconds")]
     public long ResubmissionNodeRequestTimeoutMilliseconds { get; set; } = 4000;
 
-    public Duration ResubmissionNodeRequestTimeout => Duration.FromMilliseconds(ResubmissionNodeRequestTimeoutMilliseconds);
+    public TimeSpan ResubmissionNodeRequestTimeout => TimeSpan.FromMilliseconds(ResubmissionNodeRequestTimeoutMilliseconds);
 
     [ConfigurationKeyName("AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds")]
     public long AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds { get; set; } = 1000;
 
-    public Duration AssumedBoundOnNetworkLedgerDataAggregatorClockDrift => Duration.FromMilliseconds(AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds);
+    public TimeSpan AssumedBoundOnNetworkLedgerDataAggregatorClockDrift => TimeSpan.FromMilliseconds(AssumedBoundOnNetworkLedgerDataAggregatorClockDriftMilliseconds);
 
     [ConfigurationKeyName("MinDelayBetweenResubmissionsSeconds")]
     public long MinDelayBetweenResubmissionsSeconds { get; set; } = 10;
 
-    public Duration MinDelayBetweenResubmissions => Duration.FromSeconds(MinDelayBetweenResubmissionsSeconds);
+    public TimeSpan MinDelayBetweenResubmissions => TimeSpan.FromSeconds(MinDelayBetweenResubmissionsSeconds);
 
     // NB - A transaction goes missing from the mempool when it gets put onto the ledger, but it may take some time
     // for the aggregator to see the committed transaction. This delay should be long enough that, under normal
@@ -132,27 +132,27 @@ public record MempoolOptions
     [ConfigurationKeyName("MinDelayBetweenMissingFromMempoolAndResubmissionSeconds")]
     public long MinDelayBetweenMissingFromMempoolAndResubmissionSeconds { get; set; } = 10;
 
-    public Duration MinDelayBetweenMissingFromMempoolAndResubmission => Duration.FromSeconds(MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
+    public TimeSpan MinDelayBetweenMissingFromMempoolAndResubmission => TimeSpan.FromSeconds(MinDelayBetweenMissingFromMempoolAndResubmissionSeconds);
 
     [ConfigurationKeyName("StopResubmittingAfterSeconds")]
     public long StopResubmittingAfterSeconds { get; set; } = 5 * 60;
 
-    public Duration StopResubmittingAfter => Duration.FromSeconds(StopResubmittingAfterSeconds);
+    public TimeSpan StopResubmittingAfter => TimeSpan.FromSeconds(StopResubmittingAfterSeconds);
 
     [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds")]
     public long PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
 
-    public Duration PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => Duration.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
+    public TimeSpan PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds);
 
     [ConfigurationKeyName("PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds")]
     public long PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds { get; set; } = 7 * 24 * 60 * 60; // 1 week
 
-    public Duration PruneMissingTransactionsAfterTimeSinceFirstSeen => Duration.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
+    public TimeSpan PruneMissingTransactionsAfterTimeSinceFirstSeen => TimeSpan.FromSeconds(PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds);
 
     [ConfigurationKeyName("PruneRequiresMissingFromMempoolForSeconds")]
     public long PruneRequiresMissingFromMempoolForSeconds { get; set; } = 60;
 
-    public Duration PruneRequiresMissingFromMempoolFor => Duration.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
+    public TimeSpan PruneRequiresMissingFromMempoolFor => TimeSpan.FromSeconds(PruneRequiresMissingFromMempoolForSeconds);
 }
 
 internal class MempoolOptionsValidator : AbstractOptionsValidator<MempoolOptions>

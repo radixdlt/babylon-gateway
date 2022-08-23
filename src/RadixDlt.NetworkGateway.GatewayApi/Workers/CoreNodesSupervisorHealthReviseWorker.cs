@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Workers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
@@ -83,9 +84,10 @@ public class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
 
     public CoreNodesSupervisorStatusReviseWorker(
         ILogger<CoreNodesSupervisorStatusReviseWorker> logger,
-        ICoreNodesSelectorService coreNodesSelectorService
+        ICoreNodesSelectorService coreNodesSelectorService,
+        IClock clock
     )
-        : base(logger, BehaviourOnFault.ApplicationExit, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60))
+        : base(logger, BehaviourOnFault.ApplicationExit, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), clock)
     {
         _coreNodesSelectorService = coreNodesSelectorService;
     }

@@ -63,16 +63,17 @@
  */
 
 using Microsoft.Extensions.Options;
-using NodaTime;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp);
+    void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTimeOffset topOfLedgerNormalizedRoundTimestamp);
 
     void RecordTransactionsCommitted();
 
@@ -82,43 +83,45 @@ public interface ISystemStatusService
 
     HealthReport GenerateTransactionCommitmentHealthReport();
 
-    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration);
+    bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration);
 
-    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant);
+    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTimeOffset instant);
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, Instant StartUpTime);
+public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
 
 public class SystemStatusService : ISystemStatusService
 {
-    private static readonly Instant _startupTime = SystemClock.Instance.GetCurrentInstant();
-
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
     private readonly IEnumerable<ISystemStatusServiceObserver> _observers;
+    private readonly IClock _clock;
+    private readonly DateTimeOffset _startupTime;
 
-    private Instant? _lastTransactionCommitment;
+    private DateTimeOffset? _lastTransactionCommitment;
     private bool _isPrimary;
-    private Instant? _topOfLedgerNormalizedRoundTimestamp;
+    private DateTimeOffset? _topOfLedgerNormalizedRoundTimestamp;
 
-    private Duration StartupGracePeriod => Duration.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
+    private TimeSpan StartupGracePeriod => TimeSpan.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
 
-    private Duration UnhealthyCommitmentGapSeconds => Duration.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
+    private TimeSpan UnhealthyCommitmentGapSeconds => TimeSpan.FromSeconds(_configuration.CurrentValue.UnhealthyCommitmentGapSeconds);
 
-    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, IEnumerable<ISystemStatusServiceObserver> observers)
+    public SystemStatusService(IOptionsMonitor<MonitoringOptions> configuration, IEnumerable<ISystemStatusServiceObserver> observers, IClock clock)
     {
         _configuration = configuration;
         _observers = observers;
+        _clock = clock;
+        _startupTime = clock.UtcNow;
 
         SetIsPrimary(true);
     }
 
     public void RecordTransactionsCommitted()
     {
-        _lastTransactionCommitment = SystemClock.Instance.GetCurrentInstant();
+        _lastTransactionCommitment = _clock.UtcNow;
     }
 
-    public void SetTopOfDbLedgerNormalizedRoundTimestamp(Instant topOfLedgerNormalizedRoundTimestamp)
+    public void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTimeOffset topOfLedgerNormalizedRoundTimestamp)
     {
         _topOfLedgerNormalizedRoundTimestamp = topOfLedgerNormalizedRoundTimestamp;
     }
@@ -130,13 +133,13 @@ public class SystemStatusService : ISystemStatusService
         _observers.ForEach(x => x.SetIsPrimary(isPrimary));
     }
 
-    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration duration)
+    public bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration)
     {
         return _topOfLedgerNormalizedRoundTimestamp.HasValue
-               && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration);
+               && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration, _clock);
     }
 
-    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(Duration assumedBoundOnClockDrift, Instant instant)
+    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTimeOffset instant)
     {
         return _topOfLedgerNormalizedRoundTimestamp.HasValue
                && _topOfLedgerNormalizedRoundTimestamp.Value + assumedBoundOnClockDrift >= instant;
@@ -149,7 +152,7 @@ public class SystemStatusService : ISystemStatusService
 
     public bool IsInStartupGracePeriod()
     {
-        return _startupTime.WithinPeriodOfNow(StartupGracePeriod);
+        return _startupTime.WithinPeriodOfNow(StartupGracePeriod, _clock);
     }
 
     public HealthReport GenerateTransactionCommitmentHealthReport()
@@ -176,20 +179,20 @@ public class SystemStatusService : ISystemStatusService
         {
             return new HealthReport(
                 true,
-                $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()} within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
+                $"Last committed {_lastTransactionCommitment.FormatSecondsAgo(_clock)} within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
                 _startupTime
             );
         }
 
         return new HealthReport(
             false,
-            $"Last committed {_lastTransactionCommitment.FormatSecondsAgo()}, not within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
+            $"Last committed {_lastTransactionCommitment.FormatSecondsAgo(_clock)}, not within healthy period of {UnhealthyCommitmentGapSeconds.FormatSecondsHumanReadable()}",
             _startupTime
         );
     }
 
     private bool CommittedRecently()
     {
-        return _lastTransactionCommitment != null && _lastTransactionCommitment.Value.WithinPeriodOfNow(UnhealthyCommitmentGapSeconds);
+        return _lastTransactionCommitment != null && _lastTransactionCommitment.Value.WithinPeriodOfNow(UnhealthyCommitmentGapSeconds, _clock);
     }
 }

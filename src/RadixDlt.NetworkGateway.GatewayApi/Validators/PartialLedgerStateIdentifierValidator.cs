@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLedgerStateIdentifier>
 {
-    public PartialLedgerStateIdentifierValidator(ISystemClock systemClock)
+    public PartialLedgerStateIdentifierValidator(IClock clock)
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 
@@ -90,7 +90,7 @@ public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLe
             .When(x => x.StateVersion.HasValue);
 
         RuleFor(x => x.Timestamp)
-            .LessThanOrEqualTo(systemClock.UtcNow).WithMessage("'{PropertyName}' must not be in future.")
+            .LessThanOrEqualTo(clock.UtcNow).WithMessage("'{PropertyName}' must not be in future.")
             .DependentRules(() =>
             {
                 const string NullMessage = "'{PropertyName}' must be null when 'timestamp' is defined.";

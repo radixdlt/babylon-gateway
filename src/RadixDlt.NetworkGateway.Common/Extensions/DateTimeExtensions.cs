@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using System;
 using System.Text;
 
@@ -70,62 +69,57 @@ namespace RadixDlt.NetworkGateway.Common.Extensions;
 
 public static class DateTimeExtensions
 {
-    public static string AsUtcIsoDateWithMillisString(this Instant instant)
+    public static string AsUtcIsoDateWithMillisString(this DateTimeOffset instant)
     {
-        return instant.ToDateTimeUtc().ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
+        return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
     }
 
-    public static string AsUtcIsoDateWithMillisString(this DateTime dateTime)
+    public static string AsUtcIsoDateToSecondsForLogs(this DateTimeOffset instant)
     {
-        return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
+        return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
     }
 
-    public static string AsUtcIsoDateToSecondsForLogs(this Instant instant)
+    public static TimeSpan GetTimeAgo(this DateTimeOffset instant, IClock clock)
     {
-        return instant.ToDateTimeUtc().ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
+        return clock.UtcNow - instant;
     }
 
-    public static Duration GetTimeAgo(this Instant instant)
+    public static TimeSpan Absolute(this TimeSpan duration)
     {
-        return NodaTime.SystemClock.Instance.GetCurrentInstant() - instant;
+        return duration.Ticks >= 0 ? duration : -duration;
     }
 
-    public static Duration Absolute(this Duration duration)
+    public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan duration, IClock clock)
     {
-        return duration.BclCompatibleTicks >= 0 ? duration : -duration;
+        return dateTime.GetTimeAgo(clock).Absolute() <= duration;
     }
 
-    public static bool WithinPeriodOfNow(this Instant dateTime, Duration duration)
-    {
-        return dateTime.GetTimeAgo().Absolute() <= duration;
-    }
-
-    public static Instant LatestOf(Instant a, Instant b)
+    public static DateTimeOffset LatestOf(DateTimeOffset a, DateTimeOffset b)
     {
         return a >= b ? a : b;
     }
 
-    public static double ToUnixTimeSecondsWithMilliPrecision(this Instant a)
+    public static double ToUnixTimeSecondsWithMilliPrecision(this DateTimeOffset a)
     {
         return ((double)a.ToUnixTimeMilliseconds()) / 1000;
     }
 
-    public static string FormatSecondsHumanReadable(this Duration duration)
+    public static string FormatSecondsHumanReadable(this TimeSpan duration)
     {
         return $"{duration.Absolute().TotalSeconds:F3}s";
     }
 
-    public static string FormatSecondsAgo(this Instant dateTime)
+    public static string FormatSecondsAgo(this DateTimeOffset instant, IClock clock)
     {
-        return $"{(NodaTime.SystemClock.Instance.GetCurrentInstant() - dateTime).FormatSecondsHumanReadable()} ago";
+        return $"{(clock.UtcNow - instant).FormatSecondsHumanReadable()} ago";
     }
 
-    public static string FormatSecondsAgo(this Instant? dateTime)
+    public static string FormatSecondsAgo(this DateTimeOffset? instant, IClock clock)
     {
-        return dateTime == null ? "never" : $"{(NodaTime.SystemClock.Instance.GetCurrentInstant() - dateTime.Value).FormatSecondsHumanReadable()} ago";
+        return instant == null ? "never" : $"{(clock.UtcNow - instant.Value).FormatSecondsHumanReadable()} ago";
     }
 
-    public static string FormatPositiveDurationHumanReadable(this Duration? durationOrNull)
+    public static string FormatPositiveDurationHumanReadable(this TimeSpan? durationOrNull)
     {
         if (durationOrNull == null)
         {
@@ -135,7 +129,7 @@ public static class DateTimeExtensions
         return durationOrNull.Value.FormatPositiveDurationHumanReadable();
     }
 
-    public static string FormatPositiveDurationHumanReadable(this Duration duration)
+    public static string FormatPositiveDurationHumanReadable(this TimeSpan duration)
     {
         var stringBuilder = new StringBuilder();
         var notFirst = false;

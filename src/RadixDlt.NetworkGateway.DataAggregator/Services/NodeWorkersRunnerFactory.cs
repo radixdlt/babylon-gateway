@@ -64,6 +64,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using System;
@@ -96,6 +97,6 @@ public class NodeWorkersRunnerFactory : INodeWorkersRunnerFactory
         var nodeScope = _services.CreateScope();
         nodeScope.ServiceProvider.GetRequiredService<INodeConfigProvider>().CoreApiNode = initialCoreApiNode;
         var logScope = _logger.BeginScope($"[NODE: {initialCoreApiNode.Name}]");
-        return new NodeWorkersRunner(_logger, nodeScope, logScope);
+        return new NodeWorkersRunner(_logger, nodeScope, logScope, nodeScope.ServiceProvider.GetRequiredService<IClock>());
     }
 }

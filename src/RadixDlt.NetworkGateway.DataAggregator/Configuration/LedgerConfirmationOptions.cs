@@ -64,8 +64,8 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Configuration;
+using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
@@ -121,7 +121,7 @@ public record LedgerConfirmationOptions
     [ConfigurationKeyName("DelayBetweenLargeBatchesMilliseconds")]
     public long DelayBetweenLargeBatchesMilliseconds { get; set; } = 0;
 
-    public Duration DelayBetweenLargeBatches => Duration.FromMilliseconds(DelayBetweenLargeBatchesMilliseconds);
+    public TimeSpan DelayBetweenLargeBatches => TimeSpan.FromMilliseconds(DelayBetweenLargeBatchesMilliseconds);
 
     /// <summary>
     /// Gets or sets MaxTransactionPipelineSizePerNode.

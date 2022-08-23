@@ -65,8 +65,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -106,6 +106,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
     private readonly IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> _observers;
+    private readonly IClock _clock;
 
     // NB - So that we can get new transient dependencies each iteration (such as the HttpClients)
     //      we create such dependencies from the service provider.
@@ -117,8 +118,9 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig,
         IEnumerable<INodeMempoolFullTransactionReaderWorkerObserver> observers,
-        IEnumerable<INodeWorkerObserver> nodeWorkerObservers)
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
+        IClock clock)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
         _services = services;
@@ -127,6 +129,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
         _observers = observers;
+        _clock = clock;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -251,7 +254,7 @@ public class NodeMempoolFullTransactionReaderWorker : NodeWorker
 
             return new FullTransactionData(
                 transactionId,
-                SystemClock.Instance.GetCurrentInstant(),
+                _clock.UtcNow,
                 response.Transaction.Metadata.Hex.ConvertFromHex(),
                 response.Transaction
             );

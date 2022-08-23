@@ -67,7 +67,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -95,7 +94,7 @@ public static class ServiceCollectionExtensions
         builder.Services
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName), o => o.NonBrokenUseNodaTime());
+                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
             });
 
         return builder;

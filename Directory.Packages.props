@@ -23,10 +23,7 @@
     <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Polly" Version="7.2.3" />
-    <PackageVersion Include="NodaTime" Version="3.1.0" />
-    <PackageVersion Include="NodaTime.Serialization.JsonNet" Version="3.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.5" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="6.0.5" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />

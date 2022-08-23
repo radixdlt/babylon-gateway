@@ -63,8 +63,6 @@
  */
 
 using Newtonsoft.Json;
-using NodaTime;
-using NodaTime.Serialization.JsonNet;
 using RadixDlt.NetworkGateway.Common.Database.ValueConverters;
 using RadixDlt.NetworkGateway.Common.Model;
 using System;
@@ -122,7 +120,7 @@ public record GatewayTransactionContents
     public string? MessageHex { get; set; }
 
     [DataMember(Name = "confirmed_time", EmitDefaultValue = false)]
-    public Instant? ConfirmedTime { get; set; }
+    public DateTimeOffset? ConfirmedTime { get; set; }
 
     [DataMember(Name = "state_version", EmitDefaultValue = false)]
     public long? LedgerStateVersion { get; set; }
@@ -139,9 +137,6 @@ public record GatewayTransactionContents
 [Table("mempool_transactions")]
 public class MempoolTransaction
 {
-    private static readonly JsonSerializerSettings _transactionContentsSerializerSettings = new JsonSerializerSettings()
-        .ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
-
     private MempoolTransaction(byte[] payloadHash, byte[] payload, GatewayTransactionContents transactionContents)
     {
         PayloadHash = payloadHash;
@@ -192,19 +187,19 @@ public class MempoolTransaction
     /// The timestamp when the transaction was initially submitted to a node through this gateway.
     /// </summary>
     [Column("first_submitted_to_gateway_timestamp")]
-    public Instant? FirstSubmittedToGatewayTimestamp { get; private set; }
+    public DateTimeOffset? FirstSubmittedToGatewayTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_gateway_timestamp")]
-    public Instant? LastSubmittedToGatewayTimestamp { get; private set; }
+    public DateTimeOffset? LastSubmittedToGatewayTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_node_timestamp")]
-    public Instant? LastSubmittedToNodeTimestamp { get; private set; }
+    public DateTimeOffset? LastSubmittedToNodeTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
@@ -219,19 +214,19 @@ public class MempoolTransaction
     /// The timestamp when the transaction was first seen in a node's mempool.
     /// </summary>
     [Column("first_seen_in_mempool_timestamp")]
-    public Instant? FirstSeenInMempoolTimestamp { get; private set; }
+    public DateTimeOffset? FirstSeenInMempoolTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last changed to a MISSING state.
     /// </summary>
     [Column("last_missing_from_mempool_timestamp")]
-    public Instant? LastDroppedOutOfMempoolTimestamp { get; private set; }
+    public DateTimeOffset? LastDroppedOutOfMempoolTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was committed to the DB ledger.
     /// </summary>
     [Column("commit_timestamp")]
-    public Instant? CommitTimestamp { get; private set; }
+    public DateTimeOffset? CommitTimestamp { get; private set; }
 
     [Column("failure_reason")]
     public MempoolTransactionFailureReason? FailureReason { get; private set; }
@@ -240,13 +235,13 @@ public class MempoolTransaction
     public string? FailureExplanation { get; private set; }
 
     [Column("failure_timestamp")]
-    public Instant? FailureTimestamp { get; private set; }
+    public DateTimeOffset? FailureTimestamp { get; private set; }
 
     public static MempoolTransaction NewFirstSeenInMempool(
         byte[] payloadHash,
         byte[] payload,
         GatewayTransactionContents transactionContents,
-        Instant? firstSeenAt = null
+        DateTimeOffset firstSeenAt
     )
     {
         var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
@@ -259,12 +254,11 @@ public class MempoolTransaction
         byte[] payload,
         string submittedToNodeName,
         GatewayTransactionContents transactionContents,
-        Instant? submittedTimestamp = null
+        DateTimeOffset submittedTimestamp
     )
     {
         var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
 
-        submittedTimestamp ??= NodaTime.SystemClock.Instance.GetCurrentInstant();
         mempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
 
         // We assume it's been successfully submitted until we see an error and then mark it as an error then
@@ -278,10 +272,7 @@ public class MempoolTransaction
     {
         try
         {
-            return JsonConvert.DeserializeObject<GatewayTransactionContents>(
-                TransactionContents,
-                _transactionContentsSerializerSettings
-            ) ?? GatewayTransactionContents.Default();
+            return JsonConvert.DeserializeObject<GatewayTransactionContents>(TransactionContents) ?? GatewayTransactionContents.Default();
         }
         catch (Exception)
         {
@@ -289,15 +280,15 @@ public class MempoolTransaction
         }
     }
 
-    public void MarkAsMissing(Instant? timestamp = null)
+    public void MarkAsMissing(DateTimeOffset timestamp)
     {
         Status = MempoolTransactionStatus.Missing;
-        LastDroppedOutOfMempoolTimestamp = timestamp ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
+        LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
-    public void MarkAsCommitted(long ledgerStateVersion, Instant ledgerCommitTimestamp)
+    public void MarkAsCommitted(long ledgerStateVersion, DateTimeOffset ledgerCommitTimestamp, IClock clock)
     {
-        var commitToDbTimestamp = NodaTime.SystemClock.Instance.GetCurrentInstant();
+        var commitToDbTimestamp = clock.UtcNow;
         Status = MempoolTransactionStatus.Committed;
         CommitTimestamp = commitToDbTimestamp;
 
@@ -308,55 +299,54 @@ public class MempoolTransaction
         SetTransactionContents(transactionContents);
     }
 
-    public void MarkAsSeenInAMempool(Instant? timestamp = null)
+    public void MarkAsSeenInAMempool(DateTimeOffset timestamp)
     {
         Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
-        FirstSeenInMempoolTimestamp ??= timestamp ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
+        FirstSeenInMempoolTimestamp ??= timestamp;
     }
 
-    public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? timestamp = null)
+    public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset timestamp)
     {
         Status = MempoolTransactionStatus.Failed;
         FailureReason = failureReason;
         FailureExplanation = failureExplanation;
-        FailureTimestamp = timestamp ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
+        FailureTimestamp = timestamp;
     }
 
-    public void MarkAsSubmittedToGateway(Instant? submittedAt = null)
+    public void MarkAsSubmittedToGateway(DateTimeOffset submittedAt)
     {
-        submittedAt ??= NodaTime.SystemClock.Instance.GetCurrentInstant();
         SubmittedByThisGateway = true;
         FirstSubmittedToGatewayTimestamp ??= submittedAt;
         LastSubmittedToGatewayTimestamp = submittedAt;
     }
 
-    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
+    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
         Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, Instant? submittedAt = null)
+    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset submittedAt, DateTimeOffset timestamp)
     {
-        MarkAsFailed(failureReason, failureExplanation);
+        MarkAsFailed(failureReason, failureExplanation, timestamp);
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, Instant? submittedAt = null)
+    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
         Status = MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    private void RecordSubmission(string nodeSubmittedTo, Instant? submittedAt = null)
+    private void RecordSubmission(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
-        LastSubmittedToNodeTimestamp = submittedAt ?? NodaTime.SystemClock.Instance.GetCurrentInstant();
+        LastSubmittedToNodeTimestamp = submittedAt;
         LastSubmittedToNodeName = nodeSubmittedTo;
         SubmissionToNodesCount += 1;
     }
 
     private void SetTransactionContents(GatewayTransactionContents transactionContents)
     {
-        TransactionContents = JsonConvert.SerializeObject(transactionContents, _transactionContentsSerializerSettings);
+        TransactionContents = JsonConvert.SerializeObject(transactionContents);
     }
 }

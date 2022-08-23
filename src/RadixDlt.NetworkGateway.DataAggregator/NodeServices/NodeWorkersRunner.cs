@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NodaTime;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
@@ -97,22 +97,20 @@ public class NodeWorkersRunner : IDisposable
         get => _status;
         private set
         {
-            _lastStatusChange = SystemClock.Instance.GetCurrentInstant();
+            _lastStatusChange = _clock.UtcNow;
             _status = value;
         }
     }
 
     private readonly List<INodeInitializer> _initializers;
-
     private readonly List<INodeWorker> _workers;
-
     private readonly object _statusLock = new();
-
     private readonly ILogger<NodeWorkersRunner> _logger;
+    private readonly IClock _clock;
 
     private IServiceScope? _nodeDependencyInjectionScope;
 
-    private Instant _lastStatusChange;
+    private DateTimeOffset _lastStatusChange;
 
     // Items needing disposal
     private CancellationTokenSource? _cancellationTokenSource;
@@ -121,11 +119,12 @@ public class NodeWorkersRunner : IDisposable
     private IDisposable? _logScope;
     private NodeWorkersRunnerStatus _status;
 
-    public NodeWorkersRunner(ILogger<NodeWorkersRunner> logger, IServiceScope nodeDependencyInjectionScope, IDisposable logScope)
+    public NodeWorkersRunner(ILogger<NodeWorkersRunner> logger, IServiceScope nodeDependencyInjectionScope, IDisposable logScope, IClock clock)
     {
         _logger = logger;
         _nodeDependencyInjectionScope = nodeDependencyInjectionScope;
         _logScope = logScope;
+        _clock = clock;
         _cancellationTokenSource = new CancellationTokenSource();
         _initializers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeInitializer>().ToList();
         _workers = nodeDependencyInjectionScope.ServiceProvider.GetServices<INodeWorker>().ToList();
@@ -139,7 +138,7 @@ public class NodeWorkersRunner : IDisposable
     {
         const int GraceSecondsBeforeMarkingStalled = 10;
 
-        var isRunningOrNotStalled = Status == NodeWorkersRunnerStatus.Running || _lastStatusChange.WithinPeriodOfNow(Duration.FromSeconds(GraceSecondsBeforeMarkingStalled));
+        var isRunningOrNotStalled = Status == NodeWorkersRunnerStatus.Running || _lastStatusChange.WithinPeriodOfNow(TimeSpan.FromSeconds(GraceSecondsBeforeMarkingStalled), _clock);
         if (!isRunningOrNotStalled)
         {
             _logger.LogWarning(

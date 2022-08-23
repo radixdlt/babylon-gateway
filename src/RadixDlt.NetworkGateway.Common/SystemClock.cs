@@ -66,12 +66,12 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Common;
 
-public interface ISystemClock
+public interface IClock
 {
     public DateTimeOffset UtcNow { get; }
 }
 
-public class SystemClock : ISystemClock
+public class SystemClock : IClock
 {
     public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 }

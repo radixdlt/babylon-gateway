@@ -10,10 +10,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="NodaTime" />
-    <PackageReference Include="NodaTime.Serialization.JsonNet" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
     <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" />
   </ItemGroup>
 

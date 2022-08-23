@@ -69,7 +69,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using System.Threading.Tasks;
 
 namespace DatabaseMigrations;
@@ -147,11 +146,7 @@ public static class Program
                 {
                     options.UseNpgsql(
                         host.Configuration.GetConnectionString(NetworkGatewayConstants.Database.MigrationsConnectionStringName),
-                        o =>
-                        {
-                            o.NonBrokenUseNodaTime();
-                            o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name);
-                        }
+                        o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name)
                     );
                 });
             });

@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using NodaTime;
 using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Exceptions;
@@ -376,7 +375,7 @@ public class MetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ILedgerStateQuerierObserver.LedgerRoundTimestampClockSkew(Duration difference)
+    ValueTask ILedgerStateQuerierObserver.LedgerRoundTimestampClockSkew(TimeSpan difference)
     {
         _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(difference.TotalSeconds);
 

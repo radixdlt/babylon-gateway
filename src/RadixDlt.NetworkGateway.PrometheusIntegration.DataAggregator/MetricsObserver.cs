@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Common.Exceptions;
@@ -465,7 +464,7 @@ public class MetricsObserver :
         _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)report.TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum);
     }
 
-    ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtensionIfQuorum(Instant timestamp)
+    ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtensionIfQuorum(DateTimeOffset timestamp)
     {
         _ledgerLastExtensionAttemptStartTimestamp.Set(timestamp.ToUnixTimeSecondsWithMilliPrecision());
 
@@ -518,7 +517,7 @@ public class MetricsObserver :
         _quorumExistsStatus.SetStatus(MetricStatus.Yes);
     }
 
-    void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(Instant timestamp, Duration parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
+    void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(DateTimeOffset timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
     {
         _peakLedgerLagBeforeLastCommit.Set(parentSummaryRoundTimestamp.TotalSeconds);
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
@@ -526,7 +525,7 @@ public class MetricsObserver :
         _ledgerLastCommitTimestamp.Set(timestamp.ToUnixTimeSecondsWithMilliPrecision());
     }
 
-    void ILedgerConfirmationServiceObserver.RecordTopOfDbLedger(long stateVersion, Instant roundTimestamp)
+    void ILedgerConfirmationServiceObserver.RecordTopOfDbLedger(long stateVersion, DateTimeOffset roundTimestamp)
     {
         _ledgerStateVersion.Set(stateVersion);
         _ledgerUnixRoundTimestamp.Set(roundTimestamp.ToUnixTimeSecondsWithMilliPrecision());

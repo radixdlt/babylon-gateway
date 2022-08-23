@@ -65,7 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
@@ -88,6 +88,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
     private readonly IOptionsMonitor<EndpointOptions> _endpointOptionsMonitor;
     private readonly IOptionsMonitor<AcceptableLedgerLagOptions> _acceptableLedgerLagOptionsMonitor;
     private readonly IEnumerable<ILedgerStateQuerierObserver> _observers;
+    private readonly IClock _clock;
 
     public LedgerStateQuerier(
         ILogger<LedgerStateQuerier> logger,
@@ -95,7 +96,8 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         INetworkConfigurationProvider networkConfigurationProvider,
         IOptionsMonitor<EndpointOptions> endpointOptionsMonitor,
         IOptionsMonitor<AcceptableLedgerLagOptions> acceptableLedgerLagOptionsMonitor,
-        IEnumerable<ILedgerStateQuerierObserver> observers)
+        IEnumerable<ILedgerStateQuerierObserver> observers,
+        IClock clock)
     {
         _logger = logger;
         _dbContext = dbContext;
@@ -103,6 +105,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         _endpointOptionsMonitor = endpointOptionsMonitor;
         _acceptableLedgerLagOptionsMonitor = acceptableLedgerLagOptionsMonitor;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task<GatewayResponse> GetGatewayState()
@@ -136,7 +139,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         }
 
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
-        var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+        var timestampDiff = _clock.UtcNow - ledgerStateReport.RoundTimestamp;
 
         await _observers.ForEachAsync(x => x.LedgerRoundTimestampClockSkew(timestampDiff));
 
@@ -193,7 +196,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         }
 
         var acceptableLedgerLag = _acceptableLedgerLagOptionsMonitor.CurrentValue;
-        var timestampDiff = SystemClock.Instance.GetCurrentInstant() - ledgerStateReport.RoundTimestamp;
+        var timestampDiff = _clock.UtcNow - ledgerStateReport.RoundTimestamp;
 
         await _observers.ForEachAsync(x => x.LedgerRoundTimestampClockSkew(timestampDiff));
 
@@ -240,7 +243,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus;
     }
 
-    private record LedgerStateReport(LedgerState LedgerState, Instant RoundTimestamp);
+    private record LedgerStateReport(LedgerState LedgerState, DateTimeOffset RoundTimestamp);
 
     private async Task<LedgerStateReport> GetLedgerState(PartialLedgerStateIdentifier? at = null)
     {
@@ -304,9 +307,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = Instant.FromDateTimeOffset(timestamp);
-
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(validatedTimestamp));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(timestamp));
 
         if (ledgerState == null)
         {
@@ -318,9 +319,7 @@ public class LedgerStateQuerier : ILedgerStateQuerier
 
     private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp)
     {
-        var validatedTimestamp = Instant.FromDateTimeOffset(timestamp);
-
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(validatedTimestamp));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(timestamp));
 
         if (ledgerState == null)
         {

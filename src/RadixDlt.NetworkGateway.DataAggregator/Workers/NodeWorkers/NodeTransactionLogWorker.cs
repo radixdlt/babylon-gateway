@@ -65,6 +65,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Exceptions;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
@@ -110,9 +111,10 @@ public class NodeTransactionLogWorker : NodeWorker
         INodeConfigProvider nodeConfigProvider,
         IServiceProvider services,
         IEnumerable<INodeTransactionLogWorkerObserver> observers,
-        IEnumerable<INodeWorkerObserver> nodeWorkerObservers
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
+        IClock clock
     )
-        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
+        : base(logger, nodeConfigProvider.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
         _ledgerConfirmationService = ledgerConfirmationService;

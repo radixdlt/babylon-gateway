@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
 using System;
@@ -105,6 +104,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     private readonly BehaviourOnFault _behaviourOnFault;
     private readonly LogLimiter _stillRunningLogLimiter;
     private readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy;
+    private readonly IClock _clock;
     private Stopwatch? _loopIterationStopwatch;
     private uint _numConsecutiveErrors;
     private bool? _wasEnabledAtLastLoopIteration;
@@ -114,12 +114,13 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         ILogger logger,
         BehaviourOnFault behaviourOnFault,
         IDelayBetweenLoopsStrategy delayBetweenLoopsStrategy,
-        TimeSpan minDelayBetweenInfoLogs
-    )
+        TimeSpan minDelayBetweenInfoLogs,
+        IClock clock)
     {
         _logger = logger;
         _behaviourOnFault = behaviourOnFault;
         _delayBetweenLoopsStrategy = delayBetweenLoopsStrategy;
+        _clock = clock;
         _stillRunningLogLimiter = new LogLimiter(minDelayBetweenInfoLogs, LogLevel.Information, LogLevel.Debug);
     }
 
@@ -222,7 +223,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         _logger.Log(
             _stillRunningLogLimiter.GetLogLevel(),
             "Start requested at: {Time}. Service enabled status: {EnabledStatus}",
-            NodaTime.SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs(),
+            _clock.UtcNow.AsUtcIsoDateToSecondsForLogs(),
             isCurrentlyEnabled ? "ENABLED" : "DISABLED"
         );
         return Task.CompletedTask;
@@ -249,7 +250,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
             "{GracefulState} stop requested via {StopInstantiationMethod}. Stopping at: {Time}",
             nonGracefulShutdownCancellationToken.IsCancellationRequested ? "Non-graceful" : "Graceful",
             ExplicitStopRequested ? "an explicit StopAsync call" : "the cancellation of the token passed on start",
-            NodaTime.SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs()
+            _clock.UtcNow.AsUtcIsoDateToSecondsForLogs()
         );
         return Task.CompletedTask;
     }
@@ -259,7 +260,7 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
     /// </summary>
     protected virtual Task OnStoppedSuccessfully()
     {
-        _logger.LogInformation("Stopped successfully at: {Time}",  NodaTime.SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
+        _logger.LogInformation("Stopped successfully at: {Time}",  _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
         return Task.CompletedTask;
     }
 
@@ -333,17 +334,17 @@ public abstract class LoopedWorkerBase : BackgroundService, ILoopedWorkerBase
         {
             if (wasLastEnabled == false)
             {
-                _logger.LogInformation("Detected as re-enabled at {Time}, service will start doing work in a loop again", NodaTime.SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
+                _logger.LogInformation("Detected as re-enabled at {Time}, service will start doing work in a loop again", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             }
 
-            _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", NodaTime.SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
+            _logger.Log(_stillRunningLogLimiter.GetLogLevel(),  "Still running at {Time}", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             await DoWork(cancellationToken);
         }
         else
         {
             if (wasLastEnabled == true)
             {
-                _logger.LogInformation("Detected as disabled at {Time}. Service won't do work till re-enabled", NodaTime.SystemClock.Instance.GetCurrentInstant().AsUtcIsoDateToSecondsForLogs());
+                _logger.LogInformation("Detected as disabled at {Time}. Service won't do work till re-enabled", _clock.UtcNow.AsUtcIsoDateToSecondsForLogs());
             }
         }
     }

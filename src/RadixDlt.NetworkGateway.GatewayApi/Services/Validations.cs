@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using NodaTime;
 using RadixDlt.NetworkGateway.Common.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -94,7 +93,7 @@ public interface IValidations
 
     ValidatedSymbol ExtractValidTokenSymbol(string symbol);
 
-    Instant ExtractValidTimestamp(string capitalizedFieldDescriptor, string timestampString);
+    DateTimeOffset ExtractValidTimestamp(string capitalizedFieldDescriptor, string timestampString);
 
     int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound);
 }
@@ -277,14 +276,14 @@ public class Validations : IValidations
         return new ValidatedSymbol(symbol);
     }
 
-    public Instant ExtractValidTimestamp(string capitalizedFieldDescriptor, string timestampString)
+    public DateTimeOffset ExtractValidTimestamp(string capitalizedFieldDescriptor, string timestampString)
     {
         if (!DateTimeOffset.TryParse(timestampString, out var dateTimeOffset))
         {
-            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} DateTime could not be parsed");
+            throw InvalidRequestException.FromOtherError($"{capitalizedFieldDescriptor} date-time could not be parsed");
         }
 
-        return Instant.FromDateTimeOffset(dateTimeOffset);
+        return dateTimeOffset;
     }
 
     public int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound)

@@ -65,7 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
@@ -89,6 +89,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     private readonly IRawTransactionWriter _rawTransactionWriter;
     private readonly IEntityDeterminer _entityDeterminer;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+    private readonly IClock _clock;
 
     private record ProcessTransactionReport(
         long TransactionContentHandlingMs,
@@ -103,8 +104,8 @@ public class LedgerExtenderService : ILedgerExtenderService
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         IEntityDeterminer entityDeterminer,
-        INetworkConfigurationProvider networkConfigurationProvider
-    )
+        INetworkConfigurationProvider networkConfigurationProvider,
+        IClock clock)
     {
         _transactionAssertionsOptionsMonitor = transactionAssertionsOptionsMonitor;
         _logger = logger;
@@ -112,12 +113,13 @@ public class LedgerExtenderService : ILedgerExtenderService
         _rawTransactionWriter = rawTransactionWriter;
         _entityDeterminer = entityDeterminer;
         _networkConfigurationProvider = networkConfigurationProvider;
+        _clock = clock;
     }
 
     public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, token);
+        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, _clock, token);
     }
 
     public async Task<CommitTransactionsReport> CommitTransactions(
@@ -169,7 +171,7 @@ public class LedgerExtenderService : ILedgerExtenderService
     {
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, token);
+        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, _clock, token);
 
         if (ledgerExtension.ParentSummary.StateVersion != topOfLedgerSummary.StateVersion)
         {
@@ -303,7 +305,7 @@ public class LedgerExtenderService : ILedgerExtenderService
             dbContext.Add(ledgerStatus);
         }
 
-        ledgerStatus.LastUpdated = SystemClock.Instance.GetCurrentInstant();
+        ledgerStatus.LastUpdated = _clock.UtcNow;
         ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
         ledgerStatus.SyncTarget = latestSyncTarget;
     }

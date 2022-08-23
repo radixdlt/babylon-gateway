@@ -64,6 +64,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -87,11 +88,13 @@ public class RawTransactionWriter : IRawTransactionWriter
 {
     private readonly ILogger<RawTransactionWriter> _logger;
     private readonly IEnumerable<IRawTransactionWriterObserver> _observers;
+    private readonly IClock _clock;
 
-    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IEnumerable<IRawTransactionWriterObserver> observers)
+    public RawTransactionWriter(ILogger<RawTransactionWriter> logger, IEnumerable<IRawTransactionWriterObserver> observers, IClock clock)
     {
         _logger = logger;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
@@ -143,7 +146,8 @@ public class RawTransactionWriter : IRawTransactionWriter
             var transactionSummary = transactionsById[mempoolTransaction.PayloadHash].TransactionSummary;
             mempoolTransaction.MarkAsCommitted(
                 transactionSummary.StateVersion,
-                transactionSummary.NormalizedRoundTimestamp
+                transactionSummary.NormalizedRoundTimestamp,
+                _clock
             );
         }
 

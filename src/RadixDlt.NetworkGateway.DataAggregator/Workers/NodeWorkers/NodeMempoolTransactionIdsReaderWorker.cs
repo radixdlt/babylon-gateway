@@ -65,6 +65,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Utilities;
@@ -99,6 +100,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
     private readonly IMempoolTrackerService _mempoolTrackerService;
     private readonly INodeConfigProvider _nodeConfig;
     private readonly IEnumerable<INodeMempoolTransactionIdsReaderWorkerObserver> _observers;
+    private readonly IClock _clock;
 
     private HashSet<byte[]> _latestTransactionHashes = new(ByteArrayEqualityComparer.Default);
 
@@ -111,8 +113,9 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         IMempoolTrackerService mempoolTrackerService,
         INodeConfigProvider nodeConfig,
         IEnumerable<INodeMempoolTransactionIdsReaderWorkerObserver> observers,
-        IEnumerable<INodeWorkerObserver> nodeWorkerObservers)
-        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers)
+        IEnumerable<INodeWorkerObserver> nodeWorkerObservers,
+        IClock clock)
+        : base(logger, nodeConfig.CoreApiNode.Name, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), nodeWorkerObservers, clock)
     {
         _logger = logger;
         _services = services;
@@ -120,6 +123,7 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         _mempoolTrackerService = mempoolTrackerService;
         _nodeConfig = nodeConfig;
         _observers = observers;
+        _clock = clock;
     }
 
     public override bool IsEnabledByNodeConfiguration()
@@ -175,6 +179,6 @@ public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
             );
         }
 
-        _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.CoreApiNode.Name, new NodeMempoolHashes(_latestTransactionHashes));
+        _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.CoreApiNode.Name, new NodeMempoolHashes(_latestTransactionHashes, _clock.UtcNow));
     }
 }

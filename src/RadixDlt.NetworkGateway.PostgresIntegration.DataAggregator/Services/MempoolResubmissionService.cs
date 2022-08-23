@@ -66,8 +66,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
@@ -99,6 +99,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolResubmissionService> _logger;
     private readonly IEnumerable<IMempoolResubmissionServiceObserver> _observers;
+    private readonly IClock _clock;
 
     public MempoolResubmissionService(
         IServiceProvider services,
@@ -108,7 +109,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         INetworkConfigurationProvider networkConfigurationProvider,
         ISystemStatusService systemStatusService,
         ILogger<MempoolResubmissionService> logger,
-        IEnumerable<IMempoolResubmissionServiceObserver> observers)
+        IEnumerable<IMempoolResubmissionServiceObserver> observers,
+        IClock clock)
     {
         _services = services;
         _dbContextFactory = dbContextFactory;
@@ -118,6 +120,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
         _systemStatusService = systemStatusService;
         _logger = logger;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task RunBatchOfResubmissions(CancellationToken token = default)
@@ -126,16 +129,16 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         const int BatchSize = 30;
 
-        var instantForTransactionChoosing = SystemClock.Instance.GetCurrentInstant();
+        var instantForTransactionChoosing = _clock.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
         var transactionsToResubmit = await SelectTransactionsToResubmit(dbContext, instantForTransactionChoosing, mempoolConfiguration, BatchSize, token);
 
-        var submittedAt = SystemClock.Instance.GetCurrentInstant();
+        var submittedAt = _clock.UtcNow;
 
         // The timeout should be relative to the submittedAt time we save to the DB, so needs to include the time for initial db saving (which should be very quick).
         using var ctsWithSubmissionTimeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-        ctsWithSubmissionTimeout.CancelAfter(mempoolConfiguration.ResubmissionNodeRequestTimeout.ToTimeSpan());
+        ctsWithSubmissionTimeout.CancelAfter(mempoolConfiguration.ResubmissionNodeRequestTimeout);
 
         var transactionsToResubmitWithNodes = MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
             mempoolConfiguration,
@@ -155,7 +158,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
     private async Task<List<MempoolTransaction>> SelectTransactionsToResubmit(
         ReadWriteDbContext dbContext,
-        Instant instantForTransactionChoosing,
+        DateTimeOffset instantForTransactionChoosing,
         MempoolOptions mempoolOptions,
         int batchSize,
         CancellationToken token
@@ -200,7 +203,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private List<MempoolTransactionWithChosenNode> MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
         MempoolOptions mempoolOptions,
         List<MempoolTransaction> transactionsWantingResubmission,
-        Instant submittedAt
+        DateTimeOffset submittedAt
     )
     {
         var transactionsToResubmitWithNodes = new List<MempoolTransactionWithChosenNode>();
@@ -226,7 +229,8 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
                 transaction.MarkAsFailed(
                     MempoolTransactionFailureReason.Timeout,
-                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it"
+                    "The transaction keeps dropping out of the mempool, so we're not resubmitting it",
+                    _clock.UtcNow
                 );
             }
         }
@@ -237,7 +241,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private record MempoolTransactionWithChosenNode(MempoolTransaction MempoolTransaction, CoreApiNode CoreApiNode);
 
     private IQueryable<MempoolTransaction> GetMempoolTransactionsNeedingResubmission(
-        Instant currentTimestamp,
+        DateTimeOffset currentTimestamp,
         MempoolOptions mempoolOptions,
         ReadWriteDbContext dbContext
     )
@@ -246,7 +250,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
 
         var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
 
-        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(Duration.FromSeconds(60));
+        var isEssentiallySyncedUpNow = _systemStatusService.IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan.FromSeconds(60));
 
         return dbContext.MempoolTransactions
             .Where(mt =>
@@ -267,7 +271,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
         MempoolOptions mempoolOptions,
         List<MempoolTransactionWithChosenNode> transactionsToResubmitWithNodes,
-        Instant submittedAt,
+        DateTimeOffset submittedAt,
         CancellationToken token
     )
     {
@@ -301,7 +305,7 @@ public class MempoolResubmissionService : IMempoolResubmissionService
             {
                 await _observers.ForEachAsync(x => x.TransactionMarkedAsFailedAfterSubmittedToNode());
 
-                transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt);
+                transaction.MarkAsFailedAfterSubmittedToNode(nodeName, failureReason.Value, failureExplanation!, submittedAt, _clock.UtcNow);
             }
         }
     }

@@ -65,13 +65,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodaTime;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Mempool;
 using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -86,19 +87,22 @@ public class MempoolPrunerService : IMempoolPrunerService
     private readonly ISystemStatusService _systemStatusService;
     private readonly ILogger<MempoolPrunerService> _logger;
     private readonly IEnumerable<IMempoolPrunerServiceObserver> _observers;
+    private readonly IClock _clock;
 
     public MempoolPrunerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ISystemStatusService systemStatusService,
         ILogger<MempoolPrunerService> logger,
-        IEnumerable<IMempoolPrunerServiceObserver> observers)
+        IEnumerable<IMempoolPrunerServiceObserver> observers,
+        IClock clock)
     {
         _dbContextFactory = dbContextFactory;
         _mempoolOptionsMonitor = mempoolOptionsMonitor;
         _systemStatusService = systemStatusService;
         _logger = logger;
         _observers = observers;
+        _clock = clock;
     }
 
     public async Task PruneMempool(CancellationToken token = default)
@@ -114,13 +118,11 @@ public class MempoolPrunerService : IMempoolPrunerService
 
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
-        var currTime = SystemClock.Instance.GetCurrentInstant();
-
-        var pruneIfCommittedBefore = currTime.Minus(mempoolConfiguration.PruneCommittedAfter);
-        var pruneIfLastGatewaySubmissionBefore = currTime.Minus(mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission);
-        var pruneIfFirstSeenBefore = currTime.Minus(mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceFirstSeen);
-
-        var pruneIfNotSeenSince = currTime.Minus(mempoolConfiguration.PruneRequiresMissingFromMempoolFor);
+        var currTime = _clock.UtcNow;
+        var pruneIfCommittedBefore = currTime - mempoolConfiguration.PruneCommittedAfter;
+        var pruneIfLastGatewaySubmissionBefore = currTime - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceLastGatewaySubmission;
+        var pruneIfFirstSeenBefore = currTime - mempoolConfiguration.PruneMissingTransactionsAfterTimeSinceFirstSeen;
+        var pruneIfNotSeenSince = currTime - mempoolConfiguration.PruneRequiresMissingFromMempoolFor;
 
         var aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions = _systemStatusService.GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(
             mempoolConfiguration.AssumedBoundOnNetworkLedgerDataAggregatorClockDrift,

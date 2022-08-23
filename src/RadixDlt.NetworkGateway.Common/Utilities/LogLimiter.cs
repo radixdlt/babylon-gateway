@@ -75,32 +75,34 @@ public class LogLimiter
     private readonly TimeSpan _timespan;
     private readonly LogLevel _occasionalLogLevel;
     private readonly LogLevel _noisyLogLevel;
+    private readonly IClock _clock;
     private readonly object _lock = new();
-    private DateTime? _notBefore;
+    private DateTimeOffset? _notBefore;
 
-    public LogLimiter(TimeSpan timespan, LogLevel occasionalLogLevel, LogLevel noisyLogLevel)
+    public LogLimiter(TimeSpan timespan, LogLevel occasionalLogLevel, LogLevel noisyLogLevel, IClock? clock = null)
     {
         _timespan = timespan;
         _occasionalLogLevel = occasionalLogLevel;
         _noisyLogLevel = noisyLogLevel;
+        _clock = clock ?? new SystemClock();
     }
 
     public LogLevel GetLogLevel()
     {
         lock (_lock)
         {
-            var currTime = DateTime.Now;
+            var currTime = _clock.UtcNow;
             if (LogShouldBeMarkedAsNoisy(currTime))
             {
                 return _noisyLogLevel;
             }
 
-            _notBefore = currTime.Add(_timespan);
+            _notBefore = currTime + _timespan;
             return _occasionalLogLevel;
         }
     }
 
-    private bool LogShouldBeMarkedAsNoisy(DateTime currTime)
+    private bool LogShouldBeMarkedAsNoisy(DateTimeOffset currTime)
     {
         // ReSharper disable once MergeSequentialChecks
         return _notBefore != null && currTime < _notBefore;

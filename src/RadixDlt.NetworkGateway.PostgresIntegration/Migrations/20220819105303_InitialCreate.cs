@@ -65,12 +65,11 @@
 ﻿using System;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
-using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace RadixDlt.NetworkGateway.Migrations
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     public partial class InitialCreate : Migration
     {
@@ -86,17 +85,17 @@ namespace RadixDlt.NetworkGateway.Migrations
                     transaction_contents = table.Column<string>(type: "jsonb", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
                     submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
-                    first_submitted_to_gateway_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
-                    last_submitted_to_gateway_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
-                    last_submitted_to_node_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    first_submitted_to_gateway_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    last_submitted_to_gateway_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    last_submitted_to_node_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     last_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
                     submission_count = table.Column<int>(type: "integer", nullable: false),
-                    first_seen_in_mempool_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
-                    last_missing_from_mempool_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
-                    commit_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true),
+                    first_seen_in_mempool_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    last_missing_from_mempool_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    commit_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     failure_reason = table.Column<string>(type: "text", nullable: true),
                     failure_explanation = table.Column<string>(type: "text", nullable: true),
-                    failure_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: true)
+                    failure_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -150,9 +149,9 @@ namespace RadixDlt.NetworkGateway.Migrations
                     is_user_transaction = table.Column<bool>(type: "boolean", nullable: false),
                     is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
-                    round_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
-                    created_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
-                    normalized_timestamp = table.Column<Instant>(type: "timestamp with time zone", nullable: false)
+                    round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    normalized_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -197,7 +196,7 @@ namespace RadixDlt.NetworkGateway.Migrations
                     id = table.Column<int>(type: "integer", nullable: false),
                     top_of_ledger_state_version = table.Column<long>(type: "bigint", nullable: false),
                     sync_status_target_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    last_updated = table.Column<Instant>(type: "timestamp with time zone", nullable: false)
+                    last_updated = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

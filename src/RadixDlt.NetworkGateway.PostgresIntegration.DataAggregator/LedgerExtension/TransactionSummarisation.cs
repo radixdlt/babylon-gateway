@@ -63,8 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.Common.CoreCommunications;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Extensions;
@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 
 public static class TransactionSummarisation
 {
-    public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
+    public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(ReadWriteDbContext dbContext, IClock clock, CancellationToken token)
     {
         var lastTransaction = await dbContext.LedgerTransactions
             .AsNoTracking()
@@ -101,10 +101,10 @@ public static class TransactionSummarisation
             NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp
         );
 
-        return lastOverview ?? PreGenesisTransactionSummary();
+        return lastOverview ?? PreGenesisTransactionSummary(clock);
     }
 
-    public static TransactionSummary PreGenesisTransactionSummary()
+    public static TransactionSummary PreGenesisTransactionSummary(IClock clock)
     {
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
@@ -118,9 +118,9 @@ public static class TransactionSummarisation
             IntentHash: Array.Empty<byte>(), // Unused
             SignedTransactionHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
-            RoundTimestamp: Instant.FromUnixTimeSeconds(0),
-            CreatedTimestamp: SystemClock.Instance.GetCurrentInstant(),
-            NormalizedRoundTimestamp: Instant.FromUnixTimeSeconds(0)
+            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            CreatedTimestamp: clock.UtcNow,
+            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0)
         );
     }
 }
