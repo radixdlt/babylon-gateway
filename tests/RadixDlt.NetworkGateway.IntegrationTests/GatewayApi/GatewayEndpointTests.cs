@@ -6,8 +6,8 @@
  * radixfoundation.org/licenses/LICENSE-v1
  *
  * The Licensor hereby grants permission for the Canonical version of the Work to be
- * published, distributed and used under or by reference to the Licensor’s trademark
- * Radix ® and use of any unregistered trade names, logos or get-up.
+ * published, distributed and used under or by reference to the Licensor�s trademark
+ * Radix � and use of any unregistered trade names, logos or get-up.
  *
  * The Licensor provides the Work (and each Contributor provides its Contributions) on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
@@ -63,52 +63,45 @@
  */
 
 using FluentAssertions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests
+public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
 {
-    private class Startup
+    private readonly TestApplicationFactory _factory;
+
+    public GatewayEndpointTests(TestApplicationFactory factory)
     {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddNetworkGatewayApi();
-
-            services
-                .AddControllers();
-        }
-
-        public void Configure(IApplicationBuilder application)
-        {
-            application
-                .UseRouting()
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
-        }
+        _factory = factory;
     }
 
-    [Fact(Skip = "just a sample/placeholder/mock")]
-    public async Task Test()
+    [Fact]
+    public async Task TestGatewayApiVersion()
     {
-        var waf = new WebApplicationFactory<Startup>();
-        var client = waf.CreateClient();
+        // Arrange
+        var client = _factory.CreateClient();
 
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-        var payload = await response.Content.ReadFromJsonAsync<GatewayResponse>();
+        // Act
+        using HttpResponseMessage response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
+
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
         payload.ShouldNotBeNull();
         payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("2.0.0");
+        payload.GatewayApi._Version.Should().Be("2.0.0");
+    }
+
+    [Fact]
+    public void TestValidateOpenApiSchema()
+    {
+        // validate TransactionController
+        GatewayApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway/");
     }
 }

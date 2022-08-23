@@ -6,8 +6,8 @@
  * radixfoundation.org/licenses/LICENSE-v1
  *
  * The Licensor hereby grants permission for the Canonical version of the Work to be
- * published, distributed and used under or by reference to the Licensor’s trademark
- * Radix ® and use of any unregistered trade names, logos or get-up.
+ * published, distributed and used under or by reference to the Licensor�s trademark
+ * Radix � and use of any unregistered trade names, logos or get-up.
  *
  * The Licensor provides the Work (and each Contributor provides its Contributions) on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
@@ -62,21 +62,88 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Common;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.Common;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
+using System.Threading.Tasks;
+using Xunit;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+
+public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
 {
-    public static class Database
+    private readonly TestApplicationFactory _factory;
+
+    public TransactionEndpointTests(TestApplicationFactory factory)
     {
-        public const string MigrationsConnectionStringName = "NetworkGatewayMigrations";
-        public const string ReadOnlyConnectionStringName = "NetworkGatewayReadOnly";
-        public const string ReadWriteConnectionStringName = "NetworkGatewayReadWrite";
+        _factory = factory;
     }
 
-    public static class Transaction
+    [Fact]
+    public async Task TestTransactionRecent()
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int HashLength = 64;
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Act
+        var payload = await GetRecentTransactions(client);
+
+        // Assert
+        payload.ShouldNotBeNull();
+        payload.LedgerState.ShouldNotBeNull();
+        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
+        payload.LedgerState._Version.Should().Be(1);
+        payload.Transactions.Count.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task TestTransactionStatus()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        var recentTransactions = await GetRecentTransactions(client);
+
+        var transactionidentifier = recentTransactions?.Transactions[0].TransactionIdentifier;
+
+        // Act
+        string json = new TransactionStatusRequest(transactionidentifier).ToJson();
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await client.PostAsync("/transaction/status", content);
+
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
+
+        payload.ShouldNotBeNull();
+        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.HashLength);
+        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
+        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    }
+
+    [Fact]
+    public void TestValidateOpenApiSchema()
+    {
+        // validate TransactionController
+        GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
+    }
+
+    private async Task<RecentTransactionsResponse?> GetRecentTransactions(HttpClient client)
+    {
+        using HttpResponseMessage response = await client.PostAsync(
+            "/transaction/recent",
+            JsonContent.Create(new RecentTransactionsRequest()));
+
+        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
+
+        payload.ShouldNotBeNull();
+        payload.Transactions.ShouldNotBeNull();
+
+        return payload;
     }
 }

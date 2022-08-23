@@ -11,6 +11,21 @@ jobs:
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
+    services:
+      postgres:
+        image: postgres:12-alpine
+        env:
+          POSTGRES_DB: radixdlt_ledger
+          POSTGRES_PASSWORD: db_superuser   
+          POSTGRES_USER: db_password
+          POSTGRES_PORT: 5532
+        ports:
+          - 5532:5432  
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5  
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -22,6 +37,11 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
+      - name: Update database
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
+          dotnet ef database update --project src/RadixDlt.NetworkGateway.Core
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
