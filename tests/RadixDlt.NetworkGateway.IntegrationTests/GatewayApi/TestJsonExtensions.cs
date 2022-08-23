@@ -13,7 +13,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
     public static class TestJsonExtensions
     {
-        public static async Task<TResponse?> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+        public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
         {
             responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
 

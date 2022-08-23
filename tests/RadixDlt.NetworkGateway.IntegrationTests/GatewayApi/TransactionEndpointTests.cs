@@ -93,7 +93,6 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
         var payload = await GetRecentTransactions(client);
 
         // Assert
-        payload.ShouldNotBeNull();
         payload.LedgerState.ShouldNotBeNull();
         payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
@@ -120,7 +119,6 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
 
-        payload.ShouldNotBeNull();
         payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.HashLength);
         payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
         payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
@@ -133,7 +131,7 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
         GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 
-    private async Task<RecentTransactionsResponse?> GetRecentTransactions(HttpClient client)
+    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
     {
         using HttpResponseMessage response = await client.PostAsync(
             "/transaction/recent",
@@ -141,7 +139,6 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
 
         var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
 
-        payload.ShouldNotBeNull();
         payload.Transactions.ShouldNotBeNull();
 
         return payload;
