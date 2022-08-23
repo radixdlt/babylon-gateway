@@ -1,7 +1,7 @@
-using RadixDlt.NetworkGateway.Common.Database;
-using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
-using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
+using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,7 +79,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
             };
         }
 
-        public static List<NetworkConfiguration> GetSeedingNetworkConfiguration()
+        public static NetworkConfiguration[] GetSeedingNetworkConfiguration()
         {
             return new List<NetworkConfiguration>()
             {
@@ -90,7 +90,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     NetworkAddressHrps = new NetworkAddressHrps() { AccountHrp = "ddx", ResourceHrpSuffix = "_dr", ValidatorHrp = "dv", NodeHrp = "dn" },
                     WellKnownAddresses = new WellKnownAddresses() { XrdAddress = "xrd_dr1qyrs8qwl" },
                 },
-            };
+            }.ToArray();
         }
 
         public static List<RawTransaction> GetSeedingRawTransactions()

@@ -5,11 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
-using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
