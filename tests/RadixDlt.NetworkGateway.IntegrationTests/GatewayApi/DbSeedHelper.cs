@@ -1,9 +1,8 @@
-using NodaTime.Text;
 using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.Common.Database.Models.Ledger;
 using RadixDlt.NetworkGateway.Common.Database.Models.SingleEntries;
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -56,9 +55,9 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     roundInEpoch: 0,
                     isStartOfEpoch: true,
                     isStartOfRound: true,
-                    roundTimestamp: InstantPattern.General.Parse("1970-01-20T05:07:28Z").Value,
-                    createdTimestamp: InstantPattern.General.Parse("2022-08-09T17:03:39Z").Value,
-                    normalizedRoundTimestamp: InstantPattern.General.Parse("1970-01-20T05:07:28Z").Value)
+                    roundTimestamp: DateTime.Now,
+                    createdTimestamp: DateTime.Now,
+                    normalizedRoundTimestamp: DateTime.Now)
                 {
                      RawTransaction = rawTransaction,
                 },
@@ -74,7 +73,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     Id = 1,
                     TopOfLedgerStateVersion = 1,
                     SyncTarget = new SyncTarget() { TargetStateVersion = 1 },
-                    LastUpdated = InstantPattern.General.Parse("2022-08-09T17:03:39Z").Value,
+                    LastUpdated = DateTime.Now,
                     TopOfLedgerTransaction = topTransaction,
                 },
             };
