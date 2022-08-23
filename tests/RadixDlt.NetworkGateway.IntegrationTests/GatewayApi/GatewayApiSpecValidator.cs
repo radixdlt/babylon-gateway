@@ -56,7 +56,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 
                     // check if the route exists in the code
                     var endpoint = methodInfos.Where(m => m.CustomAttributes
-                        .FirstOrDefault(ca =>
+                        .FirstOrDefault(
+                            ca =>
                                 ca.AttributeType.Name == $"Http{openApiOpCode}Attribute" &&
                                 ca.ConstructorArguments[0].ArgumentType == typeof(string) &&
                                 openApiItemUrl.EndsWith(ca.ConstructorArguments[0].Value.ToString())) != null).ToList();
