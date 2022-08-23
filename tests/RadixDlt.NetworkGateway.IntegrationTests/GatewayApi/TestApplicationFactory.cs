@@ -5,23 +5,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using RadixDlt.NetworkGateway.Common.Database;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
     public class TestApplicationFactory : WebApplicationFactory<GatewayApiStartup>
     {
-        public static readonly string NetworkName = "integration_tests_net";
-
         private Mock<INetworkConfigurationProvider> _networkConfigurationProviderMock;
         private Mock<ICoreNodesSelectorService> _coreNodesSelectorServiceMock;
 
         public TestApplicationFactory()
         {
             _networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
-            _networkConfigurationProviderMock.Setup(x => x.GetNetworkName()).Returns(NetworkName);
+            _networkConfigurationProviderMock.Setup(x => x.GetNetworkName()).Returns(DbSeedHelper.NetworkName);
 
             _coreNodesSelectorServiceMock = new Mock<ICoreNodesSelectorService>();
             _coreNodesSelectorServiceMock.Setup(x => x.GetRandomTopTierCoreNode()).Returns(
@@ -35,7 +35,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.ConfigureServices(services =>
+            _ = builder.ConfigureServices(services =>
             {
                 var sp = services.BuildServiceProvider();
 
@@ -45,6 +45,19 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
                     var logger = scopedServices
                         .GetRequiredService<ILogger<TestApplicationFactory>>();
+
+                    var db = scopedServices.GetRequiredService<ReadOnlyDbContext>();
+
+                    db.Database.EnsureCreated();
+
+                    try
+                    {
+                        DbSeedHelper.InitializeDbForTests(db);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, $"An error occurred seeding the database with seed data. Error: {ex.Message}");
+                    }
                 }
 
                 services.AddSingleton(_coreNodesSelectorServiceMock.Object);

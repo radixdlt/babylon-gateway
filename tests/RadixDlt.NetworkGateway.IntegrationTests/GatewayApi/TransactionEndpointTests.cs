@@ -63,6 +63,7 @@
  */
 
 using FluentAssertions;
+using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Net.Http;
@@ -89,14 +90,14 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
         var client = _factory.CreateClient();
 
         // Act
-        var response = await GetRecentTransactions(client);
+        var payload = await GetRecentTransactions(client);
 
         // Assert
-        response?.LedgerState.ShouldNotBeNull();
-        response?.LedgerState.Network.Should().Be(TestApplicationFactory.NetworkName);
-        response?.LedgerState._Version.Should().Be(1);
-
-        response?.Transactions.Count.Should().BeGreaterThan(0);
+        payload.ShouldNotBeNull();
+        payload.LedgerState.ShouldNotBeNull();
+        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
+        payload.LedgerState._Version.Should().Be(1);
+        payload.Transactions.Count.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -119,9 +120,10 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
 
-        payload?.Transaction.TransactionIdentifier.Hash.Length.Should().Be(64);
-        payload?.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
-        payload?.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+        payload.ShouldNotBeNull();
+        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.HashLength);
+        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
+        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
     [Fact]
@@ -139,7 +141,8 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
 
         var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
 
-        payload?.Transactions.ShouldNotBeNull();
+        payload.ShouldNotBeNull();
+        payload.Transactions.ShouldNotBeNull();
 
         return payload;
     }
