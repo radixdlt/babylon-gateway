@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+    <PropertyGroup>
+      <IsPackable>false</IsPackable>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FluentAssertions" />
