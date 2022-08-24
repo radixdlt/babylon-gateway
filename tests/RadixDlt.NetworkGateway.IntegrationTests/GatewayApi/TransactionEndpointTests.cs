@@ -63,6 +63,7 @@
  */
 
 using FluentAssertions;
+using GatewayApiDependencies;
 using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -74,11 +75,11 @@ using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
+public class TransactionEndpointTests : IClassFixture<TestApplicationFactory<GatewayApiStartup>>
 {
-    private readonly TestApplicationFactory _factory;
+    private readonly TestApplicationFactory<GatewayApiStartup> _factory;
 
-    public TransactionEndpointTests(TestApplicationFactory factory)
+    public TransactionEndpointTests(TestApplicationFactory<GatewayApiStartup> factory)
     {
         _factory = factory;
     }

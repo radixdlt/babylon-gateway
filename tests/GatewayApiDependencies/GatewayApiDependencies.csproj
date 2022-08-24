@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi.csproj" />
+  </ItemGroup>
+
+</Project>
