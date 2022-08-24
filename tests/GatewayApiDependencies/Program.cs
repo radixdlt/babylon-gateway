@@ -62,74 +62,56 @@
  * permissions under this License.
  */
 
-using GatewayApiDependencies;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Moq;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration;
-using System;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
+namespace GatewayApiDependencies;
+
+public static class Program
 {
-    public class TestApplicationFactory<TStartup>
-        : WebApplicationFactory<TStartup> where TStartup: class
+    public static async Task Main(string[] args)
     {
-        private Mock<INetworkConfigurationProvider> _networkConfigurationProviderMock;
-        private Mock<ICoreNodesSelectorService> _coreNodesSelectorServiceMock;
+        using var host = CreateHostBuilder(args).Build();
 
-        public TestApplicationFactory()
-        {
-            _networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
-            _networkConfigurationProviderMock.Setup(x => x.GetNetworkName()).Returns(DbSeedHelper.NetworkName);
-
-            _coreNodesSelectorServiceMock = new Mock<ICoreNodesSelectorService>();
-            _coreNodesSelectorServiceMock.Setup(x => x.GetRandomTopTierCoreNode()).Returns(
-                new CoreApiNode()
-                {
-                    CoreApiAddress = "http://localhost:3333",
-                    Name = "node1",
-                    Enabled = true,
-                });
-        }
-
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder
-            .ConfigureServices(services =>
-            {
-                var sp = services.BuildServiceProvider();
-
-                using (var scope = sp.CreateScope())
-                {
-                    var scopedServices = scope.ServiceProvider;
-
-                    var logger = scopedServices
-                        .GetRequiredService<ILogger<TestApplicationFactory<TStartup>>>();
-
-                    var db = scopedServices.GetRequiredService<ReadOnlyDbContext>();
-
-                    db.Database.EnsureCreated();
-
-                    try
-                    {
-                        DbSeedHelper.InitializeDbForTests(db);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, $"An error occurred seeding the database with seed data. Error: {ex.Message}");
-                    }
-                }
-
-                services.AddSingleton(_coreNodesSelectorServiceMock.Object);
-                services.AddSingleton(_networkConfigurationProviderMock.Object);
-            });
-        }
+        await host.RunAsync();
     }
+
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                var env = context.HostingEnvironment;
+                var customConfigurationPath = GetCustomJsonConfigurationValue(context);
+                var reloadOnChange = GetReloadConfigOnChangeValue(context);
+
+                config
+                    .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
+                    .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
+
+                // backwards compability with Olympia
+                config
+                    .AddJsonFile($"appsettings.{env.EnvironmentName}Overrides.json", true, reloadOnChange)
+                    .AddJsonFile("appsettings.PersonalOverrides.json", true, reloadOnChange);
+
+                if (!string.IsNullOrWhiteSpace(customConfigurationPath))
+                {
+                    config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
+                }
+            })
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder
+                    .ConfigureKestrel(o =>
+                    {
+                        o.AddServerHeader = false;
+                    })
+                    .UseStartup<GatewayApiStartup>();
+            });
+
+    // based on https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Hosting/src/HostingHostBuilderExtensions.cs
+    private static bool GetReloadConfigOnChangeValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue("hostBuilder:reloadConfigOnChange", defaultValue: true);
+
+    private static string? GetCustomJsonConfigurationValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue<string?>("CustomJsonConfigurationFilePath", defaultValue: null);
 }

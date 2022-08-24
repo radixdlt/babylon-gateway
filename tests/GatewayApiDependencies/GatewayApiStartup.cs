@@ -63,32 +63,74 @@
  */
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
+namespace GatewayApiDependencies;
+
+public class GatewayApiStartup
 {
-    public class TestStartup
+    private readonly bool _enableSwagger;
+
+    public GatewayApiStartup(IConfiguration configuration)
     {
-        public void ConfigureServices(IServiceCollection services)
+        _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services
+            .AddNetworkGatewayApi()
+            .UsePostgresPersistence();
+
+        if (_enableSwagger)
         {
             services
-                .AddNetworkGatewayApi();
+                .AddSwaggerGen()
+                .AddSwaggerGenNewtonsoftSupport();
+        }
 
-            services
+        services
+            .AddEndpointsApiExplorer()
+            .AddCors(options =>
+            {
+                options.AddDefaultPolicy(corsPolicyBuilder =>
+                {
+                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+
+        services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson();
-        }
+            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 
-        public void Configure(IApplicationBuilder application)
+        services
+            .AddHealthChecks();
+    }
+
+    public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
+    {
+        if (_enableSwagger)
         {
             application
-                .UseRouting()
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
+                .UseSwagger()
+                .UseSwaggerUI();
         }
+
+        application
+            .UseAuthentication()
+            .UseAuthorization()
+            .UseCors()
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health");
+                endpoints.MapControllers();
+            });
     }
 }

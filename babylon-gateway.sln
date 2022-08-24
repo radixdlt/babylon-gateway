@@ -1,53 +1,58 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAggregator", "samples\DataAggregator\DataAggregator.csproj", "{66911552-ED43-4EEB-BD8E-CFE30552248B}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32819.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAggregator", "samples\DataAggregator\DataAggregator.csproj", "{66911552-ED43-4EEB-BD8E-CFE30552248B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayApi", "samples\GatewayApi\GatewayApi.csproj", "{4335C252-9F00-40EF-BAFD-38891B0F9947}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GatewayApi", "samples\GatewayApi\GatewayApi.csproj", "{4335C252-9F00-40EF-BAFD-38891B0F9947}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.GatewayApi", "src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj", "{2A8ECCEC-56AE-4A0B-9936-C707FB8B53D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.GatewayApi", "src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj", "{2A8ECCEC-56AE-4A0B-9936-C707FB8B53D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.GatewayApiSdk", "src\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.GatewayApiSdk", "src\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj", "{29EB7E5A-8E94-4DD9-9C70-9B9FFEA19AC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7B572DCA-9792-48BE-A53D-3F8B87D71372}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{7FD0B8F1-45CA-46E2-B248-66F9D3EF8727}"
 	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		docker-compose.yml = docker-compose.yml
 		LICENSE = LICENSE
 		README.md = README.md
 		stylecop.json = stylecop.json
-		.dockerignore = .dockerignore
-		.editorconfig = .editorconfig
-		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.DataAggregator", "src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj", "{6C516526-0AB0-41ED-8DA0-8CBC7751CBF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.DataAggregator", "src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj", "{6C516526-0AB0-41ED-8DA0-8CBC7751CBF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Common", "src\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj", "{A193C01E-9DF5-4437-AE45-5018EBF37EFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.Common", "src\RadixDlt.NetworkGateway.Common\RadixDlt.NetworkGateway.Common.csproj", "{A193C01E-9DF5-4437-AE45-5018EBF37EFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseMigrations", "samples\DatabaseMigrations\DatabaseMigrations.csproj", "{8FA82D83-7886-4B1D-A7F1-5883165EF156}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseMigrations", "samples\DatabaseMigrations\DatabaseMigrations.csproj", "{8FA82D83-7886-4B1D-A7F1-5883165EF156}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{11A96B08-1472-4F25-9740-9C12B242CE6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.UnitTests", "tests\RadixDlt.NetworkGateway.UnitTests\RadixDlt.NetworkGateway.UnitTests.csproj", "{17988C9B-C9F0-489D-A6C6-7CDA12AC6AE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.UnitTests", "tests\RadixDlt.NetworkGateway.UnitTests\RadixDlt.NetworkGateway.UnitTests.csproj", "{17988C9B-C9F0-489D-A6C6-7CDA12AC6AE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.IntegrationTests", "tests\RadixDlt.NetworkGateway.IntegrationTests\RadixDlt.NetworkGateway.IntegrationTests.csproj", "{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.IntegrationTests", "tests\RadixDlt.NetworkGateway.IntegrationTests\RadixDlt.NetworkGateway.IntegrationTests.csproj", "{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.CoreApiSdk", "src\RadixDlt.CoreApiSdk\RadixDlt.CoreApiSdk.csproj", "{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.CoreApiSdk", "src\RadixDlt.CoreApiSdk\RadixDlt.CoreApiSdk.csproj", "{9ABABC7D-4E72-439E-A3AA-F893CA4B47A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PostgresIntegration", "src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj", "{20BD5236-4797-4EF2-9324-F75B0F2B24AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PostgresIntegration", "src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj", "{20BD5236-4797-4EF2-9324-F75B0F2B24AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi", "src\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi.csproj", "{C22FF1C6-71A8-495A-BEC7-5F93314A60C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi", "src\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi\RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi.csproj", "{C22FF1C6-71A8-495A-BEC7-5F93314A60C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator", "src\RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator\RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator.csproj", "{DF6EAEBA-6B82-4FF4-B27C-736D0103B00C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator", "src\RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator\RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator.csproj", "{DF6EAEBA-6B82-4FF4-B27C-736D0103B00C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PrometheusIntegration", "src\RadixDlt.NetworkGateway.PrometheusIntegration\RadixDlt.NetworkGateway.PrometheusIntegration.csproj", "{5DF83C67-0F91-4A2C-864B-20290CB26B3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PrometheusIntegration", "src\RadixDlt.NetworkGateway.PrometheusIntegration\RadixDlt.NetworkGateway.PrometheusIntegration.csproj", "{5DF83C67-0F91-4A2C-864B-20290CB26B3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi", "src\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi.csproj", "{8316B0C4-C181-4B91-84B6-C37A855F520D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi", "src\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi\RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi.csproj", "{8316B0C4-C181-4B91-84B6-C37A855F520D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator", "src\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator.csproj", "{1DCCD05F-5442-404B-A816-8347B44833CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator", "src\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator.csproj", "{1DCCD05F-5442-404B-A816-8347B44833CD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GatewayApiDependencies", "tests\GatewayApiDependencies\GatewayApiDependencies.csproj", "{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,19 +124,26 @@ Global
 		{1DCCD05F-5442-404B-A816-8347B44833CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DCCD05F-5442-404B-A816-8347B44833CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DCCD05F-5442-404B-A816-8347B44833CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(RiderSharedRunConfigurations) = postSolution
-		File = .idea-run-configurations\DataAggregator.run.xml
-		File = .idea-run-configurations\Postgres.run.xml
-		File = .idea-run-configurations\GatewayAPI.run.xml
-		File = .idea-run-configurations\DataAggregator (Production).run.xml
-		File = .idea-run-configurations\GatewayApi (Production).run.xml
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{4335C252-9F00-40EF-BAFD-38891B0F9947} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
 		{66911552-ED43-4EEB-BD8E-CFE30552248B} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
+		{4335C252-9F00-40EF-BAFD-38891B0F9947} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
 		{8FA82D83-7886-4B1D-A7F1-5883165EF156} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
 		{17988C9B-C9F0-489D-A6C6-7CDA12AC6AE1} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
 		{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
+		{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {89AC0586-198F-499A-8A34-6FE56FAC602B}
+	EndGlobalSection
+	GlobalSection(RiderSharedRunConfigurations) = postSolution
+		File = .idea-run-configurations\GatewayApi (Production).run.xml
 	EndGlobalSection
 EndGlobal
