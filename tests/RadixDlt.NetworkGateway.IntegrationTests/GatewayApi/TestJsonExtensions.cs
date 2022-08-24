@@ -89,7 +89,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
             mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
 
-            string json = await responseMessage.Content.ReadAsStringAsync();
+            var json = await responseMessage.Content.ReadAsStringAsync();
 
             var payload = JsonConvert.DeserializeObject<TResponse>(json);
 
