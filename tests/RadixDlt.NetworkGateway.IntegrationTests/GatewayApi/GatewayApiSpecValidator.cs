@@ -83,7 +83,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
         {
             if (_openApiDocument == null)
             {
-                string stringYml = File.ReadAllText(_openApiFileName);
+                var stringYml = File.ReadAllText(_openApiFileName);
 
                 // Read the schema
                 _openApiDocument = new OpenApiStringReader().Read(stringYml, out var diagnostic);
@@ -131,9 +131,9 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                     if (endpoint.Any())
                     {
                         // Verify the response type
-                        string openApiResponseParameter = openApiPathItem.Value.Operations[op.Key].Responses["200"].Content["application/json"].Schema.Reference.Id;
+                        var openApiResponseParameter = openApiPathItem.Value.Operations[op.Key].Responses["200"].Content["application/json"].Schema.Reference.Id;
 
-                        string codeResponseParameter = endpoint[0].ReturnType.GenericTypeArguments[0].Name;
+                        var codeResponseParameter = endpoint[0].ReturnType.GenericTypeArguments[0].Name;
 
                         openApiResponseParameter.Should().BeEquivalentTo(codeResponseParameter);
 

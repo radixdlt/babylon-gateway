@@ -88,7 +88,7 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
         var client = _factory.CreateClient();
 
         // Act
-        using HttpResponseMessage response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
+        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
 
         // Assert
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
