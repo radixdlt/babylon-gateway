@@ -6,8 +6,8 @@
  * radixfoundation.org/licenses/LICENSE-v1
  *
  * The Licensor hereby grants permission for the Canonical version of the Work to be
- * published, distributed and used under or by reference to the Licensor�s trademark
- * Radix � and use of any unregistered trade names, logos or get-up.
+ * published, distributed and used under or by reference to the Licensor’s trademark
+ * Radix ® and use of any unregistered trade names, logos or get-up.
  *
  * The Licensor provides the Work (and each Contributor provides its Contributions) on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
@@ -127,7 +127,6 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory>
     [Fact]
     public void TestValidateOpenApiSchema()
     {
-        // validate TransactionController
         GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 
