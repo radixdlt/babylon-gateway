@@ -13,7 +13,7 @@ jobs:
         dotnet-version: ['6.0.x']
     services:
       postgres:
-        image: postgres:12-alpine
+        image: postgres:14.3-alpine
         env:
           POSTGRES_DB: radixdlt_ledger
           POSTGRES_PASSWORD: db_superuser   
