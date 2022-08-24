@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using FluentAssertions;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using System;
@@ -102,9 +103,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
             var openApiPathItems = _openApiDocument.Paths.Where(p => p.Key.Contains(controllerRoute));
 
             // Verify that the number of endpoints matches (first parameter is 'expected', second is 'actual')
-            Assert.True(
-                openApiPathItems.Count() == methodInfos.Count(),
-                $"The number of endpoints in openApi ({openApiPathItems.Count()}) does not match the number of implemented endpoints ({methodInfos.Count()}).");
+            openApiPathItems.Count().Should().Be(methodInfos.Count());
 
             // Loop through openApi items
             foreach (var openApiPathItem in openApiPathItems)
@@ -112,7 +111,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                 // Main route
                 var openApiItemUrl = openApiPathItem.Key;
 
-                // loop through CRUD ops
+                // Loop through CRUD ops
                 foreach (var op in openApiPathItem.Value.Operations)
                 {
                     // CRUD op codes
@@ -126,7 +125,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                                 ca.ConstructorArguments[0].ArgumentType == typeof(string) &&
                                 openApiItemUrl.EndsWith(ca.ConstructorArguments[0].Value.ToString())) != null).ToList();
 
-                    // Assert.True(endpoint.Count() == 1, $"The endpoint '{openApiUrl}' is not implemented.");
+                    // Verify the endpoint is implemented.");
+                    endpoint.Count().Should().Be(1);
 
                     if (endpoint.Any())
                     {
@@ -134,9 +134,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                         string openApiResponseParameter = openApiPathItem.Value.Operations[op.Key].Responses["200"].Content["application/json"].Schema.Reference.Id;
 
                         string codeResponseParameter = endpoint[0].ReturnType.GenericTypeArguments[0].Name;
-                        Assert.True(
-                            openApiResponseParameter.Equals(codeResponseParameter),
-                            $"Error in '{openApiItemUrl}'. The return parameter '{openApiResponseParameter}' is not equal to '{codeResponseParameter}'.");
+
+                        openApiResponseParameter.Should().BeEquivalentTo(codeResponseParameter);
 
                         // Verify request parameters
 
@@ -147,9 +146,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                         var openApiRequestParameters = openApiPathItem.Value.Operations[op.Key].RequestBody.Content.Select(c => c.Value.Schema.Reference.Id);
 
                         // Compare with the schema request parameters including the order
-                        Assert.True(
-                            Enumerable.SequenceEqual(openApiRequestParameters, codeRequestParameters),
-                            $"Error in '{openApiItemUrl}'. The request parameters don't match.");
+                        openApiRequestParameters.Should().BeEquivalentTo(codeRequestParameters);
                     }
                 }
             }
