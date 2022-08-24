@@ -83,11 +83,11 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
             MediaTypeHeaderValue.TryParse(responseMessage.Content.Headers.ContentType?.ToString(), out var mediaTypeHeader);
 
-            Assert.NotNull(mediaTypeHeader);
+            mediaTypeHeader.ShouldNotBeNull();
 
-            Assert.Equal("application/json", mediaTypeHeader?.MediaType);
+            mediaTypeHeader.MediaType.Should().BeEquivalentTo("application/json");
 
-            Assert.Equal("utf-8", mediaTypeHeader?.CharSet);
+            mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
 
             string json = await responseMessage.Content.ReadAsStringAsync();
 

@@ -100,6 +100,6 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory>
     [Fact]
     public void TestValidateOpenApiSchema()
     {
-        GatewayApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway/");
+        GatewayApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
     }
 }
