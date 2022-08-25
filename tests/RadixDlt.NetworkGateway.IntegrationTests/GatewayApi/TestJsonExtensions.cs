@@ -81,7 +81,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
         {
             responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
 
-            MediaTypeHeaderValue.TryParse(responseMessage.Content.Headers.ContentType?.ToString(), out var mediaTypeHeader);
+            var mediaTypeHeader = MediaTypeHeaderValue.Parse(responseMessage.Content.Headers.ContentType?.ToString());
 
             mediaTypeHeader.ShouldNotBeNull();
 
