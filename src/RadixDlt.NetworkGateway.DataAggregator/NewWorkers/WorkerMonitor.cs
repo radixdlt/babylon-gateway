@@ -62,49 +62,47 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.DataAggregator.NewWorkers;
 
-public static class GatewayApiBuilderExtensions
+public sealed class WorkerMonitor : BackgroundService
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    private readonly IOptionsMonitor<NetworkOptions> _networkOptionsMonitor;
+    private readonly IDisposable _networkOptionsChangeListener;
+    private readonly ManualResetEventSlim _reset = new(true);
+
+    public WorkerMonitor(IOptionsMonitor<NetworkOptions> networkOptionsMonitor)
     {
-        builder.Services
-            .AddNetworkGatewayPostgresCommons();
+        _networkOptionsMonitor = networkOptionsMonitor;
+        _networkOptionsChangeListener = _networkOptionsMonitor.OnChange(ConfigurationChanged);
+    }
 
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+    public override void Dispose()
+    {
+        _networkOptionsChangeListener.Dispose();
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+        base.Dispose();
+    }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await Task.Yield();
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
+        // while (!stoppingToken.IsCancellationRequested && )
+        // {
+        //     _networkOptionsMonitor.CurrentValue
+        // }
+    }
 
-        return builder;
+    private void ConfigurationChanged(NetworkOptions options)
+    {
+        _reset.Reset();
     }
 }

@@ -62,49 +62,62 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Polly;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.DataAggregator.NewWorkers;
 
-public static class GatewayApiBuilderExtensions
+public sealed class WorkerRunner : IDisposable
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    private readonly INodeWorker _nodeWorker;
+    private readonly IHostApplicationLifetime _lifetime;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly CancellationTokenSource _dummyDistributedLock = new(); // TODO implement
+    private readonly CancellationTokenSource _dummyWorkerNodeShutdown = new(); // TODO implement
+    private readonly ManualResetEventSlim _completed = new();
+    private CancellationTokenRegistration? _applicationStoppingListener;
+
+    public WorkerRunner(INodeWorker nodeWorker, IHostApplicationLifetime lifetime, ILoggerFactory loggerFactory)
     {
-        builder.Services
-            .AddNetworkGatewayPostgresCommons();
+        _nodeWorker = nodeWorker;
+        _lifetime = lifetime;
+        _loggerFactory = loggerFactory;
+    }
 
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+    public async Task RunWorker()
+    {
+        await Task.Yield();
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+        _applicationStoppingListener = _lifetime.ApplicationStopping.Register(() => _completed.Wait(TimeSpan.FromSeconds(2)));
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(_lifetime.ApplicationStopping, _dummyDistributedLock.Token, _dummyWorkerNodeShutdown.Token);
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
+        // TODO policies should be dynamically configurable (think IOptions<XxxWorkerExecutionPolicy> or IOptions<WorkerExecutionPolicy>("xxx"))
+        // timer handles successful execution only, failures are handled by retry policy
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
 
-        return builder;
+        // TODO injected from ctor, defaults to below
+        var policy = DefaultExecutionPolicyBuilder.CreateExecutionPolicy();
+        var logger = _loggerFactory.CreateLogger(_nodeWorker.GetType().FullName ?? _nodeWorker.GetType().Name);
+        // var nodeName = "node1"; // TODO fetched from _dummyWorkerNodeShutdown service
+        //
+        // while (await timer.WaitForNextTickAsync(cts.Token))
+        // {
+        //     await policy.ExecuteAsync(_nodeWorker.DoWork, new Context().WithLogger(logger).WithNodeName(nodeName), cts.Token);
+        // }
+
+        _completed.Set();
+    }
+
+    public void Dispose()
+    {
+        _applicationStoppingListener?.Dispose();
+        _completed.Dispose();
+        _dummyDistributedLock.Dispose();
+        _dummyWorkerNodeShutdown.Dispose();
     }
 }

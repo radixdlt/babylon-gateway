@@ -76,6 +76,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "distributed_locks",
+                columns: table => new
+                {
+                    name = table.Column<string>(type: "text", nullable: false),
+                    value = table.Column<string>(type: "text", nullable: false),
+                    created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    expiration_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_distributed_locks", x => x.name);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "mempool_transactions",
                 columns: table => new
                 {
@@ -656,6 +670,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "account_validator_stake_history");
+
+            migrationBuilder.DropTable(
+                name: "distributed_locks");
 
             migrationBuilder.DropTable(
                 name: "ledger_status");

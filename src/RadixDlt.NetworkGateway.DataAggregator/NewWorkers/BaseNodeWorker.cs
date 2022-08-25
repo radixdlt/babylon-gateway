@@ -62,49 +62,59 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.DataAggregator.NewWorkers;
 
-public static class GatewayApiBuilderExtensions
+public abstract class BaseNodeWorker : INodeWorker, IDisposable
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    private Task? _executeTask;
+    private CancellationTokenSource? _stoppingCts;
+
+    public virtual Task? ExecuteTask => _executeTask;
+
+    public Task Start(CancellationToken stoppingToken)
     {
-        builder.Services
-            .AddNetworkGatewayPostgresCommons();
+        _stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        _executeTask = Execute(_stoppingCts.Token);
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+        // If the task is completed then return it, this will bubble cancellation and failure to the caller
+        if (_executeTask.IsCompleted)
+        {
+            return _executeTask;
+        }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+        // Otherwise it's running
+        return Task.CompletedTask;
     }
+
+    public async Task Stop(CancellationToken token)
+    {
+        // Stop called without start
+        if (_executeTask == null)
+        {
+            return;
+        }
+
+        try
+        {
+            // Signal cancellation to the executing method
+            _stoppingCts?.Cancel();
+        }
+        finally
+        {
+            // Wait until the task completes or the stop token triggers
+            await Task.WhenAny(_executeTask, Task.Delay(Timeout.Infinite, token));
+        }
+    }
+
+    public virtual void Dispose()
+    {
+        _stoppingCts?.Cancel();
+    }
+
+    protected abstract Task Execute(CancellationToken token);
 }

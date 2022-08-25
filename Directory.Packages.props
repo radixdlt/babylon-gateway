@@ -22,6 +22,7 @@
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.1" />
     <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.6" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />

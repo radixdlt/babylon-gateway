@@ -62,49 +62,49 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.Commons.Coordination;
 
-public static class GatewayApiBuilderExtensions
+public interface IDistributedLockFactory
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    Task<AcquireResult> TryAcquire(string name, CancellationToken token = default);
+
+    Task<AcquireResult> TryAcquire(string name, TimeSpan ttl, TimeSpan refreshRate, CancellationToken token = default);
+}
+
+public interface IDistributedLock : IAsyncDisposable
+{
+    CancellationToken LostToken { get; }
+}
+
+public enum TmpResult
+{
+    Ok,
+    Failed,
+    Impossible,
+}
+
+public sealed class AcquireResult : IAsyncDisposable
+{
+    public TmpResult Result { get; }
+
+    public IDistributedLock? Lock { get; }
+
+    public AcquireResult(TmpResult result, IDistributedLock? @lock = null)
     {
-        builder.Services
-            .AddNetworkGatewayPostgresCommons();
+        Result = result;
+        Lock = @lock;
+    }
 
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+    [MemberNotNullWhen(true, nameof(Lock))]
+    public bool Succeeded => Result == TmpResult.Ok;
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
-
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
-
-        return builder;
+    public ValueTask DisposeAsync()
+    {
+        return Lock?.DisposeAsync() ?? ValueTask.CompletedTask;
     }
 }

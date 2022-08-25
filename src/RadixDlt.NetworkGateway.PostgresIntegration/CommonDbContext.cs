@@ -106,6 +106,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
 
+    public DbSet<DistributedLock> DistributedLocks => Set<DistributedLock>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {

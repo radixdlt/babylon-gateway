@@ -64,7 +64,9 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Nito.Disposables;
 using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Coordination;
 using RadixDlt.NetworkGateway.Commons.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -81,16 +83,20 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 /// </summary>
 public sealed class NodeConfigurationMonitorWorker : GlobalWorker
 {
+    private const string DistributedLockName = nameof(NodeConfigurationMonitorWorker);
+
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
             TimeSpan.FromMilliseconds(1000),
             TimeSpan.FromMilliseconds(3000));
 
+    private readonly IDistributedLockFactory _distributedLockFactory;
     private readonly ILogger<NodeConfigurationMonitorWorker> _logger;
     private readonly INodeWorkersRunnerRegistry _nodeWorkersRunnerRegistry;
     private readonly IOptionsMonitor<NetworkOptions> _networkOptions;
 
     public NodeConfigurationMonitorWorker(
+        IDistributedLockFactory distributedLockFactory,
         ILogger<NodeConfigurationMonitorWorker> logger,
         INodeWorkersRunnerRegistry nodeWorkersRunnerRegistry,
         IOptionsMonitor<NetworkOptions> networkOptions,
@@ -98,14 +104,51 @@ public sealed class NodeConfigurationMonitorWorker : GlobalWorker
         IClock clock)
         : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
     {
+        _distributedLockFactory = distributedLockFactory;
         _logger = logger;
         _nodeWorkersRunnerRegistry = nodeWorkersRunnerRegistry;
         _networkOptions = networkOptions;
     }
 
+    private IDistributedLock? _distributedLock;
+
     protected override async Task DoWork(CancellationToken cancellationToken)
     {
-        await HandleNodeConfiguration(cancellationToken);
+        if (_distributedLock == null)
+        {
+            var lockResult = await _distributedLockFactory.TryAcquire(DistributedLockName, cancellationToken);
+
+            if (lockResult.Succeeded)
+            {
+                _distributedLock = lockResult.Lock;
+            }
+            else
+            {
+                // TODO we probably want to wait bit longer before another DoWork runs as if it was a failure
+                switch (lockResult.Result)
+                {
+                    case TmpResult.Failed:
+                        _logger.LogError("bla bla bla, unable to acquire lock");
+                        break;
+                    case TmpResult.Impossible:
+                        _logger.LogInformation("bla bla bla, not running as a primary data agg");
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationToken);
+
+                return;
+            }
+        }
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _distributedLock.LostToken);
+        await using var reg = cts.Token.Register(DistributedLockLost);
+
+        cts.Token.ThrowIfCancellationRequested();
+
+        await HandleNodeConfiguration(cts.Token);
     }
 
     protected override async Task OnStoppedSuccessfully()
@@ -114,6 +157,7 @@ public sealed class NodeConfigurationMonitorWorker : GlobalWorker
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.CancelAfter(TimeSpan.FromMilliseconds(1000));
+        DistributedLockLost();
         await _nodeWorkersRunnerRegistry.StopAllWorkers(cancellationTokenSource.Token);
 
         _logger.LogInformation("All node workers have been stopped");
@@ -121,7 +165,7 @@ public sealed class NodeConfigurationMonitorWorker : GlobalWorker
         await base.OnStoppedSuccessfully();
     }
 
-    private async Task HandleNodeConfiguration(CancellationToken stoppingToken)
+    private async Task HandleNodeConfiguration(CancellationToken token)
     {
         var nodeConfiguration = _networkOptions.CurrentValue.CoreApiNodes;
 
@@ -129,6 +173,16 @@ public sealed class NodeConfigurationMonitorWorker : GlobalWorker
             .Where(n => n.Enabled)
             .ToList();
 
-        await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, stoppingToken);
+        await _nodeWorkersRunnerRegistry.EnsureCorrectNodeServicesRunning(enabledNodes, token);
+    }
+
+    private async void DistributedLockLost()
+    {
+        if (_distributedLock != null)
+        {
+            await _distributedLock.DisposeAsync();
+        }
+
+        _distributedLock = null;
     }
 }

@@ -65,11 +65,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using RadixDlt.NetworkGateway.Commons.Coordination;
+using RadixDlt.NetworkGateway.Commons.Workers;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class ServiceCollectionExtensions
 {
+    public static void AddNetworkGatewayPostgresCommons(this IServiceCollection services)
+    {
+        services.TryAddSingleton<IDistributedLockFactory, PostgresDistributedLockFactory>();
+    }
+
     public static void AddNetworkGatewayPostgresMigrations(this IServiceCollection services)
     {
         services

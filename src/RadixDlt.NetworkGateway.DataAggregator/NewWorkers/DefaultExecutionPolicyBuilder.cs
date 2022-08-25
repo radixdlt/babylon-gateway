@@ -62,49 +62,71 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.DataAggregator.NewWorkers;
 
-public static class GatewayApiBuilderExtensions
+public class DefaultExecutionPolicyBuilder
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    public static IAsyncPolicy CreateExecutionPolicy()
     {
-        builder.Services
-            .AddNetworkGatewayPostgresCommons();
+        // TODO circuitBreakerPolicy should be per node,
+        // TODO policies should be dynamically configurable (think IOptions<XxxWorkerExecutionPolicy> or IOptions<WorkerExecutionPolicy>("xxx"))
 
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        var retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(DefaultRetryDurations(), OnRetryAsync);
+        var circuitBreakerPolicy = Policy.Handle<Exception>().AdvancedCircuitBreakerAsync(failureThreshold: 0.25, samplingDuration: TimeSpan.FromMinutes(1), minimumThroughput: 5, durationOfBreak: TimeSpan.FromSeconds(5), OnBreak, OnReset, OnHalfOpen);
+        var timeoutPolicy = Policy.TimeoutAsync(TimeSpan.FromSeconds(5), TimeoutStrategy.Optimistic, OnTimeoutAsync);
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
+        return Policy.WrapAsync(retryPolicy, circuitBreakerPolicy, timeoutPolicy);
+    }
 
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<SubmissionTrackingService>()
-            .AddScoped<ISubmissionTrackingService>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<IMempoolQuerier>(provider => provider.GetRequiredService<SubmissionTrackingService>())
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+    // returns duration of 1, 3, 7, 15, 31 seconds
+    private static IEnumerable<TimeSpan> DefaultRetryDurations()
+    {
+        for (var i = 1; i <= 5; i++)
+        {
+            yield return TimeSpan.FromSeconds(Math.Pow(2, i) - 1);
+        }
+    }
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
-            {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
+    private static Task OnRetryAsync(Exception exception, TimeSpan waitDuration, int retryCount, Context context)
+    {
+        context.GetLogger().LogError(exception, "bla bla bla worker failed, node '{NodeName}', attempt {RetryCount}, wait duration {WaitDuration}", context.GetNodeName(), retryCount, waitDuration);
 
-        return builder;
+        return Task.CompletedTask;
+    }
+
+    private static void OnHalfOpen()
+    {
+        // TODO why there's no Context here?!
+    }
+
+    private static void OnReset(Context context)
+    {
+        context.GetLogger().LogInformation("bla bla bla circuit closed, node '{NodeName}', restoring processing", context.GetNodeName());
+    }
+
+    private static void OnBreak(Exception exception, CircuitState circuitState, TimeSpan waitDuration, Context context)
+    {
+        context.GetLogger().LogError(exception, "bla bla bla circuit opened, node '{NodeName}', processing stopped", context.GetNodeName());
+    }
+
+    private static Task OnTimeoutAsync(Context context, TimeSpan timeout, Task task, Exception exception)
+    {
+        context.GetLogger().LogError(exception, "bla bla bla timed out, node '{NodeName}'", context.GetNodeName());
+
+        // do NOT await this one
+        task.ContinueWith(_ =>
+        {
+            // any clean-up if needed
+        });
+
+        return Task.CompletedTask;
     }
 }
