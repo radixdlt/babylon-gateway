@@ -67,8 +67,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public record ValidatorEpochDenormalized(string ValidatorAddress, long Epoch);
-public record ValidatorEpoch(Validator Validator, long Epoch);
+internal record ValidatorEpochDenormalized(string ValidatorAddress, long Epoch);
+internal record ValidatorEpoch(Validator Validator, long Epoch);
 
 /// <summary>
 /// A record of how many proposals a validator completed/missed in a given epoch.
@@ -81,7 +81,7 @@ public record ValidatorEpoch(Validator Validator, long Epoch);
 // OnModelCreating: Has composite key (epoch, validator_id)
 // OnModelCreating: Has index on (validator_id, epoch)
 [Table("validator_proposal_records")]
-public class ValidatorProposalRecord : RecordBase<ValidatorEpoch, ProposalRecord>
+internal class ValidatorProposalRecord : RecordBase<ValidatorEpoch, ProposalRecord>
 {
     [Column(name: "validator_id")]
     public long ValidatorId { get; set; }
@@ -117,7 +117,7 @@ public class ValidatorProposalRecord : RecordBase<ValidatorEpoch, ProposalRecord
 }
 
 [Owned]
-public record ProposalRecord
+internal record ProposalRecord
 {
     [Column(name: "proposals_completed")]
     public long ProposalsCompleted { get; set; }

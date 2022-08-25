@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// and to store any other fields we might want.
 /// </summary>
 [Table("ledger_status")]
-public class LedgerStatus : SingleEntryBase
+internal class LedgerStatus : SingleEntryBase
 {
     [Column("top_of_ledger_state_version")]
     public long TopOfLedgerStateVersion { get; set; }

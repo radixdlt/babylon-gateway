@@ -62,12 +62,8 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System.Threading.Tasks;
 
@@ -83,39 +79,7 @@ public static class Program
 
         try
         {
-            var services = host.Services;
-            var configuration = services.GetRequiredService<IConfiguration>();
-            var shouldWipeDatabaseInsteadOfStart = configuration.GetValue<bool>("WIPE_DATABASE");
-            var maxWaitForDbMs = configuration.GetValue("MaxWaitForDbOnStartupMs", 5000);
-
-            if (shouldWipeDatabaseInsteadOfStart)
-            {
-                await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
-                {
-                    logger.LogInformation("Connecting to database - if it exists");
-
-                    await ConnectionHelpers.TryWaitForExistingDbConnection(logger, dbContext, maxWaitForDbMs);
-
-                    logger.LogInformation("Starting database wipe");
-
-                    await dbContext.Database.EnsureDeletedAsync();
-
-                    logger.LogInformation("Database wipe completed. Now stopping...");
-                });
-
-                return;
-            }
-
-            // TODO:NG-14 - Change to manage migrations more safely outside service boot-up
-            // TODO:NG-38 - Tweak logs so that any migration based logs still appear, but that general Microsoft.EntityFrameworkCore.Database.Command logs do not
-            await ConnectionHelpers.PerformScopedDbAction<MigrationsDbContext>(services, async (_, logger, dbContext) =>
-            {
-                logger.LogInformation("Starting database migrations if required");
-
-                await ConnectionHelpers.MigrateWithRetry(logger, dbContext, maxWaitForDbMs);
-
-                logger.LogInformation("Database migrations (if required) were completed");
-            });
+            await host.ExecutePostgresMigrations();
         }
         finally
         {

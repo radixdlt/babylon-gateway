@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// </summary>
 [Table("validators")]
 // OnModelCreating: Create unique index on validator address
-public class Validator : NormalizedEntityBase
+internal class Validator : NormalizedEntityBase
 {
     [Column(name: "address")]
     public string Address { get; set; }

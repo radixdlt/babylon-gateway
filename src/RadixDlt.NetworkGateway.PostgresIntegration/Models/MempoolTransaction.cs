@@ -103,7 +103,7 @@ public record GatewayTransactionContents
 /// A record of transactions submitted recently by this and other nodes.
 /// </summary>
 [Table("mempool_transactions")]
-public class MempoolTransaction
+internal class MempoolTransaction
 {
     private MempoolTransaction(byte[] payloadHash, byte[] payload, GatewayTransactionContents transactionContents)
     {

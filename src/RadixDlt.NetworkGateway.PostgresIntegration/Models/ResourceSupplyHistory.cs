@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
 [Table("resource_supply_history")]
-public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, ResourceSupplyChange>
+internal class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, ResourceSupplyChange>
 {
     [Column(name: "resource_id")]
     public long ResourceId { get; set; }
@@ -118,7 +118,7 @@ public class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, Resou
 /// <summary>
 /// A mutable class to aggregate changes.
 /// </summary>
-public class ResourceSupplyChange
+internal class ResourceSupplyChange
 {
     public TokenAmount Minted { get; set; }
 

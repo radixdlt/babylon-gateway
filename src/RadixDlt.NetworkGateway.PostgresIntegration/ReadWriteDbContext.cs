@@ -66,7 +66,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public sealed class ReadWriteDbContext : CommonDbContext
+internal class ReadWriteDbContext : CommonDbContext
 {
     public ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options)
         : base(options)

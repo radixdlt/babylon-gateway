@@ -68,8 +68,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public record struct AccountResourceDenormalized(string AccountAddress, string Rri);
-public record struct AccountResource(Account Account, Resource Resource);
+internal record struct AccountResourceDenormalized(string AccountAddress, string Rri);
+internal record struct AccountResource(Account Account, Resource Resource);
 
 /// <summary>
 /// Tracks Account Resource Balances over time.
@@ -77,7 +77,7 @@ public record struct AccountResource(Account Account, Resource Resource);
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
 [Table("account_resource_balance_history")]
-public class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
+internal class AccountResourceBalanceHistory : HistoryBase<AccountResource, BalanceEntry, TokenAmount>
 {
     [Column(name: "account_id")]
     public long AccountId { get; set; }

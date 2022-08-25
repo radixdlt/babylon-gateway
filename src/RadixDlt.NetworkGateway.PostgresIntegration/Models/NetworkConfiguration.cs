@@ -69,7 +69,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("network_configuration")]
-public class NetworkConfiguration : SingleEntryBase
+internal class NetworkConfiguration : SingleEntryBase
 {
     // [Owned] below
     public NetworkDefinition NetworkDefinition { get; set; }

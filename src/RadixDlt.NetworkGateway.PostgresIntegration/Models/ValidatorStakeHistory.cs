@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
 [Table("validator_stake_history")]
-public class ValidatorStakeHistory : HistoryBase<Validator, ValidatorStakeSnapshot, ValidatorStakeSnapshotChange>
+internal class ValidatorStakeHistory : HistoryBase<Validator, ValidatorStakeSnapshot, ValidatorStakeSnapshotChange>
 {
     [Column(name: "validator_id")]
     public long ValidatorId { get; set; }
@@ -113,7 +113,7 @@ public class ValidatorStakeHistory : HistoryBase<Validator, ValidatorStakeSnapsh
 /// <summary>
 /// A mutable class to aggregate changes.
 /// </summary>
-public class ValidatorStakeSnapshotChange
+internal class ValidatorStakeSnapshotChange
 {
     public TokenAmount ChangeInXrdStake { get; set; }
 
@@ -177,7 +177,7 @@ public class ValidatorStakeSnapshotChange
 }
 
 [Owned]
-public record ValidatorStakeSnapshot
+internal record ValidatorStakeSnapshot
 {
     [Column("total_xrd_staked")]
     public TokenAmount TotalXrdStake { get; set; }

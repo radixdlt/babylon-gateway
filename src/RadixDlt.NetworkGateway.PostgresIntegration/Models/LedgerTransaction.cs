@@ -77,7 +77,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 // OnModelCreating: We also define an index by state version, filtered to user transactions.
 // OnModelCreating: We also define an index on Timestamp.
 // OnModelCreating: We also define a composite index on (Epoch, StartOfRound [Not Null]) - to easily query when rounds happened.
-public class LedgerTransaction
+internal class LedgerTransaction
 {
     public LedgerTransaction(long resultantStateVersion, byte[] payloadHash, byte[] intentHash, byte[] signedTransactionHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, DateTimeOffset roundTimestamp, DateTimeOffset createdTimestamp, DateTimeOffset normalizedRoundTimestamp)
     {

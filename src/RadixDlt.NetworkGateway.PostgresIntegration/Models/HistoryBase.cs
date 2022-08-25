@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// <typeparam name="TKey">A record type indicating the grouping key which is used to aggregate history together.</typeparam>
 /// <typeparam name="TEntry">A record type indicating the history entry - these are the items which change over time.</typeparam>
 /// <typeparam name="TChange">A class which is used to aggregate a diff to the last history entry.</typeparam>
-public abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
+internal abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
 {
 }
 
@@ -96,7 +96,7 @@ public abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
 /// You will likely also want to add a query in DbQueryExtensions to help with querying against a given state version.
 /// It may also be worthwhile to create a TableValuedFunction with this SQL to make direct-SQL-querying easier.
 /// </summary>
-public abstract class HistoryBase
+internal abstract class HistoryBase
 {
     /// <summary>
     /// The first state version where this version of history applied.
