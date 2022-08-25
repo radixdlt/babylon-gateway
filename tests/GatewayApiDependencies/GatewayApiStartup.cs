@@ -85,19 +85,8 @@ public class GatewayApiStartup
             .UsePostgresPersistence();
 
         services
-            .AddEndpointsApiExplorer()
-            .AddCors(options =>
-            {
-                options.AddDefaultPolicy(corsPolicyBuilder =>
-                {
-                    corsPolicyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                });
-            });
-
-        services
             .AddControllers()
-            .AddControllersAsServices()
-            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+            .AddControllersAsServices();
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration)

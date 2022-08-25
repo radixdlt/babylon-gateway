@@ -80,26 +80,6 @@ public static class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((context, config) =>
-            {
-                var env = context.HostingEnvironment;
-                var customConfigurationPath = GetCustomJsonConfigurationValue(context);
-                var reloadOnChange = GetReloadConfigOnChangeValue(context);
-
-                config
-                    .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
-                    .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
-
-                // backwards compability with Olympia
-                config
-                    .AddJsonFile($"appsettings.{env.EnvironmentName}Overrides.json", true, reloadOnChange)
-                    .AddJsonFile("appsettings.PersonalOverrides.json", true, reloadOnChange);
-
-                if (!string.IsNullOrWhiteSpace(customConfigurationPath))
-                {
-                    config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
-                }
-            })
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder
@@ -109,9 +89,4 @@ public static class Program
                     })
                     .UseStartup<GatewayApiStartup>();
             });
-
-    // based on https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Hosting/src/HostingHostBuilderExtensions.cs
-    private static bool GetReloadConfigOnChangeValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue("hostBuilder:reloadConfigOnChange", defaultValue: true);
-
-    private static string? GetCustomJsonConfigurationValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue<string?>("CustomJsonConfigurationFilePath", defaultValue: null);
 }
