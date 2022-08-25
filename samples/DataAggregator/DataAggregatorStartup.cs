@@ -87,8 +87,8 @@ public class DataAggregatorStartup
     {
         services
             .AddNetworkGatewayDataAggregator()
-            .UsePostgresPersistence()
-            .UsePrometheusMetrics();
+            .AddPostgresPersistence()
+            .AddPrometheusMetrics();
 
         services
             .AddEndpointsApiExplorer();
