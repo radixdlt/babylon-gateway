@@ -75,33 +75,34 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
+using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
     public class TestApplicationFactory<TStartup>
-        : WebApplicationFactory<TStartup> where TStartup: class
+        : WebApplicationFactory<TStartup>
+        where TStartup : class
     {
-        private Mock<INetworkConfigurationProvider> _networkConfigurationProviderMock;
-        private Mock<ICoreNodesSelectorService> _coreNodesSelectorServiceMock;
+        private string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
 
         public TestApplicationFactory()
         {
-            _networkConfigurationProviderMock = new Mock<INetworkConfigurationProvider>();
-            _networkConfigurationProviderMock.Setup(x => x.GetNetworkName()).Returns(DbSeedHelper.NetworkName);
-
-            _coreNodesSelectorServiceMock = new Mock<ICoreNodesSelectorService>();
-            _coreNodesSelectorServiceMock.Setup(x => x.GetRandomTopTierCoreNode()).Returns(
-                new CoreApiNode()
-                {
-                    CoreApiAddress = "http://localhost:3333",
-                    Name = "node1",
-                    Enabled = true,
-                });
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder
+            .ConfigureAppConfiguration(
+                    (context, config) =>
+                    {
+                        config.AddInMemoryCollection(new[]
+                        {
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", _dbConnectionString),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", _dbConnectionString),
+                            new KeyValuePair<string, string>("GatewayApi:Network:NetworkName", DbSeedHelper.NetworkName),
+                        });
+                    }
+            )
             .ConfigureServices(services =>
             {
                 var sp = services.BuildServiceProvider();
@@ -127,8 +128,15 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     }
                 }
 
-                services.AddSingleton(_coreNodesSelectorServiceMock.Object);
-                services.AddSingleton(_networkConfigurationProviderMock.Object);
+                services.PostConfigure<NetworkOptions>(o =>
+                    {
+                        o.NetworkName = "aaa";
+                        o.CoreApiNodes = new List<CoreApiNode>()
+                        {
+                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
+                        };
+                    }
+                );
             });
         }
     }
