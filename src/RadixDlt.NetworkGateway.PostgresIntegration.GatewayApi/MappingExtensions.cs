@@ -70,7 +70,7 @@ using Validator = RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class ApiIdentifiers
+internal static class MappingExtensions
 {
     public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
     {

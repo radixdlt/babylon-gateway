@@ -145,15 +145,9 @@ public static class Program
                     config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
                 }
             })
-            .ConfigureServices((host, services) =>
+            .ConfigureServices(services =>
             {
-                services.AddDbContextFactory<MigrationsDbContext>(options =>
-                {
-                    options.UseNpgsql(
-                        host.Configuration.GetConnectionString(NetworkGatewayConstants.Database.MigrationsConnectionStringName),
-                        o => o.MigrationsAssembly(typeof(MigrationsDbContext).Assembly.GetName().Name)
-                    );
-                });
+                services.AddNetworkGatewayPostgresMigrations();
             });
 
     // based on https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Hosting/src/HostingHostBuilderExtensions.cs

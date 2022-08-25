@@ -87,7 +87,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class MempoolResubmissionService : IMempoolResubmissionService
+internal class MempoolResubmissionService : IMempoolResubmissionService
 {
     private static readonly LogLimiter _emptyResubmissionQueueLogLimiter = new(TimeSpan.FromSeconds(60), LogLevel.Information, LogLevel.Debug);
 

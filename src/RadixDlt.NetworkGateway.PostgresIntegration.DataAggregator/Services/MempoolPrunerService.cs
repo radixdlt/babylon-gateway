@@ -71,7 +71,7 @@ using RadixDlt.NetworkGateway.Common.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -79,7 +79,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class MempoolPrunerService : IMempoolPrunerService
+internal class MempoolPrunerService : IMempoolPrunerService
 {
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;

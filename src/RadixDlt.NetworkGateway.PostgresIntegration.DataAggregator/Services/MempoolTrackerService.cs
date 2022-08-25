@@ -83,7 +83,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class MempoolTrackerService : IMempoolTrackerService
+internal class MempoolTrackerService : IMempoolTrackerService
 {
     private static readonly LogLimiter _combineMempoolsInfoLogLimiter = new(TimeSpan.FromSeconds(10), LogLevel.Information, LogLevel.Debug);
 

@@ -86,7 +86,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 ///
 /// See the DbActionsPlanner class doc for a detailed description on how this process should work.
 /// </summary>
-public class TransactionContentProcessor
+internal class TransactionContentProcessor
 {
     /* Dependencies */
     private readonly DbActionsPlanner _dbActionsPlanner;

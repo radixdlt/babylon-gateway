@@ -70,7 +70,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class QueryableExtensions
+internal static class QueryableExtensions
 {
     public static async Task<HashSet<TSource>> ToHashSetAsync<TSource>(
         this IQueryable<TSource> source,

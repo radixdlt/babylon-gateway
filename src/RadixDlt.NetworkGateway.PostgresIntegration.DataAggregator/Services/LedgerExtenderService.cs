@@ -80,7 +80,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public class LedgerExtenderService : ILedgerExtenderService
+internal class LedgerExtenderService : ILedgerExtenderService
 {
     private readonly IOptionsMonitor<TransactionAssertionsOptions> _transactionAssertionsOptionsMonitor;
     private readonly ILogger<LedgerExtenderService> _logger;

@@ -66,7 +66,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public class MigrationsDbContext : CommonDbContext
+public sealed class MigrationsDbContext : CommonDbContext
 {
     public MigrationsDbContext(DbContextOptions<MigrationsDbContext> options)
         : base(options)

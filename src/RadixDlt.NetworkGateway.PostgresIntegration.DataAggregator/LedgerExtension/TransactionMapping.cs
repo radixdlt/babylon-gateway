@@ -69,7 +69,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-public static class TransactionMapping
+internal static class TransactionMapping
 {
     public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
     {

@@ -109,7 +109,7 @@ public record ActionsPlannerReport(
 ///
 /// Not thread-safe - as per the dbContext it wraps.
 /// </summary>
-public class DbActionsPlanner
+internal class DbActionsPlanner
 {
     private readonly TransactionAssertionsOptions _options;
     private readonly ReadWriteDbContext _dbContext;

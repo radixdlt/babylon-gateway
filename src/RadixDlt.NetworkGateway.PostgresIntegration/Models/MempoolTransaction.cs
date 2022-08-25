@@ -75,39 +75,6 @@ using System.Runtime.Serialization;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
-{
-    public static readonly ImmutableDictionary<MempoolTransactionStatus, string> Conversion =
-        new Dictionary<MempoolTransactionStatus, string>()
-        {
-            { MempoolTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
-            { MempoolTransactionStatus.Missing, "MISSING" },
-            { MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
-            { MempoolTransactionStatus.Failed, "FAILED" },
-            { MempoolTransactionStatus.Committed, "COMMITTED" },
-        }.ToImmutableDictionary();
-
-    public MempoolTransactionStatusValueConverter()
-        : base(Conversion, Invert(Conversion))
-    {
-    }
-}
-
-public class MempoolTransactionFailureReasonValueConverter : EnumTypeValueConverterBase<MempoolTransactionFailureReason>
-{
-    private static readonly Dictionary<MempoolTransactionFailureReason, string> _conversion = new()
-    {
-        { MempoolTransactionFailureReason.DoubleSpend, "DOUBLE_SPEND" },
-        { MempoolTransactionFailureReason.Timeout, "TIMEOUT" },
-        { MempoolTransactionFailureReason.Unknown, "UNKNOWN" },
-    };
-
-    public MempoolTransactionFailureReasonValueConverter()
-        : base(_conversion, Invert(_conversion))
-    {
-    }
-}
-
 /// <summary>
 ///  This stores all the data needed to construct a Gateway.TransactionInfo (alongside the other data in the DB).
 /// </summary>

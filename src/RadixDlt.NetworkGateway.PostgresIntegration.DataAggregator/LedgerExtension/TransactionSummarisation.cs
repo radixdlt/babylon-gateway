@@ -72,7 +72,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
-public static class TransactionSummarisation
+internal static class TransactionSummarisation
 {
     public static async Task<TransactionSummary> GetSummaryOfTransactionOnTopOfLedger(ReadWriteDbContext dbContext, IClock clock, CancellationToken token)
     {

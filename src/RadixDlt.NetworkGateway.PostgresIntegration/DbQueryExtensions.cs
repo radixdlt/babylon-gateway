@@ -72,7 +72,7 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class DbQueryExtensions
+internal static class DbQueryExtensions
 {
     public static IQueryable<Account> Account<TDbContext>(
         this TDbContext dbContext,
