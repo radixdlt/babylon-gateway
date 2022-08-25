@@ -74,11 +74,8 @@ namespace GatewayApiDependencies;
 
 public class GatewayApiStartup
 {
-    private readonly bool _enableSwagger;
-
     public GatewayApiStartup(IConfiguration configuration)
     {
-        _enableSwagger = configuration.GetValue<bool>("EnableSwagger");
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -86,13 +83,6 @@ public class GatewayApiStartup
         services
             .AddNetworkGatewayApi()
             .UsePostgresPersistence();
-
-        if (_enableSwagger)
-        {
-            services
-                .AddSwaggerGen()
-                .AddSwaggerGenNewtonsoftSupport();
-        }
 
         services
             .AddEndpointsApiExplorer()
@@ -108,20 +98,10 @@ public class GatewayApiStartup
             .AddControllers()
             .AddControllersAsServices()
             .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
-
-        services
-            .AddHealthChecks();
     }
 
-    public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
+    public void Configure(IApplicationBuilder application, IConfiguration configuration)
     {
-        if (_enableSwagger)
-        {
-            application
-                .UseSwagger()
-                .UseSwaggerUI();
-        }
-
         application
             .UseAuthentication()
             .UseAuthorization()
@@ -129,7 +109,6 @@ public class GatewayApiStartup
             .UseRouting()
             .UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
     }
