@@ -131,6 +131,25 @@ public class TransactionEndpointTests : IClassFixture<TestApplicationFactory<Gat
         GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 
+    [Fact(Skip ="Valid transaction payload is required")]
+    public async Task TestTransactionSubmit()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Act
+        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await client.PostAsync("/transaction/submit", content);
+
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
+
+        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+    }
+
     private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
     {
         using HttpResponseMessage response = await client.PostAsync(
