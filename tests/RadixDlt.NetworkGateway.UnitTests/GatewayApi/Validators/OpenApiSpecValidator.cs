@@ -150,7 +150,7 @@ namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators
                     var openApiRequestParameters = openApiPathItem.Value.Operations[op.Key].RequestBody.Content.Select(c => c.Value.Schema.Reference.Id);
 
                     // Compare with the schema request parameters including the order
-                    openApiRequestParameters.Should().BeEquivalentTo(codeRequestParameters);
+                    codeRequestParameters.Should().BeEquivalentTo(openApiRequestParameters);
                 }
             }
         }
