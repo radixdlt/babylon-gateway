@@ -63,38 +63,34 @@
  */
 
 using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.TestDependencies;
-using System.Net.Http.Json;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
-
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
 {
-    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
-
-    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
+    public static class TestJsonExtensions
     {
-        _factory = factory;
-    }
+        public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+        {
+            responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
 
-    [Fact]
-    public async Task TestGatewayApiVersions()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
+            var mediaTypeHeader = MediaTypeHeaderValue.Parse(responseMessage.Content.Headers.ContentType?.ToString());
 
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
+            mediaTypeHeader.ShouldNotBeNull();
 
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+            mediaTypeHeader.MediaType.Should().BeEquivalentTo("application/json");
 
-        payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+            mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
+
+            var json = await responseMessage.Content.ReadAsStringAsync();
+
+            var payload = JsonConvert.DeserializeObject<TResponse>(json);
+
+            payload.ShouldNotBeNull();
+
+            return payload;
+        }
     }
 }

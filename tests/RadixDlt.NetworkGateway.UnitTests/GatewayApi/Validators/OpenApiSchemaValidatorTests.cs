@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,39 +62,22 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.TestDependencies;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
+public class OpenApiSchemaValidatorTests
 {
-    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
-
-    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
+    [Fact]
+    public void GatewayControllerShouldMatchOpenApiSchema()
     {
-        _factory = factory;
+        OpenApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
     }
 
     [Fact]
-    public async Task TestGatewayApiVersions()
+    public void TransactionControllerShouldMatchOpenApiSchema()
     {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
-
-        payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+        OpenApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 }

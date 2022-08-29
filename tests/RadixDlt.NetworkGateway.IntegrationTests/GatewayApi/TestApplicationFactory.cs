@@ -62,39 +62,80 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.TestDependencies;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Xunit;
+using RadixDlt.NetworkGateway.PostgresIntegration;
+using System;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
-
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
+namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
-    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
-
-    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
+    public class TestApplicationFactory<TStartup>
+        : WebApplicationFactory<TStartup>
+        where TStartup : class
     {
-        _factory = factory;
-    }
+        private readonly string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
 
-    [Fact]
-    public async Task TestGatewayApiVersions()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
+        public TestApplicationFactory()
+        {
+        }
 
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder
+            .ConfigureAppConfiguration(
+                    (context, config) =>
+                    {
+                        config.AddInMemoryCollection(new[]
+                        {
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", _dbConnectionString),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", _dbConnectionString),
+                            new KeyValuePair<string, string>("GatewayApi:Network:NetworkName", DbSeedHelper.NetworkName),
+                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayOpenApiSchemaVersion", "2.0.0"),
+                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayApiVersion", "3.0.0"),
+                        });
+                    }
+            )
+            .ConfigureServices(services =>
+            {
+                var sp = services.BuildServiceProvider();
 
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+                using (var scope = sp.CreateScope())
+                {
+                    var scopedServices = scope.ServiceProvider;
 
-        payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+                    var logger = scopedServices
+                        .GetRequiredService<ILogger<TestApplicationFactory<TStartup>>>();
+
+                    var db = scopedServices.GetRequiredService<ReadOnlyDbContext>();
+
+                    db.Database.EnsureCreated();
+
+                    try
+                    {
+                        DbSeedHelper.InitializeDbForTests(db);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, $"An error occurred seeding the database with seed data. Error: {ex.Message}");
+                    }
+                }
+
+                services.PostConfigure<NetworkOptions>(o =>
+                    {
+                        o.NetworkName = "aaa";
+                        o.CoreApiNodes = new List<CoreApiNode>()
+                        {
+                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
+                        };
+                    }
+                );
+            });
+        }
     }
 }

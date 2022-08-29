@@ -65,5 +65,6 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.UnitTests")]
+[assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.IntegrationTests")]
 [assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator")]
 [assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.PostgresIntegration.GatewayApi")]

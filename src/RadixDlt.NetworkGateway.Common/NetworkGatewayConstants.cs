@@ -77,5 +77,6 @@ public static class NetworkGatewayConstants
     {
         public const int IdentifierByteLength = 32;
         public const int CompressedPublicKeyBytesLength = 33;
+        public const int IdentifierHashLength = 64;
     }
 }

@@ -62,39 +62,38 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.TestDependencies;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Xunit;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.TestDependencies;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
+public class TestGatewayApiStartup
 {
-    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
-
-    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
+    public TestGatewayApiStartup(IConfiguration configuration)
     {
-        _factory = factory;
     }
 
-    [Fact]
-    public async Task TestGatewayApiVersions()
+    public void ConfigureServices(IServiceCollection services)
     {
-        // Arrange
-        var client = _factory.CreateClient();
+         services
+            .AddNetworkGatewayApi()
+            .AddPostgresPersistence();
 
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
+         services
+            .AddControllers()
+            .AddNewtonsoftJson();
+    }
 
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
-
-        payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+    public void Configure(IApplicationBuilder application, IConfiguration configuration)
+    {
+        application
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
     }
 }

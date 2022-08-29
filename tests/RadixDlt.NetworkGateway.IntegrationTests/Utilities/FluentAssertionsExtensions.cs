@@ -63,38 +63,37 @@
  */
 
 using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.TestDependencies;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Xunit;
+using FluentAssertions.Primitives;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
+internal static class FluentAssertionsExtensions
 {
-    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
-
-    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
+    /// <summary>
+    /// Asserts that the current object has been initialized.
+    /// </summary>
+    /// <param name="actualValue">
+    /// Asserted object.
+    /// </param>
+    /// <param name="because">
+    /// A formatted phrase as is supported by <see cref="string.Format(string,object[])" /> explaining why the assertion
+    /// is needed. If the phrase does not start with the word <i>because</i>, it is prepended automatically.
+    /// </param>
+    /// <param name="becauseArgs">
+    /// Zero or more objects to format using the placeholders in <paramref name="because" />.
+    /// </param>
+    /// <seealso href="https://github.com/fluentassertions/fluentassertions/issues/1115#issuecomment-925869230"/>
+    public static AndConstraint<ObjectAssertions> ShouldNotBeNull([NotNull] this object? actualValue, string because = "", params object[] becauseArgs)
     {
-        _factory = factory;
-    }
+        var result = actualValue.Should().NotBeNull(because, becauseArgs);
 
-    [Fact]
-    public async Task TestGatewayApiVersions()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
+        if (actualValue == null)
+        {
+            throw new ArgumentNullException(nameof(actualValue)); // Will never be thrown, needed only to trick the compiler
+        }
 
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
-
-        payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+        return result;
     }
 }
