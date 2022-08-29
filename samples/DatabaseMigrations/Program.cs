@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System.Threading.Tasks;
@@ -79,7 +80,10 @@ public static class Program
 
         try
         {
-            await host.ExecutePostgresMigrations();
+            // backwards compability with Olympia
+            var wipeDatabase = host.Services.GetRequiredService<IConfiguration>().GetValue<bool>("WIPE_DATABASE");
+
+            await host.ExecutePostgresMigrations(wipeDatabase);
         }
         finally
         {
