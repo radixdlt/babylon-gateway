@@ -16,16 +16,16 @@ jobs:
         image: postgres:14.3-alpine
         env:
           POSTGRES_DB: radixdlt_ledger
-          POSTGRES_PASSWORD: db_superuser   
+          POSTGRES_PASSWORD: db_superuser
           POSTGRES_USER: db_password
           POSTGRES_PORT: 5532
         ports:
-          - 5532:5432  
+          - 5532:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5  
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -42,8 +42,10 @@ jobs:
           dotnet tool install --global dotnet-ef
           dotnet tool restore
           dotnet ef database update --project src/RadixDlt.NetworkGateway.Core
-      - name: Test
-        run: dotnet test --no-restore --verbosity normal
+      - name: Unit tests
+        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.UnitTests
+      - name: Integration tests
+        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.IntegrationTests
 
   publish-docker:
     runs-on: ubuntu-22.04
