@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -73,34 +73,17 @@ using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<GatewayApiStartup>>
+public class OpenApiSchemaTests
 {
-    private readonly TestApplicationFactory<GatewayApiStartup> _factory;
-
-    public GatewayEndpointTests(TestApplicationFactory<GatewayApiStartup> factory)
-    {
-        _factory = factory;
-    }
-
     [Fact]
-    public async Task TestGatewayApiVersion()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
-
-        payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-    }
-
-    [Fact]
-    public void TestValidateOpenApiSchema()
+    public void GatewayControllerShouldMatchOpenApiSchema()
     {
         GatewayApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
+    }
+
+    [Fact]
+    public void TransactionControllerShouldMatchOpenApiSchema()
+    {
+        GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 }
