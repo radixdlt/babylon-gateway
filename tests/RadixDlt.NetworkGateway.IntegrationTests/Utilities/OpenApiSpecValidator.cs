@@ -70,9 +70,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
 {
-    internal static class GatewayApiSpecValidator
+    internal static class OpenApiSpecValidator
     {
         private static readonly string _openApiFileName = "../../../../../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml";
 

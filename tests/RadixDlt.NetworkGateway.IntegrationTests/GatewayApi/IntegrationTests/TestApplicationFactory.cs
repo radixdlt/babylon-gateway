@@ -73,6 +73,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
 using System.Collections.Generic;
