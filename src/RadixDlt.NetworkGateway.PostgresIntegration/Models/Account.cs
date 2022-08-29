@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// </summary>
 [Table("accounts")]
 // OnModelCreating: Create unique index on account address
-public class Account : NormalizedEntityBase
+internal class Account : NormalizedEntityBase
 {
     [Column(name: "address")]
     public string Address { get; set; }

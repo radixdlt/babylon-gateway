@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// The raw transaction details and payload.
 /// </summary>
 [Table("raw_transactions")]
-public class RawTransaction
+internal class RawTransaction
 {
     public RawTransaction(byte[] transactionPayloadHash, byte[] payload)
     {

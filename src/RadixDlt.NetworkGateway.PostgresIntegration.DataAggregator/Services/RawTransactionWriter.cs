@@ -77,14 +77,14 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public interface IRawTransactionWriter
+internal interface IRawTransactionWriter
 {
     Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
 
     Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
 }
 
-public class RawTransactionWriter : IRawTransactionWriter
+internal class RawTransactionWriter : IRawTransactionWriter
 {
     private readonly ILogger<RawTransactionWriter> _logger;
     private readonly IEnumerable<IRawTransactionWriterObserver> _observers;

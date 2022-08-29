@@ -67,7 +67,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public interface IMempoolQuerier
+internal interface IMempoolQuerier
 {
     Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
 }

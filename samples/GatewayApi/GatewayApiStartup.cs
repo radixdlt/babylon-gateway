@@ -89,8 +89,8 @@ public class GatewayApiStartup
     {
         services
             .AddNetworkGatewayApi()
-            .UsePostgresPersistence()
-            .UsePrometheusMetrics();
+            .AddPostgresPersistence()
+            .AddPrometheusMetrics();
 
         if (_enableSwagger)
         {

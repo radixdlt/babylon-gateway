@@ -79,7 +79,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
-public class MetricObserver :
+internal class MetricObserver :
     IExceptionObserver,
     ICoreNodeHealthCheckerObserver,
     IConstructionAndSubmissionServiceObserver,

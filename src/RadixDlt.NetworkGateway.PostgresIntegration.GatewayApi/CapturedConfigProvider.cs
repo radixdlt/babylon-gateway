@@ -71,7 +71,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public class CapturedConfigProvider : ICapturedConfigProvider
+internal class CapturedConfigProvider : ICapturedConfigProvider
 {
     private readonly ReadOnlyDbContext _dbContext;
 

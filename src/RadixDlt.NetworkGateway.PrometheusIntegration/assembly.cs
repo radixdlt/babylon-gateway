@@ -62,38 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
-using Validator = RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator;
+using System.Runtime.CompilerServices;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
-
-public static class ApiIdentifiers
-{
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
-    {
-        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), resource.ResourceIdentifier.AsGatewayTokenIdentifier());
-    }
-
-    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this Validator validator)
-    {
-        return new Gateway.ValidatorIdentifier(validator.Address);
-    }
-
-    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this Resource resource)
-    {
-        return new Gateway.TokenIdentifier(resource.ResourceIdentifier);
-    }
-
-    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this Account account)
-    {
-        return new Gateway.AccountIdentifier(account.Address);
-    }
-
-    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this Account? account)
-    {
-        return account == null ? null : new Gateway.AccountIdentifier(account.Address);
-    }
-}
+[assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator")]
+[assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.PrometheusIntegration.GatewayApi")]

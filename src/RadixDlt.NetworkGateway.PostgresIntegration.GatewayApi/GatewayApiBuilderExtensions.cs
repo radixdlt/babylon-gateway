@@ -73,7 +73,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class GatewayApiBuilderExtensions
 {
-    public static GatewayApiBuilder UsePostgresPersistence(this GatewayApiBuilder builder)
+    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
     {
         builder.Services
             .AddHealthChecks()

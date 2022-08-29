@@ -66,7 +66,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public class ReadOnlyDbContext : CommonDbContext
+internal class ReadOnlyDbContext : CommonDbContext
 {
     public ReadOnlyDbContext(DbContextOptions<ReadOnlyDbContext> options)
         : base(options)

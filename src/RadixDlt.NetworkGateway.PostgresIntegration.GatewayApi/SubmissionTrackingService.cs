@@ -77,7 +77,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQuerier
+internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQuerier
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly IEnumerable<ISubmissionTrackingServiceObserver> _observers;

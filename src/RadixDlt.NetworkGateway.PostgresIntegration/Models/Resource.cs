@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// </summary>
 [Table("resources")]
 // OnModelCreating: Create unique index on rri
-public class Resource : NormalizedEntityBase
+internal class Resource : NormalizedEntityBase
 {
     [Column(name: "engine_address")]
     public byte[] RadixEngineAddress { get; set; }

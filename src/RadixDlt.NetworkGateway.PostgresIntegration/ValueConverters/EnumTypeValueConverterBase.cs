@@ -68,7 +68,7 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-public class EnumTypeValueConverterBase<TEnum> : ValueConverter<TEnum, string>
+internal class EnumTypeValueConverterBase<TEnum> : ValueConverter<TEnum, string>
     where TEnum : notnull
 {
     public EnumTypeValueConverterBase(IReadOnlyDictionary<TEnum, string> conversion, IReadOnlyDictionary<string, TEnum> inverseConversion)

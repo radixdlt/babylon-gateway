@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
 public static class GatewayApiBuilderExtensions
 {
-    public static GatewayApiBuilder UsePrometheusMetrics(this GatewayApiBuilder builder)
+    public static GatewayApiBuilder AddPrometheusMetrics(this GatewayApiBuilder builder)
     {
         builder.Services
             .AddSingleton<MetricObserver>()

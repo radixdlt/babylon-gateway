@@ -68,8 +68,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public record struct AccountValidator(Account Account, Validator Validator);
-public record struct AccountValidatorDenormalized(string AccountAddress, string ValidatorAddress);
+internal record struct AccountValidator(Account Account, Validator Validator);
+internal record struct AccountValidatorDenormalized(string AccountAddress, string ValidatorAddress);
 
 /// <summary>
 /// Tracks an account's stake to a validator stake over time.
@@ -77,7 +77,7 @@ public record struct AccountValidatorDenormalized(string AccountAddress, string 
 // OnModelCreating: Indexes defined there.
 // OnModelCreating: Composite primary key is defined there.
 [Table("account_validator_stake_history")]
-public class AccountValidatorStakeHistory : HistoryBase<AccountValidator, AccountValidatorStakeSnapshot, AccountValidatorStakeSnapshotChange>
+internal class AccountValidatorStakeHistory : HistoryBase<AccountValidator, AccountValidatorStakeSnapshot, AccountValidatorStakeSnapshotChange>
 {
     [Column(name: "account_id")]
     public long AccountId { get; set; }
@@ -123,7 +123,7 @@ public class AccountValidatorStakeHistory : HistoryBase<AccountValidator, Accoun
 /// <summary>
 /// A mutable class to aggregate changes.
 /// </summary>
-public class AccountValidatorStakeSnapshotChange
+internal class AccountValidatorStakeSnapshotChange
 {
     public TokenAmount ChangeInStakeUnits { get; set; }
 
@@ -184,7 +184,7 @@ public class AccountValidatorStakeSnapshotChange
 /// Validator_XrdStaked * (AccountValidator_TotalStakeUnit / Validator_TotalStakeUnit).
 /// </summary>
 [Owned]
-public record AccountValidatorStakeSnapshot
+internal record AccountValidatorStakeSnapshot
 {
     [Column("total_stake_units")]
     public TokenAmount TotalStakeUnits { get; set; }

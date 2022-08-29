@@ -72,7 +72,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// </summary>
 // OnModelCreating: Define key on (AccountId, ResultantStateVersion)
 [Table("account_transactions")]
-public class AccountTransaction
+internal class AccountTransaction
 {
     [Column(name: "account_id")]
     public long AccountId { get; set; }

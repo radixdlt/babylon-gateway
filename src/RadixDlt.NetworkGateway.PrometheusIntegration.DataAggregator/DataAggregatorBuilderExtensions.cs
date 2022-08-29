@@ -76,7 +76,7 @@ namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
 public static class DataAggregatorBuilderExtensions
 {
-    public static DataAggregatorBuilder UsePrometheusMetrics(this DataAggregatorBuilder builder)
+    public static DataAggregatorBuilder AddPrometheusMetrics(this DataAggregatorBuilder builder)
     {
         builder.Services
             .AddSingleton<MetricsObserver>()

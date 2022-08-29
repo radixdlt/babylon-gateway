@@ -68,7 +68,7 @@ using System.Numerics;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-public class TokenAmountToBigIntegerConverter : ValueConverter<TokenAmount, BigInteger>
+internal class TokenAmountToBigIntegerConverter : ValueConverter<TokenAmount, BigInteger>
 {
     public TokenAmountToBigIntegerConverter()
         : base(v => v.GetSubUnitsSafeForPostgres(), v => TokenAmount.FromSubUnits(v))

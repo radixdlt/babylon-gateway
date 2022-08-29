@@ -69,7 +69,7 @@ using System.Text;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class DbSetExtensions
+internal static class DbSetExtensions
 {
     /// <summary>
     /// <para>

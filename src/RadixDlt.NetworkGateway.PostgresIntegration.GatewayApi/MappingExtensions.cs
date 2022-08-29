@@ -62,60 +62,38 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using RadixDlt.NetworkGateway.PostgresIntegration;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using Validator = RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator;
 
-namespace DatabaseMigrations;
+namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class Program
+internal static class MappingExtensions
 {
-    public static async Task Main(string[] args)
+    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Resource resource)
     {
-        using var host = CreateHostBuilder(args).Build();
-
-        await host.StartAsync();
-
-        try
-        {
-            await host.ExecutePostgresMigrations();
-        }
-        finally
-        {
-            await host.StopAsync();
-        }
+        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), resource.ResourceIdentifier.AsGatewayTokenIdentifier());
     }
 
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((context, config) =>
-            {
-                var env = context.HostingEnvironment;
-                var customConfigurationPath = GetCustomJsonConfigurationValue(context);
-                var reloadOnChange = GetReloadConfigOnChangeValue(context);
+    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this Validator validator)
+    {
+        return new Gateway.ValidatorIdentifier(validator.Address);
+    }
 
-                config
-                    .AddJsonFile("appsettings.overrides.json", true, reloadOnChange)
-                    .AddJsonFile($"appsettings.{env.EnvironmentName}.overrides.json", true, reloadOnChange);
+    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this Resource resource)
+    {
+        return new Gateway.TokenIdentifier(resource.ResourceIdentifier);
+    }
 
-                // backwards compability with Olympia
-                config
-                    .AddJsonFile($"appsettings.{env.EnvironmentName}Overrides.json", true, reloadOnChange)
-                    .AddJsonFile("appsettings.PersonalOverrides.json", true, reloadOnChange);
+    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this Account account)
+    {
+        return new Gateway.AccountIdentifier(account.Address);
+    }
 
-                if (!string.IsNullOrWhiteSpace(customConfigurationPath))
-                {
-                    config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
-                }
-            })
-            .ConfigureServices(services =>
-            {
-                services.AddNetworkGatewayPostgresMigrations();
-            });
-
-    // based on https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Hosting/src/HostingHostBuilderExtensions.cs
-    private static bool GetReloadConfigOnChangeValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue("hostBuilder:reloadConfigOnChange", defaultValue: true);
-
-    private static string? GetCustomJsonConfigurationValue(HostBuilderContext hostingContext) => hostingContext.Configuration.GetValue<string?>("CustomJsonConfigurationFilePath", defaultValue: null);
+    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this Account? account)
+    {
+        return account == null ? null : new Gateway.AccountIdentifier(account.Address);
+    }
 }

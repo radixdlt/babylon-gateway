@@ -76,7 +76,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 ///
 /// After updating this file, run ./generation/generate-migration.sh.
 /// </summary>
-public class CommonDbContext : DbContext
+internal abstract class CommonDbContext : DbContext
 {
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 

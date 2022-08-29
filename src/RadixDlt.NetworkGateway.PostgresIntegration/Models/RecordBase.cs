@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// </summary>
 /// <typeparam name="TKey">A record type indicating the key which is used to store the record.</typeparam>
 /// <typeparam name="TData">A record type indicating the data which can be updated against the key.</typeparam>
-public abstract class RecordBase<TKey, TData> : RecordBase
+internal abstract class RecordBase<TKey, TData> : RecordBase
 {
     public abstract void UpdateData(TData latestData);
 }
@@ -88,7 +88,7 @@ public abstract class RecordBase<TKey, TData> : RecordBase
 ///
 /// Records represent the most recent seen version of data against a given key.
 /// </summary>
-public abstract class RecordBase
+internal abstract class RecordBase
 {
     /// <summary>
     /// The resultant ledger state version when this record was last updated.

@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// <summary>
 /// Entity normalization means we can have FKs on longs instead of on long strings, to hopefully improve performance.
 /// </summary>
-public class NormalizedEntityBase
+internal class NormalizedEntityBase
 {
     [Key]
     [Column(name: "id")]

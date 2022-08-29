@@ -79,7 +79,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 /// from the database.
 /// It persists a local copy of it for the duration of the DataAggregator's uptime.
 /// </summary>
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
+internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private record CapturedConfig(
         NetworkConfiguration NetworkConfiguration,

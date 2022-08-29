@@ -77,7 +77,7 @@ using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public class TransactionQuerier : ITransactionQuerier
+internal class TransactionQuerier : ITransactionQuerier
 {
     private readonly ReadOnlyDbContext _dbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;

@@ -67,7 +67,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public class SingleEntryBase
+internal class SingleEntryBase
 {
     [Key]
     [Column(name: "id")]

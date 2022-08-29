@@ -67,14 +67,14 @@ using System;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
-public enum MetricStatus
+internal enum MetricStatus
 {
     Yes,
     Unknown,
     No,
 }
 
-public static class MetricExtensions
+internal static class MetricExtensions
 {
     public static void SetStatus(this IGauge metric, MetricStatus status)
     {

@@ -79,7 +79,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public class LedgerStateQuerier : ILedgerStateQuerier
+internal class LedgerStateQuerier : ILedgerStateQuerier
 {
     private readonly ILogger<LedgerStateQuerier> _logger;
     private readonly ReadOnlyDbContext _dbContext;
