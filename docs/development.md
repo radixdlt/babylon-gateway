@@ -97,7 +97,20 @@ After doing `docker-compose up` from the repo root, a pgAdmin container is also 
 
 ## Testing
 
-Run `dotnet test` from the repo root. This assumes postgres is running. If you're running for CI, just run `docker-compose up db` to avoid spinning up pgAdmin as well.
+It is assumed all commands are executed from the root folder `/babylon-gateway/`
+, and postgres is running.
+
+If you're running for CI, just run `docker-compose up db` to avoid spinning up pgAdmin as well.
+
+
+There are three different ways of running tests.
+
+- All tests: `dotnet test` 
+
+- Unit tests only: `dotnet test --filter RadixDlt.NetworkGateway.UnitTests`
+
+- Integration tests only: `dotnet test --filter RadixDlt.NetworkGateway.IntegrationTests`
+
 
 For more information, see the [Tests project](../../src/Tests).
 
