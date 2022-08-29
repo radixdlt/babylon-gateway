@@ -62,104 +62,42 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using GatewayApiDependencies;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public class TransactionEndpointTests : IClassFixture<TestApplicationFactory<GatewayApiStartup>>
+public class TestGatewayApiStartup
 {
-    private readonly TestApplicationFactory<GatewayApiStartup> _factory;
-
-    public TransactionEndpointTests(TestApplicationFactory<GatewayApiStartup> factory)
+    public TestGatewayApiStartup(IConfiguration configuration)
     {
-        _factory = factory;
     }
 
-    [Fact]
-    public async Task TestTransactionRecent()
+    public void ConfigureServices(IServiceCollection services)
     {
-        // Arrange
-        var client = _factory.CreateClient();
+        services
+            .AddNetworkGatewayApi()
+            .UsePostgresPersistence();
 
-        // Act
-        var payload = await GetRecentTransactions(client);
-
-        // Assert
-        payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
-        payload.LedgerState._Version.Should().Be(1);
-        payload.Transactions.Count.Should().BeGreaterThan(0);
+        services
+            .AddControllers()
+            .AddControllersAsServices();
     }
 
-    [Fact]
-    public async Task TestTransactionStatus()
+    public void Configure(IApplicationBuilder application, IWebHostEnvironment env)
     {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        var recentTransactions = await GetRecentTransactions(client);
-
-        var transactionIdentifier = recentTransactions?.Transactions[0].TransactionIdentifier;
-
-        // Act
-        string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await client.PostAsync("/transaction/status", content);
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
-
-        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
-        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
-        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
-    }
-
-    [Fact]
-    public void TestValidateOpenApiSchema()
-    {
-        GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
-    }
-
-    [Fact(Skip ="Valid transaction payload is required")]
-    public async Task TestTransactionSubmit()
-    {
-        // Arrange
-        var client = _factory.CreateClient();
-
-        // Act
-        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await client.PostAsync("/transaction/submit", content);
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
-
-        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
-    }
-
-    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
-    {
-        using HttpResponseMessage response = await client.PostAsync(
-            "/transaction/recent",
-            JsonContent.Create(new RecentTransactionsRequest()));
-
-        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
-
-        payload.Transactions.ShouldNotBeNull();
-
-        return payload;
+        application
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
     }
 }

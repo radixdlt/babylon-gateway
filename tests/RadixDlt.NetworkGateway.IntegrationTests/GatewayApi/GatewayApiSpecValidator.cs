@@ -69,9 +69,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests
+namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
     internal static class GatewayApiSpecValidator
     {
@@ -123,10 +122,10 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                             ca =>
                                 ca.AttributeType.Name == $"Http{openApiOpCode}Attribute" &&
                                 ca.ConstructorArguments[0].ArgumentType == typeof(string) &&
-                                openApiItemUrl.EndsWith(ca.ConstructorArguments[0].Value.ToString())) != null).ToList();
+                                openApiItemUrl.EndsWith(ca.ConstructorArguments[0].Value?.ToString() ?? throw new InvalidOperationException())) != null).ToList();
 
                     // Verify the endpoint is implemented.");
-                    endpoint.Count().Should().Be(1);
+                    endpoint.Count.Should().Be(1);
 
                     if (endpoint.Any())
                     {

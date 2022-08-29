@@ -145,5 +145,9 @@ Global
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = .idea-run-configurations\GatewayApi (Production).run.xml
+		File = .idea-run-configurations\DataAggregator (Production).run.xml
+		File = .idea-run-configurations\DataAggregator.run.xml
+		File = .idea-run-configurations\GatewayApi.run.xml
+		File = .idea-run-configurations\Postgres.run.xml
 	EndGlobalSection
 EndGlobal
