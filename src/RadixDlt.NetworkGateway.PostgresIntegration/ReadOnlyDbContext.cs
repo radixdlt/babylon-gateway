@@ -63,6 +63,9 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.IntegrationTests")]
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 

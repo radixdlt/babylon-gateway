@@ -80,7 +80,7 @@ public class TestGatewayApiStartup
     {
          services
             .AddNetworkGatewayApi()
-            .UsePostgresPersistence();
+            .AddPostgresPersistence();
 
          services
             .AddControllers()
