@@ -66,6 +66,7 @@ using FluentAssertions;
 using GatewayApiDependencies;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -78,12 +79,12 @@ public class OpenApiSchemaTests
     [Fact]
     public void GatewayControllerShouldMatchOpenApiSchema()
     {
-        GatewayApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
+        OpenApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
     }
 
     [Fact]
     public void TransactionControllerShouldMatchOpenApiSchema()
     {
-        GatewayApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
+        OpenApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 }

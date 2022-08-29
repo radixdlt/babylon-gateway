@@ -67,7 +67,7 @@ using FluentAssertions.Primitives;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 
 internal static class FluentAssertionsExtensions
 {

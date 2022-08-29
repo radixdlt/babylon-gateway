@@ -62,16 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Extensions;
 using RadixDlt.NetworkGateway.Common.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using RadixDlt.NetworkGateway.UnitTests;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
 {
     public static class DbSeedHelper
     {
