@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;

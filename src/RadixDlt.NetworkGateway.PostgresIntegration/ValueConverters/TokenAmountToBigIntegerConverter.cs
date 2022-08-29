@@ -63,7 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.Commons.Numerics;
 using System.Numerics;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;

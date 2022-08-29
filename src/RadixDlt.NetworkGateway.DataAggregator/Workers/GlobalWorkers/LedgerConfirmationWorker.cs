@@ -63,8 +63,8 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Workers;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;

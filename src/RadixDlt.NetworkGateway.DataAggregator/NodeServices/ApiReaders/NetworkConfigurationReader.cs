@@ -64,8 +64,8 @@
 
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;

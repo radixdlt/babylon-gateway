@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.Commons.Numerics;
 using System;
 using System.Numerics;
 

@@ -63,8 +63,8 @@
  */
 
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using System;
 using System.Collections.Generic;

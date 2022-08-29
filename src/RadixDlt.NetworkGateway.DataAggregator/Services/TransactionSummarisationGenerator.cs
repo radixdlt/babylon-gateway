@@ -63,9 +63,9 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;

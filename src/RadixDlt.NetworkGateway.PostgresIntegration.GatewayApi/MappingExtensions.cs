@@ -65,7 +65,7 @@
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 using Validator = RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;

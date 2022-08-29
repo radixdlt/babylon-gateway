@@ -64,11 +64,11 @@
 
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Exceptions;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Model;
-using RadixDlt.NetworkGateway.Common.StaticHelpers;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Exceptions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Model;
+using RadixDlt.NetworkGateway.Commons.StaticHelpers;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;

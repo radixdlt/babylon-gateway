@@ -65,9 +65,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Utilities;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;

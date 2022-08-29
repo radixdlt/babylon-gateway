@@ -63,7 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Numerics;
+using RadixDlt.NetworkGateway.Commons.Numerics;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;

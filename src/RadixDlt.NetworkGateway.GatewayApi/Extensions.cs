@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 

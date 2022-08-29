@@ -64,7 +64,7 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using RadixDlt.NetworkGateway.Common.Configuration;
+using RadixDlt.NetworkGateway.Commons.Configuration;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 

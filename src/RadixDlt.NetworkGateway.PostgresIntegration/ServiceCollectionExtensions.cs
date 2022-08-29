@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
+using RadixDlt.NetworkGateway.Commons;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 

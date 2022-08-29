@@ -65,7 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Common;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 

@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading;

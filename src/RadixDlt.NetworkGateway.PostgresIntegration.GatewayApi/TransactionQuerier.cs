@@ -63,8 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Model;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -73,7 +73,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 

@@ -69,7 +69,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 

@@ -66,9 +66,9 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Configuration;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Configuration;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
@@ -84,7 +84,7 @@ public static class ServiceCollectionExtensions
     public static GatewayApiBuilder AddNetworkGatewayApi(this IServiceCollection services)
     {
         services
-            .AddNetworkGatewayCore();
+            .AddNetworkGatewayCommons();
 
         services
             .AddValidatableOptionsAtSection<EndpointOptions, EndpointOptionsValidator>("GatewayApi:Endpoint")
