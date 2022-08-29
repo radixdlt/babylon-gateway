@@ -62,14 +62,30 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.TestDependencies;
+
+public static class Program
 {
-    public static class Transaction
+    public static async Task Main(string[] args)
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+        using var host = CreateHostBuilder(args).Build();
+
+        await host.RunAsync();
     }
+
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder
+                    .ConfigureKestrel(o =>
+                    {
+                        o.AddServerHeader = false;
+                    })
+                    .UseStartup<TestGatewayApiStartup>();
+            });
 }

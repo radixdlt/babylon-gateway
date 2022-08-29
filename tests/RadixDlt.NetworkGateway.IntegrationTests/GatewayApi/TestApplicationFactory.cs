@@ -62,14 +62,80 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using RadixDlt.NetworkGateway.PostgresIntegration;
+using System;
+using System.Collections.Generic;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
-    public static class Transaction
+    public class TestApplicationFactory<TStartup>
+        : WebApplicationFactory<TStartup>
+        where TStartup : class
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+        private readonly string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+
+        public TestApplicationFactory()
+        {
+        }
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder
+            .ConfigureAppConfiguration(
+                    (context, config) =>
+                    {
+                        config.AddInMemoryCollection(new[]
+                        {
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", _dbConnectionString),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", _dbConnectionString),
+                            new KeyValuePair<string, string>("GatewayApi:Network:NetworkName", DbSeedHelper.NetworkName),
+                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayOpenApiSchemaVersion", "2.0.0"),
+                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayApiVersion", "3.0.0"),
+                        });
+                    }
+            )
+            .ConfigureServices(services =>
+            {
+                var sp = services.BuildServiceProvider();
+
+                using (var scope = sp.CreateScope())
+                {
+                    var scopedServices = scope.ServiceProvider;
+
+                    var logger = scopedServices
+                        .GetRequiredService<ILogger<TestApplicationFactory<TStartup>>>();
+
+                    var db = scopedServices.GetRequiredService<ReadOnlyDbContext>();
+
+                    db.Database.EnsureCreated();
+
+                    try
+                    {
+                        DbSeedHelper.InitializeDbForTests(db);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, $"An error occurred seeding the database with seed data. Error: {ex.Message}");
+                    }
+                }
+
+                services.PostConfigure<NetworkOptions>(o =>
+                    {
+                        o.NetworkName = "aaa";
+                        o.CoreApiNodes = new List<CoreApiNode>()
+                        {
+                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
+                        };
+                    }
+                );
+            });
+        }
     }
 }

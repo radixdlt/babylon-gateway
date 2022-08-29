@@ -62,14 +62,38 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.TestDependencies;
+
+public class TestGatewayApiStartup
 {
-    public static class Transaction
+    public TestGatewayApiStartup(IConfiguration configuration)
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+         services
+            .AddNetworkGatewayApi()
+            .AddPostgresPersistence();
+
+         services
+            .AddControllers()
+            .AddNewtonsoftJson();
+    }
+
+    public void Configure(IApplicationBuilder application, IConfiguration configuration)
+    {
+        application
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
     }
 }

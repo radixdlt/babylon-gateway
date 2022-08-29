@@ -63,52 +63,38 @@
  */
 
 using FluentAssertions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using RadixDlt.NetworkGateway.TestDependencies;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests
+public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
 {
-    private class Startup
+    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
+
+    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
     {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddNetworkGatewayApi();
-
-            services
-                .AddControllers();
-        }
-
-        public void Configure(IApplicationBuilder application)
-        {
-            application
-                .UseRouting()
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
-        }
+        _factory = factory;
     }
 
-    [Fact(Skip = "just a sample/placeholder/mock")]
-    public async Task Test()
+    [Fact]
+    public async Task TestGatewayApiVersions()
     {
-        var waf = new WebApplicationFactory<Startup>();
-        var client = waf.CreateClient();
+        // Arrange
+        var client = _factory.CreateClient();
 
+        // Act
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-        var payload = await response.Content.ReadFromJsonAsync<GatewayResponse>();
 
-        payload.ShouldNotBeNull();
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+
         payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("2.0.0");
+        payload.GatewayApi._Version.Should().Be("2.0.0");
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
     }
 }

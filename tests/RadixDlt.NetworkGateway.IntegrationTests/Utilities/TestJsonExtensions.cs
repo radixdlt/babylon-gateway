@@ -62,14 +62,35 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using FluentAssertions;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
 {
-    public static class Transaction
+    public static class TestJsonExtensions
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+        public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+        {
+            responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
+
+            var mediaTypeHeader = MediaTypeHeaderValue.Parse(responseMessage.Content.Headers.ContentType?.ToString());
+
+            mediaTypeHeader.ShouldNotBeNull();
+
+            mediaTypeHeader.MediaType.Should().BeEquivalentTo("application/json");
+
+            mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
+
+            var json = await responseMessage.Content.ReadAsStringAsync();
+
+            var payload = JsonConvert.DeserializeObject<TResponse>(json);
+
+            payload.ShouldNotBeNull();
+
+            return payload;
+        }
     }
 }
