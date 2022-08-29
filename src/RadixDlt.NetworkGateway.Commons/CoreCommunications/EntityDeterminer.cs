@@ -70,7 +70,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.Commons.CoreCommunications;
 
-public record Entity(
+public sealed record Entity(
     EntityType EntityType,
     string? AccountAddress = null,
     string? ValidatorAddress = null, // This may be provided along with the AccountAddress for stake entities
@@ -115,7 +115,7 @@ public interface INetworkAddressConfigProvider
     string GetXrdAddress();
 }
 
-public class EntityDeterminer : IEntityDeterminer
+public sealed class EntityDeterminer : IEntityDeterminer
 {
     private readonly ILogger<EntityDeterminer> _logger;
     private readonly INetworkAddressConfigProvider _networkAddressProvider;

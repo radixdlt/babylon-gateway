@@ -69,7 +69,7 @@ namespace RadixDlt.NetworkGateway.Commons.Exceptions;
 /// <summary>
 /// An Exception thrown when the configuration provided to the service is incorrect.
 /// </summary>
-public class InvalidConfigurationException : Exception
+public sealed class InvalidConfigurationException : Exception
 {
     public InvalidConfigurationException(string message)
         : base(message)

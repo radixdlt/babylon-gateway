@@ -74,7 +74,7 @@ public enum Transience
     Permanent,
 }
 
-public class CoreApiErrorProperties
+public sealed class CoreApiErrorProperties
 {
     public bool MarksInvalidTransaction { get; init; }
 
@@ -86,7 +86,7 @@ public class CoreApiErrorProperties
 /// We use this rather than the ApiException itself so that we have a typesafe CoreError we can use in other places.
 /// </summary>
 /// <typeparam name="T">The type of the core error.</typeparam>
-public class WrappedCoreApiException<T> : WrappedCoreApiException
+public sealed class WrappedCoreApiException<T> : WrappedCoreApiException
     where T : RadixDlt.CoreApiSdk.Model.CoreError
 {
     public override T Error { get; }

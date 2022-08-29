@@ -66,7 +66,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Commons.Workers;
 
-public class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
+public sealed class ExponentialBackoffDelayBetweenLoopsStrategy : IDelayBetweenLoopsStrategy
 {
     private readonly TimeSpan _delayBetweenLoopTriggersIfSuccessful;
     private readonly TimeSpan _baseDelayAfterError;

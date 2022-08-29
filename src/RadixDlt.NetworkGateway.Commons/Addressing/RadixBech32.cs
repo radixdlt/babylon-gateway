@@ -75,9 +75,9 @@ using System.Text.RegularExpressions;
 
 namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
-public record RadixBech32Data(string Hrp, byte[] Data, Bech32.Variant Variant);
+public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32.Variant Variant);
 
-public record RadixEngineAddressData(RadixEngineAddressType Type, byte[] AddressBytes);
+public sealed record RadixEngineAddressData(RadixEngineAddressType Type, byte[] AddressBytes);
 
 public enum RadixEngineAddressType : byte
 {

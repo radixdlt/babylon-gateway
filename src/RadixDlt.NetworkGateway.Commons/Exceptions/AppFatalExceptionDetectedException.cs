@@ -66,7 +66,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Commons.Exceptions;
 
-public class AppFatalExceptionDetectedException : Exception
+public sealed class AppFatalExceptionDetectedException : Exception
 {
     public AppFatalExceptionDetectedException(Exception innerException)
         : base("An app fatal exception has been detected", innerException)

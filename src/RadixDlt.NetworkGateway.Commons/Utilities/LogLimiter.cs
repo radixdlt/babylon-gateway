@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.Commons.Utilities;
 /// <summary>
 /// Outputs occasionalLogLevel greedily at most once per timespan, otherwise outputs noisyLogLevel. Thread safe.
 /// </summary>
-public class LogLimiter
+public sealed class LogLimiter
 {
     private readonly TimeSpan _timespan;
     private readonly LogLevel _occasionalLogLevel;

@@ -77,22 +77,22 @@ public abstract record RadixAddress
     public abstract RadixAddressType Type { get; }
 }
 
-public record AccountAddress(byte[] CompressedPublicKey) : RadixAddress
+public sealed record AccountAddress(byte[] CompressedPublicKey) : RadixAddress
 {
     public override RadixAddressType Type => RadixAddressType.Account;
 }
 
-public record ResourceAddress(byte[] RadixEngineAddress) : RadixAddress
+public sealed record ResourceAddress(byte[] RadixEngineAddress) : RadixAddress
 {
     public override RadixAddressType Type => RadixAddressType.Resource;
 }
 
-public record ValidatorAddress(byte[] CompressedPublicKey) : RadixAddress
+public sealed record ValidatorAddress(byte[] CompressedPublicKey) : RadixAddress
 {
     public override RadixAddressType Type => RadixAddressType.Validator;
 }
 
-public record NodeAddress(byte[] CompressedPublicKey) : RadixAddress
+public sealed record NodeAddress(byte[] CompressedPublicKey) : RadixAddress
 {
     public override RadixAddressType Type => RadixAddressType.Node;
 }

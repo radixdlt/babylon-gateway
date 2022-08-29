@@ -73,7 +73,7 @@ namespace RadixDlt.NetworkGateway.Commons.Utilities;
 /// </summary>
 /// <typeparam name="TKey">The key for the cache.</typeparam>
 /// <typeparam name="TValue">The value for the cache.</typeparam>
-public class ConcurrentLruCache<TKey, TValue>
+public sealed class ConcurrentLruCache<TKey, TValue>
     where TKey : notnull
 {
     private readonly int _maxCapacity;

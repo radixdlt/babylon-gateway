@@ -71,7 +71,7 @@ public interface IClock
     public DateTimeOffset UtcNow { get; }
 }
 
-public class SystemClock : IClock
+internal class SystemClock : IClock
 {
     public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 }

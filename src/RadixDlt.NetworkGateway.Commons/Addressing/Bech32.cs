@@ -172,7 +172,7 @@ public static class Bech32
         return result.ToArray();
     }
 
-    public record Bech32RawData(string Hrp, byte[] RawBase32Data, Variant Variant);
+    public sealed record Bech32RawData(string Hrp, byte[] RawBase32Data, Variant Variant);
 
     public static string EncodeFromRawData(string hrp, ReadOnlySpan<byte> encodedBase32Data, Variant variant)
     {
