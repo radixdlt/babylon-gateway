@@ -70,11 +70,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators
 {
     internal static class OpenApiSpecValidator
     {
-        private static readonly string _openApiFileName = "../../../../../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml";
+        private const string _openApiFileName = "../../../../../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml";
 
         private static OpenApiDocument? _openApiDocument = null;
 
@@ -96,13 +96,15 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                                                         ca.AttributeType.Name == "HttpPostAttribute" ||
                                                         ca.AttributeType.Name == "HttpGetAttribute" ||
                                                         ca.AttributeType.Name == "HtttpPutAttribute" ||
-                                                        ca.AttributeType.Name == "HttpDeleteAttribute") != null);
+                                                        ca.AttributeType.Name == "HttpDeleteAttribute") != null).ToList();
 
             // Extract controller endpoints from the openApi specification
-            var openApiPathItems = _openApiDocument.Paths.Where(p => p.Key.Contains(controllerRoute));
+            var openApiPathItems = _openApiDocument.Paths.
+                Where(p => p.Key.Contains(controllerRoute))
+                .ToList();
 
             // Verify that the number of endpoints matches (first parameter is 'expected', second is 'actual')
-            openApiPathItems.Count().Should().Be(methodInfos.Count());
+            openApiPathItems.Count.Should().Be(methodInfos.Count);
 
             // Loop through openApi items
             foreach (var openApiPathItem in openApiPathItems)
@@ -114,7 +116,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                 foreach (var op in openApiPathItem.Value.Operations)
                 {
                     // CRUD op codes
-                    var openApiOpCode = op.Key.ToString();
+                    string openApiOpCode = op.Key.ToString();
 
                     // Check if the route exists in the code
                     var endpoint = methodInfos.Where(m => m.CustomAttributes
@@ -127,26 +129,28 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                     // Verify the endpoint is implemented.");
                     endpoint.Count.Should().Be(1);
 
-                    if (endpoint.Any())
+                    if (!endpoint.Any())
                     {
-                        // Verify the response type
-                        var openApiResponseParameter = openApiPathItem.Value.Operations[op.Key].Responses["200"].Content["application/json"].Schema.Reference.Id;
-
-                        var codeResponseParameter = endpoint[0].ReturnType.GenericTypeArguments[0].Name;
-
-                        openApiResponseParameter.Should().BeEquivalentTo(codeResponseParameter);
-
-                        // Verify request parameters
-
-                        // Code request parameters
-                        var codeRequestParameters = endpoint[0].GetParameters().Select(p => p.ParameterType.Name);
-
-                        // Schema request parameters
-                        var openApiRequestParameters = openApiPathItem.Value.Operations[op.Key].RequestBody.Content.Select(c => c.Value.Schema.Reference.Id);
-
-                        // Compare with the schema request parameters including the order
-                        openApiRequestParameters.Should().BeEquivalentTo(codeRequestParameters);
+                        continue;
                     }
+
+                    // Verify the response type
+                    var openApiResponseParameter = openApiPathItem.Value.Operations[op.Key].Responses["200"].Content["application/json"].Schema.Reference.Id;
+
+                    var codeResponseParameter = endpoint[0].ReturnType.GenericTypeArguments[0].Name;
+
+                    openApiResponseParameter.Should().BeEquivalentTo(codeResponseParameter);
+
+                    // Verify request parameters
+
+                    // Code request parameters
+                    var codeRequestParameters = endpoint[0].GetParameters().Select(p => p.ParameterType.Name);
+
+                    // Schema request parameters
+                    var openApiRequestParameters = openApiPathItem.Value.Operations[op.Key].RequestBody.Content.Select(c => c.Value.Schema.Reference.Id);
+
+                    // Compare with the schema request parameters including the order
+                    openApiRequestParameters.Should().BeEquivalentTo(codeRequestParameters);
                 }
             }
         }

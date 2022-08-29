@@ -52,7 +52,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.Pro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator", "src\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator.csproj", "{1DCCD05F-5442-404B-A816-8347B44833CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GatewayApiDependencies", "tests\GatewayApiDependencies\GatewayApiDependencies.csproj", "{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RqdixDlt.NetworkGateway.TestDependencies", "tests\RqdixDlt.NetworkGateway.TestDependencies\RqdixDlt.NetworkGateway.TestDependencies.csproj", "{9F0596A5-A8E7-48A3-BD19-9D9CE07E174F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

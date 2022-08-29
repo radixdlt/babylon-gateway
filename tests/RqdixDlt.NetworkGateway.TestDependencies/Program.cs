@@ -62,43 +62,30 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
-namespace GatewayApiDependencies;
+namespace RqdixDlt.NetworkGateway.TestDependencies;
 
-public class GatewayApiStartup
+public static class Program
 {
-    public GatewayApiStartup(IConfiguration configuration)
+    public static async Task Main(string[] args)
     {
+        using var host = CreateHostBuilder(args).Build();
+
+        await host.RunAsync();
     }
 
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services
-            .AddNetworkGatewayApi()
-            .UsePostgresPersistence();
-
-        services
-            .AddControllers()
-            .AddControllersAsServices();
-    }
-
-    public void Configure(IApplicationBuilder application, IConfiguration configuration)
-    {
-        application
-            .UseAuthentication()
-            .UseAuthorization()
-            .UseCors()
-            .UseRouting()
-            .UseEndpoints(endpoints =>
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
             {
-                endpoints.MapControllers();
+                webBuilder
+                    .ConfigureKestrel(o =>
+                    {
+                        o.AddServerHeader = false;
+                    })
+                    .UseStartup<TestGatewayApiStartup>();
             });
-    }
 }

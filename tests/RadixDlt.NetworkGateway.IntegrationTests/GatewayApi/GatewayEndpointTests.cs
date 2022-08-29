@@ -63,28 +63,26 @@
  */
 
 using FluentAssertions;
-using GatewayApiDependencies;
-using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Net.Http;
+using RqdixDlt.NetworkGateway.TestDependencies;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<GatewayApiStartup>>
+public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
 {
-    private readonly TestApplicationFactory<GatewayApiStartup> _factory;
+    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
 
-    public GatewayEndpointTests(TestApplicationFactory<GatewayApiStartup> factory)
+    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
     {
         _factory = factory;
     }
 
     [Fact]
-    public async Task TestGatewayApiVersion()
+    public async Task TestGatewayApiVersions()
     {
         // Arrange
         var client = _factory.CreateClient();
@@ -97,5 +95,6 @@ public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<Gateway
 
         payload.GatewayApi.ShouldNotBeNull();
         payload.GatewayApi._Version.Should().Be("2.0.0");
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
     }
 }
