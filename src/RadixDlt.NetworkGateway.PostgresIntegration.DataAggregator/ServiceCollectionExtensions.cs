@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Services;
@@ -94,7 +93,7 @@ public static class ServiceCollectionExtensions
         builder.Services
             .AddDbContextFactory<ReadWriteDbContext>((serviceProvider, options) =>
             {
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(NetworkGatewayConstants.Database.ReadWriteConnectionStringName));
+                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
             });
 
         return builder;
