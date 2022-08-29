@@ -62,17 +62,12 @@
  * permissions under this License.
  */
 
-using GatewayApiDependencies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Moq;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System;
@@ -84,7 +79,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
         : WebApplicationFactory<TStartup>
         where TStartup : class
     {
-        private string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+        private readonly string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
 
         public TestApplicationFactory()
         {
@@ -101,6 +96,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                             new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", _dbConnectionString),
                             new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", _dbConnectionString),
                             new KeyValuePair<string, string>("GatewayApi:Network:NetworkName", DbSeedHelper.NetworkName),
+                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayOpenApiSchemaVersion", "2.0.0"),
+                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayApiVersion", "3.0.0"),
                         });
                     }
             )

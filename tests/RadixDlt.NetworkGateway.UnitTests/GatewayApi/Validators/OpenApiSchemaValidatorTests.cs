@@ -62,19 +62,12 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using GatewayApiDependencies;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
 
-public class OpenApiSchemaTests
+public class OpenApiSchemaValidatorTests
 {
     [Fact]
     public void GatewayControllerShouldMatchOpenApiSchema()
