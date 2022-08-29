@@ -72,7 +72,7 @@ using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests;
+namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
 public class TestGatewayApiStartup
 {
