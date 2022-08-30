@@ -21,7 +21,7 @@ jobs:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway
           sonarOrganization: radixdlt-github
-          dotnetTestArguments: --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          dotnetTestArguments: --filter RadixDlt.NetworkGateway.UnitTests --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

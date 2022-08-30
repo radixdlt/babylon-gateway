@@ -63,11 +63,8 @@
  */
 
 using FluentAssertions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
@@ -76,39 +73,21 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
 public class GatewayEndpointTests
 {
-    private class Startup
+    [Fact]
+    public async Task TestGatewayApiVersions()
     {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddNetworkGatewayApi();
-
-            services
-                .AddControllers();
-        }
-
-        public void Configure(IApplicationBuilder application)
-        {
-            application
-                .UseRouting()
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
-        }
-    }
-
-    [Fact(Skip = "just a sample/placeholder/mock")]
-    public async Task Test()
-    {
-        var waf = new WebApplicationFactory<Startup>();
-        var client = waf.CreateClient();
+        var client = TestInitializationFactory.CreateClient(nameof(TestGatewayApiVersions));
 
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-        var payload = await response.Content.ReadFromJsonAsync<GatewayResponse>();
 
-        payload.ShouldNotBeNull();
+        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+
         payload.GatewayApi.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("2.0.0");
+
+        payload.GatewayApi._Version.ShouldNotBeNull();
+        payload.GatewayApi._Version.Should().Be("2.0.0");
+
+        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
     }
 }

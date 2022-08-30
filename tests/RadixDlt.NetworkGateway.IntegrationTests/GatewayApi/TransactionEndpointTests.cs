@@ -62,14 +62,84 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
+using System.Threading.Tasks;
+using Xunit;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+
+public class TransactionEndpointTests
 {
-    public static class Transaction
+    [Fact]
+    public async Task TestTransactionRecent()
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+        var client = TestInitializationFactory.CreateClient(nameof(TestTransactionRecent));
+
+        var payload = await GetRecentTransactions(client);
+
+        payload.LedgerState.ShouldNotBeNull();
+        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
+        payload.LedgerState._Version.Should().Be(1);
+        payload.Transactions.Count.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task TestTransactionStatus()
+    {
+        var client = TestInitializationFactory.CreateClient(nameof(TestTransactionStatus));
+
+        // Arrange
+        var recentTransactions = await GetRecentTransactions(client);
+        var transactionIdentifier = recentTransactions.Transactions[0].TransactionIdentifier;
+
+        // Act
+        string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await client.PostAsync("/transaction/status", content);
+
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
+
+        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
+        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    }
+
+    [Fact(Skip ="Valid transaction payload is required")]
+    public async Task TestTransactionSubmit()
+    {
+        var client = TestInitializationFactory.CreateClient(nameof(TestTransactionSubmit));
+
+        // Arrange
+        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // Act
+        HttpResponseMessage response = await client.PostAsync("/transaction/submit", content);
+
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
+
+        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+    }
+
+    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
+    {
+        using HttpResponseMessage response = await client.PostAsync(
+            "/transaction/recent",
+            JsonContent.Create(new RecentTransactionsRequest()));
+
+        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
+
+        payload.Transactions.ShouldNotBeNull();
+
+        return payload;
     }
 }

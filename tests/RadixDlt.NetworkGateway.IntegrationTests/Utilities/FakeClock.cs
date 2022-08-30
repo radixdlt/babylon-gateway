@@ -62,14 +62,30 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons;
+using System;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+
+public class FakeClock : IClock
 {
-    public static class Transaction
+    private DateTimeOffset _fakeNow;
+
+    public FakeClock()
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+        // arbitrary value, no special meaning behind it; just something that's constant across tests
+        _fakeNow = new DateTimeOffset(2020, 6, 1, 12, 0, 0, TimeSpan.Zero);
+    }
+
+    public FakeClock(DateTimeOffset fakeNow)
+    {
+        _fakeNow = fakeNow;
+    }
+
+    public DateTimeOffset UtcNow => _fakeNow;
+
+    public void Advance(TimeSpan timeSpan)
+    {
+        _fakeNow += timeSpan;
     }
 }

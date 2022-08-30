@@ -11,6 +11,20 @@ jobs:
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
+    services:
+      postgres:
+        image: postgres:14.3-alpine
+        env:
+          POSTGRES_USER: db_dev_superuser
+          POSTGRES_PASSWORD: db_dev_password
+          POSTGRES_PORT: 5432
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -22,8 +36,10 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
-      - name: Test
-        run: dotnet test --no-restore --verbosity normal
+      - name: Unit tests
+        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.UnitTests
+      - name: Integration tests
+        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.IntegrationTests
 
   publish-docker:
     runs-on: ubuntu-22.04

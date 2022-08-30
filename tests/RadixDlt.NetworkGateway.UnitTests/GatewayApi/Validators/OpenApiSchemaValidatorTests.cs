@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,14 +62,22 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.GatewayApi.Controllers;
+using Xunit;
 
-public static class NetworkGatewayConstants
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
+
+public class OpenApiSchemaValidatorTests
 {
-    public static class Transaction
+    [Fact(Skip ="Fails since the GatewayRequest parameter in missing")]
+    public void GatewayControllerShouldMatchOpenApiSchema()
     {
-        public const int IdentifierByteLength = 32;
-        public const int CompressedPublicKeyBytesLength = 33;
-        public const int IdentifierHashLength = 64;
+        OpenApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
+    }
+
+    [Fact(Skip ="CancellationToken parameter is not documented yet")]
+    public void TransactionControllerShouldMatchOpenApiSchema()
+    {
+        OpenApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 }
