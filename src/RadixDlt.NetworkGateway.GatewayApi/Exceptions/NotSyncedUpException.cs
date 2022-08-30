@@ -74,7 +74,7 @@ public enum NotSyncedUpRequestType
     Construction,
 }
 
-public class NotSyncedUpException : KnownGatewayErrorException
+public sealed class NotSyncedUpException : KnownGatewayErrorException
 {
     private NotSyncedUpException(NotSyncedUpError gatewayError, string userFacingMessage)
         : base(500, gatewayError, userFacingMessage)

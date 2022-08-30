@@ -67,7 +67,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidRequestException : ValidationException
+public sealed class InvalidRequestException : ValidationException
 {
     private InvalidRequestException(InvalidRequestError gatewayError, string userFacingMessage, string internalMessage)
         : base(gatewayError, userFacingMessage, internalMessage)

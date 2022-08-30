@@ -67,7 +67,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class TransactionStatusRequestValidator : AbstractValidator<TransactionStatusRequest>
+internal class TransactionStatusRequestValidator : AbstractValidator<TransactionStatusRequest>
 {
     public TransactionStatusRequestValidator(
         TransactionIdentifierValidator transactionIdentifierValidator,

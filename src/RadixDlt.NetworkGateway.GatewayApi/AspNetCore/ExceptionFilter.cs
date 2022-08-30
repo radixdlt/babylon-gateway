@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Mvc.Filters;
-using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Diagnostics;
 

@@ -64,7 +64,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -76,7 +75,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 [Route("transaction")]
 [TypeFilter(typeof(ExceptionFilter))]
 [TypeFilter(typeof(InvalidModelStateFilter))]
-public class TransactionController
+public sealed class TransactionController
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;

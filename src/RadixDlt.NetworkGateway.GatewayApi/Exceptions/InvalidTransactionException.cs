@@ -69,7 +69,7 @@ using InvalidTransactionError = RadixDlt.NetworkGateway.GatewayApiSdk.Model.Inva
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidTransactionException : ValidationException
+public sealed class InvalidTransactionException : ValidationException
 {
     public WrappedCoreApiException? WrappedCoreApiException { get; }
 

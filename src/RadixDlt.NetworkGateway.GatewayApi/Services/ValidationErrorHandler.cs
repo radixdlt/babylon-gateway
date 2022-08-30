@@ -76,7 +76,7 @@ public interface IValidationErrorHandler
     IActionResult GetClientError(ActionContext actionContext);
 }
 
-public class ValidationErrorHandler : IValidationErrorHandler
+internal class ValidationErrorHandler : IValidationErrorHandler
 {
     private readonly IExceptionHandler _exceptionHandler;
 

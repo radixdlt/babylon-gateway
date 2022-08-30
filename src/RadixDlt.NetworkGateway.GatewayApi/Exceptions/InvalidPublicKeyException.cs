@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidPublicKeyException : ValidationException
+public sealed class InvalidPublicKeyException : ValidationException
 {
     public InvalidPublicKeyException(PublicKey publicKey, string userFacingMessage, string internalMessage)
         : base(GenerateError(publicKey), userFacingMessage, internalMessage)

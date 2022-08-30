@@ -69,7 +69,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
-public class EndpointOptions
+public sealed class EndpointOptions
 {
     [ConfigurationKeyName("GatewayOpenApiSchemaVersion")]
     public string GatewayOpenApiSchemaVersion { get; set; } = "UNKNOWN";

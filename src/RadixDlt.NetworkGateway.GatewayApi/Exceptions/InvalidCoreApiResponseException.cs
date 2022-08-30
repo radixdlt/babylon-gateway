@@ -66,7 +66,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidCoreApiResponseException : Exception
+public sealed class InvalidCoreApiResponseException : Exception
 {
     public InvalidCoreApiResponseException(string message)
         : base(message)

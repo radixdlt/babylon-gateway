@@ -68,7 +68,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLedgerStateIdentifier>
+internal class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLedgerStateIdentifier>
 {
     public PartialLedgerStateIdentifierValidator(IClock clock)
     {

@@ -66,7 +66,7 @@ using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class CouldNotConstructFeesException : ValidationException
+public sealed class CouldNotConstructFeesException : ValidationException
 {
     public CouldNotConstructFeesException(int attempts)
         : base(new Gateway.CouldNotConstructFeesError(attempts), BuildErrorMessage(attempts))

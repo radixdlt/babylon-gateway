@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidTokenSymbolException : ValidationException
+public sealed class InvalidTokenSymbolException : ValidationException
 {
     public InvalidTokenSymbolException(string invalidTokenSymbol, string userFacingMessage)
         : base(new InvalidTokenSymbolError(invalidTokenSymbol), userFacingMessage)

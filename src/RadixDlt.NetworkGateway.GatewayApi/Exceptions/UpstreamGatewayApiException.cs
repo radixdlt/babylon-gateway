@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class UpstreamGatewayApiException : KnownGatewayErrorException
+public sealed class UpstreamGatewayApiException : KnownGatewayErrorException
 {
     private UpstreamGatewayApiException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base(statusCode, gatewayError, userFacingMessage, internalMessage)

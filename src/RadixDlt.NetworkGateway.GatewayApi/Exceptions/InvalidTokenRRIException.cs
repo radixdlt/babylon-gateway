@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidTokenRRIException : ValidationException
+public sealed class InvalidTokenRRIException : ValidationException
 {
     public InvalidTokenRRIException(string invalidRri, string userFacingMessage, string internalMessage)
         : base(new InvalidTokenRRIError(invalidRri), userFacingMessage, internalMessage)

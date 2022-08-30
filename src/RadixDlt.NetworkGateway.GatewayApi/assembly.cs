@@ -62,37 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
-
-public interface ICoreApiProvider
-{
-    public CoreApiNode CoreApiNode { get; }
-
-    ConstructionApi ConstructionApi { get; }
-}
-
-internal class CoreApiProvider : ICoreApiProvider
-{
-    public CoreApiNode CoreApiNode { get; }
-
-    public ConstructionApi ConstructionApi { get; }
-
-    public NetworkApi NetworkApi { get; }
-
-    public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
-    {
-        if (!string.IsNullOrWhiteSpace(coreApiNode.CoreApiAuthorizationHeader))
-        {
-            httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(coreApiNode.CoreApiAuthorizationHeader);
-        }
-
-        CoreApiNode = coreApiNode;
-        ConstructionApi = new ConstructionApi(httpClient, coreApiNode.CoreApiAddress);
-        NetworkApi = new NetworkApi(httpClient, coreApiNode.CoreApiAddress);
-    }
-}
+[assembly: InternalsVisibleTo("RadixDlt.NetworkGateway.UnitTests")]

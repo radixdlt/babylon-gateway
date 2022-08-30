@@ -66,9 +66,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+namespace RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 
-public class InvalidModelStateFilter : IActionFilter, IOrderedFilter
+internal class InvalidModelStateFilter : IActionFilter, IOrderedFilter
 {
     public int Order => -3000;
 

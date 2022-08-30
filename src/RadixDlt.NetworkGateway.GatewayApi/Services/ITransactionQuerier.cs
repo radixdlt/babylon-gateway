@@ -86,7 +86,7 @@ public interface ITransactionQuerier
 }
 
 [DataContract]
-public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
+public sealed record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
 {
     [DataMember(Name = "v", EmitDefaultValue = false)]
     public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
@@ -102,24 +102,24 @@ public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
     }
 }
 
-public record TransactionPageWithTotal(
+public sealed record TransactionPageWithTotal(
     long TotalRecords,
     CommittedTransactionPaginationCursor? NextPageCursor,
     List<Gateway.TransactionInfo> Transactions
 );
 
-public record TransactionPageWithoutTotal(
+public sealed record TransactionPageWithoutTotal(
     CommittedTransactionPaginationCursor? NextPageCursor,
     List<Gateway.TransactionInfo> Transactions
 );
 
-public record AccountTransactionPageRequest(
+public sealed record AccountTransactionPageRequest(
     ValidatedAccountAddress AccountAddress,
     CommittedTransactionPaginationCursor? Cursor,
     int PageSize
 );
 
-public record RecentTransactionPageRequest(
+public sealed record RecentTransactionPageRequest(
     CommittedTransactionPaginationCursor? Cursor,
     int PageSize
 );

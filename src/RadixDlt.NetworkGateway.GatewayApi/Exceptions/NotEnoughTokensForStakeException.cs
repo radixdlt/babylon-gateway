@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class NotEnoughTokensForStakeException : ValidationException
+public sealed class NotEnoughTokensForStakeException : ValidationException
 {
     public NotEnoughTokensForStakeException(TokenAmount requestedAmount, TokenAmount availableAmount)
         : base(new NotEnoughTokensForStakeError(requestedAmount: requestedAmount, availableAmount: availableAmount), GetErrorMessage(requestedAmount, availableAmount))

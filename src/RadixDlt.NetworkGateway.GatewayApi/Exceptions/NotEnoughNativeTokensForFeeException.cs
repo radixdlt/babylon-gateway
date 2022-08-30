@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class NotEnoughNativeTokensForFeeException : ValidationException
+public sealed class NotEnoughNativeTokensForFeeException : ValidationException
 {
     public NotEnoughNativeTokensForFeeException(TokenAmount requiredAmount, TokenAmount availableAmount)
         : base(new NotEnoughNativeTokensForFeesError(requiredAmount, availableAmount), GetErrorMessage(requiredAmount, availableAmount))

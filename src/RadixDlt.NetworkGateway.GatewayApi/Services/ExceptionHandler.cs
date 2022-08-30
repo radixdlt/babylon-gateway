@@ -68,7 +68,6 @@ using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -84,7 +83,7 @@ public interface IExceptionHandler
     ActionResult CreateAndLogApiResultFromException(ActionContext actionContext, Exception exception, string traceId);
 }
 
-public class ExceptionHandler : IExceptionHandler
+internal class ExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<ExceptionHandler> _logger;
     private readonly LogLevel _knownGatewayErrorLogLevel;

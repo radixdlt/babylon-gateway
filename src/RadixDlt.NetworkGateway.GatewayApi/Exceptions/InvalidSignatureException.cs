@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidSignatureException : ValidationException
+public sealed class InvalidSignatureException : ValidationException
 {
     public InvalidSignatureException(Signature invalidSignature)
         : base(new InvalidSignatureError(invalidSignature), "Signature was not valid")

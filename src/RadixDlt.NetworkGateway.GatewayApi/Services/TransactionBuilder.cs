@@ -73,7 +73,7 @@ using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public record MappedTransaction(
+public sealed record MappedTransaction(
     string TransactionManifest, // TODO - Or something? Possibly need to have some way of serializing manifests for signing
     Dictionary<string, TokenAmount> BeforeAccountBalancesByRri,
     Dictionary<string, TokenAmount> AccountBalanceChangesByRri
@@ -82,7 +82,7 @@ public record MappedTransaction(
 /// <summary>
 /// A stateful class for building a transaction and checking it's valid against the current version of state.
 /// </summary>
-public class TransactionBuilder
+internal class TransactionBuilder
 {
     private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;

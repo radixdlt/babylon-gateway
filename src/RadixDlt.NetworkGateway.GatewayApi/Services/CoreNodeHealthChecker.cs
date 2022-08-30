@@ -82,7 +82,7 @@ public interface ICoreNodeHealthChecker
     Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken);
 }
 
-public record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
+public sealed record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
 
 // Using explicit integers for enum values
 // because they're used for ordering the nodes (from best to worst).
@@ -98,7 +98,7 @@ public enum CoreNodeStatus
 /// and a LedgerStateQuerier (which is a scoped service, as it contains a DataContext) - this service should thus be
 /// scoped to a unit of work.
 /// </summary>
-public class CoreNodeHealthChecker : ICoreNodeHealthChecker
+internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;

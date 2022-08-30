@@ -69,7 +69,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
-public class NetworkOptions
+public sealed class NetworkOptions
 {
     [ConfigurationKeyName("NetworkName")]
     public string NetworkName { get; set; } = null!;
@@ -90,7 +90,7 @@ public class NetworkOptions
     public bool IgnoreNonSyncedNodes { get; set; } = true;
 }
 
-public record CoreApiNode
+public sealed record CoreApiNode
 {
     /// <summary>
     /// Whether the node's core API should be used to read from (defaults to true).

@@ -72,7 +72,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Workers;
 
-public class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
+public sealed class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(

@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class NotEnoughTokensForUnstakeException : ValidationException
+public sealed class NotEnoughTokensForUnstakeException : ValidationException
 {
     public NotEnoughTokensForUnstakeException(TokenAmount requestedAmount, AccountStakeEntry stake, AccountStakeEntry pendingStake)
         : base(new NotEnoughTokensForUnstakeError(requestedAmount, stake, pendingStake), GetErrorMessage(requestedAmount, stake, pendingStake))

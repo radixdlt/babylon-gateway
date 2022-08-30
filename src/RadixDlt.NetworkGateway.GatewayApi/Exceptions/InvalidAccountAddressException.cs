@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidAccountAddressException : ValidationException
+public sealed class InvalidAccountAddressException : ValidationException
 {
     public InvalidAccountAddressException(string accountAddress, string userFacingMessage, string internalMessage)
         : base(new InvalidAccountAddressError(accountAddress), userFacingMessage, internalMessage)

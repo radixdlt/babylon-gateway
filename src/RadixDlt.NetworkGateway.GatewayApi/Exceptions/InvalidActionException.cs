@@ -67,7 +67,7 @@ using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InvalidActionException : ValidationException
+public sealed class InvalidActionException : ValidationException
 {
     public InvalidActionException(Gateway.Action invalidAction, string userFacingMessage, string internalMessage)
         : base(new InvalidActionError(invalidAction), userFacingMessage, internalMessage)

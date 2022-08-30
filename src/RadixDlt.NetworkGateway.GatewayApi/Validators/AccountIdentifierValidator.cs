@@ -68,7 +68,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class AccountIdentifierValidator : AbstractValidator<AccountIdentifier>
+internal class AccountIdentifierValidator : AbstractValidator<AccountIdentifier>
 {
     public AccountIdentifierValidator()
     {

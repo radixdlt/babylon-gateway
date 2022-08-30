@@ -68,7 +68,7 @@ using RadixDlt.NetworkGateway.Commons.Configuration;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
-public record AcceptableLedgerLagOptions
+public sealed record AcceptableLedgerLagOptions
 {
     [ConfigurationKeyName("PreventReadRequestsIfDbLedgerIsBehind")]
     public bool PreventReadRequestsIfDbLedgerIsBehind { get; set; } = true;

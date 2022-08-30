@@ -66,7 +66,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
-public class GatewayApiBuilder
+public sealed class GatewayApiBuilder
 {
     public GatewayApiBuilder(IServiceCollection services, IHttpClientBuilder coreApiHttpClientBuilder, IHttpClientBuilder coreNodeHealthCheckerClientBuilder)
     {

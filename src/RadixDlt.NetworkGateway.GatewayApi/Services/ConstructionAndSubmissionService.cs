@@ -89,7 +89,7 @@ public interface IConstructionAndSubmissionService
     Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request);
 }
 
-public class ConstructionAndSubmissionService : IConstructionAndSubmissionService
+internal class ConstructionAndSubmissionService : IConstructionAndSubmissionService
 {
     private static readonly int MaximumMessageLengthInBytes = 255;
 

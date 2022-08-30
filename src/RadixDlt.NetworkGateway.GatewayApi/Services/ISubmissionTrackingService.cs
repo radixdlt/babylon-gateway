@@ -86,4 +86,4 @@ public interface ISubmissionTrackingService
     );
 }
 
-public record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
+public sealed record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);

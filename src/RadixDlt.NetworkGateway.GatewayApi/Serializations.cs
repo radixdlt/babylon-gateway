@@ -68,7 +68,7 @@ using System.Text;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
-public static class Serializations
+internal static class Serializations
 {
     public static string AsBase64Json<T>(T input)
     {

@@ -64,7 +64,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading.Tasks;
@@ -75,7 +74,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 [Route("gateway")]
 [TypeFilter(typeof(ExceptionFilter))]
 [TypeFilter(typeof(InvalidModelStateFilter))]
-public class GatewayController : ControllerBase
+public sealed class GatewayController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
 

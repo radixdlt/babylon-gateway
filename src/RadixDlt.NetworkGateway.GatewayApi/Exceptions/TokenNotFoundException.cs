@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class TokenNotFoundException : NotFoundException
+public sealed class TokenNotFoundException : NotFoundException
 {
     public TokenNotFoundException(string rri)
         : base(new TokenNotFoundError(rri.AsGatewayTokenIdentifier()), "Token not found")
