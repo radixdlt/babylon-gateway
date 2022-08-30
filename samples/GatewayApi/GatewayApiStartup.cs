@@ -67,6 +67,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Npgsql;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
@@ -87,17 +90,34 @@ public class GatewayApiStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services
-            .AddNetworkGatewayApi()
-            .AddPostgresPersistence()
-            .AddPrometheusMetrics();
-
         if (_enableSwagger)
         {
             services
                 .AddSwaggerGen()
                 .AddSwaggerGenNewtonsoftSupport();
         }
+
+        services
+            .AddNetworkGatewayApi()
+            .AddPostgresPersistence()
+            .AddPrometheusMetrics();
+
+        services
+            // .AddOpenTelemetryMetrics(builder =>
+            // {
+            //     // builder.AddInstrumentation()
+            // })
+            .AddOpenTelemetryTracing(builder =>
+            {
+                builder
+                    .AddJaegerExporter()
+                    .AddConsoleExporter()
+                    .AddSource("RadixDlt.NetworkGateway.PostgresIntegration")
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("GatewayApi"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddNpgsql();
+            });
 
         services
             .AddEndpointsApiExplorer()
@@ -128,6 +148,12 @@ public class GatewayApiStartup
                 .UseSwaggerUI();
         }
 
+        if (_prometheusMetricsPort != 0)
+        {
+            application
+                .UseMetricServer(_prometheusMetricsPort);
+        }
+
         application
             .UseAuthentication()
             .UseAuthorization()
@@ -140,21 +166,5 @@ public class GatewayApiStartup
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
-
-        StartMetricServer(logger);
-    }
-
-    private void StartMetricServer(ILogger logger)
-    {
-        if (_prometheusMetricsPort != 0)
-        {
-            logger.LogInformation("Starting metrics server on port http://localhost:{MetricPort}", _prometheusMetricsPort);
-
-            new KestrelMetricServer(port: _prometheusMetricsPort).Start();
-        }
-        else
-        {
-            logger.LogInformation("PrometheusMetricsPort not configured - not starting metric server");
-        }
     }
 }

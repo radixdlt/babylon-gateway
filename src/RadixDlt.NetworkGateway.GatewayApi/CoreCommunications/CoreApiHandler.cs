@@ -90,6 +90,8 @@ public interface ICoreApiHandler
     Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 
     Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
+
+    Task<CoreModel.NetworkConfigurationResponse> TmpNetworkInfo(CancellationToken token = default);
 }
 
 /// <summary>
@@ -149,6 +151,11 @@ internal class CoreApiHandler : ICoreApiHandler
     public async Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
         return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
+    }
+
+    public async Task<CoreModel.NetworkConfigurationResponse> TmpNetworkInfo(CancellationToken token = default)
+    {
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync(token));
     }
 
     private static ICoreApiProvider ChooseCoreApiProvider(

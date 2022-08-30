@@ -63,6 +63,7 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -85,17 +86,21 @@ public class StateController
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IStateQuerier _stateQuerier;
+    private readonly ILogger _logger;
 
-    public StateController(INetworkConfigurationProvider networkConfigurationProvider, ILedgerStateQuerier ledgerStateQuerier, IStateQuerier stateQuerier)
+    public StateController(INetworkConfigurationProvider networkConfigurationProvider, ILedgerStateQuerier ledgerStateQuerier, IStateQuerier stateQuerier, ILogger<StateController> logger)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _ledgerStateQuerier = ledgerStateQuerier;
         _stateQuerier = stateQuerier;
+        _logger = logger;
     }
 
     [HttpPost("tmp-entity")]
     public async Task<TmpEntitiesResponse> TmpEntities(TmpEntitiesRequest request, CancellationToken token = default)
     {
+        _logger.LogInformation("Hello world! Some values {Abc} and {Def}", "some_abc", 123.45);
+
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateVersion, token);
 
         if (!RadixAddressParser.TryParse(_networkConfigurationProvider.GetAddressHrps(), request.Address, out var address, out var em))

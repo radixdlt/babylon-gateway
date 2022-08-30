@@ -1,0 +1,117 @@
+version: "3.8"
+services:
+  postgres:
+    # See https://hub.docker.com/_/postgres for details about configuration
+    image: "postgres:14.3-alpine"
+    ports:
+      - "5432:5432"
+    volumes:
+      - .postgres_data:/var/lib/postgresql/data
+    user: root
+    # Should match with the appsettings.Development.json file/s
+    environment:
+      - POSTGRES_USER=db_dev_superuser
+      - POSTGRES_PASSWORD=db_dev_password
+      - POSTGRES_DB=radixdlt_ledger
+    networks:
+      - ng_dev
+
+  jaeger:
+    image: "jaegertracing/all-in-one:1.6"
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686" # UI
+      - "14268:14268"
+      - "9411:9411"
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    networks:
+      - ng_dev
+
+  # based on https://github.com/deviantony/docker-elk
+
+  # The 'setup' service runs a one-off script which initializes the
+  # 'logstash_internal' and 'kibana_system' users inside Elasticsearch with the
+  # values of the passwords defined in the '.env' file.
+  #
+  # This task is only performed during the *initial* startup of the stack. On all
+  # subsequent runs, the service simply returns immediately, without performing
+  # any modification to existing users.
+  elk_setup:
+    build:
+      context: ./elk/setup/
+      args:
+        ELASTIC_VERSION: 8.4.1
+    init: true
+    volumes:
+      - setup:/state:Z
+    environment:
+      ELASTIC_PASSWORD: elk_dev_password
+      LOGSTASH_INTERNAL_PASSWORD: elk_dev_password
+      KIBANA_SYSTEM_PASSWORD: elk_dev_password
+    networks:
+      - ng_dev
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.4.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./elk/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,z
+      - elasticsearch:/usr/share/elasticsearch/data:z
+    environment:
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      # Bootstrap password.
+      # Used to initialize the keystore during the initial startup of
+      # Elasticsearch. Ignored on subsequent runs.
+      ELASTIC_PASSWORD: elk_dev_password
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+    networks:
+      - ng_dev
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.4.1
+    ports:
+      - "5044:5044"
+      - "50000:50000/tcp"
+      - "50000:50000/udp"
+      - "9600:9600"
+    volumes:
+      - ./elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      LOGSTASH_INTERNAL_PASSWORD: elk_dev_password
+    networks:
+      - ng_dev
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.4.1
+    ports:
+      - "5601:5601" # UI
+    volumes:
+      - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+    environment:
+      KIBANA_SYSTEM_PASSWORD: elk_dev_password
+    networks:
+      - ng_dev
+    depends_on:
+      - elasticsearch
+
+networks:
+  ng_dev:
+    driver: bridge
+
+volumes:
+  setup:
+  elasticsearch:
