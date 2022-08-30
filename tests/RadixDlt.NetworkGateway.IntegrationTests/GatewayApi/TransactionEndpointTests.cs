@@ -63,31 +63,27 @@
  */
 
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore.Storage;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-[Collection("TestsInitialization")]
-public class TransactionEndpointTests : IClassFixture<TestInitializationFactory>
+public class TransactionEndpointTests
 {
-    private HttpClient _client;
-
-    public TransactionEndpointTests(TestInitializationFactory factory)
-    {
-        _client = factory.CreateClient();
-    }
-
     [Fact]
     public async Task TestTransactionRecent()
     {
-        var payload = await GetRecentTransactions(_client);
+        var client = TestInitializationFactory.CreateClient(nameof(TestTransactionRecent));
+
+        var payload = await GetRecentTransactions(client);
 
         payload.LedgerState.ShouldNotBeNull();
         payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
@@ -98,14 +94,16 @@ public class TransactionEndpointTests : IClassFixture<TestInitializationFactory>
     [Fact]
     public async Task TestTransactionStatus()
     {
+        var client = TestInitializationFactory.CreateClient(nameof(TestTransactionStatus));
+
         // Arrange
-        var recentTransactions = await GetRecentTransactions(_client);
+        var recentTransactions = await GetRecentTransactions(client);
         var transactionIdentifier = recentTransactions.Transactions[0].TransactionIdentifier;
 
         // Act
         string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await _client.PostAsync("/transaction/status", content);
+        HttpResponseMessage response = await client.PostAsync("/transaction/status", content);
 
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
@@ -118,13 +116,15 @@ public class TransactionEndpointTests : IClassFixture<TestInitializationFactory>
     [Fact(Skip ="Valid transaction payload is required")]
     public async Task TestTransactionSubmit()
     {
+        var client = TestInitializationFactory.CreateClient(nameof(TestTransactionSubmit));
+
         // Arrange
         string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        HttpResponseMessage response = await _client.PostAsync("/transaction/submit", content);
+        HttpResponseMessage response = await client.PostAsync("/transaction/submit", content);
 
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();

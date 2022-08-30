@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.TestDependencies;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
@@ -81,23 +82,31 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
     public class TestInitializationFactory
         : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<TestInitializationFactory>
     {
-        private readonly string _dbConnectionString = "Host=127.0.0.1:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+        private readonly string _databaseName;
 
-        public TestInitializationFactory()
+        public TestInitializationFactory(string databaseName)
         {
+            _databaseName = databaseName;
+        }
+
+        public static HttpClient CreateClient(string databaseName)
+        {
+            return new TestInitializationFactory(databaseName).CreateClient();
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            string dbConnectionString = $"Host=127.0.0.1:5432;Database={_databaseName};Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+
             builder
             .ConfigureAppConfiguration(
                     (context, config) =>
                     {
                         config.AddInMemoryCollection(new[]
                         {
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", _dbConnectionString),
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", _dbConnectionString),
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", _dbConnectionString),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", dbConnectionString),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
                         });
                     }
             )
