@@ -65,7 +65,6 @@
 using RadixDlt.NetworkGateway.Common.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using RadixDlt.NetworkGateway.UnitTests;
 using System.Collections.Generic;
 using System.Linq;
 

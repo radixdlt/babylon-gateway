@@ -65,32 +65,28 @@
 using FluentAssertions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.TestDependencies;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
 
-public class GatewayEndpointTests : IClassFixture<TestApplicationFactory<TestGatewayApiStartup>>
+[Collection("TestsInitialization")]
+public class GatewayEndpointTests
 {
-    private readonly TestApplicationFactory<TestGatewayApiStartup> _factory;
+    private HttpClient _client;
 
-    public GatewayEndpointTests(TestApplicationFactory<TestGatewayApiStartup> factory)
+    public GatewayEndpointTests(TestInitializationFactory factory)
     {
-        _factory = factory;
+        _client = factory.CreateClient();
     }
 
     [Fact]
     public async Task TestGatewayApiVersions()
     {
-        // Arrange
-        var client = _factory.CreateClient();
+        using var response = await _client.PostAsync("/gateway", JsonContent.Create(new object()));
 
-        // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        // Assert
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
         payload.GatewayApi.ShouldNotBeNull();

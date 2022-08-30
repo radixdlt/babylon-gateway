@@ -64,24 +64,27 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.TestDependencies;
 using System;
 using System.Collections.Generic;
+using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 {
-    public class TestApplicationFactory<TStartup>
-        : WebApplicationFactory<TStartup>
-        where TStartup : class
+    [CollectionDefinition("TestsInitialization")]
+    public class TestInitializationFactory
+        : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<TestInitializationFactory>
     {
         private readonly string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
 
-        public TestApplicationFactory()
+        public TestInitializationFactory()
         {
         }
 
@@ -95,9 +98,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                         {
                             new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", _dbConnectionString),
                             new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", _dbConnectionString),
-                            new KeyValuePair<string, string>("GatewayApi:Network:NetworkName", DbSeedHelper.NetworkName),
-                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayOpenApiSchemaVersion", "2.0.0"),
-                            new KeyValuePair<string, string>("GatewayApi:Endpoint:GatewayApiVersion", "3.0.0"),
+                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", _dbConnectionString),
                         });
                     }
             )
@@ -110,31 +111,47 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     var scopedServices = scope.ServiceProvider;
 
                     var logger = scopedServices
-                        .GetRequiredService<ILogger<TestApplicationFactory<TStartup>>>();
+                        .GetRequiredService<ILogger<TestInitializationFactory>>();
 
-                    var db = scopedServices.GetRequiredService<ReadOnlyDbContext>();
-
-                    db.Database.EnsureCreated();
+                    var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
                     try
                     {
-                        DbSeedHelper.InitializeDbForTests(db);
+                        DbSeedHelper.InitializeDbForTests(dbReadyOnlyContext);
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, $"An error occurred seeding the database with seed data. Error: {ex.Message}");
+                        logger.LogError(ex, $"An error occurred when initializing the database for tests. Error: {ex.Message}");
+                    }
+
+                    var dbMigrationsContext = scope.ServiceProvider.GetRequiredService<MigrationsDbContext>();
+
+                    try
+                    {
+                        dbMigrationsContext.Database.Migrate();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, $"Applying migration failed. Error: {ex.Message}");
                     }
                 }
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = "aaa";
+                        o.NetworkName = DbSeedHelper.NetworkName;
                         o.CoreApiNodes = new List<CoreApiNode>()
                         {
                             new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
                         };
                     }
                 );
+
+                services.PostConfigure<EndpointOptions>(o =>
+                {
+                    o.GatewayApiVersion = "3.0.0";
+                    o.GatewayOpenApiSchemaVersion = "2.0.0";
+                    o.MaxPageSize = 30;
+                });
             });
         }
     }

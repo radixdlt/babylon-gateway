@@ -82,6 +82,8 @@ public class TestGatewayApiStartup
             .AddNetworkGatewayApi()
             .AddPostgresPersistence();
 
+         services.AddNetworkGatewayPostgresMigrations();
+
          services
             .AddControllers()
             .AddNewtonsoftJson();
