@@ -132,6 +132,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                 services.PostConfigure<NetworkOptions>(o =>
                     {
                         o.NetworkName = DbSeedHelper.NetworkName;
+                        o.IgnoreNonSyncedNodes = false;
                         o.CoreApiNodes = new List<CoreApiNode>()
                         {
                             new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
