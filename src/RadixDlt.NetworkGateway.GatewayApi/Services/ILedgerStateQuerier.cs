@@ -63,19 +63,20 @@
  */
 
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ILedgerStateQuerier
 {
-    Task<GatewayResponse> GetGatewayState();
+    Task<GatewayResponse> GetGatewayState(CancellationToken token = default);
 
-    Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
+    Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default);
 
-    Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier);
+    Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier, CancellationToken token = default);
 
-    Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier);
+    Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default);
 
-    Task<long> GetTopOfLedgerStateVersion();
+    Task<long> GetTopOfLedgerStateVersion(CancellationToken token = default);
 }

@@ -86,6 +86,6 @@ public sealed class GatewayController : ControllerBase
     [HttpPost("")]
     public async Task<GatewayResponse> Status()
     {
-        return await _ledgerStateQuerier.GetGatewayState();
+        return await _ledgerStateQuerier.GetGatewayState(HttpContext.RequestAborted);
     }
 }

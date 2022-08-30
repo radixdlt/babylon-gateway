@@ -64,6 +64,7 @@
 
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -71,18 +72,25 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionQuerier
 {
-    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState);
+    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
+        RecentTransactionPageRequest request,
+        Gateway.LedgerState atLedgerState,
+        Gateway.LedgerState? fromLedgerState,
+        CancellationToken token = default);
 
-    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
+    Task<TransactionPageWithTotal> GetAccountTransactions(
+        AccountTransactionPageRequest request,
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
         ValidatedTransactionIdentifier transactionIdentifier,
-        Gateway.LedgerState ledgerState
-    );
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier
-    );
+        ValidatedTransactionIdentifier transactionIdentifier,
+        CancellationToken token = default);
 }
 
 [DataContract]

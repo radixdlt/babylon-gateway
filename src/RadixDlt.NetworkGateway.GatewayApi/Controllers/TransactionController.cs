@@ -75,7 +75,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 [Route("transaction")]
 [TypeFilter(typeof(ExceptionFilter))]
 [TypeFilter(typeof(InvalidModelStateFilter))]
-public sealed class TransactionController
+public sealed class TransactionController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
@@ -95,15 +95,15 @@ public sealed class TransactionController
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request)
     {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier);
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, HttpContext.RequestAborted);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, HttpContext.RequestAborted);
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
             PageSize: request.Limit ?? 10
         );
 
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState);
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, HttpContext.RequestAborted);
 
         // NB - We don't return a total here as we don't have an index on user transactions
         return new RecentTransactionsResponse(
@@ -117,16 +117,16 @@ public sealed class TransactionController
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request)
     {
         var transactionIdentifier = request.TransactionIdentifier.Hash.ToTransactionIdentifier();
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, HttpContext.RequestAborted);
 
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState, HttpContext.RequestAborted);
 
         if (committedTransaction != null)
         {
             return new TransactionStatusResponse(ledgerState, committedTransaction);
         }
 
-        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier);
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier, HttpContext.RequestAborted);
 
         if (mempoolTransaction != null)
         {
@@ -139,21 +139,21 @@ public sealed class TransactionController
     [HttpPost("build")]
     public async Task<TransactionBuildResponse> Build(TransactionBuildRequest request)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier, HttpContext.RequestAborted);
         return new TransactionBuildResponse(
-            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState)
+            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState, HttpContext.RequestAborted)
         );
     }
 
     [HttpPost("finalize")]
     public async Task<TransactionFinalizeResponse> Finalize(TransactionFinalizeRequest request)
     {
-        return await _constructionAndSubmissionService.HandleFinalizeRequest(request);
+        return await _constructionAndSubmissionService.HandleFinalizeRequest(request, HttpContext.RequestAborted);
     }
 
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request)
     {
-        return await _constructionAndSubmissionService.HandleSubmitRequest(request);
+        return await _constructionAndSubmissionService.HandleSubmitRequest(request, HttpContext.RequestAborted);
     }
 }

@@ -75,6 +75,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -107,9 +108,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _clock = clock;
     }
 
-    public async Task<GatewayResponse> GetGatewayState()
+    public async Task<GatewayResponse> GetGatewayState(CancellationToken token)
     {
-        var ledgerStatus = await GetLedgerStatus();
+        var ledgerStatus = await GetLedgerStatus(token);
         return new GatewayResponse(
             new GatewayApiVersions(
                 _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion,
@@ -127,9 +128,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     }
 
     // So that we don't forget to check the network name, add the assertion in here.
-    public async Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    public async Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
     {
-        var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
+        var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier, token);
         var ledgerState = ledgerStateReport.LedgerState;
 
         if (atLedgerStateIdentifier == null)
@@ -164,29 +165,29 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    public async Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier)
+    public async Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier, CancellationToken token = default)
     {
         LedgerStateReport? ledgerStateReport = null;
 
         if (fromLedgerStateIdentifier?.HasStateVersion == true)
         {
-            ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value);
+            ledgerStateReport = await GetLedgerStateAfterStateVersion(fromLedgerStateIdentifier.StateVersion.Value, token);
         }
         else if (fromLedgerStateIdentifier?.HasTimestamp == true)
         {
-            ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value);
+            ledgerStateReport = await GetLedgerStateAfterTimestamp(fromLedgerStateIdentifier.Timestamp.Value, token);
         }
         else if (fromLedgerStateIdentifier?.HasEpoch == true)
         {
-            ledgerStateReport = await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 0);
+            ledgerStateReport = await GetLedgerStateAfterEpochAndRound(fromLedgerStateIdentifier.Epoch.Value, fromLedgerStateIdentifier.Round ?? 0, token);
         }
 
         return ledgerStateReport?.LedgerState;
     }
 
-    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier)
+    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
     {
-        var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier);
+        var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier, token);
         var ledgerState = ledgerStateReport.LedgerState;
 
         if (atLedgerStateIdentifier == null)
@@ -221,18 +222,18 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    public async Task<long> GetTopOfLedgerStateVersion()
+    public async Task<long> GetTopOfLedgerStateVersion(CancellationToken token = default)
     {
-        var ledgerStatus = await GetLedgerStatus();
+        var ledgerStatus = await GetLedgerStatus(token);
 
         return ledgerStatus.TopOfLedgerStateVersion;
     }
 
-    private async Task<LedgerStatus> GetLedgerStatus()
+    private async Task<LedgerStatus> GetLedgerStatus(CancellationToken token)
     {
         var ledgerStatus = await _dbContext.LedgerStatus
             .Include(ls => ls.TopOfLedgerTransaction)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(token);
 
         if (ledgerStatus == null)
         {
@@ -244,33 +245,33 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
 
     private record LedgerStateReport(LedgerState LedgerState, DateTimeOffset RoundTimestamp);
 
-    private async Task<LedgerStateReport> GetLedgerState(PartialLedgerStateIdentifier? at = null)
+    private async Task<LedgerStateReport> GetLedgerState(PartialLedgerStateIdentifier? at = null, CancellationToken token = default)
     {
         LedgerStateReport result;
 
         if (at?.HasStateVersion == true)
         {
-            result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value);
+            result = await GetLedgerStateBeforeStateVersion(at.StateVersion.Value, token);
         }
         else if (at?.HasTimestamp == true)
         {
-            result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value);
+            result = await GetLedgerStateBeforeTimestamp(at.Timestamp.Value, token);
         }
         else if (at?.HasEpoch == true)
         {
-            result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 0);
+            result = await GetLedgerStateAtEpochAndRound(at.Epoch.Value, at.Round ?? 0, token);
         }
         else
         {
-            result = await GetTopOfLedgerStateReport();
+            result = await GetTopOfLedgerStateReport(token);
         }
 
         return result;
     }
 
-    private async Task<LedgerStateReport> GetTopOfLedgerStateReport()
+    private async Task<LedgerStateReport> GetTopOfLedgerStateReport(CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetTopLedgerTransaction());
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetTopLedgerTransaction(), token);
 
         if (ledgerState == null)
         {
@@ -280,9 +281,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateBeforeStateVersion(long stateVersion)
+    private async Task<LedgerStateReport> GetLedgerStateBeforeStateVersion(long stateVersion, CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeStateVersion(stateVersion));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeStateVersion(stateVersion), token);
 
         if (ledgerState == null)
         {
@@ -292,9 +293,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateAfterStateVersion(long stateVersion)
+    private async Task<LedgerStateReport> GetLedgerStateAfterStateVersion(long stateVersion, CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterStateVersion(stateVersion));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterStateVersion(stateVersion), token);
 
         if (ledgerState == null)
         {
@@ -304,9 +305,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp)
+    private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp, CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(timestamp));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(timestamp), token);
 
         if (ledgerState == null)
         {
@@ -316,9 +317,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp)
+    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp, CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(timestamp));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(timestamp), token);
 
         if (ledgerState == null)
         {
@@ -328,9 +329,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateAtEpochAndRound(long epoch, long round)
+    private async Task<LedgerStateReport> GetLedgerStateAtEpochAndRound(long epoch, long round, CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionAtEpochRound(epoch, round));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionAtEpochRound(epoch, round), token);
 
         if (ledgerState == null)
         {
@@ -340,9 +341,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateAfterEpochAndRound(long epoch, long round)
+    private async Task<LedgerStateReport> GetLedgerStateAfterEpochAndRound(long epoch, long round, CancellationToken token)
     {
-        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAtEpochRound(epoch, round));
+        var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAtEpochRound(epoch, round), token);
 
         if (ledgerState == null)
         {
@@ -352,7 +353,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport?> GetLedgerStateFromQuery(IQueryable<LedgerTransaction> query)
+    private async Task<LedgerStateReport?> GetLedgerStateFromQuery(IQueryable<LedgerTransaction> query, CancellationToken token)
     {
         var lt = await query
             .Select(lt => new
@@ -362,7 +363,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 lt.Epoch,
                 lt.RoundInEpoch,
             })
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(token);
 
         return lt == null ? null : new LedgerStateReport(
             new LedgerState(

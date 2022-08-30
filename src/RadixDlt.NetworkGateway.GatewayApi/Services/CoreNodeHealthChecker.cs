@@ -228,7 +228,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
         var timeoutSeconds = 5;
         try
         {
-            var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            using var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
             using var sharedCancellationTokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationToken,

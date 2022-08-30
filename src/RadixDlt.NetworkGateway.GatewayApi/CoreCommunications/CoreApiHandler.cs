@@ -78,13 +78,13 @@ public interface ICoreApiHandler
 
     CoreApiNode GetCoreNodeConnectedTo();
 
-    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
+    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default);
 
-    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request);
+    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default);
 
-    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request);
+    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default);
 
-    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request);
+    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default);
 
     Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
 }
@@ -117,24 +117,24 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.CoreApiNode;
     }
 
-    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
+    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request, token));
     }
 
-    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request)
+    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request, token));
     }
 
-    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request)
+    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request, token));
     }
 
-    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request)
+    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request, token));
     }
 
     public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)

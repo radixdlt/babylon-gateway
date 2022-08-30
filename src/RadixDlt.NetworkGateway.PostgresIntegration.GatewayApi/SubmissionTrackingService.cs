@@ -72,6 +72,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -98,10 +99,11 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        CoreModel.ConstructionParseResponse parseResponse
+        CoreModel.ConstructionParseResponse parseResponse,
+        CancellationToken token = default
     )
     {
-        var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
+        var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash, token);
 
         if (existingMempoolTransaction != null)
         {
@@ -111,7 +113,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
             }
 
             existingMempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(token);
 
             // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
             return new MempoolTrackGuidance(ShouldSubmitToNode: false);
@@ -133,7 +135,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
         // NB - 23 is Integrity Constraint Violation: https://www.postgresql.org/docs/current/errcodes-appendix.html)
         try
         {
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(token);
             await _observers.ForEachAsync(x => x.PostMempoolTransactionAdded());
 
             return new MempoolTrackGuidance(ShouldSubmitToNode: true);
@@ -147,10 +149,11 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
     public async Task MarkAsFailed(
         byte[] transactionIdentifierHash,
         MempoolTransactionFailureReason failureReason,
-        string failureExplanation
+        string failureExplanation,
+        CancellationToken token = default
     )
     {
-        var mempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash);
+        var mempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash, token);
 
         if (mempoolTransaction == null)
         {
@@ -160,13 +163,13 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
         mempoolTransaction.MarkAsFailed(failureReason, failureExplanation, _clock.UtcNow);
 
         await _observers.ForEachAsync(x => x.PostMempoolTransactionMarkedAsFailed());
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(token);
     }
 
-    public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash)
+    public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash, CancellationToken token = default)
     {
         return await _dbContext.MempoolTransactions
             .Where(t => t.PayloadHash == transactionIdentifierHash)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(token);
     }
 }

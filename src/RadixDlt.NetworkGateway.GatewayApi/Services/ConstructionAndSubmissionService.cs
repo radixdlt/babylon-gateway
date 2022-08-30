@@ -82,11 +82,11 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IConstructionAndSubmissionService
 {
-    Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState);
+    Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request);
+    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, CancellationToken token = default);
 
-    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request);
+    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
 internal class ConstructionAndSubmissionService : IConstructionAndSubmissionService
@@ -120,13 +120,16 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         _clock = clock;
     }
 
-    public async Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
+    public async Task<Gateway.TransactionBuild> HandleBuildRequest(
+        Gateway.TransactionBuildRequest request,
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default)
     {
         await _observers.ForEachAsync(x => x.PreHandleBuildRequest(request, ledgerState));
 
         try
         {
-            var response = await HandleBuildAndCreateResponse(request, ledgerState);
+            var response = await HandleBuildAndCreateResponse(request, ledgerState, token);
 
             await _observers.ForEachAsync(x => x.PostHandleBuildRequest(request, ledgerState, response));
 
@@ -140,13 +143,13 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         }
     }
 
-    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request)
+    public async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, CancellationToken token = default)
     {
         await _observers.ForEachAsync(x => x.PreHandleFinalizeRequest(request));
 
         try
         {
-            var response = await HandleFinalizeAndCreateResponse(request);
+            var response = await HandleFinalizeAndCreateResponse(request, token);
 
             await _observers.ForEachAsync(x => x.PostHandleFinalizeRequest(request, response));
 
@@ -160,13 +163,13 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         }
     }
 
-    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request)
+    public async Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, CancellationToken token = default)
     {
         await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
 
         try
         {
-            var response = await HandleSubmitAndCreateResponse(request);
+            var response = await HandleSubmitAndCreateResponse(request, token);
 
             await _observers.ForEachAsync(x => x.PostHandleSubmitRequest(request, response));
 
@@ -180,15 +183,18 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         }
     }
 
-    private async Task<Gateway.TransactionBuild> HandleBuildAndCreateResponse(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
+    private async Task<Gateway.TransactionBuild> HandleBuildAndCreateResponse(
+        Gateway.TransactionBuildRequest request,
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default)
     {
-        var coreBuildResponse = await BuildTransaction(request, ledgerState);
+        var coreBuildResponse = await BuildTransaction(request, ledgerState, token);
 
         var coreParseResponse = await _coreApiHandler.ParseTransaction(new CoreModel.ConstructionParseRequest(
             networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
             transaction: coreBuildResponse.UnsignedTransaction,
             signed: false
-        ));
+        ), token);
 
         var unsignedTransactionPayload = StringExtensions.ConvertFromHex(coreBuildResponse.UnsignedTransaction);
         var payloadToSign = StringExtensions.ConvertFromHex(coreBuildResponse.PayloadToSign);
@@ -209,7 +215,7 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         );
     }
 
-    private async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeAndCreateResponse(Gateway.TransactionFinalizeRequest request)
+    private async Task<Gateway.TransactionFinalizeResponse> HandleFinalizeAndCreateResponse(Gateway.TransactionFinalizeRequest request, CancellationToken token)
     {
         var coreFinalizeResponse = await HandleCoreFinalizeRequest(request, new CoreModel.ConstructionFinalizeRequest(
             _coreApiHandler.GetNetworkIdentifier(),
@@ -220,7 +226,7 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
                 ),
                 bytes: _validations.ExtractValidHex("Signature Bytes", request.Signature.Bytes).AsString
             )
-        ));
+        ), token);
 
         var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
             StringExtensions.ConvertFromHex(coreFinalizeResponse.SignedTransaction)
@@ -231,7 +237,8 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
             await HandleSubmitRequest(
                 new Gateway.TransactionSubmitRequest(
                     signedTransaction: coreFinalizeResponse.SignedTransaction
-                )
+                ),
+                token
             );
         }
 
@@ -241,21 +248,21 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         );
     }
 
-    private async Task<Gateway.TransactionSubmitResponse> HandleSubmitAndCreateResponse(Gateway.TransactionSubmitRequest request)
+    private async Task<Gateway.TransactionSubmitResponse> HandleSubmitAndCreateResponse(Gateway.TransactionSubmitRequest request, CancellationToken token)
     {
         var signedTransactionContents = _validations.ExtractValidHex("Signed transaction", request.SignedTransaction);
         var transactionHashIdentifier = RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(
             signedTransactionContents.Bytes
         );
 
-        await HandleSubmission(signedTransactionContents, transactionHashIdentifier);
+        await HandleSubmission(signedTransactionContents, transactionHashIdentifier, token);
 
         return new Gateway.TransactionSubmitResponse(
             transactionIdentifier: transactionHashIdentifier.AsGatewayTransactionIdentifier()
         );
     }
 
-    private async Task<CoreModel.ConstructionBuildResponse> BuildTransaction(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState)
+    private async Task<CoreModel.ConstructionBuildResponse> BuildTransaction(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState, CancellationToken token)
     {
         var feePayer = _validations.ExtractValidAccountAddress(request.FeePayer);
         var validatedMessage = _validations.ExtractOptionalValidHexOrNull("Message", request.Message);
@@ -274,19 +281,20 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
 
         // This performs checks against known ledger, and throws relevant exceptions, eg if a user doesn't have enough
         // funds for a given action. However -- it doesn't know how much fees will be at this point.
-        var mappedTransaction = await transactionBuilder.MapAndValidateActions(request.Actions);
+        var mappedTransaction = await transactionBuilder.MapAndValidateActions(request.Actions, token);
 
         return new CoreModel.ConstructionBuildResponse(); // TODO - Work out what to do to support legacy build
     }
 
     private async Task<CoreModel.ConstructionFinalizeResponse> HandleCoreFinalizeRequest(
         Gateway.TransactionFinalizeRequest gatewayRequest,
-        CoreModel.ConstructionFinalizeRequest request
+        CoreModel.ConstructionFinalizeRequest request,
+        CancellationToken token
     )
     {
         try
         {
-            return await _coreApiHandler.FinalizeTransaction(request);
+            return await _coreApiHandler.FinalizeTransaction(request, token);
         }
         catch (WrappedCoreApiException<CoreModel.InvalidSignatureError>)
         {
@@ -295,7 +303,8 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
     }
 
     private async Task<CoreModel.ConstructionParseResponse> HandlePreSubmissionParseSignedTransaction(
-        ValidatedHex signedTransaction
+        ValidatedHex signedTransaction,
+        CancellationToken token
     )
     {
         try
@@ -304,7 +313,7 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
                 networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
                 transaction: signedTransaction.AsString,
                 signed: true
-            ));
+            ), token);
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
@@ -329,20 +338,23 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
     // NB - The error handling here should mirror the resubmission in MempoolResubmissionService
     private async Task HandleSubmission(
         ValidatedHex signedTransaction,
-        byte[] transactionIdentifierHash
+        byte[] transactionIdentifierHash,
+        CancellationToken token
     )
     {
-        var parseResponse = await HandlePreSubmissionParseSignedTransaction(signedTransaction);
+        var parseResponse = await HandlePreSubmissionParseSignedTransaction(signedTransaction, token);
 
         var submittedTimestamp = _clock.UtcNow;
         using var submissionTimeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(3000));
+        using var submissionCancellation = CancellationTokenSource.CreateLinkedTokenSource(submissionTimeoutCts.Token, token);
 
         var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(
             submittedTimestamp,
             signedTransaction.Bytes,
             transactionIdentifierHash,
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
-            parseResponse
+            parseResponse,
+            token
         );
 
         if (mempoolTrackGuidance.TransactionAlreadyFailedReason != null)
@@ -369,7 +381,7 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
                     _coreApiHandler.GetNetworkIdentifier(),
                     signedTransaction.AsString
                 ),
-                submissionTimeoutCts.Token
+                submissionCancellation.Token
             );
 
             if (result.Duplicate)

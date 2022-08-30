@@ -66,6 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -110,19 +111,19 @@ internal class TransactionBuilder
     /// <summary>
     /// Should only be called once per instance of TransactionBuilder.
     /// </summary>
-    public async Task<MappedTransaction> MapAndValidateActions(List<Gateway.Action> requestActions)
+    public async Task<MappedTransaction> MapAndValidateActions(List<Gateway.Action> requestActions, CancellationToken token = default)
     {
         // TODO - This will probably need to actually create and compile the manifest?
         var fakeManifest = string.Join(", ", requestActions.Select(a => a.Type));
 
-        await Task.Delay(1); // Fix for compile warning in this placeholder method
+        await Task.Delay(1, token); // Fix for compile warning in this placeholder method
 
         return new MappedTransaction(fakeManifest, _feePayerBeforeBalances, _feePayerBalanceChanges);
     }
 
-    private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action)
+    private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action, CancellationToken token = default)
     {
-        await Task.Delay(1); // Fix for compile warning in this placeholder method
+        await Task.Delay(1, token); // Fix for compile warning in this placeholder method
         return action switch
         {
             /*
