@@ -63,7 +63,7 @@
  */
 
 using FluentAssertions;
-using RadixDlt.NetworkGateway.Common;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http;
