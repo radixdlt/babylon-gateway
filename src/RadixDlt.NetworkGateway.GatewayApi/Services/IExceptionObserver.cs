@@ -66,7 +66,7 @@ using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IExceptionObserver
 {

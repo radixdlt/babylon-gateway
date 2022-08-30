@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 

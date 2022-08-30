@@ -62,37 +62,99 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc.Filters;
-using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 
-public class ExceptionFilter : IActionFilter, IOrderedFilter
+[ApiController]
+[Route("transaction")]
+[TypeFilter(typeof(ExceptionFilter))]
+[TypeFilter(typeof(InvalidModelStateFilter))]
+public class TransactionController
 {
-    private readonly IExceptionHandler _exceptionHandler;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly ITransactionQuerier _transactionQuerier;
+    private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
 
-    public ExceptionFilter(IExceptionHandler exceptionHandler)
+    public TransactionController(
+        ILedgerStateQuerier ledgerStateQuerier,
+        ITransactionQuerier transactionQuerier,
+        IConstructionAndSubmissionService constructionAndSubmissionService
+    )
     {
-        _exceptionHandler = exceptionHandler;
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _transactionQuerier = transactionQuerier;
+        _constructionAndSubmissionService = constructionAndSubmissionService;
     }
 
-    public int Order => int.MaxValue - 10;
-
-    public void OnActionExecuting(ActionExecutingContext context)
+    [HttpPost("recent")]
+    public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request)
     {
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier);
+
+        var transactionsPageRequest = new RecentTransactionPageRequest(
+            Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
+            PageSize: request.Limit ?? 10
+        );
+
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState);
+
+        // NB - We don't return a total here as we don't have an index on user transactions
+        return new RecentTransactionsResponse(
+            atLedgerState,
+            nextCursor: results.NextPageCursor?.ToCursorString(),
+            results.Transactions
+        );
     }
 
-    public void OnActionExecuted(ActionExecutedContext context)
+    [HttpPost("status")]
+    public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request)
     {
-        if (context.Exception == null)
+        var transactionIdentifier = request.TransactionIdentifier.Hash.ToTransactionIdentifier();
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier);
+
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState);
+
+        if (committedTransaction != null)
         {
-            return;
+            return new TransactionStatusResponse(ledgerState, committedTransaction);
         }
 
-        // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
-        var traceId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier);
 
-        context.Result = _exceptionHandler.CreateAndLogApiResultFromException(context, context.Exception!, traceId);
-        context.ExceptionHandled = true;
+        if (mempoolTransaction != null)
+        {
+            return new TransactionStatusResponse(ledgerState, mempoolTransaction);
+        }
+
+        throw new TransactionNotFoundException(request.TransactionIdentifier);
+    }
+
+    [HttpPost("build")]
+    public async Task<TransactionBuildResponse> Build(TransactionBuildRequest request)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier);
+        return new TransactionBuildResponse(
+            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState)
+        );
+    }
+
+    [HttpPost("finalize")]
+    public async Task<TransactionFinalizeResponse> Finalize(TransactionFinalizeRequest request)
+    {
+        return await _constructionAndSubmissionService.HandleFinalizeRequest(request);
+    }
+
+    [HttpPost("submit")]
+    public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request)
+    {
+        return await _constructionAndSubmissionService.HandleSubmitRequest(request);
     }
 }

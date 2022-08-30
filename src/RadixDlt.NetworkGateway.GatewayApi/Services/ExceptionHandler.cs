@@ -68,6 +68,7 @@ using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -76,7 +77,7 @@ using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IExceptionHandler
 {

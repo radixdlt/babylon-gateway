@@ -63,49 +63,30 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Endpoints;
+namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 
-public interface IValidationErrorHandler
+[ApiController]
+[Route("gateway")]
+[TypeFilter(typeof(ExceptionFilter))]
+[TypeFilter(typeof(InvalidModelStateFilter))]
+public class GatewayController : ControllerBase
 {
-    IActionResult GetClientError(ActionContext actionContext);
-}
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-public class ValidationErrorHandler : IValidationErrorHandler
-{
-    private readonly IExceptionHandler _exceptionHandler;
-
-    public ValidationErrorHandler(IExceptionHandler exceptionHandler)
+    public GatewayController(ILedgerStateQuerier ledgerStateQuerier)
     {
-        _exceptionHandler = exceptionHandler;
+        _ledgerStateQuerier = ledgerStateQuerier;
     }
 
-    public IActionResult GetClientError(ActionContext actionContext)
+    [HttpPost("")]
+    public async Task<GatewayResponse> Status()
     {
-        var errors = new List<ValidationErrorsAtPath>();
-        foreach (var (path, modelValue) in actionContext.ModelState)
-        {
-            var errorMessagesToShow = modelValue.Errors
-                .Select(e => e.ErrorMessage)
-                .Where(e => e != "The request field is required.")
-                .ToList();
-
-            if (errorMessagesToShow.Count > 0)
-            {
-                errors.Add(new ValidationErrorsAtPath(path, errorMessagesToShow));
-            }
-        }
-
-        var invalidRequestError = InvalidRequestException.FromValidationErrors(errors);
-
-        // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
-        var traceId = Activity.Current?.Id ?? actionContext.HttpContext.TraceIdentifier;
-
-        return _exceptionHandler.CreateAndLogApiResultFromException(actionContext, invalidRequestError, traceId);
+        return await _ledgerStateQuerier.GetGatewayState();
     }
 }
