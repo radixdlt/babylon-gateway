@@ -65,6 +65,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using RadixDlt.NetworkGateway.Commons.Configuration;
+using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Configuration;
 
@@ -78,6 +79,9 @@ public class EndpointOptions
 
     [ConfigurationKeyName("MaxPageSize")]
     public int MaxPageSize { get; set; } = 30;
+
+    [ConfigurationKeyName("RequestTimeout")]
+    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
 }
 
 internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptions>
@@ -87,5 +91,6 @@ internal class EndpointOptionsValidator : AbstractOptionsValidator<EndpointOptio
         RuleFor(x => x.GatewayOpenApiSchemaVersion).NotNull();
         RuleFor(x => x.GatewayApiVersion).NotNull();
         RuleFor(x => x.MaxPageSize).GreaterThan(0);
+        RuleFor(x => x.RequestTimeout).GreaterThan(TimeSpan.Zero);
     }
 }

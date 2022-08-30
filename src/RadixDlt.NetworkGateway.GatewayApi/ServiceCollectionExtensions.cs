@@ -69,6 +69,7 @@ using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Configuration;
 using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Endpoints;
@@ -127,6 +128,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.AddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
+        services.AddSingleton<RequestTimeoutMiddleware>();
     }
 
     private static void AddHostedServices(IServiceCollection services)
