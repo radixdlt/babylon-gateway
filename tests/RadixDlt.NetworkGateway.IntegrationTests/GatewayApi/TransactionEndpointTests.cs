@@ -63,13 +63,11 @@
  */
 
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore.Storage;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
