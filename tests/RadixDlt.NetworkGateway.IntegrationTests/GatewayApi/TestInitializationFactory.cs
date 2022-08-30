@@ -81,7 +81,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
     public class TestInitializationFactory
         : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<TestInitializationFactory>
     {
-        private readonly string _dbConnectionString = "Host=localhost:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+        private readonly string _dbConnectionString = "Host=host.docker.internal:5432;Database=radixdlt_ledger;Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
 
         public TestInitializationFactory()
         {
