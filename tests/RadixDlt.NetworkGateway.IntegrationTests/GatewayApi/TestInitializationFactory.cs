@@ -114,6 +114,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
                     var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
+                    dbReadyOnlyContext.Database.EnsureDeleted();
+
                     // This function will also run migrations!
                     dbReadyOnlyContext.Database.EnsureCreated();
 
