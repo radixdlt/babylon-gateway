@@ -17,7 +17,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 
     <!-- PUBLIC NUGET: Non-Microsoft -->
-   <PackageVersion Include="FluentAssertions" Version="6.7.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.7.0" />
     <PackageVersion Include="FluentValidation" Version="11.2.0" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.1" />
     <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
