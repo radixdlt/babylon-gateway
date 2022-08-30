@@ -80,7 +80,7 @@ public interface INodeWorkersRunnerFactory
 /// Creates a DI Scope for the Node, and initialises the NodeConfigProvider with the initial settings.
 /// It then creates the NodeWorkersRunner, which takes on responsibility for disposing the scope when it's done.
 /// </summary>
-public class NodeWorkersRunnerFactory : INodeWorkersRunnerFactory
+internal class NodeWorkersRunnerFactory : INodeWorkersRunnerFactory
 {
     private readonly ILogger<NodeWorkersRunner> _logger;
     private readonly IServiceProvider _services;

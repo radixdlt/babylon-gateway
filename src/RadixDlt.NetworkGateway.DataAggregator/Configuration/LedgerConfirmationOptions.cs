@@ -69,7 +69,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public record LedgerConfirmationOptions
+public sealed record LedgerConfirmationOptions
 {
     /// <summary>
     /// Gets or sets CommitRequiresNodeQuorumTrustProportion.

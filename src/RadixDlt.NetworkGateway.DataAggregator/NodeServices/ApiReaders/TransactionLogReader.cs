@@ -84,7 +84,7 @@ public interface ITransactionLogReaderObserver
     ValueTask GetTransactionsFailed(string nodeName, Exception exception);
 }
 
-public class TransactionLogReader : ITransactionLogReader
+internal class TransactionLogReader : ITransactionLogReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly TransactionsApi _transactionsApi;

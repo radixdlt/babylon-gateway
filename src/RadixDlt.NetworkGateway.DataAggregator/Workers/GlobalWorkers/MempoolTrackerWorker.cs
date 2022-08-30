@@ -78,7 +78,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 /// <summary>
 /// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
 /// </summary>
-public class MempoolTrackerWorker : GlobalWorker
+public sealed class MempoolTrackerWorker : GlobalWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(

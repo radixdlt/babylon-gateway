@@ -69,7 +69,7 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public class NetworkOptions
+public sealed class NetworkOptions
 {
     [ConfigurationKeyName("NetworkName")]
     public string NetworkName { get; set; } = null!;
@@ -84,7 +84,7 @@ public class NetworkOptions
     public string? CoreApiHttpProxyAddress { get; set; }
 }
 
-public record CoreApiNode
+public sealed record CoreApiNode
 {
     /// <summary>
     /// If false, the node should not be used.

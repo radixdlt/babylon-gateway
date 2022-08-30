@@ -79,7 +79,7 @@ public interface ICoreApiProvider
     NetworkApi NetworkApi { get; }
 }
 
-public class CoreApiProvider : ICoreApiProvider
+internal class CoreApiProvider : ICoreApiProvider
 {
     public ConstructionApi ConstructionApi { get; }
 

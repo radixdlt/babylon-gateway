@@ -89,7 +89,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 ///
 /// Only needed when we care about tracking transactions which weren't submitted by the network.
 /// </summary>
-public class NodeMempoolFullTransactionReaderWorker : NodeWorker
+public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(

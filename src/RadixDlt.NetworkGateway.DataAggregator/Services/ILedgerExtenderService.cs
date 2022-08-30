@@ -79,12 +79,12 @@ public interface ILedgerExtenderService
     Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
 }
 
-public record ConsistentLedgerExtension(
+public sealed record ConsistentLedgerExtension(
     TransactionSummary ParentSummary,
     List<CommittedTransactionData> TransactionData
 );
 
-public record CommitTransactionsReport(
+public sealed record CommitTransactionsReport(
     int TransactionsCommittedCount,
     TransactionSummary FinalTransaction,
     long RawTxnPersistenceMs,

@@ -74,4 +74,4 @@ public interface IMempoolPrunerServiceObserver
     ValueTask PreMempoolTransactionPruned(int count);
 }
 
-public record MempoolStatusCount(string Status, int Count);
+public sealed record MempoolStatusCount(string Status, int Count);

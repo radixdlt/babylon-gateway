@@ -84,7 +84,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 /// <summary>
 /// Responsible for syncing the mempool from a node.
 /// </summary>
-public class NodeMempoolTransactionIdsReaderWorker : NodeWorker
+public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(

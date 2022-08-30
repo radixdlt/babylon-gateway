@@ -72,7 +72,7 @@ public interface INodeConfigProvider
     public CoreApiNode CoreApiNode { get; set; }
 }
 
-public class NodeConfigProvider : INodeConfigProvider
+internal class NodeConfigProvider : INodeConfigProvider
 {
     private CoreApiNode? _nodeAppSettings;
 

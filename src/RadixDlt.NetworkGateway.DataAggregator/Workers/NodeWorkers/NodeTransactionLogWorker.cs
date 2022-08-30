@@ -83,7 +83,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 /// <summary>
 /// Responsible for syncing the transaction stream from a node.
 /// </summary>
-public class NodeTransactionLogWorker : NodeWorker
+public sealed class NodeTransactionLogWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(

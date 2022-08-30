@@ -68,7 +68,7 @@ using RadixDlt.NetworkGateway.Commons.Configuration;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public class MonitoringOptions
+public sealed class MonitoringOptions
 {
     [ConfigurationKeyName("StartupGracePeriodSeconds")]
     public int StartupGracePeriodSeconds { get; set; } = 10;

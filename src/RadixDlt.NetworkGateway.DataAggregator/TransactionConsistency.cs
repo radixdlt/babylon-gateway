@@ -67,7 +67,7 @@ using RadixDlt.NetworkGateway.Commons.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
+namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class TransactionConsistency
 {

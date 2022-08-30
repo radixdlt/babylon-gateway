@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 /// An Exception thrown when we attempt to commit a transaction which is inconsistent with the transactions before it.
 /// This suggests an error with the DataAggregator.
 /// </summary>
-public class InvalidLedgerCommitException : Exception
+public sealed class InvalidLedgerCommitException : Exception
 {
     public InvalidLedgerCommitException(string message)
         : base(message)

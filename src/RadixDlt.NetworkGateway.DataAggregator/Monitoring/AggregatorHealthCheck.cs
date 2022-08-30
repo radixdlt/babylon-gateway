@@ -73,7 +73,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
-public class AggregatorHealthCheck : IHealthCheck
+internal class AggregatorHealthCheck : IHealthCheck
 {
     private static readonly LogLimiter _unhealthyLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 

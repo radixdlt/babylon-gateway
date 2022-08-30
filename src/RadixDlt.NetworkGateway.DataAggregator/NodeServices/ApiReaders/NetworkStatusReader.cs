@@ -84,7 +84,7 @@ public interface INetworkStatusReaderObserver
     ValueTask GetNetworkStatusFailed(string nodeName, Exception exception);
 }
 
-public class NetworkStatusReader : INetworkStatusReader
+internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly NetworkApi _networkApi;

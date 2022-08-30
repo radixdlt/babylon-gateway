@@ -76,7 +76,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
-public class NodeNetworkConfigurationInitializer : NodeInitializer
+public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
 {
     private readonly IOptionsMonitor<NetworkOptions> _networkGatewayDataAggregatorOptionsMonitor;
     private readonly INetworkConfigurationReader _networkConfigurationReader;

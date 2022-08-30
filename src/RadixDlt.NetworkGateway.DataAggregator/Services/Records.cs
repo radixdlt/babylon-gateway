@@ -67,7 +67,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public record TransactionSummary(
+public sealed record TransactionSummary(
     long StateVersion,
     long Epoch,
     long IndexInEpoch,
@@ -83,12 +83,12 @@ public record TransactionSummary(
     DateTimeOffset NormalizedRoundTimestamp
 );
 
-public record CommittedTransactionData(
+public sealed record CommittedTransactionData(
     CommittedTransaction CommittedTransaction,
     TransactionSummary TransactionSummary,
     byte[] TransactionContents
 );
 
-public record SyncTargetCarrier(
+public sealed record SyncTargetCarrier(
     long TargetStateVersion
 );

@@ -78,7 +78,7 @@ public interface INetworkConfigurationReader
     Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
 }
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
+internal class NetworkConfigurationReader : INetworkConfigurationReader
 {
     private readonly NetworkApi _networkApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
