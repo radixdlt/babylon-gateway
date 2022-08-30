@@ -115,6 +115,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
                     var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
+                    dbReadyOnlyContext.Database.EnsureCreated();
+
                     try
                     {
                         DbSeedHelper.InitializeDbForTests(dbReadyOnlyContext);
@@ -125,6 +127,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     }
 
                     var dbMigrationsContext = scope.ServiceProvider.GetRequiredService<MigrationsDbContext>();
+
+                    dbReadyOnlyContext.Database.EnsureCreated();
 
                     try
                     {
