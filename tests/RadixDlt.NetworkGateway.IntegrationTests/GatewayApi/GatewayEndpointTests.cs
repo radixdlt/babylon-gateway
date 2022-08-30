@@ -90,7 +90,11 @@ public class GatewayEndpointTests
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
         payload.GatewayApi.ShouldNotBeNull();
+
+        payload.GatewayApi._Version.ShouldNotBeNull();
         payload.GatewayApi._Version.Should().Be("2.0.0");
+
+        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
         payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
     }
 }
