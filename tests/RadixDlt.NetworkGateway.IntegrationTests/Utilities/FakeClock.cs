@@ -62,86 +62,30 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
 using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+using System;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 
-[Collection("TestsInitialization")]
-public class TransactionEndpointTests : IClassFixture<TestInitializationFactory>
+public class FakeClock : IClock
 {
-    private HttpClient _client;
+    private DateTimeOffset _fakeNow;
 
-    public TransactionEndpointTests(TestInitializationFactory factory)
+    public FakeClock()
     {
-        _client = factory.CreateClient();
+        // arbitrary value, no special meaning behind it; just something that's constant across tests
+        _fakeNow = new DateTimeOffset(2020, 6, 1, 12, 0, 0, TimeSpan.Zero);
     }
 
-    [Fact]
-    public async Task TestTransactionRecent()
+    public FakeClock(DateTimeOffset fakeNow)
     {
-        var payload = await GetRecentTransactions(_client);
-
-        payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
-        payload.LedgerState._Version.Should().Be(1);
-        payload.Transactions.Count.Should().BeGreaterThan(0);
+        _fakeNow = fakeNow;
     }
 
-    [Fact]
-    public async Task TestTransactionStatus()
+    public DateTimeOffset UtcNow => _fakeNow;
+
+    public void Advance(TimeSpan timeSpan)
     {
-        // Arrange
-        var recentTransactions = await GetRecentTransactions(_client);
-        var transactionIdentifier = recentTransactions.Transactions[0].TransactionIdentifier;
-
-        // Act
-        string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await _client.PostAsync("/transaction/status", content);
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
-
-        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
-        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
-        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
-    }
-
-    [Fact(Skip ="Valid transaction payload is required")]
-    public async Task TestTransactionSubmit()
-    {
-        // Arrange
-        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        // Act
-        HttpResponseMessage response = await _client.PostAsync("/transaction/submit", content);
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
-
-        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
-    }
-
-    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
-    {
-        using HttpResponseMessage response = await client.PostAsync(
-            "/transaction/recent",
-            JsonContent.Create(new RecentTransactionsRequest()));
-
-        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
-
-        payload.Transactions.ShouldNotBeNull();
-
-        return payload;
+        _fakeNow += timeSpan;
     }
 }
