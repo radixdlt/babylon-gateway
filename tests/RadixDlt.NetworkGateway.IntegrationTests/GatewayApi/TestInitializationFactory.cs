@@ -64,7 +64,6 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -115,6 +114,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
                     var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
+                    // This function will also run migrations!
                     dbReadyOnlyContext.Database.EnsureCreated();
 
                     try
@@ -124,17 +124,6 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                     catch (Exception ex)
                     {
                         logger.LogError(ex, $"An error occurred when initializing the database for tests. Error: {ex.Message}");
-                    }
-
-                    var dbMigrationsContext = scope.ServiceProvider.GetRequiredService<MigrationsDbContext>();
-
-                    try
-                    {
-                        dbMigrationsContext.Database.Migrate();
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, $"Applying migration failed. Error: {ex.Message}");
                     }
                 }
 
