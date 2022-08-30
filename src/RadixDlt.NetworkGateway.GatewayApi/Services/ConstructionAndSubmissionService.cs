@@ -190,11 +190,13 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
     {
         var coreBuildResponse = await BuildTransaction(request, ledgerState, token);
 
-        var coreParseResponse = await _coreApiHandler.ParseTransaction(new CoreModel.ConstructionParseRequest(
+        var parseRequest = new CoreModel.ConstructionParseRequest(
             networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
             transaction: coreBuildResponse.UnsignedTransaction,
             signed: false
-        ), token);
+        );
+
+        var coreParseResponse = await _coreApiHandler.ParseTransaction(parseRequest, token);
 
         var unsignedTransactionPayload = StringExtensions.ConvertFromHex(coreBuildResponse.UnsignedTransaction);
         var payloadToSign = StringExtensions.ConvertFromHex(coreBuildResponse.PayloadToSign);
@@ -309,11 +311,13 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
     {
         try
         {
-            return await _coreApiHandler.ParseTransaction(new CoreModel.ConstructionParseRequest(
+            var request = new CoreModel.ConstructionParseRequest(
                 networkIdentifier: _coreApiHandler.GetNetworkIdentifier(),
                 transaction: signedTransaction.AsString,
                 signed: true
-            ), token);
+            );
+
+            return await _coreApiHandler.ParseTransaction(request, token);
         }
         catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
         {
