@@ -65,11 +65,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Exceptions;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Utilities;
-using RadixDlt.NetworkGateway.Common.Workers;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Exceptions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Utilities;
+using RadixDlt.NetworkGateway.Commons.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -83,7 +83,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 /// <summary>
 /// Responsible for syncing the transaction stream from a node.
 /// </summary>
-public class NodeTransactionLogWorker : NodeWorker
+public sealed class NodeTransactionLogWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(

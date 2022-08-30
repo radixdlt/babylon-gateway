@@ -76,7 +76,7 @@ public interface ICoreApiProvider
     ConstructionApi ConstructionApi { get; }
 }
 
-public class CoreApiProvider : ICoreApiProvider
+internal class CoreApiProvider : ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 

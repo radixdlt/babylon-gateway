@@ -63,17 +63,18 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Model;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
@@ -94,16 +95,18 @@ internal class TransactionQuerier : ITransactionQuerier
         _mempoolQuerier = mempoolQuerier;
     }
 
-    public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState)
+    public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
+        RecentTransactionPageRequest request,
+        Gateway.LedgerState atLedgerState,
+        Gateway.LedgerState? fromLedgerState,
+        CancellationToken token = default)
     {
-        var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, atLedgerState, fromLedgerState);
+        var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, atLedgerState, fromLedgerState, token);
         var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
             ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
             : null;
 
-        var transactions = await GetTransactions(
-            transactionStateVersionsAndOneMore.Take(request.PageSize).ToList()
-        );
+        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
 
         if (fromLedgerState != null)
         {
@@ -113,25 +116,26 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
+    public async Task<TransactionPageWithTotal> GetAccountTransactions(
+        AccountTransactionPageRequest request,
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default)
     {
-        var totalCount = await CountAccountTransactions(request.AccountAddress, ledgerState);
-        var transactionStateVersionsAndOneMore = await GetAccountTransactionStateVersions(request, ledgerState);
+        var totalCount = await CountAccountTransactions(request.AccountAddress, ledgerState, token);
+        var transactionStateVersionsAndOneMore = await GetAccountTransactionStateVersions(request, ledgerState, token);
         var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
             ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
             : null;
 
-        var transactions = await GetTransactions(
-            transactionStateVersionsAndOneMore.Take(request.PageSize).ToList()
-        );
+        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
 
         return new TransactionPageWithTotal(totalCount, nextCursor, transactions);
     }
 
     public async Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
         ValidatedTransactionIdentifier transactionIdentifier,
-        Gateway.LedgerState ledgerState
-    )
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default)
     {
         var stateVersion = await _dbContext.LedgerTransactions
             .Where(lt =>
@@ -143,21 +147,22 @@ internal class TransactionQuerier : ITransactionQuerier
                 )
             )
             .Select(lt => lt.ResultantStateVersion)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(token);
 
         return stateVersion == 0
             ? null :
-            (await GetTransactions(new List<long> { stateVersion })).First();
+            (await GetTransactions(new List<long> { stateVersion }, token)).First();
     }
 
     public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier
+        ValidatedTransactionIdentifier transactionIdentifier,
+        CancellationToken token = default
     )
     {
         // We lookup the mempool transaction using the _submissionTrackingService which is bound to the
         // ReadWriteDbContext so that it gets the most recent details -- to ensure that submitted transactions
         // are immediately shown as pending.
-        var mempoolTransaction = await _mempoolQuerier.GetMempoolTransaction(transactionIdentifier.Bytes);
+        var mempoolTransaction = await _mempoolQuerier.GetMempoolTransaction(transactionIdentifier.Bytes, token);
 
         if (mempoolTransaction is null)
         {
@@ -193,7 +198,7 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState)
+    private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState, CancellationToken token)
     {
         return await _dbContext.AccountTransactions
             .Where(at =>
@@ -201,10 +206,14 @@ internal class TransactionQuerier : ITransactionQuerier
                 && at.ResultantStateVersion <= ledgerState._Version
                 && !at.LedgerTransaction.IsStartOfEpoch
             )
-            .CountAsync();
+            .CountAsync(token);
     }
 
-    private async Task<List<long>> GetRecentUserTransactionStateVersions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState)
+    private async Task<List<long>> GetRecentUserTransactionStateVersions(
+        RecentTransactionPageRequest request,
+        Gateway.LedgerState atLedgerState,
+        Gateway.LedgerState? fromLedgerState,
+        CancellationToken token)
     {
         if (fromLedgerState != null)
         {
@@ -220,7 +229,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 .OrderBy(at => at.ResultantStateVersion)
                 .Take(request.PageSize + 1)
                 .Select(at => at.ResultantStateVersion)
-                .ToListAsync();
+                .ToListAsync(token);
         }
         else
         {
@@ -234,11 +243,14 @@ internal class TransactionQuerier : ITransactionQuerier
                 .OrderByDescending(at => at.ResultantStateVersion)
                 .Take(request.PageSize + 1)
                 .Select(at => at.ResultantStateVersion)
-                .ToListAsync();
+                .ToListAsync(token);
         }
     }
 
-    private async Task<List<long>> GetAccountTransactionStateVersions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState)
+    private async Task<List<long>> GetAccountTransactionStateVersions(
+        AccountTransactionPageRequest request,
+        Gateway.LedgerState ledgerState,
+        CancellationToken token)
     {
         var stateVersionUpperBound = request.Cursor?.StateVersionBoundary ?? ledgerState._Version;
 
@@ -251,17 +263,17 @@ internal class TransactionQuerier : ITransactionQuerier
             .OrderByDescending(at => at.ResultantStateVersion)
             .Take(request.PageSize + 1)
             .Select(at => at.ResultantStateVersion)
-            .ToListAsync();
+            .ToListAsync(token);
     }
 
-    private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions)
+    private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
     {
         var transactions = await _dbContext.LedgerTransactions
             .Where(lt => transactionStateVersions.Contains(lt.ResultantStateVersion))
             .Include(lt => lt.RawTransaction)
             .OrderByDescending(lt => lt.ResultantStateVersion)
             .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
-            .ToListAsync();
+            .ToListAsync(token);
 
         var gatewayTransactions = new List<Gateway.TransactionInfo>();
         foreach (var ledgerTransaction in transactions)

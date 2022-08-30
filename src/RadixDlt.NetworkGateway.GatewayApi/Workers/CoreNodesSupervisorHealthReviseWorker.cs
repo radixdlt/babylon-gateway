@@ -63,8 +63,8 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Workers;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Workers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Threading;
@@ -72,7 +72,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Workers;
 
-public class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
+public sealed class CoreNodesSupervisorStatusReviseWorker : LoopedWorkerBase
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ConstantDelayStrategy(

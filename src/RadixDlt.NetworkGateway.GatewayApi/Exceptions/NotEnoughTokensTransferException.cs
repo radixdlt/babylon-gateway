@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class NotEnoughTokensForTransferException : ValidationException
+public sealed class NotEnoughTokensForTransferException : ValidationException
 {
     public NotEnoughTokensForTransferException(TokenAmount requestedAmount, TokenAmount availableAmount)
         : base(new NotEnoughTokensForTransferError(requestedAmount, availableAmount), GetErrorMessage(requestedAmount, availableAmount))

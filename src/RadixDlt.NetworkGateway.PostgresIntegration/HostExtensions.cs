@@ -8,12 +8,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 public static class HostExtensions
 {
-    public static async Task ExecutePostgresMigrations(this IHost host)
+    public static async Task ExecutePostgresMigrations(this IHost host, bool wipeDatabase = false)
     {
         using var scope = host.Services.CreateScope();
 
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<MigrationsDbContext>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<MigrationsDbContext>();
+
+        if (wipeDatabase)
+        {
+            logger.LogInformation("Starting database wipe");
+
+            await dbContext.Database.EnsureDeletedAsync();
+
+            logger.LogInformation("Database wipe completed");
+        }
 
         logger.LogInformation("Starting database migrations if required");
 

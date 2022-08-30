@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class TransactionNotFoundException : NotFoundException
+public sealed class TransactionNotFoundException : NotFoundException
 {
     public TransactionNotFoundException(TransactionIdentifier transactionIdentifier)
         : base(new TransactionNotFoundError(transactionIdentifier), "Transaction not found")

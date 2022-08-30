@@ -64,8 +64,8 @@
 
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
@@ -84,7 +84,7 @@ public interface ITransactionLogReaderObserver
     ValueTask GetTransactionsFailed(string nodeName, Exception exception);
 }
 
-public class TransactionLogReader : ITransactionLogReader
+internal class TransactionLogReader : ITransactionLogReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly TransactionsApi _transactionsApi;

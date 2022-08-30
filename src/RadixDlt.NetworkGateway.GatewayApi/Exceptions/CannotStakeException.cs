@@ -66,7 +66,7 @@ using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class CannotStakeException : ValidationException
+public sealed class CannotStakeException : ValidationException
 {
     public CannotStakeException(Gateway.AccountIdentifier owner, Gateway.AccountIdentifier user)
         : base(new Gateway.CannotStakeError(owner, user), BuildErrorMessage(owner, user))

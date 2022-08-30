@@ -65,7 +65,6 @@
 using FluentValidation.TestHelper;
 using RadixDlt.NetworkGateway.GatewayApi.Validators;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.UnitTests.Common;
 using System;
 using Xunit;
 

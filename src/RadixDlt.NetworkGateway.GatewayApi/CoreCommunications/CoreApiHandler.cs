@@ -63,7 +63,7 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Net.Http;
@@ -78,13 +78,13 @@ public interface ICoreApiHandler
 
     CoreApiNode GetCoreNodeConnectedTo();
 
-    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request);
+    Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default);
 
-    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request);
+    Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default);
 
-    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request);
+    Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default);
 
-    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request);
+    Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default);
 
     Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
 }
@@ -93,7 +93,7 @@ public interface ICoreApiHandler
 /// This should be Scoped to the request, so it picks up a fresh HttpClient per request.
 /// By default, this selects a random healthy Core API to handle the request.
 /// </summary>
-public class CoreApiHandler : ICoreApiHandler
+internal class CoreApiHandler : ICoreApiHandler
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ICoreApiProvider _coreApiProvider;
@@ -117,24 +117,24 @@ public class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.CoreApiNode;
     }
 
-    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request)
+    public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request, token));
     }
 
-    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request)
+    public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request, token));
     }
 
-    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request)
+    public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request, token));
     }
 
-    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request)
+    public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default)
     {
-        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request));
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request, token));
     }
 
     public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)

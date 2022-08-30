@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 
@@ -74,7 +74,7 @@ public enum NotSyncedUpRequestType
     Construction,
 }
 
-public class NotSyncedUpException : KnownGatewayErrorException
+public sealed class NotSyncedUpException : KnownGatewayErrorException
 {
     private NotSyncedUpException(NotSyncedUpError gatewayError, string userFacingMessage)
         : base(500, gatewayError, userFacingMessage)

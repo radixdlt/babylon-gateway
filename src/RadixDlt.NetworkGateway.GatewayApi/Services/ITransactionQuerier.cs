@@ -64,6 +64,7 @@
 
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -71,22 +72,29 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ITransactionQuerier
 {
-    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(RecentTransactionPageRequest request, Gateway.LedgerState atLedgerState, Gateway.LedgerState? fromLedgerState);
+    Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
+        RecentTransactionPageRequest request,
+        Gateway.LedgerState atLedgerState,
+        Gateway.LedgerState? fromLedgerState,
+        CancellationToken token = default);
 
-    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState);
+    Task<TransactionPageWithTotal> GetAccountTransactions(
+        AccountTransactionPageRequest request,
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
         ValidatedTransactionIdentifier transactionIdentifier,
-        Gateway.LedgerState ledgerState
-    );
+        Gateway.LedgerState ledgerState,
+        CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier
-    );
+        ValidatedTransactionIdentifier transactionIdentifier,
+        CancellationToken token = default);
 }
 
 [DataContract]
-public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
+public sealed record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
 {
     [DataMember(Name = "v", EmitDefaultValue = false)]
     public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
@@ -102,24 +110,24 @@ public record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
     }
 }
 
-public record TransactionPageWithTotal(
+public sealed record TransactionPageWithTotal(
     long TotalRecords,
     CommittedTransactionPaginationCursor? NextPageCursor,
     List<Gateway.TransactionInfo> Transactions
 );
 
-public record TransactionPageWithoutTotal(
+public sealed record TransactionPageWithoutTotal(
     CommittedTransactionPaginationCursor? NextPageCursor,
     List<Gateway.TransactionInfo> Transactions
 );
 
-public record AccountTransactionPageRequest(
+public sealed record AccountTransactionPageRequest(
     ValidatedAccountAddress AccountAddress,
     CommittedTransactionPaginationCursor? Cursor,
     int PageSize
 );
 
-public record RecentTransactionPageRequest(
+public sealed record RecentTransactionPageRequest(
     CommittedTransactionPaginationCursor? Cursor,
     int PageSize
 );

@@ -64,8 +64,8 @@
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Utilities;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -73,7 +73,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
-public class AggregatorHealthCheck : IHealthCheck
+internal class AggregatorHealthCheck : IHealthCheck
 {
     private static readonly LogLimiter _unhealthyLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 

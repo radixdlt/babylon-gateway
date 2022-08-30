@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
@@ -82,7 +82,7 @@ public interface ICoreNodeHealthChecker
     Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken);
 }
 
-public record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
+public sealed record CoreNodeHealthResult(Dictionary<CoreNodeStatus, List<Configuration.CoreApiNode>> CoreApiNodesByStatus);
 
 // Using explicit integers for enum values
 // because they're used for ordering the nodes (from best to worst).
@@ -98,7 +98,7 @@ public enum CoreNodeStatus
 /// and a LedgerStateQuerier (which is a scoped service, as it contains a DataContext) - this service should thus be
 /// scoped to a unit of work.
 /// </summary>
-public class CoreNodeHealthChecker : ICoreNodeHealthChecker
+internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 {
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
@@ -228,7 +228,7 @@ public class CoreNodeHealthChecker : ICoreNodeHealthChecker
         var timeoutSeconds = 5;
         try
         {
-            var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            using var timeoutCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
             using var sharedCancellationTokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationToken,

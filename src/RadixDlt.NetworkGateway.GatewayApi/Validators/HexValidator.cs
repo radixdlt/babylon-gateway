@@ -69,7 +69,7 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class HexValidator<T> : PropertyValidator<T, string?>
+public sealed class HexValidator<T> : PropertyValidator<T, string?>
 {
     public override string Name => "HexValidator";
 

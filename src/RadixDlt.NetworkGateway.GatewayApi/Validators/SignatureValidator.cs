@@ -63,12 +63,12 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Common;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class SignatureValidator : AbstractValidator<Signature>
+internal class SignatureValidator : AbstractValidator<Signature>
 {
     public SignatureValidator()
     {

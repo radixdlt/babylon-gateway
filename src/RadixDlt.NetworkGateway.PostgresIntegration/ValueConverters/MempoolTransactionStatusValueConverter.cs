@@ -1,4 +1,4 @@
-using RadixDlt.NetworkGateway.Common.Model;
+using RadixDlt.NetworkGateway.Commons.Model;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 

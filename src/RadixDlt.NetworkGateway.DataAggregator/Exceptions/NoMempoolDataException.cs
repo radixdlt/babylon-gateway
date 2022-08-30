@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 /// This exception is thrown when we haven't managed to recently synced any mempool data from any Core API nodes.
 /// It is typically thrown if the aggregator is struggling to connect to a full node.
 /// </summary>
-public class NoMempoolDataException : Exception
+public sealed class NoMempoolDataException : Exception
 {
     public NoMempoolDataException(string message)
         : base(message)

@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
@@ -82,7 +82,7 @@ public interface ICoreNodesSelectorService
     Task ReviseCoreNodesHealth(CancellationToken cancellationToken);
 }
 
-public class CoreNodesSelectorService : ICoreNodesSelectorService
+internal class CoreNodesSelectorService : ICoreNodesSelectorService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IEnumerable<CoreNodeStatus> _usableStatusesFromBestToWorst;

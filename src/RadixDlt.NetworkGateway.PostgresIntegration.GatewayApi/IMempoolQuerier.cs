@@ -63,11 +63,12 @@
  */
 
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal interface IMempoolQuerier
 {
-    Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash);
+    Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash, CancellationToken token = default);
 }

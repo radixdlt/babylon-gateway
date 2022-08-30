@@ -70,9 +70,9 @@ using CoreApi = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public record FullTransactionData(byte[] Id, DateTimeOffset SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
+public sealed record FullTransactionData(byte[] Id, DateTimeOffset SeenAt, byte[] Payload, CoreApi.Transaction Transaction);
 
-public record NodeMempoolHashes
+public sealed record NodeMempoolHashes
 {
     public HashSet<byte[]> TransactionHashes { get; }
 

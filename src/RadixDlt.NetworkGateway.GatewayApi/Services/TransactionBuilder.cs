@@ -66,14 +66,15 @@ using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Common.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public record MappedTransaction(
+public sealed record MappedTransaction(
     string TransactionManifest, // TODO - Or something? Possibly need to have some way of serializing manifests for signing
     Dictionary<string, TokenAmount> BeforeAccountBalancesByRri,
     Dictionary<string, TokenAmount> AccountBalanceChangesByRri
@@ -82,7 +83,7 @@ public record MappedTransaction(
 /// <summary>
 /// A stateful class for building a transaction and checking it's valid against the current version of state.
 /// </summary>
-public class TransactionBuilder
+internal class TransactionBuilder
 {
     private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
@@ -110,19 +111,19 @@ public class TransactionBuilder
     /// <summary>
     /// Should only be called once per instance of TransactionBuilder.
     /// </summary>
-    public async Task<MappedTransaction> MapAndValidateActions(List<Gateway.Action> requestActions)
+    public async Task<MappedTransaction> MapAndValidateActions(List<Gateway.Action> requestActions, CancellationToken token = default)
     {
         // TODO - This will probably need to actually create and compile the manifest?
         var fakeManifest = string.Join(", ", requestActions.Select(a => a.Type));
 
-        await Task.Delay(1); // Fix for compile warning in this placeholder method
+        await Task.Delay(1, token); // Fix for compile warning in this placeholder method
 
         return new MappedTransaction(fakeManifest, _feePayerBeforeBalances, _feePayerBalanceChanges);
     }
 
-    private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action)
+    private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action, CancellationToken token = default)
     {
-        await Task.Delay(1); // Fix for compile warning in this placeholder method
+        await Task.Delay(1, token); // Fix for compile warning in this placeholder method
         return action switch
         {
             /*

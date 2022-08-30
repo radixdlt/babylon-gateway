@@ -66,7 +66,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class MessageTooLongException : ValidationException
+public sealed class MessageTooLongException : ValidationException
 {
     public MessageTooLongException(int lengthLimit, int attemptedLength)
         : base(new MessageTooLongError(lengthLimit: lengthLimit, attemptedLength: attemptedLength), GenerateErrorMessage(lengthLimit, attemptedLength))

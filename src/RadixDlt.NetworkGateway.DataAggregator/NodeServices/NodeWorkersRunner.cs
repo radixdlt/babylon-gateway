@@ -64,9 +64,9 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Exceptions;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Exceptions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 using System;
 using System.Collections.Generic;
@@ -90,7 +90,7 @@ public enum NodeWorkersRunnerStatus
 /// <summary>
 /// Note - this is created directly and not injected by DI - as it manages the NodeScope as well as the workers.
 /// </summary>
-public class NodeWorkersRunner : IDisposable
+public sealed class NodeWorkersRunner : IDisposable
 {
     public NodeWorkersRunnerStatus Status
     {

@@ -67,7 +67,7 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class TransactionSubmitRequestValidator : AbstractValidator<TransactionSubmitRequest>
+internal class TransactionSubmitRequestValidator : AbstractValidator<TransactionSubmitRequest>
 {
     public TransactionSubmitRequestValidator()
     {

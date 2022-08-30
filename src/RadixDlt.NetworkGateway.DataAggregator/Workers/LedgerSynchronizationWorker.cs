@@ -72,7 +72,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers;
 
-public class LedgerSynchronizationWorker : BackgroundService
+public sealed class LedgerSynchronizationWorker : BackgroundService
 {
     private readonly DistributedLockService _distributedLockService;
     private readonly IOptionsMonitor<NetworkOptions> _optionsMonitor;
@@ -121,7 +121,7 @@ public class LedgerSynchronizationWorker : BackgroundService
     }
 }
 
-public class DistributedLockService : IDisposable
+public sealed class DistributedLockService : IDisposable
 {
     private CancellationTokenSource? _cts;
 

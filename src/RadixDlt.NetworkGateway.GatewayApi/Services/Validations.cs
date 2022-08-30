@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Addressing;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
@@ -98,16 +98,16 @@ public interface IValidations
     int ExtractValidIntInBoundInclusive(string capitalizedFieldDescriptor, int input, int lowerBound, int upperBound);
 }
 
-public record ValidatedTokenAmount(string Rri, Common.Numerics.TokenAmount Amount, ResourceAddress ResourceAddress);
-public record ValidatedResourceAddress(string Rri, ResourceAddress ResourceAddress);
-public record ValidatedAccountAddress(string Address, AccountAddress ByteAccountAddress);
-public record ValidatedValidatorAddress(string Address, ValidatorAddress ByteValidatorAddress);
-public record ValidatedTransactionIdentifier(string AsString, byte[] Bytes);
-public record ValidatedPublicKey(string AsString, byte[] Bytes);
-public record ValidatedHex(string AsString, byte[] Bytes);
-public record ValidatedSymbol(string AsString);
+public sealed record ValidatedTokenAmount(string Rri, Commons.Numerics.TokenAmount Amount, ResourceAddress ResourceAddress);
+public sealed record ValidatedResourceAddress(string Rri, ResourceAddress ResourceAddress);
+public sealed record ValidatedAccountAddress(string Address, AccountAddress ByteAccountAddress);
+public sealed record ValidatedValidatorAddress(string Address, ValidatorAddress ByteValidatorAddress);
+public sealed record ValidatedTransactionIdentifier(string AsString, byte[] Bytes);
+public sealed record ValidatedPublicKey(string AsString, byte[] Bytes);
+public sealed record ValidatedHex(string AsString, byte[] Bytes);
+public sealed record ValidatedSymbol(string AsString);
 
-public class Validations : IValidations
+internal class Validations : IValidations
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
@@ -225,7 +225,7 @@ public class Validations : IValidations
     public ValidatedTokenAmount ExtractValidTokenAmount(TokenAmount actionAmount)
     {
         var validatedResourceAddress = ExtractValidResourceAddress(actionAmount.TokenIdentifier);
-        var tokenAmount = Common.Numerics.TokenAmount.FromSubUnitsString(actionAmount.Value);
+        var tokenAmount = Commons.Numerics.TokenAmount.FromSubUnitsString(actionAmount.Value);
         if (tokenAmount.IsNaN())
         {
             if (actionAmount.Value.Contains('.'))

@@ -66,7 +66,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
 
-public class DataAggregatorBuilder
+public sealed class DataAggregatorBuilder
 {
     public DataAggregatorBuilder(IServiceCollection services, IHttpClientBuilder coreApiHttpClientBuilder)
     {

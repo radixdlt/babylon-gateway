@@ -134,6 +134,7 @@ public class GatewayApiStartup
             .UseCors()
             .UseHttpMetrics()
             .UseRouting()
+            .UseRequestTimeout()
             .UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/health");

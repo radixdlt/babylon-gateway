@@ -66,7 +66,7 @@ using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class BelowMinimumStakeException : ValidationException
+public sealed class BelowMinimumStakeException : ValidationException
 {
     public BelowMinimumStakeException(Gateway.TokenAmount requestedAmount, Gateway.TokenAmount minimumAmount)
         : base(new Gateway.BelowMinimumStakeError(requestedAmount, minimumAmount), BuildErrorMessage(requestedAmount, minimumAmount))

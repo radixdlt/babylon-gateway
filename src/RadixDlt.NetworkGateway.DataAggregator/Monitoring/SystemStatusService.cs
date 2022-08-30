@@ -63,8 +63,8 @@
  */
 
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using System;
 using System.Collections.Generic;
@@ -89,9 +89,9 @@ public interface ISystemStatusService
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
+public sealed record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
 
-public class SystemStatusService : ISystemStatusService
+internal class SystemStatusService : ISystemStatusService
 {
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
     private readonly IEnumerable<ISystemStatusServiceObserver> _observers;

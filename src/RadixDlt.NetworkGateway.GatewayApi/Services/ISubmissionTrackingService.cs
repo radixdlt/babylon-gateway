@@ -62,8 +62,9 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Model;
+using RadixDlt.NetworkGateway.Commons.Model;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
@@ -76,14 +77,16 @@ public interface ISubmissionTrackingService
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        CoreModel.ConstructionParseResponse parseResponse
+        CoreModel.ConstructionParseResponse parseResponse,
+        CancellationToken token = default
     );
 
     Task MarkAsFailed(
         byte[] transactionIdentifierHash,
         MempoolTransactionFailureReason failureReason,
-        string failureExplanation
+        string failureExplanation,
+        CancellationToken token = default
     );
 }
 
-public record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
+public sealed record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);

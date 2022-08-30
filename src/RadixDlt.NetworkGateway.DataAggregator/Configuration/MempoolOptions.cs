@@ -64,12 +64,12 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using RadixDlt.NetworkGateway.Common.Configuration;
+using RadixDlt.NetworkGateway.Commons.Configuration;
 using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public record MempoolOptions
+public sealed record MempoolOptions
 {
     // If enabling this option, you should note the following:
     //   Transactions not submitted by this gateway will never be marked as failed

@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Common.Addressing;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading;
@@ -83,14 +83,14 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
+public sealed record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
 
 public interface ICapturedConfigProvider
 {
     Task<CapturedConfig> CaptureConfiguration();
 }
 
-public class NetworkConfigurationProvider : INetworkConfigurationProvider
+internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
     private readonly object _writeLock = new();
     private CapturedConfig? _capturedConfig;

@@ -68,7 +68,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public class Base64Validator<T> : PropertyValidator<T, string?>
+public sealed class Base64Validator<T> : PropertyValidator<T, string?>
 {
     public override string Name => "Base64Validator";
 

@@ -64,8 +64,8 @@
 
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common.CoreCommunications;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -78,7 +78,7 @@ public interface INetworkConfigurationReader
     Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
 }
 
-public class NetworkConfigurationReader : INetworkConfigurationReader
+internal class NetworkConfigurationReader : INetworkConfigurationReader
 {
     private readonly NetworkApi _networkApi;
     private readonly INodeConfigProvider _nodeConfigProvider;

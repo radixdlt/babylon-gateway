@@ -76,7 +76,7 @@ public record struct TransactionOpLocator(
 /// <summary>
 /// An Exception thrown when we attempt to commit a transaction which DataAggregator doesn't understand.
 /// </summary>
-public class InvalidTransactionException : Exception
+public sealed class InvalidTransactionException : Exception
 {
     public InvalidTransactionException(
         TransactionOpLocator transactionOpLocator,

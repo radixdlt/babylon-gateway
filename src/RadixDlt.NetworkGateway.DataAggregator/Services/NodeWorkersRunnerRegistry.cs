@@ -63,7 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Common.Extensions;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using System;
@@ -81,7 +81,7 @@ public interface INodeWorkersRunnerRegistry
     Task StopAllWorkers(CancellationToken cancellationToken = default);
 }
 
-public class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
+internal class NodeWorkersRunnerRegistry : INodeWorkersRunnerRegistry
 {
     private const int ErrorStartupBlockTimeSeconds = 20;
 

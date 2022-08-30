@@ -67,7 +67,7 @@ using System;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-public class InternalServerException : KnownGatewayErrorException
+public sealed class InternalServerException : KnownGatewayErrorException
 {
     private InternalServerException(InternalServerError internalServerError, string userFacingMessage, string internalMessage)
         : base(500, internalServerError, userFacingMessage, internalMessage)

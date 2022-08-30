@@ -64,14 +64,14 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using RadixDlt.NetworkGateway.Common.Configuration;
+using RadixDlt.NetworkGateway.Commons.Configuration;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Configuration;
 
-public record TransactionAssertionsOptions
+public sealed record TransactionAssertionsOptions
 {
     /// <summary>
     /// Due to changes of parsing certain Core API responses by the Open API library between before/after the 1.1.1

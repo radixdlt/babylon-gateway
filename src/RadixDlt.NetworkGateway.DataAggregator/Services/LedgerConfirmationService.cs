@@ -65,12 +65,11 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Common;
-using RadixDlt.NetworkGateway.Common.Extensions;
-using RadixDlt.NetworkGateway.Common.Utilities;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.DataAggregator.LedgerExtension;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using System;
 using System.Collections.Concurrent;
@@ -94,13 +93,13 @@ public interface ILedgerConfirmationService
     TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
 }
 
-public record TransactionsRequested(long StateVersionExclusiveLowerBound, long StateVersionInclusiveUpperBound);
+public sealed record TransactionsRequested(long StateVersionExclusiveLowerBound, long StateVersionInclusiveUpperBound);
 
 /// <summary>
 /// This service is responsible for controlling the NodeTransactionLogWorkers, and deciding on / committing when
 /// a quorum is reached.
 /// </summary>
-public class LedgerConfirmationService : ILedgerConfirmationService
+public sealed class LedgerConfirmationService : ILedgerConfirmationService
 {
     private static readonly LogLimiter _noExtensionLogLimiter = new(TimeSpan.FromSeconds(5), LogLevel.Warning, LogLevel.Debug);
 
@@ -553,7 +552,7 @@ public class LedgerConfirmationService : ILedgerConfirmationService
         return ledgerTips.Max();
     }
 
-    public record TrustWeightingReport(
+    public sealed record TrustWeightingReport(
         int TotalTransactionNodes,
         int TotalSufficientlySyncedUpNodes,
         decimal TrustWeightingAvailableAcrossAllNodes,
