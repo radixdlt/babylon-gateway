@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
@@ -93,17 +94,17 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("recent")]
-    public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request)
+    public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token)
     {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, HttpContext.RequestAborted);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, HttpContext.RequestAborted);
+        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, token);
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
             Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
             PageSize: request.Limit ?? 10
         );
 
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, HttpContext.RequestAborted);
+        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
 
         // NB - We don't return a total here as we don't have an index on user transactions
         return new RecentTransactionsResponse(
@@ -114,19 +115,19 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("status")]
-    public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request)
+    public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
     {
         var transactionIdentifier = request.TransactionIdentifier.Hash.ToTransactionIdentifier();
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, HttpContext.RequestAborted);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState, HttpContext.RequestAborted);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState, token);
 
         if (committedTransaction != null)
         {
             return new TransactionStatusResponse(ledgerState, committedTransaction);
         }
 
-        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier, HttpContext.RequestAborted);
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier, token);
 
         if (mempoolTransaction != null)
         {
@@ -137,23 +138,23 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("build")]
-    public async Task<TransactionBuildResponse> Build(TransactionBuildRequest request)
+    public async Task<TransactionBuildResponse> Build(TransactionBuildRequest request, CancellationToken token)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier, HttpContext.RequestAborted);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier, token);
         return new TransactionBuildResponse(
-            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState, HttpContext.RequestAborted)
+            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState, token)
         );
     }
 
     [HttpPost("finalize")]
-    public async Task<TransactionFinalizeResponse> Finalize(TransactionFinalizeRequest request)
+    public async Task<TransactionFinalizeResponse> Finalize(TransactionFinalizeRequest request, CancellationToken token)
     {
-        return await _constructionAndSubmissionService.HandleFinalizeRequest(request, HttpContext.RequestAborted);
+        return await _constructionAndSubmissionService.HandleFinalizeRequest(request, token);
     }
 
     [HttpPost("submit")]
-    public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request)
+    public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token)
     {
-        return await _constructionAndSubmissionService.HandleSubmitRequest(request, HttpContext.RequestAborted);
+        return await _constructionAndSubmissionService.HandleSubmitRequest(request, token);
     }
 }
