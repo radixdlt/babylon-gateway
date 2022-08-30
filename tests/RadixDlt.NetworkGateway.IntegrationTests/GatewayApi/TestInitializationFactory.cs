@@ -128,8 +128,6 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
 
                     var dbMigrationsContext = scope.ServiceProvider.GetRequiredService<MigrationsDbContext>();
 
-                    dbReadyOnlyContext.Database.EnsureCreated();
-
                     try
                     {
                         dbMigrationsContext.Database.Migrate();
