@@ -91,64 +91,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// TransactionPreviewResponseLogsInner
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "TransactionPreviewResponse_logs_inner")]
+    public partial class TransactionPreviewResponseLogsInner : IEquatable<TransactionPreviewResponseLogsInner>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewResponseLogsInner" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected TransactionPreviewResponseLogsInner() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewResponseLogsInner" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="level">level (required).</param>
+        /// <param name="message">message (required).</param>
+        public TransactionPreviewResponseLogsInner(string level = default(string), string message = default(string))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "level" is required (not null)
+            if (level == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("level is a required property for TransactionPreviewResponseLogsInner and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.Level = level;
+            // to ensure "message" is required (not null)
+            if (message == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("message is a required property for TransactionPreviewResponseLogsInner and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
-            {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
-            }
-            this.Transactions = transactions;
+            this.Message = message;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets Level
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        [DataMember(Name = "level", IsRequired = true, EmitDefaultValue = true)]
+        public string Level { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets Message
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
-
-        /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
-        /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        [DataMember(Name = "message", IsRequired = true, EmitDefaultValue = true)]
+        public string Message { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class TransactionPreviewResponseLogsInner {\n");
+            sb.Append("  Level: ").Append(Level).Append("\n");
+            sb.Append("  Message: ").Append(Message).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as TransactionPreviewResponseLogsInner);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if TransactionPreviewResponseLogsInner instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewResponseLogsInner to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(TransactionPreviewResponseLogsInner input)
         {
             if (input == null)
             {
@@ -197,20 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.Level == input.Level ||
+                    (this.Level != null &&
+                    this.Level.Equals(input.Level))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
-                ) && 
-                (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.Message == input.Message ||
+                    (this.Message != null &&
+                    this.Message.Equals(input.Message))
                 );
         }
 
@@ -223,17 +200,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.Level != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Level.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.Message != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
-                }
-                if (this.Transactions != null)
-                {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
                 }
                 return hashCode;
             }

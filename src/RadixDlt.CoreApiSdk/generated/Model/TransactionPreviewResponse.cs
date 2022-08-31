@@ -91,64 +91,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// TransactionPreviewResponse
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "TransactionPreviewResponse")]
+    public partial class TransactionPreviewResponse : IEquatable<TransactionPreviewResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected TransactionPreviewResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="receipt">receipt (required).</param>
+        /// <param name="resourceChanges">resourceChanges (required).</param>
+        /// <param name="logs">logs (required).</param>
+        public TransactionPreviewResponse(TransactionReceipt receipt = default(TransactionReceipt), List<ResourceChange> resourceChanges = default(List<ResourceChange>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "receipt" is required (not null)
+            if (receipt == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("receipt is a required property for TransactionPreviewResponse and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.Receipt = receipt;
+            // to ensure "resourceChanges" is required (not null)
+            if (resourceChanges == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("resourceChanges is a required property for TransactionPreviewResponse and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.ResourceChanges = resourceChanges;
+            // to ensure "logs" is required (not null)
+            if (logs == null)
             {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("logs is a required property for TransactionPreviewResponse and cannot be null");
             }
-            this.Transactions = transactions;
+            this.Logs = logs;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets Receipt
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionReceipt Receipt { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets ResourceChanges
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
+        [DataMember(Name = "resource_changes", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceChange> ResourceChanges { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// Gets or Sets Logs
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        [DataMember(Name = "logs", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionPreviewResponseLogsInner> Logs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +154,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class TransactionPreviewResponse {\n");
+            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  ResourceChanges: ").Append(ResourceChanges).Append("\n");
+            sb.Append("  Logs: ").Append(Logs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +178,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as TransactionPreviewResponse);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if TransactionPreviewResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(TransactionPreviewResponse input)
         {
             if (input == null)
             {
@@ -197,20 +194,21 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.Receipt == input.Receipt ||
+                    (this.Receipt != null &&
+                    this.Receipt.Equals(input.Receipt))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
+                    this.ResourceChanges == input.ResourceChanges ||
+                    this.ResourceChanges != null &&
+                    input.ResourceChanges != null &&
+                    this.ResourceChanges.SequenceEqual(input.ResourceChanges)
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.Logs == input.Logs ||
+                    this.Logs != null &&
+                    input.Logs != null &&
+                    this.Logs.SequenceEqual(input.Logs)
                 );
         }
 
@@ -223,17 +221,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.Receipt != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.ResourceChanges != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceChanges.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this.Logs != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Logs.GetHashCode();
                 }
                 return hashCode;
             }

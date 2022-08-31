@@ -91,64 +91,63 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// NotarizedTransaction
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "NotarizedTransaction")]
+    public partial class NotarizedTransaction : IEquatable<NotarizedTransaction>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected NotarizedTransaction() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="hash">The transaction hash, hex-encoded. (required).</param>
+        /// <param name="signedIntent">signedIntent (required).</param>
+        /// <param name="notarySignature">The notary signature, hex-encoded. (required).</param>
+        public NotarizedTransaction(string hash = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), string notarySignature = default(string))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "hash" is required (not null)
+            if (hash == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.Hash = hash;
+            // to ensure "signedIntent" is required (not null)
+            if (signedIntent == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("signedIntent is a required property for NotarizedTransaction and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.SignedIntent = signedIntent;
+            // to ensure "notarySignature" is required (not null)
+            if (notarySignature == null)
             {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("notarySignature is a required property for NotarizedTransaction and cannot be null");
             }
-            this.Transactions = transactions;
+            this.NotarySignature = notarySignature;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// The transaction hash, hex-encoded.
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        /// <value>The transaction hash, hex-encoded.</value>
+        [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
+        public string Hash { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets SignedIntent
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
+        [DataMember(Name = "signed_intent", IsRequired = true, EmitDefaultValue = true)]
+        public SignedTransactionIntent SignedIntent { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// The notary signature, hex-encoded.
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        /// <value>The notary signature, hex-encoded.</value>
+        [DataMember(Name = "notary_signature", IsRequired = true, EmitDefaultValue = true)]
+        public string NotarySignature { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +156,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class NotarizedTransaction {\n");
+            sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
+            sb.Append("  NotarySignature: ").Append(NotarySignature).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +180,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as NotarizedTransaction);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if NotarizedTransaction instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of NotarizedTransaction to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(NotarizedTransaction input)
         {
             if (input == null)
             {
@@ -197,20 +196,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.Hash == input.Hash ||
+                    (this.Hash != null &&
+                    this.Hash.Equals(input.Hash))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
+                    this.SignedIntent == input.SignedIntent ||
+                    (this.SignedIntent != null &&
+                    this.SignedIntent.Equals(input.SignedIntent))
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.NotarySignature == input.NotarySignature ||
+                    (this.NotarySignature != null &&
+                    this.NotarySignature.Equals(input.NotarySignature))
                 );
         }
 
@@ -223,17 +221,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.Hash != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Hash.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.SignedIntent != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignedIntent.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this.NotarySignature != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NotarySignature.GetHashCode();
                 }
                 return hashCode;
             }
