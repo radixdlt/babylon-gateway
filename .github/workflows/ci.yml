@@ -23,7 +23,8 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
+        # Add --verbosity normal to get more noisy logs if required for debugging
+        run: dotnet test --no-restore
 
   publish-docker:
     runs-on: ubuntu-22.04
