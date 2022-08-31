@@ -75,6 +75,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
@@ -269,33 +270,34 @@ internal class MetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleSubmitRequest(TransactionSubmitRequest request)
+    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request)
     {
         _transactionSubmitRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleSubmitRequest(TransactionSubmitRequest request, TransactionSubmitResponse response)
+    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response)
     {
         _transactionSubmitSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmitRequestFailed(TransactionSubmitRequest request, Exception exception)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitErrorCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
-
-        return ValueTask.CompletedTask;
-    }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ValueTask IConstructionAndSubmissionServiceObserver.ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
+    // {
+    //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
+    //
+    //     return ValueTask.CompletedTask;
+    // }
 
     ValueTask IConstructionAndSubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
     {
@@ -325,26 +327,27 @@ internal class MetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionDuplicate(ValidatedHex signedTransaction, ConstructionSubmitResponse result)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionSucceeded(ValidatedHex signedTransaction, ConstructionSubmitResponse result)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
-    {
-        _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
-
-        return ValueTask.CompletedTask;
-    }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ValueTask IConstructionAndSubmissionServiceObserver.SubmissionDuplicate(ValidatedHex signedTransaction, ConstructionSubmitResponse result)
+    // {
+    //     _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+    //
+    //     return ValueTask.CompletedTask;
+    // }
+    //
+    // ValueTask IConstructionAndSubmissionServiceObserver.SubmissionSucceeded(ValidatedHex signedTransaction, ConstructionSubmitResponse result)
+    // {
+    //     _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
+    //
+    //     return ValueTask.CompletedTask;
+    // }
+    //
+    // ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
+    // {
+    //     _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
+    //
+    //     return ValueTask.CompletedTask;
+    // }
 
     ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
     {

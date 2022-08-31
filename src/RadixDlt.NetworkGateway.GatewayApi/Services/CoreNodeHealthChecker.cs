@@ -235,14 +235,11 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
                     timeoutCancellationTokenSource.Token
                 );
 
-            var networkStatusResponse =
-                await coreApiProvider.NetworkApi.NetworkStatusPostAsync(
-                    new CoreApiModel.NetworkStatusRequest(
-                        new CoreApiModel.NetworkIdentifier(_networkOptionsMonitor.CurrentValue.NetworkName)),
-                    sharedCancellationTokenSource.Token
-                );
+            var networkStatusResponse = await coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync(sharedCancellationTokenSource.Token);
 
-            return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion, null);
+            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+            // return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion, null);
+            return (coreApiNode, 321, null);
         }
         catch (TaskCanceledException)
         {

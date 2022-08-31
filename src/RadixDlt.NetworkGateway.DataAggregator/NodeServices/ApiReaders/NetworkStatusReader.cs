@@ -76,8 +76,16 @@ namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface INetworkStatusReader
 {
-    Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
+    Task<TmpNetworkStatusResponse> GetNetworkStatus(CancellationToken token);
 }
+
+public record CurrentStateIdentifier(long StateVersion, string TransactionAccumulator);
+
+public record SyncStatus(long TargetStateVersion);
+
+public record TmpNetworkStatusResponse(CurrentStateIdentifier CurrentStateIdentifier, SyncStatus SyncStatus);
 
 public interface INetworkStatusReaderObserver
 {
@@ -87,7 +95,7 @@ public interface INetworkStatusReaderObserver
 internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly NetworkApi _networkApi;
+    private readonly StatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
@@ -96,28 +104,34 @@ internal class NetworkStatusReader : INetworkStatusReader
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
         _observers = observers;
-        _networkApi = coreApiProvider.NetworkApi;
+        _statusApi = coreApiProvider.StatusApi;
     }
 
-    public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
-    {
-        try
-        {
-            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _networkApi
-                    .NetworkStatusPostAsync(
-                        new NetworkStatusRequest(
-                            networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
-                        ),
-                        token
-                    )
-            );
-        }
-        catch (Exception ex)
-        {
-            await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
+    // {
+    //     try
+    //     {
+    //         return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+    //             await _statusApi
+    //                 .NetworkStatusPostAsync(
+    //                     new NetworkStatusRequest(
+    //                         networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
+    //                     ),
+    //                     token
+    //                 )
+    //         );
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+    //
+    //         throw;
+    //     }
+    // }
 
-            throw;
-        }
+    public Task<TmpNetworkStatusResponse> GetNetworkStatus(CancellationToken token)
+    {
+        return Task.FromResult(new TmpNetworkStatusResponse(new(123, "22aa00"), new(321)));
     }
 }

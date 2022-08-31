@@ -66,7 +66,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Utilities;
 using RadixDlt.NetworkGateway.Commons.Workers;
@@ -224,27 +223,11 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         return transactions;
     }
 
-    private async Task<List<CommittedTransaction>> FetchTransactionsOrEmptyList(
-        long fromStateVersion,
-        int transactionsToPull,
-        CancellationToken cancellationToken
-    )
+    private async Task<List<CommittedTransaction>> FetchTransactionsOrEmptyList(long fromStateVersion, int transactionsToPull, CancellationToken token)
     {
         var transactionLogReader = _services.GetRequiredService<ITransactionLogReader>();
-        try
-        {
-            var transactionsResponse = await transactionLogReader.GetTransactions(
-                fromStateVersion,
-                transactionsToPull,
-                cancellationToken
-            );
-            return transactionsResponse.Transactions;
-        }
-        catch (WrappedCoreApiException<StateIdentifierNotFoundError>)
-        {
-            // We're requested transactions on top of state version X, but this particular full node doesn't know about
-            // state version X yet (because, say, it's not synced up to that point), so it returns a StateIdentifierNotFoundError.
-            return new List<CommittedTransaction>();
-        }
+        var transactionsResponse = await transactionLogReader.GetTransactions(fromStateVersion, transactionsToPull, token);
+
+        return transactionsResponse.Transactions;
     }
 }
