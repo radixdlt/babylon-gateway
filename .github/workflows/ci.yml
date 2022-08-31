@@ -37,9 +37,11 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Unit tests
-        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.UnitTests
+        # Add --verbosity normal to get more noisy logs if required for debugging
+        run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
       - name: Integration tests
-        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.IntegrationTests
+        # Add --verbosity normal to get more noisy logs if required for debugging
+        run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.IntegrationTests
 
   publish-docker:
     runs-on: ubuntu-22.04
