@@ -73,16 +73,22 @@ public interface ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 
-    ConstructionApi ConstructionApi { get; }
+    public StatusApi StatusApi { get; }
+
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ConstructionApi ConstructionApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 
-    public ConstructionApi ConstructionApi { get; }
+    public StatusApi StatusApi { get; }
 
-    public NetworkApi NetworkApi { get; }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // public ConstructionApi ConstructionApi { get; }
+    //
+    // public NetworkApi NetworkApi { get; }
 
     public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
@@ -92,7 +98,8 @@ internal class CoreApiProvider : ICoreApiProvider
         }
 
         CoreApiNode = coreApiNode;
-        ConstructionApi = new ConstructionApi(httpClient, coreApiNode.CoreApiAddress);
-        NetworkApi = new NetworkApi(httpClient, coreApiNode.CoreApiAddress);
+        StatusApi = new StatusApi(httpClient, coreApiNode.CoreApiAddress);
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // ConstructionApi = new ConstructionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }
