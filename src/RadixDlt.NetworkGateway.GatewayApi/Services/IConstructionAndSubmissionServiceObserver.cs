@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -84,13 +85,14 @@ public interface IConstructionAndSubmissionServiceObserver
 
     ValueTask HandleFinalizeRequestFailed(TransactionFinalizeRequest request, Exception exception);
 
-    ValueTask PreHandleSubmitRequest(TransactionSubmitRequest request);
+    ValueTask PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request);
 
-    ValueTask PostHandleSubmitRequest(TransactionSubmitRequest request, TransactionSubmitResponse response);
+    ValueTask PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response);
 
-    ValueTask HandleSubmitRequestFailed(TransactionSubmitRequest request, Exception exception);
+    ValueTask HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ValueTask ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
 
     ValueTask ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException);
 
@@ -100,11 +102,12 @@ public interface IConstructionAndSubmissionServiceObserver
 
     ValueTask SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance);
 
-    ValueTask SubmissionDuplicate(ValidatedHex signedTransaction, ConstructionSubmitResponse result);
-
-    ValueTask SubmissionSucceeded(ValidatedHex signedTransaction, ConstructionSubmitResponse result);
-
-    ValueTask HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ValueTask SubmissionDuplicate(ValidatedHex signedTransaction, ConstructionSubmitResponse result);
+    //
+    // ValueTask SubmissionSucceeded(ValidatedHex signedTransaction, ConstructionSubmitResponse result);
+    //
+    // ValueTask HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
 
     ValueTask HandleSubmissionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException);
 

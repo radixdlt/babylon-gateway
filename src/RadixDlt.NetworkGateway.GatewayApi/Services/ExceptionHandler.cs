@@ -249,29 +249,30 @@ internal class ExceptionHandler : IExceptionHandler
          */
         return wrappedCoreApiException switch
         {
-            WrappedCoreApiException<AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
-                $"You attempted to increase validator fee by {ex.Error.AttemptedValidatorFeeIncrease}, larger than the maximum of {ex.Error.MaximumValidatorFeeIncrease}"
-            ),
-            WrappedCoreApiException<CoreModel.BelowMinimumStakeError> ex => new BelowMinimumStakeException(
-                requestedAmount: ex.Error.MinimumStake.AsGatewayTokenAmount(),
-                minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
-            ),
-            WrappedCoreApiException<FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
-            WrappedCoreApiException<CoreModel.InvalidPublicKeyError> ex => new InvalidPublicKeyException(
-                new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
-                "Invalid public key"
-            ),
-            WrappedCoreApiException<CoreModel.MessageTooLongError> ex => new MessageTooLongException(
-                ex.Error.MaximumMessageLength,
-                ex.Error.AttemptedMessageLength
-            ),
-            WrappedCoreApiException<PublicKeyNotSupportedError> ex => new InvalidPublicKeyException(
-                new Gateway.PublicKey(ex.Error.UnsupportedPublicKey.Hex),
-                "Public key is not supported"
-            ),
-            WrappedCoreApiException<CoreModel.TransactionNotFoundError> ex => new TransactionNotFoundException(
-                new Gateway.TransactionIdentifier(ex.Error.TransactionIdentifier.Hash)
-            ),
+            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+            // WrappedCoreApiException<AboveMaximumValidatorFeeIncreaseError> ex => InvalidRequestException.FromOtherError(
+            //     $"You attempted to increase validator fee by {ex.Error.AttemptedValidatorFeeIncrease}, larger than the maximum of {ex.Error.MaximumValidatorFeeIncrease}"
+            // ),
+            // WrappedCoreApiException<CoreModel.BelowMinimumStakeError> ex => new BelowMinimumStakeException(
+            //     requestedAmount: ex.Error.MinimumStake.AsGatewayTokenAmount(),
+            //     minimumAmount: ex.Error.MinimumStake.AsGatewayTokenAmount()
+            // ),
+            // WrappedCoreApiException<FeeConstructionError> ex => new CouldNotConstructFeesException(ex.Error.Attempts),
+            // WrappedCoreApiException<CoreModel.InvalidPublicKeyError> ex => new InvalidPublicKeyException(
+            //     new Gateway.PublicKey(ex.Error.InvalidPublicKey.Hex),
+            //     "Invalid public key"
+            // ),
+            // WrappedCoreApiException<CoreModel.MessageTooLongError> ex => new MessageTooLongException(
+            //     ex.Error.MaximumMessageLength,
+            //     ex.Error.AttemptedMessageLength
+            // ),
+            // WrappedCoreApiException<PublicKeyNotSupportedError> ex => new InvalidPublicKeyException(
+            //     new Gateway.PublicKey(ex.Error.UnsupportedPublicKey.Hex),
+            //     "Public key is not supported"
+            // ),
+            // WrappedCoreApiException<CoreModel.TransactionNotFoundError> ex => new TransactionNotFoundException(
+            //     new Gateway.TransactionIdentifier(ex.Error.TransactionIdentifier.Hash)
+            // ),
             _ => null,
         };
     }

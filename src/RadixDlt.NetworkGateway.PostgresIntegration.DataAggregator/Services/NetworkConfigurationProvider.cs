@@ -180,20 +180,28 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
     {
-        var hrps = networkConfiguration.Bech32HumanReadableParts;
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // var hrps = networkConfiguration.Bech32HumanReadableParts;
         return new NetworkConfiguration
         {
             NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
             NetworkAddressHrps = new NetworkAddressHrps
             {
-                AccountHrp = hrps.AccountHrp,
-                ResourceHrpSuffix = hrps.ResourceHrpSuffix,
-                ValidatorHrp = hrps.ValidatorHrp,
-                NodeHrp = hrps.NodeHrp,
+                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+                // AccountHrp = hrps.AccountHrp,
+                // ResourceHrpSuffix = hrps.ResourceHrpSuffix,
+                // ValidatorHrp = hrps.ValidatorHrp,
+                // NodeHrp = hrps.NodeHrp,
+                AccountHrp = networkConfiguration.NetworkHrpSuffix,
+                ResourceHrpSuffix = networkConfiguration.NetworkHrpSuffix,
+                ValidatorHrp = networkConfiguration.NetworkHrpSuffix,
+                NodeHrp = networkConfiguration.NetworkHrpSuffix,
             },
             WellKnownAddresses = new WellKnownAddresses
             {
-                XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
+                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+                // XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
+                XrdAddress = RadixBech32.GenerateXrdAddress(networkConfiguration.NetworkHrpSuffix),
             },
         };
     }

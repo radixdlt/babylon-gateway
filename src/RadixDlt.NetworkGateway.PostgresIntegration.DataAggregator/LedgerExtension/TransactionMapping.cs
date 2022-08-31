@@ -75,9 +75,11 @@ internal static class TransactionMapping
     {
         var (transaction, summary, _) = transactionData;
 
-        var fee = transaction.Metadata.Fee == null
-            ? TokenAmount.Zero
-            : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // var fee = transaction.Metadata.Fee == null
+        //     ? TokenAmount.Zero
+        //     : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
+        var fee = TokenAmount.Zero;
 
         return new LedgerTransaction(
             resultantStateVersion: summary.StateVersion,
@@ -85,7 +87,9 @@ internal static class TransactionMapping
             intentHash: summary.IntentHash,
             signedTransactionHash: summary.SignedTransactionHash,
             transactionAccumulator: summary.TransactionAccumulator,
-            message: transaction.Metadata.Message?.ConvertFromHex(),
+            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+            // message: transaction.Metadata.Message?.ConvertFromHex(),
+            message: null,
             feePaid: fee,
             epoch: summary.Epoch,
             indexInEpoch: summary.IndexInEpoch,
