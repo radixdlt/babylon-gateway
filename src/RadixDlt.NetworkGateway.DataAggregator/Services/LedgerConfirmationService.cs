@@ -228,7 +228,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
         foreach (var transaction in transactions)
         {
-            transactionStoreForNode[transaction.CommittedStateIdentifier.StateVersion] = transaction;
+            // TODO long.Parse is just temporary as we need something more robust; what's more StateVersion is string-encoded UNSIGNED long
+            transactionStoreForNode[long.Parse(transaction.StateVersion)] = transaction;
         }
     }
 
@@ -486,7 +487,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var groupedTransactions = transactionsWithTrust
-            .GroupBy(t => t.Transaction!.CommittedStateIdentifier.TransactionAccumulator)
+            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+            // .GroupBy(t => t.Transaction!.CommittedStateIdentifier.TransactionAccumulator)
+            .GroupBy(t => t.Transaction!.NotarizedTransaction.Hash) // TODO does it even makes sense?
             .Select(grouping => new TransactionClaim(
                 grouping.First().Transaction!,
                 grouping.Select(g => g.NodeName).ToList(),
@@ -515,12 +518,15 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             foreach (var transaction in transactions)
             {
                 var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction, _clock);
-                var contents = transaction.Metadata.Hex.ConvertFromHex();
 
-                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
-                TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
-
-                transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
+                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+                // var contents = transaction.Metadata.Hex.ConvertFromHex();
+                //
+                // TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
+                // TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
+                //
+                // transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
+                transactionData.Add(new CommittedTransactionData(transaction, summary, new byte[] { 1, 2, 4, 8 })); // TODO use real contents
                 currentParentSummary = summary;
             }
 

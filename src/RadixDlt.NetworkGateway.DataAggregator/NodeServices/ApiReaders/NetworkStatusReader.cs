@@ -132,6 +132,7 @@ internal class NetworkStatusReader : INetworkStatusReader
 
     public Task<TmpNetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-        return Task.FromResult(new TmpNetworkStatusResponse(new(123, "22aa00"), new(321)));
+        // TODO this must be read from node endpoint
+        return Task.FromResult(new TmpNetworkStatusResponse(new(1, "22aa00"), new(1)));
     }
 }

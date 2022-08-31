@@ -124,9 +124,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddHostedService<NodeConfigurationMonitorWorker>();
         services.AddHostedService<LedgerConfirmationWorker>();
-        services.AddHostedService<MempoolTrackerWorker>();
-        services.AddHostedService<MempoolResubmissionWorker>();
-        services.AddHostedService<MempoolPrunerWorker>();
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // services.AddHostedService<MempoolTrackerWorker>();
+        // services.AddHostedService<MempoolResubmissionWorker>();
+        // services.AddHostedService<MempoolPrunerWorker>();
     }
 
     private static void AddNodeScopedServices(IServiceCollection services)
