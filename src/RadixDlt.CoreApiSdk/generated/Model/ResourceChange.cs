@@ -91,64 +91,78 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// ResourceChange
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "ResourceChange")]
+    public partial class ResourceChange : IEquatable<ResourceChange>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="ResourceChange" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected ResourceChange() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="ResourceChange" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="resourceAddress">Bech32 resource address. (required).</param>
+        /// <param name="componentAddress">Bech32 component address. (required).</param>
+        /// <param name="vaultId">Vault ID, SBOR-encoded and then hex-encoded. (required).</param>
+        /// <param name="amount">The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number. (required).</param>
+        public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), string vaultId = default(string), string amount = default(string))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for ResourceChange and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.ResourceAddress = resourceAddress;
+            // to ensure "componentAddress" is required (not null)
+            if (componentAddress == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("componentAddress is a required property for ResourceChange and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.ComponentAddress = componentAddress;
+            // to ensure "vaultId" is required (not null)
+            if (vaultId == null)
             {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("vaultId is a required property for ResourceChange and cannot be null");
             }
-            this.Transactions = transactions;
+            this.VaultId = vaultId;
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for ResourceChange and cannot be null");
+            }
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Bech32 resource address.
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        /// <value>Bech32 resource address.</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Bech32 component address.
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
+        /// <value>Bech32 component address.</value>
+        [DataMember(Name = "component_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ComponentAddress { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// Vault ID, SBOR-encoded and then hex-encoded.
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        /// <value>Vault ID, SBOR-encoded and then hex-encoded.</value>
+        [DataMember(Name = "vault_id", IsRequired = true, EmitDefaultValue = true)]
+        public string VaultId { get; set; }
+
+        /// <summary>
+        /// The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number.
+        /// </summary>
+        /// <value>The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number.</value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +171,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class ResourceChange {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  ComponentAddress: ").Append(ComponentAddress).Append("\n");
+            sb.Append("  VaultId: ").Append(VaultId).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +196,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as ResourceChange);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if ResourceChange instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of ResourceChange to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(ResourceChange input)
         {
             if (input == null)
             {
@@ -197,20 +212,24 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
+                    this.ComponentAddress == input.ComponentAddress ||
+                    (this.ComponentAddress != null &&
+                    this.ComponentAddress.Equals(input.ComponentAddress))
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.VaultId == input.VaultId ||
+                    (this.VaultId != null &&
+                    this.VaultId.Equals(input.VaultId))
+                ) && 
+                (
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -223,17 +242,21 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.ComponentAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ComponentAddress.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this.VaultId != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultId.GetHashCode();
+                }
+                if (this.Amount != null)
+                {
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

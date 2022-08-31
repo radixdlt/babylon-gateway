@@ -91,64 +91,74 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// Transaction state updates
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "StateUpdates")]
+    public partial class StateUpdates : IEquatable<StateUpdates>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected StateUpdates() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="StateUpdates" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="downVirtualSubstates">downVirtualSubstates (required).</param>
+        /// <param name="upSubstates">upSubstates (required).</param>
+        /// <param name="downSubstates">downSubstates (required).</param>
+        /// <param name="newRoots">newRoots (required).</param>
+        public StateUpdates(List<string> downVirtualSubstates = default(List<string>), List<UpSubstate> upSubstates = default(List<UpSubstate>), List<DownSubstate> downSubstates = default(List<DownSubstate>), List<string> newRoots = default(List<string>))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "downVirtualSubstates" is required (not null)
+            if (downVirtualSubstates == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("downVirtualSubstates is a required property for StateUpdates and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.DownVirtualSubstates = downVirtualSubstates;
+            // to ensure "upSubstates" is required (not null)
+            if (upSubstates == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("upSubstates is a required property for StateUpdates and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.UpSubstates = upSubstates;
+            // to ensure "downSubstates" is required (not null)
+            if (downSubstates == null)
             {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("downSubstates is a required property for StateUpdates and cannot be null");
             }
-            this.Transactions = transactions;
+            this.DownSubstates = downSubstates;
+            // to ensure "newRoots" is required (not null)
+            if (newRoots == null)
+            {
+                throw new ArgumentNullException("newRoots is a required property for StateUpdates and cannot be null");
+            }
+            this.NewRoots = newRoots;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets DownVirtualSubstates
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        [DataMember(Name = "down_virtual_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> DownVirtualSubstates { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets UpSubstates
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
+        [DataMember(Name = "up_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<UpSubstate> UpSubstates { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// Gets or Sets DownSubstates
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        [DataMember(Name = "down_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<DownSubstate> DownSubstates { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NewRoots
+        /// </summary>
+        [DataMember(Name = "new_roots", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> NewRoots { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +167,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class StateUpdates {\n");
+            sb.Append("  DownVirtualSubstates: ").Append(DownVirtualSubstates).Append("\n");
+            sb.Append("  UpSubstates: ").Append(UpSubstates).Append("\n");
+            sb.Append("  DownSubstates: ").Append(DownSubstates).Append("\n");
+            sb.Append("  NewRoots: ").Append(NewRoots).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +192,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as StateUpdates);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if StateUpdates instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of StateUpdates to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(StateUpdates input)
         {
             if (input == null)
             {
@@ -197,20 +208,28 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.DownVirtualSubstates == input.DownVirtualSubstates ||
+                    this.DownVirtualSubstates != null &&
+                    input.DownVirtualSubstates != null &&
+                    this.DownVirtualSubstates.SequenceEqual(input.DownVirtualSubstates)
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
+                    this.UpSubstates == input.UpSubstates ||
+                    this.UpSubstates != null &&
+                    input.UpSubstates != null &&
+                    this.UpSubstates.SequenceEqual(input.UpSubstates)
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.DownSubstates == input.DownSubstates ||
+                    this.DownSubstates != null &&
+                    input.DownSubstates != null &&
+                    this.DownSubstates.SequenceEqual(input.DownSubstates)
+                ) && 
+                (
+                    this.NewRoots == input.NewRoots ||
+                    this.NewRoots != null &&
+                    input.NewRoots != null &&
+                    this.NewRoots.SequenceEqual(input.NewRoots)
                 );
         }
 
@@ -223,17 +242,21 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.DownVirtualSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DownVirtualSubstates.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.UpSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.UpSubstates.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this.DownSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DownSubstates.GetHashCode();
+                }
+                if (this.NewRoots != null)
+                {
+                    hashCode = (hashCode * 59) + this.NewRoots.GetHashCode();
                 }
                 return hashCode;
             }

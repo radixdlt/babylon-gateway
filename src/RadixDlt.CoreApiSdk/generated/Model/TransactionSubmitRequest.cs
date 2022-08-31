@@ -91,64 +91,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// TransactionSubmitRequest
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "TransactionSubmitRequest")]
+    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected TransactionSubmitRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="networkIdentifier">networkIdentifier (required).</param>
+        /// <param name="notarizedTransaction">A notarized transaction encoded in the Radix transaction format, and then hex encoded. (required).</param>
+        public TransactionSubmitRequest(NetworkIdentifier networkIdentifier = default(NetworkIdentifier), string notarizedTransaction = default(string))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "networkIdentifier" is required (not null)
+            if (networkIdentifier == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("networkIdentifier is a required property for TransactionSubmitRequest and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.NetworkIdentifier = networkIdentifier;
+            // to ensure "notarizedTransaction" is required (not null)
+            if (notarizedTransaction == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
-            {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
-            }
-            this.Transactions = transactions;
+            this.NotarizedTransaction = notarizedTransaction;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets NetworkIdentifier
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        [DataMember(Name = "network_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public NetworkIdentifier NetworkIdentifier { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// A notarized transaction encoded in the Radix transaction format, and then hex encoded.
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
-
-        /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
-        /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        /// <value>A notarized transaction encoded in the Radix transaction format, and then hex encoded.</value>
+        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
+        public string NotarizedTransaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +142,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class TransactionSubmitRequest {\n");
+            sb.Append("  NetworkIdentifier: ").Append(NetworkIdentifier).Append("\n");
+            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +165,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as TransactionSubmitRequest);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if TransactionSubmitRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(TransactionSubmitRequest input)
         {
             if (input == null)
             {
@@ -197,20 +181,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.NetworkIdentifier == input.NetworkIdentifier ||
+                    (this.NetworkIdentifier != null &&
+                    this.NetworkIdentifier.Equals(input.NetworkIdentifier))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
-                ) && 
-                (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.NotarizedTransaction == input.NotarizedTransaction ||
+                    (this.NotarizedTransaction != null &&
+                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
                 );
         }
 
@@ -223,17 +201,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.NetworkIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NetworkIdentifier.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.NotarizedTransaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
-                }
-                if (this.Transactions != null)
-                {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
                 }
                 return hashCode;
             }

@@ -91,64 +91,62 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// SignedTransactionIntent
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "SignedTransactionIntent")]
+    public partial class SignedTransactionIntent : IEquatable<SignedTransactionIntent>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="SignedTransactionIntent" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected SignedTransactionIntent() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="SignedTransactionIntent" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="hash">Signed transaction intent hash, hex-encoded. (required).</param>
+        /// <param name="intent">intent (required).</param>
+        /// <param name="intentSignatures">intentSignatures (required).</param>
+        public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<IntentSignature> intentSignatures = default(List<IntentSignature>))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "hash" is required (not null)
+            if (hash == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("hash is a required property for SignedTransactionIntent and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.Hash = hash;
+            // to ensure "intent" is required (not null)
+            if (intent == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("intent is a required property for SignedTransactionIntent and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.Intent = intent;
+            // to ensure "intentSignatures" is required (not null)
+            if (intentSignatures == null)
             {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("intentSignatures is a required property for SignedTransactionIntent and cannot be null");
             }
-            this.Transactions = transactions;
+            this.IntentSignatures = intentSignatures;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Signed transaction intent hash, hex-encoded.
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        /// <value>Signed transaction intent hash, hex-encoded.</value>
+        [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
+        public string Hash { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets Intent
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
+        [DataMember(Name = "intent", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionIntent Intent { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// Gets or Sets IntentSignatures
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        [DataMember(Name = "intent_signatures", IsRequired = true, EmitDefaultValue = true)]
+        public List<IntentSignature> IntentSignatures { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +155,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class SignedTransactionIntent {\n");
+            sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  Intent: ").Append(Intent).Append("\n");
+            sb.Append("  IntentSignatures: ").Append(IntentSignatures).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +179,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as SignedTransactionIntent);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if SignedTransactionIntent instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of SignedTransactionIntent to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(SignedTransactionIntent input)
         {
             if (input == null)
             {
@@ -197,20 +195,20 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.Hash == input.Hash ||
+                    (this.Hash != null &&
+                    this.Hash.Equals(input.Hash))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
+                    this.Intent == input.Intent ||
+                    (this.Intent != null &&
+                    this.Intent.Equals(input.Intent))
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.IntentSignatures == input.IntentSignatures ||
+                    this.IntentSignatures != null &&
+                    input.IntentSignatures != null &&
+                    this.IntentSignatures.SequenceEqual(input.IntentSignatures)
                 );
         }
 
@@ -223,17 +221,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.Hash != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Hash.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.Intent != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Intent.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this.IntentSignatures != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentSignatures.GetHashCode();
                 }
                 return hashCode;
             }
