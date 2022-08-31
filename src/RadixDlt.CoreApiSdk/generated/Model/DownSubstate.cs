@@ -91,64 +91,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// DownSubstate
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "DownSubstate")]
+    public partial class DownSubstate : IEquatable<DownSubstate>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected DownSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="substateId">SBOR-encoded and then hex-encoded substate ID. (required).</param>
+        /// <param name="substateHash">Substate hash. (required).</param>
+        /// <param name="version">A decimal 32-bit unsigned integer (required).</param>
+        public DownSubstate(string substateId = default(string), string substateHash = default(string), string version = default(string))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
+            // to ensure "substateId" is required (not null)
+            if (substateId == null)
             {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("substateId is a required property for DownSubstate and cannot be null");
             }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
+            this.SubstateId = substateId;
+            // to ensure "substateHash" is required (not null)
+            if (substateHash == null)
             {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("substateHash is a required property for DownSubstate and cannot be null");
             }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.SubstateHash = substateHash;
+            // to ensure "version" is required (not null)
+            if (version == null)
             {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("version is a required property for DownSubstate and cannot be null");
             }
-            this.Transactions = transactions;
+            this._Version = version;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// SBOR-encoded and then hex-encoded substate ID.
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        /// <value>SBOR-encoded and then hex-encoded substate ID.</value>
+        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateId { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// Substate hash.
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
+        /// <value>Substate hash.</value>
+        [DataMember(Name = "substate_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateHash { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// A decimal 32-bit unsigned integer
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        /// <value>A decimal 32-bit unsigned integer</value>
+        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
+        public string _Version { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +157,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class DownSubstate {\n");
+            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
+            sb.Append("  SubstateHash: ").Append(SubstateHash).Append("\n");
+            sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +181,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as DownSubstate);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if DownSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of DownSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(DownSubstate input)
         {
             if (input == null)
             {
@@ -197,20 +197,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.SubstateId == input.SubstateId ||
+                    (this.SubstateId != null &&
+                    this.SubstateId.Equals(input.SubstateId))
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
+                    this.SubstateHash == input.SubstateHash ||
+                    (this.SubstateHash != null &&
+                    this.SubstateHash.Equals(input.SubstateHash))
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this._Version == input._Version ||
+                    (this._Version != null &&
+                    this._Version.Equals(input._Version))
                 );
         }
 
@@ -223,17 +222,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
+                if (this.SubstateId != null)
                 {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
                 }
-                if (this.MaxStateVersion != null)
+                if (this.SubstateHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateHash.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this._Version != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 }
                 return hashCode;
             }

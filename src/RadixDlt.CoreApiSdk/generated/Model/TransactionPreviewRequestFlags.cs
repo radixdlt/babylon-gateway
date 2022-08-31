@@ -91,64 +91,30 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransactionsResponse
+    /// TransactionPreviewRequestFlags
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsResponse")]
-    public partial class CommittedTransactionsResponse : IEquatable<CommittedTransactionsResponse>, IValidatableObject
+    [DataContract(Name = "TransactionPreviewRequest_flags")]
+    public partial class TransactionPreviewRequestFlags : IEquatable<TransactionPreviewRequestFlags>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsResponse() { }
+        protected TransactionPreviewRequestFlags() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(string startStateVersion = default(string), string maxStateVersion = default(string), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="unlimitedLoan">unlimitedLoan (required).</param>
+        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool))
         {
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
-            {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
-            }
-            this.StartStateVersion = startStateVersion;
-            // to ensure "maxStateVersion" is required (not null)
-            if (maxStateVersion == null)
-            {
-                throw new ArgumentNullException("maxStateVersion is a required property for CommittedTransactionsResponse and cannot be null");
-            }
-            this.MaxStateVersion = maxStateVersion;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
-            {
-                throw new ArgumentNullException("transactions is a required property for CommittedTransactionsResponse and cannot be null");
-            }
-            this.Transactions = transactions;
+            this.UnlimitedLoan = unlimitedLoan;
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// Gets or Sets UnlimitedLoan
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
-
-        /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
-        /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string MaxStateVersion { get; set; }
-
-        /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
-        /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<CommittedTransaction> Transactions { get; set; }
+        [DataMember(Name = "unlimited_loan", IsRequired = true, EmitDefaultValue = true)]
+        public bool UnlimitedLoan { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -157,10 +123,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("class TransactionPreviewRequestFlags {\n");
+            sb.Append("  UnlimitedLoan: ").Append(UnlimitedLoan).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -181,15 +145,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsResponse);
+            return this.Equals(input as TransactionPreviewRequestFlags);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsResponse instances are equal
+        /// Returns true if TransactionPreviewRequestFlags instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsResponse to be compared</param>
+        /// <param name="input">Instance of TransactionPreviewRequestFlags to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsResponse input)
+        public bool Equals(TransactionPreviewRequestFlags input)
         {
             if (input == null)
             {
@@ -197,20 +161,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
-                ) && 
-                (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    (this.MaxStateVersion != null &&
-                    this.MaxStateVersion.Equals(input.MaxStateVersion))
-                ) && 
-                (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.UnlimitedLoan == input.UnlimitedLoan ||
+                    this.UnlimitedLoan.Equals(input.UnlimitedLoan)
                 );
         }
 
@@ -223,18 +175,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StartStateVersion != null)
-                {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
-                }
-                if (this.MaxStateVersion != null)
-                {
-                    hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
-                }
-                if (this.Transactions != null)
-                {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.UnlimitedLoan.GetHashCode();
                 return hashCode;
             }
         }

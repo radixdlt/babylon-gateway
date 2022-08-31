@@ -73,14 +73,48 @@
 
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations;
+using FileParameter = RadixDlt.CoreApiSdk.Client.FileParameter;
+using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 
-namespace RadixDlt.CoreApiSdk.Client
+namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// A delegate to ExceptionFactory method
+    /// The status of the transaction
     /// </summary>
-    /// <param name="methodName">Method name</param>
-    /// <param name="response">Response</param>
-    /// <returns>Exceptions</returns>
-    public delegate Exception ExceptionFactory(string methodName, IApiResponse response);
+    /// <value>The status of the transaction</value>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TransactionStatus
+    {
+        /// <summary>
+        /// Enum Succeeded for value: succeeded
+        /// </summary>
+        [EnumMember(Value = "succeeded")]
+        Succeeded = 1,
+
+        /// <summary>
+        /// Enum Failed for value: failed
+        /// </summary>
+        [EnumMember(Value = "failed")]
+        Failed = 2,
+
+        /// <summary>
+        /// Enum Rejected for value: rejected
+        /// </summary>
+        [EnumMember(Value = "rejected")]
+        Rejected = 3
+
+    }
+
 }
