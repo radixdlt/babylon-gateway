@@ -64,17 +64,16 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Prometheus;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
@@ -228,42 +227,42 @@ internal class MetricObserver :
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleBuildRequest(TransactionBuildRequest request, LedgerState ledgerState)
+    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState)
     {
         _transactionBuildRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleBuildRequest(TransactionBuildRequest request, LedgerState ledgerState, TransactionBuild response)
+    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, GatewayModel.TransactionBuild response)
     {
         _transactionBuildSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleBuildRequestFailed(TransactionBuildRequest request, LedgerState ledgerState, Exception exception)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleBuildRequestFailed(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, Exception exception)
     {
         _transactionBuildErrorCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleFinalizeRequest(TransactionFinalizeRequest request)
+    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request)
     {
         _transactionFinalizeRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleFinalizeRequest(TransactionFinalizeRequest request, TransactionFinalizeResponse response)
+    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, GatewayModel.TransactionFinalizeResponse response)
     {
         _transactionFinalizeSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleFinalizeRequestFailed(TransactionFinalizeRequest request, Exception exception)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleFinalizeRequestFailed(GatewayModel.TransactionFinalizeRequest request, Exception exception)
     {
         _transactionFinalizeErrorCount.Inc();
 
@@ -327,21 +326,21 @@ internal class MetricObserver :
         return ValueTask.CompletedTask;
     }
 
+    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask IConstructionAndSubmissionServiceObserver.SubmissionDuplicate(ValidatedHex signedTransaction, ConstructionSubmitResponse result)
-    // {
-    //     _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
-    //
-    //     return ValueTask.CompletedTask;
-    // }
-    //
-    // ValueTask IConstructionAndSubmissionServiceObserver.SubmissionSucceeded(ValidatedHex signedTransaction, ConstructionSubmitResponse result)
-    // {
-    //     _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
-    //
-    //     return ValueTask.CompletedTask;
-    // }
-    //
     // ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
     // {
     //     _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
@@ -349,28 +348,28 @@ internal class MetricObserver :
     //     return ValueTask.CompletedTask;
     // }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("invalid_transaction").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedPermanently(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedTimeout(ValidatedHex signedTransaction, OperationCanceledException operationCanceledException)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("request_timeout").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedUnknown(ValidatedHex signedTransaction, Exception exception)
+    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_error").Inc();
 

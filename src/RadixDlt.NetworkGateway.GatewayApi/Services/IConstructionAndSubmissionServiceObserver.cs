@@ -62,28 +62,27 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Exceptions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IConstructionAndSubmissionServiceObserver
 {
-    ValueTask PreHandleBuildRequest(TransactionBuildRequest request, LedgerState ledgerState);
+    ValueTask PreHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState);
 
-    ValueTask PostHandleBuildRequest(TransactionBuildRequest request, LedgerState ledgerState, TransactionBuild response);
+    ValueTask PostHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, GatewayModel.TransactionBuild response);
 
-    ValueTask HandleBuildRequestFailed(TransactionBuildRequest request, LedgerState ledgerState, Exception exception);
+    ValueTask HandleBuildRequestFailed(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, Exception exception);
 
-    ValueTask PreHandleFinalizeRequest(TransactionFinalizeRequest request);
+    ValueTask PreHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request);
 
-    ValueTask PostHandleFinalizeRequest(TransactionFinalizeRequest request, TransactionFinalizeResponse response);
+    ValueTask PostHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, GatewayModel.TransactionFinalizeResponse response);
 
-    ValueTask HandleFinalizeRequestFailed(TransactionFinalizeRequest request, Exception exception);
+    ValueTask HandleFinalizeRequestFailed(GatewayModel.TransactionFinalizeRequest request, Exception exception);
 
     ValueTask PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request);
 
@@ -102,18 +101,18 @@ public interface IConstructionAndSubmissionServiceObserver
 
     ValueTask SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance);
 
+    ValueTask SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
+
+    ValueTask SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
+
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask SubmissionDuplicate(ValidatedHex signedTransaction, ConstructionSubmitResponse result);
-    //
-    // ValueTask SubmissionSucceeded(ValidatedHex signedTransaction, ConstructionSubmitResponse result);
-    //
-    // ValueTask HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
+    // ValueTask HandleSubmissionFailedSubstateNotFound(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
 
-    ValueTask HandleSubmissionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
 
-    ValueTask HandleSubmissionFailedPermanently(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
 
-    ValueTask HandleSubmissionFailedTimeout(ValidatedHex signedTransaction, OperationCanceledException operationCanceledException);
+    ValueTask HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception);
 
-    ValueTask HandleSubmissionFailedUnknown(ValidatedHex signedTransaction, Exception exception);
+    ValueTask HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 }
