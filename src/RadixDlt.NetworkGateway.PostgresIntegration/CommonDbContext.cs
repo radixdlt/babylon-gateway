@@ -151,13 +151,6 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.PayloadHash);
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.IntentHash);
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.SignedTransactionHash);
-
-        modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);
 
         // Because ResultantStateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
@@ -171,6 +164,18 @@ internal abstract class CommonDbContext : DbContext
             .IsUnique()
             .HasFilter("is_user_transaction = true")
             .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_user_transactions");
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.PayloadHash)
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_payload_hash");
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.SignedTransactionHash)
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_signed_hash");
+
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.IntentHash)
+            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_intent_hash");
 
         // This index lets you quickly translate Time => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
@@ -195,10 +200,11 @@ internal abstract class CommonDbContext : DbContext
     private static void HookupMempoolTransactions(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MempoolTransaction>()
-            .HasAlternateKey(lt => lt.IntentHash);
+            .HasIndex(lt => lt.Status);
 
         modelBuilder.Entity<MempoolTransaction>()
-            .HasIndex(lt => lt.Status);
+            .HasIndex(lt => lt.IntentHash)
+            .HasDatabaseName($"IX_{nameof(MempoolTransaction).ToSnakeCase()}_intent_hash");
 
         // TODO - We should improve these indices to match the queries we actually need to make here
     }
