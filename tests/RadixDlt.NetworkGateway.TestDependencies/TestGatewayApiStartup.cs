@@ -72,19 +72,16 @@ namespace RadixDlt.NetworkGateway.TestDependencies;
 
 public class TestGatewayApiStartup
 {
-    public TestGatewayApiStartup(IConfiguration configuration)
-    {
-    }
-
     public void ConfigureServices(IServiceCollection services)
     {
-         services
+        services
+            .AddNetworkGatewayPostgresMigrations();
+
+        services
             .AddNetworkGatewayApi()
             .AddPostgresPersistence();
 
-         services.AddNetworkGatewayPostgresMigrations();
-
-         services
+        services
             .AddControllers()
             .AddNewtonsoftJson();
     }
