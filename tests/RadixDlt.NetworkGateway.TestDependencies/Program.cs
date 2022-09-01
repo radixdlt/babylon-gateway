@@ -82,10 +82,6 @@ public static class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder
-                    .ConfigureKestrel(o =>
-                    {
-                        o.AddServerHeader = false;
-                    })
                     .UseStartup<TestGatewayApiStartup>();
             });
 }
