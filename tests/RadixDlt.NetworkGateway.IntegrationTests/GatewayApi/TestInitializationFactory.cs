@@ -144,7 +144,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                         o.IgnoreNonSyncedNodes = false;
                         o.CoreApiNodes = new List<CoreApiNode>()
                         {
-                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
+                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333/core", Name = "node1", Enabled = true },
                         };
                     }
                 );
