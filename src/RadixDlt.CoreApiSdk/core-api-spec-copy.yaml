@@ -463,7 +463,7 @@ components:
           description: The network suffix used for bech32 hrps used for addressing.
     ################################
     # REQUEST: /transaction/submit #
-    ################################
+    ################################CoreModel
     TransactionSubmitRequest:
       type: object
       required:
