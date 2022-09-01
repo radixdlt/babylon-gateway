@@ -77,14 +77,14 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20220901113751_InitialCreate")]
+    [Migration("20220822143917_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.8")
+                .HasAnnotation("ProductVersion", "6.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -327,18 +327,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("ResultantStateVersion");
 
+                    b.HasAlternateKey("IntentHash");
+
+                    b.HasAlternateKey("PayloadHash");
+
+                    b.HasAlternateKey("SignedTransactionHash");
+
                     b.HasAlternateKey("TransactionAccumulator");
 
                     b.HasIndex("Epoch")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_epoch_starts")
                         .HasFilter("is_start_of_epoch = true");
-
-                    b.HasIndex("IntentHash")
-                        .HasDatabaseName("IX_ledger_transaction_intent_hash");
-
-                    b.HasIndex("PayloadHash")
-                        .HasDatabaseName("IX_ledger_transaction_payload_hash");
 
                     b.HasIndex("ResultantStateVersion")
                         .IsUnique()
@@ -347,9 +347,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("RoundTimestamp")
                         .HasDatabaseName("IX_ledger_transaction_round_timestamp");
-
-                    b.HasIndex("SignedTransactionHash")
-                        .HasDatabaseName("IX_ledger_transaction_signed_hash");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
@@ -436,8 +433,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("PayloadHash");
 
-                    b.HasIndex("IntentHash")
-                        .HasDatabaseName("IX_mempool_transaction_intent_hash");
+                    b.HasAlternateKey("IntentHash");
 
                     b.HasIndex("Status");
 
