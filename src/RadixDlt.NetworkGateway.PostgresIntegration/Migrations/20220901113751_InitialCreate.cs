@@ -100,7 +100,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_mempool_transactions", x => x.payload_hash);
-                    table.UniqueConstraint("AK_mempool_transactions_intent_hash", x => x.intent_hash);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,9 +155,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
-                    table.UniqueConstraint("AK_ledger_transactions_intent_hash", x => x.intent_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_payload_hash", x => x.payload_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_signed_hash", x => x.signed_hash);
                     table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
                     table.ForeignKey(
                         name: "FK_ledger_transactions_raw_transactions_payload_hash",
@@ -554,6 +550,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 filter: "is_start_of_epoch = true");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_intent_hash",
+                table: "ledger_transactions",
+                column: "intent_hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_payload_hash",
+                table: "ledger_transactions",
+                column: "payload_hash");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_round_starts",
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "round_in_epoch" },
@@ -566,11 +572,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "round_timestamp");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ledger_transaction_signed_hash",
+                table: "ledger_transactions",
+                column: "signed_hash");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transaction_user_transactions",
                 table: "ledger_transactions",
                 column: "state_version",
                 unique: true,
                 filter: "is_user_transaction = true");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_mempool_transaction_intent_hash",
+                table: "mempool_transactions",
+                column: "intent_hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_mempool_transactions_status",
