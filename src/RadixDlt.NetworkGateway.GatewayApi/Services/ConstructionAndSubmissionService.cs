@@ -63,46 +63,162 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.Commons.Model;
-using RadixDlt.NetworkGateway.Commons.StaticHelpers;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IConstructionAndSubmissionService
 {
-    Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.TransactionBuild> HandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionFinalizeResponse> HandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, CancellationToken token = default);
 
-    Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
 internal class ConstructionAndSubmissionService : IConstructionAndSubmissionService
 {
-    public Task<Gateway.TransactionBuild> HandleBuildRequest(Gateway.TransactionBuildRequest request, Gateway.LedgerState ledgerState, CancellationToken token = default)
+    private readonly ICoreApiHandler _coreApiHandler;
+    private readonly IEnumerable<IConstructionAndSubmissionServiceObserver> _observers;
+    private readonly ILogger _logger;
+
+    public ConstructionAndSubmissionService(
+        ICoreApiHandler coreApiHandler,
+        IEnumerable<IConstructionAndSubmissionServiceObserver> observers,
+        ILogger<ConstructionAndSubmissionService> logger)
+    {
+        _coreApiHandler = coreApiHandler;
+        _observers = observers;
+        _logger = logger;
+    }
+
+    public Task<GatewayModel.TransactionBuild> HandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Gateway.TransactionFinalizeResponse> HandleFinalizeRequest(Gateway.TransactionFinalizeRequest request, CancellationToken token = default)
+    public Task<GatewayModel.TransactionFinalizeResponse> HandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, CancellationToken token = default)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Gateway.TransactionSubmitResponse> HandleSubmitRequest(Gateway.TransactionSubmitRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
+
+            var response = await HandleSubmitAndCreateResponse(request, token);
+
+            await _observers.ForEachAsync(x => x.PostHandleSubmitRequest(request, response));
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.HandleSubmitRequestFailed(request, ex));
+
+            throw;
+        }
+    }
+
+    private async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitAndCreateResponse(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
+    {
+        // consider this a mock/dumb implementation for testing purposes only
+
+        using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
+        using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
+
+        var notarizedTransaction = request.NotarizedTransactionBytes;
+
+        try
+        {
+            var result = await _coreApiHandler.SubmitTransaction(
+                new CoreModel.TransactionSubmitRequest(
+                    _coreApiHandler.GetNetworkIdentifier(),
+                    notarizedTransaction.ToHex()
+                ),
+                finalTokenSource.Token
+            );
+
+            if (result.Duplicate)
+            {
+                await _observers.ForEachAsync(x => x.SubmissionDuplicate(request, result));
+            }
+            else
+            {
+                await _observers.ForEachAsync(x => x.SubmissionSucceeded(request, result));
+            }
+
+            return new GatewayModel.TransactionSubmitResponse(
+                duplicate: result.Duplicate
+            );
+        }
+
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // catch (WrappedCoreApiException<SubstateDependencyNotFoundError> ex)
+        // {
+        //     await _observers.ForEachAsync(x => x.HandleSubmissionFailedSubstateNotFound(signedTransaction, ex));
+        //
+        //     await _submissionTrackingService.MarkAsFailed(
+        //         transactionIdentifierHash,
+        //         MempoolTransactionFailureReason.DoubleSpend,
+        //         "A substate identifier the transaction uses is missing or already downed"
+        //     );
+        //
+        //     throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
+        // }
+        // catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        // {
+        //     await _observers.ForEachAsync(x => x.HandleSubmissionFailedInvalidTransaction(signedTransaction, ex));
+        //
+        //     await _submissionTrackingService.MarkAsFailed(
+        //         transactionIdentifierHash,
+        //         MempoolTransactionFailureReason.Unknown,
+        //         $"Core API Exception: {ex.Error.GetType().Name} marking invalid transaction on initial submission"
+        //     );
+        //
+        //     throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
+        // }
+        // catch (WrappedCoreApiException ex) when (ex.Properties.Transience == Transience.Permanent)
+        // {
+        //     // Any other known Core exception which can't result in the transaction being submitted
+        //     await _observers.ForEachAsync(x => x.HandleSubmissionFailedPermanently(signedTransaction, ex));
+        //
+        //     await _submissionTrackingService.MarkAsFailed(
+        //         transactionIdentifierHash,
+        //         MempoolTransactionFailureReason.Unknown,
+        //         $"Core API Exception: {ex.Error.GetType().Name} without undefined behaviour on initial submission"
+        //     );
+        //
+        //     throw;
+        // }
+        catch (OperationCanceledException ex) when (timeoutTokenSource.Token.IsCancellationRequested)
+        {
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(request, ex));
+
+            _logger.LogWarning(ex, "Request timeout submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
+
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // Any other kind of exception is unknown - eg it a connection drop or a 500 from the Core API.
+            // In theory, the transaction could have been submitted -- so we return success and
+            // if it wasn't submitted successfully, it'll be retried automatically by the resubmission service in
+            // any case.
+            await _observers.ForEachAsync(x => x.HandleSubmissionFailedUnknown(request, ex));
+
+            _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
+
+            throw;
+        }
     }
 }

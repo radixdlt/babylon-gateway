@@ -62,19 +62,19 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 
 public interface ICoreApiHandler
 {
-    NetworkIdentifier GetNetworkIdentifier();
+    CoreModel.NetworkIdentifier GetNetworkIdentifier();
 
     CoreApiNode GetCoreNodeConnectedTo();
 
@@ -86,8 +86,8 @@ public interface ICoreApiHandler
     // Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default);
     //
     // Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default);
-    //
-    // Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default);
+
+    Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
 /// <summary>
@@ -108,9 +108,9 @@ internal class CoreApiHandler : ICoreApiHandler
         _coreApiProvider = ChooseCoreApiProvider(coreNodesSelectorService, httpClient);
     }
 
-    public NetworkIdentifier GetNetworkIdentifier()
+    public CoreModel.NetworkIdentifier GetNetworkIdentifier()
     {
-        return new NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
+        return new CoreModel.NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
     }
 
     public CoreApiNode GetCoreNodeConnectedTo()
@@ -138,11 +138,11 @@ internal class CoreApiHandler : ICoreApiHandler
     // {
     //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request, token));
     // }
-    //
-    // public async Task<ConstructionSubmitResponse> SubmitTransaction(ConstructionSubmitRequest request, CancellationToken token = default)
-    // {
-    //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionSubmitPostAsync(request, token));
-    // }
+
+    public async Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
+    {
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
+    }
 
     private static ICoreApiProvider ChooseCoreApiProvider(
         ICoreNodesSelectorService coreNodesSelectorService,
