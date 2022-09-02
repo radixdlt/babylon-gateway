@@ -87,6 +87,8 @@ public interface ICoreApiHandler
     //
     // Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default);
 
+    Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
+
     Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
@@ -138,6 +140,11 @@ internal class CoreApiHandler : ICoreApiHandler
     // {
     //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request, token));
     // }
+
+    public async Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
+    {
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionPreviewPostAsync(request, token));
+    }
 
     public async Task<CoreModel.TransactionSubmitResponse> SubmitTransaction(CoreModel.TransactionSubmitRequest request, CancellationToken token = default)
     {

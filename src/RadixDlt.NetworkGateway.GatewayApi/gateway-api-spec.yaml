@@ -72,6 +72,32 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/transaction/preview":
+    post:
+      summary: Preview Transaction
+      description: |
+        Previews transaction against the network.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TransactionPreviewRequest"
+      responses:
+        '200':
+          description: Successful Preview
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TransactionPreviewResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/submit":
     post:
       summary: Submit Transaction
@@ -303,6 +329,74 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TransactionInfo"
+    TransactionPreviewRequest:
+      type: object
+      required:
+        - manifest
+        - cost_unit_limit
+        - tip_percentage
+        - nonce
+        - signer_public_keys
+        - flags
+      properties:
+        manifest:
+          description: A transaction manifest. sbor encoded, and then hex encoded.
+          type: string
+        cost_unit_limit:
+          type: string
+          description: Maximum number of cost units available for transaction execution.
+        tip_percentage:
+          type: string
+          description: The validator tip.
+        nonce:
+          type: string
+          description: The nonce value to use for execution.
+        signer_public_keys:
+          type: array
+          items:
+            type: string
+          description: A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
+        flags:
+          type: object
+          required:
+            - unlimited_loan
+          properties:
+            unlimited_loan:
+              type: boolean
+      example:
+        manifest: TBD
+        cost_unit_limit: TBD
+        tip_percentage: TBD
+        nonce: TBD
+        signer_public_keys:
+          - TBD
+        flags:
+          unlimited_loan: true
+    TransactionPreviewResponse:
+      type: object
+      required:
+        - receipt
+        - resource_changes
+        - logs
+      properties:
+        receipt:
+          "$ref": "#/components/schemas/TransactionReceipt"
+        resource_changes:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResourceChange"
+        logs:
+          type: array
+          items:
+            type: object
+            required:
+              - level
+              - message
+            properties:
+              level:
+                type: string
+              message:
+                type: string
     TransactionSubmitRequest:
       type: object
       required:
@@ -503,6 +597,21 @@ components:
           type: string
         message:
           description: The message bytes, hex encoded.
+          type: string
+    TransactionReceipt:
+      type: object
+      description: The transaction execution receipt
+      required:
+        - tbd
+      properties:
+        tbd:
+          type: string
+    ResourceChange:
+      type: object
+      required:
+        - tbd
+      properties:
+        tbd:
           type: string
     TokenAmount:
       type: object
