@@ -74,21 +74,21 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface IConstructionAndSubmissionService
+public interface ISubmissionService
 {
     Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
-internal class ConstructionAndSubmissionService : IConstructionAndSubmissionService
+internal class SubmissionService : ISubmissionService
 {
     private readonly ICoreApiHandler _coreApiHandler;
-    private readonly IEnumerable<IConstructionAndSubmissionServiceObserver> _observers;
+    private readonly IEnumerable<ISubmissionServiceObserver> _observers;
     private readonly ILogger _logger;
 
-    public ConstructionAndSubmissionService(
+    public SubmissionService(
         ICoreApiHandler coreApiHandler,
-        IEnumerable<IConstructionAndSubmissionServiceObserver> observers,
-        ILogger<ConstructionAndSubmissionService> logger)
+        IEnumerable<ISubmissionServiceObserver> observers,
+        ILogger<SubmissionService> logger)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;

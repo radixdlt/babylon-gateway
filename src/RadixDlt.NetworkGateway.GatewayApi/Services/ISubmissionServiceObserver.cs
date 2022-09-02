@@ -70,7 +70,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public interface IConstructionAndSubmissionServiceObserver
+public interface ISubmissionServiceObserver
 {
     ValueTask PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request);
 
