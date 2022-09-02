@@ -76,10 +76,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IConstructionAndSubmissionService
 {
-    Task<GatewayModel.TransactionBuild> HandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<GatewayModel.TransactionFinalizeResponse> HandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, CancellationToken token = default);
-
     Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
 
@@ -97,16 +93,6 @@ internal class ConstructionAndSubmissionService : IConstructionAndSubmissionServ
         _coreApiHandler = coreApiHandler;
         _observers = observers;
         _logger = logger;
-    }
-
-    public Task<GatewayModel.TransactionBuild> HandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<GatewayModel.TransactionFinalizeResponse> HandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, CancellationToken token = default)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)

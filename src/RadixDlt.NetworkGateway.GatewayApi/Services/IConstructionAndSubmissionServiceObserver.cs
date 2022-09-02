@@ -72,18 +72,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IConstructionAndSubmissionServiceObserver
 {
-    ValueTask PreHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState);
-
-    ValueTask PostHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, GatewayModel.TransactionBuild response);
-
-    ValueTask HandleBuildRequestFailed(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, Exception exception);
-
-    ValueTask PreHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request);
-
-    ValueTask PostHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, GatewayModel.TransactionFinalizeResponse response);
-
-    ValueTask HandleFinalizeRequestFailed(GatewayModel.TransactionFinalizeRequest request, Exception exception);
-
     ValueTask PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request);
 
     ValueTask PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response);
