@@ -240,7 +240,7 @@ internal class ExceptionHandler : IExceptionHandler
          *     the TransactionBuilder)
          *   3b) Errors which need to be remapped/re-interpreted by the Gateway service. EG extracting a
          *     Gateway.NotEnoughNativeTokensForFeeError from a Core.NotEnoughResourcesError or
-         *     Core.NotEnoughNativeTokensForFeesError in the ConstructionAndSubmissionService
+         *     Core.NotEnoughNativeTokensForFeesError in the SubmissionService
          *     If these errors propagate to this point, we should also return a 500.
          * 4) Core API Internal server errors - we return Gateway 500s for these.
          *
