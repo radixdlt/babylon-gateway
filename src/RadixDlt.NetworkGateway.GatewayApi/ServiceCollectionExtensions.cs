@@ -138,6 +138,7 @@ public static class ServiceCollectionExtensions
     private static void AddRequestScopedServices(IServiceCollection services)
     {
         services.AddScoped<ISubmissionService, SubmissionService>();
+        services.AddScoped<IPreviewService, PreviewService>();
     }
 
     private static void AddWorkerScopedServices(IServiceCollection services)

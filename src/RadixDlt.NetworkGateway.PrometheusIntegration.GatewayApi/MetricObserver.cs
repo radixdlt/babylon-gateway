@@ -82,6 +82,7 @@ internal class MetricObserver :
     IExceptionObserver,
     ICoreNodeHealthCheckerObserver,
     ISubmissionServiceObserver,
+    IPreviewServiceObserver,
     ILedgerStateQuerierObserver,
     ISubmissionTrackingServiceObserver
 {
@@ -122,6 +123,24 @@ internal class MetricObserver :
         .CreateCounter(
             "ng_construction_transaction_submission_error_count",
             "Number of transaction submission errors (including as part of a finalize request)"
+        );
+
+    private static readonly Counter _transactionPreviewRequestCount = Metrics
+        .CreateCounter(
+            "ng_construction_transaction_preview_request_count",
+            "Number of transaction preview requests"
+        );
+
+    private static readonly Counter _transactionPreviewSuccessCount = Metrics
+        .CreateCounter(
+            "ng_construction_transaction_preview_success_count",
+            "Number of transaction preview successes"
+        );
+
+    private static readonly Counter _transactionPreviewErrorCount = Metrics
+        .CreateCounter(
+            "ng_construction_transaction_preview_error_count",
+            "Number of transaction preview errors"
         );
 
     private static readonly Counter _transactionSubmitResolutionByResultCount = Metrics
@@ -301,6 +320,27 @@ internal class MetricObserver :
     ValueTask ILedgerStateQuerierObserver.LedgerRoundTimestampClockSkew(TimeSpan difference)
     {
         _ledgerTipRoundTimestampVsGatewayApiClockLagAtLastRequestSeconds.Set(difference.TotalSeconds);
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request)
+    {
+        _transactionPreviewRequestCount.Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, GatewayModel.TransactionPreviewResponse response)
+    {
+        _transactionPreviewSuccessCount.Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, Exception exception)
+    {
+        _transactionPreviewErrorCount.Inc();
 
         return ValueTask.CompletedTask;
     }

@@ -92,6 +92,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Preview Transaction
+        /// </summary>
+        /// <remarks>
+        /// Previews transaction against the network. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <returns>TransactionPreviewResponse</returns>
+        TransactionPreviewResponse TransactionPreviewPost(TransactionPreviewRequest transactionPreviewRequest);
+
+        /// <summary>
+        /// Preview Transaction
+        /// </summary>
+        /// <remarks>
+        /// Previews transaction against the network. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <returns>ApiResponse of TransactionPreviewResponse</returns>
+        ApiResponse<TransactionPreviewResponse> TransactionPreviewPostWithHttpInfo(TransactionPreviewRequest transactionPreviewRequest);
+        /// <summary>
         /// Get Recent Transactions
         /// </summary>
         /// <remarks>
@@ -163,6 +184,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     public interface ITransactionApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Preview Transaction
+        /// </summary>
+        /// <remarks>
+        /// Previews transaction against the network. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionPreviewResponse</returns>
+        System.Threading.Tasks.Task<TransactionPreviewResponse> TransactionPreviewPostAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Preview Transaction
+        /// </summary>
+        /// <remarks>
+        /// Previews transaction against the network. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionPreviewResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionPreviewResponse>> TransactionPreviewPostWithHttpInfoAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Recent Transactions
         /// </summary>
@@ -443,6 +487,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Preview Transaction Previews transaction against the network. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <returns>TransactionPreviewResponse</returns>
+        public TransactionPreviewResponse TransactionPreviewPost(TransactionPreviewRequest transactionPreviewRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionPreviewResponse> localVarResponse = TransactionPreviewPostWithHttpInfo(transactionPreviewRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Preview Transaction Previews transaction against the network. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <returns>ApiResponse of TransactionPreviewResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionPreviewResponse> TransactionPreviewPostWithHttpInfo(TransactionPreviewRequest transactionPreviewRequest)
+        {
+            // verify the required parameter 'transactionPreviewRequest' is set
+            if (transactionPreviewRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionPreviewRequest' when calling TransactionApi->TransactionPreviewPost");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionPreviewRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionPreviewResponse>("/transaction/preview", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionPreviewPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Preview Transaction Previews transaction against the network. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionPreviewResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionPreviewResponse> TransactionPreviewPostAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionPreviewResponse> localVarResponse = await TransactionPreviewPostWithHttpInfoAsync(transactionPreviewRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Preview Transaction Previews transaction against the network. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionPreviewResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionPreviewResponse>> TransactionPreviewPostWithHttpInfoAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'transactionPreviewRequest' is set
+            if (transactionPreviewRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionPreviewRequest' when calling TransactionApi->TransactionPreviewPost");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionPreviewRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionPreviewResponse>("/transaction/preview", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionPreviewPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>
