@@ -81,7 +81,7 @@ namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 internal class MetricObserver :
     IExceptionObserver,
     ICoreNodeHealthCheckerObserver,
-    IConstructionAndSubmissionServiceObserver,
+    ISubmissionServiceObserver,
     ILedgerStateQuerierObserver,
     ISubmissionTrackingServiceObserver
 {
@@ -191,21 +191,21 @@ internal class MetricObserver :
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request)
+    ValueTask ISubmissionServiceObserver.PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request)
     {
         _transactionSubmitRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response)
+    ValueTask ISubmissionServiceObserver.PostHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, GatewayModel.TransactionSubmitResponse response)
     {
         _transactionSubmitSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitErrorCount.Inc();
 
@@ -213,49 +213,49 @@ internal class MetricObserver :
     }
 
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask IConstructionAndSubmissionServiceObserver.ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
+    // ValueTask ISubmissionServiceObserver.ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
     // {
     //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
     //
     //     return ValueTask.CompletedTask;
     // }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.ParseTransactionFailedUnknown(ValidatedHex signedTransaction, Exception exception)
+    ValueTask ISubmissionServiceObserver.ParseTransactionFailedUnknown(ValidatedHex signedTransaction, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_unknown_error").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionAlreadyFailed(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance)
+    ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_failed").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance)
+    ValueTask ISubmissionServiceObserver.SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_submitted").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
+    ValueTask ISubmissionServiceObserver.SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
+    ValueTask ISubmissionServiceObserver.SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("success").Inc();
 
@@ -263,35 +263,35 @@ internal class MetricObserver :
     }
 
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
+    // ValueTask ISubmissionServiceObserver.HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
     // {
     //     _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
     //
     //     return ValueTask.CompletedTask;
     // }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("invalid_transaction").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedPermanently(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedTimeout(GatewayModel.TransactionSubmitRequest request, OperationCanceledException exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("request_timeout").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception)
+    ValueTask ISubmissionServiceObserver.HandleSubmissionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("unknown_error").Inc();
 

@@ -80,17 +80,17 @@ public sealed class TransactionController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
-    private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
+    private readonly ISubmissionService _submissionService;
 
     public TransactionController(
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
-        IConstructionAndSubmissionService constructionAndSubmissionService
+        ISubmissionService submissionService
     )
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
-        _constructionAndSubmissionService = constructionAndSubmissionService;
+        _submissionService = submissionService;
     }
 
     [HttpPost("recent")]
@@ -140,6 +140,6 @@ public sealed class TransactionController : ControllerBase
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token)
     {
-        return await _constructionAndSubmissionService.HandleSubmitRequest(request, token);
+        return await _submissionService.HandleSubmitRequest(request, token);
     }
 }
