@@ -137,21 +137,6 @@ public sealed class TransactionController : ControllerBase
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
-    [HttpPost("build")]
-    public async Task<TransactionBuildResponse> Build(TransactionBuildRequest request, CancellationToken token)
-    {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier, token);
-        return new TransactionBuildResponse(
-            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState, token)
-        );
-    }
-
-    [HttpPost("finalize")]
-    public async Task<TransactionFinalizeResponse> Finalize(TransactionFinalizeRequest request, CancellationToken token)
-    {
-        return await _constructionAndSubmissionService.HandleFinalizeRequest(request, token);
-    }
-
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token)
     {

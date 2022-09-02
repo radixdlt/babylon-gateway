@@ -106,42 +106,6 @@ internal class MetricObserver :
             new GaugeConfiguration { LabelNames = new[] { "status" } }
         );
 
-    private static readonly Counter _transactionBuildRequestCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_build_request_count",
-            "Number of transaction build requests"
-        );
-
-    private static readonly Counter _transactionBuildSuccessCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_build_success_count",
-            "Number of transaction build successes"
-        );
-
-    private static readonly Counter _transactionBuildErrorCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_build_error_count",
-            "Number of transaction build errors"
-        );
-
-    private static readonly Counter _transactionFinalizeRequestCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_finalize_request_count",
-            "Number of transaction finalize requests"
-        );
-
-    private static readonly Counter _transactionFinalizeSuccessCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_finalize_success_count",
-            "Number of transaction finalize successes"
-        );
-
-    private static readonly Counter _transactionFinalizeErrorCount = Metrics
-        .CreateCounter(
-            "ng_construction_transaction_finalize_error_count",
-            "Number of transaction finalize errors"
-        );
-
     private static readonly Counter _transactionSubmitRequestCount = Metrics
         .CreateCounter(
             "ng_construction_transaction_submission_request_count",
@@ -225,48 +189,6 @@ internal class MetricObserver :
     void ICoreNodeHealthCheckerObserver.NodeHealthyAndSynced((CoreApiNode CoreApiNode, long? NodeStateVersion, Exception? Exception) healthCheckData)
     {
         _healthCheckStatusByNode.WithLabels(healthCheckData.CoreApiNode.Name).Set(1);
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState)
-    {
-        _transactionBuildRequestCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleBuildRequest(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, GatewayModel.TransactionBuild response)
-    {
-        _transactionBuildSuccessCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleBuildRequestFailed(GatewayModel.TransactionBuildRequest request, GatewayModel.LedgerState ledgerState, Exception exception)
-    {
-        _transactionBuildErrorCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.PreHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request)
-    {
-        _transactionFinalizeRequestCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.PostHandleFinalizeRequest(GatewayModel.TransactionFinalizeRequest request, GatewayModel.TransactionFinalizeResponse response)
-    {
-        _transactionFinalizeSuccessCount.Inc();
-
-        return ValueTask.CompletedTask;
-    }
-
-    ValueTask IConstructionAndSubmissionServiceObserver.HandleFinalizeRequestFailed(GatewayModel.TransactionFinalizeRequest request, Exception exception)
-    {
-        _transactionFinalizeErrorCount.Inc();
-
-        return ValueTask.CompletedTask;
     }
 
     ValueTask IConstructionAndSubmissionServiceObserver.PreHandleSubmitRequest(GatewayModel.TransactionSubmitRequest request)
