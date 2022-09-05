@@ -180,28 +180,19 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
     {
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // var hrps = networkConfiguration.Bech32HumanReadableParts;
         return new NetworkConfiguration
         {
             NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
             NetworkAddressHrps = new NetworkAddressHrps
             {
-                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-                // AccountHrp = hrps.AccountHrp,
-                // ResourceHrpSuffix = hrps.ResourceHrpSuffix,
-                // ValidatorHrp = hrps.ValidatorHrp,
-                // NodeHrp = hrps.NodeHrp,
-                AccountHrp = networkConfiguration.NetworkHrpSuffix,
-                ResourceHrpSuffix = networkConfiguration.NetworkHrpSuffix,
-                ValidatorHrp = networkConfiguration.NetworkHrpSuffix,
-                NodeHrp = networkConfiguration.NetworkHrpSuffix,
+                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
+                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
+                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
+                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
             },
             WellKnownAddresses = new WellKnownAddresses
             {
-                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-                // XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
-                XrdAddress = RadixBech32.GenerateXrdAddress(networkConfiguration.NetworkHrpSuffix),
+                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
             },
         };
     }
