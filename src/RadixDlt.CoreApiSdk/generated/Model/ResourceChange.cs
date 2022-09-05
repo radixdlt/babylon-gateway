@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceChange" /> class.
         /// </summary>
-        /// <param name="resourceAddress">Bech32 resource address. (required).</param>
-        /// <param name="componentAddress">Bech32 component address. (required).</param>
+        /// <param name="resourceAddress">Bech32m resource address. (required).</param>
+        /// <param name="componentAddress">Bech32m component address. (required).</param>
         /// <param name="vaultId">Vault ID, SBOR-encoded and then hex-encoded. (required).</param>
         /// <param name="amount">The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number. (required).</param>
         public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), string vaultId = default(string), string amount = default(string))
@@ -137,16 +137,16 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32 resource address.
+        /// Bech32m resource address.
         /// </summary>
-        /// <value>Bech32 resource address.</value>
+        /// <value>Bech32m resource address.</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Bech32 component address.
+        /// Bech32m component address.
         /// </summary>
-        /// <value>Bech32 component address.</value>
+        /// <value>Bech32m component address.</value>
         [DataMember(Name = "component_address", IsRequired = true, EmitDefaultValue = true)]
         public string ComponentAddress { get; set; }
 

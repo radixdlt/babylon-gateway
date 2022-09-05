@@ -96,6 +96,12 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "UpSubstate")]
     public partial class UpSubstate : IEquatable<UpSubstate>, IValidatableObject
     {
+
+        /// <summary>
+        /// Gets or Sets SubstateJsonType
+        /// </summary>
+        [DataMember(Name = "substate_json_type", IsRequired = true, EmitDefaultValue = true)]
+        public TemporaryUpSubstateJsonPayloadType SubstateJsonType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="UpSubstate" /> class.
         /// </summary>
@@ -107,7 +113,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="substateId">SBOR-encoded and then hex-encoded substate ID. (required).</param>
         /// <param name="version">A decimal 32-bit unsigned integer (required).</param>
         /// <param name="substateBytes">SBOR-encoded and then hex-encoded substate bytes. (required).</param>
-        public UpSubstate(string substateId = default(string), string version = default(string), string substateBytes = default(string))
+        /// <param name="substateJsonType">substateJsonType (required).</param>
+        /// <param name="substateJsonStr">JSON-encoded (and then stringified) substate model. Warning! This is temporary property until we get proper polymorphism in place. (required).</param>
+        public UpSubstate(string substateId = default(string), string version = default(string), string substateBytes = default(string), TemporaryUpSubstateJsonPayloadType substateJsonType = default(TemporaryUpSubstateJsonPayloadType), string substateJsonStr = default(string))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -127,6 +135,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("substateBytes is a required property for UpSubstate and cannot be null");
             }
             this.SubstateBytes = substateBytes;
+            this.SubstateJsonType = substateJsonType;
+            // to ensure "substateJsonStr" is required (not null)
+            if (substateJsonStr == null)
+            {
+                throw new ArgumentNullException("substateJsonStr is a required property for UpSubstate and cannot be null");
+            }
+            this.SubstateJsonStr = substateJsonStr;
         }
 
         /// <summary>
@@ -151,6 +166,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public string SubstateBytes { get; set; }
 
         /// <summary>
+        /// JSON-encoded (and then stringified) substate model. Warning! This is temporary property until we get proper polymorphism in place.
+        /// </summary>
+        /// <value>JSON-encoded (and then stringified) substate model. Warning! This is temporary property until we get proper polymorphism in place.</value>
+        [DataMember(Name = "substate_json_str", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateJsonStr { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -161,6 +183,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("  SubstateBytes: ").Append(SubstateBytes).Append("\n");
+            sb.Append("  SubstateJsonType: ").Append(SubstateJsonType).Append("\n");
+            sb.Append("  SubstateJsonStr: ").Append(SubstateJsonStr).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,6 +234,15 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateBytes == input.SubstateBytes ||
                     (this.SubstateBytes != null &&
                     this.SubstateBytes.Equals(input.SubstateBytes))
+                ) && 
+                (
+                    this.SubstateJsonType == input.SubstateJsonType ||
+                    this.SubstateJsonType.Equals(input.SubstateJsonType)
+                ) && 
+                (
+                    this.SubstateJsonStr == input.SubstateJsonStr ||
+                    (this.SubstateJsonStr != null &&
+                    this.SubstateJsonStr.Equals(input.SubstateJsonStr))
                 );
         }
 
@@ -233,6 +266,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.SubstateBytes != null)
                 {
                     hashCode = (hashCode * 59) + this.SubstateBytes.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.SubstateJsonType.GetHashCode();
+                if (this.SubstateJsonStr != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubstateJsonStr.GetHashCode();
                 }
                 return hashCode;
             }
