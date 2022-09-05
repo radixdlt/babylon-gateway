@@ -92,7 +92,7 @@ public static class RadixBech32
     public const int HashedKeyTruncatedBytesLength = 26;
     public const int CompressedPublicKeyBytesLength = 33;
     public static readonly Regex ValidResourceSymbolRegex = new("^[a-z0-9]{1,35}$");
-    private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32;
+    private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32M;
 
     public static string GenerateValidatorAddress(string validatorHrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
     {
