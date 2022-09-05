@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="version">version (required).</param>
         /// <param name="networkIdentifier">networkIdentifier (required).</param>
-        /// <param name="networkHrpSuffix">The network suffix used for bech32 hrps used for addressing. (required).</param>
+        /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
         public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), NetworkIdentifier networkIdentifier = default(NetworkIdentifier), string networkHrpSuffix = default(string))
         {
             // to ensure "version" is required (not null)
@@ -142,9 +142,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public NetworkIdentifier NetworkIdentifier { get; set; }
 
         /// <summary>
-        /// The network suffix used for bech32 hrps used for addressing.
+        /// The network suffix used for Bech32m HRPs used for addressing.
         /// </summary>
-        /// <value>The network suffix used for bech32 hrps used for addressing.</value>
+        /// <value>The network suffix used for Bech32m HRPs used for addressing.</value>
         [DataMember(Name = "network_hrp_suffix", IsRequired = true, EmitDefaultValue = true)]
         public string NetworkHrpSuffix { get; set; }
 
