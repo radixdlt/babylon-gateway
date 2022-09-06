@@ -101,9 +101,6 @@ internal class TransactionLogReader : ITransactionLogReader
 
     public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        // TODO Olympia allowed /transactions?state_version=0 (genesis) whereas Babylon prohibits that (start_state_version is invalid (minimum state version is 1) - should we simply assume lowest state_version is 1?
-        var startStateVersion = Math.Max(1, stateVersion);
-
         try
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
@@ -111,7 +108,7 @@ internal class TransactionLogReader : ITransactionLogReader
                     .TransactionsPostAsync(
                         new CommittedTransactionsRequest(
                             networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                            startStateVersion: startStateVersion.ToString(),
+                            startStateVersion: stateVersion.ToString(),
                             limit: count
                         ),
                         token
