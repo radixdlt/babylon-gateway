@@ -93,7 +93,7 @@ public interface ILedgerConfirmationService
     TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
 }
 
-public sealed record TransactionsRequested(long StateVersionExclusiveLowerBound, long StateVersionInclusiveUpperBound);
+public sealed record TransactionsRequested(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound);
 
 /// <summary>
 /// This service is responsible for controlling the NodeTransactionLogWorkers, and deciding on / committing when
@@ -251,7 +251,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         return (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
             ? null
-            : new TransactionsRequested(firstMissingStateVersionGap.Value - 1, inclusiveUpperBound);
+            : new TransactionsRequested(firstMissingStateVersionGap.Value, inclusiveUpperBound);
     }
 
     private void PrepareForLedgerExtensionCheck()

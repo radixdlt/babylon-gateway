@@ -168,12 +168,12 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         }
 
         var batchSize = Math.Min(
-            (int)(toFetch.StateVersionInclusiveUpperBound - toFetch.StateVersionExclusiveLowerBound),
+            (int)(toFetch.StateVersionInclusiveUpperBound - toFetch.StateVersionInclusiveLowerBound),
             FetchMaxBatchSize
         );
 
         var transactions = await FetchTransactionsFromCoreApiWithLogging(
-            toFetch.StateVersionExclusiveLowerBound,
+            toFetch.StateVersionInclusiveLowerBound,
             batchSize,
             cancellationToken
         );
