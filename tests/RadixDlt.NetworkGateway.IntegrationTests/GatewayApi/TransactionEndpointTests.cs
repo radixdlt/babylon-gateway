@@ -66,6 +66,7 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -111,13 +112,15 @@ public class TransactionEndpointTests
         payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
-    [Fact(Skip ="Valid transaction payload is required")]
+    [Fact]
     public async Task TestTransactionSubmit()
     {
         var client = TestInitializationFactory.CreateClient(nameof(TestTransactionSubmit));
 
         // Arrange
-        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
+        string hexTransaction = Convert.ToHexString(Encoding.UTF8.GetBytes(DbSeedHelper.SubmitTransaction)).ToLowerInvariant();
+
+        string json = new TransactionSubmitRequest(hexTransaction).ToJson();
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
