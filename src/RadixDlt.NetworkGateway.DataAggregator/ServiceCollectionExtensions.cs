@@ -63,6 +63,7 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Configuration;
@@ -72,7 +73,6 @@ using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 using RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 using System.Net;
 using System.Net.Http;
@@ -82,6 +82,16 @@ namespace RadixDlt.NetworkGateway.DataAggregator;
 public static class ServiceCollectionExtensions
 {
     public static DataAggregatorBuilder AddNetworkGatewayDataAggregator(this IServiceCollection services)
+    {
+        var builder = services
+            .AddNetworkGatewayDataAggregatorCore()
+            .AddHealthChecks()
+            .AddHostedServices();
+
+        return builder;
+    }
+
+    public static DataAggregatorBuilder AddNetworkGatewayDataAggregatorCore(this IServiceCollection services)
     {
         services
             .AddNetworkGatewayCommons();
@@ -93,13 +103,8 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<LedgerConfirmationOptions, LedgerConfirmationOptionsValidator>("DataAggregator:LedgerConfirmation")
             .AddValidatableOptionsAtSection<TransactionAssertionsOptions, TransactionAssertionsOptionsValidator>("DataAggregator:TransactionAssertions");
 
-        services
-            .AddHealthChecks()
-            .AddCheck<AggregatorHealthCheck>("network_gateway_data_aggregator");
-
         // Globally-Scoped services
         AddGlobalScopedServices(services);
-        AddGlobalHostedServices(services);
 
         // Node-Scoped services
         AddNodeScopedServices(services);
@@ -112,54 +117,46 @@ public static class ServiceCollectionExtensions
 
     private static void AddGlobalScopedServices(IServiceCollection services)
     {
-        services.AddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
-        services.AddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
-        services.AddSingleton<ILedgerConfirmationService, LedgerConfirmationService>();
-        services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
-        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-        services.AddSingleton<ISystemStatusService, SystemStatusService>();
-    }
-
-    private static void AddGlobalHostedServices(IServiceCollection services)
-    {
-        services.AddHostedService<NodeConfigurationMonitorWorker>();
-        services.AddHostedService<LedgerConfirmationWorker>();
-        services.AddHostedService<MempoolTrackerWorker>();
-        services.AddHostedService<MempoolResubmissionWorker>();
-        services.AddHostedService<MempoolPrunerWorker>();
+        services.TryAddSingleton<INodeWorkersRunnerRegistry, NodeWorkersRunnerRegistry>();
+        services.TryAddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
+        services.TryAddSingleton<ILedgerConfirmationService, LedgerConfirmationService>();
+        services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
+        services.TryAddSingleton<IEntityDeterminer, EntityDeterminer>();
+        services.TryAddSingleton<ISystemStatusService, SystemStatusService>();
     }
 
     private static void AddNodeScopedServices(IServiceCollection services)
     {
-        services.AddScoped<INodeConfigProvider, NodeConfigProvider>();
+        services.TryAddScoped<INodeConfigProvider, NodeConfigProvider>();
     }
 
     private static void AddTransientApiReaders(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder)
     {
         // NB - AddHttpClient is essentially like AddTransient, except it provides a HttpClient from the HttpClientFactory
         // See https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-        coreApiHttpClientBuilder = services.AddHttpClient<ICoreApiProvider, CoreApiProvider>()
+        coreApiHttpClientBuilder = services
+            .AddHttpClient<ICoreApiProvider, CoreApiProvider>()
             .ConfigurePrimaryHttpMessageHandler(serviceProvider => ConfigureHttpClientHandler(serviceProvider.GetRequiredService<IOptions<NetworkOptions>>()));
 
         // We can mock these out in tests
         // These should be transient so that they don't capture a transient HttpClient
-        services.AddTransient<ITransactionLogReader, TransactionLogReader>();
-        services.AddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
-        services.AddTransient<INetworkStatusReader, NetworkStatusReader>();
+        services.TryAddTransient<ITransactionLogReader, TransactionLogReader>();
+        services.TryAddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
+        services.TryAddTransient<INetworkStatusReader, NetworkStatusReader>();
     }
 
     private static void AddNodeInitializers(IServiceCollection services)
     {
         // Add node initializers - these will be instantiated by the NodeWorkersRunner.cs and run before the workers start
-        services.AddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
+        services.TryAddScoped<INodeInitializer, NodeNetworkConfigurationInitializer>();
     }
 
     private static void AddNodeWorkers(IServiceCollection services)
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
-        services.AddScoped<INodeWorker, NodeTransactionLogWorker>();
-        services.AddScoped<INodeWorker, NodeMempoolTransactionIdsReaderWorker>();
-        services.AddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
+        services.TryAddScoped<INodeWorker, NodeTransactionLogWorker>();
+        services.TryAddScoped<INodeWorker, NodeMempoolTransactionIdsReaderWorker>();
+        services.TryAddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }
 
     private static HttpClientHandler ConfigureHttpClientHandler(IOptions<NetworkOptions> options)

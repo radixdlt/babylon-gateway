@@ -65,6 +65,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Configuration;
@@ -73,7 +74,6 @@ using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApi.Workers;
 using System.Net;
 using System.Net.Http;
 
@@ -82,6 +82,16 @@ namespace RadixDlt.NetworkGateway.GatewayApi;
 public static class ServiceCollectionExtensions
 {
     public static GatewayApiBuilder AddNetworkGatewayApi(this IServiceCollection services)
+    {
+        var builder = services
+            .AddNetworkGatewayApiCore()
+            .AddWorkerServices()
+            .AddHostedServices();
+
+        return builder;
+    }
+
+    public static GatewayApiBuilder AddNetworkGatewayApiCore(this IServiceCollection services)
     {
         services
             .AddNetworkGatewayCommons();
@@ -102,13 +112,9 @@ public static class ServiceCollectionExtensions
 
         // Singleton-Scoped services
         AddSingletonServices(services);
-        AddHostedServices(services);
 
         // Request scoped services
         AddRequestScopedServices(services);
-
-        // Other scoped services
-        AddWorkerScopedServices(services);
 
         // Transient (pooled) services
         AddCoreApiHttpClient(services, out var coreApiHttpClientBuilder, out var coreNodeHealthCheckerClientBuilder);
@@ -120,29 +126,19 @@ public static class ServiceCollectionExtensions
     {
         // Should only contain services without any DBContext or HttpClient - as these both need to be recycled
         // semi-regularly
-        services.AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
-        services.AddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
-        services.AddSingleton<IValidations, Validations>();
-        services.AddSingleton<IExceptionHandler, ExceptionHandler>();
-        services.AddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
-        services.AddSingleton<IEntityDeterminer, EntityDeterminer>();
-        services.AddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
-        services.AddSingleton<RequestTimeoutMiddleware>();
-    }
-
-    private static void AddHostedServices(IServiceCollection services)
-    {
-        services.AddHostedService<CoreNodesSupervisorStatusReviseWorker>();
+        services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
+        services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
+        services.TryAddSingleton<IValidations, Validations>();
+        services.TryAddSingleton<IExceptionHandler, ExceptionHandler>();
+        services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
+        services.TryAddSingleton<IEntityDeterminer, EntityDeterminer>();
+        services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
+        services.TryAddSingleton<RequestTimeoutMiddleware>();
     }
 
     private static void AddRequestScopedServices(IServiceCollection services)
     {
-        services.AddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
-    }
-
-    private static void AddWorkerScopedServices(IServiceCollection services)
-    {
-        services.AddScoped<ICoreNodeHealthChecker, CoreNodeHealthChecker>();
+        services.TryAddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
     }
 
     private static void AddCoreApiHttpClient(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder, out IHttpClientBuilder coreNodeHealthCheckerClientBuilder)

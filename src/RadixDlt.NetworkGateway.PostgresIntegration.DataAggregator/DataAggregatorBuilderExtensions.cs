@@ -71,9 +71,16 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-public static class ServiceCollectionExtensions
+public static class DataAggregatorBuilderExtensions
 {
     public static DataAggregatorBuilder AddPostgresPersistence(this DataAggregatorBuilder builder)
+    {
+        return builder
+            .AddPostgresPersistenceCore()
+            .AddPostgresPersistenceHealthChecks();
+    }
+
+    public static DataAggregatorBuilder AddPostgresPersistenceCore(this DataAggregatorBuilder builder)
     {
         builder.Services
             .AddSingleton<IRawTransactionWriter, RawTransactionWriter>()
@@ -83,10 +90,6 @@ public static class ServiceCollectionExtensions
             .AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>()
             .AddSingleton<IMempoolPrunerService, MempoolPrunerService>();
 
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_data_aggregator_database_readwrite_connection");
-
         // Useful links:
         // https://www.npgsql.org/efcore/index.html
         // https://www.npgsql.org/doc/connection-string-parameters.html
@@ -95,6 +98,15 @@ public static class ServiceCollectionExtensions
             {
                 options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
             });
+
+        return builder;
+    }
+
+    public static DataAggregatorBuilder AddPostgresPersistenceHealthChecks(this DataAggregatorBuilder builder)
+    {
+        builder.Services
+            .AddHealthChecks()
+            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_data_aggregator_database_readwrite_connection");
 
         return builder;
     }

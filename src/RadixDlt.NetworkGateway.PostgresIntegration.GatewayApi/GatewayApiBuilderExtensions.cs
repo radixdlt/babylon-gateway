@@ -74,14 +74,14 @@ public static class GatewayApiBuilderExtensions
 {
     public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
     {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
+        return builder
+            .AddPostgresPersistenceCore()
+            .AddPostgresPersistenceInitializers()
+            .AddPostgresPersistenceHealthChecks();
+    }
 
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
+    public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
+    {
         builder.Services
             .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
             .AddScoped<ITransactionQuerier, TransactionQuerier>()
@@ -101,6 +101,24 @@ public static class GatewayApiBuilderExtensions
                 // https://www.npgsql.org/efcore/index.html
                 options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
             });
+
+        return builder;
+    }
+
+    public static GatewayApiBuilder AddPostgresPersistenceInitializers(this GatewayApiBuilder builder)
+    {
+        builder.Services
+            .AddHostedService<NetworkConfigurationInitializer>();
+
+        return builder;
+    }
+
+    public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
+    {
+        builder.Services
+            .AddHealthChecks()
+            .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
+            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");
 
         return builder;
     }
