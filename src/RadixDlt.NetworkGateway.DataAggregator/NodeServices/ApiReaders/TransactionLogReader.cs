@@ -87,7 +87,7 @@ public interface ITransactionLogReaderObserver
 internal class TransactionLogReader : ITransactionLogReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly TransactionsApi _transactionsApi;
+    private readonly TransactionApi _transactionsApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<ITransactionLogReaderObserver> _observers;
 
@@ -108,7 +108,7 @@ internal class TransactionLogReader : ITransactionLogReader
                     .TransactionsPostAsync(
                         new CommittedTransactionsRequest(
                             networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                            stateIdentifier: new PartialStateIdentifier(stateVersion),
+                            startStateVersion: stateVersion.ToString(),
                             limit: count
                         ),
                         token

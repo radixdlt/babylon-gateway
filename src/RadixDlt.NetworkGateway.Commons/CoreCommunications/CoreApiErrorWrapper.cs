@@ -99,56 +99,47 @@ public static class CoreApiErrorWrapper
 
     public static WrappedCoreApiException? ExtractWrappedCoreApiException(ApiException apiException)
     {
-        var coreError = ExtractUpstreamGatewayErrorResponse(apiException.ErrorContent?.ToString());
-        if (coreError == null)
-        {
-            return null;
-        }
+        return null;
 
-        // We have to handle each separately to capture the right types on the error objects
-        return coreError.Details switch
-        {
-            AboveMaximumValidatorFeeIncreaseError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            BelowMinimumStakeError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            DataObjectNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
-            FeeConstructionError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.MaybeTransient }),
-            InternalServerError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.MaybeTransient }),
-            InvalidAddressError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidDataObjectError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidFeePayerEntityError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidHexError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidJsonError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidPartialStateIdentifierError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidPublicKeyError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            InvalidSignatureError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            InvalidSubEntityError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidTransactionError error => WrappedCoreApiException.Of(apiException, error),
-            InvalidTransactionHashError error => WrappedCoreApiException.Of(apiException, error),
-            MessageTooLongError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            MempoolFullError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.Transient }),
-            NetworkNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
-            NotEnoughNativeTokensForFeesError error => WrappedCoreApiException.Of(apiException, error),
-            NotEnoughResourcesError error => WrappedCoreApiException.Of(apiException, error),
-            NotValidatorOwnerError error => WrappedCoreApiException.Of(apiException, error),
-            PublicKeyNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
-            ResourceDepositOperationNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
-            ResourceWithdrawOperationNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
-            StateIdentifierNotFoundError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            SubstateDependencyNotFoundError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
-            TransactionNotFoundError error => WrappedCoreApiException.Of(apiException, error),
-            _ => null,
-        };
-    }
-
-    private static UnexpectedError? ExtractUpstreamGatewayErrorResponse(string? upstreamErrorResponse)
-    {
-        try
-        {
-            return string.IsNullOrWhiteSpace(upstreamErrorResponse) ? null : JsonConvert.DeserializeObject<UnexpectedError>(upstreamErrorResponse);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // var coreError = ExtractUpstreamGatewayErrorResponse(apiException.ErrorContent?.ToString());
+        // if (coreError == null)
+        // {
+        //     return null;
+        // }
+        //
+        // // We have to handle each separately to capture the right types on the error objects
+        // return coreError.Details switch
+        // {
+        //     AboveMaximumValidatorFeeIncreaseError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     BelowMinimumStakeError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     DataObjectNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
+        //     FeeConstructionError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.MaybeTransient }),
+        //     InternalServerError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.MaybeTransient }),
+        //     InvalidAddressError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidDataObjectError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidFeePayerEntityError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidHexError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidJsonError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidPartialStateIdentifierError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidPublicKeyError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     InvalidSignatureError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     InvalidSubEntityError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidTransactionError error => WrappedCoreApiException.Of(apiException, error),
+        //     InvalidTransactionHashError error => WrappedCoreApiException.Of(apiException, error),
+        //     MessageTooLongError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     MempoolFullError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { Transience = Transience.Transient }),
+        //     NetworkNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
+        //     NotEnoughNativeTokensForFeesError error => WrappedCoreApiException.Of(apiException, error),
+        //     NotEnoughResourcesError error => WrappedCoreApiException.Of(apiException, error),
+        //     NotValidatorOwnerError error => WrappedCoreApiException.Of(apiException, error),
+        //     PublicKeyNotSupportedError error => WrappedCoreApiException.Of(apiException, error),
+        //     ResourceDepositOperationNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
+        //     ResourceWithdrawOperationNotSupportedByEntityError error => WrappedCoreApiException.Of(apiException, error),
+        //     StateIdentifierNotFoundError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     SubstateDependencyNotFoundError error => WrappedCoreApiException.Of(apiException, error, new CoreApiErrorProperties { MarksInvalidTransaction = true }),
+        //     TransactionNotFoundError error => WrappedCoreApiException.Of(apiException, error),
+        //     _ => null,
+        // };
     }
 }

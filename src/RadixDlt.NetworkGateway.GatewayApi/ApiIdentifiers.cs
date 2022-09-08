@@ -95,17 +95,18 @@ public static class ApiIdentifiers
             : $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this CoreModel.ResourceAmount resourceAmount)
-    {
-        if (resourceAmount.ResourceIdentifier is not CoreModel.TokenResourceIdentifier tokenResourceIdentifier)
-        {
-            throw new InvalidCoreApiResponseException(
-                "Expected a response from the core API to have a tokenResourceIdentifier but it was another kind of resourceIdentifier"
-            );
-        }
-
-        return new Gateway.TokenAmount(resourceAmount.Value, tokenResourceIdentifier.Rri.AsGatewayTokenIdentifier());
-    }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // public static Gateway.TokenAmount AsGatewayTokenAmount(this CoreModel.ResourceAmount resourceAmount)
+    // {
+    //     if (resourceAmount.ResourceIdentifier is not CoreModel.TokenResourceIdentifier tokenResourceIdentifier)
+    //     {
+    //         throw new InvalidCoreApiResponseException(
+    //             "Expected a response from the core API to have a tokenResourceIdentifier but it was another kind of resourceIdentifier"
+    //         );
+    //     }
+    //
+    //     return new Gateway.TokenAmount(resourceAmount.Value, tokenResourceIdentifier.Rri.AsGatewayTokenIdentifier());
+    // }
 
     public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, string rri)
     {
@@ -137,10 +138,11 @@ public static class ApiIdentifiers
         return new Gateway.TransactionIdentifier(hexTransactionId);
     }
 
-    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this CoreModel.TransactionIdentifier transactionIdentifier)
-    {
-        return new Gateway.TransactionIdentifier(transactionIdentifier.Hash);
-    }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this CoreModel.TransactionIdentifier transactionIdentifier)
+    // {
+    //     return new Gateway.TransactionIdentifier(transactionIdentifier.Hash);
+    // }
 
     public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this byte[] transactionIdentifierHash)
     {

@@ -121,26 +121,25 @@ internal class TransactionBuilder
         return new MappedTransaction(fakeManifest, _feePayerBeforeBalances, _feePayerBalanceChanges);
     }
 
-    private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action, CancellationToken token = default)
-    {
-        await Task.Delay(1, token); // Fix for compile warning in this placeholder method
-        return action switch
-        {
-            /*
-            Gateway.TransferTokens transferTokens => MapTransferTokens(transferTokens),
-            Gateway.BurnTokens burnTokens => await MapBurnTokens(burnTokens),
-            Gateway.MintTokens mintTokens => await MapMintTokens(mintTokens),
-            Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
-            Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
-            Gateway.CreateTokenDefinition createTokenDefinition => await MapCreateTokenDefinition(createTokenDefinition),
-            Gateway.RegisterValidator registerValidator => MapRegisterValidator(registerValidator),
-            Gateway.UnregisterValidator unregisterValidator => MapUnregisterValidator(unregisterValidator),
-            */
-            /* Users can supply a type which validates as an action (because it has a string type), but not as a type
-               which matches the discriminator, so the deserializer doesn't deserialize it into one of the subtypes
-               above. This error catches these issues */
-            not null => throw new InvalidActionException(action, $"Action type of {action.Type} is not supported"),
-            _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unhandled action type"),
-        };
-    }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action, CancellationToken token = default)
+    // {
+    //     await Task.Delay(1, token); // Fix for compile warning in this placeholder method
+    //     return action switch
+    //     {
+    //         Gateway.TransferTokens transferTokens => MapTransferTokens(transferTokens),
+    //         Gateway.BurnTokens burnTokens => await MapBurnTokens(burnTokens),
+    //         Gateway.MintTokens mintTokens => await MapMintTokens(mintTokens),
+    //         Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
+    //         Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
+    //         Gateway.CreateTokenDefinition createTokenDefinition => await MapCreateTokenDefinition(createTokenDefinition),
+    //         Gateway.RegisterValidator registerValidator => MapRegisterValidator(registerValidator),
+    //         Gateway.UnregisterValidator unregisterValidator => MapUnregisterValidator(unregisterValidator),
+    //         /* Users can supply a type which validates as an action (because it has a string type), but not as a type
+    //            which matches the discriminator, so the deserializer doesn't deserialize it into one of the subtypes
+    //            above. This error catches these issues */
+    //         not null => throw new InvalidActionException(action, $"Action type of {action.Type} is not supported"),
+    //         _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unhandled action type"),
+    //     };
+    // }
 }

@@ -63,9 +63,11 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -113,6 +115,52 @@ internal class TransactionContentProcessor
         _transaction = transaction;
         _transactionSummary = transactionSummary;
         _dbTransaction = dbTransaction;
-        // TBC - see Olympia TransactionContentProcessor
+
+        // TODO reimplement, see Olympia TransactionContentProcessor
+
+        var stateVersion = long.Parse(transaction.StateVersion);
+        var stateUpdates = transaction.Receipt.StateUpdates;
+
+        foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
+        {
+            // TODO do something
+        }
+
+        foreach (var upSubstate in stateUpdates.UpSubstates)
+        {
+            // TODO parse json and do something
+        }
+
+        foreach (var downSubstate in stateUpdates.DownSubstates)
+        {
+            // TODO do something
+        }
+
+        // foreach (string resourceAddress in transaction.Receipt.NewResourceAddresses)
+        // {
+        //     _dbActionsPlanner.ResolveResource(resourceAddress, stateVersion);
+        // }
+        //
+        // // TODO use var once CoreApiSdk turns on <nullable>enable</nullable>
+        // foreach (string componentAddress in transaction.Receipt.NewComponentAddresses)
+        // {
+        //     // TODO do we have to parse addresses?
+        //     // TODO we should still move all the prefixes outside of this class and use proper parser (RadixAddressParser.TryParse)
+        //     const string accountPrefix = "account_";
+        //
+        //     if (componentAddress.StartsWith(accountPrefix))
+        //     {
+        //         _dbActionsPlanner.ResolveAccount(componentAddress, stateVersion);
+        //     }
+        //     else
+        //     {
+        //         throw new Exception("bleeeeee unsupported value of " + componentAddress);
+        //     }
+        // }
+        //
+        // foreach (string packageAddress in transaction.Receipt.NewPackageAddresses)
+        // {
+        //     // TODO do something
+        // }
     }
 }

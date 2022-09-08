@@ -93,7 +93,9 @@ public enum EntityType
 
 public interface IEntityDeterminer
 {
-    Entity? DetermineEntity(EntityIdentifier? entityIdentifier);
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // Entity? DetermineEntity(EntityIdentifier? entityIdentifier);
+    Entity? DetermineEntity(object? entityIdentifier);
 
     bool IsXrd(string rri);
 
@@ -126,14 +128,18 @@ public sealed class EntityDeterminer : IEntityDeterminer
         _networkAddressProvider = networkAddressProvider;
     }
 
-    public Entity? DetermineEntity(EntityIdentifier? entityIdentifier)
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // public Entity? DetermineEntity(EntityIdentifier? entityIdentifier)
+    public Entity? DetermineEntity(object? entityIdentifier)
     {
         if (entityIdentifier == null)
         {
             return null;
         }
 
-        var primaryEntityAddress = entityIdentifier.Address;
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // var primaryEntityAddress = entityIdentifier.Address;
+        var primaryEntityAddress = "something random";
         if (primaryEntityAddress == "system")
         {
             return new Entity(EntityType.System);
@@ -154,33 +160,36 @@ public sealed class EntityDeterminer : IEntityDeterminer
             return null;
         }
 
-        var subEntity = entityIdentifier.SubEntity;
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // var subEntity = entityIdentifier.SubEntity;
+        object? subEntity = null;
 
         switch (primaryEntityRadixAddress.Type)
         {
             case RadixAddressType.Account when subEntity == null:
                 return new Entity(EntityType.Account, AccountAddress: primaryEntityAddress);
-            case RadixAddressType.Account when subEntity.Address == "prepared_stakes":
-                return new Entity(EntityType.Account_PreparedStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata!.ValidatorAddress);
-            case RadixAddressType.Account when subEntity.Address == "prepared_unstakes":
-                return new Entity(EntityType.Account_PreparedUnstake, AccountAddress: primaryEntityAddress); // The validator address is part of the StakeUnit resource
-            case RadixAddressType.Account when subEntity.Address == "exiting_unstakes":
-                return new Entity(EntityType.Account_ExitingStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata!.ValidatorAddress, EpochUnlock: subEntity.Metadata.EpochUnlock);
-            case RadixAddressType.Account:
-                _logger.LogWarning("Unknown account sub-entity address: {SubEntityAddress}", subEntity.Address);
-                return null;
-            case RadixAddressType.Validator when subEntity == null:
-                return new Entity(EntityType.Validator, ValidatorAddress: primaryEntityAddress);
-            case RadixAddressType.Validator when subEntity.Address == "system":
-                return new Entity(EntityType.Validator_System, ValidatorAddress: primaryEntityAddress);
-            case RadixAddressType.Validator:
-                _logger.LogWarning("Unknown validator sub-entity address: {SubEntityAddress}", subEntity.Address);
-                return null;
-            case RadixAddressType.Resource when subEntity == null:
-                return new Entity(EntityType.Resource, ResourceAddress: primaryEntityAddress);
-            case RadixAddressType.Resource:
-                _logger.LogWarning("Unknown resource sub-entity address: {SubEntityAddress}", subEntity.Address);
-                return null;
+            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+            // case RadixAddressType.Account when subEntity.Address == "prepared_stakes":
+            //     return new Entity(EntityType.Account_PreparedStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata!.ValidatorAddress);
+            // case RadixAddressType.Account when subEntity.Address == "prepared_unstakes":
+            //     return new Entity(EntityType.Account_PreparedUnstake, AccountAddress: primaryEntityAddress); // The validator address is part of the StakeUnit resource
+            // case RadixAddressType.Account when subEntity.Address == "exiting_unstakes":
+            //     return new Entity(EntityType.Account_ExitingStake, AccountAddress: primaryEntityAddress, ValidatorAddress: subEntity.Metadata!.ValidatorAddress, EpochUnlock: subEntity.Metadata.EpochUnlock);
+            // case RadixAddressType.Account:
+            //     _logger.LogWarning("Unknown account sub-entity address: {SubEntityAddress}", subEntity.Address);
+            //     return null;
+            // case RadixAddressType.Validator when subEntity == null:
+            //     return new Entity(EntityType.Validator, ValidatorAddress: primaryEntityAddress);
+            // case RadixAddressType.Validator when subEntity.Address == "system":
+            //     return new Entity(EntityType.Validator_System, ValidatorAddress: primaryEntityAddress);
+            // case RadixAddressType.Validator:
+            //     _logger.LogWarning("Unknown validator sub-entity address: {SubEntityAddress}", subEntity.Address);
+            //     return null;
+            // case RadixAddressType.Resource when subEntity == null:
+            //     return new Entity(EntityType.Resource, ResourceAddress: primaryEntityAddress);
+            // case RadixAddressType.Resource:
+            //     _logger.LogWarning("Unknown resource sub-entity address: {SubEntityAddress}", subEntity.Address);
+            //     return null;
             case RadixAddressType.Node: // A Node address here should not be possible
             default:
                 _logger.LogWarning("Unhandled radix address type: {RadixAddressType}", primaryEntityRadixAddress.Type);

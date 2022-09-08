@@ -75,6 +75,9 @@ public static class GatewayApiBuilderExtensions
     public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
     {
         builder.Services
+            .AddNetworkGatewayPostgresCommons();
+
+        builder.Services
             .AddHealthChecks()
             .AddDbContextCheck<ReadOnlyDbContext>("network_gateway_api_database_readonly_connection")
             .AddDbContextCheck<ReadWriteDbContext>("network_gateway_api_database_readwrite_connection");

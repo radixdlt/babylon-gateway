@@ -76,6 +76,9 @@ public static class ServiceCollectionExtensions
     public static DataAggregatorBuilder AddPostgresPersistence(this DataAggregatorBuilder builder)
     {
         builder.Services
+            .AddNetworkGatewayPostgresCommons();
+
+        builder.Services
             .AddSingleton<IRawTransactionWriter, RawTransactionWriter>()
             .AddSingleton<ILedgerExtenderService, LedgerExtenderService>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()

@@ -104,22 +104,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitResponse" /> class.
         /// </summary>
-        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
-        public TransactionSubmitResponse(TransactionIdentifier transactionIdentifier = default(TransactionIdentifier))
+        /// <param name="duplicate">Is true if the transaction is a duplicate of an existing transaction in the mempool. (required).</param>
+        public TransactionSubmitResponse(bool duplicate = default(bool))
         {
-            // to ensure "transactionIdentifier" is required (not null)
-            if (transactionIdentifier == null)
-            {
-                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionSubmitResponse and cannot be null");
-            }
-            this.TransactionIdentifier = transactionIdentifier;
+            this.Duplicate = duplicate;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionIdentifier
+        /// Is true if the transaction is a duplicate of an existing transaction in the mempool.
         /// </summary>
-        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIdentifier TransactionIdentifier { get; set; }
+        /// <value>Is true if the transaction is a duplicate of an existing transaction in the mempool.</value>
+        [DataMember(Name = "duplicate", IsRequired = true, EmitDefaultValue = true)]
+        public bool Duplicate { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +125,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionSubmitResponse {\n");
-            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
+            sb.Append("  Duplicate: ").Append(Duplicate).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,9 +162,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TransactionIdentifier == input.TransactionIdentifier ||
-                    (this.TransactionIdentifier != null &&
-                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
+                    this.Duplicate == input.Duplicate ||
+                    this.Duplicate.Equals(input.Duplicate)
                 );
         }
 
@@ -181,10 +176,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Duplicate.GetHashCode();
                 return hashCode;
             }
         }

@@ -180,20 +180,19 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
     {
-        var hrps = networkConfiguration.Bech32HumanReadableParts;
         return new NetworkConfiguration
         {
             NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
             NetworkAddressHrps = new NetworkAddressHrps
             {
-                AccountHrp = hrps.AccountHrp,
-                ResourceHrpSuffix = hrps.ResourceHrpSuffix,
-                ValidatorHrp = hrps.ValidatorHrp,
-                NodeHrp = hrps.NodeHrp,
+                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
+                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
+                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
+                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
             },
             WellKnownAddresses = new WellKnownAddresses
             {
-                XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
+                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
             },
         };
     }

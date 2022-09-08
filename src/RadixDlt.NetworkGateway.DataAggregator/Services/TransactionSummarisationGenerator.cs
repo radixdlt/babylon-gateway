@@ -78,27 +78,28 @@ public static class TransactionSummarisationGenerator
         long? newRoundInEpoch = null;
         DateTimeOffset? newRoundTimestamp = null;
 
-        foreach (var operationGroup in transaction.OperationGroups)
-        {
-            foreach (var operation in operationGroup.Operations)
-            {
-                if (operation.IsCreateOf<EpochData>(out var epochData))
-                {
-                    newEpoch = epochData.Epoch;
-                }
-
-                if (operation.IsCreateOf<RoundData>(out var newRoundData))
-                {
-                    newRoundInEpoch = newRoundData.Round;
-
-                    // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
-                    if (newRoundData.Timestamp != 0)
-                    {
-                        newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
-                    }
-                }
-            }
-        }
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // foreach (var operationGroup in transaction.OperationGroups)
+        // {
+        //     foreach (var operation in operationGroup.Operations)
+        //     {
+        //         if (operation.IsCreateOf<EpochData>(out var epochData))
+        //         {
+        //             newEpoch = epochData.Epoch;
+        //         }
+        //
+        //         if (operation.IsCreateOf<RoundData>(out var newRoundData))
+        //         {
+        //             newRoundInEpoch = newRoundData.Round;
+        //
+        //             // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
+        //             if (newRoundData.Timestamp != 0)
+        //             {
+        //                 newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+        //             }
+        //         }
+        //     }
+        // }
 
         /* NB:
            The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
@@ -115,17 +116,18 @@ public static class TransactionSummarisationGenerator
             : roundTimestamp > createdTimestamp ? createdTimestamp
             : roundTimestamp;
 
+        // TODO those hashes are almost certainly mismatched/invalid
         return new TransactionSummary(
-            StateVersion: transaction.CommittedStateIdentifier.StateVersion,
+            StateVersion: long.Parse(transaction.StateVersion), // TODO long.Parse is just temporary as we need something more robust; what's more StateVersion is string-encoded UNSIGNED long
             Epoch: newEpoch ?? lastTransaction.Epoch,
             IndexInEpoch: isStartOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
             RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
             IsStartOfEpoch: isStartOfEpoch,
             IsStartOfRound: isStartOfRound,
-            PayloadHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
-            IntentHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(), // TODO - Fix me when we read this from the Core API
-            SignedTransactionHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(), // TODO - Fix me when we read this from the Core API
-            TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
+            PayloadHash: transaction.NotarizedTransaction.NotarySignature.ConvertFromHex(), // TODO almost certainly invalid
+            IntentHash: transaction.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex(),
+            SignedTransactionHash: transaction.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex(),
+            TransactionAccumulator: transaction.NotarizedTransaction.NotarySignature.ConvertFromHex(), // TODO almost certainly invalid
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
             NormalizedRoundTimestamp: normalizedRoundTimestamp
