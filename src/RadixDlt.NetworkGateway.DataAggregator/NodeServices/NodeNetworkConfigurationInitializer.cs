@@ -103,10 +103,10 @@ public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
     {
         var networkConfiguration = await ReadNetworkConfigurationFromNode(token);
 
-        if (_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName != networkConfiguration.NetworkIdentifier.Network)
+        if (_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName != networkConfiguration.Network)
         {
             throw new NodeInitializationException(
-            $"The node's network name is {networkConfiguration.NetworkIdentifier.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
+            $"The node's network name is {networkConfiguration.Network}, not {_networkGatewayDataAggregatorOptionsMonitor.CurrentValue.NetworkName}"
             );
         }
 
@@ -114,7 +114,7 @@ public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
 
         _logger.LogInformation(
             "The node has network name {NodeNetworkName}, with matching config to db ledger and/or any other nodes",
-            networkConfiguration.NetworkIdentifier.Network
+            networkConfiguration.Network
         );
     }
 

@@ -228,8 +228,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
         foreach (var transaction in transactions)
         {
-            // TODO long.Parse is just temporary as we need something more robust; what's more StateVersion is string-encoded UNSIGNED long
-            transactionStoreForNode[long.Parse(transaction.StateVersion)] = transaction;
+            transactionStoreForNode[transaction.StateVersion] = transaction;
         }
     }
 

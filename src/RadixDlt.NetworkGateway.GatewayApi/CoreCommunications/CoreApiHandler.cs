@@ -74,7 +74,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 
 public interface ICoreApiHandler
 {
-    CoreModel.NetworkIdentifier GetNetworkIdentifier();
+    string GetNetworkIdentifier();
 
     CoreApiNode GetCoreNodeConnectedTo();
 
@@ -110,9 +110,9 @@ internal class CoreApiHandler : ICoreApiHandler
         _coreApiProvider = ChooseCoreApiProvider(coreNodesSelectorService, httpClient);
     }
 
-    public CoreModel.NetworkIdentifier GetNetworkIdentifier()
+    public string GetNetworkIdentifier()
     {
-        return new CoreModel.NetworkIdentifier(_networkConfigurationProvider.GetNetworkName());
+        return _networkConfigurationProvider.GetNetworkName();
     }
 
     public CoreApiNode GetCoreNodeConnectedTo()

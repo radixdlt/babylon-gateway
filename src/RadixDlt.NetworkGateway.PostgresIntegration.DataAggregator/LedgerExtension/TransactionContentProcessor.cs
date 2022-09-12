@@ -118,7 +118,7 @@ internal class TransactionContentProcessor
 
         // TODO reimplement, see Olympia TransactionContentProcessor
 
-        var stateVersion = long.Parse(transaction.StateVersion);
+        var stateVersion = transaction.StateVersion;
         var stateUpdates = transaction.Receipt.StateUpdates;
 
         foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)

@@ -84,7 +84,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     private record CapturedConfig(
         NetworkConfiguration NetworkConfiguration,
         AddressHrps AddressHrps,
-        NetworkIdentifier NetworkIdentifier
+        string NetworkName
     );
 
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
@@ -160,12 +160,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     public string GetNetworkName()
     {
-        return GetCapturedConfig().NetworkConfiguration.NetworkDefinition.NetworkName;
-    }
-
-    public NetworkIdentifier GetNetworkIdentifierForApiRequests()
-    {
-        return GetCapturedConfig().NetworkIdentifier;
+        return GetCapturedConfig().NetworkName;
     }
 
     public AddressHrps GetAddressHrps()
@@ -182,7 +177,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     {
         return new NetworkConfiguration
         {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
+            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.Network },
             NetworkAddressHrps = new NetworkAddressHrps
             {
                 AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
@@ -214,7 +209,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             _capturedConfig = new CapturedConfig(
                 inputNetworkConfiguration,
                 inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-                new NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName)
+                inputNetworkConfiguration.NetworkDefinition.NetworkName
             );
         }
     }

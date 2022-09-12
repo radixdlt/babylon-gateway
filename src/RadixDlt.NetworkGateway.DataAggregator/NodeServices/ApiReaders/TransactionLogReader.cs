@@ -105,10 +105,10 @@ internal class TransactionLogReader : ITransactionLogReader
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _transactionsApi
-                    .TransactionsPostAsync(
+                    .TransactionStreamPostAsync(
                         new CommittedTransactionsRequest(
-                            networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests(),
-                            startStateVersion: stateVersion.ToString(),
+                            network: _networkConfigurationProvider.GetNetworkName(),
+                            startStateVersion: stateVersion,
                             limit: count
                         ),
                         token
