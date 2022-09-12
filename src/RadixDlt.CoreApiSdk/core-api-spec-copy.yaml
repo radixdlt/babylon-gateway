@@ -286,19 +286,16 @@ components:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted
         end_epoch_exclusive:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected
         nonce:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents
         notary_public_key:
           type: string
@@ -327,7 +324,6 @@ components:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
     ErrorResponse:
       type: object
       required:
@@ -419,7 +415,6 @@ components:
           type: integer
           format: int32
           minimum: 0
-          maximum: 4294967295
           description: A decimal 32-bit unsigned integer, counting the number of times the substate was updated
         substate_bytes:
           type: string
@@ -445,7 +440,6 @@ components:
           type: integer
           format: int32
           minimum: 0
-          maximum: 4294967295
           description: A decimal 32-bit unsigned integer, counting the number of times the substate was updated
     GlobalEntityId:
       type: object
@@ -587,7 +581,6 @@ components:
               type: integer
               format: int64
               minimum: 0
-              maximum: 18446744073709551615
     ResourceManagerSubstate:
       allOf:
         - $ref: '#/components/schemas/SubstateBase'
@@ -877,7 +870,6 @@ components:
           type: integer
           format: int32
           minimum: 0
-          maximum: 4294967295
           description: The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.
         tip_percentage:
           type: integer
@@ -889,7 +881,6 @@ components:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: The nonce value to use for execution. A decimal 64-bit unsigned integer.
         signer_public_keys:
           type: array
@@ -946,7 +937,6 @@ components:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: A decimal 64-bit unsigned integer.
         limit:
           description: The maximum number of transactions that will be returned.
@@ -962,13 +952,11 @@ components:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: The first state version returned. A decimal 64-bit unsigned integer.
         max_state_version:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: The maximum state version returned. A decimal 64-bit unsigned integer.
         transactions:
           description: A committed transactions list starting from the `start_state_version_inclusive`.
@@ -986,7 +974,6 @@ components:
           type: integer
           format: int64
           minimum: 0
-          maximum: 18446744073709551615
           description: The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
         notarized_transaction:
           $ref: "#/components/schemas/NotarizedTransaction"

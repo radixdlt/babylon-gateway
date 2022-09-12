@@ -228,22 +228,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StartStateVersion (long) maximum
-            if (this.StartStateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartStateVersion, must be a value less than or equal to -1.", new [] { "StartStateVersion" });
-            }
-
             // StartStateVersion (long) minimum
             if (this.StartStateVersion < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartStateVersion, must be a value greater than or equal to 0.", new [] { "StartStateVersion" });
-            }
-
-            // MaxStateVersion (long) maximum
-            if (this.MaxStateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxStateVersion, must be a value less than or equal to -1.", new [] { "MaxStateVersion" });
             }
 
             // MaxStateVersion (long) minimum

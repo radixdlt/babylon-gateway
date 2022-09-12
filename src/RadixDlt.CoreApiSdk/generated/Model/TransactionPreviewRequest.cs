@@ -314,12 +314,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // CostUnitLimit (int) maximum
-            if (this.CostUnitLimit > (int)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
-            }
-
             // CostUnitLimit (int) minimum
             if (this.CostUnitLimit < (int)0)
             {
@@ -336,12 +330,6 @@ namespace RadixDlt.CoreApiSdk.Model
             if (this.TipPercentage < (int)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
-            }
-
-            // Nonce (long) maximum
-            if (this.Nonce > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value less than or equal to -1.", new [] { "Nonce" });
             }
 
             // Nonce (long) minimum

@@ -235,12 +235,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (int) maximum
-            if (this._Version > (int)4294967295)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 4294967295.", new [] { "_Version" });
-            }
-
             // _Version (int) minimum
             if (this._Version < (int)0)
             {

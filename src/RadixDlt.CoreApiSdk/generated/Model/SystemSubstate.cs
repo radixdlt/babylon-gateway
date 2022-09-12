@@ -215,12 +215,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Epoch (long) maximum
-            if (this.Epoch > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to -1.", new [] { "Epoch" });
-            }
-
             // Epoch (long) minimum
             if (this.Epoch < (long)0)
             {

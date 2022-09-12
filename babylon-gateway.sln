@@ -129,9 +129,8 @@ Global
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = .idea-run-configurations\DataAggregator.run.xml
 		File = .idea-run-configurations\Postgres.run.xml
-		File = .idea-run-configurations\GatewayAPI.run.xml
-		File = .idea-run-configurations\DataAggregator (Production).run.xml
-		File = .idea-run-configurations\GatewayApi (Production).run.xml
+		File = .idea-run-configurations\Gateway Api.run.xml
+		File = .idea-run-configurations\Database Migrations with Wipe Database.run.xml
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4335C252-9F00-40EF-BAFD-38891B0F9947} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
