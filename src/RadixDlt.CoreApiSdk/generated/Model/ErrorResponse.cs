@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
         /// </summary>
-        /// <param name="code">A numeric code corresponding to the given error type. (required).</param>
+        /// <param name="code">A numeric code corresponding to the given HTTP error code. (required).</param>
         /// <param name="message">A human-readable error message. (required).</param>
         /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Core API&#39;s error logs, in the case where the Core API details are hidden..</param>
         public ErrorResponse(int code = default(int), string message = default(string), string traceId = default(string))
@@ -120,9 +120,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// A numeric code corresponding to the given error type.
+        /// A numeric code corresponding to the given HTTP error code.
         /// </summary>
-        /// <value>A numeric code corresponding to the given error type.</value>
+        /// <value>A numeric code corresponding to the given HTTP error code.</value>
         [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
         public int Code { get; set; }
 

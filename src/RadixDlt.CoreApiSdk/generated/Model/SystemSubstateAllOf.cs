@@ -104,15 +104,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">epoch (required).</param>
+        /// <param name="epoch">An integer between 0 and 10^10, marking the current epoch (required).</param>
         public SystemSubstateAllOf(long epoch = default(long))
         {
             this.Epoch = epoch;
         }
 
         /// <summary>
-        /// Gets or Sets Epoch
+        /// An integer between 0 and 10^10, marking the current epoch
         /// </summary>
+        /// <value>An integer between 0 and 10^10, marking the current epoch</value>
         [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
         public long Epoch { get; set; }
 
@@ -187,6 +188,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Epoch (long) maximum
+            if (this.Epoch > (long)10000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to 10000000000.", new [] { "Epoch" });
+            }
+
             // Epoch (long) minimum
             if (this.Epoch < (long)0)
             {

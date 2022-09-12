@@ -106,19 +106,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="version">version (required).</param>
         /// <param name="networkId">networkId (required).</param>
-        /// <param name="startEpochInclusive">A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted (required).</param>
-        /// <param name="endEpochExclusive">A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
-        /// <param name="nonce">A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents (required).</param>
+        /// <param name="startEpochInclusive">An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted (required).</param>
+        /// <param name="endEpochExclusive">An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
+        /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents (required).</param>
         /// <param name="notaryPublicKey">A hex-encoded public key of a notary (required).</param>
         /// <param name="notaryAsSignatory">Specifies whether the notary&#39;s signature should be included in transaction signers list (required).</param>
-        /// <param name="costUnitLimit">Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer. (required).</param>
-        /// <param name="tipPercentage">Specifies the validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%). (required).</param>
-        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), long nonce = default(long), string notaryPublicKey = default(string), bool notaryAsSignatory = default(bool), string costUnitLimit = default(string), string tipPercentage = default(string))
+        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution. (required).</param>
+        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
+        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), string notaryPublicKey = default(string), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long))
         {
             this._Version = version;
             this.NetworkId = networkId;
             this.StartEpochInclusive = startEpochInclusive;
             this.EndEpochExclusive = endEpochExclusive;
+            // to ensure "nonce" is required (not null)
+            if (nonce == null)
+            {
+                throw new ArgumentNullException("nonce is a required property for TransactionHeader and cannot be null");
+            }
             this.Nonce = nonce;
             // to ensure "notaryPublicKey" is required (not null)
             if (notaryPublicKey == null)
@@ -127,17 +132,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.NotaryPublicKey = notaryPublicKey;
             this.NotaryAsSignatory = notaryAsSignatory;
-            // to ensure "costUnitLimit" is required (not null)
-            if (costUnitLimit == null)
-            {
-                throw new ArgumentNullException("costUnitLimit is a required property for TransactionHeader and cannot be null");
-            }
             this.CostUnitLimit = costUnitLimit;
-            // to ensure "tipPercentage" is required (not null)
-            if (tipPercentage == null)
-            {
-                throw new ArgumentNullException("tipPercentage is a required property for TransactionHeader and cannot be null");
-            }
             this.TipPercentage = tipPercentage;
         }
 
@@ -154,25 +149,25 @@ namespace RadixDlt.CoreApiSdk.Model
         public int NetworkId { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted
+        /// An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted</value>
+        /// <value>An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted</value>
         [DataMember(Name = "start_epoch_inclusive", IsRequired = true, EmitDefaultValue = true)]
         public long StartEpochInclusive { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected
+        /// An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected</value>
+        /// <value>An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected</value>
         [DataMember(Name = "end_epoch_exclusive", IsRequired = true, EmitDefaultValue = true)]
         public long EndEpochExclusive { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents
+        /// A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents</value>
+        /// <value>A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public long Nonce { get; set; }
+        public string Nonce { get; set; }
 
         /// <summary>
         /// A hex-encoded public key of a notary
@@ -189,18 +184,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool NotaryAsSignatory { get; set; }
 
         /// <summary>
-        /// Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.
+        /// An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution.
         /// </summary>
-        /// <value>Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.</value>
+        /// <value>An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public string CostUnitLimit { get; set; }
+        public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// Specifies the validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).
+        /// An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>Specifies the validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).</value>
+        /// <value>An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public string TipPercentage { get; set; }
+        public long TipPercentage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -272,7 +267,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    this.Nonce.Equals(input.Nonce)
+                    (this.Nonce != null &&
+                    this.Nonce.Equals(input.Nonce))
                 ) && 
                 (
                     this.NotaryPublicKey == input.NotaryPublicKey ||
@@ -285,13 +281,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.CostUnitLimit == input.CostUnitLimit ||
-                    (this.CostUnitLimit != null &&
-                    this.CostUnitLimit.Equals(input.CostUnitLimit))
+                    this.CostUnitLimit.Equals(input.CostUnitLimit)
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
-                    (this.TipPercentage != null &&
-                    this.TipPercentage.Equals(input.TipPercentage))
+                    this.TipPercentage.Equals(input.TipPercentage)
                 );
         }
 
@@ -308,20 +302,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 hashCode = (hashCode * 59) + this.NetworkId.GetHashCode();
                 hashCode = (hashCode * 59) + this.StartEpochInclusive.GetHashCode();
                 hashCode = (hashCode * 59) + this.EndEpochExclusive.GetHashCode();
-                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                if (this.Nonce != null)
+                {
+                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                }
                 if (this.NotaryPublicKey != null)
                 {
                     hashCode = (hashCode * 59) + this.NotaryPublicKey.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.NotaryAsSignatory.GetHashCode();
-                if (this.CostUnitLimit != null)
-                {
-                    hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
-                }
-                if (this.TipPercentage != null)
-                {
-                    hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
+                hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 return hashCode;
             }
         }
@@ -357,10 +348,22 @@ namespace RadixDlt.CoreApiSdk.Model
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value greater than or equal to 0.", new [] { "NetworkId" });
             }
 
+            // StartEpochInclusive (long) maximum
+            if (this.StartEpochInclusive > (long)10000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value less than or equal to 10000000000.", new [] { "StartEpochInclusive" });
+            }
+
             // StartEpochInclusive (long) minimum
             if (this.StartEpochInclusive < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value greater than or equal to 0.", new [] { "StartEpochInclusive" });
+            }
+
+            // EndEpochExclusive (long) maximum
+            if (this.EndEpochExclusive > (long)10000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value less than or equal to 10000000000.", new [] { "EndEpochExclusive" });
             }
 
             // EndEpochExclusive (long) minimum
@@ -369,10 +372,28 @@ namespace RadixDlt.CoreApiSdk.Model
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value greater than or equal to 0.", new [] { "EndEpochExclusive" });
             }
 
-            // Nonce (long) minimum
-            if (this.Nonce < (long)0)
+            // CostUnitLimit (long) maximum
+            if (this.CostUnitLimit > (long)4294967295)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value greater than or equal to 0.", new [] { "Nonce" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitLimit (long) minimum
+            if (this.CostUnitLimit < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
+            }
+
+            // TipPercentage (long) maximum
+            if (this.TipPercentage > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
+            }
+
+            // TipPercentage (long) minimum
+            if (this.TipPercentage < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
             }
 
             yield break;

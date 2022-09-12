@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="preGenesisStateIdentifier">preGenesisStateIdentifier (required).</param>
         /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier (required).</param>
         /// <param name="currentStateIdentifier">currentStateIdentifier (required).</param>
-        public NetworkStatusResponse(StateIdentifier preGenesisStateIdentifier = default(StateIdentifier), StateIdentifier postGenesisStateIdentifier = default(StateIdentifier), StateIdentifier currentStateIdentifier = default(StateIdentifier))
+        public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier))
         {
             // to ensure "preGenesisStateIdentifier" is required (not null)
             if (preGenesisStateIdentifier == null)
@@ -133,19 +133,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets PreGenesisStateIdentifier
         /// </summary>
         [DataMember(Name = "pre_genesis_state_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public StateIdentifier PreGenesisStateIdentifier { get; set; }
+        public CommittedStateIdentifier PreGenesisStateIdentifier { get; set; }
 
         /// <summary>
         /// Gets or Sets PostGenesisStateIdentifier
         /// </summary>
         [DataMember(Name = "post_genesis_state_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public StateIdentifier PostGenesisStateIdentifier { get; set; }
+        public CommittedStateIdentifier PostGenesisStateIdentifier { get; set; }
 
         /// <summary>
         /// Gets or Sets CurrentStateIdentifier
         /// </summary>
         [DataMember(Name = "current_state_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public StateIdentifier CurrentStateIdentifier { get; set; }
+        public CommittedStateIdentifier CurrentStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

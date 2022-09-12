@@ -113,8 +113,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
         /// <param name="metadata">metadata (required).</param>
-        /// <param name="totalSupply">totalSupply (required).</param>
-        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupply = default(string))
+        /// <param name="totalSupplyAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
+        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupplyAttos = default(string))
         {
             this.ResourceType = resourceType;
             // to ensure "metadata" is required (not null)
@@ -123,12 +123,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
             this.Metadata = metadata;
-            // to ensure "totalSupply" is required (not null)
-            if (totalSupply == null)
+            // to ensure "totalSupplyAttos" is required (not null)
+            if (totalSupplyAttos == null)
             {
-                throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("totalSupplyAttos is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
-            this.TotalSupply = totalSupply;
+            this.TotalSupplyAttos = totalSupplyAttos;
             this.FungibleDivisibility = fungibleDivisibility;
         }
 
@@ -145,10 +145,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<ResourceManagerSubstateAllOfMetadata> Metadata { get; set; }
 
         /// <summary>
-        /// Gets or Sets TotalSupply
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
         /// </summary>
-        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupply { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
+        [DataMember(Name = "total_supply_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupplyAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -161,7 +162,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
-            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -212,9 +213,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Metadata.SequenceEqual(input.Metadata)
                 ) && 
                 (
-                    this.TotalSupply == input.TotalSupply ||
-                    (this.TotalSupply != null &&
-                    this.TotalSupply.Equals(input.TotalSupply))
+                    this.TotalSupplyAttos == input.TotalSupplyAttos ||
+                    (this.TotalSupplyAttos != null &&
+                    this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
                 );
         }
 
@@ -233,9 +234,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
-                if (this.TotalSupply != null)
+                if (this.TotalSupplyAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();
                 }
                 return hashCode;
             }
