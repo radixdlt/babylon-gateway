@@ -91,29 +91,22 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The status of the transaction
+    /// Defines ResourceType
     /// </summary>
-    /// <value>The status of the transaction</value>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum TransactionStatus
+    public enum ResourceType
     {
         /// <summary>
-        /// Enum Succeeded for value: Succeeded
+        /// Enum Fungible for value: Fungible
         /// </summary>
-        [EnumMember(Value = "Succeeded")]
-        Succeeded = 1,
+        [EnumMember(Value = "Fungible")]
+        Fungible = 1,
 
         /// <summary>
-        /// Enum Failed for value: Failed
+        /// Enum NonFungible for value: NonFungible
         /// </summary>
-        [EnumMember(Value = "Failed")]
-        Failed = 2,
-
-        /// <summary>
-        /// Enum Rejected for value: Rejected
-        /// </summary>
-        [EnumMember(Value = "Rejected")]
-        Rejected = 3
+        [EnumMember(Value = "NonFungible")]
+        NonFungible = 2
 
     }
 

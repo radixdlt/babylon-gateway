@@ -91,57 +91,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// DataStruct
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "DataStruct")]
+    public partial class DataStruct : IEquatable<DataStruct>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="DataStruct" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected DataStruct() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="DataStruct" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="structData">structData (required).</param>
+        /// <param name="ownedEntities">ownedEntities (required).</param>
+        /// <param name="referencedEntities">referencedEntities (required).</param>
+        public DataStruct(SborData structData = default(SborData), List<EntityId> ownedEntities = default(List<EntityId>), List<EntityId> referencedEntities = default(List<EntityId>))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "structData" is required (not null)
+            if (structData == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("structData is a required property for DataStruct and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.StructData = structData;
+            // to ensure "ownedEntities" is required (not null)
+            if (ownedEntities == null)
             {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("ownedEntities is a required property for DataStruct and cannot be null");
             }
-            this.Receipt = receipt;
+            this.OwnedEntities = ownedEntities;
+            // to ensure "referencedEntities" is required (not null)
+            if (referencedEntities == null)
+            {
+                throw new ArgumentNullException("referencedEntities is a required property for DataStruct and cannot be null");
+            }
+            this.ReferencedEntities = referencedEntities;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// Gets or Sets StructData
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        [DataMember(Name = "struct_data", IsRequired = true, EmitDefaultValue = true)]
+        public SborData StructData { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Gets or Sets OwnedEntities
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        [DataMember(Name = "owned_entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityId> OwnedEntities { get; set; }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// Gets or Sets ReferencedEntities
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        [DataMember(Name = "referenced_entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityId> ReferencedEntities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +154,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class DataStruct {\n");
+            sb.Append("  StructData: ").Append(StructData).Append("\n");
+            sb.Append("  OwnedEntities: ").Append(OwnedEntities).Append("\n");
+            sb.Append("  ReferencedEntities: ").Append(ReferencedEntities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +178,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as DataStruct);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if DataStruct instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of DataStruct to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(DataStruct input)
         {
             if (input == null)
             {
@@ -190,18 +194,21 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.StructData == input.StructData ||
+                    (this.StructData != null &&
+                    this.StructData.Equals(input.StructData))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.OwnedEntities == input.OwnedEntities ||
+                    this.OwnedEntities != null &&
+                    input.OwnedEntities != null &&
+                    this.OwnedEntities.SequenceEqual(input.OwnedEntities)
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.ReferencedEntities == input.ReferencedEntities ||
+                    this.ReferencedEntities != null &&
+                    input.ReferencedEntities != null &&
+                    this.ReferencedEntities.SequenceEqual(input.ReferencedEntities)
                 );
         }
 
@@ -214,14 +221,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                if (this.StructData != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.StructData.GetHashCode();
                 }
-                if (this.Receipt != null)
+                if (this.OwnedEntities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OwnedEntities.GetHashCode();
+                }
+                if (this.ReferencedEntities != null)
+                {
+                    hashCode = (hashCode * 59) + this.ReferencedEntities.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,18 +244,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
-            }
-
             yield break;
         }
     }

@@ -96,6 +96,18 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "ComponentInfoSubstate")]
     public partial class ComponentInfoSubstate : IEquatable<ComponentInfoSubstate>, IValidatableObject
     {
+
+        /// <summary>
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentInfoSubstate" /> class.
         /// </summary>
@@ -104,10 +116,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentInfoSubstate" /> class.
         /// </summary>
-        /// <param name="packageAddress">Package address, Bech32m-encoded. (required).</param>
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
-        public ComponentInfoSubstate(string packageAddress = default(string), string blueprintName = default(string))
+        public ComponentInfoSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string packageAddress = default(string), string blueprintName = default(string))
         {
+            this.EntityType = entityType;
+            this.SubstateType = substateType;
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
             {
@@ -123,9 +139,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Package address, Bech32m-encoded.
+        /// The Bech32m-encoded human readable version of the package address
         /// </summary>
-        /// <value>Package address, Bech32m-encoded.</value>
+        /// <value>The Bech32m-encoded human readable version of the package address</value>
         [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
         public string PackageAddress { get; set; }
 
@@ -143,6 +159,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ComponentInfoSubstate {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("}\n");
@@ -181,6 +199,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
+                ) && 
+                (
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
                     this.PackageAddress == input.PackageAddress ||
                     (this.PackageAddress != null &&
                     this.PackageAddress.Equals(input.PackageAddress))
@@ -201,6 +227,8 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 if (this.PackageAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();

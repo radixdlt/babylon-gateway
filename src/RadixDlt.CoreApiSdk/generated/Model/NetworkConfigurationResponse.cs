@@ -105,9 +105,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NetworkConfigurationResponse" /> class.
         /// </summary>
         /// <param name="version">version (required).</param>
-        /// <param name="networkIdentifier">networkIdentifier (required).</param>
+        /// <param name="network">The logical name of the network (required).</param>
         /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
-        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), NetworkIdentifier networkIdentifier = default(NetworkIdentifier), string networkHrpSuffix = default(string))
+        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), string networkHrpSuffix = default(string))
         {
             // to ensure "version" is required (not null)
             if (version == null)
@@ -115,12 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("version is a required property for NetworkConfigurationResponse and cannot be null");
             }
             this._Version = version;
-            // to ensure "networkIdentifier" is required (not null)
-            if (networkIdentifier == null)
+            // to ensure "network" is required (not null)
+            if (network == null)
             {
-                throw new ArgumentNullException("networkIdentifier is a required property for NetworkConfigurationResponse and cannot be null");
+                throw new ArgumentNullException("network is a required property for NetworkConfigurationResponse and cannot be null");
             }
-            this.NetworkIdentifier = networkIdentifier;
+            this.Network = network;
             // to ensure "networkHrpSuffix" is required (not null)
             if (networkHrpSuffix == null)
             {
@@ -136,10 +136,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public NetworkConfigurationResponseVersion _Version { get; set; }
 
         /// <summary>
-        /// Gets or Sets NetworkIdentifier
+        /// The logical name of the network
         /// </summary>
-        [DataMember(Name = "network_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkIdentifier NetworkIdentifier { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
 
         /// <summary>
         /// The network suffix used for Bech32m HRPs used for addressing.
@@ -157,7 +158,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NetworkConfigurationResponse {\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
-            sb.Append("  NetworkIdentifier: ").Append(NetworkIdentifier).Append("\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  NetworkHrpSuffix: ").Append(NetworkHrpSuffix).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -200,9 +201,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this._Version.Equals(input._Version))
                 ) && 
                 (
-                    this.NetworkIdentifier == input.NetworkIdentifier ||
-                    (this.NetworkIdentifier != null &&
-                    this.NetworkIdentifier.Equals(input.NetworkIdentifier))
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
                 ) && 
                 (
                     this.NetworkHrpSuffix == input.NetworkHrpSuffix ||
@@ -224,9 +225,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 }
-                if (this.NetworkIdentifier != null)
+                if (this.Network != null)
                 {
-                    hashCode = (hashCode * 59) + this.NetworkIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
                 if (this.NetworkHrpSuffix != null)
                 {

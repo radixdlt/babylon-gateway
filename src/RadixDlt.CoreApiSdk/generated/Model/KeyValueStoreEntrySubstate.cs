@@ -91,25 +91,68 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// A not yet implemented substate model
+    /// KeyValueStoreEntrySubstate
     /// </summary>
-    [DataContract(Name = "EmptySubstate")]
-    public partial class EmptySubstate : IEquatable<EmptySubstate>, IValidatableObject
+    [DataContract(Name = "KeyValueStoreEntrySubstate")]
+    public partial class KeyValueStoreEntrySubstate : IEquatable<KeyValueStoreEntrySubstate>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="EmptySubstate" /> class.
+        /// Gets or Sets EntityType
         /// </summary>
-        /// <param name="dummy">dummy.</param>
-        public EmptySubstate(string dummy = default(string))
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyValueStoreEntrySubstate" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected KeyValueStoreEntrySubstate() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyValueStoreEntrySubstate" /> class.
+        /// </summary>
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="key">The hex-encoded bytes of its key (required).</param>
+        /// <param name="isDeleted">isDeleted (required).</param>
+        /// <param name="dataStruct">dataStruct.</param>
+        public KeyValueStoreEntrySubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string key = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
         {
-            this.Dummy = dummy;
+            this.EntityType = entityType;
+            this.SubstateType = substateType;
+            // to ensure "key" is required (not null)
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is a required property for KeyValueStoreEntrySubstate and cannot be null");
+            }
+            this.Key = key;
+            this.IsDeleted = isDeleted;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// Gets or Sets Dummy
+        /// The hex-encoded bytes of its key
         /// </summary>
-        [DataMember(Name = "dummy", EmitDefaultValue = true)]
-        public string Dummy { get; set; }
+        /// <value>The hex-encoded bytes of its key</value>
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public string Key { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsDeleted
+        /// </summary>
+        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsDeleted { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DataStruct
+        /// </summary>
+        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -118,8 +161,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EmptySubstate {\n");
-            sb.Append("  Dummy: ").Append(Dummy).Append("\n");
+            sb.Append("class KeyValueStoreEntrySubstate {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -140,15 +187,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EmptySubstate);
+            return this.Equals(input as KeyValueStoreEntrySubstate);
         }
 
         /// <summary>
-        /// Returns true if EmptySubstate instances are equal
+        /// Returns true if KeyValueStoreEntrySubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of EmptySubstate to be compared</param>
+        /// <param name="input">Instance of KeyValueStoreEntrySubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EmptySubstate input)
+        public bool Equals(KeyValueStoreEntrySubstate input)
         {
             if (input == null)
             {
@@ -156,9 +203,26 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Dummy == input.Dummy ||
-                    (this.Dummy != null &&
-                    this.Dummy.Equals(input.Dummy))
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
+                ) && 
+                (
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
+                ) && 
+                (
+                    this.IsDeleted == input.IsDeleted ||
+                    this.IsDeleted.Equals(input.IsDeleted)
+                ) && 
+                (
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -171,9 +235,16 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Dummy != null)
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.Dummy.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
+                if (this.DataStruct != null)
+                {
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }

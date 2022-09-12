@@ -113,12 +113,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="status">status (required).</param>
         /// <param name="feeSummary">feeSummary (required).</param>
         /// <param name="stateUpdates">stateUpdates (required).</param>
-        /// <param name="newPackageAddresses">A list of new package addresses. (required).</param>
-        /// <param name="newComponentAddresses">A list of new component addresses. (required).</param>
-        /// <param name="newResourceAddresses">A list of new resource addresses. (required).</param>
-        /// <param name="output">The engine return data (only present if status is succeeded).</param>
-        /// <param name="errorMessage">Error message (only present if status is failed or rejected).</param>
-        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<string> newPackageAddresses = default(List<string>), List<string> newComponentAddresses = default(List<string>), List<string> newResourceAddresses = default(List<string>), List<string> output = default(List<string>), string errorMessage = default(string))
+        /// <param name="output">The manifest line-by-line engine return data (only present if status is Succeeded).</param>
+        /// <param name="errorMessage">Error message (only present if status is Failed or Rejected).</param>
+        public TransactionReceipt(TransactionStatus status = default(TransactionStatus), FeeSummary feeSummary = default(FeeSummary), StateUpdates stateUpdates = default(StateUpdates), List<SborData> output = default(List<SborData>), string errorMessage = default(string))
         {
             this.Status = status;
             // to ensure "feeSummary" is required (not null)
@@ -133,24 +130,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("stateUpdates is a required property for TransactionReceipt and cannot be null");
             }
             this.StateUpdates = stateUpdates;
-            // to ensure "newPackageAddresses" is required (not null)
-            if (newPackageAddresses == null)
-            {
-                throw new ArgumentNullException("newPackageAddresses is a required property for TransactionReceipt and cannot be null");
-            }
-            this.NewPackageAddresses = newPackageAddresses;
-            // to ensure "newComponentAddresses" is required (not null)
-            if (newComponentAddresses == null)
-            {
-                throw new ArgumentNullException("newComponentAddresses is a required property for TransactionReceipt and cannot be null");
-            }
-            this.NewComponentAddresses = newComponentAddresses;
-            // to ensure "newResourceAddresses" is required (not null)
-            if (newResourceAddresses == null)
-            {
-                throw new ArgumentNullException("newResourceAddresses is a required property for TransactionReceipt and cannot be null");
-            }
-            this.NewResourceAddresses = newResourceAddresses;
             this.Output = output;
             this.ErrorMessage = errorMessage;
         }
@@ -168,37 +147,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public StateUpdates StateUpdates { get; set; }
 
         /// <summary>
-        /// A list of new package addresses.
+        /// The manifest line-by-line engine return data (only present if status is Succeeded)
         /// </summary>
-        /// <value>A list of new package addresses.</value>
-        [DataMember(Name = "new_package_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> NewPackageAddresses { get; set; }
-
-        /// <summary>
-        /// A list of new component addresses.
-        /// </summary>
-        /// <value>A list of new component addresses.</value>
-        [DataMember(Name = "new_component_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> NewComponentAddresses { get; set; }
-
-        /// <summary>
-        /// A list of new resource addresses.
-        /// </summary>
-        /// <value>A list of new resource addresses.</value>
-        [DataMember(Name = "new_resource_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> NewResourceAddresses { get; set; }
-
-        /// <summary>
-        /// The engine return data (only present if status is succeeded)
-        /// </summary>
-        /// <value>The engine return data (only present if status is succeeded)</value>
+        /// <value>The manifest line-by-line engine return data (only present if status is Succeeded)</value>
         [DataMember(Name = "output", EmitDefaultValue = true)]
-        public List<string> Output { get; set; }
+        public List<SborData> Output { get; set; }
 
         /// <summary>
-        /// Error message (only present if status is failed or rejected)
+        /// Error message (only present if status is Failed or Rejected)
         /// </summary>
-        /// <value>Error message (only present if status is failed or rejected)</value>
+        /// <value>Error message (only present if status is Failed or Rejected)</value>
         [DataMember(Name = "error_message", EmitDefaultValue = true)]
         public string ErrorMessage { get; set; }
 
@@ -213,9 +171,6 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  FeeSummary: ").Append(FeeSummary).Append("\n");
             sb.Append("  StateUpdates: ").Append(StateUpdates).Append("\n");
-            sb.Append("  NewPackageAddresses: ").Append(NewPackageAddresses).Append("\n");
-            sb.Append("  NewComponentAddresses: ").Append(NewComponentAddresses).Append("\n");
-            sb.Append("  NewResourceAddresses: ").Append(NewResourceAddresses).Append("\n");
             sb.Append("  Output: ").Append(Output).Append("\n");
             sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
@@ -268,24 +223,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateUpdates.Equals(input.StateUpdates))
                 ) && 
                 (
-                    this.NewPackageAddresses == input.NewPackageAddresses ||
-                    this.NewPackageAddresses != null &&
-                    input.NewPackageAddresses != null &&
-                    this.NewPackageAddresses.SequenceEqual(input.NewPackageAddresses)
-                ) && 
-                (
-                    this.NewComponentAddresses == input.NewComponentAddresses ||
-                    this.NewComponentAddresses != null &&
-                    input.NewComponentAddresses != null &&
-                    this.NewComponentAddresses.SequenceEqual(input.NewComponentAddresses)
-                ) && 
-                (
-                    this.NewResourceAddresses == input.NewResourceAddresses ||
-                    this.NewResourceAddresses != null &&
-                    input.NewResourceAddresses != null &&
-                    this.NewResourceAddresses.SequenceEqual(input.NewResourceAddresses)
-                ) && 
-                (
                     this.Output == input.Output ||
                     this.Output != null &&
                     input.Output != null &&
@@ -315,18 +252,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.StateUpdates != null)
                 {
                     hashCode = (hashCode * 59) + this.StateUpdates.GetHashCode();
-                }
-                if (this.NewPackageAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewPackageAddresses.GetHashCode();
-                }
-                if (this.NewComponentAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewComponentAddresses.GetHashCode();
-                }
-                if (this.NewResourceAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.NewResourceAddresses.GetHashCode();
                 }
                 if (this.Output != null)
                 {

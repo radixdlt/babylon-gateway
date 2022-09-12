@@ -106,34 +106,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="version">version (required).</param>
         /// <param name="networkId">networkId (required).</param>
-        /// <param name="startEpochInclusive">A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="endEpochExclusive">A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="nonce">A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notaryPublicKey">A hex-encoded public key of a notary. (required).</param>
+        /// <param name="startEpochInclusive">A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted (required).</param>
+        /// <param name="endEpochExclusive">A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
+        /// <param name="nonce">A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents (required).</param>
+        /// <param name="notaryPublicKey">A hex-encoded public key of a notary (required).</param>
         /// <param name="notaryAsSignatory">Specifies whether the notary&#39;s signature should be included in transaction signers list (required).</param>
         /// <param name="costUnitLimit">Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer. (required).</param>
         /// <param name="tipPercentage">Specifies the validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%). (required).</param>
-        public TransactionHeader(int version = default(int), int networkId = default(int), string startEpochInclusive = default(string), string endEpochExclusive = default(string), string nonce = default(string), string notaryPublicKey = default(string), bool notaryAsSignatory = default(bool), string costUnitLimit = default(string), string tipPercentage = default(string))
+        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), long nonce = default(long), string notaryPublicKey = default(string), bool notaryAsSignatory = default(bool), string costUnitLimit = default(string), string tipPercentage = default(string))
         {
             this._Version = version;
             this.NetworkId = networkId;
-            // to ensure "startEpochInclusive" is required (not null)
-            if (startEpochInclusive == null)
-            {
-                throw new ArgumentNullException("startEpochInclusive is a required property for TransactionHeader and cannot be null");
-            }
             this.StartEpochInclusive = startEpochInclusive;
-            // to ensure "endEpochExclusive" is required (not null)
-            if (endEpochExclusive == null)
-            {
-                throw new ArgumentNullException("endEpochExclusive is a required property for TransactionHeader and cannot be null");
-            }
             this.EndEpochExclusive = endEpochExclusive;
-            // to ensure "nonce" is required (not null)
-            if (nonce == null)
-            {
-                throw new ArgumentNullException("nonce is a required property for TransactionHeader and cannot be null");
-            }
             this.Nonce = nonce;
             // to ensure "notaryPublicKey" is required (not null)
             if (notaryPublicKey == null)
@@ -169,30 +154,30 @@ namespace RadixDlt.CoreApiSdk.Model
         public int NetworkId { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer.
+        /// A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer.</value>
+        /// <value>A decimal 64-bit unsigned integer, marking the epoch from which the transaction can be submitted</value>
         [DataMember(Name = "start_epoch_inclusive", IsRequired = true, EmitDefaultValue = true)]
-        public string StartEpochInclusive { get; set; }
+        public long StartEpochInclusive { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer.
+        /// A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer.</value>
+        /// <value>A decimal 64-bit unsigned integer, marking the epoch from which the transaction will no longer be valid, and be rejected</value>
         [DataMember(Name = "end_epoch_exclusive", IsRequired = true, EmitDefaultValue = true)]
-        public string EndEpochExclusive { get; set; }
+        public long EndEpochExclusive { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer.
+        /// A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer.</value>
+        /// <value>A decimal 64-bit unsigned integer, chosen to be unique to allow replay of transaction intents</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public string Nonce { get; set; }
+        public long Nonce { get; set; }
 
         /// <summary>
-        /// A hex-encoded public key of a notary.
+        /// A hex-encoded public key of a notary
         /// </summary>
-        /// <value>A hex-encoded public key of a notary.</value>
+        /// <value>A hex-encoded public key of a notary</value>
         [DataMember(Name = "notary_public_key", IsRequired = true, EmitDefaultValue = true)]
         public string NotaryPublicKey { get; set; }
 
@@ -279,18 +264,15 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.StartEpochInclusive == input.StartEpochInclusive ||
-                    (this.StartEpochInclusive != null &&
-                    this.StartEpochInclusive.Equals(input.StartEpochInclusive))
+                    this.StartEpochInclusive.Equals(input.StartEpochInclusive)
                 ) && 
                 (
                     this.EndEpochExclusive == input.EndEpochExclusive ||
-                    (this.EndEpochExclusive != null &&
-                    this.EndEpochExclusive.Equals(input.EndEpochExclusive))
+                    this.EndEpochExclusive.Equals(input.EndEpochExclusive)
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    (this.Nonce != null &&
-                    this.Nonce.Equals(input.Nonce))
+                    this.Nonce.Equals(input.Nonce)
                 ) && 
                 (
                     this.NotaryPublicKey == input.NotaryPublicKey ||
@@ -324,18 +306,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 hashCode = (hashCode * 59) + this.NetworkId.GetHashCode();
-                if (this.StartEpochInclusive != null)
-                {
-                    hashCode = (hashCode * 59) + this.StartEpochInclusive.GetHashCode();
-                }
-                if (this.EndEpochExclusive != null)
-                {
-                    hashCode = (hashCode * 59) + this.EndEpochExclusive.GetHashCode();
-                }
-                if (this.Nonce != null)
-                {
-                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.StartEpochInclusive.GetHashCode();
+                hashCode = (hashCode * 59) + this.EndEpochExclusive.GetHashCode();
+                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
                 if (this.NotaryPublicKey != null)
                 {
                     hashCode = (hashCode * 59) + this.NotaryPublicKey.GetHashCode();
@@ -360,6 +333,66 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // _Version (int) maximum
+            if (this._Version > (int)255)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 255.", new [] { "_Version" });
+            }
+
+            // _Version (int) minimum
+            if (this._Version < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
+            }
+
+            // NetworkId (int) maximum
+            if (this.NetworkId > (int)255)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value less than or equal to 255.", new [] { "NetworkId" });
+            }
+
+            // NetworkId (int) minimum
+            if (this.NetworkId < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value greater than or equal to 0.", new [] { "NetworkId" });
+            }
+
+            // StartEpochInclusive (long) maximum
+            if (this.StartEpochInclusive > (long)-1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value less than or equal to -1.", new [] { "StartEpochInclusive" });
+            }
+
+            // StartEpochInclusive (long) minimum
+            if (this.StartEpochInclusive < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value greater than or equal to 0.", new [] { "StartEpochInclusive" });
+            }
+
+            // EndEpochExclusive (long) maximum
+            if (this.EndEpochExclusive > (long)-1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value less than or equal to -1.", new [] { "EndEpochExclusive" });
+            }
+
+            // EndEpochExclusive (long) minimum
+            if (this.EndEpochExclusive < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value greater than or equal to 0.", new [] { "EndEpochExclusive" });
+            }
+
+            // Nonce (long) maximum
+            if (this.Nonce > (long)-1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value less than or equal to -1.", new [] { "Nonce" });
+            }
+
+            // Nonce (long) minimum
+            if (this.Nonce < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value greater than or equal to 0.", new [] { "Nonce" });
+            }
+
             yield break;
         }
     }

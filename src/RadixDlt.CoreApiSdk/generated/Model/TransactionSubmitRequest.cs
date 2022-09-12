@@ -104,16 +104,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
         /// </summary>
-        /// <param name="networkIdentifier">networkIdentifier (required).</param>
+        /// <param name="network">The logical name of the network (required).</param>
         /// <param name="notarizedTransaction">A notarized transaction encoded in the Radix transaction format, and then hex encoded. (required).</param>
-        public TransactionSubmitRequest(NetworkIdentifier networkIdentifier = default(NetworkIdentifier), string notarizedTransaction = default(string))
+        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
         {
-            // to ensure "networkIdentifier" is required (not null)
-            if (networkIdentifier == null)
+            // to ensure "network" is required (not null)
+            if (network == null)
             {
-                throw new ArgumentNullException("networkIdentifier is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
             }
-            this.NetworkIdentifier = networkIdentifier;
+            this.Network = network;
             // to ensure "notarizedTransaction" is required (not null)
             if (notarizedTransaction == null)
             {
@@ -123,10 +123,11 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets NetworkIdentifier
+        /// The logical name of the network
         /// </summary>
-        [DataMember(Name = "network_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkIdentifier NetworkIdentifier { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
 
         /// <summary>
         /// A notarized transaction encoded in the Radix transaction format, and then hex encoded.
@@ -143,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  NetworkIdentifier: ").Append(NetworkIdentifier).Append("\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -181,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NetworkIdentifier == input.NetworkIdentifier ||
-                    (this.NetworkIdentifier != null &&
-                    this.NetworkIdentifier.Equals(input.NetworkIdentifier))
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
                 ) && 
                 (
                     this.NotarizedTransaction == input.NotarizedTransaction ||
@@ -201,9 +202,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NetworkIdentifier != null)
+                if (this.Network != null)
                 {
-                    hashCode = (hashCode * 59) + this.NetworkIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
                 if (this.NotarizedTransaction != null)
                 {

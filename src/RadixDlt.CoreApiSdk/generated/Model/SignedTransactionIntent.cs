@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SignedTransactionIntent" /> class.
         /// </summary>
-        /// <param name="hash">Signed transaction intent hash, hex-encoded. (required).</param>
+        /// <param name="hash">The hex-encoded double-SHA256 hash of the signed transaction intent. (required).</param>
         /// <param name="intent">intent (required).</param>
         /// <param name="intentSignatures">intentSignatures (required).</param>
         public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<IntentSignature> intentSignatures = default(List<IntentSignature>))
@@ -130,9 +130,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Signed transaction intent hash, hex-encoded.
+        /// The hex-encoded double-SHA256 hash of the signed transaction intent.
         /// </summary>
-        /// <value>Signed transaction intent hash, hex-encoded.</value>
+        /// <value>The hex-encoded double-SHA256 hash of the signed transaction intent.</value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 

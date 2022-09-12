@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="IntentSignature" /> class.
         /// </summary>
-        /// <param name="publicKey">Signer public key, hex-encoded. (required).</param>
-        /// <param name="signature">The signature, hex-encoded. (required).</param>
+        /// <param name="publicKey">The hex-encoded signer public key. (required).</param>
+        /// <param name="signature">The hex-encoded signature. (required).</param>
         public IntentSignature(string publicKey = default(string), string signature = default(string))
         {
             // to ensure "publicKey" is required (not null)
@@ -123,16 +123,16 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Signer public key, hex-encoded.
+        /// The hex-encoded signer public key.
         /// </summary>
-        /// <value>Signer public key, hex-encoded.</value>
+        /// <value>The hex-encoded signer public key.</value>
         [DataMember(Name = "public_key", IsRequired = true, EmitDefaultValue = true)]
         public string PublicKey { get; set; }
 
         /// <summary>
-        /// The signature, hex-encoded.
+        /// The hex-encoded signature.
         /// </summary>
-        /// <value>The signature, hex-encoded.</value>
+        /// <value>The hex-encoded signature.</value>
         [DataMember(Name = "signature", IsRequired = true, EmitDefaultValue = true)]
         public string Signature { get; set; }
 

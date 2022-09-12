@@ -104,11 +104,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceChange" /> class.
         /// </summary>
-        /// <param name="resourceAddress">Bech32m resource address. (required).</param>
-        /// <param name="componentAddress">Bech32m component address. (required).</param>
-        /// <param name="vaultId">Vault ID, SBOR-encoded and then hex-encoded. (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
+        /// <param name="componentAddress">The Bech32m-encoded human readable version of the component address (required).</param>
+        /// <param name="vaultEntityId">vaultEntityId (required).</param>
         /// <param name="amount">The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number. (required).</param>
-        public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), string vaultId = default(string), string amount = default(string))
+        public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), EntityId vaultEntityId = default(EntityId), string amount = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
@@ -122,12 +122,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("componentAddress is a required property for ResourceChange and cannot be null");
             }
             this.ComponentAddress = componentAddress;
-            // to ensure "vaultId" is required (not null)
-            if (vaultId == null)
+            // to ensure "vaultEntityId" is required (not null)
+            if (vaultEntityId == null)
             {
-                throw new ArgumentNullException("vaultId is a required property for ResourceChange and cannot be null");
+                throw new ArgumentNullException("vaultEntityId is a required property for ResourceChange and cannot be null");
             }
-            this.VaultId = vaultId;
+            this.VaultEntityId = vaultEntityId;
             // to ensure "amount" is required (not null)
             if (amount == null)
             {
@@ -137,25 +137,24 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Bech32m resource address.
+        /// The Bech32m-encoded human readable version of the resource address
         /// </summary>
-        /// <value>Bech32m resource address.</value>
+        /// <value>The Bech32m-encoded human readable version of the resource address</value>
         [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// Bech32m component address.
+        /// The Bech32m-encoded human readable version of the component address
         /// </summary>
-        /// <value>Bech32m component address.</value>
+        /// <value>The Bech32m-encoded human readable version of the component address</value>
         [DataMember(Name = "component_address", IsRequired = true, EmitDefaultValue = true)]
         public string ComponentAddress { get; set; }
 
         /// <summary>
-        /// Vault ID, SBOR-encoded and then hex-encoded.
+        /// Gets or Sets VaultEntityId
         /// </summary>
-        /// <value>Vault ID, SBOR-encoded and then hex-encoded.</value>
-        [DataMember(Name = "vault_id", IsRequired = true, EmitDefaultValue = true)]
-        public string VaultId { get; set; }
+        [DataMember(Name = "vault_entity_id", IsRequired = true, EmitDefaultValue = true)]
+        public EntityId VaultEntityId { get; set; }
 
         /// <summary>
         /// The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number.
@@ -174,7 +173,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class ResourceChange {\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  ComponentAddress: ").Append(ComponentAddress).Append("\n");
-            sb.Append("  VaultId: ").Append(VaultId).Append("\n");
+            sb.Append("  VaultEntityId: ").Append(VaultEntityId).Append("\n");
             sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -222,9 +221,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ComponentAddress.Equals(input.ComponentAddress))
                 ) && 
                 (
-                    this.VaultId == input.VaultId ||
-                    (this.VaultId != null &&
-                    this.VaultId.Equals(input.VaultId))
+                    this.VaultEntityId == input.VaultEntityId ||
+                    (this.VaultEntityId != null &&
+                    this.VaultEntityId.Equals(input.VaultEntityId))
                 ) && 
                 (
                     this.Amount == input.Amount ||
@@ -250,9 +249,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ComponentAddress.GetHashCode();
                 }
-                if (this.VaultId != null)
+                if (this.VaultEntityId != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultEntityId.GetHashCode();
                 }
                 if (this.Amount != null)
                 {
