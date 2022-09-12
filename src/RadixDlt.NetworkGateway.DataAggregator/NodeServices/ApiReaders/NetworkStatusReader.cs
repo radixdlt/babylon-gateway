@@ -76,16 +76,8 @@ namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface INetworkStatusReader
 {
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
-    Task<TmpNetworkStatusResponse> GetNetworkStatus(CancellationToken token);
+    Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
 }
-
-public record CurrentStateIdentifier(long StateVersion, string TransactionAccumulator);
-
-public record SyncStatus(long TargetStateVersion);
-
-public record TmpNetworkStatusResponse(CurrentStateIdentifier CurrentStateIdentifier, SyncStatus SyncStatus);
 
 public interface INetworkStatusReaderObserver
 {
@@ -107,32 +99,24 @@ internal class NetworkStatusReader : INetworkStatusReader
         _statusApi = coreApiProvider.StatusApi;
     }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
-    // {
-    //     try
-    //     {
-    //         return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-    //             await _statusApi
-    //                 .NetworkStatusPostAsync(
-    //                     new NetworkStatusRequest(
-    //                         networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
-    //                     ),
-    //                     token
-    //                 )
-    //         );
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
-    //
-    //         throw;
-    //     }
-    // }
-
-    public Task<TmpNetworkStatusResponse> GetNetworkStatus(CancellationToken token)
+    public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
-        // TODO this must be read from node endpoint
-        return Task.FromResult(new TmpNetworkStatusResponse(new(1, "22aa00"), new(1)));
+        try
+        {
+            return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
+                await _statusApi.StatusNetworkStatusPostAsync(
+                    new NetworkStatusRequest(
+                        network: _networkConfigurationProvider.GetNetworkName()
+                    ),
+                    token
+                )
+            );
+        }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.GetNetworkStatusFailed(_nodeConfigProvider.CoreApiNode.Name, ex));
+
+            throw;
+        }
     }
 }

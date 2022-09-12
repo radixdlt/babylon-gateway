@@ -349,7 +349,7 @@ components:
           type: integer
           description: The validator tip.
         nonce:
-          type: integer
+          type: string
           description: The nonce value to use for execution.
         signer_public_keys:
           type: array

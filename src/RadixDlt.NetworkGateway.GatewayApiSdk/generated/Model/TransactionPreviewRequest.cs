@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonce">The nonce value to use for execution. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string manifest = default(string), int costUnitLimit = default(int), int tipPercentage = default(int), int nonce = default(int), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string manifest = default(string), int costUnitLimit = default(int), int tipPercentage = default(int), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -120,6 +120,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.Manifest = manifest;
             this.CostUnitLimit = costUnitLimit;
             this.TipPercentage = tipPercentage;
+            // to ensure "nonce" is required (not null)
+            if (nonce == null)
+            {
+                throw new ArgumentNullException("nonce is a required property for TransactionPreviewRequest and cannot be null");
+            }
             this.Nonce = nonce;
             // to ensure "signerPublicKeys" is required (not null)
             if (signerPublicKeys == null)
@@ -161,7 +166,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>The nonce value to use for execution.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public int Nonce { get; set; }
+        public string Nonce { get; set; }
 
         /// <summary>
         /// A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
@@ -240,7 +245,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    this.Nonce.Equals(input.Nonce)
+                    (this.Nonce != null &&
+                    this.Nonce.Equals(input.Nonce))
                 ) && 
                 (
                     this.SignerPublicKeys == input.SignerPublicKeys ||
@@ -270,7 +276,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 }
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                if (this.Nonce != null)
+                {
+                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                }
                 if (this.SignerPublicKeys != null)
                 {
                     hashCode = (hashCode * 59) + this.SignerPublicKeys.GetHashCode();
