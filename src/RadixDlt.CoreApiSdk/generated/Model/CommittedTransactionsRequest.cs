@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// A request to retrieve a sublist of committed transactions from the ledger.
+    /// A request to retrieve a sublist of committed transactions from the ledger. 
     /// </summary>
     [DataContract(Name = "CommittedTransactionsRequest")]
     public partial class CommittedTransactionsRequest : IEquatable<CommittedTransactionsRequest>, IValidatableObject
@@ -104,38 +104,34 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
         /// </summary>
-        /// <param name="networkIdentifier">networkIdentifier (required).</param>
+        /// <param name="network">The logical name of the network (required).</param>
         /// <param name="startStateVersion">A decimal 64-bit unsigned integer. (required).</param>
         /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
-        public CommittedTransactionsRequest(NetworkIdentifier networkIdentifier = default(NetworkIdentifier), string startStateVersion = default(string), int limit = default(int))
+        public CommittedTransactionsRequest(string network = default(string), long startStateVersion = default(long), int limit = default(int))
         {
-            // to ensure "networkIdentifier" is required (not null)
-            if (networkIdentifier == null)
+            // to ensure "network" is required (not null)
+            if (network == null)
             {
-                throw new ArgumentNullException("networkIdentifier is a required property for CommittedTransactionsRequest and cannot be null");
+                throw new ArgumentNullException("network is a required property for CommittedTransactionsRequest and cannot be null");
             }
-            this.NetworkIdentifier = networkIdentifier;
-            // to ensure "startStateVersion" is required (not null)
-            if (startStateVersion == null)
-            {
-                throw new ArgumentNullException("startStateVersion is a required property for CommittedTransactionsRequest and cannot be null");
-            }
+            this.Network = network;
             this.StartStateVersion = startStateVersion;
             this.Limit = limit;
         }
 
         /// <summary>
-        /// Gets or Sets NetworkIdentifier
+        /// The logical name of the network
         /// </summary>
-        [DataMember(Name = "network_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkIdentifier NetworkIdentifier { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
 
         /// <summary>
         /// A decimal 64-bit unsigned integer.
         /// </summary>
         /// <value>A decimal 64-bit unsigned integer.</value>
         [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public string StartStateVersion { get; set; }
+        public long StartStateVersion { get; set; }
 
         /// <summary>
         /// The maximum number of transactions that will be returned.
@@ -152,7 +148,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransactionsRequest {\n");
-            sb.Append("  NetworkIdentifier: ").Append(NetworkIdentifier).Append("\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
@@ -191,14 +187,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NetworkIdentifier == input.NetworkIdentifier ||
-                    (this.NetworkIdentifier != null &&
-                    this.NetworkIdentifier.Equals(input.NetworkIdentifier))
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
                 ) && 
                 (
                     this.StartStateVersion == input.StartStateVersion ||
-                    (this.StartStateVersion != null &&
-                    this.StartStateVersion.Equals(input.StartStateVersion))
+                    this.StartStateVersion.Equals(input.StartStateVersion)
                 ) && 
                 (
                     this.Limit == input.Limit ||
@@ -215,14 +210,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NetworkIdentifier != null)
+                if (this.Network != null)
                 {
-                    hashCode = (hashCode * 59) + this.NetworkIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
-                if (this.StartStateVersion != null)
-                {
-                    hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 return hashCode;
             }
@@ -235,6 +227,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // StartStateVersion (long) maximum
+            if (this.StartStateVersion > (long)-1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartStateVersion, must be a value less than or equal to -1.", new [] { "StartStateVersion" });
+            }
+
+            // StartStateVersion (long) minimum
+            if (this.StartStateVersion < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartStateVersion, must be a value greater than or equal to 0.", new [] { "StartStateVersion" });
+            }
+
             yield break;
         }
     }

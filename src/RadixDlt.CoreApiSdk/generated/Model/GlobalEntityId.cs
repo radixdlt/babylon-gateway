@@ -91,57 +91,72 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// GlobalEntityId
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "GlobalEntityId")]
+    public partial class GlobalEntityId : IEquatable<GlobalEntityId>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalEntityId" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected GlobalEntityId() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="GlobalEntityId" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="entityAddress">The hex-encoded bytes of the entity address (required).</param>
+        /// <param name="globalAddressBytes">The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future. (required).</param>
+        /// <param name="globalAddressStr">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        public GlobalEntityId(EntityType entityType = default(EntityType), string entityAddress = default(string), string globalAddressBytes = default(string), string globalAddressStr = default(string))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            this.EntityType = entityType;
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for GlobalEntityId and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.EntityAddress = entityAddress;
+            // to ensure "globalAddressBytes" is required (not null)
+            if (globalAddressBytes == null)
             {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("globalAddressBytes is a required property for GlobalEntityId and cannot be null");
             }
-            this.Receipt = receipt;
+            this.GlobalAddressBytes = globalAddressBytes;
+            // to ensure "globalAddressStr" is required (not null)
+            if (globalAddressStr == null)
+            {
+                throw new ArgumentNullException("globalAddressStr is a required property for GlobalEntityId and cannot be null");
+            }
+            this.GlobalAddressStr = globalAddressStr;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// The hex-encoded bytes of the entity address
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        /// <value>The hex-encoded bytes of the entity address</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future.
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        /// <value>The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future.</value>
+        [DataMember(Name = "global_address_bytes", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddressBytes { get; set; }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "global_address_str", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddressStr { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +165,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class GlobalEntityId {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  GlobalAddressBytes: ").Append(GlobalAddressBytes).Append("\n");
+            sb.Append("  GlobalAddressStr: ").Append(GlobalAddressStr).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +190,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as GlobalEntityId);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if GlobalEntityId instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of GlobalEntityId to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(GlobalEntityId input)
         {
             if (input == null)
             {
@@ -190,18 +206,23 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.GlobalAddressBytes == input.GlobalAddressBytes ||
+                    (this.GlobalAddressBytes != null &&
+                    this.GlobalAddressBytes.Equals(input.GlobalAddressBytes))
+                ) && 
+                (
+                    this.GlobalAddressStr == input.GlobalAddressStr ||
+                    (this.GlobalAddressStr != null &&
+                    this.GlobalAddressStr.Equals(input.GlobalAddressStr))
                 );
         }
 
@@ -214,14 +235,18 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.Receipt != null)
+                if (this.GlobalAddressBytes != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GlobalAddressBytes.GetHashCode();
+                }
+                if (this.GlobalAddressStr != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalAddressStr.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,18 +259,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
-            }
-
             yield break;
         }
     }

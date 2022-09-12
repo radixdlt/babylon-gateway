@@ -104,44 +104,29 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
-        /// <param name="networkIdentifier">networkIdentifier (required).</param>
-        /// <param name="manifest">A transaction manifest. Sbor encoded, and then hex encoded. (required).</param>
-        /// <param name="costUnitLimit">Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer. (required).</param>
+        /// <param name="network">The logical name of the network (required).</param>
+        /// <param name="manifest">A hex-encoded, SBOR-encoded transaction manifest (required).</param>
+        /// <param name="costUnitLimit">The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer. (required).</param>
         /// <param name="tipPercentage">The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%). (required).</param>
         /// <param name="nonce">The nonce value to use for execution. A decimal 64-bit unsigned integer. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(NetworkIdentifier networkIdentifier = default(NetworkIdentifier), string manifest = default(string), string costUnitLimit = default(string), string tipPercentage = default(string), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), int costUnitLimit = default(int), int tipPercentage = default(int), long nonce = default(long), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
-            // to ensure "networkIdentifier" is required (not null)
-            if (networkIdentifier == null)
+            // to ensure "network" is required (not null)
+            if (network == null)
             {
-                throw new ArgumentNullException("networkIdentifier is a required property for TransactionPreviewRequest and cannot be null");
+                throw new ArgumentNullException("network is a required property for TransactionPreviewRequest and cannot be null");
             }
-            this.NetworkIdentifier = networkIdentifier;
+            this.Network = network;
             // to ensure "manifest" is required (not null)
             if (manifest == null)
             {
                 throw new ArgumentNullException("manifest is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Manifest = manifest;
-            // to ensure "costUnitLimit" is required (not null)
-            if (costUnitLimit == null)
-            {
-                throw new ArgumentNullException("costUnitLimit is a required property for TransactionPreviewRequest and cannot be null");
-            }
             this.CostUnitLimit = costUnitLimit;
-            // to ensure "tipPercentage" is required (not null)
-            if (tipPercentage == null)
-            {
-                throw new ArgumentNullException("tipPercentage is a required property for TransactionPreviewRequest and cannot be null");
-            }
             this.TipPercentage = tipPercentage;
-            // to ensure "nonce" is required (not null)
-            if (nonce == null)
-            {
-                throw new ArgumentNullException("nonce is a required property for TransactionPreviewRequest and cannot be null");
-            }
             this.Nonce = nonce;
             // to ensure "signerPublicKeys" is required (not null)
             if (signerPublicKeys == null)
@@ -158,38 +143,39 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets NetworkIdentifier
+        /// The logical name of the network
         /// </summary>
-        [DataMember(Name = "network_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkIdentifier NetworkIdentifier { get; set; }
+        /// <value>The logical name of the network</value>
+        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
+        public string Network { get; set; }
 
         /// <summary>
-        /// A transaction manifest. Sbor encoded, and then hex encoded.
+        /// A hex-encoded, SBOR-encoded transaction manifest
         /// </summary>
-        /// <value>A transaction manifest. Sbor encoded, and then hex encoded.</value>
+        /// <value>A hex-encoded, SBOR-encoded transaction manifest</value>
         [DataMember(Name = "manifest", IsRequired = true, EmitDefaultValue = true)]
         public string Manifest { get; set; }
 
         /// <summary>
-        /// Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.
+        /// The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.
         /// </summary>
-        /// <value>Maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.</value>
+        /// <value>The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public string CostUnitLimit { get; set; }
+        public int CostUnitLimit { get; set; }
 
         /// <summary>
         /// The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).
         /// </summary>
         /// <value>The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public string TipPercentage { get; set; }
+        public int TipPercentage { get; set; }
 
         /// <summary>
         /// The nonce value to use for execution. A decimal 64-bit unsigned integer.
         /// </summary>
         /// <value>The nonce value to use for execution. A decimal 64-bit unsigned integer.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public string Nonce { get; set; }
+        public long Nonce { get; set; }
 
         /// <summary>
         /// A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
@@ -212,7 +198,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewRequest {\n");
-            sb.Append("  NetworkIdentifier: ").Append(NetworkIdentifier).Append("\n");
+            sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
@@ -255,9 +241,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NetworkIdentifier == input.NetworkIdentifier ||
-                    (this.NetworkIdentifier != null &&
-                    this.NetworkIdentifier.Equals(input.NetworkIdentifier))
+                    this.Network == input.Network ||
+                    (this.Network != null &&
+                    this.Network.Equals(input.Network))
                 ) && 
                 (
                     this.Manifest == input.Manifest ||
@@ -266,18 +252,15 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.CostUnitLimit == input.CostUnitLimit ||
-                    (this.CostUnitLimit != null &&
-                    this.CostUnitLimit.Equals(input.CostUnitLimit))
+                    this.CostUnitLimit.Equals(input.CostUnitLimit)
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
-                    (this.TipPercentage != null &&
-                    this.TipPercentage.Equals(input.TipPercentage))
+                    this.TipPercentage.Equals(input.TipPercentage)
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    (this.Nonce != null &&
-                    this.Nonce.Equals(input.Nonce))
+                    this.Nonce.Equals(input.Nonce)
                 ) && 
                 (
                     this.SignerPublicKeys == input.SignerPublicKeys ||
@@ -301,26 +284,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NetworkIdentifier != null)
+                if (this.Network != null)
                 {
-                    hashCode = (hashCode * 59) + this.NetworkIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
                 if (this.Manifest != null)
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
                 }
-                if (this.CostUnitLimit != null)
-                {
-                    hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
-                }
-                if (this.TipPercentage != null)
-                {
-                    hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                }
-                if (this.Nonce != null)
-                {
-                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
+                hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
+                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
                 if (this.SignerPublicKeys != null)
                 {
                     hashCode = (hashCode * 59) + this.SignerPublicKeys.GetHashCode();
@@ -340,6 +314,42 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // CostUnitLimit (int) maximum
+            if (this.CostUnitLimit > (int)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitLimit (int) minimum
+            if (this.CostUnitLimit < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
+            }
+
+            // TipPercentage (int) maximum
+            if (this.TipPercentage > (int)100)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 100.", new [] { "TipPercentage" });
+            }
+
+            // TipPercentage (int) minimum
+            if (this.TipPercentage < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
+            }
+
+            // Nonce (long) maximum
+            if (this.Nonce > (long)-1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value less than or equal to -1.", new [] { "Nonce" });
+            }
+
+            // Nonce (long) minimum
+            if (this.Nonce < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value greater than or equal to 0.", new [] { "Nonce" });
+            }
+
             yield break;
         }
     }

@@ -91,35 +91,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The name of the network.
+    /// PackageSubstateAllOf
     /// </summary>
-    [DataContract(Name = "NetworkIdentifier")]
-    public partial class NetworkIdentifier : IEquatable<NetworkIdentifier>, IValidatableObject
+    [DataContract(Name = "PackageSubstate_allOf")]
+    public partial class PackageSubstateAllOf : IEquatable<PackageSubstateAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="PackageSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NetworkIdentifier() { }
+        protected PackageSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="PackageSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="network">network (required).</param>
-        public NetworkIdentifier(string network = default(string))
+        /// <param name="code">The hex-encoded package code (required).</param>
+        public PackageSubstateAllOf(string code = default(string))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "code" is required (not null)
+            if (code == null)
             {
-                throw new ArgumentNullException("network is a required property for NetworkIdentifier and cannot be null");
+                throw new ArgumentNullException("code is a required property for PackageSubstateAllOf and cannot be null");
             }
-            this.Network = network;
+            this.Code = code;
         }
 
         /// <summary>
-        /// Gets or Sets Network
+        /// The hex-encoded package code
         /// </summary>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        /// <value>The hex-encoded package code</value>
+        [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
+        public string Code { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +129,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NetworkIdentifier {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
+            sb.Append("class PackageSubstateAllOf {\n");
+            sb.Append("  Code: ").Append(Code).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +151,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NetworkIdentifier);
+            return this.Equals(input as PackageSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if NetworkIdentifier instances are equal
+        /// Returns true if PackageSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NetworkIdentifier to be compared</param>
+        /// <param name="input">Instance of PackageSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NetworkIdentifier input)
+        public bool Equals(PackageSubstateAllOf input)
         {
             if (input == null)
             {
@@ -166,9 +167,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.Code == input.Code ||
+                    (this.Code != null &&
+                    this.Code.Equals(input.Code))
                 );
         }
 
@@ -181,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.Code != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Code.GetHashCode();
                 }
                 return hashCode;
             }

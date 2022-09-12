@@ -104,9 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionIntent" /> class.
         /// </summary>
-        /// <param name="hash">Transaction intent hash, hex-encoded. (required).</param>
+        /// <param name="hash">The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash.  (required).</param>
         /// <param name="header">header (required).</param>
-        /// <param name="manifest">Transaction manifest, SBOR-encoded and then hex-encoded. (required).</param>
+        /// <param name="manifest">The hex-encoded, SBOR-encoded transaction manifest. (required).</param>
         public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string manifest = default(string))
         {
             // to ensure "hash" is required (not null)
@@ -130,9 +130,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Transaction intent hash, hex-encoded.
+        /// The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash. 
         /// </summary>
-        /// <value>Transaction intent hash, hex-encoded.</value>
+        /// <value>The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash. </value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 
@@ -143,9 +143,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public TransactionHeader Header { get; set; }
 
         /// <summary>
-        /// Transaction manifest, SBOR-encoded and then hex-encoded.
+        /// The hex-encoded, SBOR-encoded transaction manifest.
         /// </summary>
-        /// <value>Transaction manifest, SBOR-encoded and then hex-encoded.</value>
+        /// <value>The hex-encoded, SBOR-encoded transaction manifest.</value>
         [DataMember(Name = "manifest", IsRequired = true, EmitDefaultValue = true)]
         public string Manifest { get; set; }
 

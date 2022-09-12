@@ -91,57 +91,66 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// SubstateId
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "SubstateId")]
+    public partial class SubstateId : IEquatable<SubstateId>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected SubstateId() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="entityAddress">The hex-encoded bytes of the entity address (required).</param>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="substateKey">The hex-encoded bytes of the substate key, under the entity (required).</param>
+        public SubstateId(EntityType entityType = default(EntityType), string entityAddress = default(string), SubstateType substateType = default(SubstateType), string substateKey = default(string))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            this.EntityType = entityType;
+            // to ensure "entityAddress" is required (not null)
+            if (entityAddress == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("entityAddress is a required property for SubstateId and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.EntityAddress = entityAddress;
+            this.SubstateType = substateType;
+            // to ensure "substateKey" is required (not null)
+            if (substateKey == null)
             {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("substateKey is a required property for SubstateId and cannot be null");
             }
-            this.Receipt = receipt;
+            this.SubstateKey = substateKey;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// The hex-encoded bytes of the entity address
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        /// <value>The hex-encoded bytes of the entity address</value>
+        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddress { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// The hex-encoded bytes of the substate key, under the entity
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Receipt
-        /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        /// <value>The hex-encoded bytes of the substate key, under the entity</value>
+        [DataMember(Name = "substate_key", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateKey { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +159,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class SubstateId {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  SubstateKey: ").Append(SubstateKey).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +184,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as SubstateId);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if SubstateId instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of SubstateId to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(SubstateId input)
         {
             if (input == null)
             {
@@ -190,18 +200,22 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.EntityAddress == input.EntityAddress ||
+                    (this.EntityAddress != null &&
+                    this.EntityAddress.Equals(input.EntityAddress))
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
+                    this.SubstateKey == input.SubstateKey ||
+                    (this.SubstateKey != null &&
+                    this.SubstateKey.Equals(input.SubstateKey))
                 );
         }
 
@@ -214,14 +228,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                if (this.EntityAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
                 }
-                if (this.Receipt != null)
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                if (this.SubstateKey != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateKey.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,18 +249,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
-            }
-
             yield break;
         }
     }

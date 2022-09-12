@@ -104,10 +104,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="DownSubstate" /> class.
         /// </summary>
-        /// <param name="substateId">SBOR-encoded and then hex-encoded substate ID. (required).</param>
-        /// <param name="substateHash">Substate hash. (required).</param>
-        /// <param name="version">A decimal 32-bit unsigned integer (required).</param>
-        public DownSubstate(string substateId = default(string), string substateHash = default(string), string version = default(string))
+        /// <param name="substateId">substateId (required).</param>
+        /// <param name="substateDataHash">The hex-encoded double-SHA256 hash of the substate data bytes (required).</param>
+        /// <param name="version">A decimal 32-bit unsigned integer, counting the number of times the substate was updated (required).</param>
+        public DownSubstate(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), int version = default(int))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -115,40 +115,34 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("substateId is a required property for DownSubstate and cannot be null");
             }
             this.SubstateId = substateId;
-            // to ensure "substateHash" is required (not null)
-            if (substateHash == null)
+            // to ensure "substateDataHash" is required (not null)
+            if (substateDataHash == null)
             {
-                throw new ArgumentNullException("substateHash is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("substateDataHash is a required property for DownSubstate and cannot be null");
             }
-            this.SubstateHash = substateHash;
-            // to ensure "version" is required (not null)
-            if (version == null)
-            {
-                throw new ArgumentNullException("version is a required property for DownSubstate and cannot be null");
-            }
+            this.SubstateDataHash = substateDataHash;
             this._Version = version;
         }
 
         /// <summary>
-        /// SBOR-encoded and then hex-encoded substate ID.
+        /// Gets or Sets SubstateId
         /// </summary>
-        /// <value>SBOR-encoded and then hex-encoded substate ID.</value>
         [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateId { get; set; }
+        public SubstateId SubstateId { get; set; }
 
         /// <summary>
-        /// Substate hash.
+        /// The hex-encoded double-SHA256 hash of the substate data bytes
         /// </summary>
-        /// <value>Substate hash.</value>
-        [DataMember(Name = "substate_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateHash { get; set; }
+        /// <value>The hex-encoded double-SHA256 hash of the substate data bytes</value>
+        [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateDataHash { get; set; }
 
         /// <summary>
-        /// A decimal 32-bit unsigned integer
+        /// A decimal 32-bit unsigned integer, counting the number of times the substate was updated
         /// </summary>
-        /// <value>A decimal 32-bit unsigned integer</value>
+        /// <value>A decimal 32-bit unsigned integer, counting the number of times the substate was updated</value>
         [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public string _Version { get; set; }
+        public int _Version { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -159,7 +153,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class DownSubstate {\n");
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
-            sb.Append("  SubstateHash: ").Append(SubstateHash).Append("\n");
+            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -202,14 +196,13 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateId.Equals(input.SubstateId))
                 ) && 
                 (
-                    this.SubstateHash == input.SubstateHash ||
-                    (this.SubstateHash != null &&
-                    this.SubstateHash.Equals(input.SubstateHash))
+                    this.SubstateDataHash == input.SubstateDataHash ||
+                    (this.SubstateDataHash != null &&
+                    this.SubstateDataHash.Equals(input.SubstateDataHash))
                 ) && 
                 (
                     this._Version == input._Version ||
-                    (this._Version != null &&
-                    this._Version.Equals(input._Version))
+                    this._Version.Equals(input._Version)
                 );
         }
 
@@ -226,14 +219,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
                 }
-                if (this.SubstateHash != null)
+                if (this.SubstateDataHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
                 }
-                if (this._Version != null)
-                {
-                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 return hashCode;
             }
         }
@@ -245,6 +235,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // _Version (int) maximum
+            if (this._Version > (int)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 4294967295.", new [] { "_Version" });
+            }
+
+            // _Version (int) minimum
+            if (this._Version < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
+            }
+
             yield break;
         }
     }

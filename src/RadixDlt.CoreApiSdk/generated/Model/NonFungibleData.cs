@@ -91,57 +91,48 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// Only present if the non fungible isn&#39;t deleted
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "NonFungibleData")]
+    public partial class NonFungibleData : IEquatable<NonFungibleData>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected NonFungibleData() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleData" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="immutableData">immutableData (required).</param>
+        /// <param name="mutableData">mutableData (required).</param>
+        public NonFungibleData(DataStruct immutableData = default(DataStruct), DataStruct mutableData = default(DataStruct))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "immutableData" is required (not null)
+            if (immutableData == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("immutableData is a required property for NonFungibleData and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.ImmutableData = immutableData;
+            // to ensure "mutableData" is required (not null)
+            if (mutableData == null)
             {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("mutableData is a required property for NonFungibleData and cannot be null");
             }
-            this.Receipt = receipt;
+            this.MutableData = mutableData;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// Gets or Sets ImmutableData
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        [DataMember(Name = "immutable_data", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct ImmutableData { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Gets or Sets MutableData
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Receipt
-        /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        [DataMember(Name = "mutable_data", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct MutableData { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +141,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class NonFungibleData {\n");
+            sb.Append("  ImmutableData: ").Append(ImmutableData).Append("\n");
+            sb.Append("  MutableData: ").Append(MutableData).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +164,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as NonFungibleData);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if NonFungibleData instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of NonFungibleData to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(NonFungibleData input)
         {
             if (input == null)
             {
@@ -190,18 +180,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.ImmutableData == input.ImmutableData ||
+                    (this.ImmutableData != null &&
+                    this.ImmutableData.Equals(input.ImmutableData))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
-                ) && 
-                (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.MutableData == input.MutableData ||
+                    (this.MutableData != null &&
+                    this.MutableData.Equals(input.MutableData))
                 );
         }
 
@@ -214,14 +200,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                if (this.ImmutableData != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ImmutableData.GetHashCode();
                 }
-                if (this.Receipt != null)
+                if (this.MutableData != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.MutableData.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,18 +219,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
-            }
-
             yield break;
         }
     }

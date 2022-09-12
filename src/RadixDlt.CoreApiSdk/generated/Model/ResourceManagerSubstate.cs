@@ -91,57 +91,80 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// ResourceManagerSubstate
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "ResourceManagerSubstate")]
+    public partial class ResourceManagerSubstate : IEquatable<ResourceManagerSubstate>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ResourceType
+        /// </summary>
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceType ResourceType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceManagerSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected ResourceManagerSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="ResourceManagerSubstate" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
+        /// <param name="metadata">metadata (required).</param>
+        /// <param name="totalSupply">totalSupply (required).</param>
+        public ResourceManagerSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupply = default(string))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            this.EntityType = entityType;
+            this.SubstateType = substateType;
+            this.ResourceType = resourceType;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("metadata is a required property for ResourceManagerSubstate and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.Metadata = metadata;
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstate and cannot be null");
             }
-            this.Receipt = receipt;
+            this.TotalSupply = totalSupply;
+            this.FungibleDivisibility = fungibleDivisibility;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// Gets or Sets FungibleDivisibility
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        [DataMember(Name = "fungible_divisibility", EmitDefaultValue = true)]
+        public int FungibleDivisibility { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Gets or Sets Metadata
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public List<ResourceManagerSubstateAllOfMetadata> Metadata { get; set; }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// Gets or Sets TotalSupply
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +173,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class ResourceManagerSubstate {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +200,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as ResourceManagerSubstate);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if ResourceManagerSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of ResourceManagerSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(ResourceManagerSubstate input)
         {
             if (input == null)
             {
@@ -190,18 +216,31 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.ResourceType == input.ResourceType ||
+                    this.ResourceType.Equals(input.ResourceType)
+                ) && 
+                (
+                    this.FungibleDivisibility == input.FungibleDivisibility ||
+                    this.FungibleDivisibility.Equals(input.FungibleDivisibility)
+                ) && 
+                (
+                    this.Metadata == input.Metadata ||
+                    this.Metadata != null &&
+                    input.Metadata != null &&
+                    this.Metadata.SequenceEqual(input.Metadata)
+                ) && 
+                (
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
                 );
         }
 
@@ -214,14 +253,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                hashCode = (hashCode * 59) + this.FungibleDivisibility.GetHashCode();
+                if (this.Metadata != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
-                if (this.Receipt != null)
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,16 +276,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
+            // FungibleDivisibility (int) maximum
+            if (this.FungibleDivisibility > (int)18)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FungibleDivisibility, must be a value less than or equal to 18.", new [] { "FungibleDivisibility" });
             }
 
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
+            // FungibleDivisibility (int) minimum
+            if (this.FungibleDivisibility < (int)0)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FungibleDivisibility, must be a value greater than or equal to 0.", new [] { "FungibleDivisibility" });
             }
 
             yield break;

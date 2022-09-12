@@ -91,57 +91,50 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// SborData
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "SborData")]
+    public partial class SborData : IEquatable<SborData>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="SborData" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected SborData() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="SborData" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="dataBytes">The hex-encoded, raw SBOR-encoded data (required).</param>
+        /// <param name="dataJson">A JSON string representing the encoded SBOR (required).</param>
+        public SborData(string dataBytes = default(string), string dataJson = default(string))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "dataBytes" is required (not null)
+            if (dataBytes == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("dataBytes is a required property for SborData and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.DataBytes = dataBytes;
+            // to ensure "dataJson" is required (not null)
+            if (dataJson == null)
             {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("dataJson is a required property for SborData and cannot be null");
             }
-            this.Receipt = receipt;
+            this.DataJson = dataJson;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// The hex-encoded, raw SBOR-encoded data
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        /// <value>The hex-encoded, raw SBOR-encoded data</value>
+        [DataMember(Name = "data_bytes", IsRequired = true, EmitDefaultValue = true)]
+        public string DataBytes { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// A JSON string representing the encoded SBOR
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Receipt
-        /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        /// <value>A JSON string representing the encoded SBOR</value>
+        [DataMember(Name = "data_json", IsRequired = true, EmitDefaultValue = true)]
+        public string DataJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +143,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class SborData {\n");
+            sb.Append("  DataBytes: ").Append(DataBytes).Append("\n");
+            sb.Append("  DataJson: ").Append(DataJson).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +166,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as SborData);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if SborData instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of SborData to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(SborData input)
         {
             if (input == null)
             {
@@ -190,18 +182,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.DataBytes == input.DataBytes ||
+                    (this.DataBytes != null &&
+                    this.DataBytes.Equals(input.DataBytes))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
-                ) && 
-                (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.DataJson == input.DataJson ||
+                    (this.DataJson != null &&
+                    this.DataJson.Equals(input.DataJson))
                 );
         }
 
@@ -214,14 +202,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                if (this.DataBytes != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataBytes.GetHashCode();
                 }
-                if (this.Receipt != null)
+                if (this.DataJson != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataJson.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,18 +221,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
-            }
-
             yield break;
         }
     }

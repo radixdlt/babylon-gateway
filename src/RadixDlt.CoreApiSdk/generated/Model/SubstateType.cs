@@ -91,29 +91,58 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// The status of the transaction
+    /// Defines SubstateType
     /// </summary>
-    /// <value>The status of the transaction</value>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum TransactionStatus
+    public enum SubstateType
     {
         /// <summary>
-        /// Enum Succeeded for value: Succeeded
+        /// Enum System for value: System
         /// </summary>
-        [EnumMember(Value = "Succeeded")]
-        Succeeded = 1,
+        [EnumMember(Value = "System")]
+        System = 1,
 
         /// <summary>
-        /// Enum Failed for value: Failed
+        /// Enum ResourceManager for value: ResourceManager
         /// </summary>
-        [EnumMember(Value = "Failed")]
-        Failed = 2,
+        [EnumMember(Value = "ResourceManager")]
+        ResourceManager = 2,
 
         /// <summary>
-        /// Enum Rejected for value: Rejected
+        /// Enum ComponentInfo for value: ComponentInfo
         /// </summary>
-        [EnumMember(Value = "Rejected")]
-        Rejected = 3
+        [EnumMember(Value = "ComponentInfo")]
+        ComponentInfo = 3,
+
+        /// <summary>
+        /// Enum ComponentState for value: ComponentState
+        /// </summary>
+        [EnumMember(Value = "ComponentState")]
+        ComponentState = 4,
+
+        /// <summary>
+        /// Enum Package for value: Package
+        /// </summary>
+        [EnumMember(Value = "Package")]
+        Package = 5,
+
+        /// <summary>
+        /// Enum Vault for value: Vault
+        /// </summary>
+        [EnumMember(Value = "Vault")]
+        Vault = 6,
+
+        /// <summary>
+        /// Enum NonFungible for value: NonFungible
+        /// </summary>
+        [EnumMember(Value = "NonFungible")]
+        NonFungible = 7,
+
+        /// <summary>
+        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
+        /// </summary>
+        [EnumMember(Value = "KeyValueStoreEntry")]
+        KeyValueStoreEntry = 8
 
     }
 

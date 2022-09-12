@@ -96,12 +96,6 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "UpSubstate")]
     public partial class UpSubstate : IEquatable<UpSubstate>, IValidatableObject
     {
-
-        /// <summary>
-        /// Gets or Sets SubstateJsonType
-        /// </summary>
-        [DataMember(Name = "substate_json_type", IsRequired = true, EmitDefaultValue = true)]
-        public TemporaryUpSubstateJsonPayloadType SubstateJsonType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="UpSubstate" /> class.
         /// </summary>
@@ -110,12 +104,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="UpSubstate" /> class.
         /// </summary>
-        /// <param name="substateId">SBOR-encoded and then hex-encoded substate ID. (required).</param>
-        /// <param name="version">A decimal 32-bit unsigned integer (required).</param>
-        /// <param name="substateBytes">SBOR-encoded and then hex-encoded substate bytes. (required).</param>
-        /// <param name="substateJsonType">substateJsonType (required).</param>
-        /// <param name="substateJsonStr">JSON-encoded (and then stringified) substate model. Warning! This is temporary property until we get proper polymorphism in place. (required).</param>
-        public UpSubstate(string substateId = default(string), string version = default(string), string substateBytes = default(string), TemporaryUpSubstateJsonPayloadType substateJsonType = default(TemporaryUpSubstateJsonPayloadType), string substateJsonStr = default(string))
+        /// <param name="substateId">substateId (required).</param>
+        /// <param name="version">A decimal 32-bit unsigned integer, counting the number of times the substate was updated (required).</param>
+        /// <param name="substateBytes">The hex-encoded, SBOR-encoded substate data bytes (required).</param>
+        /// <param name="substateDataHash">The hex-encoded double-SHA256 hash of the substate data bytes (required).</param>
+        /// <param name="substateData">substateData (required).</param>
+        public UpSubstate(SubstateId substateId = default(SubstateId), int version = default(int), string substateBytes = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -123,11 +117,6 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("substateId is a required property for UpSubstate and cannot be null");
             }
             this.SubstateId = substateId;
-            // to ensure "version" is required (not null)
-            if (version == null)
-            {
-                throw new ArgumentNullException("version is a required property for UpSubstate and cannot be null");
-            }
             this._Version = version;
             // to ensure "substateBytes" is required (not null)
             if (substateBytes == null)
@@ -135,42 +124,52 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("substateBytes is a required property for UpSubstate and cannot be null");
             }
             this.SubstateBytes = substateBytes;
-            this.SubstateJsonType = substateJsonType;
-            // to ensure "substateJsonStr" is required (not null)
-            if (substateJsonStr == null)
+            // to ensure "substateDataHash" is required (not null)
+            if (substateDataHash == null)
             {
-                throw new ArgumentNullException("substateJsonStr is a required property for UpSubstate and cannot be null");
+                throw new ArgumentNullException("substateDataHash is a required property for UpSubstate and cannot be null");
             }
-            this.SubstateJsonStr = substateJsonStr;
+            this.SubstateDataHash = substateDataHash;
+            // to ensure "substateData" is required (not null)
+            if (substateData == null)
+            {
+                throw new ArgumentNullException("substateData is a required property for UpSubstate and cannot be null");
+            }
+            this.SubstateData = substateData;
         }
 
         /// <summary>
-        /// SBOR-encoded and then hex-encoded substate ID.
+        /// Gets or Sets SubstateId
         /// </summary>
-        /// <value>SBOR-encoded and then hex-encoded substate ID.</value>
         [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateId { get; set; }
+        public SubstateId SubstateId { get; set; }
 
         /// <summary>
-        /// A decimal 32-bit unsigned integer
+        /// A decimal 32-bit unsigned integer, counting the number of times the substate was updated
         /// </summary>
-        /// <value>A decimal 32-bit unsigned integer</value>
+        /// <value>A decimal 32-bit unsigned integer, counting the number of times the substate was updated</value>
         [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public string _Version { get; set; }
+        public int _Version { get; set; }
 
         /// <summary>
-        /// SBOR-encoded and then hex-encoded substate bytes.
+        /// The hex-encoded, SBOR-encoded substate data bytes
         /// </summary>
-        /// <value>SBOR-encoded and then hex-encoded substate bytes.</value>
+        /// <value>The hex-encoded, SBOR-encoded substate data bytes</value>
         [DataMember(Name = "substate_bytes", IsRequired = true, EmitDefaultValue = true)]
         public string SubstateBytes { get; set; }
 
         /// <summary>
-        /// JSON-encoded (and then stringified) substate model. Warning! This is temporary property until we get proper polymorphism in place.
+        /// The hex-encoded double-SHA256 hash of the substate data bytes
         /// </summary>
-        /// <value>JSON-encoded (and then stringified) substate model. Warning! This is temporary property until we get proper polymorphism in place.</value>
-        [DataMember(Name = "substate_json_str", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateJsonStr { get; set; }
+        /// <value>The hex-encoded double-SHA256 hash of the substate data bytes</value>
+        [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateDataHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateData
+        /// </summary>
+        [DataMember(Name = "substate_data", IsRequired = true, EmitDefaultValue = true)]
+        public Substate SubstateData { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -183,8 +182,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("  SubstateBytes: ").Append(SubstateBytes).Append("\n");
-            sb.Append("  SubstateJsonType: ").Append(SubstateJsonType).Append("\n");
-            sb.Append("  SubstateJsonStr: ").Append(SubstateJsonStr).Append("\n");
+            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
+            sb.Append("  SubstateData: ").Append(SubstateData).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -227,8 +226,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this._Version == input._Version ||
-                    (this._Version != null &&
-                    this._Version.Equals(input._Version))
+                    this._Version.Equals(input._Version)
                 ) && 
                 (
                     this.SubstateBytes == input.SubstateBytes ||
@@ -236,13 +234,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateBytes.Equals(input.SubstateBytes))
                 ) && 
                 (
-                    this.SubstateJsonType == input.SubstateJsonType ||
-                    this.SubstateJsonType.Equals(input.SubstateJsonType)
+                    this.SubstateDataHash == input.SubstateDataHash ||
+                    (this.SubstateDataHash != null &&
+                    this.SubstateDataHash.Equals(input.SubstateDataHash))
                 ) && 
                 (
-                    this.SubstateJsonStr == input.SubstateJsonStr ||
-                    (this.SubstateJsonStr != null &&
-                    this.SubstateJsonStr.Equals(input.SubstateJsonStr))
+                    this.SubstateData == input.SubstateData ||
+                    (this.SubstateData != null &&
+                    this.SubstateData.Equals(input.SubstateData))
                 );
         }
 
@@ -259,18 +258,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
                 }
-                if (this._Version != null)
-                {
-                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 if (this.SubstateBytes != null)
                 {
                     hashCode = (hashCode * 59) + this.SubstateBytes.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.SubstateJsonType.GetHashCode();
-                if (this.SubstateJsonStr != null)
+                if (this.SubstateDataHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateJsonStr.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
+                }
+                if (this.SubstateData != null)
+                {
+                    hashCode = (hashCode * 59) + this.SubstateData.GetHashCode();
                 }
                 return hashCode;
             }
@@ -283,6 +282,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // _Version (int) maximum
+            if (this._Version > (int)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 4294967295.", new [] { "_Version" });
+            }
+
+            // _Version (int) minimum
+            if (this._Version < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
+            }
+
             yield break;
         }
     }

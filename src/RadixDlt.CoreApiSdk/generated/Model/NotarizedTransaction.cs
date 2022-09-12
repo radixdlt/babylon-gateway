@@ -104,10 +104,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="hash">The transaction hash, hex-encoded. (required).</param>
+        /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload. (required).</param>
+        /// <param name="payload">The hex-encoded full notarized transaction payload. (required).</param>
         /// <param name="signedIntent">signedIntent (required).</param>
-        /// <param name="notarySignature">The notary signature, hex-encoded. (required).</param>
-        public NotarizedTransaction(string hash = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), string notarySignature = default(string))
+        /// <param name="notarySignature">The hex-encoded SBOR-encoded notary signature. (required).</param>
+        public NotarizedTransaction(string hash = default(string), string payload = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), string notarySignature = default(string))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -115,6 +116,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
             }
             this.Hash = hash;
+            // to ensure "payload" is required (not null)
+            if (payload == null)
+            {
+                throw new ArgumentNullException("payload is a required property for NotarizedTransaction and cannot be null");
+            }
+            this.Payload = payload;
             // to ensure "signedIntent" is required (not null)
             if (signedIntent == null)
             {
@@ -130,11 +137,18 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The transaction hash, hex-encoded.
+        /// The hex-encoded double-SHA256 hash of the notarized transaction payload.
         /// </summary>
-        /// <value>The transaction hash, hex-encoded.</value>
+        /// <value>The hex-encoded double-SHA256 hash of the notarized transaction payload.</value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
+
+        /// <summary>
+        /// The hex-encoded full notarized transaction payload.
+        /// </summary>
+        /// <value>The hex-encoded full notarized transaction payload.</value>
+        [DataMember(Name = "payload", IsRequired = true, EmitDefaultValue = true)]
+        public string Payload { get; set; }
 
         /// <summary>
         /// Gets or Sets SignedIntent
@@ -143,9 +157,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public SignedTransactionIntent SignedIntent { get; set; }
 
         /// <summary>
-        /// The notary signature, hex-encoded.
+        /// The hex-encoded SBOR-encoded notary signature.
         /// </summary>
-        /// <value>The notary signature, hex-encoded.</value>
+        /// <value>The hex-encoded SBOR-encoded notary signature.</value>
         [DataMember(Name = "notary_signature", IsRequired = true, EmitDefaultValue = true)]
         public string NotarySignature { get; set; }
 
@@ -158,6 +172,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NotarizedTransaction {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
+            sb.Append("  Payload: ").Append(Payload).Append("\n");
             sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
             sb.Append("  NotarySignature: ").Append(NotarySignature).Append("\n");
             sb.Append("}\n");
@@ -201,6 +216,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Hash.Equals(input.Hash))
                 ) && 
                 (
+                    this.Payload == input.Payload ||
+                    (this.Payload != null &&
+                    this.Payload.Equals(input.Payload))
+                ) && 
+                (
                     this.SignedIntent == input.SignedIntent ||
                     (this.SignedIntent != null &&
                     this.SignedIntent.Equals(input.SignedIntent))
@@ -224,6 +244,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Hash != null)
                 {
                     hashCode = (hashCode * 59) + this.Hash.GetHashCode();
+                }
+                if (this.Payload != null)
+                {
+                    hashCode = (hashCode * 59) + this.Payload.GetHashCode();
                 }
                 if (this.SignedIntent != null)
                 {

@@ -91,57 +91,52 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// CommittedTransaction
+    /// KeyValueStoreEntrySubstateAllOf
     /// </summary>
-    [DataContract(Name = "CommittedTransaction")]
-    public partial class CommittedTransaction : IEquatable<CommittedTransaction>, IValidatableObject
+    [DataContract(Name = "KeyValueStoreEntrySubstate_allOf")]
+    public partial class KeyValueStoreEntrySubstateAllOf : IEquatable<KeyValueStoreEntrySubstateAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreEntrySubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransaction() { }
+        protected KeyValueStoreEntrySubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="KeyValueStoreEntrySubstateAllOf" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        /// <param name="key">The hex-encoded bytes of its key (required).</param>
+        /// <param name="isDeleted">isDeleted (required).</param>
+        /// <param name="dataStruct">dataStruct.</param>
+        public KeyValueStoreEntrySubstateAllOf(string key = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
         {
-            this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
+                throw new ArgumentNullException("key is a required property for KeyValueStoreEntrySubstateAllOf and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
-            {
-                throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
-            }
-            this.Receipt = receipt;
+            this.Key = key;
+            this.IsDeleted = isDeleted;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// The hex-encoded bytes of its key
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        /// <value>The hex-encoded bytes of its key</value>
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public string Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Gets or Sets IsDeleted
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsDeleted { get; set; }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// Gets or Sets DataStruct
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
+        [DataMember(Name = "data_struct", EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,10 +145,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransaction {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("class KeyValueStoreEntrySubstateAllOf {\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -174,15 +169,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransaction);
+            return this.Equals(input as KeyValueStoreEntrySubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransaction instances are equal
+        /// Returns true if KeyValueStoreEntrySubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransaction to be compared</param>
+        /// <param name="input">Instance of KeyValueStoreEntrySubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransaction input)
+        public bool Equals(KeyValueStoreEntrySubstateAllOf input)
         {
             if (input == null)
             {
@@ -190,18 +185,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.IsDeleted == input.IsDeleted ||
+                    this.IsDeleted.Equals(input.IsDeleted)
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -214,14 +209,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                if (this.Receipt != null)
+                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
+                if (this.DataStruct != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }
@@ -234,18 +229,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) maximum
-            if (this.StateVersion > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to -1.", new [] { "StateVersion" });
-            }
-
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
-            }
-
             yield break;
         }
     }

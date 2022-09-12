@@ -110,6 +110,27 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of NetworkConfigurationResponse</returns>
         ApiResponse<NetworkConfigurationResponse> StatusNetworkConfigurationPostWithHttpInfo();
+        /// <summary>
+        /// Get Network Status
+        /// </summary>
+        /// <remarks>
+        /// Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <returns>NetworkStatusResponse</returns>
+        NetworkStatusResponse StatusNetworkStatusPost(NetworkStatusRequest networkStatusRequest);
+
+        /// <summary>
+        /// Get Network Status
+        /// </summary>
+        /// <remarks>
+        /// Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <returns>ApiResponse of NetworkStatusResponse</returns>
+        ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest);
         #endregion Synchronous Operations
     }
 
@@ -140,6 +161,29 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (NetworkConfigurationResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<NetworkConfigurationResponse>> StatusNetworkConfigurationPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Network Status
+        /// </summary>
+        /// <remarks>
+        /// Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of NetworkStatusResponse</returns>
+        System.Threading.Tasks.Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Network Status
+        /// </summary>
+        /// <remarks>
+        /// Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (NetworkStatusResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -448,6 +492,123 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("StatusNetworkConfigurationPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <returns>NetworkStatusResponse</returns>
+        public NetworkStatusResponse StatusNetworkStatusPost(NetworkStatusRequest networkStatusRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> localVarResponse = StatusNetworkStatusPostWithHttpInfo(networkStatusRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <returns>ApiResponse of NetworkStatusResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest)
+        {
+            // verify the required parameter 'networkStatusRequest' is set
+            if (networkStatusRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'networkStatusRequest' when calling StatusApi->StatusNetworkStatusPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = networkStatusRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<NetworkStatusResponse>("/status/network-status", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StatusNetworkStatusPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of NetworkStatusResponse</returns>
+        public async System.Threading.Tasks.Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> localVarResponse = await StatusNetworkStatusPostWithHttpInfoAsync(networkStatusRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Network Status Returns the current state and status of the node&#39;s copy of the ledger.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="networkStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (NetworkStatusResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'networkStatusRequest' is set
+            if (networkStatusRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'networkStatusRequest' when calling StatusApi->StatusNetworkStatusPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = networkStatusRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<NetworkStatusResponse>("/status/network-status", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("StatusNetworkStatusPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

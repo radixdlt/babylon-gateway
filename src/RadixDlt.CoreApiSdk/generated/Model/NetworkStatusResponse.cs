@@ -91,48 +91,61 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ResourceSubstateMetadataInner
+    /// NetworkStatusResponse
     /// </summary>
-    [DataContract(Name = "ResourceSubstate_metadata_inner")]
-    public partial class ResourceSubstateMetadataInner : IEquatable<ResourceSubstateMetadataInner>, IValidatableObject
+    [DataContract(Name = "NetworkStatusResponse")]
+    public partial class NetworkStatusResponse : IEquatable<NetworkStatusResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceSubstateMetadataInner" /> class.
+        /// Initializes a new instance of the <see cref="NetworkStatusResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceSubstateMetadataInner() { }
+        protected NetworkStatusResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceSubstateMetadataInner" /> class.
+        /// Initializes a new instance of the <see cref="NetworkStatusResponse" /> class.
         /// </summary>
-        /// <param name="key">key (required).</param>
-        /// <param name="value">value (required).</param>
-        public ResourceSubstateMetadataInner(string key = default(string), string value = default(string))
+        /// <param name="preGenesisStateIdentifier">preGenesisStateIdentifier (required).</param>
+        /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier (required).</param>
+        /// <param name="currentStateIdentifier">currentStateIdentifier (required).</param>
+        public NetworkStatusResponse(StateIdentifier preGenesisStateIdentifier = default(StateIdentifier), StateIdentifier postGenesisStateIdentifier = default(StateIdentifier), StateIdentifier currentStateIdentifier = default(StateIdentifier))
         {
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "preGenesisStateIdentifier" is required (not null)
+            if (preGenesisStateIdentifier == null)
             {
-                throw new ArgumentNullException("key is a required property for ResourceSubstateMetadataInner and cannot be null");
+                throw new ArgumentNullException("preGenesisStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
             }
-            this.Key = key;
-            // to ensure "value" is required (not null)
-            if (value == null)
+            this.PreGenesisStateIdentifier = preGenesisStateIdentifier;
+            // to ensure "postGenesisStateIdentifier" is required (not null)
+            if (postGenesisStateIdentifier == null)
             {
-                throw new ArgumentNullException("value is a required property for ResourceSubstateMetadataInner and cannot be null");
+                throw new ArgumentNullException("postGenesisStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
             }
-            this.Value = value;
+            this.PostGenesisStateIdentifier = postGenesisStateIdentifier;
+            // to ensure "currentStateIdentifier" is required (not null)
+            if (currentStateIdentifier == null)
+            {
+                throw new ArgumentNullException("currentStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
+            }
+            this.CurrentStateIdentifier = currentStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets Key
+        /// Gets or Sets PreGenesisStateIdentifier
         /// </summary>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public string Key { get; set; }
+        [DataMember(Name = "pre_genesis_state_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public StateIdentifier PreGenesisStateIdentifier { get; set; }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// Gets or Sets PostGenesisStateIdentifier
         /// </summary>
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
-        public string Value { get; set; }
+        [DataMember(Name = "post_genesis_state_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public StateIdentifier PostGenesisStateIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CurrentStateIdentifier
+        /// </summary>
+        [DataMember(Name = "current_state_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public StateIdentifier CurrentStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +154,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceSubstateMetadataInner {\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
+            sb.Append("class NetworkStatusResponse {\n");
+            sb.Append("  PreGenesisStateIdentifier: ").Append(PreGenesisStateIdentifier).Append("\n");
+            sb.Append("  PostGenesisStateIdentifier: ").Append(PostGenesisStateIdentifier).Append("\n");
+            sb.Append("  CurrentStateIdentifier: ").Append(CurrentStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +178,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceSubstateMetadataInner);
+            return this.Equals(input as NetworkStatusResponse);
         }
 
         /// <summary>
-        /// Returns true if ResourceSubstateMetadataInner instances are equal
+        /// Returns true if NetworkStatusResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceSubstateMetadataInner to be compared</param>
+        /// <param name="input">Instance of NetworkStatusResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceSubstateMetadataInner input)
+        public bool Equals(NetworkStatusResponse input)
         {
             if (input == null)
             {
@@ -180,14 +194,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.PreGenesisStateIdentifier == input.PreGenesisStateIdentifier ||
+                    (this.PreGenesisStateIdentifier != null &&
+                    this.PreGenesisStateIdentifier.Equals(input.PreGenesisStateIdentifier))
                 ) && 
                 (
-                    this.Value == input.Value ||
-                    (this.Value != null &&
-                    this.Value.Equals(input.Value))
+                    this.PostGenesisStateIdentifier == input.PostGenesisStateIdentifier ||
+                    (this.PostGenesisStateIdentifier != null &&
+                    this.PostGenesisStateIdentifier.Equals(input.PostGenesisStateIdentifier))
+                ) && 
+                (
+                    this.CurrentStateIdentifier == input.CurrentStateIdentifier ||
+                    (this.CurrentStateIdentifier != null &&
+                    this.CurrentStateIdentifier.Equals(input.CurrentStateIdentifier))
                 );
         }
 
@@ -200,13 +219,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Key != null)
+                if (this.PreGenesisStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreGenesisStateIdentifier.GetHashCode();
                 }
-                if (this.Value != null)
+                if (this.PostGenesisStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PostGenesisStateIdentifier.GetHashCode();
+                }
+                if (this.CurrentStateIdentifier != null)
+                {
+                    hashCode = (hashCode * 59) + this.CurrentStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

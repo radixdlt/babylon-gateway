@@ -96,6 +96,18 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "ComponentStateSubstate")]
     public partial class ComponentStateSubstate : IEquatable<ComponentStateSubstate>, IValidatableObject
     {
+
+        /// <summary>
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentStateSubstate" /> class.
         /// </summary>
@@ -104,23 +116,26 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ComponentStateSubstate" /> class.
         /// </summary>
-        /// <param name="state">hex-encoded state data (required).</param>
-        public ComponentStateSubstate(string state = default(string))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="dataStruct">dataStruct (required).</param>
+        public ComponentStateSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), DataStruct dataStruct = default(DataStruct))
         {
-            // to ensure "state" is required (not null)
-            if (state == null)
+            this.EntityType = entityType;
+            this.SubstateType = substateType;
+            // to ensure "dataStruct" is required (not null)
+            if (dataStruct == null)
             {
-                throw new ArgumentNullException("state is a required property for ComponentStateSubstate and cannot be null");
+                throw new ArgumentNullException("dataStruct is a required property for ComponentStateSubstate and cannot be null");
             }
-            this.State = state;
+            this.DataStruct = dataStruct;
         }
 
         /// <summary>
-        /// hex-encoded state data
+        /// Gets or Sets DataStruct
         /// </summary>
-        /// <value>hex-encoded state data</value>
-        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
-        public string State { get; set; }
+        [DataMember(Name = "data_struct", IsRequired = true, EmitDefaultValue = true)]
+        public DataStruct DataStruct { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,7 +145,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ComponentStateSubstate {\n");
-            sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,9 +184,17 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.State == input.State ||
-                    (this.State != null &&
-                    this.State.Equals(input.State))
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
+                ) && 
+                (
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
+                    this.DataStruct == input.DataStruct ||
+                    (this.DataStruct != null &&
+                    this.DataStruct.Equals(input.DataStruct))
                 );
         }
 
@@ -182,9 +207,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.State != null)
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                if (this.DataStruct != null)
                 {
-                    hashCode = (hashCode * 59) + this.State.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataStruct.GetHashCode();
                 }
                 return hashCode;
             }

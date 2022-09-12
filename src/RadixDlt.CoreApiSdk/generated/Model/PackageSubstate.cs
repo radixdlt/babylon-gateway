@@ -96,6 +96,18 @@ namespace RadixDlt.CoreApiSdk.Model
     [DataContract(Name = "PackageSubstate")]
     public partial class PackageSubstate : IEquatable<PackageSubstate>, IValidatableObject
     {
+
+        /// <summary>
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageSubstate" /> class.
         /// </summary>
@@ -104,9 +116,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageSubstate" /> class.
         /// </summary>
-        /// <param name="code">Package code, hex-encoded. (required).</param>
-        public PackageSubstate(string code = default(string))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="code">The hex-encoded package code (required).</param>
+        public PackageSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string code = default(string))
         {
+            this.EntityType = entityType;
+            this.SubstateType = substateType;
             // to ensure "code" is required (not null)
             if (code == null)
             {
@@ -116,9 +132,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Package code, hex-encoded.
+        /// The hex-encoded package code
         /// </summary>
-        /// <value>Package code, hex-encoded.</value>
+        /// <value>The hex-encoded package code</value>
         [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
         public string Code { get; set; }
 
@@ -130,6 +146,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageSubstate {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  Code: ").Append(Code).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -167,6 +185,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
+                ) && 
+                (
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
                     this.Code == input.Code ||
                     (this.Code != null &&
                     this.Code.Equals(input.Code))
@@ -182,6 +208,8 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
                 if (this.Code != null)
                 {
                     hashCode = (hashCode * 59) + this.Code.GetHashCode();

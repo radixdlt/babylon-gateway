@@ -91,60 +91,113 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Warning! This is temporary property until we get proper polymorphism in place.
+    /// VaultSubstateAllOf
     /// </summary>
-    /// <value>Warning! This is temporary property until we get proper polymorphism in place.</value>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum TemporaryUpSubstateJsonPayloadType
+    [DataContract(Name = "VaultSubstate_allOf")]
+    public partial class VaultSubstateAllOf : IEquatable<VaultSubstateAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Enum System for value: system
+        /// Initializes a new instance of the <see cref="VaultSubstateAllOf" /> class.
         /// </summary>
-        [EnumMember(Value = "system")]
-        System = 1,
+        [JsonConstructorAttribute]
+        protected VaultSubstateAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VaultSubstateAllOf" /> class.
+        /// </summary>
+        /// <param name="resourceAmount">resourceAmount (required).</param>
+        public VaultSubstateAllOf(ResourceAmount resourceAmount = default(ResourceAmount))
+        {
+            // to ensure "resourceAmount" is required (not null)
+            if (resourceAmount == null)
+            {
+                throw new ArgumentNullException("resourceAmount is a required property for VaultSubstateAllOf and cannot be null");
+            }
+            this.ResourceAmount = resourceAmount;
+        }
 
         /// <summary>
-        /// Enum Resource for value: resource
+        /// Gets or Sets ResourceAmount
         /// </summary>
-        [EnumMember(Value = "resource")]
-        Resource = 2,
+        [DataMember(Name = "resource_amount", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceAmount ResourceAmount { get; set; }
 
         /// <summary>
-        /// Enum ComponentInfo for value: component_info
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "component_info")]
-        ComponentInfo = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class VaultSubstateAllOf {\n");
+            sb.Append("  ResourceAmount: ").Append(ResourceAmount).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum ComponentState for value: component_state
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "component_state")]
-        ComponentState = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum Package for value: package
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "package")]
-        Package = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as VaultSubstateAllOf);
+        }
 
         /// <summary>
-        /// Enum Vault for value: vault
+        /// Returns true if VaultSubstateAllOf instances are equal
         /// </summary>
-        [EnumMember(Value = "vault")]
-        Vault = 6,
+        /// <param name="input">Instance of VaultSubstateAllOf to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(VaultSubstateAllOf input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.ResourceAmount == input.ResourceAmount ||
+                    (this.ResourceAmount != null &&
+                    this.ResourceAmount.Equals(input.ResourceAmount))
+                );
+        }
 
         /// <summary>
-        /// Enum NonFungible for value: non_fungible
+        /// Gets the hash code
         /// </summary>
-        [EnumMember(Value = "non_fungible")]
-        NonFungible = 7,
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.ResourceAmount != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAmount.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
         /// <summary>
-        /// Enum KeyValueStoreEntry for value: key_value_store_entry
+        /// To validate all properties of the instance
         /// </summary>
-        [EnumMember(Value = "key_value_store_entry")]
-        KeyValueStoreEntry = 8
-
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }

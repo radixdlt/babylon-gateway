@@ -91,62 +91,42 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// ResourceSubstate
+    /// ResourceManagerSubstateAllOf
     /// </summary>
-    [DataContract(Name = "ResourceSubstate")]
-    public partial class ResourceSubstate : IEquatable<ResourceSubstate>, IValidatableObject
+    [DataContract(Name = "ResourceManagerSubstate_allOf")]
+    public partial class ResourceManagerSubstateAllOf : IEquatable<ResourceManagerSubstateAllOf>, IValidatableObject
     {
-        /// <summary>
-        /// Defines ResourceType
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum ResourceTypeEnum
-        {
-            /// <summary>
-            /// Enum Fungible for value: fungible
-            /// </summary>
-            [EnumMember(Value = "fungible")]
-            Fungible = 1,
-
-            /// <summary>
-            /// Enum NonFungible for value: non_fungible
-            /// </summary>
-            [EnumMember(Value = "non_fungible")]
-            NonFungible = 2
-
-        }
-
 
         /// <summary>
         /// Gets or Sets ResourceType
         /// </summary>
         [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceTypeEnum ResourceType { get; set; }
+        public ResourceType ResourceType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ResourceManagerSubstateAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceSubstate() { }
+        protected ResourceManagerSubstateAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceSubstate" /> class.
+        /// Initializes a new instance of the <see cref="ResourceManagerSubstateAllOf" /> class.
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="totalSupply">totalSupply (required).</param>
-        public ResourceSubstate(ResourceTypeEnum resourceType = default(ResourceTypeEnum), int fungibleDivisibility = default(int), List<ResourceSubstateMetadataInner> metadata = default(List<ResourceSubstateMetadataInner>), string totalSupply = default(string))
+        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupply = default(string))
         {
             this.ResourceType = resourceType;
             // to ensure "metadata" is required (not null)
             if (metadata == null)
             {
-                throw new ArgumentNullException("metadata is a required property for ResourceSubstate and cannot be null");
+                throw new ArgumentNullException("metadata is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
             this.Metadata = metadata;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
             {
-                throw new ArgumentNullException("totalSupply is a required property for ResourceSubstate and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
             this.TotalSupply = totalSupply;
             this.FungibleDivisibility = fungibleDivisibility;
@@ -162,7 +142,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets Metadata
         /// </summary>
         [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceSubstateMetadataInner> Metadata { get; set; }
+        public List<ResourceManagerSubstateAllOfMetadata> Metadata { get; set; }
 
         /// <summary>
         /// Gets or Sets TotalSupply
@@ -177,7 +157,7 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceSubstate {\n");
+            sb.Append("class ResourceManagerSubstateAllOf {\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
@@ -202,15 +182,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceSubstate);
+            return this.Equals(input as ResourceManagerSubstateAllOf);
         }
 
         /// <summary>
-        /// Returns true if ResourceSubstate instances are equal
+        /// Returns true if ResourceManagerSubstateAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceSubstate to be compared</param>
+        /// <param name="input">Instance of ResourceManagerSubstateAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceSubstate input)
+        public bool Equals(ResourceManagerSubstateAllOf input)
         {
             if (input == null)
             {
@@ -268,6 +248,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // FungibleDivisibility (int) maximum
+            if (this.FungibleDivisibility > (int)18)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FungibleDivisibility, must be a value less than or equal to 18.", new [] { "FungibleDivisibility" });
+            }
+
+            // FungibleDivisibility (int) minimum
+            if (this.FungibleDivisibility < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FungibleDivisibility, must be a value greater than or equal to 0.", new [] { "FungibleDivisibility" });
+            }
+
             yield break;
         }
     }

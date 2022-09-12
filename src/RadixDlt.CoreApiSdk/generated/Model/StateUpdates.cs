@@ -91,7 +91,7 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Transaction state updates
+    /// Transaction state updates (only present if status is Succeeded or Failed)
     /// </summary>
     [DataContract(Name = "StateUpdates")]
     public partial class StateUpdates : IEquatable<StateUpdates>, IValidatableObject
@@ -107,8 +107,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="downVirtualSubstates">downVirtualSubstates (required).</param>
         /// <param name="upSubstates">upSubstates (required).</param>
         /// <param name="downSubstates">downSubstates (required).</param>
-        /// <param name="newRoots">newRoots (required).</param>
-        public StateUpdates(List<string> downVirtualSubstates = default(List<string>), List<UpSubstate> upSubstates = default(List<UpSubstate>), List<DownSubstate> downSubstates = default(List<DownSubstate>), List<string> newRoots = default(List<string>))
+        /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
+        public StateUpdates(List<SubstateId> downVirtualSubstates = default(List<SubstateId>), List<UpSubstate> upSubstates = default(List<UpSubstate>), List<DownSubstate> downSubstates = default(List<DownSubstate>), List<GlobalEntityId> newGlobalEntities = default(List<GlobalEntityId>))
         {
             // to ensure "downVirtualSubstates" is required (not null)
             if (downVirtualSubstates == null)
@@ -128,19 +128,19 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("downSubstates is a required property for StateUpdates and cannot be null");
             }
             this.DownSubstates = downSubstates;
-            // to ensure "newRoots" is required (not null)
-            if (newRoots == null)
+            // to ensure "newGlobalEntities" is required (not null)
+            if (newGlobalEntities == null)
             {
-                throw new ArgumentNullException("newRoots is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("newGlobalEntities is a required property for StateUpdates and cannot be null");
             }
-            this.NewRoots = newRoots;
+            this.NewGlobalEntities = newGlobalEntities;
         }
 
         /// <summary>
         /// Gets or Sets DownVirtualSubstates
         /// </summary>
         [DataMember(Name = "down_virtual_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> DownVirtualSubstates { get; set; }
+        public List<SubstateId> DownVirtualSubstates { get; set; }
 
         /// <summary>
         /// Gets or Sets UpSubstates
@@ -155,10 +155,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<DownSubstate> DownSubstates { get; set; }
 
         /// <summary>
-        /// Gets or Sets NewRoots
+        /// Gets or Sets NewGlobalEntities
         /// </summary>
-        [DataMember(Name = "new_roots", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> NewRoots { get; set; }
+        [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<GlobalEntityId> NewGlobalEntities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -171,7 +171,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  DownVirtualSubstates: ").Append(DownVirtualSubstates).Append("\n");
             sb.Append("  UpSubstates: ").Append(UpSubstates).Append("\n");
             sb.Append("  DownSubstates: ").Append(DownSubstates).Append("\n");
-            sb.Append("  NewRoots: ").Append(NewRoots).Append("\n");
+            sb.Append("  NewGlobalEntities: ").Append(NewGlobalEntities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -226,10 +226,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.DownSubstates.SequenceEqual(input.DownSubstates)
                 ) && 
                 (
-                    this.NewRoots == input.NewRoots ||
-                    this.NewRoots != null &&
-                    input.NewRoots != null &&
-                    this.NewRoots.SequenceEqual(input.NewRoots)
+                    this.NewGlobalEntities == input.NewGlobalEntities ||
+                    this.NewGlobalEntities != null &&
+                    input.NewGlobalEntities != null &&
+                    this.NewGlobalEntities.SequenceEqual(input.NewGlobalEntities)
                 );
         }
 
@@ -254,9 +254,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.DownSubstates.GetHashCode();
                 }
-                if (this.NewRoots != null)
+                if (this.NewGlobalEntities != null)
                 {
-                    hashCode = (hashCode * 59) + this.NewRoots.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NewGlobalEntities.GetHashCode();
                 }
                 return hashCode;
             }
