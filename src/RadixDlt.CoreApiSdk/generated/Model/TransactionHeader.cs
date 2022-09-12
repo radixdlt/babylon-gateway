@@ -357,34 +357,16 @@ namespace RadixDlt.CoreApiSdk.Model
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for NetworkId, must be a value greater than or equal to 0.", new [] { "NetworkId" });
             }
 
-            // StartEpochInclusive (long) maximum
-            if (this.StartEpochInclusive > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value less than or equal to -1.", new [] { "StartEpochInclusive" });
-            }
-
             // StartEpochInclusive (long) minimum
             if (this.StartEpochInclusive < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value greater than or equal to 0.", new [] { "StartEpochInclusive" });
             }
 
-            // EndEpochExclusive (long) maximum
-            if (this.EndEpochExclusive > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value less than or equal to -1.", new [] { "EndEpochExclusive" });
-            }
-
             // EndEpochExclusive (long) minimum
             if (this.EndEpochExclusive < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value greater than or equal to 0.", new [] { "EndEpochExclusive" });
-            }
-
-            // Nonce (long) maximum
-            if (this.Nonce > (long)-1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value less than or equal to -1.", new [] { "Nonce" });
             }
 
             // Nonce (long) minimum
