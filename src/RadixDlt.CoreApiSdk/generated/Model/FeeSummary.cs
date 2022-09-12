@@ -105,51 +105,36 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="FeeSummary" /> class.
         /// </summary>
         /// <param name="loanFullyRepaid">Specifies whether the transaction execution loan has been fully repaid. (required).</param>
-        /// <param name="costUnitLimit">Maximum amount of cost units available for the transaction execution. A decimal 32-bit unsigned integer. (required).</param>
-        /// <param name="costUnitConsumed">The amount of cost units consumed by the transaction execution. A decimal 32-bit unsigned integer. (required).</param>
-        /// <param name="costUnitPrice">The XRD price of a single cost unit. A fixed-scale 256-bit signed decimal number. (required).</param>
-        /// <param name="tipPercentage">The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%). (required).</param>
-        /// <param name="xrdBurned">The total amount of XRD burned. A fixed-scale 256-bit signed decimal number. (required).</param>
-        /// <param name="xrdTipped">The total amount of XRD tipped to validators. A fixed-scale 256-bit signed decimal number. (required).</param>
-        public FeeSummary(bool loanFullyRepaid = default(bool), string costUnitLimit = default(string), string costUnitConsumed = default(string), string costUnitPrice = default(string), string tipPercentage = default(string), string xrdBurned = default(string), string xrdTipped = default(string))
+        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, representing the maximum amount of cost units available for the transaction execution. (required).</param>
+        /// <param name="costUnitConsumed">An integer between 0 and 2^32 - 1, representing the amount of cost units consumed by the transaction execution. (required).</param>
+        /// <param name="costUnitPriceAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD price of a single cost unit.  (required).</param>
+        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
+        /// <param name="xrdBurnedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD burned in the transaction.  (required).</param>
+        /// <param name="xrdTippedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD tipped to validators in the transaction.  (required).</param>
+        public FeeSummary(bool loanFullyRepaid = default(bool), long costUnitLimit = default(long), long costUnitConsumed = default(long), string costUnitPriceAttos = default(string), long tipPercentage = default(long), string xrdBurnedAttos = default(string), string xrdTippedAttos = default(string))
         {
             this.LoanFullyRepaid = loanFullyRepaid;
-            // to ensure "costUnitLimit" is required (not null)
-            if (costUnitLimit == null)
-            {
-                throw new ArgumentNullException("costUnitLimit is a required property for FeeSummary and cannot be null");
-            }
             this.CostUnitLimit = costUnitLimit;
-            // to ensure "costUnitConsumed" is required (not null)
-            if (costUnitConsumed == null)
-            {
-                throw new ArgumentNullException("costUnitConsumed is a required property for FeeSummary and cannot be null");
-            }
             this.CostUnitConsumed = costUnitConsumed;
-            // to ensure "costUnitPrice" is required (not null)
-            if (costUnitPrice == null)
+            // to ensure "costUnitPriceAttos" is required (not null)
+            if (costUnitPriceAttos == null)
             {
-                throw new ArgumentNullException("costUnitPrice is a required property for FeeSummary and cannot be null");
+                throw new ArgumentNullException("costUnitPriceAttos is a required property for FeeSummary and cannot be null");
             }
-            this.CostUnitPrice = costUnitPrice;
-            // to ensure "tipPercentage" is required (not null)
-            if (tipPercentage == null)
-            {
-                throw new ArgumentNullException("tipPercentage is a required property for FeeSummary and cannot be null");
-            }
+            this.CostUnitPriceAttos = costUnitPriceAttos;
             this.TipPercentage = tipPercentage;
-            // to ensure "xrdBurned" is required (not null)
-            if (xrdBurned == null)
+            // to ensure "xrdBurnedAttos" is required (not null)
+            if (xrdBurnedAttos == null)
             {
-                throw new ArgumentNullException("xrdBurned is a required property for FeeSummary and cannot be null");
+                throw new ArgumentNullException("xrdBurnedAttos is a required property for FeeSummary and cannot be null");
             }
-            this.XrdBurned = xrdBurned;
-            // to ensure "xrdTipped" is required (not null)
-            if (xrdTipped == null)
+            this.XrdBurnedAttos = xrdBurnedAttos;
+            // to ensure "xrdTippedAttos" is required (not null)
+            if (xrdTippedAttos == null)
             {
-                throw new ArgumentNullException("xrdTipped is a required property for FeeSummary and cannot be null");
+                throw new ArgumentNullException("xrdTippedAttos is a required property for FeeSummary and cannot be null");
             }
-            this.XrdTipped = xrdTipped;
+            this.XrdTippedAttos = xrdTippedAttos;
         }
 
         /// <summary>
@@ -160,46 +145,46 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool LoanFullyRepaid { get; set; }
 
         /// <summary>
-        /// Maximum amount of cost units available for the transaction execution. A decimal 32-bit unsigned integer.
+        /// An integer between 0 and 2^32 - 1, representing the maximum amount of cost units available for the transaction execution.
         /// </summary>
-        /// <value>Maximum amount of cost units available for the transaction execution. A decimal 32-bit unsigned integer.</value>
+        /// <value>An integer between 0 and 2^32 - 1, representing the maximum amount of cost units available for the transaction execution.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public string CostUnitLimit { get; set; }
+        public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// The amount of cost units consumed by the transaction execution. A decimal 32-bit unsigned integer.
+        /// An integer between 0 and 2^32 - 1, representing the amount of cost units consumed by the transaction execution.
         /// </summary>
-        /// <value>The amount of cost units consumed by the transaction execution. A decimal 32-bit unsigned integer.</value>
+        /// <value>An integer between 0 and 2^32 - 1, representing the amount of cost units consumed by the transaction execution.</value>
         [DataMember(Name = "cost_unit_consumed", IsRequired = true, EmitDefaultValue = true)]
-        public string CostUnitConsumed { get; set; }
+        public long CostUnitConsumed { get; set; }
 
         /// <summary>
-        /// The XRD price of a single cost unit. A fixed-scale 256-bit signed decimal number.
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD price of a single cost unit. 
         /// </summary>
-        /// <value>The XRD price of a single cost unit. A fixed-scale 256-bit signed decimal number.</value>
-        [DataMember(Name = "cost_unit_price", IsRequired = true, EmitDefaultValue = true)]
-        public string CostUnitPrice { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD price of a single cost unit. </value>
+        [DataMember(Name = "cost_unit_price_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string CostUnitPriceAttos { get; set; }
 
         /// <summary>
-        /// The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).
+        /// An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).</value>
+        /// <value>An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public string TipPercentage { get; set; }
+        public long TipPercentage { get; set; }
 
         /// <summary>
-        /// The total amount of XRD burned. A fixed-scale 256-bit signed decimal number.
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD burned in the transaction. 
         /// </summary>
-        /// <value>The total amount of XRD burned. A fixed-scale 256-bit signed decimal number.</value>
-        [DataMember(Name = "xrd_burned", IsRequired = true, EmitDefaultValue = true)]
-        public string XrdBurned { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD burned in the transaction. </value>
+        [DataMember(Name = "xrd_burned_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdBurnedAttos { get; set; }
 
         /// <summary>
-        /// The total amount of XRD tipped to validators. A fixed-scale 256-bit signed decimal number.
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD tipped to validators in the transaction. 
         /// </summary>
-        /// <value>The total amount of XRD tipped to validators. A fixed-scale 256-bit signed decimal number.</value>
-        [DataMember(Name = "xrd_tipped", IsRequired = true, EmitDefaultValue = true)]
-        public string XrdTipped { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD tipped to validators in the transaction. </value>
+        [DataMember(Name = "xrd_tipped_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string XrdTippedAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -212,10 +197,10 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  LoanFullyRepaid: ").Append(LoanFullyRepaid).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  CostUnitConsumed: ").Append(CostUnitConsumed).Append("\n");
-            sb.Append("  CostUnitPrice: ").Append(CostUnitPrice).Append("\n");
+            sb.Append("  CostUnitPriceAttos: ").Append(CostUnitPriceAttos).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
-            sb.Append("  XrdBurned: ").Append(XrdBurned).Append("\n");
-            sb.Append("  XrdTipped: ").Append(XrdTipped).Append("\n");
+            sb.Append("  XrdBurnedAttos: ").Append(XrdBurnedAttos).Append("\n");
+            sb.Append("  XrdTippedAttos: ").Append(XrdTippedAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -257,33 +242,30 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.CostUnitLimit == input.CostUnitLimit ||
-                    (this.CostUnitLimit != null &&
-                    this.CostUnitLimit.Equals(input.CostUnitLimit))
+                    this.CostUnitLimit.Equals(input.CostUnitLimit)
                 ) && 
                 (
                     this.CostUnitConsumed == input.CostUnitConsumed ||
-                    (this.CostUnitConsumed != null &&
-                    this.CostUnitConsumed.Equals(input.CostUnitConsumed))
+                    this.CostUnitConsumed.Equals(input.CostUnitConsumed)
                 ) && 
                 (
-                    this.CostUnitPrice == input.CostUnitPrice ||
-                    (this.CostUnitPrice != null &&
-                    this.CostUnitPrice.Equals(input.CostUnitPrice))
+                    this.CostUnitPriceAttos == input.CostUnitPriceAttos ||
+                    (this.CostUnitPriceAttos != null &&
+                    this.CostUnitPriceAttos.Equals(input.CostUnitPriceAttos))
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
-                    (this.TipPercentage != null &&
-                    this.TipPercentage.Equals(input.TipPercentage))
+                    this.TipPercentage.Equals(input.TipPercentage)
                 ) && 
                 (
-                    this.XrdBurned == input.XrdBurned ||
-                    (this.XrdBurned != null &&
-                    this.XrdBurned.Equals(input.XrdBurned))
+                    this.XrdBurnedAttos == input.XrdBurnedAttos ||
+                    (this.XrdBurnedAttos != null &&
+                    this.XrdBurnedAttos.Equals(input.XrdBurnedAttos))
                 ) && 
                 (
-                    this.XrdTipped == input.XrdTipped ||
-                    (this.XrdTipped != null &&
-                    this.XrdTipped.Equals(input.XrdTipped))
+                    this.XrdTippedAttos == input.XrdTippedAttos ||
+                    (this.XrdTippedAttos != null &&
+                    this.XrdTippedAttos.Equals(input.XrdTippedAttos))
                 );
         }
 
@@ -297,29 +279,20 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.LoanFullyRepaid.GetHashCode();
-                if (this.CostUnitLimit != null)
+                hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
+                hashCode = (hashCode * 59) + this.CostUnitConsumed.GetHashCode();
+                if (this.CostUnitPriceAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CostUnitPriceAttos.GetHashCode();
                 }
-                if (this.CostUnitConsumed != null)
+                hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
+                if (this.XrdBurnedAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.CostUnitConsumed.GetHashCode();
+                    hashCode = (hashCode * 59) + this.XrdBurnedAttos.GetHashCode();
                 }
-                if (this.CostUnitPrice != null)
+                if (this.XrdTippedAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.CostUnitPrice.GetHashCode();
-                }
-                if (this.TipPercentage != null)
-                {
-                    hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                }
-                if (this.XrdBurned != null)
-                {
-                    hashCode = (hashCode * 59) + this.XrdBurned.GetHashCode();
-                }
-                if (this.XrdTipped != null)
-                {
-                    hashCode = (hashCode * 59) + this.XrdTipped.GetHashCode();
+                    hashCode = (hashCode * 59) + this.XrdTippedAttos.GetHashCode();
                 }
                 return hashCode;
             }
@@ -332,6 +305,42 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // CostUnitLimit (long) maximum
+            if (this.CostUnitLimit > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitLimit (long) minimum
+            if (this.CostUnitLimit < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitConsumed (long) maximum
+            if (this.CostUnitConsumed > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitConsumed, must be a value less than or equal to 4294967295.", new [] { "CostUnitConsumed" });
+            }
+
+            // CostUnitConsumed (long) minimum
+            if (this.CostUnitConsumed < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitConsumed, must be a value greater than or equal to 0.", new [] { "CostUnitConsumed" });
+            }
+
+            // TipPercentage (long) maximum
+            if (this.TipPercentage > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
+            }
+
+            // TipPercentage (long) minimum
+            if (this.TipPercentage < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
+            }
+
             yield break;
         }
     }

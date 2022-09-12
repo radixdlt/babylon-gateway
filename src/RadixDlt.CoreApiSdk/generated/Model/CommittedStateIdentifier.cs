@@ -91,31 +91,31 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// StateIdentifier
+    /// CommittedStateIdentifier
     /// </summary>
-    [DataContract(Name = "StateIdentifier")]
-    public partial class StateIdentifier : IEquatable<StateIdentifier>, IValidatableObject
+    [DataContract(Name = "CommittedStateIdentifier")]
+    public partial class CommittedStateIdentifier : IEquatable<CommittedStateIdentifier>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="CommittedStateIdentifier" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected StateIdentifier() { }
+        protected CommittedStateIdentifier() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="CommittedStateIdentifier" /> class.
         /// </summary>
-        /// <param name="version">The state version increments with each transaction. (required).</param>
-        public StateIdentifier(long version = default(long))
+        /// <param name="stateVersion">An integer between 0 and 10^13, representing the state version. The state version increments with each transaction, starting at 0 pre-genesis. (required).</param>
+        public CommittedStateIdentifier(long stateVersion = default(long))
         {
-            this._Version = version;
+            this.StateVersion = stateVersion;
         }
 
         /// <summary>
-        /// The state version increments with each transaction.
+        /// An integer between 0 and 10^13, representing the state version. The state version increments with each transaction, starting at 0 pre-genesis.
         /// </summary>
-        /// <value>The state version increments with each transaction.</value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        /// <value>An integer between 0 and 10^13, representing the state version. The state version increments with each transaction, starting at 0 pre-genesis.</value>
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,8 +124,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class StateIdentifier {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class CommittedStateIdentifier {\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,15 +146,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as StateIdentifier);
+            return this.Equals(input as CommittedStateIdentifier);
         }
 
         /// <summary>
-        /// Returns true if StateIdentifier instances are equal
+        /// Returns true if CommittedStateIdentifier instances are equal
         /// </summary>
-        /// <param name="input">Instance of StateIdentifier to be compared</param>
+        /// <param name="input">Instance of CommittedStateIdentifier to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(StateIdentifier input)
+        public bool Equals(CommittedStateIdentifier input)
         {
             if (input == null)
             {
@@ -162,8 +162,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
                 );
         }
 
@@ -176,7 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 return hashCode;
             }
         }
@@ -188,10 +188,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (long) minimum
-            if (this._Version < (long)0)
+            // StateVersion (long) maximum
+            if (this.StateVersion > (long)100000000000000)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to 100000000000000.", new [] { "StateVersion" });
+            }
+
+            // StateVersion (long) minimum
+            if (this.StateVersion < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
             }
 
             yield break;

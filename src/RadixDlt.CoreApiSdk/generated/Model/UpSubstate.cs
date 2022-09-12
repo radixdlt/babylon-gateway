@@ -105,11 +105,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="UpSubstate" /> class.
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
-        /// <param name="version">A decimal 32-bit unsigned integer, counting the number of times the substate was updated (required).</param>
+        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
         /// <param name="substateBytes">The hex-encoded, SBOR-encoded substate data bytes (required).</param>
         /// <param name="substateDataHash">The hex-encoded double-SHA256 hash of the substate data bytes (required).</param>
         /// <param name="substateData">substateData (required).</param>
-        public UpSubstate(SubstateId substateId = default(SubstateId), int version = default(int), string substateBytes = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
+        public UpSubstate(SubstateId substateId = default(SubstateId), long version = default(long), string substateBytes = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -145,11 +145,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateId SubstateId { get; set; }
 
         /// <summary>
-        /// A decimal 32-bit unsigned integer, counting the number of times the substate was updated
+        /// An integer between 0 and 10^13, counting the number of times the substate was updated
         /// </summary>
-        /// <value>A decimal 32-bit unsigned integer, counting the number of times the substate was updated</value>
+        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
         [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public int _Version { get; set; }
+        public long _Version { get; set; }
 
         /// <summary>
         /// The hex-encoded, SBOR-encoded substate data bytes
@@ -282,8 +282,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (int) minimum
-            if (this._Version < (int)0)
+            // _Version (long) maximum
+            if (this._Version > (long)100000000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 100000000000000.", new [] { "_Version" });
+            }
+
+            // _Version (long) minimum
+            if (this._Version < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
             }

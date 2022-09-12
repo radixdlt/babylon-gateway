@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
         /// </summary>
-        /// <param name="stateVersion">The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer. (required).</param>
+        /// <param name="stateVersion">An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed (required).</param>
         /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
         /// <param name="receipt">receipt (required).</param>
         public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
@@ -125,9 +125,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.
+        /// An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed
         /// </summary>
-        /// <value>The resultant state version after the txn has been committed. A decimal 64-bit unsigned integer.</value>
+        /// <value>An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed</value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
 
@@ -234,10 +234,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StateVersion (long) minimum
-            if (this.StateVersion < (long)0)
+            // StateVersion (long) maximum
+            if (this.StateVersion > (long)100000000000000)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value less than or equal to 100000000000000.", new [] { "StateVersion" });
+            }
+
+            // StateVersion (long) minimum
+            if (this.StateVersion < (long)1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 1.", new [] { "StateVersion" });
             }
 
             yield break;

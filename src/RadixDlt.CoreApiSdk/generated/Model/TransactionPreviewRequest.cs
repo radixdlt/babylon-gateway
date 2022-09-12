@@ -106,12 +106,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="manifest">A hex-encoded, SBOR-encoded transaction manifest (required).</param>
-        /// <param name="costUnitLimit">The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer. (required).</param>
-        /// <param name="tipPercentage">The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%). (required).</param>
-        /// <param name="nonce">The nonce value to use for execution. A decimal 64-bit unsigned integer. (required).</param>
+        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution (required).</param>
+        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
+        /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), int costUnitLimit = default(int), int tipPercentage = default(int), long nonce = default(long), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -127,6 +127,11 @@ namespace RadixDlt.CoreApiSdk.Model
             this.Manifest = manifest;
             this.CostUnitLimit = costUnitLimit;
             this.TipPercentage = tipPercentage;
+            // to ensure "nonce" is required (not null)
+            if (nonce == null)
+            {
+                throw new ArgumentNullException("nonce is a required property for TransactionPreviewRequest and cannot be null");
+            }
             this.Nonce = nonce;
             // to ensure "signerPublicKeys" is required (not null)
             if (signerPublicKeys == null)
@@ -157,25 +162,25 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Manifest { get; set; }
 
         /// <summary>
-        /// The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.
+        /// An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution
         /// </summary>
-        /// <value>The maximum number of cost units available for transaction execution. A decimal 32-bit unsigned integer.</value>
+        /// <value>An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public int CostUnitLimit { get; set; }
+        public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).
+        /// An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>The validator tip. A decimal 32-bit unsigned integer, representing the percentage amount (a value of \&quot;1\&quot; corresponds to 1%).</value>
+        /// <value>An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public int TipPercentage { get; set; }
+        public long TipPercentage { get; set; }
 
         /// <summary>
-        /// The nonce value to use for execution. A decimal 64-bit unsigned integer.
+        /// A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.
         /// </summary>
-        /// <value>The nonce value to use for execution. A decimal 64-bit unsigned integer.</value>
+        /// <value>A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public long Nonce { get; set; }
+        public string Nonce { get; set; }
 
         /// <summary>
         /// A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
@@ -260,7 +265,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    this.Nonce.Equals(input.Nonce)
+                    (this.Nonce != null &&
+                    this.Nonce.Equals(input.Nonce))
                 ) && 
                 (
                     this.SignerPublicKeys == input.SignerPublicKeys ||
@@ -294,7 +300,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 }
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                if (this.Nonce != null)
+                {
+                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
+                }
                 if (this.SignerPublicKeys != null)
                 {
                     hashCode = (hashCode * 59) + this.SignerPublicKeys.GetHashCode();
@@ -314,28 +323,28 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // CostUnitLimit (int) minimum
-            if (this.CostUnitLimit < (int)0)
+            // CostUnitLimit (long) maximum
+            if (this.CostUnitLimit > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitLimit (long) minimum
+            if (this.CostUnitLimit < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
             }
 
-            // TipPercentage (int) maximum
-            if (this.TipPercentage > (int)100)
+            // TipPercentage (long) maximum
+            if (this.TipPercentage > (long)4294967295)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 100.", new [] { "TipPercentage" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
             }
 
-            // TipPercentage (int) minimum
-            if (this.TipPercentage < (int)0)
+            // TipPercentage (long) minimum
+            if (this.TipPercentage < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
-            }
-
-            // Nonce (long) minimum
-            if (this.Nonce < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Nonce, must be a value greater than or equal to 0.", new [] { "Nonce" });
             }
 
             yield break;

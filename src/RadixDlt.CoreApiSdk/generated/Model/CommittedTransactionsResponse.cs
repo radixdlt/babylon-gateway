@@ -104,12 +104,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
         /// </summary>
-        /// <param name="startStateVersion">The first state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="maxStateVersion">The maximum state version returned. A decimal 64-bit unsigned integer. (required).</param>
-        /// <param name="transactions">A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;. (required).</param>
-        public CommittedTransactionsResponse(long startStateVersion = default(long), long maxStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        /// <param name="fromStateVersion">An integer between 1 and 10^13, giving the first (resultant) state version in the returned response (required).</param>
+        /// <param name="toStateVersion">An integer between 1 and 10^13, giving the final (resultant) state version in the returned response (required).</param>
+        /// <param name="maxStateVersion">An integer between 1 and 10^13, giving the maximum state version currently committed (required).</param>
+        /// <param name="transactions">A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive). (required).</param>
+        public CommittedTransactionsResponse(long fromStateVersion = default(long), long toStateVersion = default(long), long maxStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
         {
-            this.StartStateVersion = startStateVersion;
+            this.FromStateVersion = fromStateVersion;
+            this.ToStateVersion = toStateVersion;
             this.MaxStateVersion = maxStateVersion;
             // to ensure "transactions" is required (not null)
             if (transactions == null)
@@ -120,23 +122,30 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The first state version returned. A decimal 64-bit unsigned integer.
+        /// An integer between 1 and 10^13, giving the first (resultant) state version in the returned response
         /// </summary>
-        /// <value>The first state version returned. A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StartStateVersion { get; set; }
+        /// <value>An integer between 1 and 10^13, giving the first (resultant) state version in the returned response</value>
+        [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FromStateVersion { get; set; }
 
         /// <summary>
-        /// The maximum state version returned. A decimal 64-bit unsigned integer.
+        /// An integer between 1 and 10^13, giving the final (resultant) state version in the returned response
         /// </summary>
-        /// <value>The maximum state version returned. A decimal 64-bit unsigned integer.</value>
+        /// <value>An integer between 1 and 10^13, giving the final (resultant) state version in the returned response</value>
+        [DataMember(Name = "to_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long ToStateVersion { get; set; }
+
+        /// <summary>
+        /// An integer between 1 and 10^13, giving the maximum state version currently committed
+        /// </summary>
+        /// <value>An integer between 1 and 10^13, giving the maximum state version currently committed</value>
         [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long MaxStateVersion { get; set; }
 
         /// <summary>
-        /// A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.
+        /// A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive).
         /// </summary>
-        /// <value>A committed transactions list starting from the &#x60;start_state_version_inclusive&#x60;.</value>
+        /// <value>A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive).</value>
         [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
         public List<CommittedTransaction> Transactions { get; set; }
 
@@ -148,7 +157,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransactionsResponse {\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
+            sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
+            sb.Append("  ToStateVersion: ").Append(ToStateVersion).Append("\n");
             sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
             sb.Append("  Transactions: ").Append(Transactions).Append("\n");
             sb.Append("}\n");
@@ -187,8 +197,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    this.StartStateVersion.Equals(input.StartStateVersion)
+                    this.FromStateVersion == input.FromStateVersion ||
+                    this.FromStateVersion.Equals(input.FromStateVersion)
+                ) && 
+                (
+                    this.ToStateVersion == input.ToStateVersion ||
+                    this.ToStateVersion.Equals(input.ToStateVersion)
                 ) && 
                 (
                     this.MaxStateVersion == input.MaxStateVersion ||
@@ -211,7 +225,8 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.ToStateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
                 if (this.Transactions != null)
                 {
@@ -228,16 +243,40 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StartStateVersion (long) minimum
-            if (this.StartStateVersion < (long)0)
+            // FromStateVersion (long) maximum
+            if (this.FromStateVersion > (long)100000000000000)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartStateVersion, must be a value greater than or equal to 0.", new [] { "StartStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
+            }
+
+            // FromStateVersion (long) minimum
+            if (this.FromStateVersion < (long)1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
+            }
+
+            // ToStateVersion (long) maximum
+            if (this.ToStateVersion > (long)100000000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for ToStateVersion, must be a value less than or equal to 100000000000000.", new [] { "ToStateVersion" });
+            }
+
+            // ToStateVersion (long) minimum
+            if (this.ToStateVersion < (long)1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for ToStateVersion, must be a value greater than or equal to 1.", new [] { "ToStateVersion" });
+            }
+
+            // MaxStateVersion (long) maximum
+            if (this.MaxStateVersion > (long)100000000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxStateVersion, must be a value less than or equal to 100000000000000.", new [] { "MaxStateVersion" });
             }
 
             // MaxStateVersion (long) minimum
-            if (this.MaxStateVersion < (long)0)
+            if (this.MaxStateVersion < (long)1)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxStateVersion, must be a value greater than or equal to 0.", new [] { "MaxStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxStateVersion, must be a value greater than or equal to 1.", new [] { "MaxStateVersion" });
             }
 
             yield break;

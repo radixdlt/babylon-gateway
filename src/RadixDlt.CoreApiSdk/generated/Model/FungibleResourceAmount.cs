@@ -112,8 +112,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="amountSubunits">The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
-        public FungibleResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), string amountSubunits = default(string))
+        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
+        public FungibleResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), string amountAttos = default(string))
         {
             this.ResourceType = resourceType;
             // to ensure "resourceAddress" is required (not null)
@@ -122,12 +122,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for FungibleResourceAmount and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            // to ensure "amountSubunits" is required (not null)
-            if (amountSubunits == null)
+            // to ensure "amountAttos" is required (not null)
+            if (amountAttos == null)
             {
-                throw new ArgumentNullException("amountSubunits is a required property for FungibleResourceAmount and cannot be null");
+                throw new ArgumentNullException("amountAttos is a required property for FungibleResourceAmount and cannot be null");
             }
-            this.AmountSubunits = amountSubunits;
+            this.AmountAttos = amountAttos;
         }
 
         /// <summary>
@@ -141,8 +141,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
         /// </summary>
         /// <value>The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
-        [DataMember(Name = "amount_subunits", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountSubunits { get; set; }
+        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string AmountAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,7 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class FungibleResourceAmount {\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  AmountSubunits: ").Append(AmountSubunits).Append("\n");
+            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,9 +200,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.AmountSubunits == input.AmountSubunits ||
-                    (this.AmountSubunits != null &&
-                    this.AmountSubunits.Equals(input.AmountSubunits))
+                    this.AmountAttos == input.AmountAttos ||
+                    (this.AmountAttos != null &&
+                    this.AmountAttos.Equals(input.AmountAttos))
                 );
         }
 
@@ -220,9 +220,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.AmountSubunits != null)
+                if (this.AmountAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.AmountSubunits.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
                 }
                 return hashCode;
             }

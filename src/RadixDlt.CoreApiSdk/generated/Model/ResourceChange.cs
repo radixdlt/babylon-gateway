@@ -107,8 +107,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="componentAddress">The Bech32m-encoded human readable version of the component address (required).</param>
         /// <param name="vaultEntityId">vaultEntityId (required).</param>
-        /// <param name="amount">The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number. (required).</param>
-        public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), EntityId vaultEntityId = default(EntityId), string amount = default(string))
+        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault  (required).</param>
+        public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), EntityId vaultEntityId = default(EntityId), string amountAttos = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
@@ -128,12 +128,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("vaultEntityId is a required property for ResourceChange and cannot be null");
             }
             this.VaultEntityId = vaultEntityId;
-            // to ensure "amount" is required (not null)
-            if (amount == null)
+            // to ensure "amountAttos" is required (not null)
+            if (amountAttos == null)
             {
-                throw new ArgumentNullException("amount is a required property for ResourceChange and cannot be null");
+                throw new ArgumentNullException("amountAttos is a required property for ResourceChange and cannot be null");
             }
-            this.Amount = amount;
+            this.AmountAttos = amountAttos;
         }
 
         /// <summary>
@@ -157,11 +157,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public EntityId VaultEntityId { get; set; }
 
         /// <summary>
-        /// The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number.
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault 
         /// </summary>
-        /// <value>The XRD amount put or taken from the vault. A fixed-scale 256-bit signed decimal number.</value>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public string Amount { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault </value>
+        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string AmountAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -174,7 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
             sb.Append("  ComponentAddress: ").Append(ComponentAddress).Append("\n");
             sb.Append("  VaultEntityId: ").Append(VaultEntityId).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -226,9 +226,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.VaultEntityId.Equals(input.VaultEntityId))
                 ) && 
                 (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
+                    this.AmountAttos == input.AmountAttos ||
+                    (this.AmountAttos != null &&
+                    this.AmountAttos.Equals(input.AmountAttos))
                 );
         }
 
@@ -253,9 +253,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.VaultEntityId.GetHashCode();
                 }
-                if (this.Amount != null)
+                if (this.AmountAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
                 }
                 return hashCode;
             }

@@ -105,9 +105,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="startStateVersion">A decimal 64-bit unsigned integer. (required).</param>
+        /// <param name="fromStateVersion">An integer between 1 and 10^13, giving the first (resultant) state version to be returned (required).</param>
         /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
-        public CommittedTransactionsRequest(string network = default(string), long startStateVersion = default(long), int limit = default(int))
+        public CommittedTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -115,7 +115,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("network is a required property for CommittedTransactionsRequest and cannot be null");
             }
             this.Network = network;
-            this.StartStateVersion = startStateVersion;
+            this.FromStateVersion = fromStateVersion;
             this.Limit = limit;
         }
 
@@ -127,11 +127,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Network { get; set; }
 
         /// <summary>
-        /// A decimal 64-bit unsigned integer.
+        /// An integer between 1 and 10^13, giving the first (resultant) state version to be returned
         /// </summary>
-        /// <value>A decimal 64-bit unsigned integer.</value>
-        [DataMember(Name = "start_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long StartStateVersion { get; set; }
+        /// <value>An integer between 1 and 10^13, giving the first (resultant) state version to be returned</value>
+        [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long FromStateVersion { get; set; }
 
         /// <summary>
         /// The maximum number of transactions that will be returned.
@@ -149,7 +149,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransactionsRequest {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  StartStateVersion: ").Append(StartStateVersion).Append("\n");
+            sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -192,8 +192,8 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Network.Equals(input.Network))
                 ) && 
                 (
-                    this.StartStateVersion == input.StartStateVersion ||
-                    this.StartStateVersion.Equals(input.StartStateVersion)
+                    this.FromStateVersion == input.FromStateVersion ||
+                    this.FromStateVersion.Equals(input.FromStateVersion)
                 ) && 
                 (
                     this.Limit == input.Limit ||
@@ -214,7 +214,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.StartStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 return hashCode;
             }
@@ -227,10 +227,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StartStateVersion (long) minimum
-            if (this.StartStateVersion < (long)0)
+            // FromStateVersion (long) maximum
+            if (this.FromStateVersion > (long)100000000000000)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartStateVersion, must be a value greater than or equal to 0.", new [] { "StartStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
+            }
+
+            // FromStateVersion (long) minimum
+            if (this.FromStateVersion < (long)1)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
             }
 
             yield break;
