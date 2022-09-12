@@ -108,7 +108,7 @@ internal class TransactionLogReader : ITransactionLogReader
                     .TransactionStreamPostAsync(
                         new CommittedTransactionsRequest(
                             network: _networkConfigurationProvider.GetNetworkName(),
-                            startStateVersion: stateVersion,
+                            fromStateVersion: stateVersion,
                             limit: count
                         ),
                         token

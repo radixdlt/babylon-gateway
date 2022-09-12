@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -147,12 +148,12 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
         var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(cancellationToken);
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
-        var nodeLedgerTarget = networkStatus.SyncStatus.TargetStateVersion;
+        var nodeLedgerTarget = nodeLedgerTip + 1; // TODO waiting for CoreApi: networkStatus.SyncStatus.TargetStateVersion;
 
         _ledgerConfirmationService.SubmitNodeNetworkStatus(
             NodeName,
             nodeLedgerTip,
-            networkStatus.CurrentStateIdentifier.TransactionAccumulator.ConvertFromHex(),
+            SHA256.HashData(BitConverter.GetBytes(nodeLedgerTip)), // TODO waiting for CoreApi: networkStatus.CurrentStateIdentifier.TransactionAccumulator.ConvertFromHex(),
             nodeLedgerTarget
         );
 
