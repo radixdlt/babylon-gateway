@@ -343,13 +343,13 @@ components:
           description: A transaction manifest. sbor encoded, and then hex encoded.
           type: string
         cost_unit_limit:
-          type: string
+          type: integer
           description: Maximum number of cost units available for transaction execution.
         tip_percentage:
-          type: string
+          type: integer
           description: The validator tip.
         nonce:
-          type: string
+          type: integer
           description: The nonce value to use for execution.
         signer_public_keys:
           type: array

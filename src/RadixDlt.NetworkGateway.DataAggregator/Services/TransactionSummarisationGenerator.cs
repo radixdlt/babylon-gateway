@@ -64,7 +64,6 @@
 
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using System;
 
@@ -118,7 +117,7 @@ public static class TransactionSummarisationGenerator
 
         // TODO those hashes are almost certainly mismatched/invalid
         return new TransactionSummary(
-            StateVersion: long.Parse(transaction.StateVersion), // TODO long.Parse is just temporary as we need something more robust; what's more StateVersion is string-encoded UNSIGNED long
+            StateVersion: transaction.StateVersion,
             Epoch: newEpoch ?? lastTransaction.Epoch,
             IndexInEpoch: isStartOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
             RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,

@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="nonce">The nonce value to use for execution. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string manifest = default(string), string costUnitLimit = default(string), string tipPercentage = default(string), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string manifest = default(string), int costUnitLimit = default(int), int tipPercentage = default(int), int nonce = default(int), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -118,23 +118,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("manifest is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Manifest = manifest;
-            // to ensure "costUnitLimit" is required (not null)
-            if (costUnitLimit == null)
-            {
-                throw new ArgumentNullException("costUnitLimit is a required property for TransactionPreviewRequest and cannot be null");
-            }
             this.CostUnitLimit = costUnitLimit;
-            // to ensure "tipPercentage" is required (not null)
-            if (tipPercentage == null)
-            {
-                throw new ArgumentNullException("tipPercentage is a required property for TransactionPreviewRequest and cannot be null");
-            }
             this.TipPercentage = tipPercentage;
-            // to ensure "nonce" is required (not null)
-            if (nonce == null)
-            {
-                throw new ArgumentNullException("nonce is a required property for TransactionPreviewRequest and cannot be null");
-            }
             this.Nonce = nonce;
             // to ensure "signerPublicKeys" is required (not null)
             if (signerPublicKeys == null)
@@ -162,21 +147,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>Maximum number of cost units available for transaction execution.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public string CostUnitLimit { get; set; }
+        public int CostUnitLimit { get; set; }
 
         /// <summary>
         /// The validator tip.
         /// </summary>
         /// <value>The validator tip.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public string TipPercentage { get; set; }
+        public int TipPercentage { get; set; }
 
         /// <summary>
         /// The nonce value to use for execution.
         /// </summary>
         /// <value>The nonce value to use for execution.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
-        public string Nonce { get; set; }
+        public int Nonce { get; set; }
 
         /// <summary>
         /// A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
@@ -247,18 +232,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.CostUnitLimit == input.CostUnitLimit ||
-                    (this.CostUnitLimit != null &&
-                    this.CostUnitLimit.Equals(input.CostUnitLimit))
+                    this.CostUnitLimit.Equals(input.CostUnitLimit)
                 ) && 
                 (
                     this.TipPercentage == input.TipPercentage ||
-                    (this.TipPercentage != null &&
-                    this.TipPercentage.Equals(input.TipPercentage))
+                    this.TipPercentage.Equals(input.TipPercentage)
                 ) && 
                 (
                     this.Nonce == input.Nonce ||
-                    (this.Nonce != null &&
-                    this.Nonce.Equals(input.Nonce))
+                    this.Nonce.Equals(input.Nonce)
                 ) && 
                 (
                     this.SignerPublicKeys == input.SignerPublicKeys ||
@@ -286,18 +268,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
                 }
-                if (this.CostUnitLimit != null)
-                {
-                    hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
-                }
-                if (this.TipPercentage != null)
-                {
-                    hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
-                }
-                if (this.Nonce != null)
-                {
-                    hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
+                hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
+                hashCode = (hashCode * 59) + this.Nonce.GetHashCode();
                 if (this.SignerPublicKeys != null)
                 {
                     hashCode = (hashCode * 59) + this.SignerPublicKeys.GetHashCode();

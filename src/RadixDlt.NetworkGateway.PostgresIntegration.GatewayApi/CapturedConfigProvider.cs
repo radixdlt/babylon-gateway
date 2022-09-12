@@ -93,7 +93,6 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
             networkConfiguration.NetworkDefinition.NetworkName,
             networkConfiguration.WellKnownAddresses.XrdAddress,
             networkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-            new CoreModel.NetworkIdentifier(networkConfiguration.NetworkDefinition.NetworkName),
             new TokenIdentifier(networkConfiguration.WellKnownAddresses.XrdAddress)
         );
     }
