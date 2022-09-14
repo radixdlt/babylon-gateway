@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="hash">The hex-encoded double-SHA256 hash of the signed transaction intent. (required).</param>
         /// <param name="intent">intent (required).</param>
         /// <param name="intentSignatures">intentSignatures (required).</param>
-        public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<IntentSignature> intentSignatures = default(List<IntentSignature>))
+        public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<SignatureWithPublicKey> intentSignatures = default(List<SignatureWithPublicKey>))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -146,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets IntentSignatures
         /// </summary>
         [DataMember(Name = "intent_signatures", IsRequired = true, EmitDefaultValue = true)]
-        public List<IntentSignature> IntentSignatures { get; set; }
+        public List<SignatureWithPublicKey> IntentSignatures { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

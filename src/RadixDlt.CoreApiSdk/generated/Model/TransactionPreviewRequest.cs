@@ -109,9 +109,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution (required).</param>
         /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique. (required).</param>
-        /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
+        /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -183,11 +183,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Nonce { get; set; }
 
         /// <summary>
-        /// A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
+        /// A list of public keys to be used as transaction signers
         /// </summary>
-        /// <value>A list of public keys to be used as transaction signers, in a compressed format, hex encoded.</value>
+        /// <value>A list of public keys to be used as transaction signers</value>
         [DataMember(Name = "signer_public_keys", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> SignerPublicKeys { get; set; }
+        public List<PublicKey> SignerPublicKeys { get; set; }
 
         /// <summary>
         /// Gets or Sets Flags

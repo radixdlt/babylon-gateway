@@ -91,76 +91,43 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NotarizedTransaction
+    /// Because ECDSA has recoverable signatures, this only includes a signature
     /// </summary>
-    [DataContract(Name = "NotarizedTransaction")]
-    public partial class NotarizedTransaction : IEquatable<NotarizedTransaction>, IValidatableObject
+    [DataContract(Name = "EcdsaSecp256k1SignatureWithPublicKey")]
+    public partial class EcdsaSecp256k1SignatureWithPublicKey : IEquatable<EcdsaSecp256k1SignatureWithPublicKey>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public PublicKeyType KeyType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1SignatureWithPublicKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NotarizedTransaction() { }
+        protected EcdsaSecp256k1SignatureWithPublicKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1SignatureWithPublicKey" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload (required).</param>
-        /// <param name="payload">The hex-encoded full notarized transaction payload (required).</param>
-        /// <param name="signedIntent">signedIntent (required).</param>
-        /// <param name="notarySignature">notarySignature (required).</param>
-        public NotarizedTransaction(string hash = default(string), string payload = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
+        /// <param name="keyType">keyType (required).</param>
+        /// <param name="recoverableSignature">recoverableSignature (required).</param>
+        public EcdsaSecp256k1SignatureWithPublicKey(PublicKeyType keyType = default(PublicKeyType), EcdsaSecp256k1Signature recoverableSignature = default(EcdsaSecp256k1Signature))
         {
-            // to ensure "hash" is required (not null)
-            if (hash == null)
+            this.KeyType = keyType;
+            // to ensure "recoverableSignature" is required (not null)
+            if (recoverableSignature == null)
             {
-                throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
+                throw new ArgumentNullException("recoverableSignature is a required property for EcdsaSecp256k1SignatureWithPublicKey and cannot be null");
             }
-            this.Hash = hash;
-            // to ensure "payload" is required (not null)
-            if (payload == null)
-            {
-                throw new ArgumentNullException("payload is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.Payload = payload;
-            // to ensure "signedIntent" is required (not null)
-            if (signedIntent == null)
-            {
-                throw new ArgumentNullException("signedIntent is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.SignedIntent = signedIntent;
-            // to ensure "notarySignature" is required (not null)
-            if (notarySignature == null)
-            {
-                throw new ArgumentNullException("notarySignature is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.NotarySignature = notarySignature;
+            this.RecoverableSignature = recoverableSignature;
         }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the notarized transaction payload
+        /// Gets or Sets RecoverableSignature
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the notarized transaction payload</value>
-        [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
-        public string Hash { get; set; }
-
-        /// <summary>
-        /// The hex-encoded full notarized transaction payload
-        /// </summary>
-        /// <value>The hex-encoded full notarized transaction payload</value>
-        [DataMember(Name = "payload", IsRequired = true, EmitDefaultValue = true)]
-        public string Payload { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SignedIntent
-        /// </summary>
-        [DataMember(Name = "signed_intent", IsRequired = true, EmitDefaultValue = true)]
-        public SignedTransactionIntent SignedIntent { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NotarySignature
-        /// </summary>
-        [DataMember(Name = "notary_signature", IsRequired = true, EmitDefaultValue = true)]
-        public Signature NotarySignature { get; set; }
+        [DataMember(Name = "recoverable_signature", IsRequired = true, EmitDefaultValue = true)]
+        public EcdsaSecp256k1Signature RecoverableSignature { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -169,11 +136,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NotarizedTransaction {\n");
-            sb.Append("  Hash: ").Append(Hash).Append("\n");
-            sb.Append("  Payload: ").Append(Payload).Append("\n");
-            sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
-            sb.Append("  NotarySignature: ").Append(NotarySignature).Append("\n");
+            sb.Append("class EcdsaSecp256k1SignatureWithPublicKey {\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  RecoverableSignature: ").Append(RecoverableSignature).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,15 +159,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NotarizedTransaction);
+            return this.Equals(input as EcdsaSecp256k1SignatureWithPublicKey);
         }
 
         /// <summary>
-        /// Returns true if NotarizedTransaction instances are equal
+        /// Returns true if EcdsaSecp256k1SignatureWithPublicKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of NotarizedTransaction to be compared</param>
+        /// <param name="input">Instance of EcdsaSecp256k1SignatureWithPublicKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NotarizedTransaction input)
+        public bool Equals(EcdsaSecp256k1SignatureWithPublicKey input)
         {
             if (input == null)
             {
@@ -210,24 +175,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Hash == input.Hash ||
-                    (this.Hash != null &&
-                    this.Hash.Equals(input.Hash))
+                    this.KeyType == input.KeyType ||
+                    this.KeyType.Equals(input.KeyType)
                 ) && 
                 (
-                    this.Payload == input.Payload ||
-                    (this.Payload != null &&
-                    this.Payload.Equals(input.Payload))
-                ) && 
-                (
-                    this.SignedIntent == input.SignedIntent ||
-                    (this.SignedIntent != null &&
-                    this.SignedIntent.Equals(input.SignedIntent))
-                ) && 
-                (
-                    this.NotarySignature == input.NotarySignature ||
-                    (this.NotarySignature != null &&
-                    this.NotarySignature.Equals(input.NotarySignature))
+                    this.RecoverableSignature == input.RecoverableSignature ||
+                    (this.RecoverableSignature != null &&
+                    this.RecoverableSignature.Equals(input.RecoverableSignature))
                 );
         }
 
@@ -240,21 +194,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Hash != null)
+                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                if (this.RecoverableSignature != null)
                 {
-                    hashCode = (hashCode * 59) + this.Hash.GetHashCode();
-                }
-                if (this.Payload != null)
-                {
-                    hashCode = (hashCode * 59) + this.Payload.GetHashCode();
-                }
-                if (this.SignedIntent != null)
-                {
-                    hashCode = (hashCode * 59) + this.SignedIntent.GetHashCode();
-                }
-                if (this.NotarySignature != null)
-                {
-                    hashCode = (hashCode * 59) + this.NotarySignature.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RecoverableSignature.GetHashCode();
                 }
                 return hashCode;
             }

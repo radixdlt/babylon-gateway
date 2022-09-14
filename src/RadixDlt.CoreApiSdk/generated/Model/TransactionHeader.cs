@@ -109,11 +109,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="startEpochInclusive">An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted (required).</param>
         /// <param name="endEpochExclusive">An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents (required).</param>
-        /// <param name="notaryPublicKey">A hex-encoded public key of a notary (required).</param>
+        /// <param name="notaryPublicKey">notaryPublicKey (required).</param>
         /// <param name="notaryAsSignatory">Specifies whether the notary&#39;s signature should be included in transaction signers list (required).</param>
         /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution. (required).</param>
         /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
-        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), string notaryPublicKey = default(string), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long))
+        public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long))
         {
             this._Version = version;
             this.NetworkId = networkId;
@@ -170,11 +170,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string Nonce { get; set; }
 
         /// <summary>
-        /// A hex-encoded public key of a notary
+        /// Gets or Sets NotaryPublicKey
         /// </summary>
-        /// <value>A hex-encoded public key of a notary</value>
         [DataMember(Name = "notary_public_key", IsRequired = true, EmitDefaultValue = true)]
-        public string NotaryPublicKey { get; set; }
+        public PublicKey NotaryPublicKey { get; set; }
 
         /// <summary>
         /// Specifies whether the notary&#39;s signature should be included in transaction signers list
