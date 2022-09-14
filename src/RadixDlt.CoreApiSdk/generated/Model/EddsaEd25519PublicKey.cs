@@ -91,50 +91,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// IntentSignature
+    /// EddsaEd25519PublicKey
     /// </summary>
-    [DataContract(Name = "IntentSignature")]
-    public partial class IntentSignature : IEquatable<IntentSignature>, IValidatableObject
+    [DataContract(Name = "EddsaEd25519PublicKey")]
+    public partial class EddsaEd25519PublicKey : IEquatable<EddsaEd25519PublicKey>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="IntentSignature" /> class.
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public PublicKeyType KeyType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EddsaEd25519PublicKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected IntentSignature() { }
+        protected EddsaEd25519PublicKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="IntentSignature" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519PublicKey" /> class.
         /// </summary>
-        /// <param name="publicKey">The hex-encoded signer public key. (required).</param>
-        /// <param name="signature">The hex-encoded signature. (required).</param>
-        public IntentSignature(string publicKey = default(string), string signature = default(string))
+        /// <param name="keyType">keyType (required).</param>
+        /// <param name="keyBytes">The hex-encoded compressed EdDSA Ed25519 public key (32 bytes) (required).</param>
+        public EddsaEd25519PublicKey(PublicKeyType keyType = default(PublicKeyType), string keyBytes = default(string))
         {
-            // to ensure "publicKey" is required (not null)
-            if (publicKey == null)
+            this.KeyType = keyType;
+            // to ensure "keyBytes" is required (not null)
+            if (keyBytes == null)
             {
-                throw new ArgumentNullException("publicKey is a required property for IntentSignature and cannot be null");
+                throw new ArgumentNullException("keyBytes is a required property for EddsaEd25519PublicKey and cannot be null");
             }
-            this.PublicKey = publicKey;
-            // to ensure "signature" is required (not null)
-            if (signature == null)
-            {
-                throw new ArgumentNullException("signature is a required property for IntentSignature and cannot be null");
-            }
-            this.Signature = signature;
+            this.KeyBytes = keyBytes;
         }
 
         /// <summary>
-        /// The hex-encoded signer public key.
+        /// The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
         /// </summary>
-        /// <value>The hex-encoded signer public key.</value>
-        [DataMember(Name = "public_key", IsRequired = true, EmitDefaultValue = true)]
-        public string PublicKey { get; set; }
-
-        /// <summary>
-        /// The hex-encoded signature.
-        /// </summary>
-        /// <value>The hex-encoded signature.</value>
-        [DataMember(Name = "signature", IsRequired = true, EmitDefaultValue = true)]
-        public string Signature { get; set; }
+        /// <value>The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)</value>
+        [DataMember(Name = "key_bytes", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyBytes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class IntentSignature {\n");
-            sb.Append("  PublicKey: ").Append(PublicKey).Append("\n");
-            sb.Append("  Signature: ").Append(Signature).Append("\n");
+            sb.Append("class EddsaEd25519PublicKey {\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  KeyBytes: ").Append(KeyBytes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +160,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as IntentSignature);
+            return this.Equals(input as EddsaEd25519PublicKey);
         }
 
         /// <summary>
-        /// Returns true if IntentSignature instances are equal
+        /// Returns true if EddsaEd25519PublicKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of IntentSignature to be compared</param>
+        /// <param name="input">Instance of EddsaEd25519PublicKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(IntentSignature input)
+        public bool Equals(EddsaEd25519PublicKey input)
         {
             if (input == null)
             {
@@ -182,14 +176,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PublicKey == input.PublicKey ||
-                    (this.PublicKey != null &&
-                    this.PublicKey.Equals(input.PublicKey))
+                    this.KeyType == input.KeyType ||
+                    this.KeyType.Equals(input.KeyType)
                 ) && 
                 (
-                    this.Signature == input.Signature ||
-                    (this.Signature != null &&
-                    this.Signature.Equals(input.Signature))
+                    this.KeyBytes == input.KeyBytes ||
+                    (this.KeyBytes != null &&
+                    this.KeyBytes.Equals(input.KeyBytes))
                 );
         }
 
@@ -202,13 +195,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PublicKey != null)
+                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                if (this.KeyBytes != null)
                 {
-                    hashCode = (hashCode * 59) + this.PublicKey.GetHashCode();
-                }
-                if (this.Signature != null)
-                {
-                    hashCode = (hashCode * 59) + this.Signature.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyBytes.GetHashCode();
                 }
                 return hashCode;
             }
@@ -221,6 +211,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // KeyBytes (string) maxLength
+            if (this.KeyBytes != null && this.KeyBytes.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyBytes, length must be less than 64.", new [] { "KeyBytes" });
+            }
+
+            // KeyBytes (string) minLength
+            if (this.KeyBytes != null && this.KeyBytes.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyBytes, length must be greater than 64.", new [] { "KeyBytes" });
+            }
+
             yield break;
         }
     }

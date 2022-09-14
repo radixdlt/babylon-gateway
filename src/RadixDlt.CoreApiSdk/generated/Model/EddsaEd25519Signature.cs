@@ -91,76 +91,44 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NotarizedTransaction
+    /// EddsaEd25519Signature
     /// </summary>
-    [DataContract(Name = "NotarizedTransaction")]
-    public partial class NotarizedTransaction : IEquatable<NotarizedTransaction>, IValidatableObject
+    [DataContract(Name = "EddsaEd25519Signature")]
+    public partial class EddsaEd25519Signature : IEquatable<EddsaEd25519Signature>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public PublicKeyType KeyType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EddsaEd25519Signature" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NotarizedTransaction() { }
+        protected EddsaEd25519Signature() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519Signature" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload (required).</param>
-        /// <param name="payload">The hex-encoded full notarized transaction payload (required).</param>
-        /// <param name="signedIntent">signedIntent (required).</param>
-        /// <param name="notarySignature">notarySignature (required).</param>
-        public NotarizedTransaction(string hash = default(string), string payload = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
+        /// <param name="keyType">keyType (required).</param>
+        /// <param name="signatureBytes">A hex-encoded EdDSA Ed25519 signature (64 bytes). This is CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format. (required).</param>
+        public EddsaEd25519Signature(PublicKeyType keyType = default(PublicKeyType), string signatureBytes = default(string))
         {
-            // to ensure "hash" is required (not null)
-            if (hash == null)
+            this.KeyType = keyType;
+            // to ensure "signatureBytes" is required (not null)
+            if (signatureBytes == null)
             {
-                throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
+                throw new ArgumentNullException("signatureBytes is a required property for EddsaEd25519Signature and cannot be null");
             }
-            this.Hash = hash;
-            // to ensure "payload" is required (not null)
-            if (payload == null)
-            {
-                throw new ArgumentNullException("payload is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.Payload = payload;
-            // to ensure "signedIntent" is required (not null)
-            if (signedIntent == null)
-            {
-                throw new ArgumentNullException("signedIntent is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.SignedIntent = signedIntent;
-            // to ensure "notarySignature" is required (not null)
-            if (notarySignature == null)
-            {
-                throw new ArgumentNullException("notarySignature is a required property for NotarizedTransaction and cannot be null");
-            }
-            this.NotarySignature = notarySignature;
+            this.SignatureBytes = signatureBytes;
         }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the notarized transaction payload
+        /// A hex-encoded EdDSA Ed25519 signature (64 bytes). This is CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the notarized transaction payload</value>
-        [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
-        public string Hash { get; set; }
-
-        /// <summary>
-        /// The hex-encoded full notarized transaction payload
-        /// </summary>
-        /// <value>The hex-encoded full notarized transaction payload</value>
-        [DataMember(Name = "payload", IsRequired = true, EmitDefaultValue = true)]
-        public string Payload { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SignedIntent
-        /// </summary>
-        [DataMember(Name = "signed_intent", IsRequired = true, EmitDefaultValue = true)]
-        public SignedTransactionIntent SignedIntent { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NotarySignature
-        /// </summary>
-        [DataMember(Name = "notary_signature", IsRequired = true, EmitDefaultValue = true)]
-        public Signature NotarySignature { get; set; }
+        /// <value>A hex-encoded EdDSA Ed25519 signature (64 bytes). This is CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.</value>
+        [DataMember(Name = "signature_bytes", IsRequired = true, EmitDefaultValue = true)]
+        public string SignatureBytes { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -169,11 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NotarizedTransaction {\n");
-            sb.Append("  Hash: ").Append(Hash).Append("\n");
-            sb.Append("  Payload: ").Append(Payload).Append("\n");
-            sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
-            sb.Append("  NotarySignature: ").Append(NotarySignature).Append("\n");
+            sb.Append("class EddsaEd25519Signature {\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  SignatureBytes: ").Append(SignatureBytes).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,15 +160,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NotarizedTransaction);
+            return this.Equals(input as EddsaEd25519Signature);
         }
 
         /// <summary>
-        /// Returns true if NotarizedTransaction instances are equal
+        /// Returns true if EddsaEd25519Signature instances are equal
         /// </summary>
-        /// <param name="input">Instance of NotarizedTransaction to be compared</param>
+        /// <param name="input">Instance of EddsaEd25519Signature to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NotarizedTransaction input)
+        public bool Equals(EddsaEd25519Signature input)
         {
             if (input == null)
             {
@@ -210,24 +176,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Hash == input.Hash ||
-                    (this.Hash != null &&
-                    this.Hash.Equals(input.Hash))
+                    this.KeyType == input.KeyType ||
+                    this.KeyType.Equals(input.KeyType)
                 ) && 
                 (
-                    this.Payload == input.Payload ||
-                    (this.Payload != null &&
-                    this.Payload.Equals(input.Payload))
-                ) && 
-                (
-                    this.SignedIntent == input.SignedIntent ||
-                    (this.SignedIntent != null &&
-                    this.SignedIntent.Equals(input.SignedIntent))
-                ) && 
-                (
-                    this.NotarySignature == input.NotarySignature ||
-                    (this.NotarySignature != null &&
-                    this.NotarySignature.Equals(input.NotarySignature))
+                    this.SignatureBytes == input.SignatureBytes ||
+                    (this.SignatureBytes != null &&
+                    this.SignatureBytes.Equals(input.SignatureBytes))
                 );
         }
 
@@ -240,21 +195,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Hash != null)
+                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                if (this.SignatureBytes != null)
                 {
-                    hashCode = (hashCode * 59) + this.Hash.GetHashCode();
-                }
-                if (this.Payload != null)
-                {
-                    hashCode = (hashCode * 59) + this.Payload.GetHashCode();
-                }
-                if (this.SignedIntent != null)
-                {
-                    hashCode = (hashCode * 59) + this.SignedIntent.GetHashCode();
-                }
-                if (this.NotarySignature != null)
-                {
-                    hashCode = (hashCode * 59) + this.NotarySignature.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignatureBytes.GetHashCode();
                 }
                 return hashCode;
             }
@@ -267,6 +211,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // SignatureBytes (string) maxLength
+            if (this.SignatureBytes != null && this.SignatureBytes.Length > 128)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureBytes, length must be less than 128.", new [] { "SignatureBytes" });
+            }
+
+            // SignatureBytes (string) minLength
+            if (this.SignatureBytes != null && this.SignatureBytes.Length < 128)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureBytes, length must be greater than 128.", new [] { "SignatureBytes" });
+            }
+
             yield break;
         }
     }
