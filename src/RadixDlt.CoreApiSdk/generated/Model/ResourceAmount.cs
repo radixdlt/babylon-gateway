@@ -207,6 +207,35 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return newResourceAmount;
             }
+
+            try
+            {
+                var discriminatorObj = JObject.Parse(jsonString)["resource_type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "Fungible":
+                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<FungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
+                        return newResourceAmount;
+                    case "FungibleResourceAmount":
+                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<FungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
+                        return newResourceAmount;
+                    case "NonFungible":
+                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<NonFungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
+                        return newResourceAmount;
+                    case "NonFungibleResourceAmount":
+                        newResourceAmount = new ResourceAmount(JsonConvert.DeserializeObject<NonFungibleResourceAmount>(jsonString, ResourceAmount.AdditionalPropertiesSerializerSettings));
+                        return newResourceAmount;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for ResourceAmount. Possible values: Fungible FungibleResourceAmount NonFungible NonFungibleResourceAmount", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
             int match = 0;
             List<string> matchedTypes = new List<string>();
 

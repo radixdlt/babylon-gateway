@@ -207,6 +207,35 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return newSignatureWithPublicKey;
             }
+
+            try
+            {
+                var discriminatorObj = JObject.Parse(jsonString)["key_type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "EcdsaSecp256k1":
+                        newSignatureWithPublicKey = new SignatureWithPublicKey(JsonConvert.DeserializeObject<EcdsaSecp256k1SignatureWithPublicKey>(jsonString, SignatureWithPublicKey.AdditionalPropertiesSerializerSettings));
+                        return newSignatureWithPublicKey;
+                    case "EcdsaSecp256k1SignatureWithPublicKey":
+                        newSignatureWithPublicKey = new SignatureWithPublicKey(JsonConvert.DeserializeObject<EcdsaSecp256k1SignatureWithPublicKey>(jsonString, SignatureWithPublicKey.AdditionalPropertiesSerializerSettings));
+                        return newSignatureWithPublicKey;
+                    case "EddsaEd25519":
+                        newSignatureWithPublicKey = new SignatureWithPublicKey(JsonConvert.DeserializeObject<EddsaEd25519SignatureWithPublicKey>(jsonString, SignatureWithPublicKey.AdditionalPropertiesSerializerSettings));
+                        return newSignatureWithPublicKey;
+                    case "EddsaEd25519SignatureWithPublicKey":
+                        newSignatureWithPublicKey = new SignatureWithPublicKey(JsonConvert.DeserializeObject<EddsaEd25519SignatureWithPublicKey>(jsonString, SignatureWithPublicKey.AdditionalPropertiesSerializerSettings));
+                        return newSignatureWithPublicKey;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for SignatureWithPublicKey. Possible values: EcdsaSecp256k1 EcdsaSecp256k1SignatureWithPublicKey EddsaEd25519 EddsaEd25519SignatureWithPublicKey", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
             int match = 0;
             List<string> matchedTypes = new List<string>();
 

@@ -207,6 +207,35 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return newSignature;
             }
+
+            try
+            {
+                var discriminatorObj = JObject.Parse(jsonString)["key_type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "EcdsaSecp256k1":
+                        newSignature = new Signature(JsonConvert.DeserializeObject<EcdsaSecp256k1Signature>(jsonString, Signature.AdditionalPropertiesSerializerSettings));
+                        return newSignature;
+                    case "EcdsaSecp256k1Signature":
+                        newSignature = new Signature(JsonConvert.DeserializeObject<EcdsaSecp256k1Signature>(jsonString, Signature.AdditionalPropertiesSerializerSettings));
+                        return newSignature;
+                    case "EddsaEd25519":
+                        newSignature = new Signature(JsonConvert.DeserializeObject<EddsaEd25519Signature>(jsonString, Signature.AdditionalPropertiesSerializerSettings));
+                        return newSignature;
+                    case "EddsaEd25519Signature":
+                        newSignature = new Signature(JsonConvert.DeserializeObject<EddsaEd25519Signature>(jsonString, Signature.AdditionalPropertiesSerializerSettings));
+                        return newSignature;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Signature. Possible values: EcdsaSecp256k1 EcdsaSecp256k1Signature EddsaEd25519 EddsaEd25519Signature", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
             int match = 0;
             List<string> matchedTypes = new List<string>();
 

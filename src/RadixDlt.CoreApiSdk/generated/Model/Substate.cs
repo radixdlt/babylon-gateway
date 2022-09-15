@@ -363,6 +363,71 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 return newSubstate;
             }
+
+            try
+            {
+                var discriminatorObj = JObject.Parse(jsonString)["substate_type"];
+                string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
+                switch (discriminatorValue)
+                {
+                    case "ComponentInfo":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentInfoSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentInfoSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentState":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ComponentStateSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "KeyValueStoreEntry":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "KeyValueStoreEntrySubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "NonFungible":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "NonFungibleSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<NonFungibleSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "Package":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "PackageSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<PackageSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ResourceManager":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "ResourceManagerSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "System":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<SystemSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "SystemSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<SystemSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "Vault":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "VaultSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    default:
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: ComponentInfo ComponentInfoSubstate ComponentState ComponentStateSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate NonFungible NonFungibleSubstate Package PackageSubstate ResourceManager ResourceManagerSubstate System SystemSubstate Vault VaultSubstate", discriminatorValue));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to parse the json data : `{0}` {1}", jsonString, ex.ToString()));
+            }
+
             int match = 0;
             List<string> matchedTypes = new List<string>();
 
