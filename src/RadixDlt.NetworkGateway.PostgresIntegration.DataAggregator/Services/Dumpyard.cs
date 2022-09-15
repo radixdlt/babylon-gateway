@@ -73,9 +73,20 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 {
     private TmpBaseEntity? _databaseEntity;
 
-    public long DatabaseId => DatabaseEntity.Id;
+    public long DatabaseId
+    {
+        get
+        {
+            var de = _databaseEntity ?? throw new Exception("bla bla");
 
-    public TmpBaseEntity DatabaseEntity => _databaseEntity ?? throw new Exception("bla bla");
+            if (de.Id == 0)
+            {
+                throw new Exception("bla bla bla bla x6");
+            }
+
+            return de.Id;
+        }
+    }
 
     public string? GlobalAddress { get; private set; }
 
@@ -100,7 +111,7 @@ internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, Su
     public EntitySubstateKey EntitySubstateKey { get; } = new EntitySubstateKey(ReferencedEntity.Address, Key);
 }
 
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, UpSubstate Raw)
+internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, Substate Data)
 {
     public EntitySubstateKey EntitySubstateKey { get; } = new EntitySubstateKey(ReferencedEntity.Address, Key);
 
@@ -127,16 +138,5 @@ internal static class DictionaryExtensions
         dictionary[key] = value;
 
         return value;
-    }
-
-    public static void Put<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, TVal value)
-        where TKey : notnull
-    {
-        if (dictionary.ContainsKey(key))
-        {
-            throw new Exception("bla bla bla x1");
-        }
-
-        dictionary[key] = value;
     }
 }

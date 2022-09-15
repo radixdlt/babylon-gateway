@@ -91,50 +91,77 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRequest
+    /// V0TransactionPayloadStatus
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
+    [DataContract(Name = "V0TransactionPayloadStatus")]
+    public partial class V0TransactionPayloadStatus : IEquatable<V0TransactionPayloadStatus>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// The status of the transaction payload, as per this node
+        /// </summary>
+        /// <value>The status of the transaction payload, as per this node</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum StatusEnum
+        {
+            /// <summary>
+            /// Enum CommittedSuccess for value: CommittedSuccess
+            /// </summary>
+            [EnumMember(Value = "CommittedSuccess")]
+            CommittedSuccess = 1,
+
+            /// <summary>
+            /// Enum CommittedFailure for value: CommittedFailure
+            /// </summary>
+            [EnumMember(Value = "CommittedFailure")]
+            CommittedFailure = 2,
+
+            /// <summary>
+            /// Enum InMempool for value: InMempool
+            /// </summary>
+            [EnumMember(Value = "InMempool")]
+            InMempool = 3,
+
+            /// <summary>
+            /// Enum Rejected for value: Rejected
+            /// </summary>
+            [EnumMember(Value = "Rejected")]
+            Rejected = 4
+
+        }
+
+
+        /// <summary>
+        /// The status of the transaction payload, as per this node
+        /// </summary>
+        /// <value>The status of the transaction payload, as per this node</value>
+        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
+        public StatusEnum Status { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRequest() { }
+        protected V0TransactionPayloadStatus() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="notarizedTransaction">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
+        /// <param name="payloadHash">payloadHash (required).</param>
+        /// <param name="status">The status of the transaction payload, as per this node (required).</param>
+        public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "payloadHash" is required (not null)
+            if (payloadHash == null)
             {
-                throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("payloadHash is a required property for V0TransactionPayloadStatus and cannot be null");
             }
-            this.Network = network;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
-            {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
-            }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.PayloadHash = payloadHash;
+            this.Status = status;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets PayloadHash
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
-
-        /// <summary>
-        /// A hex-encoded, compiled notarized transaction.
-        /// </summary>
-        /// <value>A hex-encoded, compiled notarized transaction.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHash { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +170,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("class V0TransactionPayloadStatus {\n");
+            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
+            sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +193,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRequest);
+            return this.Equals(input as V0TransactionPayloadStatus);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRequest instances are equal
+        /// Returns true if V0TransactionPayloadStatus instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
+        /// <param name="input">Instance of V0TransactionPayloadStatus to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRequest input)
+        public bool Equals(V0TransactionPayloadStatus input)
         {
             if (input == null)
             {
@@ -182,14 +209,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.PayloadHash == input.PayloadHash ||
+                    (this.PayloadHash != null &&
+                    this.PayloadHash.Equals(input.PayloadHash))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.Status == input.Status ||
+                    this.Status.Equals(input.Status)
                 );
         }
 
@@ -202,14 +228,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.PayloadHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
-                if (this.NotarizedTransaction != null)
-                {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 return hashCode;
             }
         }

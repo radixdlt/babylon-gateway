@@ -105,23 +105,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
         /// </summary>
         /// <param name="stateVersion">An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
+        /// <param name="notarizedTransaction">notarizedTransaction.</param>
         /// <param name="receipt">receipt (required).</param>
         public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
         {
             this.StateVersion = stateVersion;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
-            {
-                throw new ArgumentNullException("notarizedTransaction is a required property for CommittedTransaction and cannot be null");
-            }
-            this.NotarizedTransaction = notarizedTransaction;
             // to ensure "receipt" is required (not null)
             if (receipt == null)
             {
                 throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
             }
             this.Receipt = receipt;
+            this.NotarizedTransaction = notarizedTransaction;
         }
 
         /// <summary>
@@ -134,7 +129,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets NotarizedTransaction
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "notarized_transaction", EmitDefaultValue = true)]
         public NotarizedTransaction NotarizedTransaction { get; set; }
 
         /// <summary>

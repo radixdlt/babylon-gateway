@@ -165,9 +165,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     data_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     type = table.Column<string>(type: "text", nullable: false),
-                    auth_rule_blob = table.Column<string>(type: "text", nullable: true),
-                    metadata_blob = table.Column<string>(type: "text", nullable: true),
-                    resource_id = table.Column<long>(type: "bigint", nullable: true),
+                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    fungible_divisibility = table.Column<int>(type: "integer", nullable: true),
                     amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true)
                 },
                 constraints: table =>

@@ -91,50 +91,64 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRequest
+    /// TransactionIdentifiers
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
+    [DataContract(Name = "TransactionIdentifiers")]
+    public partial class TransactionIdentifiers : IEquatable<TransactionIdentifiers>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionIdentifiers" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRequest() { }
+        protected TransactionIdentifiers() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionIdentifiers" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="notarizedTransaction">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
+        /// <param name="intentHash">The hex-encoded transaction intent hash. This is also known as the Transaction Identifier hash for user transactions. This hash is SHA256(SHA256(compiled_intent)) (required).</param>
+        /// <param name="signaturesHash">The hex-encoded signed transaction hash. This is the hash which is signed as part of notarization. This hash is SHA256(SHA256(compiled_signed_transaction)) (required).</param>
+        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction)) (required).</param>
+        public TransactionIdentifiers(string intentHash = default(string), string signaturesHash = default(string), string payloadHash = default(string))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "intentHash" is required (not null)
+            if (intentHash == null)
             {
-                throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("intentHash is a required property for TransactionIdentifiers and cannot be null");
             }
-            this.Network = network;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            this.IntentHash = intentHash;
+            // to ensure "signaturesHash" is required (not null)
+            if (signaturesHash == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("signaturesHash is a required property for TransactionIdentifiers and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.SignaturesHash = signaturesHash;
+            // to ensure "payloadHash" is required (not null)
+            if (payloadHash == null)
+            {
+                throw new ArgumentNullException("payloadHash is a required property for TransactionIdentifiers and cannot be null");
+            }
+            this.PayloadHash = payloadHash;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// The hex-encoded transaction intent hash. This is also known as the Transaction Identifier hash for user transactions. This hash is SHA256(SHA256(compiled_intent))
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        /// <value>The hex-encoded transaction intent hash. This is also known as the Transaction Identifier hash for user transactions. This hash is SHA256(SHA256(compiled_intent))</value>
+        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
-        /// A hex-encoded, compiled notarized transaction.
+        /// The hex-encoded signed transaction hash. This is the hash which is signed as part of notarization. This hash is SHA256(SHA256(compiled_signed_transaction))
         /// </summary>
-        /// <value>A hex-encoded, compiled notarized transaction.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        /// <value>The hex-encoded signed transaction hash. This is the hash which is signed as part of notarization. This hash is SHA256(SHA256(compiled_signed_transaction))</value>
+        [DataMember(Name = "signatures_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SignaturesHash { get; set; }
+
+        /// <summary>
+        /// The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))
+        /// </summary>
+        /// <value>The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))</value>
+        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHash { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +157,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("class TransactionIdentifiers {\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  SignaturesHash: ").Append(SignaturesHash).Append("\n");
+            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +181,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRequest);
+            return this.Equals(input as TransactionIdentifiers);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRequest instances are equal
+        /// Returns true if TransactionIdentifiers instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
+        /// <param name="input">Instance of TransactionIdentifiers to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRequest input)
+        public bool Equals(TransactionIdentifiers input)
         {
             if (input == null)
             {
@@ -182,14 +197,19 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.SignaturesHash == input.SignaturesHash ||
+                    (this.SignaturesHash != null &&
+                    this.SignaturesHash.Equals(input.SignaturesHash))
+                ) && 
+                (
+                    this.PayloadHash == input.PayloadHash ||
+                    (this.PayloadHash != null &&
+                    this.PayloadHash.Equals(input.PayloadHash))
                 );
         }
 
@@ -202,13 +222,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.IntentHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
-                if (this.NotarizedTransaction != null)
+                if (this.SignaturesHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignaturesHash.GetHashCode();
+                }
+                if (this.PayloadHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
                 return hashCode;
             }
@@ -221,6 +245,42 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // IntentHash (string) maxLength
+            if (this.IntentHash != null && this.IntentHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be less than 64.", new [] { "IntentHash" });
+            }
+
+            // IntentHash (string) minLength
+            if (this.IntentHash != null && this.IntentHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 64.", new [] { "IntentHash" });
+            }
+
+            // SignaturesHash (string) maxLength
+            if (this.SignaturesHash != null && this.SignaturesHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be less than 64.", new [] { "SignaturesHash" });
+            }
+
+            // SignaturesHash (string) minLength
+            if (this.SignaturesHash != null && this.SignaturesHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be greater than 64.", new [] { "SignaturesHash" });
+            }
+
+            // PayloadHash (string) maxLength
+            if (this.PayloadHash != null && this.PayloadHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be less than 64.", new [] { "PayloadHash" });
+            }
+
+            // PayloadHash (string) minLength
+            if (this.PayloadHash != null && this.PayloadHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be greater than 64.", new [] { "PayloadHash" });
+            }
+
             yield break;
         }
     }

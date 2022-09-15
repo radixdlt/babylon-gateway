@@ -106,8 +106,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="hash">The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash.  (required).</param>
         /// <param name="header">header (required).</param>
-        /// <param name="manifest">The hex-encoded, SBOR-encoded transaction manifest. (required).</param>
-        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string manifest = default(string))
+        /// <param name="manifest">The decompiled transaction manifest (required).</param>
+        /// <param name="blobs">A map of the hex-encoded blob hash, to hex-encoded blob content (required).</param>
+        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string manifest = default(string), Dictionary<string, string> blobs = default(Dictionary<string, string>))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -127,6 +128,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("manifest is a required property for TransactionIntent and cannot be null");
             }
             this.Manifest = manifest;
+            // to ensure "blobs" is required (not null)
+            if (blobs == null)
+            {
+                throw new ArgumentNullException("blobs is a required property for TransactionIntent and cannot be null");
+            }
+            this.Blobs = blobs;
         }
 
         /// <summary>
@@ -143,11 +150,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public TransactionHeader Header { get; set; }
 
         /// <summary>
-        /// The hex-encoded, SBOR-encoded transaction manifest.
+        /// The decompiled transaction manifest
         /// </summary>
-        /// <value>The hex-encoded, SBOR-encoded transaction manifest.</value>
+        /// <value>The decompiled transaction manifest</value>
         [DataMember(Name = "manifest", IsRequired = true, EmitDefaultValue = true)]
         public string Manifest { get; set; }
+
+        /// <summary>
+        /// A map of the hex-encoded blob hash, to hex-encoded blob content
+        /// </summary>
+        /// <value>A map of the hex-encoded blob hash, to hex-encoded blob content</value>
+        [DataMember(Name = "blobs", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> Blobs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -160,6 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Hash: ").Append(Hash).Append("\n");
             sb.Append("  Header: ").Append(Header).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
+            sb.Append("  Blobs: ").Append(Blobs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -209,6 +224,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Manifest == input.Manifest ||
                     (this.Manifest != null &&
                     this.Manifest.Equals(input.Manifest))
+                ) && 
+                (
+                    this.Blobs == input.Blobs ||
+                    this.Blobs != null &&
+                    input.Blobs != null &&
+                    this.Blobs.SequenceEqual(input.Blobs)
                 );
         }
 
@@ -232,6 +253,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Manifest != null)
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
+                }
+                if (this.Blobs != null)
+                {
+                    hashCode = (hashCode * 59) + this.Blobs.GetHashCode();
                 }
                 return hashCode;
             }

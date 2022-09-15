@@ -91,50 +91,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRequest
+    /// V0CommittedTransactionResponse
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
+    [DataContract(Name = "V0CommittedTransactionResponse")]
+    public partial class V0CommittedTransactionResponse : IEquatable<V0CommittedTransactionResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0CommittedTransactionResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRequest() { }
+        protected V0CommittedTransactionResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0CommittedTransactionResponse" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="notarizedTransaction">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
+        /// <param name="committed">committed (required).</param>
+        public V0CommittedTransactionResponse(CommittedTransaction committed = default(CommittedTransaction))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "committed" is required (not null)
+            if (committed == null)
             {
-                throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("committed is a required property for V0CommittedTransactionResponse and cannot be null");
             }
-            this.Network = network;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
-            {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
-            }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.Committed = committed;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets Committed
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
-
-        /// <summary>
-        /// A hex-encoded, compiled notarized transaction.
-        /// </summary>
-        /// <value>A hex-encoded, compiled notarized transaction.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        [DataMember(Name = "committed", IsRequired = true, EmitDefaultValue = true)]
+        public CommittedTransaction Committed { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("class V0CommittedTransactionResponse {\n");
+            sb.Append("  Committed: ").Append(Committed).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRequest);
+            return this.Equals(input as V0CommittedTransactionResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRequest instances are equal
+        /// Returns true if V0CommittedTransactionResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
+        /// <param name="input">Instance of V0CommittedTransactionResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRequest input)
+        public bool Equals(V0CommittedTransactionResponse input)
         {
             if (input == null)
             {
@@ -182,14 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
-                ) && 
-                (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.Committed == input.Committed ||
+                    (this.Committed != null &&
+                    this.Committed.Equals(input.Committed))
                 );
         }
 
@@ -202,13 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.Committed != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
-                }
-                if (this.NotarizedTransaction != null)
-                {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Committed.GetHashCode();
                 }
                 return hashCode;
             }

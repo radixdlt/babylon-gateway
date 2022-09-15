@@ -91,50 +91,31 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRequest
+    /// V0StateEpochResponse
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
+    [DataContract(Name = "V0StateEpochResponse")]
+    public partial class V0StateEpochResponse : IEquatable<V0StateEpochResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0StateEpochResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRequest() { }
+        protected V0StateEpochResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0StateEpochResponse" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="notarizedTransaction">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
+        /// <param name="epoch">An integer between 0 and 10^10, marking the current epoch (required).</param>
+        public V0StateEpochResponse(long epoch = default(long))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
-            {
-                throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
-            }
-            this.Network = network;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
-            {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
-            }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.Epoch = epoch;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// An integer between 0 and 10^10, marking the current epoch
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
-
-        /// <summary>
-        /// A hex-encoded, compiled notarized transaction.
-        /// </summary>
-        /// <value>A hex-encoded, compiled notarized transaction.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        /// <value>An integer between 0 and 10^10, marking the current epoch</value>
+        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
+        public long Epoch { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +124,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("class V0StateEpochResponse {\n");
+            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +146,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRequest);
+            return this.Equals(input as V0StateEpochResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRequest instances are equal
+        /// Returns true if V0StateEpochResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
+        /// <param name="input">Instance of V0StateEpochResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRequest input)
+        public bool Equals(V0StateEpochResponse input)
         {
             if (input == null)
             {
@@ -182,14 +162,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
-                ) && 
-                (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.Epoch == input.Epoch ||
+                    this.Epoch.Equals(input.Epoch)
                 );
         }
 
@@ -202,14 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
-                {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
-                }
-                if (this.NotarizedTransaction != null)
-                {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
                 return hashCode;
             }
         }
@@ -221,6 +188,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Epoch (long) maximum
+            if (this.Epoch > (long)10000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to 10000000000.", new [] { "Epoch" });
+            }
+
+            // Epoch (long) minimum
+            if (this.Epoch < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value greater than or equal to 0.", new [] { "Epoch" });
+            }
+
             yield break;
         }
     }

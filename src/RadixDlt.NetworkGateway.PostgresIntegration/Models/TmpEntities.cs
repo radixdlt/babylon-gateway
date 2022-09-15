@@ -93,19 +93,23 @@ internal class TmpBaseEntity
     public long FromStateVersion { get; set; }
 }
 
+internal class TmpSystemEntity : TmpBaseEntity
+{
+}
+
+internal class TmpResourceManagerEntity : TmpBaseEntity
+{
+}
+
 internal class TmpComponentEntity : TmpBaseEntity
 {
 }
 
+internal class TmpPackageEntity : TmpBaseEntity
+{
+}
+
 internal class TmpKeyValueStoreEntity : TmpBaseEntity
-{
-}
-
-internal class TmpAccountEntity : TmpBaseEntity
-{
-}
-
-internal class TmpValidatorEntity : TmpBaseEntity
 {
 }
 
