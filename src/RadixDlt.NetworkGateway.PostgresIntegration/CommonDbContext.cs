@@ -130,20 +130,23 @@ internal abstract class CommonDbContext : DbContext
         // Configure temporary types
         modelBuilder.Entity<TmpBaseEntity>()
             .HasDiscriminator<string>("type")
+            .HasValue<TmpSystemEntity>("system")
+            .HasValue<TmpResourceManagerEntity>("resourcemanager")
             .HasValue<TmpComponentEntity>("component")
+            .HasValue<TmpPackageEntity>("package")
             .HasValue<TmpKeyValueStoreEntity>("keyvaluestore")
-            .HasValue<TmpAccountEntity>("account")
-            .HasValue<TmpVaultEntity>("vault")
-            .HasValue<TmpValidatorEntity>("validator");
+            .HasValue<TmpVaultEntity>("vault");
 
         modelBuilder.Entity<TmpBaseSubstate>()
             .HasDiscriminator<string>("type")
-            .HasValue<TmpResourceAuthRuleSubstate>("resource_auth_rule")
-            .HasValue<TmpResourceMetadataSubstate>("resource_metadata")
+            .HasValue<TmpSystemSubstate>("system")
+            .HasValue<TmpResourceManagerSubstate>("resourcemanager")
+            .HasValue<TmpComponentInfoSubstate>("componentinfo")
+            .HasValue<TmpComponentStateSubstate>("componentstate")
+            .HasValue<TmpPackageSubstate>("package")
             .HasValue<TmpVaultSubstate>("vault")
-            .HasValue<TmpComponentInfoSubstate>("component_info")
-            .HasValue<TmpComponentStateSubstate>("component_state")
-            .HasValue<TmpKeyValueStoreEntrySubstate>("key_value_store_entry");
+            .HasValue<TmpNonFungibleSubstate>("nonfungible")
+            .HasValue<TmpKeyValueStoreEntrySubstate>("keyvaluestoreentry");
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

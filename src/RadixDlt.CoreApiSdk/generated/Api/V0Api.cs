@@ -88,69 +88,25 @@ namespace RadixDlt.CoreApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface ITransactionApiSync : IApiAccessor
+    public interface IV0ApiSync : IApiAccessor
     {
         #region Synchronous Operations
         /// <summary>
-        /// Preview a transaction against the latest network state
+        /// Read Current Epoch
         /// </summary>
-        /// <remarks>
-        /// Returns the preview response
-        /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
-        /// <returns>TransactionPreviewResponse</returns>
-        TransactionPreviewResponse TransactionPreviewPost(TransactionPreviewRequest transactionPreviewRequest);
+        /// <returns>V0StateEpochResponse</returns>
+        V0StateEpochResponse V0StateEpochPost();
 
         /// <summary>
-        /// Preview a transaction against the latest network state
-        /// </summary>
-        /// <remarks>
-        /// Returns the preview response
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
-        /// <returns>ApiResponse of TransactionPreviewResponse</returns>
-        ApiResponse<TransactionPreviewResponse> TransactionPreviewPostWithHttpInfo(TransactionPreviewRequest transactionPreviewRequest);
-        /// <summary>
-        /// Get committed transactions
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
-        /// <returns>CommittedTransactionsResponse</returns>
-        CommittedTransactionsResponse TransactionStreamPost(CommittedTransactionsRequest committedTransactionsRequest);
-
-        /// <summary>
-        /// Get committed transactions
+        /// Read Current Epoch
         /// </summary>
         /// <remarks>
         /// 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
-        /// <returns>ApiResponse of CommittedTransactionsResponse</returns>
-        ApiResponse<CommittedTransactionsResponse> TransactionStreamPostWithHttpInfo(CommittedTransactionsRequest committedTransactionsRequest);
-        /// <summary>
-        /// Submit transaction to the network
-        /// </summary>
-        /// <remarks>
-        /// Returns whether the transaction submission was accepted.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>TransactionSubmitResponse</returns>
-        TransactionSubmitResponse TransactionSubmitPost(TransactionSubmitRequest transactionSubmitRequest);
-
-        /// <summary>
-        /// Submit transaction to the network
-        /// </summary>
-        /// <remarks>
-        /// Returns whether the transaction submission was accepted.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>ApiResponse of TransactionSubmitResponse</returns>
-        ApiResponse<TransactionSubmitResponse> TransactionSubmitPostWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest);
+        /// <returns>ApiResponse of V0StateEpochResponse</returns>
+        ApiResponse<V0StateEpochResponse> V0StateEpochPostWithHttpInfo();
         /// <summary>
         /// Read Committed Transaction
         /// </summary>
@@ -211,78 +167,30 @@ namespace RadixDlt.CoreApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface ITransactionApiAsync : IApiAccessor
+    public interface IV0ApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Preview a transaction against the latest network state
-        /// </summary>
-        /// <remarks>
-        /// Returns the preview response
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionPreviewResponse</returns>
-        System.Threading.Tasks.Task<TransactionPreviewResponse> TransactionPreviewPostAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Preview a transaction against the latest network state
-        /// </summary>
-        /// <remarks>
-        /// Returns the preview response
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionPreviewResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionPreviewResponse>> TransactionPreviewPostWithHttpInfoAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Get committed transactions
+        /// Read Current Epoch
         /// </summary>
         /// <remarks>
         /// 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of CommittedTransactionsResponse</returns>
-        System.Threading.Tasks.Task<CommittedTransactionsResponse> TransactionStreamPostAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of V0StateEpochResponse</returns>
+        System.Threading.Tasks.Task<V0StateEpochResponse> V0StateEpochPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Get committed transactions
+        /// Read Current Epoch
         /// </summary>
         /// <remarks>
         /// 
         /// </remarks>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (CommittedTransactionsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<CommittedTransactionsResponse>> TransactionStreamPostWithHttpInfoAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Submit transaction to the network
-        /// </summary>
-        /// <remarks>
-        /// Returns whether the transaction submission was accepted.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionSubmitResponse</returns>
-        System.Threading.Tasks.Task<TransactionSubmitResponse> TransactionSubmitPostAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Submit transaction to the network
-        /// </summary>
-        /// <remarks>
-        /// Returns whether the transaction submission was accepted.
-        /// </remarks>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionSubmitResponse>> TransactionSubmitPostWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (V0StateEpochResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<V0StateEpochResponse>> V0StateEpochPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Read Committed Transaction
         /// </summary>
@@ -358,7 +266,7 @@ namespace RadixDlt.CoreApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface ITransactionApi : ITransactionApiSync, ITransactionApiAsync
+    public interface IV0Api : IV0ApiSync, IV0ApiAsync
     {
 
     }
@@ -366,29 +274,29 @@ namespace RadixDlt.CoreApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public partial class TransactionApi : IDisposable, ITransactionApi
+    public partial class V0Api : IDisposable, IV0Api
     {
         private RadixDlt.CoreApiSdk.Client.ExceptionFactory _exceptionFactory = (name, response) => null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class.
+        /// Initializes a new instance of the <see cref="V0Api"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
-        public TransactionApi() : this((string)null)
+        public V0Api() : this((string)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class.
+        /// Initializes a new instance of the <see cref="V0Api"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
-        public TransactionApi(string basePath)
+        public V0Api(string basePath)
         {
             this.Configuration = RadixDlt.CoreApiSdk.Client.Configuration.MergeConfigurations(
                 RadixDlt.CoreApiSdk.Client.GlobalConfiguration.Instance,
@@ -401,14 +309,14 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="V0Api"/> class using Configuration object.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="configuration">An instance of Configuration.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public TransactionApi(RadixDlt.CoreApiSdk.Client.Configuration configuration)
+        public V0Api(RadixDlt.CoreApiSdk.Client.Configuration configuration)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
 
@@ -423,7 +331,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class.
+        /// Initializes a new instance of the <see cref="V0Api"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
@@ -433,12 +341,12 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public TransactionApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        public V0Api(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class.
+        /// Initializes a new instance of the <see cref="V0Api"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="basePath">The target service's base path in URL format.</param>
@@ -450,7 +358,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public TransactionApi(HttpClient client, string basePath, HttpClientHandler handler = null)
+        public V0Api(HttpClient client, string basePath, HttpClientHandler handler = null)
         {
             if (client == null) throw new ArgumentNullException("client");
 
@@ -465,7 +373,7 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="V0Api"/> class using Configuration object.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="configuration">An instance of Configuration.</param>
@@ -476,7 +384,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public TransactionApi(HttpClient client, RadixDlt.CoreApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
+        public V0Api(HttpClient client, RadixDlt.CoreApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
             if (client == null) throw new ArgumentNullException("client");
@@ -492,14 +400,14 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionApi"/> class
+        /// Initializes a new instance of the <see cref="V0Api"/> class
         /// using a Configuration object and client instance.
         /// </summary>
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public TransactionApi(RadixDlt.CoreApiSdk.Client.ISynchronousClient client, RadixDlt.CoreApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.CoreApiSdk.Client.IReadableConfiguration configuration)
+        public V0Api(RadixDlt.CoreApiSdk.Client.ISynchronousClient client, RadixDlt.CoreApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.CoreApiSdk.Client.IReadableConfiguration configuration)
         {
             if (client == null) throw new ArgumentNullException("client");
             if (asyncClient == null) throw new ArgumentNullException("asyncClient");
@@ -566,33 +474,26 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Preview a transaction against the latest network state Returns the preview response
+        /// Read Current Epoch 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
-        /// <returns>TransactionPreviewResponse</returns>
-        public TransactionPreviewResponse TransactionPreviewPost(TransactionPreviewRequest transactionPreviewRequest)
+        /// <returns>V0StateEpochResponse</returns>
+        public V0StateEpochResponse V0StateEpochPost()
         {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewResponse> localVarResponse = TransactionPreviewPostWithHttpInfo(transactionPreviewRequest);
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateEpochResponse> localVarResponse = V0StateEpochPostWithHttpInfo();
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Preview a transaction against the latest network state Returns the preview response
+        /// Read Current Epoch 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
-        /// <returns>ApiResponse of TransactionPreviewResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewResponse> TransactionPreviewPostWithHttpInfo(TransactionPreviewRequest transactionPreviewRequest)
+        /// <returns>ApiResponse of V0StateEpochResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateEpochResponse> V0StateEpochPostWithHttpInfo()
         {
-            // verify the required parameter 'transactionPreviewRequest' is set
-            if (transactionPreviewRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionPreviewRequest' when calling TransactionApi->TransactionPreviewPost");
-
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
-                "application/json"
             };
 
             // to determine the Accept header
@@ -606,15 +507,14 @@ namespace RadixDlt.CoreApiSdk.Api
             var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = transactionPreviewRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionPreviewResponse>("/transaction/preview", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<V0StateEpochResponse>("/v0/state/epoch", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("TransactionPreviewPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("V0StateEpochPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -622,36 +522,29 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
-        /// Preview a transaction against the latest network state Returns the preview response
+        /// Read Current Epoch 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionPreviewResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionPreviewResponse> TransactionPreviewPostAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of V0StateEpochResponse</returns>
+        public async System.Threading.Tasks.Task<V0StateEpochResponse> V0StateEpochPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewResponse> localVarResponse = await TransactionPreviewPostWithHttpInfoAsync(transactionPreviewRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateEpochResponse> localVarResponse = await V0StateEpochPostWithHttpInfoAsync(cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Preview a transaction against the latest network state Returns the preview response
+        /// Read Current Epoch 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionPreviewRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionPreviewResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionPreviewResponse>> TransactionPreviewPostWithHttpInfoAsync(TransactionPreviewRequest transactionPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (V0StateEpochResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateEpochResponse>> V0StateEpochPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'transactionPreviewRequest' is set
-            if (transactionPreviewRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionPreviewRequest' when calling TransactionApi->TransactionPreviewPost");
-
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
             string[] _contentTypes = new string[] {
-                "application/json"
             };
 
             // to determine the Accept header
@@ -666,250 +559,15 @@ namespace RadixDlt.CoreApiSdk.Api
             var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = transactionPreviewRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionPreviewResponse>("/transaction/preview", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<V0StateEpochResponse>("/v0/state/epoch", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("TransactionPreviewPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get committed transactions 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
-        /// <returns>CommittedTransactionsResponse</returns>
-        public CommittedTransactionsResponse TransactionStreamPost(CommittedTransactionsRequest committedTransactionsRequest)
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse> localVarResponse = TransactionStreamPostWithHttpInfo(committedTransactionsRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get committed transactions 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
-        /// <returns>ApiResponse of CommittedTransactionsResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse> TransactionStreamPostWithHttpInfo(CommittedTransactionsRequest committedTransactionsRequest)
-        {
-            // verify the required parameter 'committedTransactionsRequest' is set
-            if (committedTransactionsRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'committedTransactionsRequest' when calling TransactionApi->TransactionStreamPost");
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = committedTransactionsRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<CommittedTransactionsResponse>("/transaction/stream", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionStreamPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Get committed transactions 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of CommittedTransactionsResponse</returns>
-        public async System.Threading.Tasks.Task<CommittedTransactionsResponse> TransactionStreamPostAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse> localVarResponse = await TransactionStreamPostWithHttpInfoAsync(committedTransactionsRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Get committed transactions 
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="committedTransactionsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (CommittedTransactionsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<CommittedTransactionsResponse>> TransactionStreamPostWithHttpInfoAsync(CommittedTransactionsRequest committedTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'committedTransactionsRequest' is set
-            if (committedTransactionsRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'committedTransactionsRequest' when calling TransactionApi->TransactionStreamPost");
-
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = committedTransactionsRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<CommittedTransactionsResponse>("/transaction/stream", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionStreamPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Submit transaction to the network Returns whether the transaction submission was accepted.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>TransactionSubmitResponse</returns>
-        public TransactionSubmitResponse TransactionSubmitPost(TransactionSubmitRequest transactionSubmitRequest)
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionSubmitResponse> localVarResponse = TransactionSubmitPostWithHttpInfo(transactionSubmitRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Submit transaction to the network Returns whether the transaction submission was accepted.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>ApiResponse of TransactionSubmitResponse</returns>
-        public RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionSubmitResponse> TransactionSubmitPostWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest)
-        {
-            // verify the required parameter 'transactionSubmitRequest' is set
-            if (transactionSubmitRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionSubmitRequest' when calling TransactionApi->TransactionSubmitPost");
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionSubmitRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionSubmitResponse>("/transaction/submit", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionSubmitPost", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Submit transaction to the network Returns whether the transaction submission was accepted.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionSubmitResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionSubmitResponse> TransactionSubmitPostAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionSubmitResponse> localVarResponse = await TransactionSubmitPostWithHttpInfoAsync(transactionSubmitRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Submit transaction to the network Returns whether the transaction submission was accepted.
-        /// </summary>
-        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionSubmitResponse>> TransactionSubmitPostWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'transactionSubmitRequest' is set
-            if (transactionSubmitRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionSubmitRequest' when calling TransactionApi->TransactionSubmitPost");
-
-
-            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionSubmitRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionSubmitResponse>("/transaction/submit", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionSubmitPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("V0StateEpochPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -938,7 +596,7 @@ namespace RadixDlt.CoreApiSdk.Api
         {
             // verify the required parameter 'v0CommittedTransactionRequest' is set
             if (v0CommittedTransactionRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0CommittedTransactionRequest' when calling TransactionApi->V0TransactionReceiptPost");
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0CommittedTransactionRequest' when calling V0Api->V0TransactionReceiptPost");
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
@@ -996,7 +654,7 @@ namespace RadixDlt.CoreApiSdk.Api
         {
             // verify the required parameter 'v0CommittedTransactionRequest' is set
             if (v0CommittedTransactionRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0CommittedTransactionRequest' when calling TransactionApi->V0TransactionReceiptPost");
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0CommittedTransactionRequest' when calling V0Api->V0TransactionReceiptPost");
 
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
@@ -1055,7 +713,7 @@ namespace RadixDlt.CoreApiSdk.Api
         {
             // verify the required parameter 'v0TransactionStatusRequest' is set
             if (v0TransactionStatusRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionStatusRequest' when calling TransactionApi->V0TransactionStatusPost");
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionStatusRequest' when calling V0Api->V0TransactionStatusPost");
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
@@ -1113,7 +771,7 @@ namespace RadixDlt.CoreApiSdk.Api
         {
             // verify the required parameter 'v0TransactionStatusRequest' is set
             if (v0TransactionStatusRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionStatusRequest' when calling TransactionApi->V0TransactionStatusPost");
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionStatusRequest' when calling V0Api->V0TransactionStatusPost");
 
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
@@ -1172,7 +830,7 @@ namespace RadixDlt.CoreApiSdk.Api
         {
             // verify the required parameter 'v0TransactionSubmitRequest' is set
             if (v0TransactionSubmitRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionSubmitRequest' when calling TransactionApi->V0TransactionSubmitPost");
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionSubmitRequest' when calling V0Api->V0TransactionSubmitPost");
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
 
@@ -1230,7 +888,7 @@ namespace RadixDlt.CoreApiSdk.Api
         {
             // verify the required parameter 'v0TransactionSubmitRequest' is set
             if (v0TransactionSubmitRequest == null)
-                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionSubmitRequest' when calling TransactionApi->V0TransactionSubmitPost");
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0TransactionSubmitRequest' when calling V0Api->V0TransactionSubmitPost");
 
 
             RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();

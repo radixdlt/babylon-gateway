@@ -62,87 +62,50 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 
-public static class TransactionSummarisationGenerator
+public record TmpEntitiesRequest(string Address, long? AtStateVersion);
+public record TmpEntitiesResponse();
+
+[ApiController]
+[Route("state")]
+[TypeFilter(typeof(ExceptionFilter))]
+[TypeFilter(typeof(InvalidModelStateFilter))]
+public class StateController
 {
-    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction, IClock clock)
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
+
+    public StateController(INetworkConfigurationProvider networkConfigurationProvider)
     {
-        long? newEpoch = null;
-        long? newRoundInEpoch = null;
-        DateTimeOffset? newRoundTimestamp = null;
+        _networkConfigurationProvider = networkConfigurationProvider;
+    }
 
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // foreach (var operationGroup in transaction.OperationGroups)
-        // {
-        //     foreach (var operation in operationGroup.Operations)
-        //     {
-        //         if (operation.IsCreateOf<EpochData>(out var epochData))
-        //         {
-        //             newEpoch = epochData.Epoch;
-        //         }
-        //
-        //         if (operation.IsCreateOf<RoundData>(out var newRoundData))
-        //         {
-        //             newRoundInEpoch = newRoundData.Round;
-        //
-        //             // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
-        //             if (newRoundData.Timestamp != 0)
-        //             {
-        //                 newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
-        //             }
-        //         }
-        //     }
-        // }
+    [HttpPost("tmp-entity")]
+    public async Task<TmpEntitiesResponse> TmpEntities(TmpEntitiesRequest request, CancellationToken token = default)
+    {
+        await Task.CompletedTask;
 
-        /* NB:
-           The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
-           as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
-        */
-
-        var isStartOfEpoch = newEpoch != null;
-        var isStartOfRound = newRoundInEpoch != null;
-
-        var roundTimestamp = newRoundTimestamp ?? lastTransaction.RoundTimestamp;
-        var createdTimestamp = clock.UtcNow;
-        var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
-            roundTimestamp < lastTransaction.NormalizedRoundTimestamp ? lastTransaction.NormalizedRoundTimestamp
-            : roundTimestamp > createdTimestamp ? createdTimestamp
-            : roundTimestamp;
-
-        // TODO invalid, those are just placeholders
-        var transactionAccumulator = BitConverter.GetBytes(transaction.StateVersion);
-        var payloadHash = BitConverter.GetBytes(transaction.StateVersion);
-        var intentHash = payloadHash;
-        var signedIntentHash = payloadHash;
-
-        if (transaction.NotarizedTransaction != null)
+        if (!RadixAddressParser.TryParse(_networkConfigurationProvider.GetAddressHrps(), request.Address, out var address, out var em))
         {
-            payloadHash = transaction.NotarizedTransaction.NotarySignature.GetEcdsaSecp256k1Signature().SignatureBytes.ConvertFromHex();
-            intentHash = transaction.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex();
-            signedIntentHash = transaction.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex();
+            throw new Exception("bla bla bla api x1: " + em);
         }
 
-        // TODO those hashes are almost certainly mismatched/invalid
-        return new TransactionSummary(
-            StateVersion: transaction.StateVersion,
-            Epoch: newEpoch ?? lastTransaction.Epoch,
-            IndexInEpoch: isStartOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
-            RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
-            IsStartOfEpoch: isStartOfEpoch,
-            IsStartOfRound: isStartOfRound,
-            PayloadHash: payloadHash,
-            IntentHash: intentHash,
-            SignedTransactionHash: signedIntentHash,
-            TransactionAccumulator: transactionAccumulator,
-            RoundTimestamp: roundTimestamp,
-            CreatedTimestamp: createdTimestamp,
-            NormalizedRoundTimestamp: normalizedRoundTimestamp
-        );
+        return address.Type switch
+        {
+            RadixAddressType.Account => new TmpEntitiesResponse(),
+            // RadixAddressType.Resource => expr,
+            // RadixAddressType.Validator => expr,
+            // RadixAddressType.Node => expr,
+            _ => throw new Exception("bla bla bla bla api x2"),
+        };
     }
 }

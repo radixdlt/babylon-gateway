@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload (required).</param>
+        /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash. (required).</param>
         /// <param name="payload">The hex-encoded full notarized transaction payload (required).</param>
         /// <param name="signedIntent">signedIntent (required).</param>
         /// <param name="notarySignature">notarySignature (required).</param>
@@ -137,9 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the notarized transaction payload
+        /// The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash.
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the notarized transaction payload</value>
+        /// <value>The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash.</value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 

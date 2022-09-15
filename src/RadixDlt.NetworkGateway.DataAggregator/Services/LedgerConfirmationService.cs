@@ -486,9 +486,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var groupedTransactions = transactionsWithTrust
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // .GroupBy(t => t.Transaction!.CommittedStateIdentifier.TransactionAccumulator)
-            .GroupBy(t => t.Transaction!.NotarizedTransaction.Hash) // TODO does it even makes sense?
+            .GroupBy(t => t.Transaction!.StateVersion)
             .Select(grouping => new TransactionClaim(
                 grouping.First().Transaction!,
                 grouping.Select(g => g.NodeName).ToList(),

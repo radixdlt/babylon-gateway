@@ -106,25 +106,17 @@ internal class TmpBaseSubstate
     }
 }
 
-internal class TmpResourceAuthRuleSubstate : TmpBaseSubstate
+internal class TmpSystemSubstate : TmpBaseSubstate
 {
-    [Column("auth_rule_blob")]
-    public string AuthRuleBlob { get; set; }
 }
 
-internal class TmpResourceMetadataSubstate : TmpBaseSubstate
+internal class TmpResourceManagerSubstate : TmpBaseSubstate
 {
-    [Column("metadata_blob")]
-    public string MetadataBlob { get; set; }
-}
+    [Column("total_supply")]
+    public TokenAmount TotalSupply { get; set; }
 
-internal class TmpVaultSubstate : TmpBaseSubstate
-{
-    [Column("resource_id")]
-    public long ResourceId { get; set; }
-
-    [Column("amount")]
-    public TokenAmount Amount { get; set; }
+    [Column("fungible_divisibility")]
+    public int FungibleDivisibility { get; set; }
 }
 
 internal class TmpComponentInfoSubstate : TmpBaseSubstate
@@ -132,6 +124,20 @@ internal class TmpComponentInfoSubstate : TmpBaseSubstate
 }
 
 internal class TmpComponentStateSubstate : TmpBaseSubstate
+{
+}
+
+internal class TmpPackageSubstate : TmpBaseSubstate
+{
+}
+
+internal class TmpVaultSubstate : TmpBaseSubstate
+{
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
+
+internal class TmpNonFungibleSubstate : TmpBaseSubstate
 {
 }
 

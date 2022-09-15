@@ -270,54 +270,55 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
     private async Task ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
     {
-        // step 1: scan / process raw response
-
         var referencedEntities = new Dictionary<string, ReferencedEntity>();
-        var downedSubstates = new Dictionary<EntitySubstateKey, DownedSubstate>();
-        var uppedSubstates = new Dictionary<EntitySubstateKey, UppedSubstate>();
+        var downedSubstates = new List<DownedSubstate>();
+        var uppedSubstates = new List<UppedSubstate>();
+        var parentEntities = new Dictionary<long, long>();
 
-        foreach (var transactionData in transactionsData)
+        // step 1: scan for entities
         {
-            var dbTransaction = TransactionMapping.CreateLedgerTransaction(transactionData);
-
-            dbContext.LedgerTransactions.Add(dbTransaction);
-
-            var stateVersion = transactionData.CommittedTransaction.StateVersion;
-            var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
-
-            foreach (var upSubstate in stateUpdates.UpSubstates)
+            foreach (var transactionData in transactionsData)
             {
-                var sid = upSubstate.SubstateId;
-                var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
-                var us = new UppedSubstate(re, sid.SubstateKey, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate);
+                var dbTransaction = TransactionMapping.CreateLedgerTransaction(transactionData);
 
-                uppedSubstates.Put(us.EntitySubstateKey, us);
-            }
+                dbContext.LedgerTransactions.Add(dbTransaction);
 
-            foreach (var downSubstate in stateUpdates.DownSubstates)
-            {
-                var sid = downSubstate.SubstateId;
-                var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
-                var ds = new DownedSubstate(re, sid.SubstateKey, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
+                var stateVersion = transactionData.CommittedTransaction.StateVersion;
+                var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
 
-                downedSubstates.Put(ds.EntitySubstateKey, ds);
-            }
+                foreach (var upSubstate in stateUpdates.UpSubstates)
+                {
+                    var sid = upSubstate.SubstateId;
+                    var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
+                    var us = new UppedSubstate(re, sid.SubstateKey, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
-            foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
-            {
-                // TODO not sure how to handle those; not sure what they even are
+                    uppedSubstates.Add(us);
+                }
 
-                referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddress, _ => new ReferencedEntity(downVirtualSubstate.EntityAddress, downVirtualSubstate.EntityType, stateVersion));
-            }
+                foreach (var downSubstate in stateUpdates.DownSubstates)
+                {
+                    var sid = downSubstate.SubstateId;
+                    var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
+                    var ds = new DownedSubstate(re, sid.SubstateKey, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
 
-            foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
-            {
-                referencedEntities[newGlobalEntity.EntityAddress].Globalize(newGlobalEntity.GlobalAddressStr, newGlobalEntity.GlobalAddressBytes);
+                    downedSubstates.Add(ds);
+                }
+
+                foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
+                {
+                    // TODO not sure how to handle those; not sure what they even are
+
+                    referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddress, _ => new ReferencedEntity(downVirtualSubstate.EntityAddress, downVirtualSubstate.EntityType, stateVersion));
+                }
+
+                foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
+                {
+                    referencedEntities[newGlobalEntity.EntityAddress].Globalize(newGlobalEntity.GlobalAddressStr, newGlobalEntity.GlobalAddressBytes);
+                }
             }
         }
 
         // step 2: resolve known types (optionally create missing entities)
-
         {
             var entityAddresses = referencedEntities.Keys.ToList();
 
@@ -336,10 +337,10 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 TmpBaseEntity dbEntity = e.Type switch
                 {
-                    // EntityType.System => expr,
-                    // EntityType.ResourceManager => expr,
+                    EntityType.System => new TmpSystemEntity(),
+                    EntityType.ResourceManager => new TmpResourceManagerEntity(),
                     EntityType.Component => new TmpComponentEntity(),
-                    // EntityType.Package => expr,
+                    EntityType.Package => new TmpPackageEntity(),
                     EntityType.Vault => new TmpVaultEntity(),
                     EntityType.KeyValueStore => new TmpKeyValueStoreEntity(),
                     _ => throw new Exception("bla bla bla x2"),
@@ -358,56 +359,122 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
 
         // step 3: insert all newly seen substates first as some substates we want to delete might not even exist yet!
-
-        TmpVaultSubstate CreateTmpVaultSubstate(UppedSubstate uppedSubstate)
         {
-            // TODO handle fungible vs non-fungible properly
-
-            var vs = (VaultSubstate)uppedSubstate.Raw.SubstateData.ActualInstance;
-            var fra = (FungibleResourceAmount)vs.ResourceAmount.ActualInstance;
-
-            return new TmpVaultSubstate
+            TmpResourceManagerSubstate CreateResourceManagerSubstate(UppedSubstate us)
             {
-                Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos),
-            };
+                var data = us.Data.GetResourceManagerSubstate();
+
+                // TODO handle metadata
+
+                return new TmpResourceManagerSubstate
+                {
+                    TotalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos),
+                    FungibleDivisibility = data.FungibleDivisibility,
+                };
+            }
+
+            TmpComponentStateSubstate CreateComponentStateSubstate(UppedSubstate us)
+            {
+                var data = us.Data.GetComponentStateSubstate();
+
+                // TODO handle referenced_entities
+
+                foreach (var oe in data.DataStruct.OwnedEntities)
+                {
+                    parentEntities[referencedEntities[oe.EntityAddress].DatabaseId] = us.ReferencedEntity.DatabaseId;
+                }
+
+                return new TmpComponentStateSubstate();
+            }
+
+            TmpVaultSubstate CreateTmpVaultSubstate(UppedSubstate us)
+            {
+                var data = us.Data.GetVaultSubstate();
+
+                // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
+
+                var fra = data.ResourceAmount.GetFungibleResourceAmount();
+
+                return new TmpVaultSubstate
+                {
+                    Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos),
+                };
+            }
+
+            TmpKeyValueStoreEntrySubstate CreateKeyValueStoreEntrySubstate(UppedSubstate us)
+            {
+                // TODO handle owned_entities and referenced_entities properly (not sure if we can ensure references types have been seen)
+
+                return new TmpKeyValueStoreEntrySubstate();
+            }
+
+            foreach (var us in uppedSubstates)
+            {
+                TmpBaseSubstate dbSubstate = us.Type switch
+                {
+                    SubstateType.System => new TmpSystemSubstate(),
+                    SubstateType.ResourceManager => CreateResourceManagerSubstate(us),
+                    SubstateType.ComponentInfo => new TmpComponentInfoSubstate(),
+                    SubstateType.ComponentState => CreateComponentStateSubstate(us),
+                    SubstateType.Package => new TmpPackageSubstate(),
+                    SubstateType.Vault => CreateTmpVaultSubstate(us),
+                    SubstateType.NonFungible => new TmpNonFungibleSubstate(),
+                    SubstateType.KeyValueStoreEntry => CreateKeyValueStoreEntrySubstate(us),
+                    _ => throw new Exception("bla bla bla x3"),
+                };
+
+                dbSubstate.Key = us.Key;
+                dbSubstate.EntityId = us.ReferencedEntity.DatabaseId;
+                dbSubstate.FromStateVersion = us.StateVersion;
+                dbSubstate.DataHash = us.DataHash;
+                dbSubstate.Version = us.Version;
+
+                dbContext.TmpSubstates.Add(dbSubstate);
+
+                us.Resolve(dbSubstate);
+            }
+
+            await dbContext.SaveChangesAsync(token);
         }
 
-        foreach (var us in uppedSubstates.Values)
+        // step 4: update entity hierarchy
         {
-            TmpBaseSubstate dbSubstate = us.Type switch
+            var ids = new List<long>();
+            var parentIds = new List<long>();
+
+            foreach (var (entityId, parentId) in parentEntities)
             {
-                // SubstateType.System => expr,
-                // SubstateType.ResourceManager => expr,
-                SubstateType.ComponentInfo => new TmpComponentInfoSubstate(),
-                SubstateType.ComponentState => new TmpComponentStateSubstate(),
-                // SubstateType.Package => expr,
-                SubstateType.Vault => CreateTmpVaultSubstate(us),
-                // SubstateType.NonFungible => expr,
-                SubstateType.KeyValueStoreEntry => new TmpKeyValueStoreEntrySubstate(),
-                _ => throw new Exception("bla bla bla x3"),
-            };
+                ids.Add(entityId);
+                parentIds.Add(parentId);
+            }
 
-            dbSubstate.Key = us.Key;
-            dbSubstate.EntityId = us.ReferencedEntity.DatabaseId;
-            dbSubstate.FromStateVersion = us.StateVersion;
-            dbSubstate.DataHash = us.DataHash;
-            dbSubstate.Version = us.Version;
+            var idsParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = ids };
+            var parentIdsParameter = new NpgsqlParameter("@parent_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = parentIds };
 
-            dbContext.TmpSubstates.Add(dbSubstate);
+            var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
+                $@"
+UPDATE tmp_entities AS e
+SET parent_id = data.parent_id
+FROM (
+    SELECT * FROM UNNEST({idsParameter}, {parentIdsParameter}) d(id, parent_id)
+) AS data
+WHERE e.id = data.id
+", token);
 
-            us.Resolve(dbSubstate);
+            if (parentEntities.Count != affected)
+            {
+                throw new Exception("bla bla bla x4");
+            }
         }
 
-        await dbContext.SaveChangesAsync(token);
-
-        // step 4: now, that we're sure all the substates exists we can remove all of them
+        // step 5: now, that we're sure all the substates exists we can remove some of them
         {
             var substateKeys = new List<string>();
             var entityIds = new List<long>();
             var versions = new List<long>();
             var toStateVersions = new List<long>();
 
-            foreach (var ds in downedSubstates.Values)
+            foreach (var ds in downedSubstates)
             {
                 substateKeys.Add(ds.Key);
                 entityIds.Add(ds.ReferencedEntity.DatabaseId);
@@ -432,8 +499,7 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
 
             if (downedSubstates.Count != affected)
             {
-                // TODO replace with exception once we get genesis trans
-                Console.WriteLine("bla bla bla x4 - we can't throw as we don't have proper genesis transaction in our db");
+                throw new Exception("bla bla bla x5");
             }
         }
     }

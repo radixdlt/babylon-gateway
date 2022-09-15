@@ -91,50 +91,31 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRequest
+    /// V0TransactionSubmitResponse
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
+    [DataContract(Name = "V0TransactionSubmitResponse")]
+    public partial class V0TransactionSubmitResponse : IEquatable<V0TransactionSubmitResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0TransactionSubmitResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRequest() { }
+        protected V0TransactionSubmitResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="V0TransactionSubmitResponse" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="notarizedTransaction">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
+        /// <param name="duplicate">Is true if the transaction is a duplicate of an existing transaction in the mempool. (required).</param>
+        public V0TransactionSubmitResponse(bool duplicate = default(bool))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
-            {
-                throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
-            }
-            this.Network = network;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
-            {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
-            }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.Duplicate = duplicate;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// Is true if the transaction is a duplicate of an existing transaction in the mempool.
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
-
-        /// <summary>
-        /// A hex-encoded, compiled notarized transaction.
-        /// </summary>
-        /// <value>A hex-encoded, compiled notarized transaction.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        /// <value>Is true if the transaction is a duplicate of an existing transaction in the mempool.</value>
+        [DataMember(Name = "duplicate", IsRequired = true, EmitDefaultValue = true)]
+        public bool Duplicate { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +124,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("class V0TransactionSubmitResponse {\n");
+            sb.Append("  Duplicate: ").Append(Duplicate).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +146,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRequest);
+            return this.Equals(input as V0TransactionSubmitResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRequest instances are equal
+        /// Returns true if V0TransactionSubmitResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
+        /// <param name="input">Instance of V0TransactionSubmitResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRequest input)
+        public bool Equals(V0TransactionSubmitResponse input)
         {
             if (input == null)
             {
@@ -182,14 +162,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
-                ) && 
-                (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.Duplicate == input.Duplicate ||
+                    this.Duplicate.Equals(input.Duplicate)
                 );
         }
 
@@ -202,14 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
-                {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
-                }
-                if (this.NotarizedTransaction != null)
-                {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Duplicate.GetHashCode();
                 return hashCode;
             }
         }
