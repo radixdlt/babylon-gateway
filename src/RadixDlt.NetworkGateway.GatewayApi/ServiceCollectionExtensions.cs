@@ -113,9 +113,6 @@ public static class ServiceCollectionExtensions
         // Singleton-Scoped services
         AddSingletonServices(services);
 
-        // Request scoped services
-        AddRequestScopedServices(services);
-
         // Transient (pooled) services
         AddCoreApiHttpClient(services, out var coreApiHttpClientBuilder, out var coreNodeHealthCheckerClientBuilder);
 
@@ -131,14 +128,8 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IValidations, Validations>();
         services.TryAddSingleton<IExceptionHandler, ExceptionHandler>();
         services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
-        services.TryAddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();
         services.TryAddSingleton<RequestTimeoutMiddleware>();
-    }
-
-    private static void AddRequestScopedServices(IServiceCollection services)
-    {
-        services.TryAddScoped<IConstructionAndSubmissionService, ConstructionAndSubmissionService>();
     }
 
     private static void AddCoreApiHttpClient(IServiceCollection services, out IHttpClientBuilder coreApiHttpClientBuilder, out IHttpClientBuilder coreNodeHealthCheckerClientBuilder)
