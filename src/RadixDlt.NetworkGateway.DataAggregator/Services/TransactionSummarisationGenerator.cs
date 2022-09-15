@@ -115,6 +115,10 @@ public static class TransactionSummarisationGenerator
             : roundTimestamp > createdTimestamp ? createdTimestamp
             : roundTimestamp;
 
+        // TODO invalid, those are just placeholders
+        var transactionAccumulator = BitConverter.GetBytes(transaction.StateVersion);
+        var payloadHash = transaction.NotarizedTransaction.NotarySignature.GetEcdsaSecp256k1Signature().SignatureBytes.ConvertFromHex();
+
         // TODO those hashes are almost certainly mismatched/invalid
         return new TransactionSummary(
             StateVersion: transaction.StateVersion,
@@ -123,10 +127,10 @@ public static class TransactionSummarisationGenerator
             RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
             IsStartOfEpoch: isStartOfEpoch,
             IsStartOfRound: isStartOfRound,
-            PayloadHash: transaction.NotarizedTransaction.NotarySignature.ConvertFromHex(), // TODO almost certainly invalid
+            PayloadHash: payloadHash,
             IntentHash: transaction.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex(),
             SignedTransactionHash: transaction.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex(),
-            TransactionAccumulator: transaction.NotarizedTransaction.NotarySignature.ConvertFromHex(), // TODO almost certainly invalid
+            TransactionAccumulator: transactionAccumulator,
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
             NormalizedRoundTimestamp: normalizedRoundTimestamp

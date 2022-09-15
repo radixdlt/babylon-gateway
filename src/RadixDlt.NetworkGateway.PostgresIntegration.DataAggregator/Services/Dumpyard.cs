@@ -63,104 +63,80 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Addressing;
-using RadixDlt.NetworkGateway.Commons.CoreCommunications;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-/// <summary>
-/// A stateful class for processing the content of a transaction, and determining how the database should be updated.
-/// The class is short-lived, lasting to process one transaction.
-///
-/// It works in tandem with the DbActionsPlanner, which is another stateful class, which lasts across the whole
-/// batch of transactions, and is designed to enable performant bulk transaction processing.
-///
-/// Roughly, the process proceeds as follows:
-/// * TransactionContentProcessor runs for each transaction, performing initial processing, which:
-///   - Marks which dependencies need to be loaded / resolved
-///   - Adds deferred "DbActions" against the DbActionsPlanner which will create/update entities on the DbContext
-/// * DbActionsPlanner - Bulk load dependencies
-/// * DbActionsPlanner - Process deferred actions in order
-/// * DbContext is saved
-///
-/// See the DbActionsPlanner class doc for a detailed description on how this process should work.
-/// </summary>
-internal class TransactionContentProcessor
+internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
 {
-    /* Dependencies */
-    private readonly DbActionsPlanner _dbActionsPlanner;
-    private readonly IEntityDeterminer _entityDeterminer;
+    private TmpBaseEntity? _databaseEntity;
 
-    /* Mutable Class State */
-    /* > These simply help us avoid passing tons of references down the call stack.
-    /* > These will all not be null at the time of use in the Handle methods. */
-    private CommittedTransaction? _transaction;
-    private TransactionSummary? _transactionSummary;
-    private LedgerTransaction? _dbTransaction;
+    public long DatabaseId => DatabaseEntity.Id;
 
-    public TransactionContentProcessor(
-        DbActionsPlanner dbActionsPlanner,
-        IEntityDeterminer entityDeterminer
-    )
+    public TmpBaseEntity DatabaseEntity => _databaseEntity ?? throw new Exception("bla bla");
+
+    public string? GlobalAddress { get; private set; }
+
+    public byte[]? GlobalAddressBytes { get; private set; }
+
+    public void Globalize(string address, string addressBytes)
     {
-        _dbActionsPlanner = dbActionsPlanner;
-        _entityDeterminer = entityDeterminer;
+        GlobalAddress = address;
+        GlobalAddressBytes = Convert.FromHexString(addressBytes);
     }
 
-    public void ProcessTransactionContents(CommittedTransaction transaction, LedgerTransaction dbTransaction, TransactionSummary transactionSummary)
+    public void Resolve(TmpBaseEntity entity)
     {
-        _transaction = transaction;
-        _transactionSummary = transactionSummary;
-        _dbTransaction = dbTransaction;
+        _databaseEntity = entity;
+    }
+}
 
-        // TODO reimplement, see Olympia TransactionContentProcessor
+internal record EntitySubstateKey(string EntityAddress, string SubstateKey);
 
-        var stateVersion = transaction.StateVersion;
-        var stateUpdates = transaction.Receipt.StateUpdates;
+internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion)
+{
+    public EntitySubstateKey EntitySubstateKey { get; } = new EntitySubstateKey(ReferencedEntity.Address, Key);
+}
 
-        foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
+internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, UpSubstate Raw)
+{
+    public EntitySubstateKey EntitySubstateKey { get; } = new EntitySubstateKey(ReferencedEntity.Address, Key);
+
+    public TmpBaseSubstate? DatabaseSubstate { get; private set; }
+
+    public void Resolve(TmpBaseSubstate substate)
+    {
+        DatabaseSubstate = substate;
+    }
+}
+
+internal static class DictionaryExtensions
+{
+    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
+        where TKey : notnull
+    {
+        if (dictionary.ContainsKey(key))
         {
-            // TODO do something
+            return dictionary[key];
         }
 
-        foreach (var upSubstate in stateUpdates.UpSubstates)
+        var value = factory(key);
+
+        dictionary[key] = value;
+
+        return value;
+    }
+
+    public static void Put<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, TVal value)
+        where TKey : notnull
+    {
+        if (dictionary.ContainsKey(key))
         {
-            // TODO parse json and do something
+            throw new Exception("bla bla bla x1");
         }
 
-        foreach (var downSubstate in stateUpdates.DownSubstates)
-        {
-            // TODO do something
-        }
-
-        // foreach (string resourceAddress in transaction.Receipt.NewResourceAddresses)
-        // {
-        //     _dbActionsPlanner.ResolveResource(resourceAddress, stateVersion);
-        // }
-        //
-        // // TODO use var once CoreApiSdk turns on <nullable>enable</nullable>
-        // foreach (string componentAddress in transaction.Receipt.NewComponentAddresses)
-        // {
-        //     // TODO do we have to parse addresses?
-        //     // TODO we should still move all the prefixes outside of this class and use proper parser (RadixAddressParser.TryParse)
-        //     const string accountPrefix = "account_";
-        //
-        //     if (componentAddress.StartsWith(accountPrefix))
-        //     {
-        //         _dbActionsPlanner.ResolveAccount(componentAddress, stateVersion);
-        //     }
-        //     else
-        //     {
-        //         throw new Exception("bleeeeee unsupported value of " + componentAddress);
-        //     }
-        // }
-        //
-        // foreach (string packageAddress in transaction.Receipt.NewPackageAddresses)
-        // {
-        //     // TODO do something
-        // }
+        dictionary[key] = value;
     }
 }

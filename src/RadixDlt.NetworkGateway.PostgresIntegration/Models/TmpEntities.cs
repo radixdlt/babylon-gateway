@@ -62,42 +62,53 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Numerics;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal static class TransactionMapping
+[Table("tmp_entities")]
+internal class TmpBaseEntity
 {
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
-    {
-        var (transaction, summary, _) = transactionData;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // var fee = transaction.Metadata.Fee == null
-        //     ? TokenAmount.Zero
-        //     : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-        var fee = TokenAmount.Zero;
+    [Column("address")]
+    public string Address { get; set; }
 
-        return new LedgerTransaction(
-            resultantStateVersion: summary.StateVersion,
-            payloadHash: summary.PayloadHash,
-            intentHash: summary.IntentHash,
-            signedTransactionHash: summary.SignedTransactionHash,
-            transactionAccumulator: summary.TransactionAccumulator,
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // message: transaction.Metadata.Message?.ConvertFromHex(),
-            message: null,
-            feePaid: fee,
-            epoch: summary.Epoch,
-            indexInEpoch: summary.IndexInEpoch,
-            roundInEpoch: summary.RoundInEpoch,
-            isStartOfEpoch: summary.IsStartOfEpoch,
-            isStartOfRound: summary.IsStartOfRound,
-            roundTimestamp: summary.RoundTimestamp,
-            createdTimestamp: summary.CreatedTimestamp,
-            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
-        );
-    }
+    [Column("global_address")]
+    public byte[]? GlobalAddress { get; set; }
+
+    [Column("parent_id")]
+    public long? ParentId { get; set; }
+
+    [Column("owner_ancestor_id")]
+    public long? OwnerAncestorId { get; set; }
+
+    [Column("global_ancestor_id")]
+    public long? GlobalAncestorId { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+}
+
+internal class TmpComponentEntity : TmpBaseEntity
+{
+}
+
+internal class TmpKeyValueStoreEntity : TmpBaseEntity
+{
+}
+
+internal class TmpAccountEntity : TmpBaseEntity
+{
+}
+
+internal class TmpValidatorEntity : TmpBaseEntity
+{
+}
+
+internal class TmpVaultEntity : TmpBaseEntity
+{
 }

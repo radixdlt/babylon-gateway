@@ -62,42 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Numerics;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.Commons.CoreCommunications;
 
-internal static class TransactionMapping
+public interface INetworkAddressConfigProvider
 {
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
-    {
-        var (transaction, summary, _) = transactionData;
+    AddressHrps GetAddressHrps();
 
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // var fee = transaction.Metadata.Fee == null
-        //     ? TokenAmount.Zero
-        //     : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-        var fee = TokenAmount.Zero;
-
-        return new LedgerTransaction(
-            resultantStateVersion: summary.StateVersion,
-            payloadHash: summary.PayloadHash,
-            intentHash: summary.IntentHash,
-            signedTransactionHash: summary.SignedTransactionHash,
-            transactionAccumulator: summary.TransactionAccumulator,
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // message: transaction.Metadata.Message?.ConvertFromHex(),
-            message: null,
-            feePaid: fee,
-            epoch: summary.Epoch,
-            indexInEpoch: summary.IndexInEpoch,
-            roundInEpoch: summary.RoundInEpoch,
-            isStartOfEpoch: summary.IsStartOfEpoch,
-            isStartOfRound: summary.IsStartOfRound,
-            roundTimestamp: summary.RoundTimestamp,
-            createdTimestamp: summary.CreatedTimestamp,
-            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
-        );
-    }
+    string GetXrdAddress();
 }
