@@ -63,41 +63,78 @@
  */
 
 using RadixDlt.NetworkGateway.Commons.Numerics;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal static class TransactionMapping
+[Table("tmp_substates")]
+internal class TmpBaseSubstate
 {
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("key")]
+    public string Key { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("to_state_version")]
+    public long? ToStateVersion { get; set; }
+
+    [Column("data_hash")]
+    public byte[] DataHash { get; set; }
+
+    [Column("version")]
+    public long Version { get; set; } = 0;
+
+    public TmpBaseSubstate()
     {
-        var (transaction, summary, _) = transactionData;
-
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // var fee = transaction.Metadata.Fee == null
-        //     ? TokenAmount.Zero
-        //     : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-        var fee = TokenAmount.Zero;
-
-        return new LedgerTransaction(
-            resultantStateVersion: summary.StateVersion,
-            payloadHash: summary.PayloadHash,
-            intentHash: summary.IntentHash,
-            signedTransactionHash: summary.SignedTransactionHash,
-            transactionAccumulator: summary.TransactionAccumulator,
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // message: transaction.Metadata.Message?.ConvertFromHex(),
-            message: null,
-            feePaid: fee,
-            epoch: summary.Epoch,
-            indexInEpoch: summary.IndexInEpoch,
-            roundInEpoch: summary.RoundInEpoch,
-            isStartOfEpoch: summary.IsStartOfEpoch,
-            isStartOfRound: summary.IsStartOfRound,
-            roundTimestamp: summary.RoundTimestamp,
-            createdTimestamp: summary.CreatedTimestamp,
-            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
-        );
     }
+
+    protected TmpBaseSubstate(byte[] dataHash)
+    {
+        DataHash = dataHash;
+    }
+}
+
+internal class TmpResourceAuthRuleSubstate : TmpBaseSubstate
+{
+    [Column("auth_rule_blob")]
+    public string AuthRuleBlob { get; set; }
+}
+
+internal class TmpResourceMetadataSubstate : TmpBaseSubstate
+{
+    [Column("metadata_blob")]
+    public string MetadataBlob { get; set; }
+}
+
+internal class TmpVaultSubstate : TmpBaseSubstate
+{
+    [Column("resource_id")]
+    public long ResourceId { get; set; }
+
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
+
+internal class TmpComponentInfoSubstate : TmpBaseSubstate
+{
+}
+
+internal class TmpComponentStateSubstate : TmpBaseSubstate
+{
+}
+
+internal class TmpKeyValueStoreEntrySubstate : TmpBaseSubstate
+{
 }

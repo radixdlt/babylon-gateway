@@ -127,7 +127,7 @@ internal class PreviewService : IPreviewService
                 request.CostUnitLimit,
                 request.TipPercentage,
                 request.Nonce,
-                request.SignerPublicKeys,
+                new List<CoreModel.PublicKey>(),
                 new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan)
             ),
             finalTokenSource.Token

@@ -133,6 +133,49 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "tmp_entities",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    address = table.Column<string>(type: "text", nullable: false),
+                    global_address = table.Column<byte[]>(type: "bytea", nullable: true),
+                    parent_id = table.Column<long>(type: "bigint", nullable: true),
+                    owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tmp_entities", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tmp_substates",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    key = table.Column<string>(type: "text", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    data_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    version = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    auth_rule_blob = table.Column<string>(type: "text", nullable: true),
+                    metadata_blob = table.Column<string>(type: "text", nullable: true),
+                    resource_id = table.Column<long>(type: "bigint", nullable: true),
+                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tmp_substates", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ledger_transactions",
                 columns: table => new
                 {
@@ -668,6 +711,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "resource_supply_history");
+
+            migrationBuilder.DropTable(
+                name: "tmp_entities");
+
+            migrationBuilder.DropTable(
+                name: "tmp_substates");
 
             migrationBuilder.DropTable(
                 name: "validator_proposal_records");

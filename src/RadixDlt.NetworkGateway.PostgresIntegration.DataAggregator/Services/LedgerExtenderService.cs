@@ -65,14 +65,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Npgsql;
+using NpgsqlTypes;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.Commons.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -86,7 +91,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
     private readonly ILogger<LedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
-    private readonly IEntityDeterminer _entityDeterminer;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly IClock _clock;
 
@@ -102,7 +106,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
         ILogger<LedgerExtenderService> logger,
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
-        IEntityDeterminer entityDeterminer,
         INetworkConfigurationProvider networkConfigurationProvider,
         IClock clock)
     {
@@ -110,7 +113,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
-        _entityDeterminer = entityDeterminer;
         _networkConfigurationProvider = networkConfigurationProvider;
         _clock = clock;
     }
@@ -232,6 +234,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
     {
         // Create own context for ledger extension unit of work
         await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        await using var tx = await ledgerExtensionDbContext.Database.BeginTransactionAsync(token);
 
         var processTransactionReport = await BulkProcessTransactionDependenciesAndEntityCreation(
             ledgerExtensionDbContext,
@@ -247,6 +250,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
             () => ledgerExtensionDbContext.SaveChangesAsync(token)
         );
 
+        await tx.CommitAsync(token);
+
         return new LedgerExtensionReport(processTransactionReport, finalTransactionSummary, ledgerExtensionEntriesWritten, dbPersistenceMs);
     }
 
@@ -256,36 +261,180 @@ internal class LedgerExtenderService : ILedgerExtenderService
         CancellationToken cancellationToken
     )
     {
-        var dbActionsPlanner = new DbActionsPlanner(
-            _transactionAssertionsOptionsMonitor.CurrentValue,
-            dbContext,
-            _entityDeterminer,
-            cancellationToken
+        var transactionContentProcessingMs = await CodeStopwatch.TimeInMs(
+            async () => await ProcessTransactions(dbContext, transactions, cancellationToken)
         );
 
-        var transactionContentProcessingMs = CodeStopwatch.TimeInMs(
-            () => ProcessTransactions(dbContext, dbActionsPlanner, transactions)
-        );
-
-        var dbActionsReport = await dbActionsPlanner.ProcessAllChanges();
-
-        return new ProcessTransactionReport(
-            transactionContentProcessingMs,
-            dbActionsReport.DbDependenciesLoadingMs,
-            dbActionsReport.ActionsCount,
-            dbActionsReport.LocalDbContextActionsMs
-        );
+        return new ProcessTransactionReport(123, 321, 123, 321);
     }
 
-    private void ProcessTransactions(ReadWriteDbContext dbContext, DbActionsPlanner dbActionsPlanner, List<CommittedTransactionData> transactions)
+    private async Task ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
     {
-        foreach (var transactionData in transactions)
+        // step 1: scan / process raw response
+
+        var referencedEntities = new Dictionary<string, ReferencedEntity>();
+        var downedSubstates = new Dictionary<EntitySubstateKey, DownedSubstate>();
+        var uppedSubstates = new Dictionary<EntitySubstateKey, UppedSubstate>();
+
+        foreach (var transactionData in transactionsData)
         {
             var dbTransaction = TransactionMapping.CreateLedgerTransaction(transactionData);
+
             dbContext.LedgerTransactions.Add(dbTransaction);
 
-            var transactionContentProcessor = new TransactionContentProcessor(dbActionsPlanner, _entityDeterminer);
-            transactionContentProcessor.ProcessTransactionContents(transactionData.CommittedTransaction, dbTransaction, transactionData.TransactionSummary);
+            var stateVersion = transactionData.CommittedTransaction.StateVersion;
+            var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
+
+            foreach (var upSubstate in stateUpdates.UpSubstates)
+            {
+                var sid = upSubstate.SubstateId;
+                var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
+                var us = new UppedSubstate(re, sid.SubstateKey, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate);
+
+                uppedSubstates.Put(us.EntitySubstateKey, us);
+            }
+
+            foreach (var downSubstate in stateUpdates.DownSubstates)
+            {
+                var sid = downSubstate.SubstateId;
+                var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
+                var ds = new DownedSubstate(re, sid.SubstateKey, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
+
+                downedSubstates.Put(ds.EntitySubstateKey, ds);
+            }
+
+            foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
+            {
+                // TODO not sure how to handle those; not sure what they even are
+
+                referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddress, _ => new ReferencedEntity(downVirtualSubstate.EntityAddress, downVirtualSubstate.EntityType, stateVersion));
+            }
+
+            foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
+            {
+                referencedEntities[newGlobalEntity.EntityAddress].Globalize(newGlobalEntity.GlobalAddressStr, newGlobalEntity.GlobalAddressBytes);
+            }
+        }
+
+        // step 2: resolve known types (optionally create missing entities)
+
+        {
+            var entityAddresses = referencedEntities.Keys.ToList();
+
+            var knownDbEntities = await dbContext.TmpEntities
+                .Where(e => entityAddresses.Contains(e.Address))
+                .ToDictionaryAsync(e => e.Address, token);
+
+            foreach (var e in referencedEntities.Values)
+            {
+                if (knownDbEntities.ContainsKey(e.Address))
+                {
+                    e.Resolve(knownDbEntities[e.Address]);
+
+                    continue;
+                }
+
+                TmpBaseEntity dbEntity = e.Type switch
+                {
+                    // EntityType.System => expr,
+                    // EntityType.ResourceManager => expr,
+                    EntityType.Component => new TmpComponentEntity(),
+                    // EntityType.Package => expr,
+                    EntityType.Vault => new TmpVaultEntity(),
+                    EntityType.KeyValueStore => new TmpKeyValueStoreEntity(),
+                    _ => throw new Exception("bla bla bla x2"),
+                };
+
+                dbEntity.Address = e.Address;
+                dbEntity.GlobalAddress = e.GlobalAddressBytes;
+                dbEntity.FromStateVersion = e.StateVersion;
+
+                dbContext.TmpEntities.Add(dbEntity);
+
+                e.Resolve(dbEntity);
+            }
+
+            await dbContext.SaveChangesAsync(token);
+        }
+
+        // step 3: insert all newly seen substates first as some substates we want to delete might not even exist yet!
+
+        TmpVaultSubstate CreateTmpVaultSubstate(UppedSubstate uppedSubstate)
+        {
+            // TODO handle fungible vs non-fungible properly
+
+            var vs = (VaultSubstate)uppedSubstate.Raw.SubstateData.ActualInstance;
+            var fra = (FungibleResourceAmount)vs.ResourceAmount.ActualInstance;
+
+            return new TmpVaultSubstate
+            {
+                Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos),
+            };
+        }
+
+        foreach (var us in uppedSubstates.Values)
+        {
+            TmpBaseSubstate dbSubstate = us.Type switch
+            {
+                // SubstateType.System => expr,
+                // SubstateType.ResourceManager => expr,
+                SubstateType.ComponentInfo => new TmpComponentInfoSubstate(),
+                SubstateType.ComponentState => new TmpComponentStateSubstate(),
+                // SubstateType.Package => expr,
+                SubstateType.Vault => CreateTmpVaultSubstate(us),
+                // SubstateType.NonFungible => expr,
+                SubstateType.KeyValueStoreEntry => new TmpKeyValueStoreEntrySubstate(),
+                _ => throw new Exception("bla bla bla x3"),
+            };
+
+            dbSubstate.Key = us.Key;
+            dbSubstate.EntityId = us.ReferencedEntity.DatabaseId;
+            dbSubstate.FromStateVersion = us.StateVersion;
+            dbSubstate.DataHash = us.DataHash;
+            dbSubstate.Version = us.Version;
+
+            dbContext.TmpSubstates.Add(dbSubstate);
+
+            us.Resolve(dbSubstate);
+        }
+
+        await dbContext.SaveChangesAsync(token);
+
+        // step 4: now, that we're sure all the substates exists we can remove all of them
+        {
+            var substateKeys = new List<string>();
+            var entityIds = new List<long>();
+            var versions = new List<long>();
+            var toStateVersions = new List<long>();
+
+            foreach (var ds in downedSubstates.Values)
+            {
+                substateKeys.Add(ds.Key);
+                entityIds.Add(ds.ReferencedEntity.DatabaseId);
+                versions.Add(ds.Version);
+                toStateVersions.Add(ds.StateVersion);
+            }
+
+            var substateIdsParameter = new NpgsqlParameter("@substate_keys", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = substateKeys };
+            var entityIdsParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = entityIds };
+            var versionsParameter = new NpgsqlParameter("@versions", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = versions };
+            var toStateVersionsParameter = new NpgsqlParameter("@to_state_versions", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = toStateVersions };
+
+            var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
+                $@"
+UPDATE tmp_substates AS s
+SET is_deleted = true, to_state_version = data.to_state_version
+FROM (
+    SELECT * FROM UNNEST({substateIdsParameter}, {entityIdsParameter}, {versionsParameter}, {toStateVersionsParameter}) d(key, entity_id, version, to_state_version)
+) AS data
+WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.version
+", token);
+
+            if (downedSubstates.Count != affected)
+            {
+                // TODO replace with exception once we get genesis trans
+                Console.WriteLine("bla bla bla x4 - we can't throw as we don't have proper genesis transaction in our db");
+            }
         }
     }
 
