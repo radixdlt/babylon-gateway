@@ -68,7 +68,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.TestDependencies;
+namespace RadixDlt.NetworkGateway.GatewayTestServer;
 
 public class TestGatewayApiStartup
 {
