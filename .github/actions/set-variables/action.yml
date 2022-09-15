@@ -22,7 +22,7 @@ outputs:
   gateway_api_tags:
     description: "API gateway tags"
     value: ${{ steps.set_variables.outputs.gateway_api_tags }}
-  gateway_api_tags:
+  database_migrations_tags:
     description: "Database Migrations tags"
     value: ${{ steps.set_variables.outputs.database_migrations_tags }}
 runs:
@@ -45,7 +45,7 @@ runs:
             case "${GH_EVENT_NAME}" in
                 release)
                     DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-data-aggregator"
-                    DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-database-migrations"
+                    DOCKER_REPO_DATABASE_MIGRATIONS="radixdlt/babylon-ng-database-migrations"
                     DOCKER_REPO_GATEWAY_API="radixdlt/babylon-ng-gateway-api"
                     DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${{ github.event.release.tag_name }}"
                     DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${{ github.event.release.tag_name }}"
