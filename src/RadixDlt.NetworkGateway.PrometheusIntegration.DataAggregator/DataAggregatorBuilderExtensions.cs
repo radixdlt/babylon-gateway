@@ -78,6 +78,13 @@ public static class DataAggregatorBuilderExtensions
 {
     public static DataAggregatorBuilder AddPrometheusMetrics(this DataAggregatorBuilder builder)
     {
+        return builder
+            .AddPrometheusObserverMetrics()
+            .AddPrometheusHttpMetrics();
+    }
+
+    public static DataAggregatorBuilder AddPrometheusObserverMetrics(this DataAggregatorBuilder builder)
+    {
         builder.Services
             .AddSingleton<MetricsObserver>()
             .AddSingleton<IGlobalWorkerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
@@ -97,6 +104,11 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<INetworkStatusReaderObserver>(provider => provider.GetRequiredService<MetricsObserver>())
             .AddSingleton<ITransactionLogReaderObserver>(provider => provider.GetRequiredService<MetricsObserver>());
 
+        return builder;
+    }
+
+    public static DataAggregatorBuilder AddPrometheusHttpMetrics(this DataAggregatorBuilder builder)
+    {
         builder.CoreApiHttpClientBuilder
             .UseHttpClientMetrics();
 

@@ -73,6 +73,13 @@ public static class GatewayApiBuilderExtensions
 {
     public static GatewayApiBuilder AddPrometheusMetrics(this GatewayApiBuilder builder)
     {
+        return builder
+            .AddPrometheusObserverMetrics()
+            .AddPrometheusHttpMetrics();
+    }
+
+    public static GatewayApiBuilder AddPrometheusObserverMetrics(this GatewayApiBuilder builder)
+    {
         builder.Services
             .AddSingleton<MetricObserver>()
             .AddSingleton<IExceptionObserver>(provider => provider.GetRequiredService<MetricObserver>())
@@ -81,6 +88,11 @@ public static class GatewayApiBuilderExtensions
             .AddSingleton<ILedgerStateQuerierObserver>(provider => provider.GetRequiredService<MetricObserver>())
             .AddSingleton<ISubmissionTrackingServiceObserver>(provider => provider.GetRequiredService<MetricObserver>());
 
+        return builder;
+    }
+
+    public static GatewayApiBuilder AddPrometheusHttpMetrics(this GatewayApiBuilder builder)
+    {
         builder.CoreApiHttpClientBuilder
             .UseHttpClientMetrics();
 

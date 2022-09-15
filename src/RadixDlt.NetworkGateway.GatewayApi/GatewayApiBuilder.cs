@@ -63,6 +63,9 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApi.Workers;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
@@ -80,4 +83,18 @@ public sealed class GatewayApiBuilder
     public IHttpClientBuilder CoreApiHttpClientBuilder { get; }
 
     public IHttpClientBuilder CoreNodeHealthCheckerClientBuilder { get; }
+
+    public GatewayApiBuilder AddWorkerServices()
+    {
+        Services.TryAddScoped<ICoreNodeHealthChecker, CoreNodeHealthChecker>();
+
+        return this;
+    }
+
+    public GatewayApiBuilder AddHostedServices()
+    {
+        Services.AddHostedService<CoreNodesSupervisorStatusReviseWorker>();
+
+        return this;
+    }
 }

@@ -63,6 +63,8 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
 
@@ -77,4 +79,24 @@ public sealed class DataAggregatorBuilder
     public IServiceCollection Services { get; }
 
     public IHttpClientBuilder CoreApiHttpClientBuilder { get; }
+
+    public DataAggregatorBuilder AddHealthChecks()
+    {
+        Services
+            .AddHealthChecks()
+            .AddCheck<AggregatorHealthCheck>("network_gateway_data_aggregator");
+
+        return this;
+    }
+
+    public DataAggregatorBuilder AddHostedServices()
+    {
+        Services.AddHostedService<NodeConfigurationMonitorWorker>();
+        Services.AddHostedService<LedgerConfirmationWorker>();
+        Services.AddHostedService<MempoolTrackerWorker>();
+        Services.AddHostedService<MempoolResubmissionWorker>();
+        Services.AddHostedService<MempoolPrunerWorker>();
+
+        return this;
+    }
 }
