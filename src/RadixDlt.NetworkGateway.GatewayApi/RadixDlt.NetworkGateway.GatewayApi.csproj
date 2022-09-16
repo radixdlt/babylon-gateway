@@ -3,9 +3,10 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="FluentValidation.AspNetCore" />  
+    <PackageReference Include="FluentValidation.AspNetCore" />
+    <PackageReference Include="Moq" />
   </ItemGroup>
 
   <ItemGroup>

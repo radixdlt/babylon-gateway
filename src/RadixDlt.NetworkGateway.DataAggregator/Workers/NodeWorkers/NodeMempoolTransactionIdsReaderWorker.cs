@@ -81,10 +81,15 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
+public interface INodeMempoolTransactionIdsReaderWorker
+{
+    Task FetchAndShareMempoolTransactions(CancellationToken stoppingToken);
+}
+
 /// <summary>
 /// Responsible for syncing the mempool from a node.
 /// </summary>
-public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker
+public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker, INodeMempoolTransactionIdsReaderWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
@@ -132,12 +137,7 @@ public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         return nodeConfig.CoreApiNode.Enabled && !nodeConfig.CoreApiNode.DisabledForMempool;
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
-    {
-        await FetchAndShareMempoolTransactions(cancellationToken);
-    }
-
-    private async Task FetchAndShareMempoolTransactions(CancellationToken stoppingToken)
+    public async Task FetchAndShareMempoolTransactions(CancellationToken stoppingToken)
     {
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
 
@@ -180,5 +180,10 @@ public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker
         }
 
         _mempoolTrackerService.RegisterNodeMempoolHashes(_nodeConfig.CoreApiNode.Name, new NodeMempoolHashes(_latestTransactionHashes, _clock.UtcNow));
+    }
+
+    protected override async Task DoWork(CancellationToken cancellationToken)
+    {
+        await FetchAndShareMempoolTransactions(cancellationToken);
     }
 }

@@ -63,31 +63,82 @@
  */
 
 using FluentAssertions;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreMocks;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public class GatewayEndpointTests
+public class TransactionEndpointTests
 {
     [Fact]
-    public async Task TestGatewayApiVersions()
+    public async Task TestTransactionRecent()
     {
-        var client = TestInitializationFactory.CreateClient(nameof(TestGatewayApiVersions));
+        var coreApiMocks = CoreApiMocks.CreateDefaultMocks();
 
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
+        var client = GatewayTestServerFactory.Create(coreApiMocks, nameof(TestTransactionRecent)).GatewayApiHttpClient;
 
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+        var payload = await GetRecentTransactions(client);
 
-        payload.GatewayApi.ShouldNotBeNull();
+        payload.LedgerState.ShouldNotBeNull();
+        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
+        payload.LedgerState._Version.Should().Be(1);
+        payload.Transactions.Count.Should().BeGreaterThan(0);
+    }
 
-        payload.GatewayApi._Version.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
+    [Theory]
+    [InlineData("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20")]
+    public async Task TestTransactionStatus(string transactionHash)
+    {
+        // Arrange
+        var coreApiMocks = CoreApiMocks.CreateDefaultMocks();
+        var gatewayRunner = new GatewayTestsRunner(coreApiMocks, nameof(TestTransactionStatus));
+        var transactionIdentifier = new TransactionIdentifier(transactionHash);
 
-        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+        // Act
+        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
+
+        // Assert
+        status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    }
+
+    [Fact(Skip ="Valid transaction payload is required")]
+    public async Task TestTransactionSubmit()
+    {
+        var coreApiMocks = CoreApiMocks.CreateDefaultMocks();
+
+        var client = GatewayTestServerFactory.Create(coreApiMocks, nameof(TestTransactionSubmit)).GatewayApiHttpClient;
+
+        // Arrange
+        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
+
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // Act
+        HttpResponseMessage response = await client.PostAsync("/transaction/submit", content);
+
+        // Assert
+        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
+
+        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+    }
+
+    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
+    {
+        using HttpResponseMessage response = await client.PostAsync(
+            "/transaction/recent",
+            JsonContent.Create(new RecentTransactionsRequest()));
+
+        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
+
+        payload.Transactions.ShouldNotBeNull();
+
+        return payload;
     }
 }

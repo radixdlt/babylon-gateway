@@ -84,12 +84,17 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
+public interface INodeMempoolFullTransactionReaderWorker
+{
+    public Task FetchAndShareUnknownFullTransactions(CancellationToken cancellationToken);
+}
+
 /// <summary>
 /// Responsible for syncing unknown transaction contents from the mempool of a node.
 ///
 /// Only needed when we care about tracking transactions which weren't submitted by the network.
 /// </summary>
-public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker
+public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker, INodeMempoolFullTransactionReaderWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
@@ -140,12 +145,7 @@ public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker
                && _mempoolOptionsMonitor.CurrentValue.TrackTransactionsNotSubmittedByThisGateway;
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
-    {
-        await FetchAndShareUnknownFullTransactions(cancellationToken);
-    }
-
-    private async Task FetchAndShareUnknownFullTransactions(CancellationToken cancellationToken)
+    public async Task FetchAndShareUnknownFullTransactions(CancellationToken cancellationToken)
     {
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
         var coreApiProvider = _services.GetRequiredService<ICoreApiProvider>();
@@ -185,6 +185,11 @@ public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker
             fetchAndSubmissionReport.DuplicateCount,
             transactionFetchMs
         );
+    }
+
+    protected override async Task DoWork(CancellationToken cancellationToken)
+    {
+        await FetchAndShareUnknownFullTransactions(cancellationToken);
     }
 
     private record FetchAndSubmissionReport(int NonDuplicateCount, int DuplicateCount);

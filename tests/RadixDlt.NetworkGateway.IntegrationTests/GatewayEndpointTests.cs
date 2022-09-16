@@ -62,100 +62,35 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayTestServer;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreMocks;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.PostgresIntegration;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
+namespace RadixDlt.NetworkGateway.IntegrationTests;
+
+public class GatewayEndpointTests
 {
-    [CollectionDefinition("TestsInitialization")]
-    public class TestInitializationFactory
-        : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<TestInitializationFactory>
+    [Fact]
+    public async Task TestGatewayApiVersions()
     {
-        private readonly string _databaseName;
+        var coreApiMocks = CoreApiMocks.CreateDefaultMocks();
 
-        public TestInitializationFactory(string databaseName)
-        {
-            _databaseName = databaseName;
-        }
+        var client = GatewayTestServerFactory.Create(coreApiMocks, nameof(TestGatewayApiVersions)).GatewayApiHttpClient;
 
-        public static HttpClient CreateClient(string databaseName)
-        {
-            return new TestInitializationFactory(databaseName).CreateClient();
-        }
+        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            string dbConnectionString = $"Host=127.0.0.1:5432;Database={_databaseName};Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
-            builder
-            .ConfigureAppConfiguration(
-                    (context, config) =>
-                    {
-                        config.AddInMemoryCollection(new[]
-                        {
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", dbConnectionString),
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
-                        });
-                    }
-            )
-            .ConfigureServices(services =>
-            {
-                var sp = services.BuildServiceProvider();
+        payload.GatewayApi.ShouldNotBeNull();
 
-                using (var scope = sp.CreateScope())
-                {
-                    var scopedServices = scope.ServiceProvider;
+        payload.GatewayApi._Version.ShouldNotBeNull();
+        payload.GatewayApi._Version.Should().Be("2.0.0");
 
-                    var logger = scopedServices
-                        .GetRequiredService<ILogger<TestInitializationFactory>>();
-
-                    var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
-
-                    dbReadyOnlyContext.Database.EnsureDeleted();
-
-                    // This function will also run migrations!
-                    dbReadyOnlyContext.Database.EnsureCreated();
-
-                    try
-                    {
-                        DbSeedHelper.InitializeDbForTests(dbReadyOnlyContext);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, $"An error occurred when initializing the database for tests. Error: {ex.Message}");
-                    }
-                }
-
-                services.PostConfigure<NetworkOptions>(o =>
-                    {
-                        o.NetworkName = DbSeedHelper.NetworkName;
-                        o.IgnoreNonSyncedNodes = false;
-                        o.CoreApiNodes = new List<CoreApiNode>()
-                        {
-                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
-                        };
-                    }
-                );
-
-                services.PostConfigure<EndpointOptions>(o =>
-                {
-                    o.GatewayApiVersion = "3.0.0";
-                    o.GatewayOpenApiSchemaVersion = "2.0.0";
-                    o.MaxPageSize = 30;
-                });
-            });
-        }
+        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
     }
 }
