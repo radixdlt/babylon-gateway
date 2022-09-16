@@ -68,6 +68,25 @@ namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
 public static class RadixAddressParser
 {
+    public static TmpAccountHashedAddress TmpParseRadixAccountHashedAddress(AddressHrps hrps, string address)
+    {
+        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+
+        if (addressHrp != hrps.AccountHrp)
+        {
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match account HRP {hrps.AccountHrp}");
+        }
+
+        var (reAddressType, publicKey) = RadixBech32.ExtractRadixEngineAddressData(addressData);
+
+        if (reAddressType != RadixEngineAddressType.HASHED_KEY)
+        {
+            throw new AddressException("Address with account hrp is not of type HASHED_KEY");
+        }
+
+        return new TmpAccountHashedAddress(addressData);
+    }
+
     public static bool TryParse(
         AddressHrps hrps,
         string address,
@@ -235,7 +254,7 @@ public static class RadixAddressParser
             throw new AddressException("Address with account hrp is not of type PUB_KEY");
         }
 
-        return new AccountAddress(publicKey);
+        return new AccountAddress(addressData, publicKey);
     }
 
     private static ResourceAddress GetResourceAddressFromAddressData(byte[] addressData)
@@ -246,20 +265,20 @@ public static class RadixAddressParser
             throw new AddressException("Address with resource hrp suffix is not of type NATIVE_TOKEN or HASHED_KEY");
         }
 
-        return new ResourceAddress(addressData);
+        return new ResourceAddress(addressData, addressData);
     }
 
     private static ValidatorAddress GetValidatorAddressFromAddressData(byte[] addressData)
     {
         // Validator Addresses aren't Radix Engine Addresses
         RadixBech32.ValidatePublicKeyLength(addressData);
-        return new ValidatorAddress(addressData);
+        return new ValidatorAddress(addressData, addressData);
     }
 
     private static NodeAddress GetNodeAddressFromAddressData(byte[] addressData)
     {
         // Node Addresses aren't Radix Engine Addresses
         RadixBech32.ValidatePublicKeyLength(addressData);
-        return new NodeAddress(addressData);
+        return new NodeAddress(addressData, addressData);
     }
 }
