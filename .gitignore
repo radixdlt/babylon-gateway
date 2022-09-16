@@ -1,10 +1,10 @@
 # Custom gitignore
-.postgresdata/
-.postgresdata_backup*/
+ng_dev/.postgres_data/
 *.overrides.json
 *.PersonalOverrides.json
 *.DevelopmentOverrides.json
 *.ProductionOverrides.json
+*.DS_Store
 
 # Rider gitignore
 

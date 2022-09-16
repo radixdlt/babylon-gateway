@@ -84,7 +84,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     private record CapturedConfig(
         NetworkConfiguration NetworkConfiguration,
         AddressHrps AddressHrps,
-        NetworkIdentifier NetworkIdentifier
+        string NetworkName
     );
 
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
@@ -160,12 +160,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     public string GetNetworkName()
     {
-        return GetCapturedConfig().NetworkConfiguration.NetworkDefinition.NetworkName;
-    }
-
-    public NetworkIdentifier GetNetworkIdentifierForApiRequests()
-    {
-        return GetCapturedConfig().NetworkIdentifier;
+        return GetCapturedConfig().NetworkName;
     }
 
     public AddressHrps GetAddressHrps()
@@ -180,20 +175,19 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
     {
-        var hrps = networkConfiguration.Bech32HumanReadableParts;
         return new NetworkConfiguration
         {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
+            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.Network },
             NetworkAddressHrps = new NetworkAddressHrps
             {
-                AccountHrp = hrps.AccountHrp,
-                ResourceHrpSuffix = hrps.ResourceHrpSuffix,
-                ValidatorHrp = hrps.ValidatorHrp,
-                NodeHrp = hrps.NodeHrp,
+                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
+                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
+                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
+                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
             },
             WellKnownAddresses = new WellKnownAddresses
             {
-                XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
+                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
             },
         };
     }
@@ -215,7 +209,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             _capturedConfig = new CapturedConfig(
                 inputNetworkConfiguration,
                 inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-                new NetworkIdentifier(inputNetworkConfiguration.NetworkDefinition.NetworkName)
+                inputNetworkConfiguration.NetworkDefinition.NetworkName
             );
         }
     }

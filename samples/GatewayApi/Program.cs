@@ -65,6 +65,11 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Enrichers.Span;
+using Serilog.Formatting.Json;
+using Serilog.Sinks.Network;
+using Serilog.Sinks.Network.Formatters;
 using System.Threading.Tasks;
 
 namespace GatewayApi;
@@ -99,6 +104,18 @@ public static class Program
                 {
                     config.AddJsonFile(customConfigurationPath, false, reloadOnChange);
                 }
+            })
+            .UseSerilog((context, loggerConfiguration) =>
+            {
+                loggerConfiguration
+                    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+                    .WriteTo.TCPSink("tcp://localhost:50000", new JsonFormatter(renderMessage: true)) // logstash:50000
+                    .Enrich.FromLogContext()
+                    .Enrich.WithSpan(new SpanOptions { IncludeBaggage = true, IncludeTags = true })
+                    .Enrich.WithProperty("tmp_application", context.HostingEnvironment.ApplicationName)
+                    .Enrich.WithProperty("tmp_environment", context.HostingEnvironment.EnvironmentName)
+                    .Enrich.WithProperty("tmp_datacenter", "localhost")
+                    .ReadFrom.Configuration(context.Configuration);
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {

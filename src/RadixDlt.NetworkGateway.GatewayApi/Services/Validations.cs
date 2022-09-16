@@ -77,8 +77,6 @@ public interface IValidations
 
     ValidatedTransactionIdentifier ExtractValidTransactionIdentifier(TransactionIdentifier requestTransactionIdentifier);
 
-    ValidatedPublicKey ExtractValidPublicKey(PublicKey publicKey);
-
     ValidatedHex ExtractValidHex(string capitalizedErrorMessageFieldName, string hexString);
 
     ValidatedHex? ExtractOptionalValidHexOrNull(string capitalizedErrorMessageFieldName, string hexString);
@@ -162,24 +160,6 @@ internal class Validations : IValidations
         catch (FormatException exception)
         {
             throw InvalidRequestException.FromOtherError("Transaction identifier hash is not valid hex", exception.Message);
-        }
-    }
-
-    public ValidatedPublicKey ExtractValidPublicKey(PublicKey publicKey)
-    {
-        try
-        {
-            var bytes = Convert.FromHexString(publicKey.Hex);
-            if (bytes.Length != RadixBech32.CompressedPublicKeyBytesLength)
-            {
-                throw new InvalidPublicKeyException(publicKey, $"Public key is not {RadixBech32.CompressedPublicKeyBytesLength} bytes long");
-            }
-
-            return new ValidatedPublicKey(publicKey.Hex.ToLowerInvariant(), bytes);
-        }
-        catch (FormatException exception)
-        {
-            throw new InvalidPublicKeyException(publicKey, "Public key is not valid hex", exception.Message);
         }
     }
 

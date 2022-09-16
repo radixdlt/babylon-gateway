@@ -78,12 +78,10 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 
     string GetNetworkName();
 
-    CoreModel.NetworkIdentifier GetCoreNetworkIdentifier();
-
     TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public sealed record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, CoreModel.NetworkIdentifier CoreNetworkIdentifier, TokenIdentifier XrdTokenIdentifier);
+public sealed record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, TokenIdentifier XrdTokenIdentifier);
 
 public interface ICapturedConfigProvider
 {
@@ -113,11 +111,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public string GetNetworkName()
     {
         return GetCapturedConfig().NetworkName;
-    }
-
-    public CoreModel.NetworkIdentifier GetCoreNetworkIdentifier()
-    {
-        return GetCapturedConfig().CoreNetworkIdentifier;
     }
 
     public AddressHrps GetAddressHrps()

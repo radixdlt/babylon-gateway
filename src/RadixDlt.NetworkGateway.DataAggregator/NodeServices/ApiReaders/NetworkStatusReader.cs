@@ -87,7 +87,7 @@ public interface INetworkStatusReaderObserver
 internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly NetworkApi _networkApi;
+    private readonly StatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
@@ -96,7 +96,7 @@ internal class NetworkStatusReader : INetworkStatusReader
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
         _observers = observers;
-        _networkApi = coreApiProvider.NetworkApi;
+        _statusApi = coreApiProvider.StatusApi;
     }
 
     public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
@@ -104,13 +104,12 @@ internal class NetworkStatusReader : INetworkStatusReader
         try
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _networkApi
-                    .NetworkStatusPostAsync(
-                        new NetworkStatusRequest(
-                            networkIdentifier: _networkConfigurationProvider.GetNetworkIdentifierForApiRequests()
-                        ),
-                        token
-                    )
+                await _statusApi.StatusNetworkStatusPostAsync(
+                    new NetworkStatusRequest(
+                        network: _networkConfigurationProvider.GetNetworkName()
+                    ),
+                    token
+                )
             );
         }
         catch (Exception ex)

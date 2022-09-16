@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -80,17 +81,19 @@ public sealed class TransactionController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly ITransactionQuerier _transactionQuerier;
-    private readonly IConstructionAndSubmissionService _constructionAndSubmissionService;
+    private readonly IPreviewService _previewService;
+    private readonly ISubmissionService _submissionService;
 
     public TransactionController(
         ILedgerStateQuerier ledgerStateQuerier,
         ITransactionQuerier transactionQuerier,
-        IConstructionAndSubmissionService constructionAndSubmissionService
-    )
+        IPreviewService previewService,
+        ISubmissionService submissionService)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _transactionQuerier = transactionQuerier;
-        _constructionAndSubmissionService = constructionAndSubmissionService;
+        _previewService = previewService;
+        _submissionService = submissionService;
     }
 
     [HttpPost("recent")]
@@ -137,24 +140,15 @@ public sealed class TransactionController : ControllerBase
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
-    [HttpPost("build")]
-    public async Task<TransactionBuildResponse> Build(TransactionBuildRequest request, CancellationToken token)
+    [HttpPost("preview")]
+    public async Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForConstructionRequest(request.AtStateIdentifier, token);
-        return new TransactionBuildResponse(
-            await _constructionAndSubmissionService.HandleBuildRequest(request, ledgerState, token)
-        );
-    }
-
-    [HttpPost("finalize")]
-    public async Task<TransactionFinalizeResponse> Finalize(TransactionFinalizeRequest request, CancellationToken token)
-    {
-        return await _constructionAndSubmissionService.HandleFinalizeRequest(request, token);
+        return await _previewService.HandlePreviewRequest(request, token);
     }
 
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token)
     {
-        return await _constructionAndSubmissionService.HandleSubmitRequest(request, token);
+        return await _submissionService.HandleSubmitRequest(request, token);
     }
 }

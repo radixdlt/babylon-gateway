@@ -99,7 +99,9 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
         byte[] signedTransaction,
         byte[] transactionIdentifierHash,
         string submittedToNodeName,
-        CoreModel.ConstructionParseResponse parseResponse,
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // CoreModel.ConstructionParseResponse parseResponse,
+        object? parseResponse,
         CancellationToken token = default
     )
     {

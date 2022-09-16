@@ -71,7 +71,8 @@ internal class TransactionSubmitRequestValidator : AbstractValidator<Transaction
 {
     public TransactionSubmitRequestValidator()
     {
-        RuleFor(x => x.SignedTransaction)
-            .NotEmpty();
+        RuleFor(x => x.NotarizedTransaction)
+            .NotEmpty()
+            .Hex();
     }
 }

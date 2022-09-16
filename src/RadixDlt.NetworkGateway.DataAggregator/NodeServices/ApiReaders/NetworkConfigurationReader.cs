@@ -80,15 +80,18 @@ public interface INetworkConfigurationReader
 
 internal class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private readonly NetworkApi _networkApi;
+    private readonly StatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
 
-    public NetworkConfigurationReader(ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<INetworkConfigurationReaderObserver> observers)
+    public NetworkConfigurationReader(
+        ICoreApiProvider coreApiProvider,
+        INodeConfigProvider nodeConfigProvider,
+        IEnumerable<INetworkConfigurationReaderObserver> observers)
     {
         _observers = observers;
         _nodeConfigProvider = nodeConfigProvider;
-        _networkApi = coreApiProvider.NetworkApi;
+        _statusApi = coreApiProvider.StatusApi;
     }
 
     public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
@@ -96,9 +99,7 @@ internal class NetworkConfigurationReader : INetworkConfigurationReader
         try
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _networkApi
-                    .NetworkConfigurationPostAsync(new object(), token)
-            );
+                await _statusApi.StatusNetworkConfigurationPostAsync(token));
         }
         catch (Exception ex)
         {

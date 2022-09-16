@@ -121,7 +121,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<INodeWorkersRunnerFactory, NodeWorkersRunnerFactory>();
         services.TryAddSingleton<ILedgerConfirmationService, LedgerConfirmationService>();
         services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
-        services.TryAddSingleton<IEntityDeterminer, EntityDeterminer>();
         services.TryAddSingleton<ISystemStatusService, SystemStatusService>();
     }
 
@@ -155,8 +154,6 @@ public static class ServiceCollectionExtensions
     {
         // Add node workers - these will be instantiated by the NodeWorkersRunner.cs.
         services.TryAddScoped<INodeWorker, NodeTransactionLogWorker>();
-        services.TryAddScoped<INodeWorker, NodeMempoolTransactionIdsReaderWorker>();
-        services.TryAddScoped<INodeWorker, NodeMempoolFullTransactionReaderWorker>();
     }
 
     private static HttpClientHandler ConfigureHttpClientHandler(IOptions<NetworkOptions> options)

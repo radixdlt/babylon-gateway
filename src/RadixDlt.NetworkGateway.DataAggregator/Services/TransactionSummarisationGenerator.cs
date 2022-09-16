@@ -64,7 +64,6 @@
 
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using System;
 
@@ -78,27 +77,28 @@ public static class TransactionSummarisationGenerator
         long? newRoundInEpoch = null;
         DateTimeOffset? newRoundTimestamp = null;
 
-        foreach (var operationGroup in transaction.OperationGroups)
-        {
-            foreach (var operation in operationGroup.Operations)
-            {
-                if (operation.IsCreateOf<EpochData>(out var epochData))
-                {
-                    newEpoch = epochData.Epoch;
-                }
-
-                if (operation.IsCreateOf<RoundData>(out var newRoundData))
-                {
-                    newRoundInEpoch = newRoundData.Round;
-
-                    // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
-                    if (newRoundData.Timestamp != 0)
-                    {
-                        newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
-                    }
-                }
-            }
-        }
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // foreach (var operationGroup in transaction.OperationGroups)
+        // {
+        //     foreach (var operation in operationGroup.Operations)
+        //     {
+        //         if (operation.IsCreateOf<EpochData>(out var epochData))
+        //         {
+        //             newEpoch = epochData.Epoch;
+        //         }
+        //
+        //         if (operation.IsCreateOf<RoundData>(out var newRoundData))
+        //         {
+        //             newRoundInEpoch = newRoundData.Round;
+        //
+        //             // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
+        //             if (newRoundData.Timestamp != 0)
+        //             {
+        //                 newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+        //             }
+        //         }
+        //     }
+        // }
 
         /* NB:
            The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
@@ -115,17 +115,31 @@ public static class TransactionSummarisationGenerator
             : roundTimestamp > createdTimestamp ? createdTimestamp
             : roundTimestamp;
 
+        // TODO invalid, those are just placeholders
+        var transactionAccumulator = BitConverter.GetBytes(transaction.StateVersion);
+        var payloadHash = BitConverter.GetBytes(transaction.StateVersion);
+        var intentHash = payloadHash;
+        var signedIntentHash = payloadHash;
+
+        if (transaction.NotarizedTransaction != null)
+        {
+            payloadHash = transaction.NotarizedTransaction.NotarySignature.GetEcdsaSecp256k1Signature().SignatureBytes.ConvertFromHex();
+            intentHash = transaction.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex();
+            signedIntentHash = transaction.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex();
+        }
+
+        // TODO those hashes are almost certainly mismatched/invalid
         return new TransactionSummary(
-            StateVersion: transaction.CommittedStateIdentifier.StateVersion,
+            StateVersion: transaction.StateVersion,
             Epoch: newEpoch ?? lastTransaction.Epoch,
             IndexInEpoch: isStartOfEpoch ? 0 : lastTransaction.IndexInEpoch + 1,
             RoundInEpoch: newRoundInEpoch ?? lastTransaction.RoundInEpoch,
             IsStartOfEpoch: isStartOfEpoch,
             IsStartOfRound: isStartOfRound,
-            PayloadHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(),
-            IntentHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(), // TODO - Fix me when we read this from the Core API
-            SignedTransactionHash: transaction.TransactionIdentifier.Hash.ConvertFromHex(), // TODO - Fix me when we read this from the Core API
-            TransactionAccumulator: transaction.CommittedStateIdentifier.TransactionAccumulator.ConvertFromHex(),
+            PayloadHash: payloadHash,
+            IntentHash: intentHash,
+            SignedTransactionHash: signedIntentHash,
+            TransactionAccumulator: transactionAccumulator,
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,
             NormalizedRoundTimestamp: normalizedRoundTimestamp

@@ -78,6 +78,4 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token);
 
     string GetNetworkName();
-
-    NetworkIdentifier GetNetworkIdentifierForApiRequests();
 }
