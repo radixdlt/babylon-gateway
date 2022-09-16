@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" />
-    <PackageReference Include="Moq" />
   </ItemGroup>
 
   <ItemGroup>
