@@ -13,6 +13,8 @@ outputs:
     value: ${{ steps.set_variables.outputs.data-aggregator-tag }}
   gateway-api-tag:
     description: "Set API gateway image tag"
+  database-migrations-tag:
+    description: "Set database migrations image tag"
     value: ${{ steps.set_variables.outputs.gateway-api-tag }}
   data_aggregator_tags:
     description: "Aggregator tags"
@@ -20,6 +22,9 @@ outputs:
   gateway_api_tags:
     description: "API gateway tags"
     value: ${{ steps.set_variables.outputs.gateway_api_tags }}
+  database_migrations_tags:
+    description: "Database Migrations tags"
+    value: ${{ steps.set_variables.outputs.database_migrations_tags }}
 runs:
   using: "composite"
   steps:
@@ -34,12 +39,16 @@ runs:
         if [[ ! -z $GH_EVENT_NAME ]] && [[ "$GH_EVENT_NAME" == "release" ]] ;then
             DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
             DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
+            DOCKER_REPO_DATABASE_MIGRATIONS="eu.gcr.io/dev-container-repo/babylon-ng-database-migrations"
+
 
             case "${GH_EVENT_NAME}" in
                 release)
                     DOCKER_REPO_DATA_AGGREGATOR="radixdlt/babylon-ng-data-aggregator"
+                    DOCKER_REPO_DATABASE_MIGRATIONS="radixdlt/babylon-ng-database-migrations"
                     DOCKER_REPO_GATEWAY_API="radixdlt/babylon-ng-gateway-api"
                     DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${{ github.event.release.tag_name }}"
+                    DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${{ github.event.release.tag_name }}"
                     GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${{ github.event.release.tag_name }}"
                 ;;
                 *)
@@ -49,26 +58,35 @@ runs:
             esac
 
             echo "DATA_AGGREGATOR_TAGS: $DATA_AGGREGATOR_TAGS"
+            echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATIONS_TAGS"
             echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
 
             echo "::set-output name=data_aggregator_tags::$DATA_AGGREGATOR_TAGS"
             echo "::set-output name=gateway_api_tags::$GATEWAY_API_TAGS"
+            echo "::set-output name=database_migrations_tags::$DATABASE_MIGRATIONS_TAGS"
+
             echo "::set-output name=data-aggregator-tag::$DOCKER_TAG"
+            echo "::set-output name=database-migrations-tag::$DOCKER_TAG"
             echo "::set-output name=gateway-api-tag::$DOCKER_TAG"
 
         else
             DOCKER_REPO_DATA_AGGREGATOR="eu.gcr.io/dev-container-repo/babylon-ng-data-aggregator"
             DOCKER_REPO_GATEWAY_API="eu.gcr.io/dev-container-repo/babylon-ng-gateway-api"
+            DOCKER_REPO_DATABASE_MIGRATIONS="eu.gcr.io/dev-container-repo/babylon-ng-database-migrations"
 
             DATA_AGGREGATOR_TAGS="${DOCKER_REPO_DATA_AGGREGATOR}:${DOCKER_TAG}"
+            DATABASE_MIGRATIONS_TAGS="${DOCKER_REPO_DATABASE_MIGRATIONS}:${DOCKER_TAG}"
             GATEWAY_API_TAGS="${DOCKER_REPO_GATEWAY_API}:${DOCKER_TAG}"
 
             echo "DATA_AGGREGATOR_TAGS: $DATA_AGGREGATOR_TAGS"
+            echo "DATABASE_MIGRATIONS_TAGS: $DATABASE_MIGRATION_TAGS"
             echo "GATEWAY_API_TAGS: $GATEWAY_API_TAGS"
 
             echo "::set-output name=data_aggregator_tags::$DATA_AGGREGATOR_TAGS"
+            echo "::set-output name=database_migrations_tags::$DATABASE_MIGRATIONS_TAGS"
             echo "::set-output name=gateway_api_tags::$GATEWAY_API_TAGS"
             echo "::set-output name=data-aggregator-tag::$DOCKER_TAG"
+            echo "::set-output name=database-migrations-tag::$DOCKER_TAG"
             echo "::set-output name=gateway-api-tag::$DOCKER_TAG"
         fi
       shell: bash
