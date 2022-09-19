@@ -464,7 +464,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="mempoolRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of MempoolResponse</returns>
-        public async System.Threading.Tasks.Task<MempoolResponse> MempoolPostAsync(MempoolRequest mempoolRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public virtual async System.Threading.Tasks.Task<MempoolResponse> MempoolPostAsync(MempoolRequest mempoolRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             RadixDlt.CoreApiSdk.Client.ApiResponse<MempoolResponse> localVarResponse = await MempoolPostWithHttpInfoAsync(mempoolRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;

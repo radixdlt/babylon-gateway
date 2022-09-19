@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreMocks;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http;
 using System.Text;
@@ -11,21 +11,26 @@ namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 public class GatewayTestsRunner
 {
-    private GatewayTestServerFactory _gatewayTestServer;
+    private HttpClient _client = new();
 
-    public GatewayTestsRunner(CoreApiMocks coreApiMocks, string databaseName)
+    public async Task ActAsync()
     {
-        _gatewayTestServer = GatewayTestServerFactory.Create(coreApiMocks, databaseName);
-        Client = _gatewayTestServer.GatewayApiHttpClient;
+        await Task.Delay(45000);
     }
 
-    public HttpClient Client { get; }
+    public void ArrangeTransactionStatusTest(string databaseName, TransactionStatus.StatusEnum expectedStatus)
+    {
+        var coreApiStub = new CoreApiStub();
+
+        TestDataAggregatorFactory.Create(coreApiStub, databaseName);
+        _client = TestGatewayApiFactory.Create(coreApiStub, databaseName).Client;
+    }
 
     public async Task<TransactionStatus.StatusEnum> GetTransactionStatus(TransactionIdentifier transactionIdentifier)
     {
-        string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await Client.PostAsync("/transaction/status", content);
+        var response = await _client.PostAsync("/transaction/status", content);
 
         var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
 

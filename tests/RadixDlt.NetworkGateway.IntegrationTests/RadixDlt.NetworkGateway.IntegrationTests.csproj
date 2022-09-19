@@ -21,10 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\samples\DataAggregator\DataAggregator.csproj" />
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Commons\RadixDlt.NetworkGateway.Commons.csproj" />
-    <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayTestServer\RadixDlt.NetworkGateway.GatewayTestServer.csproj" />
+    <ProjectReference Include="..\RadixDlt.NetworkGateway.DataAggregatorRunner\RadixDlt.NetworkGateway.DataAggregatorRunner.csproj" />
+    <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiTestServer\RadixDlt.NetworkGateway.GatewayApiTestServer.csproj" />
   </ItemGroup>
 
 </Project>

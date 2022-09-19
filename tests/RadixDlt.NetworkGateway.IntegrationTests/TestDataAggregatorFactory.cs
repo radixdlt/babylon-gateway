@@ -67,46 +67,38 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayTestServer;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreMocks;
+using RadixDlt.NetworkGateway.DataAggregator.Configuration;
+using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using RadixDlt.NetworkGateway.PostgresIntegration;
-using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Net.Http;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests
 {
-    public class GatewayTestServerFactory
-        : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<GatewayTestServerFactory>
+    public class TestDataAggregatorFactory
+        : WebApplicationFactory<DataAggregatorRunner.Program>, ICollectionFixture<DataAggregatorRunner.Program>
     {
-        private readonly CoreApiMocks _coreApiMocks;
+        private readonly CoreApiStub _coreApiStub;
 
         private readonly string _databaseName;
 
-        public HttpClient GatewayApiHttpClient { get; }
-
-        public GatewayTestServerFactory(CoreApiMocks coreApiMocks, string databaseName)
+        private TestDataAggregatorFactory(CoreApiStub coreApiStub, string databaseName)
         {
-            _coreApiMocks = coreApiMocks;
+            _coreApiStub = coreApiStub;
             _databaseName = databaseName;
 
-            GatewayApiHttpClient = CreateClient();
+            CreateClient();
         }
 
-        public static GatewayTestServerFactory Create(CoreApiMocks coreApiMocks, string databaseName)
+        public static TestDataAggregatorFactory Create(CoreApiStub coreApiStub, string databaseName)
         {
-            return new GatewayTestServerFactory(coreApiMocks, databaseName);
+            return new TestDataAggregatorFactory(coreApiStub, databaseName);
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            string dbConnectionString = $"Host=127.0.0.1:5432;Database={_databaseName};Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+            var dbConnectionString = $"Host=127.0.0.1:5432;Database={_databaseName};Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
 
             builder
             .ConfigureAppConfiguration(
@@ -118,58 +110,62 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                             new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
                             new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
                         });
+
+                        // mempool
+                        config.AddInMemoryCollection(new[]
+                        {
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:MinDelayBetweenMissingFromMempoolAndResubmissionSeconds", "10"),
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:MinDelayBetweenResubmissionsSeconds", "10"),
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:StopResubmittingAfterSeconds", "300"),
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:PruneCommittedAfterSeconds", "10"),
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds", "604800"),
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds", "604800"),
+                            new KeyValuePair<string, string>("DataAggregator:Mempool:PruneRequiresMissingFromMempoolForSeconds", "60"),
+                        });
+
+                        // ledgerConfirmation
+                        config.AddInMemoryCollection(new[]
+                        {
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:CommitRequiresNodeQuorumTrustProportion", "0.51"),
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:OnlyUseSufficientlySyncedUpNodesForQuorumCalculation", "true"),
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:SufficientlySyncedStateVersionThreshold", "1000"),
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:MaxCommitBatchSize", "1000"),
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:MaxTransactionPipelineSizePerNode", "3000"),
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:LargeBatchSizeToAddDelay", "500"),
+                            new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:DelayBetweenLargeBatchesMilliseconds", "0"),
+                        });
+
+                        // transactionAssertions
+                        config.AddInMemoryCollection(new[]
+                        {
+                            new KeyValuePair<string, string>("DataAggregator:TransactionAssertions:AssertDownedSubstatesMatchDownFromCoreApi", "false"),
+                            new KeyValuePair<string, string>("DataAggregator:TransactionAssertions:SubstateTypesWhichAreAllowedToHaveIncompleteHistoryCommaSeparated", "ValidatorSystemMetadataSubstate"),
+                        });
                     }
             )
             .ConfigureTestServices(services =>
             {
-                // inject core mocks
-                foreach (Type mockType in _coreApiMocks.Keys)
-                {
-                    services.AddSingleton(mockType, _coreApiMocks[mockType]!);
-                }
-
-                var sp = services.BuildServiceProvider();
-
-                using var scope = sp.CreateScope();
-
-                var scopedServices = scope.ServiceProvider;
-
-                var logger = scopedServices
-                    .GetRequiredService<ILogger<GatewayTestServerFactory>>();
-
-                var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
-
-                dbReadyOnlyContext.Database.EnsureDeleted();
-
-                // This function will also run migrations!
-                dbReadyOnlyContext.Database.EnsureCreated();
-
-                try
-                {
-                    DbSeedHelper.InitializeDbForTests(dbReadyOnlyContext);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, $"An error occurred when initializing the database for tests. Error: {ex.Message}");
-                }
+                // inject core stubs
+                services.AddSingleton<INetworkConfigurationReader>(_coreApiStub);
+                services.AddSingleton<ITransactionLogReader>(_coreApiStub);
+                services.AddSingleton<ICoreApiProvider>(_coreApiStub);
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
                         o.NetworkName = DbSeedHelper.NetworkName;
-                        o.IgnoreNonSyncedNodes = false;
+                        o.DisableCoreApiHttpsCertificateChecks = false;
                         o.CoreApiNodes = new List<CoreApiNode>()
                         {
-                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333", Name = "node1", Enabled = true },
+                            new CoreApiNode()
+                            {
+                                Name = "node1",
+                                CoreApiAddress = "http://localhost:3333",
+                                TrustWeighting = 1,
+                                Enabled = true,
+                            },
                         };
                     }
                 );
-
-                services.PostConfigure<EndpointOptions>(o =>
-                {
-                    o.GatewayApiVersion = "3.0.0";
-                    o.GatewayOpenApiSchemaVersion = "2.0.0";
-                    o.MaxPageSize = 30;
-                });
             });
         }
     }

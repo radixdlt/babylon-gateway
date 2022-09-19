@@ -84,17 +84,12 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
-public interface INodeMempoolFullTransactionReaderWorker
-{
-    public Task FetchAndShareUnknownFullTransactions(CancellationToken cancellationToken);
-}
-
 /// <summary>
 /// Responsible for syncing unknown transaction contents from the mempool of a node.
 ///
 /// Only needed when we care about tracking transactions which weren't submitted by the network.
 /// </summary>
-public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker, INodeMempoolFullTransactionReaderWorker
+public sealed class NodeMempoolFullTransactionReaderWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(

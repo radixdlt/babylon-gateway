@@ -62,86 +62,43 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.DataAggregator;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests;
+namespace RadixDlt.NetworkGateway.DataAggregatorRunner;
 
-public class TransactionEndpointTests
+public class TestDataAggregatorStartup
 {
-    [Fact]
-    public async Task TestTransactionRecent()
+    public void ConfigureServices(IServiceCollection services)
     {
-        var coreApiStub = new CoreApiStub();
+        services
+            .AddNetworkGatewayDataAggregator()
+            .AddPostgresPersistence();
 
-        var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestTransactionRecent)).Client;
+        services
+            .AddControllers()
+            .AddControllersAsServices()
+            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 
-        var payload = await GetRecentTransactions(client);
-
-        payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
-        payload.LedgerState._Version.Should().Be(1);
-        payload.Transactions.Count.Should().BeGreaterThan(0);
+        services
+            .AddHealthChecks();
     }
 
-    [Theory]
-    [InlineData("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20")]
-    public async Task TestTransactionStatus(string transactionHash)
+    public void Configure(IApplicationBuilder application, ILogger<TestDataAggregatorStartup> logger)
     {
-        // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
-        gatewayRunner.ArrangeTransactionStatusTest(
-            databaseName: nameof(TestTransactionStatus),
-            expectedStatus: TransactionStatus.StatusEnum.PENDING);
-        var transactionIdentifier = new TransactionIdentifier(transactionHash);
-
-        // Act
-        await gatewayRunner.ActAsync();
-
-        // Assert
-        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
-        status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
-    }
-
-    [Fact(Skip ="Valid transaction payload is required")]
-    public async Task TestTransactionSubmit()
-    {
-        var coreApiStub = new CoreApiStub();
-
-        var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestTransactionSubmit)).Client;
-
-        // Arrange
-        var json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        // Act
-        var response = await client.PostAsync("/transaction/submit", content);
-
-        // Assert
-        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
-
-        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
-    }
-
-    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
-    {
-        using var response = await client.PostAsync(
-            "/transaction/recent",
-            JsonContent.Create(new RecentTransactionsRequest()));
-
-        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
-
-        payload.Transactions.ShouldNotBeNull();
-
-        return payload;
+        application
+            .UseAuthentication()
+            .UseAuthorization()
+            .UseCors()
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health");
+                endpoints.MapControllers();
+            });
     }
 }

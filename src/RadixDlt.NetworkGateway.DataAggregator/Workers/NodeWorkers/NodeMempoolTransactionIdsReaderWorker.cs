@@ -81,15 +81,10 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
-public interface INodeMempoolTransactionIdsReaderWorker
-{
-    Task FetchAndShareMempoolTransactions(CancellationToken stoppingToken);
-}
-
 /// <summary>
 /// Responsible for syncing the mempool from a node.
 /// </summary>
-public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker, INodeMempoolTransactionIdsReaderWorker
+public sealed class NodeMempoolTransactionIdsReaderWorker : NodeWorker
 {
     private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
         IDelayBetweenLoopsStrategy.ExponentialDelayStrategy(
