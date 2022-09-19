@@ -626,13 +626,14 @@ internal class MetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedSubstateNotFound(string signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
-    {
-        _transactionResubmissionErrorCount.Inc();
-        _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
-
-        return ValueTask.CompletedTask;
-    }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedSubstateNotFound(string signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
+    // {
+    //     _transactionResubmissionErrorCount.Inc();
+    //     _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
+    //
+    //     return ValueTask.CompletedTask;
+    // }
 
     ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedPermanently(string signedTransaction, WrappedCoreApiException wrappedCoreApiException)
     {

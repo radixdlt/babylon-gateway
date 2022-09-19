@@ -73,11 +73,6 @@ public sealed class InvalidTransactionException : ValidationException
 {
     public WrappedCoreApiException? WrappedCoreApiException { get; }
 
-    private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage, internalMessage)
-    {
-    }
-
     private InvalidTransactionException(string invalidTransactionHex, string userFacingMessage, WrappedCoreApiException? wrappedCoreApiException = null)
         : base(new InvalidTransactionError(invalidTransactionHex, userFacingMessage), userFacingMessage)
     {
@@ -93,18 +88,6 @@ public sealed class InvalidTransactionException : ValidationException
             invalidTransactionHex,
             "Transaction is invalid",
             wrappedCoreApiException
-        );
-    }
-
-    public static InvalidTransactionException FromSubstateDependencyNotFoundError(
-        string invalidTransactionHex,
-        CoreModel.SubstateDependencyNotFoundError error
-    )
-    {
-        return new InvalidTransactionException(
-            invalidTransactionHex,
-            "The transaction clashes with a previous transaction",
-            $"The transaction uses substate {error.SubstateIdentifierNotFound} which cannot be found - likely it's been used already"
         );
     }
 

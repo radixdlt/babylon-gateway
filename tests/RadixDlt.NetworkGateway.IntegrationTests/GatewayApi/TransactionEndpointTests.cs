@@ -111,13 +111,13 @@ public class TransactionEndpointTests
         payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
-    [Fact(Skip ="Valid transaction payload is required")]
+    [Fact]
     public async Task TestTransactionSubmit()
     {
         var client = TestInitializationFactory.CreateClient(nameof(TestTransactionSubmit));
 
         // Arrange
-        string json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
+        string json = new TransactionSubmitRequest(GenerateSampleNotarizedTransaction()).ToJson();
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -127,7 +127,7 @@ public class TransactionEndpointTests
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
 
-        payload.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+        payload.Duplicate.Should().BeFalse();
     }
 
     private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
@@ -141,5 +141,23 @@ public class TransactionEndpointTests
         payload.Transactions.ShouldNotBeNull();
 
         return payload;
+    }
+
+    // TODO this shouldn't use hardcoded value
+    private string GenerateSampleNotarizedTransaction()
+    {
+        return "1002000000100200000010020000001009000000070107f00a00000000000000000a64000000000000000a0500000000000000" +
+               "9121000000038258493e79d7cb71a655dc71ae429d010891590a2d33c63c60cf54b162cba21c01000980969800090500000010" +
+               "010000003011040000000a00000043616c6c4d6574686f6403000000811b000000040000000000000000000000000000000000" +
+               "0000000000000000010c080000006c6f636b5f66656530072a0000001001000000a1200000000000a0dec5adc9353600000000" +
+               "000000000000000000000000000000000000000a00000043616c6c4d6574686f6403000000811b000000040000000000000000" +
+               "0000000000000000000000000000000000010c08000000667265655f78726430070500000010000000000f00000054616b6546" +
+               "726f6d576f726b746f7001000000b61b0000000000000000000000000000000000000000000000000000000000040c00000043" +
+               "616c6c46756e6374696f6e04000000801b0000000100000000000000000000000000000000000000000000000000030c070000" +
+               "004163636f756e740c110000006e65775f776974685f7265736f7572636530071f00000010020000001108000000416c6c6f77" +
+               "416c6c00000000b10400000000020000302101000000020000009121000000038258493e79d7cb71a655dc71ae429d01089159" +
+               "0a2d33c63c60cf54b162cba21c924000000006e55ec51b6a10059b0aee80a07e44d2874104a6e0a6db3191c851d543a69cdc3f" +
+               "19d4e98853397f5cdca462be2e258e3ccdda0e8804be2b5a5715aaab75d97892400000006facf3ad44960827bec2bf13cbb8e0" +
+               "f8fbeab50113aa7b13a03f02072d66a70f65bd6b1723fc3509568fc5895d482cb20817e32aa503d76f84060071289048c5";
     }
 }

@@ -93,7 +93,7 @@ public interface ILedgerConfirmationService
     TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
 }
 
-public sealed record TransactionsRequested(long StateVersionExclusiveLowerBound, long StateVersionInclusiveUpperBound);
+public sealed record TransactionsRequested(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound);
 
 /// <summary>
 /// This service is responsible for controlling the NodeTransactionLogWorkers, and deciding on / committing when
@@ -228,7 +228,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
         foreach (var transaction in transactions)
         {
-            transactionStoreForNode[transaction.CommittedStateIdentifier.StateVersion] = transaction;
+            transactionStoreForNode[transaction.StateVersion] = transaction;
         }
     }
 
@@ -250,7 +250,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         return (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
             ? null
-            : new TransactionsRequested(firstMissingStateVersionGap.Value - 1, inclusiveUpperBound);
+            : new TransactionsRequested(firstMissingStateVersionGap.Value, inclusiveUpperBound);
     }
 
     private void PrepareForLedgerExtensionCheck()
@@ -486,7 +486,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var groupedTransactions = transactionsWithTrust
-            .GroupBy(t => t.Transaction!.CommittedStateIdentifier.TransactionAccumulator)
+            .GroupBy(t => t.Transaction!.StateVersion)
             .Select(grouping => new TransactionClaim(
                 grouping.First().Transaction!,
                 grouping.Select(g => g.NodeName).ToList(),
@@ -515,12 +515,15 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             foreach (var transaction in transactions)
             {
                 var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction, _clock);
-                var contents = transaction.Metadata.Hex.ConvertFromHex();
 
-                TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
-                TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
-
-                transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
+                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+                // var contents = transaction.Metadata.Hex.ConvertFromHex();
+                //
+                // TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
+                // TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
+                //
+                // transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
+                transactionData.Add(new CommittedTransactionData(transaction, summary, new byte[] { 1, 2, 4, 8 })); // TODO use real contents
                 currentParentSummary = summary;
             }
 

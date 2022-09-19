@@ -89,8 +89,6 @@ public interface IMempoolResubmissionServiceObserver
 
     ValueTask PostResubmitSucceeded(string signedTransaction);
 
-    ValueTask ResubmitFailedSubstateNotFound(string signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
-
     ValueTask ResubmitFailedPermanently(string signedTransaction, WrappedCoreApiException wrappedCoreApiException);
 
     ValueTask ResubmitFailedTimeout(string signedTransaction, OperationCanceledException operationCanceledException);

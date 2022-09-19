@@ -72,10 +72,11 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
-  "/transaction/build":
+  "/transaction/preview":
     post:
-      summary: Build Transaction
-      description: Returns a built unsigned transaction payload, from a set of intended actions.
+      summary: Preview Transaction
+      description: |
+        Previews transaction against the network.
       tags:
         - Transaction
       requestBody:
@@ -83,39 +84,14 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/TransactionBuildRequest"
+              "$ref": "#/components/schemas/TransactionPreviewRequest"
       responses:
         '200':
-          description: An unsigned transaction
+          description: Successful Preview
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TransactionBuildResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
-  "/transaction/finalize":
-    post:
-      summary: Finalize Transaction
-      description: Returns a signed transaction payload and transaction identifier, from an unsigned transaction payload and signature.
-      tags:
-        - Transaction
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/TransactionFinalizeRequest"
-      responses:
-        '200':
-          description: Final Signed Transaction
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/TransactionFinalizeResponse"
+                "$ref": "#/components/schemas/TransactionPreviewResponse"
         '500':
           description: Gateway Error
           content:
@@ -353,134 +329,92 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TransactionInfo"
-    TransactionBuildRequest:
+    TransactionPreviewRequest:
       type: object
       required:
-        - actions
-        - fee_payer
+        - manifest
+        - cost_unit_limit
+        - tip_percentage
+        - nonce
+        - signer_public_keys
+        - flags
       properties:
-        at_state_identifier:
-          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
-        actions:
+        manifest:
+          description: A transaction manifest. sbor encoded, and then hex encoded.
+          type: string
+        cost_unit_limit:
+          type: integer
+          description: Maximum number of cost units available for transaction execution.
+        tip_percentage:
+          type: integer
+          description: The validator tip.
+        nonce:
+          type: string
+          description: The nonce value to use for execution.
+        signer_public_keys:
           type: array
           items:
-            "$ref": "#/components/schemas/Action"
-        fee_payer:
-          description: The account which will pay the transaction fee, and whose private key will need to sign the transaction.
-          "$ref": "#/components/schemas/AccountIdentifier"
-        message:
-          description: The hex-encoded message bytes.
-          type: string
-        disable_token_mint_and_burn:
-          description: If true, mints and burns (aside from fee payments) are not permitted during transaction execution.
-          type: boolean
+            type: string
+          description: A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
+        flags:
+          type: object
+          required:
+            - unlimited_loan
+          properties:
+            unlimited_loan:
+              type: boolean
       example:
-        actions:
-          - type: TransferTokens
-            from_account:
-              address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
-            to_account:
-              address: rdx1qspcvwwuf8s549zyspz683v4n93g9kzpn6u6a9yalwzt00zghg75lmsftwv29
-            amount:
-              token_identifier:
-                rri: xrd_rr1qy5wfsfh
-              value: '123000000000000000'
-        fee_payer:
-          address: rdx1qspacch6qjqy7awspx304sev3n4em302en25jd87yrh4hp47grr692cm0kv88
-        disable_token_mint_and_burn: true
-    TransactionBuildResponse:
+        manifest: TBD
+        cost_unit_limit: TBD
+        tip_percentage: TBD
+        nonce: TBD
+        signer_public_keys:
+          - TBD
+        flags:
+          unlimited_loan: true
+    TransactionPreviewResponse:
       type: object
       required:
-        - transaction_build
+        - receipt
+        - resource_changes
+        - logs
       properties:
-        transaction_build:
-          $ref: "#/components/schemas/TransactionBuild"
-    TransactionBuild:
-      type: object
-      required:
-        - fee
-        - unsigned_transaction
-        - payload_to_sign
-      properties:
-        fee:
-          "$ref": "#/components/schemas/TokenAmount"
-        unsigned_transaction:
-          description: The unsigned transaction payload, hex encoded.
-          type: string
-        payload_to_sign:
-          description: The payload which needs signing, hex encoded. This is `SHA256(SHA256(unsigned_transaction_bytes))`.
-          type: string
-    TransactionFinalizeRequest:
-      type: object
-      required:
-        - unsigned_transaction
-        - signature
-      properties:
-        unsigned_transaction:
-          description: The unsigned transaction payload, hex encoded.
-          type: string
-        signature:
-          description: A signature of the payload to sign - `SHA256(SHA256(unsigned_transaction_bytes))`.
-          $ref: "#/components/schemas/Signature"
-        submit:
-          description: |
-            If true, the transaction is immediately submitted after finalization. However, we recommend that a transaction is submitted in a step after finalization. This ensures that you have a transaction identifier on hand to monitor the transaction status, even if the submission request failed with an uncertain error.
-          type: boolean
-      example:
-        unsigned_transaction: 0d00010776bf65acf2d25e9dcf4c716f5f39f201dccbfa173ad9c7f1c1dbcb8a86776b4d0000000101002100000000000000000000000000000000000000000000000000012901c1cf3900000200450600040279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798010000000000000000000000000000000000000000000000017afba303493b7ff8000800000200450600040279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798010000000000000000000000000000000000000000000000017afba303493b7f9402004506000402c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5010000000000000000000000000000000000000000000000000000000000000064000c003430303030366336663631363432303734363537333734363936653637323037343732363136653733363136333734363936663665
-        signature:
-          bytes: 3046022100cda0fcd31bf976aa65c31c180b4f595a61c866252c52898b952b8fe1d8fdcc33022100999e83036f9529c6250c07423d8b57f252dfba1b843385970bfa69f2c367658e
-          public_key:
-            hex: 0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
-        submit: false
-    PublicKey:
-      type: object
-      required:
-        - hex
-      properties:
-        hex:
-          description: The compressed public key (33 bytes), hex-encoded.
-          type: string
-    Signature:
-      type: object
-      required:
-        - public_key
-        - bytes
-      properties:
-        public_key:
-          $ref: "#/components/schemas/PublicKey"
-        bytes:
-          description: An ECDSA signature of the payload to sign with the given `public_key`. The ECDSA signature should be created using the secp256k1 curve and should be encoded in DER format, and then encoded as a hex string.
-          type: string
-    TransactionFinalizeResponse:
-      type: object
-      required:
-        - transaction_identifier
-        - signed_transaction
-      properties:
-        signed_transaction:
-          description: The signed transaction payload which can be submitted, hex encoded.
-          type: string
-        transaction_identifier:
-          $ref: "#/components/schemas/TransactionIdentifier"
+        receipt:
+          "$ref": "#/components/schemas/TransactionReceipt"
+        resource_changes:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResourceChange"
+        logs:
+          type: array
+          items:
+            type: object
+            required:
+              - level
+              - message
+            properties:
+              level:
+                type: string
+              message:
+                type: string
     TransactionSubmitRequest:
       type: object
       required:
-        - signed_transaction
+        - notarized_transaction
       properties:
-        signed_transaction:
-          description: The signed transaction payload which can be submitted, hex encoded.
+        notarized_transaction:
+          description: The notarized transaction payload which can be submitted, hex encoded.
           type: string
       example:
-        signed_transaction: 0d00010776bf65acf2d25e9dcf4c716f5f39f201dccbfa173ad9c7f1c1dbcb8a86776b4d0000000101002100000000000000000000000000000000000000000000000000012901c1cf3900000200450600040279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798010000000000000000000000000000000000000000000000017afba303493b7ff8000800000200450600040279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798010000000000000000000000000000000000000000000000017afba303493b7f9402004506000402c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5010000000000000000000000000000000000000000000000000000000000000064000c0034303030303663366636313634323037343635373337343639366536373230373437323631366537333631363337343639366636650b00cda0fcd31bf976aa65c31c180b4f595a61c866252c52898b952b8fe1d8fdcc33999e83036f9529c6250c07423d8b57f252dfba1b843385970bfa69f2c367658e
+        signed_transaction: 1002000000100200000010020000001009000000070107f00a00000000000000000a64000000000000000a0500000000000000912100000002ee228603d95b51f6f908c3ab20ffe075971f74c0f1668fa3b3924177d908054b01000980969800090500000010010000003011040000000a00000043616c6c4d6574686f6403000000811b0000000400000000000000000000000000000000000000000000000000010c080000006c6f636b5f66656530072a0000001001000000a1200000000000a0dec5adc9353600000000000000000000000000000000000000000000000a00000043616c6c4d6574686f6403000000811b0000000400000000000000000000000000000000000000000000000000010c08000000667265655f78726430070500000010000000000f00000054616b6546726f6d576f726b746f7001000000b61b0000000000000000000000000000000000000000000000000000000000040c00000043616c6c46756e6374696f6e04000000801b0000000100000000000000000000000000000000000000000000000000030c070000004163636f756e740c110000006e65775f776974685f7265736f7572636530071f00000010020000001108000000416c6c6f77416c6c00000000b1040000000002000030210100000002000000912100000002ee228603d95b51f6f908c3ab20ffe075971f74c0f1668fa3b3924177d908054b9240000000fb9d850fa850b0d3c0ad03ceb0737648337ed90526d059720375b833bfea00d503ad2360db5530490da11063a894d4e4bd2f419f638881296605f510ac2e88149240000000fb031ae2922c11cb45af44ee13fbdc2077c6647a982282ab6a23cb74fcdfd98c110c62ee5516e8e867e1e9c23b472f4e038464fba1adb16e70d8d520a9b1c9e6
     TransactionSubmitResponse:
       type: object
       required:
-        - transaction_identifier
+        - duplicate
       properties:
-        transaction_identifier:
-          description: The transaction identifier of the submitted transaction.
-          $ref: "#/components/schemas/TransactionIdentifier"
+        duplicate:
+          type: boolean
+          description: Is true if the transaction is a duplicate of an existing transaction in the mempool.
     GatewayRequest:
       type: object
       example: {}
@@ -664,6 +598,21 @@ components:
         message:
           description: The message bytes, hex encoded.
           type: string
+    TransactionReceipt:
+      type: object
+      description: The transaction execution receipt
+      required:
+        - tbd
+      properties:
+        tbd:
+          type: string
+    ResourceChange:
+      type: object
+      required:
+        - tbd
+      properties:
+        tbd:
+          type: string
     TokenAmount:
       type: object
       required:
@@ -753,12 +702,10 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          InvalidSignatureError: "#/components/schemas/InvalidSignatureError"
           InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
           InvalidTokenRRIError: "#/components/schemas/InvalidTokenRRIError"
           InvalidAccountAddressError: "#/components/schemas/InvalidAccountAddressError"
           InvalidValidatorAddressError: "#/components/schemas/InvalidValidatorAddressError"
-          InvalidPublicKeyError: "#/components/schemas/InvalidPublicKeyError"
           InvalidTokenSymbolError: "#/components/schemas/InvalidTokenSymbolError"
           InvalidActionError: "#/components/schemas/InvalidActionError"
           TokenNotFoundError: "#/components/schemas/TokenNotFoundError"
@@ -842,16 +789,6 @@ components:
             invalid_action:
               description: The action which was invalid. The descriptive reason is in the main error message.
               $ref: "#/components/schemas/Action"
-    InvalidSignatureError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_signature
-          properties:
-            invalid_signature:
-              description: The signature which was invalid. The descriptive reason is in the main error message.
-              $ref: "#/components/schemas/Signature"
     InvalidTransactionError:
       allOf:
         - "$ref": "#/components/schemas/GatewayError"
@@ -978,16 +915,6 @@ components:
             attempts:
               description: The number of attempts the system tried and failed to create a consistent transaction fee.
               type: integer
-    InvalidPublicKeyError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_public_key
-          properties:
-            invalid_public_key:
-              description: The public key which was invalid. A descriptive reason is given in the main error message.
-              type: string
     InvalidTokenSymbolError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"

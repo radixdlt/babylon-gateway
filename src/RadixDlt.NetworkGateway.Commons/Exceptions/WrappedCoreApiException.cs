@@ -87,7 +87,7 @@ public sealed class CoreApiErrorProperties
 /// </summary>
 /// <typeparam name="T">The type of the core error.</typeparam>
 public sealed class WrappedCoreApiException<T> : WrappedCoreApiException
-    where T : RadixDlt.CoreApiSdk.Model.CoreError
+    where T : RadixDlt.CoreApiSdk.Model.ErrorResponse
 {
     public override T Error { get; }
 
@@ -100,7 +100,7 @@ public sealed class WrappedCoreApiException<T> : WrappedCoreApiException
 
 public abstract class WrappedCoreApiException : Exception
 {
-    public abstract RadixDlt.CoreApiSdk.Model.CoreError Error { get; }
+    public abstract RadixDlt.CoreApiSdk.Model.ErrorResponse Error { get; }
 
     public CoreClient.ApiException ApiException { get; }
 
@@ -114,7 +114,7 @@ public abstract class WrappedCoreApiException : Exception
     }
 
     public static WrappedCoreApiException<T> Of<T>(CoreClient.ApiException apiException, T error, CoreApiErrorProperties? properties = null)
-        where T : RadixDlt.CoreApiSdk.Model.CoreError
+        where T : RadixDlt.CoreApiSdk.Model.ErrorResponse
     {
         return new WrappedCoreApiException<T>(apiException, error, properties);
     }

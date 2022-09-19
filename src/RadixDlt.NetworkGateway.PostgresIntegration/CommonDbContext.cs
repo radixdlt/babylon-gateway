@@ -106,6 +106,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
 
+    public DbSet<TmpBaseEntity> TmpEntities => Set<TmpBaseEntity>();
+
+    public DbSet<TmpBaseSubstate> TmpSubstates => Set<TmpBaseSubstate>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -122,6 +126,27 @@ internal abstract class CommonDbContext : DbContext
         HookupHistory(modelBuilder);
         HookupRecords(modelBuilder);
         HookupJoinTables(modelBuilder);
+
+        // Configure temporary types
+        modelBuilder.Entity<TmpBaseEntity>()
+            .HasDiscriminator<string>("type")
+            .HasValue<TmpSystemEntity>("system")
+            .HasValue<TmpResourceManagerEntity>("resourcemanager")
+            .HasValue<TmpComponentEntity>("component")
+            .HasValue<TmpPackageEntity>("package")
+            .HasValue<TmpKeyValueStoreEntity>("keyvaluestore")
+            .HasValue<TmpVaultEntity>("vault");
+
+        modelBuilder.Entity<TmpBaseSubstate>()
+            .HasDiscriminator<string>("type")
+            .HasValue<TmpSystemSubstate>("system")
+            .HasValue<TmpResourceManagerSubstate>("resourcemanager")
+            .HasValue<TmpComponentInfoSubstate>("componentinfo")
+            .HasValue<TmpComponentStateSubstate>("componentstate")
+            .HasValue<TmpPackageSubstate>("package")
+            .HasValue<TmpVaultSubstate>("vault")
+            .HasValue<TmpNonFungibleSubstate>("nonfungible")
+            .HasValue<TmpKeyValueStoreEntrySubstate>("keyvaluestoreentry");
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

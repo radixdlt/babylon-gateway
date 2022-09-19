@@ -7,6 +7,7 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - ./.postgresdata:/var/lib/postgresql/data
+    user: root
     # Should match with the appsettings.Development.json file/s
     environment:
       - POSTGRES_USER=db_dev_superuser

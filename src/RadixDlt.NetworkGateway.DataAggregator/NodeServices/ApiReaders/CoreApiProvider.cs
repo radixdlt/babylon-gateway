@@ -70,24 +70,30 @@ namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface ICoreApiProvider
 {
-    ConstructionApi ConstructionApi { get; }
+    TransactionApi TransactionsApi { get; }
 
-    TransactionsApi TransactionsApi { get; }
+    StatusApi StatusApi { get; }
 
-    MempoolApi MempoolApi { get; }
-
-    NetworkApi NetworkApi { get; }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // ConstructionApi ConstructionApi { get; }
+    //
+    // MempoolApi MempoolApi { get; }
+    //
+    // NetworkApi NetworkApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
 {
-    public ConstructionApi ConstructionApi { get; }
+    public TransactionApi TransactionsApi { get; }
 
-    public TransactionsApi TransactionsApi { get; }
+    public StatusApi StatusApi { get; }
 
-    public MempoolApi MempoolApi { get; }
-
-    public NetworkApi NetworkApi { get; }
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+    // public ConstructionApi ConstructionApi { get; }
+    //
+    // public MempoolApi MempoolApi { get; }
+    //
+    // public NetworkApi NetworkApi { get; }
 
     public CoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
@@ -96,9 +102,11 @@ internal class CoreApiProvider : ICoreApiProvider
             httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.CoreApiNode.CoreApiAuthorizationHeader);
         }
 
-        ConstructionApi = new ConstructionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        TransactionsApi = new TransactionsApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        MempoolApi = new MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        NetworkApi = new NetworkApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        TransactionsApi = new TransactionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        StatusApi = new StatusApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        // ConstructionApi = new ConstructionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        // MempoolApi = new MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        // NetworkApi = new NetworkApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
     }
 }
