@@ -64,7 +64,7 @@
 
 namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
-public enum RadixAddressType
+public enum OlympiaRadixAddressType
 {
     Account,
     Resource,
@@ -72,32 +72,27 @@ public enum RadixAddressType
     Node,
 }
 
-public abstract record RadixAddress(byte[] AddressData)
+public abstract record OlympiaRadixAddress(byte[] AddressData)
 {
-    public abstract RadixAddressType Type { get; }
+    public abstract OlympiaRadixAddressType Type { get; }
 }
 
-public sealed record TmpAccountHashedAddress(byte[] AddressData) : RadixAddress(AddressData)
+public sealed record AccountAddress(byte[] AddressData, byte[] CompressedPublicKey) : OlympiaRadixAddress(AddressData)
 {
-    public override RadixAddressType Type => RadixAddressType.Account;
+    public override OlympiaRadixAddressType Type => OlympiaRadixAddressType.Account;
 }
 
-public sealed record AccountAddress(byte[] AddressData, byte[] CompressedPublicKey) : RadixAddress(AddressData)
+public sealed record ResourceAddress(byte[] AddressData, byte[] RadixEngineAddress) : OlympiaRadixAddress(AddressData)
 {
-    public override RadixAddressType Type => RadixAddressType.Account;
+    public override OlympiaRadixAddressType Type => OlympiaRadixAddressType.Resource;
 }
 
-public sealed record ResourceAddress(byte[] AddressData, byte[] RadixEngineAddress) : RadixAddress(AddressData)
+public sealed record ValidatorAddress(byte[] AddressData, byte[] CompressedPublicKey) : OlympiaRadixAddress(AddressData)
 {
-    public override RadixAddressType Type => RadixAddressType.Resource;
+    public override OlympiaRadixAddressType Type => OlympiaRadixAddressType.Validator;
 }
 
-public sealed record ValidatorAddress(byte[] AddressData, byte[] CompressedPublicKey) : RadixAddress(AddressData)
+public sealed record NodeAddress(byte[] AddressData, byte[] CompressedPublicKey) : OlympiaRadixAddress(AddressData)
 {
-    public override RadixAddressType Type => RadixAddressType.Validator;
-}
-
-public sealed record NodeAddress(byte[] AddressData, byte[] CompressedPublicKey) : RadixAddress(AddressData)
-{
-    public override RadixAddressType Type => RadixAddressType.Node;
+    public override OlympiaRadixAddressType Type => OlympiaRadixAddressType.Node;
 }

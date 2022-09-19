@@ -68,29 +68,29 @@ namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
 public static class RadixAddressParser
 {
-    public static TmpAccountHashedAddress TmpParseRadixAccountHashedAddress(AddressHrps hrps, string address)
-    {
-        var (addressHrp, addressData, _) = RadixBech32.Decode(address);
-
-        if (addressHrp != hrps.AccountHrp)
-        {
-            throw new AddressException($"Address HRP was {addressHrp} but didn't match account HRP {hrps.AccountHrp}");
-        }
-
-        var (reAddressType, publicKey) = RadixBech32.ExtractRadixEngineAddressData(addressData);
-
-        if (reAddressType != RadixEngineAddressType.HASHED_KEY)
-        {
-            throw new AddressException("Address with account hrp is not of type HASHED_KEY");
-        }
-
-        return new TmpAccountHashedAddress(addressData);
-    }
+    // public static TmpAccountHashedAddress TmpParseRadixAccountHashedAddress(AddressHrps hrps, string address)
+    // {
+    //     var (addressHrp, addressData, _) = RadixBech32.Decode(address);
+    //
+    //     if (addressHrp != hrps.AccountHrp)
+    //     {
+    //         throw new AddressException($"Address HRP was {addressHrp} but didn't match account HRP {hrps.AccountHrp}");
+    //     }
+    //
+    //     var (reAddressType, publicKey) = RadixBech32.ExtractRadixEngineAddressData(addressData);
+    //
+    //     if (reAddressType != RadixEngineAddressType.HASHED_KEY)
+    //     {
+    //         throw new AddressException("Address with account hrp is not of type HASHED_KEY");
+    //     }
+    //
+    //     return new TmpAccountHashedAddress(addressData);
+    // }
 
     public static bool TryParse(
         AddressHrps hrps,
         string address,
-        [NotNullWhen(true)] out RadixAddress? radixAddress,
+        [NotNullWhen(true)] out OlympiaRadixAddress? radixAddress,
         [NotNullWhen(false)] out string? errorMessage
     )
     {
@@ -219,7 +219,7 @@ public static class RadixAddressParser
         return GetNodeAddressFromAddressData(addressData);
     }
 
-    private static RadixAddress Parse(AddressHrps hrps, string address)
+    private static OlympiaRadixAddress Parse(AddressHrps hrps, string address)
     {
         var (addressHrp, addressData, _) = RadixBech32.Decode(address);
 

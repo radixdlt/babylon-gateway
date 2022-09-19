@@ -124,6 +124,7 @@ internal class PreviewService : IPreviewService
             new CoreModel.TransactionPreviewRequest(
                 _coreApiHandler.GetNetworkIdentifier(),
                 request.Manifest,
+                new List<string>(),
                 request.CostUnitLimit,
                 request.TipPercentage,
                 request.Nonce,

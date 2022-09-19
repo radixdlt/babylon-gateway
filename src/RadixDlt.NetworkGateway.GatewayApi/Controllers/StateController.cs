@@ -64,6 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -96,20 +97,19 @@ public class StateController
     [HttpPost("tmp-entity")]
     public async Task<TmpEntitiesResponse> TmpEntities(TmpEntitiesRequest request, CancellationToken token = default)
     {
+        var address = RadixBech32.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateVersion, token);
 
-        if (!RadixAddressParser.TryParse(_networkConfigurationProvider.GetAddressHrps(), request.Address, out var address, out var em))
-        {
-            throw new Exception("bla bla bla api x1: " + em);
-        }
+        var state = await _stateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
 
-        return address.Type switch
-        {
-            RadixAddressType.Account => new TmpEntitiesResponse(await _stateQuerier.TmpAccountResourcesSnapshot(address, ledgerState, token)),
-            // RadixAddressType.Resource => expr,
-            // RadixAddressType.Validator => expr,
-            // RadixAddressType.Node => expr,
-            _ => throw new Exception("bla bla bla bla api x2"),
-        };
+        throw new Exception("aaaaaaaa");
+        // return address.Type switch
+        // {
+        //     OlympiaRadixAddressType.Account => new TmpEntitiesResponse(await _stateQuerier.TmpAccountResourcesSnapshot(address, ledgerState, token)),
+        //     // RadixAddressType.Resource => expr,
+        //     // RadixAddressType.Validator => expr,
+        //     // RadixAddressType.Node => expr,
+        //     _ => throw new Exception("bla bla bla bla api x2"),
+        // };
     }
 }

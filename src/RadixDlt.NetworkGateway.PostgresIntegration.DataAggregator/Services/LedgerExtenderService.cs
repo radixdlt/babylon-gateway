@@ -273,7 +273,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var referencedEntities = new Dictionary<string, ReferencedEntity>();
         var downedSubstates = new List<DownedSubstate>();
         var uppedSubstates = new List<UppedSubstate>();
-        var parentEntities = new Dictionary<long, long>();
+        var childToParentEntities = new Dictionary<string, string>();
 
         // step 1: scan for entities
         {
@@ -291,6 +291,16 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     var sid = upSubstate.SubstateId;
                     var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
                     var us = new UppedSubstate(re, sid.SubstateKey, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
+
+                    if (us.Data.ActualInstance is IOwner o)
+                    {
+                        foreach (var oe in o.OwnedEntities)
+                        {
+                            referencedEntities.GetOrAdd(oe.EntityAddress, _ => new ReferencedEntity(oe.EntityAddress, oe.EntityType, stateVersion)).IsChildOf(re);
+
+                            childToParentEntities.Add(oe.EntityAddress, sid.EntityAddress);
+                        }
+                    }
 
                     uppedSubstates.Add(us);
                 }
@@ -313,18 +323,50 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                 {
-                    referencedEntities[newGlobalEntity.EntityAddress].Globalize(newGlobalEntity.GlobalAddressStr, newGlobalEntity.GlobalAddressBytes);
+                    referencedEntities[newGlobalEntity.EntityAddress].Globalize(newGlobalEntity.GlobalAddressBytes);
                 }
             }
         }
 
         // step 2: resolve known types (optionally create missing entities)
         {
+            IEnumerable<long> ExpandParentalIds(TmpBaseEntity entity)
+            {
+                if (entity.ParentId.HasValue)
+                {
+                    yield return entity.ParentId.Value;
+                }
+
+                if (entity.OwnerAncestorId.HasValue)
+                {
+                    yield return entity.OwnerAncestorId.Value;
+                }
+
+                if (entity.GlobalAncestorId.HasValue)
+                {
+                    yield return entity.GlobalAncestorId.Value;
+                }
+            }
+
             var entityAddresses = referencedEntities.Keys.ToList();
 
             var knownDbEntities = await dbContext.TmpEntities
                 .Where(e => entityAddresses.Contains(e.Address))
                 .ToDictionaryAsync(e => e.Address, token);
+
+            var parentalEntitiesToLoad = knownDbEntities.Values.SelectMany(ExpandParentalIds).Distinct().ToList();
+
+            var knownParentalDbEntities = await dbContext.TmpEntities
+                .Where(e => parentalEntitiesToLoad.Contains(e.Id))
+                .ToDictionaryAsync(e => e.Address, token);
+
+            foreach (var (address, entity) in knownParentalDbEntities)
+            {
+                if (!knownDbEntities.ContainsKey(address))
+                {
+                    knownDbEntities[address] = entity;
+                }
+            }
 
             foreach (var e in referencedEntities.Values)
             {
@@ -376,13 +418,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
             TmpComponentStateSubstate CreateComponentStateSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetComponentStateSubstate();
-
-                // TODO handle referenced_entities
-
-                foreach (var oe in data.DataStruct.OwnedEntities)
-                {
-                    parentEntities[referencedEntities[oe.EntityAddress].DatabaseId] = us.ReferencedEntity.DatabaseId;
-                }
 
                 return new TmpComponentStateSubstate();
             }
@@ -441,27 +476,46 @@ internal class LedgerExtenderService : ILedgerExtenderService
         {
             var ids = new List<long>();
             var parentIds = new List<long>();
+            var ownerIds = new List<long>();
+            var globalIds = new List<long>();
 
-            foreach (var (entityId, parentId) in parentEntities)
+            foreach (var (childAddress, parentAddress) in childToParentEntities)
             {
-                ids.Add(entityId);
-                parentIds.Add(parentId);
+                var globalAncestor = referencedEntities[parentAddress];
+                var ownerAncestor = referencedEntities[parentAddress];
+
+                while (globalAncestor.HasParent)
+                {
+                    globalAncestor = globalAncestor.Parent;
+                }
+
+                while (!ownerAncestor.IsOwner)
+                {
+                    ownerAncestor = ownerAncestor.Parent;
+                }
+
+                ids.Add(referencedEntities[childAddress].DatabaseId);
+                parentIds.Add(referencedEntities[parentAddress].DatabaseId);
+                ownerIds.Add(globalAncestor.DatabaseId);
+                globalIds.Add(ownerAncestor.DatabaseId);
             }
 
             var idsParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = ids };
             var parentIdsParameter = new NpgsqlParameter("@parent_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = parentIds };
+            var ownerIdsParameter = new NpgsqlParameter("@owner_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = ownerIds };
+            var globalIdsParameter = new NpgsqlParameter("@global_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = globalIds };
 
             var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
                 $@"
 UPDATE tmp_entities AS e
-SET parent_id = data.parent_id
+SET parent_id = data.parent_id, owner_ancestor_id = data.owner_ancestor_id, global_ancestor_id = data.global_ancestor_id
 FROM (
-    SELECT * FROM UNNEST({idsParameter}, {parentIdsParameter}) d(id, parent_id)
+    SELECT * FROM UNNEST({idsParameter}, {parentIdsParameter}, {ownerIdsParameter}, {globalIdsParameter}) d(id, parent_id, owner_ancestor_id, global_ancestor_id)
 ) AS data
 WHERE e.id = data.id
 ", token);
 
-            if (parentEntities.Count != affected)
+            if (childToParentEntities.Count != affected)
             {
                 throw new Exception("bla bla bla x4");
             }

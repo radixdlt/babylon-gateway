@@ -66,41 +66,52 @@ using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
 {
+    private ReferencedEntity? _parent;
     private TmpBaseEntity? _databaseEntity;
-
-    public long DatabaseId
-    {
-        get
-        {
-            var de = _databaseEntity ?? throw new Exception("bla bla");
-
-            if (de.Id == 0)
-            {
-                throw new Exception("bla bla bla bla x6");
-            }
-
-            return de.Id;
-        }
-    }
-
-    public string? GlobalAddress { get; private set; }
 
     public byte[]? GlobalAddressBytes { get; private set; }
 
-    public void Globalize(string address, string addressBytes)
+    public long DatabaseId => GetDatabaseEntity().Id;
+
+    // TODO not sure if this logic is valid?
+    public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
+
+    [MemberNotNullWhen(true, nameof(Parent))]
+    public bool HasParent => _parent != null;
+
+    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
+
+    public void Globalize(string addressBytes)
     {
-        GlobalAddress = address;
         GlobalAddressBytes = Convert.FromHexString(addressBytes);
     }
 
     public void Resolve(TmpBaseEntity entity)
     {
         _databaseEntity = entity;
+    }
+
+    public void IsChildOf(ReferencedEntity parent)
+    {
+        _parent = parent;
+    }
+
+    private TmpBaseEntity GetDatabaseEntity()
+    {
+        var de = _databaseEntity ?? throw new Exception("bla bla");
+
+        if (de.Id == 0)
+        {
+            throw new Exception("bla bla bla bla x6");
+        }
+
+        return de;
     }
 }
 
