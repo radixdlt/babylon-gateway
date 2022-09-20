@@ -83,13 +83,11 @@ public record TmpEntitiesResponse(TmpSomeResult Output);
 [TypeFilter(typeof(InvalidModelStateFilter))]
 public class StateController
 {
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IStateQuerier _stateQuerier;
 
-    public StateController(INetworkConfigurationProvider networkConfigurationProvider, ILedgerStateQuerier ledgerStateQuerier, IStateQuerier stateQuerier)
+    public StateController(ILedgerStateQuerier ledgerStateQuerier, IStateQuerier stateQuerier)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
         _ledgerStateQuerier = ledgerStateQuerier;
         _stateQuerier = stateQuerier;
     }
@@ -102,14 +100,6 @@ public class StateController
 
         var state = await _stateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
 
-        throw new Exception("aaaaaaaa");
-        // return address.Type switch
-        // {
-        //     OlympiaRadixAddressType.Account => new TmpEntitiesResponse(await _stateQuerier.TmpAccountResourcesSnapshot(address, ledgerState, token)),
-        //     // RadixAddressType.Resource => expr,
-        //     // RadixAddressType.Validator => expr,
-        //     // RadixAddressType.Node => expr,
-        //     _ => throw new Exception("bla bla bla bla api x2"),
-        // };
+        return new TmpEntitiesResponse(state);
     }
 }

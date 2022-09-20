@@ -64,12 +64,15 @@
 
 using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public sealed record TmpSomeResult();
+public sealed record TmpNonFungibleResource(string ResourceAddress, string BalanceAttos);
+public sealed record TmpSomeResult(string ComponentAddress, ICollection<TmpNonFungibleResource> NonFungibleResources);
 
 public interface IStateQuerier
 {

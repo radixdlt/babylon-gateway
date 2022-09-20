@@ -68,6 +68,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,10 +77,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal class StateQuerier : IStateQuerier
 {
+    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
 
-    public StateQuerier(ReadOnlyDbContext dbContext)
+    public StateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext)
     {
+        _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;
     }
 
@@ -89,22 +92,39 @@ internal class StateQuerier : IStateQuerier
         // TODO we will denormalize a lot to improve performance and reduce complexity
 
         var entity = await _dbContext.TmpEntities
-            .Where(e => e.GlobalAncestorId == null && e.FromStateVersion <= ledgerState._Version)
+            .Where(e => e.FromStateVersion <= ledgerState._Version)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
-        if (entity == null)
+        // TODO account only?
+        if (entity == null || entity.GetType() != typeof(TmpComponentEntity))
         {
             throw new Exception("zzz zzz zzz x1");
         }
 
-        var keyValueStores = await _dbContext.TmpEntities
-            .Where(e => e.GetType() == typeof(TmpKeyValueStoreEntity))
-            .Where(e => e.GlobalAncestorId == entity.Id)
+        var fungibleBalanceHistory = await _dbContext.TmpOwnerEntityFungibleResourceBalanceHistory
+            .FromSqlInterpolated($@"
+SELECT DISTINCT ON (owner_entity_id, fungible_resource_entity_id) *
+FROM tmp_entity_fungible_resource_balance_history
+WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
+ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .ToListAsync(token);
 
-        // // all fungible vaults
-        // var allResources = _dbContext.TmpEntities.Where(e => e.)
+        var uniqueResources = fungibleBalanceHistory.Select(h => h.FungibleResourceEntityId).Distinct();
 
-        return new TmpSomeResult();
+        var resources = await _dbContext.TmpEntities
+            .Where(e => uniqueResources.Contains(e.Id))
+            .ToDictionaryAsync(e => e.Id, token);
+
+        var x = new List<TmpNonFungibleResource>();
+
+        foreach (var fbh in fungibleBalanceHistory)
+        {
+            var r = resources[fbh.FungibleResourceEntityId];
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
+
+            x.Add(new TmpNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
+        }
+
+        return new TmpSomeResult(RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().AccountHrp, address), x);
     }
 }
