@@ -67,6 +67,7 @@ using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -87,21 +88,38 @@ public class TransactionEndpointTests
         var payload = await GetRecentTransactions(client);
 
         payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
+        payload.LedgerState.Network.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
         payload.Transactions.Count.Should().BeGreaterThan(0);
     }
 
-    [Theory]
-    [InlineData("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20")]
-    public async Task TestTransactionStatus(string transactionHash)
+    [Fact]
+    public async Task MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        gatewayRunner.ArrangeTransactionStatusTest(
-            databaseName: nameof(TestTransactionStatus),
-            expectedStatus: TransactionStatus.StatusEnum.PENDING);
-        var transactionIdentifier = new TransactionIdentifier(transactionHash);
+        var coreApiStubs = gatewayRunner.ArrangeTransactionStatusTest(
+            databaseName: nameof(MempoolTransactionStatusShouldBeFailed),
+            expectedStatus: TransactionStatus.StatusEnum.FAILED);
+        var transactionIdentifier = new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+
+        // Act
+        await gatewayRunner.ActAsync();
+
+        // Assert
+        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
+        status.Should().Be(TransactionStatus.StatusEnum.FAILED);
+    }
+
+    [Fact]
+    public async Task MempoolTransactionStatusShouldBeConfirmed()
+    {
+        // Arrange
+        var gatewayRunner = new GatewayTestsRunner();
+        var coreApiStubs = gatewayRunner.ArrangeTransactionStatusTest(
+            databaseName: nameof(MempoolTransactionStatusShouldBeConfirmed),
+            expectedStatus: TransactionStatus.StatusEnum.CONFIRMED);
+        var transactionIdentifier = new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
         // Act
         await gatewayRunner.ActAsync();
@@ -109,6 +127,24 @@ public class TransactionEndpointTests
         // Assert
         var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    }
+
+    [Fact]
+    public async Task MempoolTransactionStatusShouldBePending()
+    {
+        // Arrange
+        var gatewayRunner = new GatewayTestsRunner();
+        var coreApiStubs = gatewayRunner.ArrangeTransactionStatusTest(
+            databaseName: nameof(MempoolTransactionStatusShouldBePending),
+            expectedStatus: TransactionStatus.StatusEnum.PENDING);
+        var transactionIdentifier = new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+
+        // Act
+        await gatewayRunner.ActAsync();
+
+        // Assert
+        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
+        status.Should().Be(TransactionStatus.StatusEnum.PENDING);
     }
 
     [Fact(Skip ="Valid transaction payload is required")]
@@ -119,7 +155,9 @@ public class TransactionEndpointTests
         var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestTransactionSubmit)).Client;
 
         // Arrange
-        var json = new TransactionSubmitRequest(DbSeedHelper.SubmitTransaction).ToJson();
+        string hexTransaction = Convert.ToHexString(Encoding.UTF8.GetBytes(coreApiStub.CoreApiStubDefaultConfiguration.SubmitTransaction)).ToLowerInvariant();
+
+        string json = new TransactionSubmitRequest(hexTransaction).ToJson();
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 

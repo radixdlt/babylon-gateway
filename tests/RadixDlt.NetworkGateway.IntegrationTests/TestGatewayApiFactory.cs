@@ -68,7 +68,12 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -76,11 +81,13 @@ using RadixDlt.NetworkGateway.GatewayApiTestServer;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using RadixDlt.NetworkGateway.PostgresIntegration;
+using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using Xunit;
-using ICoreApiProvider = RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders.ICoreApiProvider;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests
 {
@@ -112,7 +119,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 
             builder
             .ConfigureAppConfiguration(
-                    (context, config) =>
+                    (_, config) =>
                     {
                         config.AddInMemoryCollection(new[]
                         {
@@ -155,7 +162,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 
                 try
                 {
-                    DbSeedHelper.InitializeDbForTests(dbReadyOnlyContext);
+                    InitializeDbForTests(dbReadyOnlyContext);
                 }
                 catch (Exception ex)
                 {
@@ -164,16 +171,11 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = DbSeedHelper.NetworkName;
+                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkName;
                         o.IgnoreNonSyncedNodes = false;
                         o.CoreApiNodes = new List<CoreApiNode>()
                         {
-                            new CoreApiNode()
-                            {
-                                Name = "node1",
-                                CoreApiAddress = "http://localhost:3333",
-                                Enabled = true,
-                            },
+                            _coreApiStub.CoreApiStubDefaultConfiguration.GatewayCoreApiNode,
                         };
                     }
                 );
@@ -185,6 +187,92 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
                     o.MaxPageSize = 30;
                 });
             });
+        }
+
+        private void InitializeDbForTests(ReadOnlyDbContext db)
+        {
+            // network configuration
+            db.NetworkConfiguration.Add(MapNetworkConfigurationResponse(_coreApiStub.CoreApiStubDefaultConfiguration
+                .NetworkConfigurationResponse));
+
+            // ledger and raw transaction
+            db.RawTransactions.Add(new RawTransaction()
+            {
+                Payload = _coreApiStub.CoreApiStubDefaultConfiguration.Hash.ConvertFromHex(),
+                TransactionPayloadHash = _coreApiStub.CoreApiStubDefaultConfiguration.Hash.ConvertFromHex(),
+            });
+
+            // mempool transactions
+            var mempoolTransaction = MempoolTransaction.NewAsSubmittedForFirstTimeByGateway(
+                payloadHash: _coreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionHash.ConvertFromHex(),
+                payload: Encoding.UTF8.GetBytes(_coreApiStub.CoreApiStubDefaultConfiguration.SubmitTransaction),
+                submittedToNodeName: _coreApiStub.CoreApiStubDefaultConfiguration.GatewayCoreApiNode.Name,
+                transactionContents: GatewayTransactionContents.Default(),
+                submittedTimestamp: new FakeClock().UtcNow
+            );
+
+            db.MempoolTransactions.Add(mempoolTransaction);
+
+            // set status
+            switch (_coreApiStub.CoreApiStubDefaultConfiguration.MempoolTransaction.TransactionStatus)
+            {
+                case MempoolTransactionStatus.Committed:
+                    mempoolTransaction.MarkAsCommitted(
+                        _coreApiStub.CoreApiStubDefaultConfiguration.TransactionSummary.StateVersion,
+                        new FakeClock().UtcNow, new FakeClock());
+                    break;
+                case MempoolTransactionStatus.Failed:
+                    mempoolTransaction.MarkAsFailed(
+                        failureReason: MempoolTransactionFailureReason.Timeout,
+                        failureExplanation: "stack snapshot",
+                        timestamp: new FakeClock().UtcNow);
+                    break;
+                case MempoolTransactionStatus.Missing:
+                    break;
+                case MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp:
+                    break;
+                case MempoolTransactionStatus.SubmittedOrKnownInNodeMempool:
+                    mempoolTransaction.MarkAsSubmittedToGateway(new FakeClock().UtcNow);
+                    break;
+            }
+
+            db.LedgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(
+                    new CommittedTransactionData(
+                        _coreApiStub.CoreApiStubDefaultConfiguration.CommittedTransaction,
+                        _coreApiStub.CoreApiStubDefaultConfiguration.TransactionSummary,
+                        _coreApiStub.CoreApiStubDefaultConfiguration.CommittedTransaction.Metadata.Hex.ConvertFromHex())
+                )
+            );
+
+            // ledger status
+            db.LedgerStatus.Add(new LedgerStatus()
+            {
+                LastUpdated = new FakeClock().UtcNow,
+                TopOfLedgerStateVersion = _coreApiStub.CoreApiStubDefaultConfiguration.TransactionSummary.StateVersion,
+                SyncTarget = new SyncTarget() { TargetStateVersion = 1 },
+            });
+
+            db.SaveChanges();
+        }
+
+        private NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
+        {
+            var hrps = networkConfiguration.Bech32HumanReadableParts;
+            return new NetworkConfiguration
+            {
+                NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.NetworkIdentifier.Network },
+                NetworkAddressHrps = new NetworkAddressHrps
+                {
+                    AccountHrp = hrps.AccountHrp,
+                    ResourceHrpSuffix = hrps.ResourceHrpSuffix,
+                    ValidatorHrp = hrps.ValidatorHrp,
+                    NodeHrp = hrps.NodeHrp,
+                },
+                WellKnownAddresses = new WellKnownAddresses
+                {
+                    XrdAddress = RadixBech32.GenerateXrdAddress(hrps.ResourceHrpSuffix),
+                },
+            };
         }
     }
 }

@@ -152,17 +152,11 @@ namespace RadixDlt.NetworkGateway.IntegrationTests
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = DbSeedHelper.NetworkName;
+                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkName;
                         o.DisableCoreApiHttpsCertificateChecks = false;
                         o.CoreApiNodes = new List<CoreApiNode>()
                         {
-                            new CoreApiNode()
-                            {
-                                Name = "node1",
-                                CoreApiAddress = "http://localhost:3333",
-                                TrustWeighting = 1,
-                                Enabled = true,
-                            },
+                            _coreApiStub.CoreApiStubDefaultConfiguration.DataAggregatorCoreApiNode,
                         };
                     }
                 );
