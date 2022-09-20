@@ -140,7 +140,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     {
         if (_parentId == null || _ownerId == null || _globalId == null)
         {
-            throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgot to call ResolveParentalIds(long, long, long)?");
+            throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgotten to call ResolveParentalIds(long, long, long)?");
         }
     }
 }

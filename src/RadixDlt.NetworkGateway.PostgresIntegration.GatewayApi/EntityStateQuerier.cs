@@ -75,12 +75,12 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal class StateQuerier : IStateQuerier
+internal class EntityStateQuerier : IEntityStateQuerier
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
 
-    public StateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext)
+    public EntityStateQuerier(INetworkConfigurationProvider networkConfigurationProvider, ReadOnlyDbContext dbContext)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _dbContext = dbContext;

@@ -62,19 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public sealed record TmpNonFungibleResource(string ResourceAddress, string BalanceAttos);
-public sealed record TmpSomeResult(string ComponentAddress, ICollection<TmpNonFungibleResource> NonFungibleResources);
-
-public interface IStateQuerier
+public interface IEntityStateQuerier
 {
     Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
 }

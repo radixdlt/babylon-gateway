@@ -64,11 +64,9 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.Commons.Addressing;
-using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -81,12 +79,12 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 public class StateController
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IStateQuerier _stateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
 
-    public StateController(ILedgerStateQuerier ledgerStateQuerier, IStateQuerier stateQuerier)
+    public StateController(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
-        _stateQuerier = stateQuerier;
+        _entityStateQuerier = entityStateQuerier;
     }
 
     [HttpPost("tmp-entity")]
@@ -95,6 +93,6 @@ public class StateController
         var address = RadixBech32.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return await _stateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
+        return await _entityStateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
     }
 }
