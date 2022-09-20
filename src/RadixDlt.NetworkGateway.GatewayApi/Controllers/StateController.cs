@@ -74,9 +74,6 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 
-public record TmpEntitiesRequest(string Address, PartialLedgerStateIdentifier? AtStateVersion);
-public record TmpEntitiesResponse(TmpSomeResult Output);
-
 [ApiController]
 [Route("state")]
 [TypeFilter(typeof(ExceptionFilter))]
@@ -93,13 +90,11 @@ public class StateController
     }
 
     [HttpPost("tmp-entity")]
-    public async Task<TmpEntitiesResponse> TmpEntities(TmpEntitiesRequest request, CancellationToken token = default)
+    public async Task<ComponentStateResponse> TmpEntity(ComponentStateRequest request, CancellationToken token = default)
     {
         var address = RadixBech32.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateVersion, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var state = await _stateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
-
-        return new TmpEntitiesResponse(state);
+        return await _stateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
     }
 }

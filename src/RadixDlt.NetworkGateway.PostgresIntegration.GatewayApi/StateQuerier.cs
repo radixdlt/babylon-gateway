@@ -86,7 +86,7 @@ internal class StateQuerier : IStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<TmpSomeResult> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
@@ -115,16 +115,18 @@ ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .Where(e => uniqueResources.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
-        var x = new List<TmpNonFungibleResource>();
+        var nonFungibles = new List<ComponentStateResponseNonFungibleResource>();
 
         foreach (var fbh in fungibleBalanceHistory)
         {
             var r = resources[fbh.FungibleResourceEntityId];
             var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
 
-            x.Add(new TmpNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
+            nonFungibles.Add(new ComponentStateResponseNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
         }
 
-        return new TmpSomeResult(RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().AccountHrp, address), x);
+        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().AccountHrp, address);
+
+        return new ComponentStateResponse(adr, nonFungibles);
     }
 }

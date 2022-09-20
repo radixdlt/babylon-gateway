@@ -5,6 +5,7 @@
 *.PersonalOverrides.json
 *.DevelopmentOverrides.json
 *.ProductionOverrides.json
+ng_dev/.postgresdata/
 
 # Rider gitignore
 

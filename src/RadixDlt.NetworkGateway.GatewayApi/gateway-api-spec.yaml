@@ -19,6 +19,9 @@ tags:
   - name: Transaction
     x-displayName: Transaction Endpoints
     description: To build, finalize and submit transactions, and to query transaction status and contents.
+  - name: State
+    x-displayName: TBD State Endpoints
+    description: TBD
 paths:
   "/gateway":
     post:
@@ -151,8 +154,72 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  /state/tmp-entity:
+    post:
+      summary: Component State
+      description: |
+        TBD
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ComponentStateRequest"
+      responses:
+        '200':
+          description: Component State
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ComponentStateResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    ComponentStateRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the entity's global address
+          type: string
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+    ComponentStateResponse:
+      type: object
+      required:
+        - address
+        - non_fungible_resources
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the entity's global address
+          type: string
+        non_fungible_resources:
+          description: TBD
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentStateResponseNonFungibleResource"
+    ComponentStateResponseNonFungibleResource:
+      type: object
+      required:
+        - address
+        - amount_attos
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the resource's global address
+          type: string
+        amount_attos:
+          type: string
+          description: |
+            A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
+            the total supply of this resource.
     TransferTokens:
       allOf:
         - "$ref": "#/components/schemas/Action"

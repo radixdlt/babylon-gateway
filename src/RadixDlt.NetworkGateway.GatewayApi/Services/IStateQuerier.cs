@@ -76,5 +76,5 @@ public sealed record TmpSomeResult(string ComponentAddress, ICollection<TmpNonFu
 
 public interface IStateQuerier
 {
-    Task<TmpSomeResult> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
 }
