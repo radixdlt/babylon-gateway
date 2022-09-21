@@ -282,7 +282,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var childToParentEntities = new Dictionary<string, string>();
         var fungibleResourceChanges = new List<FungibleResourceChange>();
 
-        // step 1: scan for entities
+        // step 1: scan for any referenced entities
         {
             foreach (var transactionData in transactionsData)
             {
@@ -299,13 +299,24 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
                     var us = new UppedSubstate(re, sid.SubstateKey, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
-                    if (us.Data.ActualInstance is IOwner o)
+                    if (us.Data.ActualInstance is IOwner owner)
                     {
-                        foreach (var oe in o.OwnedEntities)
+                        foreach (var oe in owner.OwnedEntities)
                         {
                             referencedEntities.GetOrAdd(oe.EntityAddress, _ => new ReferencedEntity(oe.EntityAddress, oe.EntityType, stateVersion)).IsChildOf(re);
 
                             childToParentEntities.Add(oe.EntityAddress, sid.EntityAddress);
+                        }
+                    }
+
+                    if (us.Data.ActualInstance is IResourcePointer resourcePointer)
+                    {
+                        foreach (var ra in resourcePointer.PointedResources)
+                        {
+                            // TODO ugh...
+                            var resourceAddress = RadixBech32.Decode(ra).Data.ToHex();
+
+                            referencedEntities.GetOrAdd(resourceAddress, _ => new ReferencedEntity(resourceAddress, EntityType.ResourceManager, stateVersion)).IsChildOf(re);
                         }
                     }
 
@@ -593,7 +604,7 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 {
                     var bh = new TmpOwnerEntityFungibleResourceBalanceHistory
                     {
-                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerId,
+                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
                         FungibleResourceEntityId = e.ResourceEntity.DatabaseId,
                         Balance = e.Balance,
                         FromStateVersion = e.StateVersion,

@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20220920101145_InitialCreate")]
+    [Migration("20220921143627_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -651,11 +651,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.Property<long>("OwnerEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("owner_entity_id");
-
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
 
                     b.HasKey("Id");
 

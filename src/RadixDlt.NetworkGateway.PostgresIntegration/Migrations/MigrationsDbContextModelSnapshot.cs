@@ -650,11 +650,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("owner_entity_id");
 
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
                     b.HasKey("Id");
 
                     b.ToTable("tmp_entity_fungible_resource_balance_history");
