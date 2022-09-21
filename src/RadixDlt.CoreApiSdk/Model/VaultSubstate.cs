@@ -62,124 +62,20 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Numerics;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.CoreApiSdk.Model;
 
-internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
+public partial class VaultSubstate : IResourcePointer
 {
-    private TmpBaseEntity? _databaseEntity;
-    private ReferencedEntity? _parent;
-    private long? _parentId;
-    private long? _ownerAncestorId;
-    private long? _globalAncestorId;
-
-    public byte[]? GlobalAddressBytes { get; private set; }
-
-    public long DatabaseId => GetDatabaseEntity().Id;
-
-    public long DatabaseOwnerAncestorId
+    public IEnumerable<string> PointedResources
     {
         get
         {
-            EnsureParentalIdsResolved();
-
-            return _ownerAncestorId.Value;
+            if (ResourceAmount.ActualInstance is FungibleResourceAmount fra)
+            {
+                yield return fra.ResourceAddress;
+            }
         }
-    }
-
-    // TODO not sure if this logic is valid?
-    public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
-
-    [MemberNotNullWhen(true, nameof(Parent))]
-    public bool HasParent => _parent != null;
-
-    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
-
-    public void Globalize(string addressBytes)
-    {
-        GlobalAddressBytes = Convert.FromHexString(addressBytes);
-    }
-
-    public void Resolve(TmpBaseEntity entity)
-    {
-        _databaseEntity = entity;
-        _parentId = entity.ParentId;
-        _ownerAncestorId = entity.OwnerAncestorId;
-        _globalAncestorId = entity.GlobalAncestorId;
-    }
-
-    public void ResolveParentalIds(long parentId, long ownerId, long globalId)
-    {
-        _parentId = parentId;
-        _ownerAncestorId = ownerId;
-        _globalAncestorId = globalId;
-    }
-
-    public void IsChildOf(ReferencedEntity parent)
-    {
-        _parent = parent;
-    }
-
-    private TmpBaseEntity GetDatabaseEntity()
-    {
-        var de = _databaseEntity ?? throw new Exception("bla bla");
-
-        if (de.Id == 0)
-        {
-            throw new Exception("bla bla bla bla x6");
-        }
-
-        return de;
-    }
-
-    [MemberNotNull(nameof(_parentId), nameof(_ownerAncestorId), nameof(_globalAncestorId))]
-    private void EnsureParentalIdsResolved()
-    {
-        if (_parentId == null || _ownerAncestorId == null || _globalAncestorId == null)
-        {
-            throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgotten to call ResolveParentalIds(long, long, long)?");
-        }
-    }
-}
-
-internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion)
-{
-}
-
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, Substate Data)
-{
-    public TmpBaseSubstate? DatabaseSubstate { get; private set; }
-
-    public void Resolve(TmpBaseSubstate substate)
-    {
-        DatabaseSubstate = substate;
-    }
-}
-
-internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion)
-{
-}
-
-internal static class DictionaryExtensions
-{
-    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
-        where TKey : notnull
-    {
-        if (dictionary.ContainsKey(key))
-        {
-            return dictionary[key];
-        }
-
-        var value = factory(key);
-
-        dictionary[key] = value;
-
-        return value;
     }
 }
