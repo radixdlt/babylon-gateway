@@ -64,24 +64,30 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 public class GatewayEndpointTests
 {
     [Fact]
     public async Task TestGatewayApiVersions()
     {
-        var client = TestInitializationFactory.CreateClient(nameof(TestGatewayApiVersions));
+        // Arrange
+        var coreApiStub = new CoreApiStub();
 
+        var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestGatewayApiVersions)).Client;
+
+        // Act
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
 
         var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
 
+        // Assert
         payload.GatewayApi.ShouldNotBeNull();
 
         payload.GatewayApi._Version.ShouldNotBeNull();

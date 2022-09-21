@@ -49,7 +49,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Pro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator", "src\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator\RadixDlt.NetworkGateway.PrometheusIntegration.DataAggregator.csproj", "{1DCCD05F-5442-404B-A816-8347B44833CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.TestDependencies", "tests\RadixDlt.NetworkGateway.TestDependencies\RadixDlt.NetworkGateway.TestDependencies.csproj", "{6AB96B37-52CA-4DBA-B32E-E1C0CCBEEF5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.GatewayApiTestServer", "tests\RadixDlt.NetworkGateway.GatewayApiTestServer\RadixDlt.NetworkGateway.GatewayApiTestServer.csproj", "{7EB6FDBF-8E68-4F69-BAD7-4282F637CD7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.DataAggregatorRunner", "tests\RadixDlt.NetworkGateway.DataAggregatorRunner\RadixDlt.NetworkGateway.DataAggregatorRunner.csproj", "{8B62380E-693A-4F5C-80B8-DF3D1BE4EA51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,10 +123,14 @@ Global
 		{1DCCD05F-5442-404B-A816-8347B44833CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DCCD05F-5442-404B-A816-8347B44833CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DCCD05F-5442-404B-A816-8347B44833CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6AB96B37-52CA-4DBA-B32E-E1C0CCBEEF5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6AB96B37-52CA-4DBA-B32E-E1C0CCBEEF5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6AB96B37-52CA-4DBA-B32E-E1C0CCBEEF5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6AB96B37-52CA-4DBA-B32E-E1C0CCBEEF5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EB6FDBF-8E68-4F69-BAD7-4282F637CD7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EB6FDBF-8E68-4F69-BAD7-4282F637CD7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EB6FDBF-8E68-4F69-BAD7-4282F637CD7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EB6FDBF-8E68-4F69-BAD7-4282F637CD7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B62380E-693A-4F5C-80B8-DF3D1BE4EA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B62380E-693A-4F5C-80B8-DF3D1BE4EA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B62380E-693A-4F5C-80B8-DF3D1BE4EA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B62380E-693A-4F5C-80B8-DF3D1BE4EA51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = .idea-run-configurations\DataAggregator.run.xml
@@ -138,6 +144,7 @@ Global
 		{8FA82D83-7886-4B1D-A7F1-5883165EF156} = {7B572DCA-9792-48BE-A53D-3F8B87D71372}
 		{17988C9B-C9F0-489D-A6C6-7CDA12AC6AE1} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
 		{FF8BA5BA-5CA9-4BA9-A3AE-20EDAD868740} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
-		{6AB96B37-52CA-4DBA-B32E-E1C0CCBEEF5D} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
+		{7EB6FDBF-8E68-4F69-BAD7-4282F637CD7F} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
+		{8B62380E-693A-4F5C-80B8-DF3D1BE4EA51} = {11A96B08-1472-4F25-9740-9C12B242CE6C}
 	EndGlobalSection
 EndGlobal

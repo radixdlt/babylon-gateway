@@ -62,34 +62,34 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.DataAggregatorRunner;
 
-public static class TestJsonExtensions
+public class Program
 {
-    public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+    public static async Task Main(string[] args)
     {
-        responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
+        using var host = CreateHostBuilder().Build();
 
-        var mediaTypeHeader = MediaTypeHeaderValue.Parse(responseMessage.Content.Headers.ContentType?.ToString());
+        await host.RunAsync();
+    }
 
-        mediaTypeHeader.ShouldNotBeNull();
+    private static IHostBuilder CreateHostBuilder()
+    {
+        var host = Host.CreateDefaultBuilder()
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder
+                    .ConfigureKestrel(o =>
+                    {
+                        o.AddServerHeader = false;
+                    })
+                    .UseStartup<TestDataAggregatorStartup>();
+            });
 
-        mediaTypeHeader.MediaType.Should().BeEquivalentTo("application/json");
-
-        mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
-
-        var json = await responseMessage.Content.ReadAsStringAsync();
-
-        var payload = JsonConvert.DeserializeObject<TResponse>(json);
-
-        payload.ShouldNotBeNull();
-
-        return payload;
+        return host;
     }
 }

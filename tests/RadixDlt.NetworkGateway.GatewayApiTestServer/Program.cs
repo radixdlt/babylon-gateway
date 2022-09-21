@@ -62,37 +62,26 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
-using RadixDlt.NetworkGateway.PostgresIntegration;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.TestDependencies;
+namespace RadixDlt.NetworkGateway.GatewayApiTestServer;
 
-public class TestGatewayApiStartup
+public static class Program
 {
-    public void ConfigureServices(IServiceCollection services)
+    public static async Task Main(string[] args)
     {
-        services
-            .AddNetworkGatewayPostgresMigrations();
+        using var host = CreateHostBuilder(args).Build();
 
-        services
-            .AddNetworkGatewayApi()
-            .AddPostgresPersistence();
-
-        services
-            .AddControllers()
-            .AddNewtonsoftJson();
+        await host.RunAsync();
     }
 
-    public void Configure(IApplicationBuilder application, IConfiguration configuration)
-    {
-        application
-            .UseRouting()
-            .UseEndpoints(endpoints =>
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
             {
-                endpoints.MapControllers();
+                webBuilder
+                    .UseStartup<TestGatewayApiStartup>();
             });
-    }
 }

@@ -69,23 +69,21 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 
 public class FakeClock : IClock
 {
-    private DateTimeOffset _fakeNow;
-
     public FakeClock()
     {
         // arbitrary value, no special meaning behind it; just something that's constant across tests
-        _fakeNow = new DateTimeOffset(2020, 6, 1, 12, 0, 0, TimeSpan.Zero);
+        UtcNow = new DateTimeOffset(2020, 6, 1, 12, 0, 0, TimeSpan.Zero);
     }
 
     public FakeClock(DateTimeOffset fakeNow)
     {
-        _fakeNow = fakeNow;
+        UtcNow = fakeNow;
     }
 
-    public DateTimeOffset UtcNow => _fakeNow;
+    public DateTimeOffset UtcNow { get; private set; }
 
     public void Advance(TimeSpan timeSpan)
     {
-        _fakeNow += timeSpan;
+        UtcNow += timeSpan;
     }
 }
