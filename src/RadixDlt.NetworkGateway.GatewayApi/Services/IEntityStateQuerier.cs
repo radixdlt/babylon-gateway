@@ -62,16 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public sealed record TmpSomeResult();
-
-public interface IStateQuerier
+public interface IEntityStateQuerier
 {
-    Task<TmpSomeResult> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
 }

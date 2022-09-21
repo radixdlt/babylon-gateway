@@ -69,7 +69,9 @@ using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.Commons.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
@@ -270,10 +272,15 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
     private async Task ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
     {
+        // TODO replace usage of HEX-encoded strings in favor of raw byte[]?
+        // TODO EF sucks and creates individual INSERT for every single added object,
+        // TODO maybe we should just use https://entityframework-extensions.net/bulk-savechanges (difficult to open-source)
+
         var referencedEntities = new Dictionary<string, ReferencedEntity>();
         var downedSubstates = new List<DownedSubstate>();
         var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
+        var fungibleResourceChanges = new List<FungibleResourceChange>();
 
         // step 1: scan for entities
         {
@@ -428,17 +435,36 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
 
-                var fra = data.ResourceAmount.GetFungibleResourceAmount();
+                var x = data.ResourceAmount.ActualInstance;
 
-                return new TmpVaultSubstate
+                if (x is FungibleResourceAmount fra)
                 {
-                    Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos),
-                };
+                    var substate = new TmpVaultSubstate
+                    {
+                        Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos),
+                    };
+
+                    // TODO ugh...
+                    var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
+                    var resourceEntity = referencedEntities[resourceAddress];
+                    var substateEntity = us.ReferencedEntity;
+
+                    fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, substate.Amount, us.StateVersion));
+
+                    return substate;
+                }
+
+                if (x is NonFungibleResourceAmount nfra)
+                {
+                    return new TmpVaultSubstate();
+                }
+
+                throw new Exception("bla bla bla bla x9");
             }
 
             TmpKeyValueStoreEntrySubstate CreateKeyValueStoreEntrySubstate(UppedSubstate us)
             {
-                // TODO handle owned_entities and referenced_entities properly (not sure if we can ensure references types have been seen)
+                // TODO handle referenced_entities properly (not sure if we can ensure references types have been seen)
 
                 return new TmpKeyValueStoreEntrySubstate();
             }
@@ -496,8 +522,10 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 ids.Add(referencedEntities[childAddress].DatabaseId);
                 parentIds.Add(referencedEntities[parentAddress].DatabaseId);
-                ownerIds.Add(globalAncestor.DatabaseId);
-                globalIds.Add(ownerAncestor.DatabaseId);
+                ownerIds.Add(ownerAncestor.DatabaseId);
+                globalIds.Add(globalAncestor.DatabaseId);
+
+                referencedEntities[childAddress].ResolveParentalIds(referencedEntities[parentAddress].DatabaseId, ownerAncestor.DatabaseId, globalAncestor.DatabaseId);
             }
 
             var idsParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = ids };
@@ -555,6 +583,28 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
             {
                 throw new Exception("bla bla bla x5");
             }
+        }
+
+        // step 6: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
+        // step 6.1: handle tmp_entity_fungible_resource_balance_history
+        {
+            var insertEntities = fungibleResourceChanges
+                .Select(e =>
+                {
+                    var bh = new TmpOwnerEntityFungibleResourceBalanceHistory
+                    {
+                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerId,
+                        FungibleResourceEntityId = e.ResourceEntity.DatabaseId,
+                        Balance = e.Balance,
+                        FromStateVersion = e.StateVersion,
+                    };
+
+                    return bh;
+                })
+                .ToList();
+
+            await dbContext.TmpOwnerEntityFungibleResourceBalanceHistory.AddRangeAsync(insertEntities, token);
+            await dbContext.SaveChangesAsync(token);
         }
     }
 

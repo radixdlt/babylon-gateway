@@ -152,6 +152,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "tmp_entity_fungible_resource_balance_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tmp_entity_fungible_resource_balance_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tmp_substates",
                 columns: table => new
                 {
@@ -713,6 +730,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "tmp_entities");
+
+            migrationBuilder.DropTable(
+                name: "tmp_entity_fungible_resource_balance_history");
 
             migrationBuilder.DropTable(
                 name: "tmp_substates");

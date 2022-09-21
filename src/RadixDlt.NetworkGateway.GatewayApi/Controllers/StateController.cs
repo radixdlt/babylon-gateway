@@ -64,18 +64,13 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.Commons.Addressing;
-using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
-
-public record TmpEntitiesRequest(string Address, PartialLedgerStateIdentifier? AtStateVersion);
-public record TmpEntitiesResponse(TmpSomeResult Output);
 
 [ApiController]
 [Route("state")]
@@ -83,33 +78,21 @@ public record TmpEntitiesResponse(TmpSomeResult Output);
 [TypeFilter(typeof(InvalidModelStateFilter))]
 public class StateController
 {
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IStateQuerier _stateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
 
-    public StateController(INetworkConfigurationProvider networkConfigurationProvider, ILedgerStateQuerier ledgerStateQuerier, IStateQuerier stateQuerier)
+    public StateController(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
     {
-        _networkConfigurationProvider = networkConfigurationProvider;
         _ledgerStateQuerier = ledgerStateQuerier;
-        _stateQuerier = stateQuerier;
+        _entityStateQuerier = entityStateQuerier;
     }
 
     [HttpPost("tmp-entity")]
-    public async Task<TmpEntitiesResponse> TmpEntities(TmpEntitiesRequest request, CancellationToken token = default)
+    public async Task<ComponentStateResponse> TmpEntity(ComponentStateRequest request, CancellationToken token = default)
     {
         var address = RadixBech32.Decode(request.Address);
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateVersion, token);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var state = await _stateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
-
-        throw new Exception("aaaaaaaa");
-        // return address.Type switch
-        // {
-        //     OlympiaRadixAddressType.Account => new TmpEntitiesResponse(await _stateQuerier.TmpAccountResourcesSnapshot(address, ledgerState, token)),
-        //     // RadixAddressType.Resource => expr,
-        //     // RadixAddressType.Validator => expr,
-        //     // RadixAddressType.Node => expr,
-        //     _ => throw new Exception("bla bla bla bla api x2"),
-        // };
+        return await _entityStateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
     }
 }

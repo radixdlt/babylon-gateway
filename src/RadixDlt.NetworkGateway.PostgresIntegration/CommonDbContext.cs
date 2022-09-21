@@ -110,6 +110,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<TmpBaseSubstate> TmpSubstates => Set<TmpBaseSubstate>();
 
+    public DbSet<TmpOwnerEntityFungibleResourceBalanceHistory> TmpOwnerEntityFungibleResourceBalanceHistory => Set<TmpOwnerEntityFungibleResourceBalanceHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -147,6 +149,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<TmpVaultSubstate>("vault")
             .HasValue<TmpNonFungibleSubstate>("nonfungible")
             .HasValue<TmpKeyValueStoreEntrySubstate>("keyvaluestoreentry");
+
+        modelBuilder.Entity<TmpOwnerEntityFungibleResourceBalanceHistory>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

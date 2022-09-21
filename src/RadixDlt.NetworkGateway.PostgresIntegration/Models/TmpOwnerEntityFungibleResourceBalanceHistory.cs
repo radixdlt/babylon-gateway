@@ -62,49 +62,30 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Commons.Addressing;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.Commons.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal class StateQuerier : IStateQuerier
+// TODO owner_entity -> vault_entity ?
+
+[Table("tmp_entity_fungible_resource_balance_history")]
+public class TmpOwnerEntityFungibleResourceBalanceHistory
 {
-    private readonly ReadOnlyDbContext _dbContext;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public StateQuerier(ReadOnlyDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
 
-    public async Task<TmpSomeResult> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
-    {
-        // TODO just some quick and naive implementation
-        // TODO we will denormalize a lot to improve performance and reduce complexity
+    [Column("fungible_resource_entity_id")]
+    public long FungibleResourceEntityId { get; set; }
 
-        var entity = await _dbContext.TmpEntities
-            .Where(e => e.GlobalAncestorId == null && e.FromStateVersion <= ledgerState._Version)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
 
-        if (entity == null)
-        {
-            throw new Exception("zzz zzz zzz x1");
-        }
-
-        var keyValueStores = await _dbContext.TmpEntities
-            .Where(e => e.GetType() == typeof(TmpKeyValueStoreEntity))
-            .Where(e => e.GlobalAncestorId == entity.Id)
-            .ToListAsync(token);
-
-        // // all fungible vaults
-        // var allResources = _dbContext.TmpEntities.Where(e => e.)
-
-        return new TmpSomeResult();
-    }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 }
