@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20220922090548_InitialCreate")]
+    [Migration("20220922145743_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -540,9 +540,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Address")
+                    b.Property<byte[]>("Address")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("bytea")
                         .HasColumnName("address");
 
                     b.Property<long>("FromStateVersion")
@@ -779,6 +779,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
 
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
                     b.ToTable("tmp_entities");
 
                     b.HasDiscriminator().HasValue("component");
@@ -790,7 +795,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_substates");
 
-                    b.HasDiscriminator().HasValue("componentinfo");
+                    b.HasDiscriminator().HasValue("component_info");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpComponentStateSubstate", b =>
@@ -799,7 +804,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_substates");
 
-                    b.HasDiscriminator().HasValue("componentstate");
+                    b.HasDiscriminator().HasValue("component_state");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpKeyValueStoreEntity", b =>
@@ -808,7 +813,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_entities");
 
-                    b.HasDiscriminator().HasValue("keyvaluestore");
+                    b.HasDiscriminator().HasValue("key_value_store");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpKeyValueStoreEntrySubstate", b =>
@@ -817,7 +822,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_substates");
 
-                    b.HasDiscriminator().HasValue("keyvaluestoreentry");
+                    b.HasDiscriminator().HasValue("key_value_store_entry");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpNonFungibleSubstate", b =>
@@ -826,7 +831,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_substates");
 
-                    b.HasDiscriminator().HasValue("nonfungible");
+                    b.HasDiscriminator().HasValue("non_fungible");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpPackageEntity", b =>
@@ -853,7 +858,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_entities");
 
-                    b.HasDiscriminator().HasValue("resourcemanager");
+                    b.HasDiscriminator().HasValue("resource_manager");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpResourceManagerSubstate", b =>
@@ -871,7 +876,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("tmp_substates");
 
-                    b.HasDiscriminator().HasValue("resourcemanager");
+                    b.HasDiscriminator().HasValue("resource_manager");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpSystemEntity", b =>

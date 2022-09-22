@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Commons;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -75,10 +76,10 @@ internal abstract class TmpBaseEntity
     public long Id { get; set; }
 
     [Column("address")]
-    public string Address { get; set; } // TODO use byte[] over string
+    public RadixAddress Address { get; set; }
 
     [Column("global_address")]
-    public byte[]? GlobalAddress { get; set; }
+    public RadixAddress? GlobalAddress { get; set; }
 
     [Column("parent_id")]
     public long? ParentId { get; set; }
@@ -97,32 +98,14 @@ internal class TmpSystemEntity : TmpBaseEntity
 {
 }
 
-internal abstract class TmpResourceManagerEntity : TmpBaseEntity
+internal class TmpResourceManagerEntity : TmpBaseEntity
 {
 }
 
-internal class TmpFungibleResourceEntity : TmpResourceManagerEntity
+internal class TmpComponentEntity : TmpBaseEntity
 {
-}
-
-internal class TmpNonFungibleResourceEntity : TmpResourceManagerEntity
-{
-}
-
-internal abstract class TmpComponentEntity : TmpBaseEntity
-{
-}
-
-internal class TmpNormalComponentEntity : TmpComponentEntity
-{
-}
-
-internal class TmpAccountComponentEntity : TmpComponentEntity
-{
-}
-
-internal class TmpValidatorComponentEntity : TmpComponentEntity
-{
+    [Column("kind")]
+    public string Kind { get; set; }
 }
 
 internal class TmpPackageEntity : TmpBaseEntity

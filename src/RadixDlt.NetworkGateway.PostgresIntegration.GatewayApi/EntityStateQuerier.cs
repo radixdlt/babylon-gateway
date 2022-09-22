@@ -110,9 +110,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
         {
             hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
         }
-        else if (entity is TmpAccountComponentEntity)
+        else if (entity is TmpComponentEntity component)
         {
-            hrp = _networkConfigurationProvider.GetAddressHrps().AccountHrp;
+            hrp = component.Kind switch
+            {
+                "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
+                "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
+                _ => throw new Exception("fix me"), // TODO fix me
+            };
         }
         else
         {
@@ -156,8 +161,8 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
 
         foreach (var fbh in fungibleBalanceHistory)
         {
-            var r = resources[fbh.FungibleResourceEntityId];
-            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
+            var rga = resources[fbh.FungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
 
             fungibles.Add(new EntityStateResponseFungibleResource(ra, fbh.Balance.ToSubUnitString()));
         }
@@ -166,8 +171,8 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
 
         foreach (var nfih in nonFungibleIdsHistory)
         {
-            var r = resources[nfih.NonFungibleResourceEntityId];
-            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
+            var rga = resources[nfih.NonFungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
             var ids = nfih.Ids.Select(id => id.ToHex()).ToList();
 
             nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, new EntityStateResponseNonFungibleResourceIds(ids.Count, null, ids.Count > 0 ? "TBD (currently everything is returned)" : null, ids)));

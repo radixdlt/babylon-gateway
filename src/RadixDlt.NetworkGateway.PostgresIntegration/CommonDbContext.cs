@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.Commons.Numerics;
@@ -135,11 +136,8 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<TmpBaseEntity>()
             .HasDiscriminator<string>("type")
             .HasValue<TmpSystemEntity>("system")
-            .HasValue<TmpFungibleResourceEntity>("fungible_resource")
-            .HasValue<TmpNonFungibleResourceEntity>("noon_fungible_resource")
-            .HasValue<TmpNormalComponentEntity>("normal_component")
-            .HasValue<TmpAccountComponentEntity>("account_component")
-            .HasValue<TmpValidatorComponentEntity>("validator_component")
+            .HasValue<TmpResourceManagerEntity>("resource_manager")
+            .HasValue<TmpComponentEntity>("component")
             .HasValue<TmpPackageEntity>("package")
             .HasValue<TmpKeyValueStoreEntity>("key_value_store")
             .HasValue<TmpVaultEntity>("vault");
@@ -166,6 +164,9 @@ internal abstract class CommonDbContext : DbContext
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
             .HavePrecision(1000, 0);
+
+        configurationBuilder.Properties<RadixAddress>()
+            .HaveConversion<RadixAddressToByteArrayConverter>();
 
         configurationBuilder.Properties<MempoolTransactionStatus>()
             .HaveConversion<MempoolTransactionStatusValueConverter>();
