@@ -2,19 +2,38 @@
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 public class GatewayTestsRunner
 {
-    private HttpClient _client = new();
+    private HttpClient? _client;
 
     public async Task ActAsync()
     {
         await Task.Delay(10000);
+    }
+
+    public async Task<T> ActAsync<T>(string? requestUri, HttpContent? content)
+    {
+        if (requestUri == null)
+        {
+            throw new Exception("Gateway api uri is missing.");
+        }
+
+        if (_client == null)
+        {
+            throw new Exception("Gateway http client is not initialized.");
+        }
+
+        using var response = await _client.PostAsync(requestUri, content);
+
+        var payload = await response.ParseToObjectAndAssert<T>();
+
+        return payload;
     }
 
     public CoreApiStub ArrangeTransactionStatusTest(string databaseName, TransactionStatus.StatusEnum expectedStatus)
@@ -43,14 +62,13 @@ public class GatewayTestsRunner
         return coreApiStub;
     }
 
-    public async Task<TransactionStatus.StatusEnum> GetTransactionStatus(TransactionIdentifier transactionIdentifier)
+    public CoreApiStub ArrangeGatewayVersionsTest(string databaseName)
     {
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync("/transaction/status", content);
+        var coreApiStub = new CoreApiStub();
+        _client = TestGatewayApiFactory.Create(coreApiStub, databaseName).Client;
 
-        var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
+        // set custom gatewayApi and openSchemaApi versions
 
-        return payload.Transaction.TransactionStatus.Status;
+        return coreApiStub;
     }
 }

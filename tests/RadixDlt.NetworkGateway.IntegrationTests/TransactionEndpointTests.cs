@@ -103,11 +103,14 @@ public class TransactionEndpointTests
         var transactionIdentifier =
             new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
+        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
         // Act
-        await gatewayRunner.ActAsync();
+        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
 
         // Assert
-        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
+        var status = payload.Transaction.TransactionStatus.Status;
         status.Should().Be(TransactionStatus.StatusEnum.FAILED);
     }
 
@@ -122,11 +125,14 @@ public class TransactionEndpointTests
         var transactionIdentifier =
             new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
+        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
         // Act
-        await gatewayRunner.ActAsync();
+        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
 
         // Assert
-        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
+        var status = payload.Transaction.TransactionStatus.Status;
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
@@ -141,11 +147,14 @@ public class TransactionEndpointTests
         var transactionIdentifier =
             new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
+        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
         // Act
-        await gatewayRunner.ActAsync();
+        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
 
         // Assert
-        var status = await gatewayRunner.GetTransactionStatus(transactionIdentifier);
+        var status = payload.Transaction.TransactionStatus.Status;
         status.Should().Be(TransactionStatus.StatusEnum.PENDING);
     }
 

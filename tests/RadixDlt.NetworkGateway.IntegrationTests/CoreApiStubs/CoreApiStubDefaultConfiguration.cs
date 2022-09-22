@@ -36,6 +36,10 @@ public class CoreApiStubDefaultConfiguration
 
     public string CoreVersion { get; set; }
 
+    public string GatewayApiVersion { get; set; }
+
+    public string GatewayOpenApiSchemaVersion { get; set; }
+
     public CoreApiNode DataAggregatorCoreApiNode { get; set; }
 
     public GatewayApi.Configuration.CoreApiNode GatewayCoreApiNode { get; set; }
@@ -69,6 +73,10 @@ public class CoreApiStubDefaultConfiguration
         CoreVersion = "1.0";
 
         ApiVersion = "2.0";
+
+        GatewayApiVersion = "2.0.0";
+
+        GatewayOpenApiSchemaVersion = "3.0.0";
 
         Hash = "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20";
 

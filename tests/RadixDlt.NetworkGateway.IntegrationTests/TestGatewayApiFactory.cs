@@ -177,8 +177,8 @@ public class TestGatewayApiFactory
 
                 services.PostConfigure<EndpointOptions>(o =>
                 {
-                    o.GatewayApiVersion = "3.0.0";
-                    o.GatewayOpenApiSchemaVersion = "2.0.0";
+                    o.GatewayApiVersion = _coreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion;
+                    o.GatewayOpenApiSchemaVersion = _coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion;
                     o.MaxPageSize = 30;
                 });
             });

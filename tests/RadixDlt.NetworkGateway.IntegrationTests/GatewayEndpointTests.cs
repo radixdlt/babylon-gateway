@@ -78,22 +78,19 @@ public class GatewayEndpointTests
     public async Task TestGatewayApiVersions()
     {
         // Arrange
-        var coreApiStub = new CoreApiStub();
-
-        var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestGatewayApiVersions)).Client;
+        var gatewayRunner = new GatewayTestsRunner();
+        var coreApiStub = gatewayRunner.ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
 
         // Act
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+        var payload = await gatewayRunner.ActAsync<GatewayResponse>("/gateway", JsonContent.Create(new object()));
 
         // Assert
         payload.GatewayApi.ShouldNotBeNull();
 
         payload.GatewayApi._Version.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
+        payload.GatewayApi._Version.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion);
 
         payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
     }
 }
