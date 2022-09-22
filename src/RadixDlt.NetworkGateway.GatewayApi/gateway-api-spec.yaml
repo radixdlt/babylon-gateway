@@ -182,6 +182,26 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    ResultSetCursor:
+      type: object
+      required:
+        - total_count
+        - results
+      properties:
+        total_count:
+          description: TBD (make it nullable when we're dealing with unknown result set sizes?)
+          type: number
+        previous_cursor:
+          description: TBD (maybe we should use HATEOAS-like permalinks?)
+          type: string
+          nullable: true
+        next_cursor:
+          description: TBD (maybe we should use HATEOAS-like permalinks?)
+          type: string
+          nullable: true
+        results:
+          type: array
+          items: { } # any type of items
     EntityStateRequest:
       type: object
       required:
@@ -196,17 +216,35 @@ components:
       type: object
       required:
         - address
+        - fungible_resources
         - non_fungible_resources
       properties:
         address:
           description: The Bech32m-encoded human readable version of the entity's global address
           type: string
+        fungible_resources:
+          allOf:
+            - $ref: "#/components/schemas/ResultSetCursor"
+            - type: object
+              required:
+                - results
+              properties:
+                results:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EntityStateResponseFungibleResource"
         non_fungible_resources:
-          description: TBD
-          type: array
-          items:
-            $ref: "#/components/schemas/EntityStateResponseNonFungibleResource"
-    EntityStateResponseNonFungibleResource:
+          allOf:
+            - $ref: "#/components/schemas/ResultSetCursor"
+            - type: object
+              required:
+                - results
+              properties:
+                results:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EntityStateResponseNonFungibleResource"
+    EntityStateResponseFungibleResource:
       type: object
       required:
         - address
@@ -220,6 +258,27 @@ components:
           description: |
             A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
             the total supply of this resource.
+    EntityStateResponseNonFungibleResource:
+      type: object
+      required:
+        - address
+        - ids
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the resource's global address
+          type: string
+        ids:
+          allOf:
+            - $ref: "#/components/schemas/ResultSetCursor"
+            - type: object
+              required:
+                - results
+              properties:
+                results:
+                  type: array
+                  items:
+                    description: The hex-encoded bytes of the non-fungible id
+                    type: string
     TransferTokens:
       allOf:
         - "$ref": "#/components/schemas/Action"
@@ -409,20 +468,27 @@ components:
         manifest:
           description: A transaction manifest. sbor encoded, and then hex encoded.
           type: string
-        cost_unit_limit:
-          type: integer
-          description: Maximum number of cost units available for transaction execution.
-        tip_percentage:
-          type: integer
-          description: The validator tip.
-        nonce:
-          type: string
-          description: The nonce value to use for execution.
-        signer_public_keys:
+        blobs:
+          description: An array of hex-encoded blob data
           type: array
           items:
             type: string
+        cost_unit_limit:
+          description: Maximum number of cost units available for transaction execution.
+          type: integer
+          format: int64
+        tip_percentage:
+          description: The validator tip.
+          type: integer
+          format: int64
+        nonce:
+          description: The nonce value to use for execution.
+          type: string
+        signer_public_keys:
           description: A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
+          type: array
+          items:
+            type: string
         flags:
           type: object
           required:

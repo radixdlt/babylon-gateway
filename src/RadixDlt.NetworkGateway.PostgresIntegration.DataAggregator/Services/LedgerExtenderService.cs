@@ -70,7 +70,6 @@ using NpgsqlTypes;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Addressing;
-using RadixDlt.NetworkGateway.Commons.CoreCommunications;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.Commons.Utilities;
@@ -79,7 +78,6 @@ using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -311,12 +309,13 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                     if (us.Data.ActualInstance is IResourcePointer resourcePointer)
                     {
-                        foreach (var ra in resourcePointer.PointedResources)
+                        foreach (var typedResource in resourcePointer.PointedResources)
                         {
                             // TODO ugh...
-                            var resourceAddress = RadixBech32.Decode(ra).Data.ToHex();
+                            var resourceAddress = RadixBech32.Decode(typedResource.Address).Data.ToHex();
 
-                            referencedEntities.GetOrAdd(resourceAddress, _ => new ReferencedEntity(resourceAddress, EntityType.ResourceManager, stateVersion)).IsChildOf(re);
+                            // TODO this one is really big ugh...
+                            referencedEntities.GetOrAdd(resourceAddress, _ => new ReferencedEntity(resourceAddress, EntityType.ResourceManager, stateVersion)).Hints += "ResourceType=" + typedResource.Type;
                         }
                     }
 
@@ -366,6 +365,37 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 }
             }
 
+            TmpResourceManagerEntity CreateResourceEntity(ReferencedEntity re)
+            {
+                if (re.Hints.Contains("ResourceType=Fungible"))
+                {
+                    return new TmpFungibleResourceEntity();
+                }
+
+                if (re.Hints.Contains("ResourceType=NonFungible"))
+                {
+                    return new TmpNonFungibleResourceEntity();
+                }
+
+                // TODO fix me, this is just WRONG!
+                return new TmpFungibleResourceEntity();
+            }
+
+            TmpComponentEntity CreateComponentEntity(ReferencedEntity re)
+            {
+                if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().AccountHrp))
+                {
+                    return new TmpAccountComponentEntity();
+                }
+
+                if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().ValidatorHrp))
+                {
+                    return new TmpValidatorComponentEntity();
+                }
+
+                return new TmpNormalComponentEntity();
+            }
+
             var entityAddresses = referencedEntities.Keys.ToList();
 
             var knownDbEntities = await dbContext.TmpEntities
@@ -398,8 +428,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 TmpBaseEntity dbEntity = e.Type switch
                 {
                     EntityType.System => new TmpSystemEntity(),
-                    EntityType.ResourceManager => new TmpResourceManagerEntity(),
-                    EntityType.Component => new TmpComponentEntity(),
+                    EntityType.ResourceManager => CreateResourceEntity(e),
+                    EntityType.Component => CreateComponentEntity(e),
                     EntityType.Package => new TmpPackageEntity(),
                     EntityType.Vault => new TmpVaultEntity(),
                     EntityType.KeyValueStore => new TmpKeyValueStoreEntity(),
@@ -465,7 +495,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     return substate;
                 }
 
-                if (x is NonFungibleResourceAmount nfra)
+                if (x is NonFungibleResourceAmount)
                 {
                     return new TmpVaultSubstate();
                 }

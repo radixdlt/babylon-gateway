@@ -105,12 +105,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
         /// <param name="manifest">A transaction manifest. sbor encoded, and then hex encoded. (required).</param>
+        /// <param name="blobs">An array of hex-encoded blob data.</param>
         /// <param name="costUnitLimit">Maximum number of cost units available for transaction execution. (required).</param>
         /// <param name="tipPercentage">The validator tip. (required).</param>
         /// <param name="nonce">The nonce value to use for execution. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string manifest = default(string), int costUnitLimit = default(int), int tipPercentage = default(int), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string manifest = default(string), List<string> blobs = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -138,6 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("flags is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Flags = flags;
+            this.Blobs = blobs;
         }
 
         /// <summary>
@@ -148,18 +150,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Manifest { get; set; }
 
         /// <summary>
+        /// An array of hex-encoded blob data
+        /// </summary>
+        /// <value>An array of hex-encoded blob data</value>
+        [DataMember(Name = "blobs", EmitDefaultValue = true)]
+        public List<string> Blobs { get; set; }
+
+        /// <summary>
         /// Maximum number of cost units available for transaction execution.
         /// </summary>
         /// <value>Maximum number of cost units available for transaction execution.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
-        public int CostUnitLimit { get; set; }
+        public long CostUnitLimit { get; set; }
 
         /// <summary>
         /// The validator tip.
         /// </summary>
         /// <value>The validator tip.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
-        public int TipPercentage { get; set; }
+        public long TipPercentage { get; set; }
 
         /// <summary>
         /// The nonce value to use for execution.
@@ -190,6 +199,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewRequest {\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
+            sb.Append("  Blobs: ").Append(Blobs).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  Nonce: ").Append(Nonce).Append("\n");
@@ -236,6 +246,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Manifest.Equals(input.Manifest))
                 ) && 
                 (
+                    this.Blobs == input.Blobs ||
+                    this.Blobs != null &&
+                    input.Blobs != null &&
+                    this.Blobs.SequenceEqual(input.Blobs)
+                ) && 
+                (
                     this.CostUnitLimit == input.CostUnitLimit ||
                     this.CostUnitLimit.Equals(input.CostUnitLimit)
                 ) && 
@@ -273,6 +289,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Manifest != null)
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
+                }
+                if (this.Blobs != null)
+                {
+                    hashCode = (hashCode * 59) + this.Blobs.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();

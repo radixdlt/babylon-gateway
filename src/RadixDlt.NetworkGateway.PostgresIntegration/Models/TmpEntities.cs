@@ -68,7 +68,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("tmp_entities")]
-internal class TmpBaseEntity
+internal abstract class TmpBaseEntity
 {
     [Key]
     [Column("id")]
@@ -97,11 +97,31 @@ internal class TmpSystemEntity : TmpBaseEntity
 {
 }
 
-internal class TmpResourceManagerEntity : TmpBaseEntity
+internal abstract class TmpResourceManagerEntity : TmpBaseEntity
 {
 }
 
-internal class TmpComponentEntity : TmpBaseEntity
+internal class TmpFungibleResourceEntity : TmpResourceManagerEntity
+{
+}
+
+internal class TmpNonFungibleResourceEntity : TmpResourceManagerEntity
+{
+}
+
+internal abstract class TmpComponentEntity : TmpBaseEntity
+{
+}
+
+internal class TmpNormalComponentEntity : TmpComponentEntity
+{
+}
+
+internal class TmpAccountComponentEntity : TmpComponentEntity
+{
+}
+
+internal class TmpValidatorComponentEntity : TmpComponentEntity
 {
 }
 

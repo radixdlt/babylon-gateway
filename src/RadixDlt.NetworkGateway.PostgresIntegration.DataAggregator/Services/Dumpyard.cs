@@ -79,6 +79,9 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     private long? _ownerAncestorId;
     private long? _globalAncestorId;
 
+    // TODO super dirty!
+    public string Hints { get; set; } = string.Empty;
+
     public byte[]? GlobalAddressBytes { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;

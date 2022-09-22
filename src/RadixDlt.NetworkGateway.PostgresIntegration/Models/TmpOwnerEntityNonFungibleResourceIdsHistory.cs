@@ -62,21 +62,29 @@
  * permissions under this License.
  */
 
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.CoreApiSdk.Model;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-// TODO rename
-// a) indicates that this model type is owner_ancestor_id
-// b) has owned_entities
-public interface IOwner
+// TODO owner_entity -> vault_entity ?
+
+[Table("tmp_entity_non_fungible_resource_ids_history")]
+public class TmpOwnerEntityNonFungibleResourceIdsHistory
 {
-    public IEnumerable<EntityId> OwnedEntities { get; }
-}
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-public interface IResourcePointer
-{
-    public IEnumerable<TypedResourceAddress> PointedResources { get; }
-}
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
 
-public record TypedResourceAddress(ResourceType Type, string Address);
+    [Column("non_fungible_resource_entity_id")]
+    public long NonFungibleResourceEntityId { get; set; }
+
+    [Column("ids")]
+    public byte[][] Ids { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+}

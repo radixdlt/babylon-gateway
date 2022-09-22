@@ -115,23 +115,20 @@ internal class PreviewService : IPreviewService
 
     private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
-        // consider this a mock/dumb implementation for testing purposes only
-
-        using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
-        using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
+        // TODO consider this a mock/dumb implementation for testing purposes only
 
         var result = await _coreApiHandler.PreviewTransaction(
             new CoreModel.TransactionPreviewRequest(
                 _coreApiHandler.GetNetworkIdentifier(),
                 request.Manifest,
-                new List<string>(),
+                request.Blobs,
                 request.CostUnitLimit,
                 request.TipPercentage,
                 request.Nonce,
                 new List<CoreModel.PublicKey>(),
                 new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan)
             ),
-            finalTokenSource.Token
+            token
         );
 
         // TODO implement
