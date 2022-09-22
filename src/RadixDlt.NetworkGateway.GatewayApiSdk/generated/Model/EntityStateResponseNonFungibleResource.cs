@@ -105,8 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityStateResponseNonFungibleResource" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="ids">ids (required).</param>
-        public EntityStateResponseNonFungibleResource(string address = default(string), EntityStateResponseNonFungibleResourceIds ids = default(EntityStateResponseNonFungibleResourceIds))
+        /// <param name="amount">amount (required).</param>
+        public EntityStateResponseNonFungibleResource(string address = default(string), decimal amount = default(decimal))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -114,12 +114,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for EntityStateResponseNonFungibleResource and cannot be null");
             }
             this.Address = address;
-            // to ensure "ids" is required (not null)
-            if (ids == null)
-            {
-                throw new ArgumentNullException("ids is a required property for EntityStateResponseNonFungibleResource and cannot be null");
-            }
-            this.Ids = ids;
+            this.Amount = amount;
         }
 
         /// <summary>
@@ -130,10 +125,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets Ids
+        /// Gets or Sets Amount
         /// </summary>
-        [DataMember(Name = "ids", IsRequired = true, EmitDefaultValue = true)]
-        public EntityStateResponseNonFungibleResourceIds Ids { get; set; }
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public decimal Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityStateResponseNonFungibleResource {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Ids: ").Append(Ids).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,9 +181,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Ids == input.Ids ||
-                    (this.Ids != null &&
-                    this.Ids.Equals(input.Ids))
+                    this.Amount == input.Amount ||
+                    this.Amount.Equals(input.Amount)
                 );
         }
 
@@ -205,10 +199,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Ids != null)
-                {
-                    hashCode = (hashCode * 59) + this.Ids.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 return hashCode;
             }
         }

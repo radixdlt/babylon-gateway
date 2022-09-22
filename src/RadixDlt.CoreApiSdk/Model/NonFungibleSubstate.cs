@@ -62,35 +62,17 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.CoreApiSdk.Model;
 
-// TODO owner_entity -> vault_entity ?
-
-[Table("tmp_entity_non_fungible_resource_ids_history")]
-public class TmpOwnerEntityNonFungibleResourceIdsHistory
+public partial class NonFungibleSubstate : IResourcePointer
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("owner_entity_id")]
-    public long OwnerEntityId { get; set; }
-
-    [Column("global_entity_id")]
-    public long GlobalEntityId { get; set; }
-
-    [Column("non_fungible_resource_entity_id")]
-    public long NonFungibleResourceEntityId { get; set; }
-
-    [Column("ids_count")]
-    public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
-
-    [Column("ids")]
-    public long[] Ids { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    public IEnumerable<TypedResourceAddress> PointedResources
+    {
+        get
+        {
+            yield return new TypedResourceAddress(ResourceType.NonFungible, NfId);
+        }
+    }
 }

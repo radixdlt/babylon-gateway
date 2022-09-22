@@ -80,6 +80,9 @@ public class TmpOwnerEntityFungibleResourceBalanceHistory
     [Column("owner_entity_id")]
     public long OwnerEntityId { get; set; }
 
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
+
     [Column("fungible_resource_entity_id")]
     public long FungibleResourceEntityId { get; set; }
 

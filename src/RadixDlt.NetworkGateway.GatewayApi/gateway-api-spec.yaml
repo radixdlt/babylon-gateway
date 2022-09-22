@@ -262,23 +262,13 @@ components:
       type: object
       required:
         - address
-        - ids
+        - amount
       properties:
         address:
           description: The Bech32m-encoded human readable version of the resource's global address
           type: string
-        ids:
-          allOf:
-            - $ref: "#/components/schemas/ResultSetCursor"
-            - type: object
-              required:
-                - results
-              properties:
-                results:
-                  type: array
-                  items:
-                    description: The hex-encoded bytes of the non-fungible id
-                    type: string
+        amount:
+          type: number
     TransferTokens:
       allOf:
         - "$ref": "#/components/schemas/Action"
