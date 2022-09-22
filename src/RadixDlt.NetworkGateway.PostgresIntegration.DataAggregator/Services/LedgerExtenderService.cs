@@ -279,6 +279,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
         var fungibleResourceChanges = new List<FungibleResourceChange>();
+        var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
 
         // step 1: scan for any referenced entities
         {
@@ -465,28 +466,32 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
 
-                var x = data.ResourceAmount.ActualInstance;
+                var substate = new TmpVaultSubstate();
 
-                if (x is FungibleResourceAmount fra)
+                // TODO ugh...
+                var resourceAmount = data.ResourceAmount.ActualInstance;
+                var substateEntity = us.ReferencedEntity;
+
+                if (resourceAmount is FungibleResourceAmount fra)
                 {
-                    var substate = new TmpVaultSubstate
-                    {
-                        Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos),
-                    };
+                    substate.Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
 
-                    // TODO ugh...
                     var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
                     var resourceEntity = referencedEntities[resourceAddress];
-                    var substateEntity = us.ReferencedEntity;
 
                     fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, substate.Amount, us.StateVersion));
 
                     return substate;
                 }
 
-                if (x is NonFungibleResourceAmount)
+                if (resourceAmount is NonFungibleResourceAmount nfra)
                 {
-                    return new TmpVaultSubstate();
+                    var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
+                    var resourceEntity = referencedEntities[resourceAddress];
+
+                    nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIds, us.StateVersion));
+
+                    return substate;
                 }
 
                 throw new Exception("bla bla bla bla x9"); // TODO fix me
@@ -616,24 +621,33 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
         }
 
         // step 6: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
-        // step 6.1: handle tmp_entity_fungible_resource_balance_history
+        // step 6.1: handle tmp_entity_fungible_resource_balance_history & tmp_entity_non_fungible_resource_ids_history
         {
-            var insertEntities = fungibleResourceChanges
-                .Select(e =>
+            var fungibles = fungibleResourceChanges
+                .Select(e => new TmpOwnerEntityFungibleResourceBalanceHistory
                 {
-                    var bh = new TmpOwnerEntityFungibleResourceBalanceHistory
-                    {
-                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
-                        FungibleResourceEntityId = e.ResourceEntity.DatabaseId,
-                        Balance = e.Balance,
-                        FromStateVersion = e.StateVersion,
-                    };
-
-                    return bh;
+                    OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
+                    GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
+                    FungibleResourceEntityId = e.ResourceEntity.DatabaseId,
+                    Balance = e.Balance,
+                    FromStateVersion = e.StateVersion,
                 })
                 .ToList();
 
-            await dbContext.TmpOwnerEntityFungibleResourceBalanceHistory.AddRangeAsync(insertEntities, token);
+            var nonFungibles = nonFungibleResourceChanges
+                .Select(e => new TmpOwnerEntityNonFungibleResourceIdsHistory
+                {
+                    OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
+                    GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
+                    NonFungibleResourceEntityId = e.ResourceEntity.DatabaseId,
+                    IdsCount = e.Ids.Count,
+                    Ids = e.Ids.Select(id => referencedEntities[id].DatabaseId).ToArray(),
+                    FromStateVersion = e.StateVersion,
+                })
+                .ToList();
+
+            await dbContext.TmpOwnerEntityFungibleResourceBalanceHistory.AddRangeAsync(fungibles, token);
+            await dbContext.TmpOwnerEntityNonFungibleResourceIdsHistory.AddRangeAsync(nonFungibles, token);
             await dbContext.SaveChangesAsync(token);
         }
     }

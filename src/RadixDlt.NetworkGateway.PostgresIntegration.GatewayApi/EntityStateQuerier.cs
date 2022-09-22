@@ -125,6 +125,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         }
 
         // TODO those DISTINCT ON queries are going to be slow because we have to fetch everything first, ideally we should change it to somehow just fetch first element form index and stop immediately
+        // TODO as we support "lookup by global" and "lookup by owner" we must duplicate some keys
 
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
@@ -136,7 +137,7 @@ WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Vers
 ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .ToListAsync(token);
 
-        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) - but no INCLUDE(ids) as its just too big
+        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include(ids.length) - but no INCLUDE(ids) as its just too big
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, ids" (first x elements of ids actually)
         // TODO or maybe we don't even want to return actual NF ids here?
         var nonFungibleIdsHistory = await _dbContext.TmpOwnerEntityNonFungibleResourceIdsHistory
@@ -173,9 +174,8 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
         {
             var rga = resources[nfih.NonFungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
             var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
-            var ids = nfih.Ids.Select(id => id.ToHex()).ToList();
 
-            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, new EntityStateResponseNonFungibleResourceIds(ids.Count, null, ids.Count > 0 ? "TBD (currently everything is returned)" : null, ids)));
+            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, nfih.IdsCount));
         }
 
         var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);

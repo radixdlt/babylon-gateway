@@ -93,6 +93,16 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         }
     }
 
+    public long DatabaseGlobalAncestorId
+    {
+        get
+        {
+            EnsureParentalIdsResolved();
+
+            return _globalAncestorId.Value;
+        }
+    }
+
     // TODO not sure if this logic is valid?
     public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
 
@@ -162,9 +172,9 @@ internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, Sub
     }
 }
 
-internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion)
-{
-}
+internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
+
+internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
 
 internal static class DictionaryExtensions
 {
