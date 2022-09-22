@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -86,7 +87,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
@@ -96,11 +97,13 @@ internal class EntityStateQuerier : IEntityStateQuerier
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
         // TODO account only?
-        if (entity == null || entity.GetType() != typeof(TmpComponentEntity))
+        if (entity == null || (entity.GetType() != typeof(TmpComponentEntity)))
         {
-            throw new Exception("zzz zzz zzz x1");
+            throw new Exception("zzz zzz zzz x1"); // TODO fix me
         }
 
+        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
+        // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
         var fungibleBalanceHistory = await _dbContext.TmpOwnerEntityFungibleResourceBalanceHistory
             .FromSqlInterpolated($@"
 SELECT DISTINCT ON (owner_entity_id, fungible_resource_entity_id) *
@@ -115,18 +118,18 @@ ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .Where(e => uniqueResources.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
-        var nonFungibles = new List<ComponentStateResponseNonFungibleResource>();
+        var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
 
         foreach (var fbh in fungibleBalanceHistory)
         {
             var r = resources[fbh.FungibleResourceEntityId];
             var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
 
-            nonFungibles.Add(new ComponentStateResponseNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
+            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
         }
 
         var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().AccountHrp, address);
 
-        return new ComponentStateResponse(adr, nonFungibles);
+        return new EntityStateResponse(adr, nonFungibles);
     }
 }

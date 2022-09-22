@@ -87,8 +87,8 @@ public class StateController
         _entityStateQuerier = entityStateQuerier;
     }
 
-    [HttpPost("tmp-entity")]
-    public async Task<ComponentStateResponse> TmpEntity(ComponentStateRequest request, CancellationToken token = default)
+    [HttpPost("")]
+    public async Task<EntityStateResponse> Snapshot(EntityStateRequest request, CancellationToken token = default)
     {
         var address = RadixBech32.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);

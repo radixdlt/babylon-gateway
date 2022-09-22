@@ -75,7 +75,7 @@ internal class TmpBaseEntity
     public long Id { get; set; }
 
     [Column("address")]
-    public string Address { get; set; }
+    public string Address { get; set; } // TODO use byte[] over string
 
     [Column("global_address")]
     public byte[]? GlobalAddress { get; set; }

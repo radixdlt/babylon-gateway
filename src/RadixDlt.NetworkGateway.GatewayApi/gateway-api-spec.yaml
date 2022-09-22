@@ -154,9 +154,9 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
-  /state/tmp-entity:
+  /state:
     post:
-      summary: Component State
+      summary: Entity State
       description: |
         TBD
       tags:
@@ -166,14 +166,14 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/ComponentStateRequest"
+              "$ref": "#/components/schemas/EntityStateRequest"
       responses:
         '200':
-          description: Component State
+          description: Entity State
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ComponentStateResponse"
+                "$ref": "#/components/schemas/EntityStateResponse"
         '500':
           description: Gateway Error
           content:
@@ -182,7 +182,7 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
-    ComponentStateRequest:
+    EntityStateRequest:
       type: object
       required:
         - address
@@ -192,7 +192,7 @@ components:
           type: string
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
-    ComponentStateResponse:
+    EntityStateResponse:
       type: object
       required:
         - address
@@ -205,8 +205,8 @@ components:
           description: TBD
           type: array
           items:
-            $ref: "#/components/schemas/ComponentStateResponseNonFungibleResource"
-    ComponentStateResponseNonFungibleResource:
+            $ref: "#/components/schemas/EntityStateResponseNonFungibleResource"
+    EntityStateResponseNonFungibleResource:
       type: object
       required:
         - address

@@ -91,33 +91,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentStateResponse
+    /// EntityStateResponse
     /// </summary>
-    [DataContract(Name = "ComponentStateResponse")]
-    public partial class ComponentStateResponse : IEquatable<ComponentStateResponse>, IValidatableObject
+    [DataContract(Name = "EntityStateResponse")]
+    public partial class EntityStateResponse : IEquatable<EntityStateResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentStateResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntityStateResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentStateResponse() { }
+        protected EntityStateResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentStateResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntityStateResponse" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="nonFungibleResources">TBD (required).</param>
-        public ComponentStateResponse(string address = default(string), List<ComponentStateResponseNonFungibleResource> nonFungibleResources = default(List<ComponentStateResponseNonFungibleResource>))
+        public EntityStateResponse(string address = default(string), List<EntityStateResponseNonFungibleResource> nonFungibleResources = default(List<EntityStateResponseNonFungibleResource>))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for ComponentStateResponse and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityStateResponse and cannot be null");
             }
             this.Address = address;
             // to ensure "nonFungibleResources" is required (not null)
             if (nonFungibleResources == null)
             {
-                throw new ArgumentNullException("nonFungibleResources is a required property for ComponentStateResponse and cannot be null");
+                throw new ArgumentNullException("nonFungibleResources is a required property for EntityStateResponse and cannot be null");
             }
             this.NonFungibleResources = nonFungibleResources;
         }
@@ -134,7 +134,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>TBD</value>
         [DataMember(Name = "non_fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public List<ComponentStateResponseNonFungibleResource> NonFungibleResources { get; set; }
+        public List<EntityStateResponseNonFungibleResource> NonFungibleResources { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentStateResponse {\n");
+            sb.Append("class EntityStateResponse {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
             sb.Append("}\n");
@@ -166,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentStateResponse);
+            return this.Equals(input as EntityStateResponse);
         }
 
         /// <summary>
-        /// Returns true if ComponentStateResponse instances are equal
+        /// Returns true if EntityStateResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentStateResponse to be compared</param>
+        /// <param name="input">Instance of EntityStateResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentStateResponse input)
+        public bool Equals(EntityStateResponse input)
         {
             if (input == null)
             {

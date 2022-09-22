@@ -91,50 +91,44 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentStateResponseNonFungibleResource
+    /// EntityStateRequest
     /// </summary>
-    [DataContract(Name = "ComponentStateResponseNonFungibleResource")]
-    public partial class ComponentStateResponseNonFungibleResource : IEquatable<ComponentStateResponseNonFungibleResource>, IValidatableObject
+    [DataContract(Name = "EntityStateRequest")]
+    public partial class EntityStateRequest : IEquatable<EntityStateRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentStateResponseNonFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="EntityStateRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentStateResponseNonFungibleResource() { }
+        protected EntityStateRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentStateResponseNonFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="EntityStateRequest" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public ComponentStateResponseNonFungibleResource(string address = default(string), string amountAttos = default(string))
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        public EntityStateRequest(string address = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for ComponentStateResponseNonFungibleResource and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityStateRequest and cannot be null");
             }
             this.Address = address;
-            // to ensure "amountAttos" is required (not null)
-            if (amountAttos == null)
-            {
-                throw new ArgumentNullException("amountAttos is a required property for ComponentStateResponseNonFungibleResource and cannot be null");
-            }
-            this.AmountAttos = amountAttos;
+            this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource&#39;s global address
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// Gets or Sets AtStateIdentifier
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountAttos { get; set; }
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +137,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentStateResponseNonFungibleResource {\n");
+            sb.Append("class EntityStateRequest {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentStateResponseNonFungibleResource);
+            return this.Equals(input as EntityStateRequest);
         }
 
         /// <summary>
-        /// Returns true if ComponentStateResponseNonFungibleResource instances are equal
+        /// Returns true if EntityStateRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentStateResponseNonFungibleResource to be compared</param>
+        /// <param name="input">Instance of EntityStateRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentStateResponseNonFungibleResource input)
+        public bool Equals(EntityStateRequest input)
         {
             if (input == null)
             {
@@ -187,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.AmountAttos == input.AmountAttos ||
-                    (this.AmountAttos != null &&
-                    this.AmountAttos.Equals(input.AmountAttos))
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -206,9 +200,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.AmountAttos != null)
+                if (this.AtStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

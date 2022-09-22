@@ -128,11 +128,11 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     private TmpBaseEntity GetDatabaseEntity()
     {
-        var de = _databaseEntity ?? throw new Exception("bla bla");
+        var de = _databaseEntity ?? throw new Exception("bla bla"); // TODO fix me
 
         if (de.Id == 0)
         {
-            throw new Exception("bla bla bla bla x6");
+            throw new Exception("bla bla bla bla x6"); // TODO fix me
         }
 
         return de;
