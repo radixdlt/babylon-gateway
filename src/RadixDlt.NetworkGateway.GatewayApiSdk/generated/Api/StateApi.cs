@@ -92,26 +92,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// Component State
+        /// Entity State
         /// </summary>
         /// <remarks>
         /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
-        /// <returns>ComponentStateResponse</returns>
-        ComponentStateResponse StateTmpEntityPost(ComponentStateRequest componentStateRequest);
+        /// <param name="entityStateRequest"></param>
+        /// <returns>EntityStateResponse</returns>
+        EntityStateResponse StatePost(EntityStateRequest entityStateRequest);
 
         /// <summary>
-        /// Component State
+        /// Entity State
         /// </summary>
         /// <remarks>
         /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
-        /// <returns>ApiResponse of ComponentStateResponse</returns>
-        ApiResponse<ComponentStateResponse> StateTmpEntityPostWithHttpInfo(ComponentStateRequest componentStateRequest);
+        /// <param name="entityStateRequest"></param>
+        /// <returns>ApiResponse of EntityStateResponse</returns>
+        ApiResponse<EntityStateResponse> StatePostWithHttpInfo(EntityStateRequest entityStateRequest);
         #endregion Synchronous Operations
     }
 
@@ -122,28 +122,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Component State
+        /// Entity State
         /// </summary>
         /// <remarks>
         /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
+        /// <param name="entityStateRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ComponentStateResponse</returns>
-        System.Threading.Tasks.Task<ComponentStateResponse> StateTmpEntityPostAsync(ComponentStateRequest componentStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of EntityStateResponse</returns>
+        System.Threading.Tasks.Task<EntityStateResponse> StatePostAsync(EntityStateRequest entityStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Component State
+        /// Entity State
         /// </summary>
         /// <remarks>
         /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
+        /// <param name="entityStateRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (ComponentStateResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<ComponentStateResponse>> StateTmpEntityPostWithHttpInfoAsync(ComponentStateRequest componentStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (EntityStateResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntityStateResponse>> StatePostWithHttpInfoAsync(EntityStateRequest entityStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -358,28 +358,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Component State TBD 
+        /// Entity State TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
-        /// <returns>ComponentStateResponse</returns>
-        public ComponentStateResponse StateTmpEntityPost(ComponentStateRequest componentStateRequest)
+        /// <param name="entityStateRequest"></param>
+        /// <returns>EntityStateResponse</returns>
+        public EntityStateResponse StatePost(EntityStateRequest entityStateRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ComponentStateResponse> localVarResponse = StateTmpEntityPostWithHttpInfo(componentStateRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityStateResponse> localVarResponse = StatePostWithHttpInfo(entityStateRequest);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Component State TBD 
+        /// Entity State TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
-        /// <returns>ApiResponse of ComponentStateResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ComponentStateResponse> StateTmpEntityPostWithHttpInfo(ComponentStateRequest componentStateRequest)
+        /// <param name="entityStateRequest"></param>
+        /// <returns>ApiResponse of EntityStateResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityStateResponse> StatePostWithHttpInfo(EntityStateRequest entityStateRequest)
         {
-            // verify the required parameter 'componentStateRequest' is set
-            if (componentStateRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'componentStateRequest' when calling StateApi->StateTmpEntityPost");
+            // verify the required parameter 'entityStateRequest' is set
+            if (entityStateRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityStateRequest' when calling StateApi->StatePost");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -398,15 +398,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = componentStateRequest;
+            localVarRequestOptions.Data = entityStateRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<ComponentStateResponse>("/state/tmp-entity", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<EntityStateResponse>("/state", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("StateTmpEntityPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("StatePost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -414,30 +414,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Component State TBD 
+        /// Entity State TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
+        /// <param name="entityStateRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ComponentStateResponse</returns>
-        public async System.Threading.Tasks.Task<ComponentStateResponse> StateTmpEntityPostAsync(ComponentStateRequest componentStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of EntityStateResponse</returns>
+        public async System.Threading.Tasks.Task<EntityStateResponse> StatePostAsync(EntityStateRequest entityStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ComponentStateResponse> localVarResponse = await StateTmpEntityPostWithHttpInfoAsync(componentStateRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityStateResponse> localVarResponse = await StatePostWithHttpInfoAsync(entityStateRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
         /// <summary>
-        /// Component State TBD 
+        /// Entity State TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="componentStateRequest"></param>
+        /// <param name="entityStateRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (ComponentStateResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<ComponentStateResponse>> StateTmpEntityPostWithHttpInfoAsync(ComponentStateRequest componentStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (EntityStateResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityStateResponse>> StatePostWithHttpInfoAsync(EntityStateRequest entityStateRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'componentStateRequest' is set
-            if (componentStateRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'componentStateRequest' when calling StateApi->StateTmpEntityPost");
+            // verify the required parameter 'entityStateRequest' is set
+            if (entityStateRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityStateRequest' when calling StateApi->StatePost");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -458,16 +458,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = componentStateRequest;
+            localVarRequestOptions.Data = entityStateRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<ComponentStateResponse>("/state/tmp-entity", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityStateResponse>("/state", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("StateTmpEntityPost", localVarResponse);
+                Exception _exception = this.ExceptionFactory("StatePost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

@@ -125,7 +125,7 @@ public sealed class DistributedLockService : IDisposable
 {
     private CancellationTokenSource? _cts;
 
-    public CancellationToken CancellationToken => (_cts ?? throw new Exception("bla bla")).Token;
+    public CancellationToken CancellationToken => (_cts ?? throw new Exception("bla bla")).Token; // TODO fix me
 
     public async Task<bool> TryAcquire(CancellationToken token = default)
     {

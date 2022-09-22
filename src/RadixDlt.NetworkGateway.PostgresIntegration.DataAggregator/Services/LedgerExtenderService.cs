@@ -403,7 +403,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     EntityType.Package => new TmpPackageEntity(),
                     EntityType.Vault => new TmpVaultEntity(),
                     EntityType.KeyValueStore => new TmpKeyValueStoreEntity(),
-                    _ => throw new Exception("bla bla bla x2"),
+                    _ => throw new Exception("bla bla bla x2"), // TODO fix me
                 };
 
                 dbEntity.Address = e.Address;
@@ -470,7 +470,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     return new TmpVaultSubstate();
                 }
 
-                throw new Exception("bla bla bla bla x9");
+                throw new Exception("bla bla bla bla x9"); // TODO fix me
             }
 
             TmpKeyValueStoreEntrySubstate CreateKeyValueStoreEntrySubstate(UppedSubstate us)
@@ -492,7 +492,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     SubstateType.Vault => CreateTmpVaultSubstate(us),
                     SubstateType.NonFungible => new TmpNonFungibleSubstate(),
                     SubstateType.KeyValueStoreEntry => CreateKeyValueStoreEntrySubstate(us),
-                    _ => throw new Exception("bla bla bla x3"),
+                    _ => throw new Exception("bla bla bla x3"), // TODO fix me
                 };
 
                 dbSubstate.Key = us.Key;
@@ -556,7 +556,7 @@ WHERE e.id = data.id
 
             if (childToParentEntities.Count != affected)
             {
-                throw new Exception("bla bla bla x4");
+                throw new Exception("bla bla bla x4"); // TODO fix me
             }
         }
 
@@ -592,7 +592,7 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
 
             if (downedSubstates.Count != affected)
             {
-                throw new Exception("bla bla bla x5");
+                throw new Exception("bla bla bla x5"); // TODO fix me
             }
         }
 
