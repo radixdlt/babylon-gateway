@@ -135,7 +135,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 
         var enabledCoreNodeStateVersionLookupTasks = coreNodes
             .Where(n => n.Enabled && !string.IsNullOrWhiteSpace(n.CoreApiAddress))
-            .Select(n => GetCoreNodeStateVersion(n, cancellationToken));
+            .Select(n => GetCoreNodeStateVersion(n, _networkOptionsMonitor.CurrentValue.NetworkName, cancellationToken));
 
         var topOfLedgerStateVersionTask = _ledgerStateQuerier.GetTopOfLedgerStateVersion();
 
@@ -222,6 +222,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
 
     private async Task<(CoreApiNode CoreApiNode, long? StateVersion, Exception? Exception)> GetCoreNodeStateVersion(
         CoreApiNode coreApiNode,
+        string networkName,
         CancellationToken cancellationToken)
     {
         var coreApiProvider = new CoreApiProvider(coreApiNode, _httpClient);
@@ -235,11 +236,11 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
                     timeoutCancellationTokenSource.Token
                 );
 
-            var networkStatusResponse = await coreApiProvider.StatusApi.StatusNetworkConfigurationPostAsync(sharedCancellationTokenSource.Token);
+            var networkStatusResponse = await coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(
+                new CoreApiModel.NetworkStatusRequest(networkName),
+                sharedCancellationTokenSource.Token);
 
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion, null);
-            return (coreApiNode, 321, null);
+            return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion, null);
         }
         catch (TaskCanceledException)
         {
