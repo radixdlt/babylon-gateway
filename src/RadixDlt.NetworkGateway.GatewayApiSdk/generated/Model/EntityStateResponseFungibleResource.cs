@@ -91,62 +91,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponse
+    /// EntityStateResponseFungibleResource
     /// </summary>
-    [DataContract(Name = "EntityStateResponse")]
-    public partial class EntityStateResponse : IEquatable<EntityStateResponse>, IValidatableObject
+    [DataContract(Name = "EntityStateResponseFungibleResource")]
+    public partial class EntityStateResponseFungibleResource : IEquatable<EntityStateResponseFungibleResource>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResource" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponse() { }
+        protected EntityStateResponseFungibleResource() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResource" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        /// <param name="fungibleResources">fungibleResources (required).</param>
-        /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
-        public EntityStateResponse(string address = default(string), EntityStateResponseFungibleResources fungibleResources = default(EntityStateResponseFungibleResources), EntityStateResponseNonFungibleResources nonFungibleResources = default(EntityStateResponseNonFungibleResources))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
+        public EntityStateResponseFungibleResource(string address = default(string), string amountAttos = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityStateResponse and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityStateResponseFungibleResource and cannot be null");
             }
             this.Address = address;
-            // to ensure "fungibleResources" is required (not null)
-            if (fungibleResources == null)
+            // to ensure "amountAttos" is required (not null)
+            if (amountAttos == null)
             {
-                throw new ArgumentNullException("fungibleResources is a required property for EntityStateResponse and cannot be null");
+                throw new ArgumentNullException("amountAttos is a required property for EntityStateResponseFungibleResource and cannot be null");
             }
-            this.FungibleResources = fungibleResources;
-            // to ensure "nonFungibleResources" is required (not null)
-            if (nonFungibleResources == null)
-            {
-                throw new ArgumentNullException("nonFungibleResources is a required property for EntityStateResponse and cannot be null");
-            }
-            this.NonFungibleResources = nonFungibleResources;
+            this.AmountAttos = amountAttos;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the resource&#39;s global address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets FungibleResources
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
         /// </summary>
-        [DataMember(Name = "fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public EntityStateResponseFungibleResources FungibleResources { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibleResources
-        /// </summary>
-        [DataMember(Name = "non_fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public EntityStateResponseNonFungibleResources NonFungibleResources { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
+        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string AmountAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,10 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponse {\n");
+            sb.Append("class EntityStateResponseFungibleResource {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  FungibleResources: ").Append(FungibleResources).Append("\n");
-            sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
+            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponse);
+            return this.Equals(input as EntityStateResponseFungibleResource);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponse instances are equal
+        /// Returns true if EntityStateResponseFungibleResource instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponse to be compared</param>
+        /// <param name="input">Instance of EntityStateResponseFungibleResource to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponse input)
+        public bool Equals(EntityStateResponseFungibleResource input)
         {
             if (input == null)
             {
@@ -200,14 +187,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.FungibleResources == input.FungibleResources ||
-                    (this.FungibleResources != null &&
-                    this.FungibleResources.Equals(input.FungibleResources))
-                ) && 
-                (
-                    this.NonFungibleResources == input.NonFungibleResources ||
-                    (this.NonFungibleResources != null &&
-                    this.NonFungibleResources.Equals(input.NonFungibleResources))
+                    this.AmountAttos == input.AmountAttos ||
+                    (this.AmountAttos != null &&
+                    this.AmountAttos.Equals(input.AmountAttos))
                 );
         }
 
@@ -224,13 +206,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.FungibleResources != null)
+                if (this.AmountAttos != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleResources.GetHashCode();
-                }
-                if (this.NonFungibleResources != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleResources.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
                 }
                 return hashCode;
             }

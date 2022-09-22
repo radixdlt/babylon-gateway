@@ -64,13 +64,13 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -91,16 +91,35 @@ internal class EntityStateQuerier : IEntityStateQuerier
     {
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
+        // TODO add proper pagination support
 
         var entity = await _dbContext.TmpEntities
             .Where(e => e.FromStateVersion <= ledgerState._Version)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
-        // TODO account only?
-        if (entity == null || (entity.GetType() != typeof(TmpComponentEntity)))
+        if (entity == null)
         {
-            throw new Exception("zzz zzz zzz x1"); // TODO fix me
+            // TODO just not found
+            throw new Exception("xxxx");
         }
+
+        string hrp;
+
+        // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
+        if (entity is TmpResourceManagerEntity)
+        {
+            hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
+        }
+        else if (entity is TmpAccountComponentEntity)
+        {
+            hrp = _networkConfigurationProvider.GetAddressHrps().AccountHrp;
+        }
+        else
+        {
+            throw new Exception("unsupported entity type"); // TODO fix me
+        }
+
+        // TODO those DISTINCT ON queries are going to be slow because we have to fetch everything first, ideally we should change it to somehow just fetch first element form index and stop immediately
 
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
@@ -112,24 +131,52 @@ WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Vers
 ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .ToListAsync(token);
 
-        var uniqueResources = fungibleBalanceHistory.Select(h => h.FungibleResourceEntityId).Distinct();
+        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) - but no INCLUDE(ids) as its just too big
+        // TODO this one might benefit form "*" => "fungible_resource_entity_id, ids" (first x elements of ids actually)
+        // TODO or maybe we don't even want to return actual NF ids here?
+        var nonFungibleIdsHistory = await _dbContext.TmpOwnerEntityNonFungibleResourceIdsHistory
+            .FromSqlInterpolated($@"
+SELECT DISTINCT ON (owner_entity_id, non_fungible_resource_entity_id) *
+FROM tmp_entity_non_fungible_resource_ids_history
+WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
+ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DESC")
+            .ToListAsync(token);
+
+        var referencedEntityIds = fungibleBalanceHistory
+            .Select(h => h.FungibleResourceEntityId)
+            .Concat(nonFungibleIdsHistory.Select(h => h.NonFungibleResourceEntityId))
+            .Distinct()
+            .ToList();
 
         var resources = await _dbContext.TmpEntities
-            .Where(e => uniqueResources.Contains(e.Id))
+            .Where(e => referencedEntityIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
-        var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
+        var fungibles = new List<EntityStateResponseFungibleResource>();
 
         foreach (var fbh in fungibleBalanceHistory)
         {
             var r = resources[fbh.FungibleResourceEntityId];
             var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
 
-            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
+            fungibles.Add(new EntityStateResponseFungibleResource(ra, fbh.Balance.ToSubUnitString()));
         }
 
-        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().AccountHrp, address);
+        var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
 
-        return new EntityStateResponse(adr, nonFungibles);
+        foreach (var nfih in nonFungibleIdsHistory)
+        {
+            var r = resources[nfih.NonFungibleResourceEntityId];
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
+            var ids = nfih.Ids.Select(id => id.ToHex()).ToList();
+
+            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, new EntityStateResponseNonFungibleResourceIds(ids.Count, null, ids.Count > 0 ? "TBD (currently everything is returned)" : null, ids)));
+        }
+
+        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
+        var fungiblesPagination = new EntityStateResponseFungibleResources(fungibleBalanceHistory.Count, null, "TBD (currently everything is returned)", fungibles);
+        var nonFungiblesPagination = new EntityStateResponseNonFungibleResources(nonFungibleIdsHistory.Count, null, "TBD (currently everything is returned)", nonFungibles);
+
+        return new EntityStateResponse(adr, fungiblesPagination, nonFungiblesPagination);
     }
 }

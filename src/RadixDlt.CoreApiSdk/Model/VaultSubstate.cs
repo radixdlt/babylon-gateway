@@ -68,13 +68,18 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class VaultSubstate : IResourcePointer
 {
-    public IEnumerable<string> PointedResources
+    public IEnumerable<TypedResourceAddress> PointedResources
     {
         get
         {
             if (ResourceAmount.ActualInstance is FungibleResourceAmount fra)
             {
-                yield return fra.ResourceAddress;
+                yield return new TypedResourceAddress(fra.ResourceType, fra.ResourceAddress);
+            }
+
+            if (ResourceAmount.ActualInstance is NonFungibleResourceAmount nfra)
+            {
+                yield return new TypedResourceAddress(nfra.ResourceType, nfra.ResourceAddress);
             }
         }
     }

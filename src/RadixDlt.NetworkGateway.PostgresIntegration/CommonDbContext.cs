@@ -112,6 +112,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<TmpOwnerEntityFungibleResourceBalanceHistory> TmpOwnerEntityFungibleResourceBalanceHistory => Set<TmpOwnerEntityFungibleResourceBalanceHistory>();
 
+    public DbSet<TmpOwnerEntityNonFungibleResourceIdsHistory> TmpOwnerEntityNonFungibleResourceIdsHistory => Set<TmpOwnerEntityNonFungibleResourceIdsHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -133,24 +135,29 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<TmpBaseEntity>()
             .HasDiscriminator<string>("type")
             .HasValue<TmpSystemEntity>("system")
-            .HasValue<TmpResourceManagerEntity>("resourcemanager")
-            .HasValue<TmpComponentEntity>("component")
+            .HasValue<TmpFungibleResourceEntity>("fungible_resource")
+            .HasValue<TmpNonFungibleResourceEntity>("noon_fungible_resource")
+            .HasValue<TmpNormalComponentEntity>("normal_component")
+            .HasValue<TmpAccountComponentEntity>("account_component")
+            .HasValue<TmpValidatorComponentEntity>("validator_component")
             .HasValue<TmpPackageEntity>("package")
-            .HasValue<TmpKeyValueStoreEntity>("keyvaluestore")
+            .HasValue<TmpKeyValueStoreEntity>("key_value_store")
             .HasValue<TmpVaultEntity>("vault");
 
         modelBuilder.Entity<TmpBaseSubstate>()
             .HasDiscriminator<string>("type")
             .HasValue<TmpSystemSubstate>("system")
-            .HasValue<TmpResourceManagerSubstate>("resourcemanager")
-            .HasValue<TmpComponentInfoSubstate>("componentinfo")
-            .HasValue<TmpComponentStateSubstate>("componentstate")
+            .HasValue<TmpResourceManagerSubstate>("resource_manager")
+            .HasValue<TmpComponentInfoSubstate>("component_info")
+            .HasValue<TmpComponentStateSubstate>("component_state")
             .HasValue<TmpPackageSubstate>("package")
             .HasValue<TmpVaultSubstate>("vault")
-            .HasValue<TmpNonFungibleSubstate>("nonfungible")
-            .HasValue<TmpKeyValueStoreEntrySubstate>("keyvaluestoreentry");
+            .HasValue<TmpNonFungibleSubstate>("non_fungible")
+            .HasValue<TmpKeyValueStoreEntrySubstate>("key_value_store_entry");
 
         modelBuilder.Entity<TmpOwnerEntityFungibleResourceBalanceHistory>();
+
+        modelBuilder.Entity<TmpOwnerEntityNonFungibleResourceIdsHistory>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
