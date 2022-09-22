@@ -71,4 +71,14 @@ public class GatewayTestsRunner
 
         return coreApiStub;
     }
+
+    public CoreApiStub ArrangeTransactionRecentTest(string databaseName)
+         {
+             var coreApiStub = new CoreApiStub();
+             _client = TestGatewayApiFactory.Create(coreApiStub, databaseName).Client;
+
+             // set custom gatewayApi and openSchemaApi versions
+
+             return coreApiStub;
+         }
 }

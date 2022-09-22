@@ -80,16 +80,22 @@ public class TransactionEndpointTests
     [Fact]
     public async Task TestTransactionRecent()
     {
-        var coreApiStub = new CoreApiStub();
+        // Arrange
+        var gatewayRunner = new GatewayTestsRunner();
+        var coreApiStub = gatewayRunner.ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
 
-        var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestTransactionRecent)).Client;
+        // Act
+        var payload = await gatewayRunner.ActAsync<RecentTransactionsResponse>(
+            "/transaction/recent",
+            JsonContent.Create(new RecentTransactionsRequest()));
 
-        var payload = await GetRecentTransactions(client);
+        // Assert
+        payload.Transactions.ShouldNotBeNull();
+        payload.Transactions.Count.Should().BeGreaterThan(0);
 
         payload.LedgerState.ShouldNotBeNull();
         payload.LedgerState.Network.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
-        payload.Transactions.Count.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -181,18 +187,5 @@ public class TransactionEndpointTests
         var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
 
         payload.Duplicate.Should().Be(false);
-    }
-
-    private async Task<RecentTransactionsResponse> GetRecentTransactions(HttpClient client)
-    {
-        using var response = await client.PostAsync(
-            "/transaction/recent",
-            JsonContent.Create(new RecentTransactionsRequest()));
-
-        var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
-
-        payload.Transactions.ShouldNotBeNull();
-
-        return payload;
     }
 }
