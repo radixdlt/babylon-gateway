@@ -314,8 +314,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                             // TODO ugh...
                             var resourceAddress = RadixBech32.Decode(typedResource.Address).Data.ToHex();
 
-                            // TODO this one is really big ugh...
-                            referencedEntities.GetOrAdd(resourceAddress, _ => new ReferencedEntity(resourceAddress, EntityType.ResourceManager, stateVersion)).Hints += "ResourceType=" + typedResource.Type;
+                            referencedEntities.GetOrAdd(resourceAddress, _ => new ReferencedEntity(resourceAddress, EntityType.ResourceManager, stateVersion));
                         }
                     }
 
@@ -365,48 +364,38 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 }
             }
 
-            TmpResourceManagerEntity CreateResourceEntity(ReferencedEntity re)
-            {
-                if (re.Hints.Contains("ResourceType=Fungible"))
-                {
-                    return new TmpFungibleResourceEntity();
-                }
-
-                if (re.Hints.Contains("ResourceType=NonFungible"))
-                {
-                    return new TmpNonFungibleResourceEntity();
-                }
-
-                // TODO fix me, this is just WRONG!
-                return new TmpFungibleResourceEntity();
-            }
-
             TmpComponentEntity CreateComponentEntity(ReferencedEntity re)
             {
+                // TODO use some enum or something!
+
+                var kind = "normal";
+
                 if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().AccountHrp))
                 {
-                    return new TmpAccountComponentEntity();
+                    kind = "account";
                 }
-
-                if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().ValidatorHrp))
+                else if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().ValidatorHrp))
                 {
-                    return new TmpValidatorComponentEntity();
+                    kind = "validator";
                 }
 
-                return new TmpNormalComponentEntity();
+                return new TmpComponentEntity
+                {
+                    Kind = kind,
+                };
             }
 
-            var entityAddresses = referencedEntities.Keys.ToList();
+            var entityAddresses = referencedEntities.Keys.Select(x => (RadixAddress)x.ConvertFromHex()).ToList();
 
             var knownDbEntities = await dbContext.TmpEntities
                 .Where(e => entityAddresses.Contains(e.Address))
-                .ToDictionaryAsync(e => e.Address, token);
+                .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
 
             var parentalEntitiesToLoad = knownDbEntities.Values.SelectMany(ExpandParentalIds).Distinct().ToList();
 
             var knownParentalDbEntities = await dbContext.TmpEntities
                 .Where(e => parentalEntitiesToLoad.Contains(e.Id))
-                .ToDictionaryAsync(e => e.Address, token);
+                .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
 
             foreach (var (address, entity) in knownParentalDbEntities)
             {
@@ -428,7 +417,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 TmpBaseEntity dbEntity = e.Type switch
                 {
                     EntityType.System => new TmpSystemEntity(),
-                    EntityType.ResourceManager => CreateResourceEntity(e),
+                    EntityType.ResourceManager => new TmpResourceManagerEntity(),
                     EntityType.Component => CreateComponentEntity(e),
                     EntityType.Package => new TmpPackageEntity(),
                     EntityType.Vault => new TmpVaultEntity(),
@@ -436,8 +425,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     _ => throw new Exception("bla bla bla x2"), // TODO fix me
                 };
 
-                dbEntity.Address = e.Address;
-                dbEntity.GlobalAddress = e.GlobalAddressBytes;
+                dbEntity.Address = e.Address.ConvertFromHex();
+                dbEntity.GlobalAddress = e.GlobalAddressBytes == null ? null : (RadixAddress)e.GlobalAddressBytes;
                 dbEntity.FromStateVersion = e.StateVersion;
 
                 dbContext.TmpEntities.Add(dbEntity);

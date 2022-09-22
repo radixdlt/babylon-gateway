@@ -62,124 +62,48 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Numerics;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.Commons;
 
-internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
+public sealed record RadixAddress
 {
-    private TmpBaseEntity? _databaseEntity;
-    private ReferencedEntity? _parent;
-    private long? _parentId;
-    private long? _ownerAncestorId;
-    private long? _globalAncestorId;
-
-    public byte[]? GlobalAddressBytes { get; private set; }
-
-    public long DatabaseId => GetDatabaseEntity().Id;
-
-    public long DatabaseOwnerAncestorId
+    public sealed class EqualityComparer : IEqualityComparer<RadixAddress?>
     {
-        get
+        public bool Equals(RadixAddress? x, RadixAddress? y)
         {
-            EnsureParentalIdsResolved();
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
 
-            return _ownerAncestorId.Value;
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            return x._address.Equals(y._address);
+        }
+
+        public int GetHashCode(RadixAddress? obj)
+        {
+            ArgumentNullException.ThrowIfNull(obj);
+
+            return obj._address.GetHashCode();
         }
     }
 
-    // TODO not sure if this logic is valid?
-    public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
+    private readonly byte[] _address;
 
-    [MemberNotNullWhen(true, nameof(Parent))]
-    public bool HasParent => _parent != null;
-
-    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
-
-    public void Globalize(string addressBytes)
+    private RadixAddress(byte[] address)
     {
-        GlobalAddressBytes = Convert.FromHexString(addressBytes);
+        _address = address;
     }
 
-    public void Resolve(TmpBaseEntity entity)
-    {
-        _databaseEntity = entity;
-        _parentId = entity.ParentId;
-        _ownerAncestorId = entity.OwnerAncestorId;
-        _globalAncestorId = entity.GlobalAncestorId;
-    }
+    public static implicit operator ReadOnlySpan<byte>(RadixAddress ra) => ra._address;
 
-    public void ResolveParentalIds(long parentId, long ownerId, long globalId)
-    {
-        _parentId = parentId;
-        _ownerAncestorId = ownerId;
-        _globalAncestorId = globalId;
-    }
+    public static implicit operator byte[](RadixAddress ra) => ra._address;
 
-    public void IsChildOf(ReferencedEntity parent)
-    {
-        _parent = parent;
-    }
-
-    private TmpBaseEntity GetDatabaseEntity()
-    {
-        var de = _databaseEntity ?? throw new Exception("bla bla"); // TODO fix me
-
-        if (de.Id == 0)
-        {
-            throw new Exception("bla bla bla bla x6"); // TODO fix me
-        }
-
-        return de;
-    }
-
-    [MemberNotNull(nameof(_parentId), nameof(_ownerAncestorId), nameof(_globalAncestorId))]
-    private void EnsureParentalIdsResolved()
-    {
-        if (_parentId == null || _ownerAncestorId == null || _globalAncestorId == null)
-        {
-            throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgotten to call ResolveParentalIds(long, long, long)?");
-        }
-    }
-}
-
-internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion)
-{
-}
-
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, Substate Data)
-{
-    public TmpBaseSubstate? DatabaseSubstate { get; private set; }
-
-    public void Resolve(TmpBaseSubstate substate)
-    {
-        DatabaseSubstate = substate;
-    }
-}
-
-internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion)
-{
-}
-
-internal static class DictionaryExtensions
-{
-    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
-        where TKey : notnull
-    {
-        if (dictionary.ContainsKey(key))
-        {
-            return dictionary[key];
-        }
-
-        var value = factory(key);
-
-        dictionary[key] = value;
-
-        return value;
-    }
+    public static implicit operator RadixAddress(byte[] bytes) => new RadixAddress(bytes);
 }

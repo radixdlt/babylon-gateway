@@ -138,13 +138,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    address = table.Column<string>(type: "text", nullable: false),
+                    address = table.Column<byte[]>(type: "bytea", nullable: false),
                     global_address = table.Column<byte[]>(type: "bytea", nullable: true),
                     parent_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false)
+                    type = table.Column<string>(type: "text", nullable: false),
+                    kind = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
