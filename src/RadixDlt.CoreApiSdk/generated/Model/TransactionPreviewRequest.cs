@@ -106,13 +106,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="manifest">A text-representation of a transaction manifest (required).</param>
-        /// <param name="blobs">An array of hex-encoded blob data (optional).</param>
+        /// <param name="blobsHex">An array of hex-encoded blob data (optional).</param>
         /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution (required).</param>
         /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobs = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobsHex = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -146,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("flags is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Flags = flags;
-            this.Blobs = blobs;
+            this.BlobsHex = blobsHex;
         }
 
         /// <summary>
@@ -167,8 +167,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// An array of hex-encoded blob data (optional)
         /// </summary>
         /// <value>An array of hex-encoded blob data (optional)</value>
-        [DataMember(Name = "blobs", EmitDefaultValue = true)]
-        public List<string> Blobs { get; set; }
+        [DataMember(Name = "blobs_hex", EmitDefaultValue = true)]
+        public List<string> BlobsHex { get; set; }
 
         /// <summary>
         /// An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution
@@ -214,7 +214,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class TransactionPreviewRequest {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
-            sb.Append("  Blobs: ").Append(Blobs).Append("\n");
+            sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  Nonce: ").Append(Nonce).Append("\n");
@@ -266,10 +266,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Manifest.Equals(input.Manifest))
                 ) && 
                 (
-                    this.Blobs == input.Blobs ||
-                    this.Blobs != null &&
-                    input.Blobs != null &&
-                    this.Blobs.SequenceEqual(input.Blobs)
+                    this.BlobsHex == input.BlobsHex ||
+                    this.BlobsHex != null &&
+                    input.BlobsHex != null &&
+                    this.BlobsHex.SequenceEqual(input.BlobsHex)
                 ) && 
                 (
                     this.CostUnitLimit == input.CostUnitLimit ||
@@ -314,9 +314,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
                 }
-                if (this.Blobs != null)
+                if (this.BlobsHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blobs.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlobsHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();

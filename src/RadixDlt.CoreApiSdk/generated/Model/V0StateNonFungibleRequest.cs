@@ -91,58 +91,50 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DownSubstate
+    /// V0StateNonFungibleRequest
     /// </summary>
-    [DataContract(Name = "DownSubstate")]
-    public partial class DownSubstate : IEquatable<DownSubstate>, IValidatableObject
+    [DataContract(Name = "V0StateNonFungibleRequest")]
+    public partial class V0StateNonFungibleRequest : IEquatable<V0StateNonFungibleRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StateNonFungibleRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DownSubstate() { }
+        protected V0StateNonFungibleRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StateNonFungibleRequest" /> class.
         /// </summary>
-        /// <param name="substateId">substateId (required).</param>
-        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
-        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
-        public DownSubstate(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), long version = default(long))
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="nonFungibleIdHex">The hex-encoded non-fungible id (required).</param>
+        public V0StateNonFungibleRequest(string resourceAddress = default(string), string nonFungibleIdHex = default(string))
         {
-            // to ensure "substateId" is required (not null)
-            if (substateId == null)
+            // to ensure "resourceAddress" is required (not null)
+            if (resourceAddress == null)
             {
-                throw new ArgumentNullException("substateId is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("resourceAddress is a required property for V0StateNonFungibleRequest and cannot be null");
             }
-            this.SubstateId = substateId;
-            // to ensure "substateDataHash" is required (not null)
-            if (substateDataHash == null)
+            this.ResourceAddress = resourceAddress;
+            // to ensure "nonFungibleIdHex" is required (not null)
+            if (nonFungibleIdHex == null)
             {
-                throw new ArgumentNullException("substateDataHash is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("nonFungibleIdHex is a required property for V0StateNonFungibleRequest and cannot be null");
             }
-            this.SubstateDataHash = substateDataHash;
-            this._Version = version;
+            this.NonFungibleIdHex = nonFungibleIdHex;
         }
 
         /// <summary>
-        /// Gets or Sets SubstateId
+        /// The Bech32m-encoded human readable version of the resource&#39;s global address
         /// </summary>
-        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateId SubstateId { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        [DataMember(Name = "resource_address", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The hex-encoded single-SHA256 hash of the substate data bytes
+        /// The hex-encoded non-fungible id
         /// </summary>
-        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
-        [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateDataHash { get; set; }
-
-        /// <summary>
-        /// An integer between 0 and 10^13, counting the number of times the substate was updated
-        /// </summary>
-        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        /// <value>The hex-encoded non-fungible id</value>
+        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleIdHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,10 +143,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DownSubstate {\n");
-            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
-            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class V0StateNonFungibleRequest {\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +166,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DownSubstate);
+            return this.Equals(input as V0StateNonFungibleRequest);
         }
 
         /// <summary>
-        /// Returns true if DownSubstate instances are equal
+        /// Returns true if V0StateNonFungibleRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of DownSubstate to be compared</param>
+        /// <param name="input">Instance of V0StateNonFungibleRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DownSubstate input)
+        public bool Equals(V0StateNonFungibleRequest input)
         {
             if (input == null)
             {
@@ -191,18 +182,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SubstateId == input.SubstateId ||
-                    (this.SubstateId != null &&
-                    this.SubstateId.Equals(input.SubstateId))
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.SubstateDataHash == input.SubstateDataHash ||
-                    (this.SubstateDataHash != null &&
-                    this.SubstateDataHash.Equals(input.SubstateDataHash))
-                ) && 
-                (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
+                    (this.NonFungibleIdHex != null &&
+                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
                 );
         }
 
@@ -215,15 +202,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SubstateId != null)
+                if (this.ResourceAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.SubstateDataHash != null)
+                if (this.NonFungibleIdHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 return hashCode;
             }
         }
@@ -235,18 +221,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (long) maximum
-            if (this._Version > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 100000000000000.", new [] { "_Version" });
-            }
-
-            // _Version (long) minimum
-            if (this._Version < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
-            }
-
             yield break;
         }
     }

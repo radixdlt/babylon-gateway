@@ -104,16 +104,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SborData" /> class.
         /// </summary>
-        /// <param name="dataBytes">The hex-encoded, raw SBOR-encoded data (required).</param>
-        /// <param name="dataJson">A JSON string representing the encoded SBOR (required).</param>
-        public SborData(string dataBytes = default(string), string dataJson = default(string))
+        /// <param name="dataHex">The hex-encoded, raw SBOR-encoded data (required).</param>
+        /// <param name="dataJson">An untyped JSON body representing the content of the SBOR data (required).</param>
+        public SborData(string dataHex = default(string), Object dataJson = default(Object))
         {
-            // to ensure "dataBytes" is required (not null)
-            if (dataBytes == null)
+            // to ensure "dataHex" is required (not null)
+            if (dataHex == null)
             {
-                throw new ArgumentNullException("dataBytes is a required property for SborData and cannot be null");
+                throw new ArgumentNullException("dataHex is a required property for SborData and cannot be null");
             }
-            this.DataBytes = dataBytes;
+            this.DataHex = dataHex;
             // to ensure "dataJson" is required (not null)
             if (dataJson == null)
             {
@@ -126,15 +126,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The hex-encoded, raw SBOR-encoded data
         /// </summary>
         /// <value>The hex-encoded, raw SBOR-encoded data</value>
-        [DataMember(Name = "data_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string DataBytes { get; set; }
+        [DataMember(Name = "data_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string DataHex { get; set; }
 
         /// <summary>
-        /// A JSON string representing the encoded SBOR
+        /// An untyped JSON body representing the content of the SBOR data
         /// </summary>
-        /// <value>A JSON string representing the encoded SBOR</value>
+        /// <value>An untyped JSON body representing the content of the SBOR data</value>
         [DataMember(Name = "data_json", IsRequired = true, EmitDefaultValue = true)]
-        public string DataJson { get; set; }
+        public Object DataJson { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class SborData {\n");
-            sb.Append("  DataBytes: ").Append(DataBytes).Append("\n");
+            sb.Append("  DataHex: ").Append(DataHex).Append("\n");
             sb.Append("  DataJson: ").Append(DataJson).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -182,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DataBytes == input.DataBytes ||
-                    (this.DataBytes != null &&
-                    this.DataBytes.Equals(input.DataBytes))
+                    this.DataHex == input.DataHex ||
+                    (this.DataHex != null &&
+                    this.DataHex.Equals(input.DataHex))
                 ) && 
                 (
                     this.DataJson == input.DataJson ||
@@ -202,9 +202,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DataBytes != null)
+                if (this.DataHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.DataBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DataHex.GetHashCode();
                 }
                 if (this.DataJson != null)
                 {

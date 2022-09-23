@@ -106,10 +106,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
         /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
-        /// <param name="substateBytes">The hex-encoded, SBOR-encoded substate data bytes (required).</param>
-        /// <param name="substateDataHash">The hex-encoded double-SHA256 hash of the substate data bytes (required).</param>
+        /// <param name="substateHex">The hex-encoded, SBOR-encoded substate data bytes (required).</param>
+        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
         /// <param name="substateData">substateData (required).</param>
-        public UpSubstate(SubstateId substateId = default(SubstateId), long version = default(long), string substateBytes = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
+        public UpSubstate(SubstateId substateId = default(SubstateId), long version = default(long), string substateHex = default(string), string substateDataHash = default(string), Substate substateData = default(Substate))
         {
             // to ensure "substateId" is required (not null)
             if (substateId == null)
@@ -118,12 +118,12 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.SubstateId = substateId;
             this._Version = version;
-            // to ensure "substateBytes" is required (not null)
-            if (substateBytes == null)
+            // to ensure "substateHex" is required (not null)
+            if (substateHex == null)
             {
-                throw new ArgumentNullException("substateBytes is a required property for UpSubstate and cannot be null");
+                throw new ArgumentNullException("substateHex is a required property for UpSubstate and cannot be null");
             }
-            this.SubstateBytes = substateBytes;
+            this.SubstateHex = substateHex;
             // to ensure "substateDataHash" is required (not null)
             if (substateDataHash == null)
             {
@@ -155,13 +155,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The hex-encoded, SBOR-encoded substate data bytes
         /// </summary>
         /// <value>The hex-encoded, SBOR-encoded substate data bytes</value>
-        [DataMember(Name = "substate_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateBytes { get; set; }
+        [DataMember(Name = "substate_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateHex { get; set; }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the substate data bytes
+        /// The hex-encoded single-SHA256 hash of the substate data bytes
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the substate data bytes</value>
+        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
         [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
         public string SubstateDataHash { get; set; }
 
@@ -181,7 +181,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class UpSubstate {\n");
             sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
-            sb.Append("  SubstateBytes: ").Append(SubstateBytes).Append("\n");
+            sb.Append("  SubstateHex: ").Append(SubstateHex).Append("\n");
             sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
             sb.Append("  SubstateData: ").Append(SubstateData).Append("\n");
             sb.Append("}\n");
@@ -229,9 +229,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this._Version.Equals(input._Version)
                 ) && 
                 (
-                    this.SubstateBytes == input.SubstateBytes ||
-                    (this.SubstateBytes != null &&
-                    this.SubstateBytes.Equals(input.SubstateBytes))
+                    this.SubstateHex == input.SubstateHex ||
+                    (this.SubstateHex != null &&
+                    this.SubstateHex.Equals(input.SubstateHex))
                 ) && 
                 (
                     this.SubstateDataHash == input.SubstateDataHash ||
@@ -259,9 +259,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this._Version.GetHashCode();
-                if (this.SubstateBytes != null)
+                if (this.SubstateHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateHex.GetHashCode();
                 }
                 if (this.SubstateDataHash != null)
                 {

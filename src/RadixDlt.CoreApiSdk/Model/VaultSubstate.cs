@@ -79,11 +79,11 @@ public partial class VaultSubstate : IResourcePointer
 
             if (ResourceAmount.ActualInstance is NonFungibleResourceAmount nfra)
             {
-                // TODO shouldn't we differienciate between "nf" and "nf value"?
+                // TODO shouldn't we differentiate between "nf" and "nf value"?
 
                 yield return new TypedResourceAddress(nfra.ResourceType, nfra.ResourceAddress);
 
-                foreach (var id in nfra.NfIds)
+                foreach (var id in nfra.NfIdsHex)
                 {
                     yield return new TypedResourceAddress(ResourceType.NonFungible, id);
                 }

@@ -91,58 +91,57 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DownSubstate
+    /// V0StateComponentDescendentId
     /// </summary>
-    [DataContract(Name = "DownSubstate")]
-    public partial class DownSubstate : IEquatable<DownSubstate>, IValidatableObject
+    [DataContract(Name = "V0StateComponentDescendentId")]
+    public partial class V0StateComponentDescendentId : IEquatable<V0StateComponentDescendentId>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StateComponentDescendentId" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DownSubstate() { }
+        protected V0StateComponentDescendentId() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StateComponentDescendentId" /> class.
         /// </summary>
-        /// <param name="substateId">substateId (required).</param>
-        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
-        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
-        public DownSubstate(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), long version = default(long))
+        /// <param name="parent">parent (required).</param>
+        /// <param name="entityId">entityId (required).</param>
+        /// <param name="depth">Depth under component (required).</param>
+        public V0StateComponentDescendentId(SubstateId parent = default(SubstateId), EntityId entityId = default(EntityId), int depth = default(int))
         {
-            // to ensure "substateId" is required (not null)
-            if (substateId == null)
+            // to ensure "parent" is required (not null)
+            if (parent == null)
             {
-                throw new ArgumentNullException("substateId is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("parent is a required property for V0StateComponentDescendentId and cannot be null");
             }
-            this.SubstateId = substateId;
-            // to ensure "substateDataHash" is required (not null)
-            if (substateDataHash == null)
+            this.Parent = parent;
+            // to ensure "entityId" is required (not null)
+            if (entityId == null)
             {
-                throw new ArgumentNullException("substateDataHash is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("entityId is a required property for V0StateComponentDescendentId and cannot be null");
             }
-            this.SubstateDataHash = substateDataHash;
-            this._Version = version;
+            this.EntityId = entityId;
+            this.Depth = depth;
         }
 
         /// <summary>
-        /// Gets or Sets SubstateId
+        /// Gets or Sets Parent
         /// </summary>
-        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateId SubstateId { get; set; }
+        [DataMember(Name = "parent", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateId Parent { get; set; }
 
         /// <summary>
-        /// The hex-encoded single-SHA256 hash of the substate data bytes
+        /// Gets or Sets EntityId
         /// </summary>
-        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
-        [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateDataHash { get; set; }
+        [DataMember(Name = "entity_id", IsRequired = true, EmitDefaultValue = true)]
+        public EntityId EntityId { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 10^13, counting the number of times the substate was updated
+        /// Depth under component
         /// </summary>
-        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        /// <value>Depth under component</value>
+        [DataMember(Name = "depth", IsRequired = true, EmitDefaultValue = true)]
+        public int Depth { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,10 +150,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DownSubstate {\n");
-            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
-            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class V0StateComponentDescendentId {\n");
+            sb.Append("  Parent: ").Append(Parent).Append("\n");
+            sb.Append("  EntityId: ").Append(EntityId).Append("\n");
+            sb.Append("  Depth: ").Append(Depth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +174,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DownSubstate);
+            return this.Equals(input as V0StateComponentDescendentId);
         }
 
         /// <summary>
-        /// Returns true if DownSubstate instances are equal
+        /// Returns true if V0StateComponentDescendentId instances are equal
         /// </summary>
-        /// <param name="input">Instance of DownSubstate to be compared</param>
+        /// <param name="input">Instance of V0StateComponentDescendentId to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DownSubstate input)
+        public bool Equals(V0StateComponentDescendentId input)
         {
             if (input == null)
             {
@@ -191,18 +190,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SubstateId == input.SubstateId ||
-                    (this.SubstateId != null &&
-                    this.SubstateId.Equals(input.SubstateId))
+                    this.Parent == input.Parent ||
+                    (this.Parent != null &&
+                    this.Parent.Equals(input.Parent))
                 ) && 
                 (
-                    this.SubstateDataHash == input.SubstateDataHash ||
-                    (this.SubstateDataHash != null &&
-                    this.SubstateDataHash.Equals(input.SubstateDataHash))
+                    this.EntityId == input.EntityId ||
+                    (this.EntityId != null &&
+                    this.EntityId.Equals(input.EntityId))
                 ) && 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.Depth == input.Depth ||
+                    this.Depth.Equals(input.Depth)
                 );
         }
 
@@ -215,15 +214,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SubstateId != null)
+                if (this.Parent != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Parent.GetHashCode();
                 }
-                if (this.SubstateDataHash != null)
+                if (this.EntityId != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityId.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                hashCode = (hashCode * 59) + this.Depth.GetHashCode();
                 return hashCode;
             }
         }
@@ -235,16 +234,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (long) maximum
-            if (this._Version > (long)100000000000000)
+            // Depth (int) maximum
+            if (this.Depth > (int)100)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 100000000000000.", new [] { "_Version" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Depth, must be a value less than or equal to 100.", new [] { "Depth" });
             }
 
-            // _Version (long) minimum
-            if (this._Version < (long)0)
+            // Depth (int) minimum
+            if (this.Depth < (int)0)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Depth, must be a value greater than or equal to 0.", new [] { "Depth" });
             }
 
             yield break;

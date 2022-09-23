@@ -111,24 +111,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EddsaEd25519PublicKey" /> class.
         /// </summary>
         /// <param name="keyType">keyType (required).</param>
-        /// <param name="keyBytes">The hex-encoded compressed EdDSA Ed25519 public key (32 bytes) (required).</param>
-        public EddsaEd25519PublicKey(PublicKeyType keyType = default(PublicKeyType), string keyBytes = default(string))
+        /// <param name="keyHex">The hex-encoded compressed EdDSA Ed25519 public key (32 bytes) (required).</param>
+        public EddsaEd25519PublicKey(PublicKeyType keyType = default(PublicKeyType), string keyHex = default(string))
         {
             this.KeyType = keyType;
-            // to ensure "keyBytes" is required (not null)
-            if (keyBytes == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("keyBytes is a required property for EddsaEd25519PublicKey and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for EddsaEd25519PublicKey and cannot be null");
             }
-            this.KeyBytes = keyBytes;
+            this.KeyHex = keyHex;
         }
 
         /// <summary>
         /// The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
         /// </summary>
         /// <value>The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)</value>
-        [DataMember(Name = "key_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string KeyBytes { get; set; }
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,7 +139,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EddsaEd25519PublicKey {\n");
             sb.Append("  KeyType: ").Append(KeyType).Append("\n");
-            sb.Append("  KeyBytes: ").Append(KeyBytes).Append("\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.KeyType.Equals(input.KeyType)
                 ) && 
                 (
-                    this.KeyBytes == input.KeyBytes ||
-                    (this.KeyBytes != null &&
-                    this.KeyBytes.Equals(input.KeyBytes))
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 );
         }
 
@@ -196,9 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
-                if (this.KeyBytes != null)
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.KeyBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
                 return hashCode;
             }
@@ -211,16 +211,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // KeyBytes (string) maxLength
-            if (this.KeyBytes != null && this.KeyBytes.Length > 64)
+            // KeyHex (string) maxLength
+            if (this.KeyHex != null && this.KeyHex.Length > 64)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyBytes, length must be less than 64.", new [] { "KeyBytes" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be less than 64.", new [] { "KeyHex" });
             }
 
-            // KeyBytes (string) minLength
-            if (this.KeyBytes != null && this.KeyBytes.Length < 64)
+            // KeyHex (string) minLength
+            if (this.KeyHex != null && this.KeyHex.Length < 64)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyBytes, length must be greater than 64.", new [] { "KeyBytes" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be greater than 64.", new [] { "KeyHex" });
             }
 
             yield break;

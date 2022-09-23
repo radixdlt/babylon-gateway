@@ -72,7 +72,7 @@ public partial class NonFungibleSubstate : IResourcePointer
     {
         get
         {
-            yield return new TypedResourceAddress(ResourceType.NonFungible, NfId);
+            yield return new TypedResourceAddress(ResourceType.NonFungible, NfIdHex);
         }
     }
 }
