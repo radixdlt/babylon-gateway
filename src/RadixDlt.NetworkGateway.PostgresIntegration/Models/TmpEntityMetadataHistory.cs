@@ -62,15 +62,27 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Threading;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-public interface IEntityStateQuerier
+[Table("tmp_entity_metadata_history")]
+public class TmpEntityMetadataHistory
 {
-    Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    Task<EntityDetailsResponse> EntityDetailsSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("keys")]
+    public string[] Keys { get; set; }
+
+    [Column("values")]
+    public string[] Values { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 }

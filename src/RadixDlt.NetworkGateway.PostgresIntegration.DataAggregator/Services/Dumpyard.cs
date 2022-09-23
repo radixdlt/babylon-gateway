@@ -176,6 +176,8 @@ internal record FungibleResourceChange(ReferencedEntity SubstateEntity, Referenc
 
 internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
 
+internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
+
 internal static class DictionaryExtensions
 {
     public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)

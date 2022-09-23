@@ -91,62 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponseFungibleResources
+    /// EntityResourcesResponseNonFungibleResourcesAllOf
     /// </summary>
-    [DataContract(Name = "EntityStateResponse_fungible_resources")]
-    public partial class EntityStateResponseFungibleResources : IEquatable<EntityStateResponseFungibleResources>, IValidatableObject
+    [DataContract(Name = "EntityResourcesResponse_non_fungible_resources_allOf")]
+    public partial class EntityResourcesResponseNonFungibleResourcesAllOf : IEquatable<EntityResourcesResponseNonFungibleResourcesAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResources" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponseFungibleResources() { }
+        protected EntityResourcesResponseNonFungibleResourcesAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResources" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="results">results (required).</param>
-        public EntityStateResponseFungibleResources(decimal totalCount = default(decimal), string previousCursor = default(string), string nextCursor = default(string), List<EntityStateResponseFungibleResource> results = default(List<EntityStateResponseFungibleResource>))
+        public EntityResourcesResponseNonFungibleResourcesAllOf(List<EntityStateResponseNonFungibleResource> results = default(List<EntityStateResponseNonFungibleResource>))
         {
-            this.TotalCount = totalCount;
             // to ensure "results" is required (not null)
             if (results == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityStateResponseFungibleResources and cannot be null");
+                throw new ArgumentNullException("results is a required property for EntityResourcesResponseNonFungibleResourcesAllOf and cannot be null");
             }
             this.Results = results;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
         }
-
-        /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
-        /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public decimal TotalCount { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
 
         /// <summary>
         /// Gets or Sets Results
         /// </summary>
         [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityStateResponseFungibleResource> Results { get; set; }
+        public List<EntityStateResponseNonFungibleResource> Results { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,10 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponseFungibleResources {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("class EntityResourcesResponseNonFungibleResourcesAllOf {\n");
             sb.Append("  Results: ").Append(Results).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -180,35 +150,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponseFungibleResources);
+            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponseFungibleResources instances are equal
+        /// Returns true if EntityResourcesResponseNonFungibleResourcesAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponseFungibleResources to be compared</param>
+        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponseFungibleResources input)
+        public bool Equals(EntityResourcesResponseNonFungibleResourcesAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
-                (
-                    this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
-                ) && 
-                (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
                 (
                     this.Results == input.Results ||
                     this.Results != null &&
@@ -226,15 +182,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                if (this.PreviousCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
                 if (this.Results != null)
                 {
                     hashCode = (hashCode * 59) + this.Results.GetHashCode();

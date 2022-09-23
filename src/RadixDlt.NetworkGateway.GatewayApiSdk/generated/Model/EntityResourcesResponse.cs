@@ -91,35 +91,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponseNonFungibleResourcesAllOf
+    /// EntityResourcesResponse
     /// </summary>
-    [DataContract(Name = "EntityStateResponse_non_fungible_resources_allOf")]
-    public partial class EntityStateResponseNonFungibleResourcesAllOf : IEquatable<EntityStateResponseNonFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "EntityResourcesResponse")]
+    public partial class EntityResourcesResponse : IEquatable<EntityResourcesResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponseNonFungibleResourcesAllOf() { }
+        protected EntityResourcesResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponse" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityStateResponseNonFungibleResourcesAllOf(List<EntityStateResponseNonFungibleResource> results = default(List<EntityStateResponseNonFungibleResource>))
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="fungibleResources">fungibleResources (required).</param>
+        /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
+        public EntityResourcesResponse(string address = default(string), EntityResourcesResponseFungibleResources fungibleResources = default(EntityResourcesResponseFungibleResources), EntityResourcesResponseNonFungibleResources nonFungibleResources = default(EntityResourcesResponseNonFungibleResources))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityStateResponseNonFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityResourcesResponse and cannot be null");
             }
-            this.Results = results;
+            this.Address = address;
+            // to ensure "fungibleResources" is required (not null)
+            if (fungibleResources == null)
+            {
+                throw new ArgumentNullException("fungibleResources is a required property for EntityResourcesResponse and cannot be null");
+            }
+            this.FungibleResources = fungibleResources;
+            // to ensure "nonFungibleResources" is required (not null)
+            if (nonFungibleResources == null)
+            {
+                throw new ArgumentNullException("nonFungibleResources is a required property for EntityResourcesResponse and cannot be null");
+            }
+            this.NonFungibleResources = nonFungibleResources;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityStateResponseNonFungibleResource> Results { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// Gets or Sets FungibleResources
+        /// </summary>
+        [DataMember(Name = "fungible_resources", IsRequired = true, EmitDefaultValue = true)]
+        public EntityResourcesResponseFungibleResources FungibleResources { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NonFungibleResources
+        /// </summary>
+        [DataMember(Name = "non_fungible_resources", IsRequired = true, EmitDefaultValue = true)]
+        public EntityResourcesResponseNonFungibleResources NonFungibleResources { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +155,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponseNonFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class EntityResourcesResponse {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  FungibleResources: ").Append(FungibleResources).Append("\n");
+            sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +179,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponseNonFungibleResourcesAllOf);
+            return this.Equals(input as EntityResourcesResponse);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponseNonFungibleResourcesAllOf instances are equal
+        /// Returns true if EntityResourcesResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponseNonFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of EntityResourcesResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponseNonFungibleResourcesAllOf input)
+        public bool Equals(EntityResourcesResponse input)
         {
             if (input == null)
             {
@@ -166,10 +195,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.FungibleResources == input.FungibleResources ||
+                    (this.FungibleResources != null &&
+                    this.FungibleResources.Equals(input.FungibleResources))
+                ) && 
+                (
+                    this.NonFungibleResources == input.NonFungibleResources ||
+                    (this.NonFungibleResources != null &&
+                    this.NonFungibleResources.Equals(input.NonFungibleResources))
                 );
         }
 
@@ -182,9 +220,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.FungibleResources != null)
+                {
+                    hashCode = (hashCode * 59) + this.FungibleResources.GetHashCode();
+                }
+                if (this.NonFungibleResources != null)
+                {
+                    hashCode = (hashCode * 59) + this.NonFungibleResources.GetHashCode();
                 }
                 return hashCode;
             }
