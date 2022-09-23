@@ -115,6 +115,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<TmpOwnerEntityNonFungibleResourceIdsHistory> TmpOwnerEntityNonFungibleResourceIdsHistory => Set<TmpOwnerEntityNonFungibleResourceIdsHistory>();
 
+    public DbSet<TmpEntityMetadataHistory> TmpEntityMetadataHistory => Set<TmpEntityMetadataHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {

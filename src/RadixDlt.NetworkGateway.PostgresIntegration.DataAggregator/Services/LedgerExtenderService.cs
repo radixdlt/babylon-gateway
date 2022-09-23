@@ -280,6 +280,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var childToParentEntities = new Dictionary<string, string>();
         var fungibleResourceChanges = new List<FungibleResourceChange>();
         var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
+        var metadataChanges = new List<MetadataChange>();
 
         // step 1: scan for any referenced entities
         {
@@ -444,7 +445,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
             {
                 var data = us.Data.GetResourceManagerSubstate();
 
-                // TODO handle metadata
+                metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
 
                 return new TmpResourceManagerSubstate
                 {
@@ -621,7 +622,6 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
         }
 
         // step 6: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
-        // step 6.1: handle tmp_entity_fungible_resource_balance_history & tmp_entity_non_fungible_resource_ids_history
         {
             var fungibles = fungibleResourceChanges
                 .Select(e => new TmpOwnerEntityFungibleResourceBalanceHistory
@@ -646,8 +646,30 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 })
                 .ToList();
 
+            var metadata = metadataChanges
+                .Select(e =>
+                {
+                    var keys = new List<string>();
+                    var values = new List<string>();
+
+                    foreach (var (key, value) in e.Metadata)
+                    {
+                        keys.Add(key);
+                        values.Add(value);
+                    }
+
+                    return new TmpEntityMetadataHistory
+                    {
+                        EntityId = e.ResourceEntity.DatabaseId,
+                        Keys = keys.ToArray(),
+                        Values = values.ToArray(),
+                        FromStateVersion = e.StateVersion,
+                    };
+                });
+
             await dbContext.TmpOwnerEntityFungibleResourceBalanceHistory.AddRangeAsync(fungibles, token);
             await dbContext.TmpOwnerEntityNonFungibleResourceIdsHistory.AddRangeAsync(nonFungibles, token);
+            await dbContext.TmpEntityMetadataHistory.AddRangeAsync(metadata, token);
             await dbContext.SaveChangesAsync(token);
         }
     }

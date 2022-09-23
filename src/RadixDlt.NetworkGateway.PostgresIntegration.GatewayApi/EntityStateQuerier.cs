@@ -64,7 +64,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons.Addressing;
-using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -87,7 +86,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<EntityStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
@@ -179,9 +178,63 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
         }
 
         var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
-        var fungiblesPagination = new EntityStateResponseFungibleResources(fungibleBalanceHistory.Count, null, "TBD (currently everything is returned)", fungibles);
-        var nonFungiblesPagination = new EntityStateResponseNonFungibleResources(nonFungibleIdsHistory.Count, null, "TBD (currently everything is returned)", nonFungibles);
+        var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibleBalanceHistory.Count, null, "TBD (currently everything is returned)", fungibles);
+        var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibleIdsHistory.Count, null, "TBD (currently everything is returned)", nonFungibles);
 
-        return new EntityStateResponse(adr, fungiblesPagination, nonFungiblesPagination);
+        return new EntityResourcesResponse(adr, fungiblesPagination, nonFungiblesPagination);
+    }
+
+    public async Task<EntityDetailsResponse> EntityDetailsSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    {
+        // TODO just some quick and naive implementation
+
+        var entity = await _dbContext.TmpEntities
+            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
+
+        if (entity == null)
+        {
+            // TODO just not found
+            throw new Exception("xxxx");
+        }
+
+        string hrp;
+
+        // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
+        if (entity is TmpResourceManagerEntity)
+        {
+            hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
+        }
+        else if (entity is TmpComponentEntity component)
+        {
+            hrp = component.Kind switch
+            {
+                "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
+                "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
+                _ => throw new Exception("fix me"), // TODO fix me
+            };
+        }
+        else
+        {
+            throw new Exception("unsupported entity type"); // TODO fix me
+        }
+
+        var metadata = new Dictionary<string, string>();
+        var metadataHistory = await _dbContext.TmpEntityMetadataHistory
+            .FromSqlInterpolated($@"
+SELECT DISTINCT ON (entity_id) *
+FROM tmp_entity_metadata
+WHERE entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
+ORDER BY entity_id, from_state_version DESC")
+            .FirstOrDefaultAsync(token);
+
+        if (metadataHistory != null)
+        {
+            metadata = metadataHistory.Keys.Zip(metadata.Values).ToDictionary(z => z.First, z => z.Second);
+        }
+
+        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
+
+        return new EntityDetailsResponse(adr, metadata);
     }
 }

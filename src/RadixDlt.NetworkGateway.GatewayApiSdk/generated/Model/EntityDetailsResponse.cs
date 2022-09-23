@@ -91,35 +91,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponseFungibleResourcesAllOf
+    /// EntityDetailsResponse
     /// </summary>
-    [DataContract(Name = "EntityStateResponse_fungible_resources_allOf")]
-    public partial class EntityStateResponseFungibleResourcesAllOf : IEquatable<EntityStateResponseFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponse")]
+    public partial class EntityDetailsResponse : IEquatable<EntityDetailsResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponseFungibleResourcesAllOf() { }
+        protected EntityDetailsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityStateResponseFungibleResourcesAllOf(List<EntityStateResponseFungibleResource> results = default(List<EntityStateResponseFungibleResource>))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="metadata">TBD (required).</param>
+        public EntityDetailsResponse(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityStateResponseFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityDetailsResponse and cannot be null");
             }
-            this.Results = results;
+            this.Address = address;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata is a required property for EntityDetailsResponse and cannot be null");
+            }
+            this.Metadata = metadata;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// The Bech32m-encoded human readable version of the resource&#39;s global address
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityStateResponseFungibleResource> Results { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponseFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class EntityDetailsResponse {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponseFungibleResourcesAllOf);
+            return this.Equals(input as EntityDetailsResponse);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponseFungibleResourcesAllOf instances are equal
+        /// Returns true if EntityDetailsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponseFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponseFungibleResourcesAllOf input)
+        public bool Equals(EntityDetailsResponse input)
         {
             if (input == null)
             {
@@ -166,10 +182,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.Metadata == input.Metadata ||
+                    this.Metadata != null &&
+                    input.Metadata != null &&
+                    this.Metadata.SequenceEqual(input.Metadata)
                 );
         }
 
@@ -182,9 +203,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.Metadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

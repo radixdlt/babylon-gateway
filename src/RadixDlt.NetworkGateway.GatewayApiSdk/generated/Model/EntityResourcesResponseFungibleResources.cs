@@ -91,44 +91,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateRequest
+    /// EntityResourcesResponseFungibleResources
     /// </summary>
-    [DataContract(Name = "EntityStateRequest")]
-    public partial class EntityStateRequest : IEquatable<EntityStateRequest>, IValidatableObject
+    [DataContract(Name = "EntityResourcesResponse_fungible_resources")]
+    public partial class EntityResourcesResponseFungibleResources : IEquatable<EntityResourcesResponseFungibleResources>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResources" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateRequest() { }
+        protected EntityResourcesResponseFungibleResources() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResources" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public EntityStateRequest(string address = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="results">results (required).</param>
+        public EntityResourcesResponseFungibleResources(decimal totalCount = default(decimal), string previousCursor = default(string), string nextCursor = default(string), List<EntityStateResponseFungibleResource> results = default(List<EntityStateResponseFungibleResource>))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            this.TotalCount = totalCount;
+            // to ensure "results" is required (not null)
+            if (results == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityStateRequest and cannot be null");
+                throw new ArgumentNullException("results is a required property for EntityResourcesResponseFungibleResources and cannot be null");
             }
-            this.Address = address;
-            this.AtStateIdentifier = atStateIdentifier;
+            this.Results = results;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public decimal TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets AtStateIdentifier
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
+
+        /// <summary>
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// </summary>
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Results
+        /// </summary>
+        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityStateResponseFungibleResource> Results { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +155,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateRequest {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("class EntityResourcesResponseFungibleResources {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Results: ").Append(Results).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateRequest);
+            return this.Equals(input as EntityResourcesResponseFungibleResources);
         }
 
         /// <summary>
-        /// Returns true if EntityStateRequest instances are equal
+        /// Returns true if EntityResourcesResponseFungibleResources instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateRequest to be compared</param>
+        /// <param name="input">Instance of EntityResourcesResponseFungibleResources to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateRequest input)
+        public bool Equals(EntityResourcesResponseFungibleResources input)
         {
             if (input == null)
             {
@@ -176,14 +196,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 ) && 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Results == input.Results ||
+                    this.Results != null &&
+                    input.Results != null &&
+                    this.Results.SequenceEqual(input.Results)
                 );
         }
 
@@ -196,13 +226,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.AtStateIdentifier != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Results != null)
+                {
+                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
                 }
                 return hashCode;
             }
