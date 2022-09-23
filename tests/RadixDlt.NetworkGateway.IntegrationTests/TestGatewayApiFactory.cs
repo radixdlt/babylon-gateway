@@ -68,8 +68,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -82,7 +80,6 @@ using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -155,15 +152,6 @@ public class TestGatewayApiFactory
                 // This function will also run migrations!
                 dbReadyOnlyContext.Database.EnsureCreated();
 
-                try
-                {
-                    InitializeDbForTests(dbReadyOnlyContext);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, $"An error occurred when initializing the database for tests. Error: {ex.Message}");
-                }
-
                 services.PostConfigure<NetworkOptions>(o =>
                     {
                         o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkName;
@@ -182,90 +170,5 @@ public class TestGatewayApiFactory
                     o.MaxPageSize = 30;
                 });
             });
-    }
-
-    private void InitializeDbForTests(ReadOnlyDbContext db)
-    {
-        // network configuration
-        db.NetworkConfiguration.Add(MapNetworkConfigurationResponse(_coreApiStub.CoreApiStubDefaultConfiguration
-            .NetworkConfigurationResponse));
-
-        // ledger and raw transaction
-        db.RawTransactions.Add(new RawTransaction
-        {
-            Payload = _coreApiStub.CoreApiStubDefaultConfiguration.Hash.ConvertFromHex(),
-            TransactionPayloadHash = _coreApiStub.CoreApiStubDefaultConfiguration.Hash.ConvertFromHex(),
-        });
-
-        // mempool transactions
-        var mempoolTransaction = MempoolTransaction.NewAsSubmittedForFirstTimeByGateway(
-            _coreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionHash.ConvertFromHex(),
-            Encoding.UTF8.GetBytes(_coreApiStub.CoreApiStubDefaultConfiguration.SubmitTransaction),
-            _coreApiStub.CoreApiStubDefaultConfiguration.GatewayCoreApiNode.Name,
-            GatewayTransactionContents.Default(),
-            new FakeClock().UtcNow
-        );
-
-        db.MempoolTransactions.Add(mempoolTransaction);
-
-        // set status
-        switch (_coreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus)
-        {
-            case MempoolTransactionStatus.Committed:
-                mempoolTransaction.MarkAsCommitted(
-                    _coreApiStub.CoreApiStubDefaultConfiguration.TransactionSummary.StateVersion,
-                    new FakeClock().UtcNow, new FakeClock());
-                break;
-            case MempoolTransactionStatus.Failed:
-                mempoolTransaction.MarkAsFailed(
-                    MempoolTransactionFailureReason.Timeout,
-                    "stack snapshot",
-                    new FakeClock().UtcNow);
-                break;
-            case MempoolTransactionStatus.Missing:
-                break;
-            case MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp:
-                break;
-            case MempoolTransactionStatus.SubmittedOrKnownInNodeMempool:
-                mempoolTransaction.MarkAsSubmittedToGateway(new FakeClock().UtcNow);
-                break;
-        }
-
-        db.LedgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(
-                new CommittedTransactionData(
-                    _coreApiStub.CoreApiStubDefaultConfiguration.CommittedTransaction,
-                    _coreApiStub.CoreApiStubDefaultConfiguration.TransactionSummary,
-                    new byte[] { 1, 2, 4, 8 })
-            )
-        );
-
-        // ledger status
-        db.LedgerStatus.Add(new LedgerStatus
-        {
-            LastUpdated = new FakeClock().UtcNow,
-            TopOfLedgerStateVersion = _coreApiStub.CoreApiStubDefaultConfiguration.TransactionSummary.StateVersion,
-            SyncTarget = new SyncTarget { TargetStateVersion = 1 },
-        });
-
-        db.SaveChanges();
-    }
-
-    private NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
-    {
-        return new NetworkConfiguration
-        {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.Network },
-            NetworkAddressHrps = new NetworkAddressHrps
-            {
-                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
-                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
-                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
-                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
-            },
-            WellKnownAddresses = new WellKnownAddresses
-            {
-                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
-            },
-        };
     }
 }

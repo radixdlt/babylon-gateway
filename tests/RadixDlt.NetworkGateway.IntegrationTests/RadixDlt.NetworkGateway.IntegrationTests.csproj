@@ -32,4 +32,10 @@
     <Folder Include="CoreApiStubs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="genesis.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

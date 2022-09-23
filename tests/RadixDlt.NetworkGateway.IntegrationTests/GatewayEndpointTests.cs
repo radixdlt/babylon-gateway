@@ -78,7 +78,9 @@ public class GatewayEndpointTests
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStub = gatewayRunner.ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
+        var coreApiStub = gatewayRunner
+            .MockGenesis()
+            .ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
 
         // Act
         var payload = await gatewayRunner.ActAsync<GatewayResponse>("/gateway", JsonContent.Create(new object()));

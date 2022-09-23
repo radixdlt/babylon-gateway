@@ -1,16 +1,10 @@
 #nullable disable
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using ResourceChange = RadixDlt.CoreApiSdk.Model.ResourceChange;
 using TransactionPreviewResponseLogsInner = RadixDlt.CoreApiSdk.Model.TransactionPreviewResponseLogsInner;
 using TransactionReceipt = RadixDlt.CoreApiSdk.Model.TransactionReceipt;
@@ -27,8 +21,6 @@ public class CoreApiStubDefaultConfiguration
     }
 
     public string ApiVersion { get; set; }
-
-    public CommittedTransaction CommittedTransaction { get; set; }
 
     public CommittedTransactionsResponse CommittedTransactionsResponse { get; set; }
 
@@ -64,8 +56,6 @@ public class CoreApiStubDefaultConfiguration
 
     public TransactionSubmitResponse TransactionSubmitResponse { get; set; }
 
-    public TransactionSummary TransactionSummary { get; set; }
-
     public void CreateDefault()
     {
         NetworkName = "integrationtestsnet";
@@ -87,12 +77,13 @@ public class CoreApiStubDefaultConfiguration
             Enabled = true, Name = "node1", RequestWeighting = 1, CoreApiAddress = "3333",
         };
 
-        DataAggregatorCoreApiNode = new CoreApiNode
+        DataAggregatorCoreApiNode = new RadixDlt.NetworkGateway.DataAggregator.Configuration.CoreApiNode
         {
+            CoreApiAddress = GatewayCoreApiNode.CoreApiAddress,
             Enabled = GatewayCoreApiNode.Enabled,
             Name = GatewayCoreApiNode.Name,
             RequestWeighting = GatewayCoreApiNode.RequestWeighting,
-            CoreApiAddress = GatewayCoreApiNode.CoreApiAddress,
+            TrustWeighting = 1,
         };
 
         NetworkConfigurationResponse = new NetworkConfigurationResponse(
@@ -158,31 +149,6 @@ public class CoreApiStubDefaultConfiguration
                         "address string"),
                 }));
 
-        CommittedTransaction = new CommittedTransaction(
-            1L,
-            new NotarizedTransaction(
-                Hash,
-                Convert.ToHexString(Encoding.UTF8.GetBytes(SubmitTransaction)).ToLowerInvariant(),
-                new SignedTransactionIntent(
-                    Hash,
-                    new TransactionIntent(
-                        Hash,
-                        new TransactionHeader(
-                            nonce: "nonce cannot be null",
-                            notaryPublicKey: new PublicKey(new EcdsaSecp256k1PublicKey(
-                                PublicKeyType.EcdsaSecp256k1,
-                                "public key"))),
-                        "manifest",
-                        new Dictionary<string, string> { { "1", "blob1" } }),
-                    new List<SignatureWithPublicKey>()),
-                new Signature(new EcdsaSecp256k1Signature(PublicKeyType.EcdsaSecp256k1, Hash))),
-            TransactionReceipt
-        );
-
-        CommittedTransactionsResponse = new CommittedTransactionsResponse(
-            transactions: new List<CommittedTransaction> { CommittedTransaction }
-        );
-
         TransactionPreviewResponse = new RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse(
             TransactionReceipt,
             new List<ResourceChange>()
@@ -195,26 +161,26 @@ public class CoreApiStubDefaultConfiguration
             },
             logs: new List<TransactionPreviewResponseLogsInner>()
             {
-                new TransactionPreviewResponseLogsInner("level: debug", "message"),
+                new("level: debug", "message"),
             });
 
         TransactionSubmitResponse = new TransactionSubmitResponse();
 
-        TransactionSummary = new TransactionSummary(
-            CommittedTransaction.StateVersion,
-            0,
-            0,
-            0,
-            false,
-            false,
-            CommittedTransaction.NotarizedTransaction.Hash.ConvertFromHex(),
-            CommittedTransaction.NotarizedTransaction.Hash.ConvertFromHex(),
-            CommittedTransaction.NotarizedTransaction.Hash.ConvertFromHex(),
-            BitConverter.GetBytes(CommittedTransaction.StateVersion),
-            new FakeClock().UtcNow,
-            new FakeClock().UtcNow,
-            new FakeClock().UtcNow
-        );
+        // TransactionSummary = new TransactionSummary(
+        //     CommittedTransactionsResponse.Transactions[0].StateVersion,
+        //     0,
+        //     0,
+        //     0,
+        //     false,
+        //     false,
+        //     Hash.ConvertFromHex(),
+        //     Hash.ConvertFromHex(),
+        //     Hash.ConvertFromHex(),
+        //     BitConverter.GetBytes(CommittedTransactionsResponse.Transactions[0].StateVersion),
+        //     new FakeClock().UtcNow,
+        //     new FakeClock().UtcNow,
+        //     new FakeClock().UtcNow
+        // );
 
         CoreNodeHealthResult = new CoreNodeHealthResult(
             new Dictionary<CoreNodeStatus, List<GatewayApi.Configuration.CoreApiNode>>

@@ -82,10 +82,14 @@ public class TransactionEndpointTests
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStub = gatewayRunner.ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
+        var coreApiStub = gatewayRunner
+            .MockGenesis()
+            .ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
 
         // Act
-        var payload = await gatewayRunner.ActAsync<RecentTransactionsResponse>(
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result
+            .ActAsync<RecentTransactionsResponse>(
             "/transaction/recent",
             JsonContent.Create(new RecentTransactionsRequest()));
 
@@ -98,12 +102,12 @@ public class TransactionEndpointTests
         payload.LedgerState._Version.Should().Be(1);
     }
 
-    [Fact]
+    [Fact(Skip = "Dsiabled until MempoolTrackerWorker is re-enabled")]
     public async Task MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStubs = gatewayRunner.ArrangeTransactionStatusTest(
+        var coreApiStubs = gatewayRunner.ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeFailed),
             TransactionStatus.StatusEnum.FAILED);
         var transactionIdentifier =
@@ -120,12 +124,13 @@ public class TransactionEndpointTests
         status.Should().Be(TransactionStatus.StatusEnum.FAILED);
     }
 
-    [Fact]
+    [Fact(Skip = "Dsiabled until MempoolTrackerWorker is re-enabled")]
     public async Task MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStubs = gatewayRunner.ArrangeTransactionStatusTest(
+
+        var coreApiStubs = gatewayRunner.ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeConfirmed),
             TransactionStatus.StatusEnum.CONFIRMED);
         var transactionIdentifier =
@@ -142,12 +147,12 @@ public class TransactionEndpointTests
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
-    [Fact]
+    [Fact(Skip = "Dsiabled until MempoolTrackerWorker is re-enabled")]
     public async Task MempoolTransactionStatusShouldBePending()
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStubs = gatewayRunner.ArrangeTransactionStatusTest(
+        var coreApiStubs = gatewayRunner.ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBePending),
             TransactionStatus.StatusEnum.PENDING);
         var transactionIdentifier =
@@ -187,5 +192,33 @@ public class TransactionEndpointTests
         var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
 
         payload.Duplicate.Should().Be(false);
+    }
+
+    [Fact]
+    public async Task SubmittedTransactionStatusShouldBeConfirmed()
+    {
+        // Arrange
+        var gatewayRunner = new GatewayTestsRunner();
+
+        var coreApiStubs = gatewayRunner.MockGenesis()
+            .ArrangeSubmittedTransactionStatusTest(
+            nameof(SubmittedTransactionStatusShouldBeConfirmed));
+
+        // Act
+        var recentTransactions = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result
+            .ActAsync<RecentTransactionsResponse>(
+                "/transaction/recent",
+                JsonContent.Create(new RecentTransactionsRequest()));
+
+        var transactionIdentifier = recentTransactions.Transactions[0].TransactionIdentifier;
+        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+
+        // Assert
+        var status = payload.Transaction.TransactionStatus.Status;
+        status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 }
