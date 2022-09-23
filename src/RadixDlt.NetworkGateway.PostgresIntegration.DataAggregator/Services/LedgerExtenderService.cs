@@ -82,6 +82,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ComponentInfoSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentInfoSubstate;
+using ComponentStateSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentStateSubstate;
+using KeyValueStoreEntrySubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntrySubstate;
+using NonFungibleSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleSubstate;
+using PackageSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageSubstate;
+using ResourceManagerSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerSubstate;
+using Substate = RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate;
+using SystemSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemSubstate;
+using VaultSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultSubstate;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -261,9 +270,17 @@ internal class LedgerExtenderService : ILedgerExtenderService
         CancellationToken cancellationToken
     )
     {
-        var transactionContentProcessingMs = await CodeStopwatch.TimeInMs(
-            async () => await ProcessTransactions(dbContext, transactions, cancellationToken)
-        );
+        var transactionContentProcessingMs = await CodeStopwatch.TimeInMs(async () =>
+        {
+            try
+            {
+                await ProcessTransactions(dbContext, transactions, cancellationToken);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("drop me"); // TODO drop this try..catch
+            }
+        });
 
         return new ProcessTransactionReport(123, 321, 123, 321);
     }
@@ -348,7 +365,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         // step 2: resolve known types (optionally create missing entities)
         {
-            IEnumerable<long> ExpandParentalIds(TmpBaseEntity entity)
+            IEnumerable<long> ExpandParentalIds(Entity entity)
             {
                 if (entity.ParentId.HasValue)
                 {
@@ -366,7 +383,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 }
             }
 
-            TmpComponentEntity CreateComponentEntity(ReferencedEntity re)
+            ComponentEntity CreateComponentEntity(ReferencedEntity re)
             {
                 // TODO use some enum or something!
 
@@ -381,7 +398,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     kind = "validator";
                 }
 
-                return new TmpComponentEntity
+                return new ComponentEntity
                 {
                     Kind = kind,
                 };
@@ -389,13 +406,13 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
             var entityAddresses = referencedEntities.Keys.Select(x => (RadixAddress)x.ConvertFromHex()).ToList();
 
-            var knownDbEntities = await dbContext.TmpEntities
+            var knownDbEntities = await dbContext.Entities
                 .Where(e => entityAddresses.Contains(e.Address))
                 .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
 
             var parentalEntitiesToLoad = knownDbEntities.Values.SelectMany(ExpandParentalIds).Distinct().ToList();
 
-            var knownParentalDbEntities = await dbContext.TmpEntities
+            var knownParentalDbEntities = await dbContext.Entities
                 .Where(e => parentalEntitiesToLoad.Contains(e.Id))
                 .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
 
@@ -416,22 +433,22 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     continue;
                 }
 
-                TmpBaseEntity dbEntity = e.Type switch
+                Entity dbEntity = e.Type switch
                 {
-                    EntityType.System => new TmpSystemEntity(),
-                    EntityType.ResourceManager => new TmpResourceManagerEntity(),
+                    EntityType.System => new SystemEntity(),
+                    EntityType.ResourceManager => new ResourceManagerEntity(),
                     EntityType.Component => CreateComponentEntity(e),
-                    EntityType.Package => new TmpPackageEntity(),
-                    EntityType.Vault => new TmpVaultEntity(),
-                    EntityType.KeyValueStore => new TmpKeyValueStoreEntity(),
+                    EntityType.Package => new PackageEntity(),
+                    EntityType.Vault => new VaultEntity(),
+                    EntityType.KeyValueStore => new ValueStoreEntity(),
                     _ => throw new Exception("bla bla bla x2"), // TODO fix me
                 };
 
+                dbEntity.FromStateVersion = e.StateVersion;
                 dbEntity.Address = e.Address.ConvertFromHex();
                 dbEntity.GlobalAddress = e.GlobalAddressBytes == null ? null : (RadixAddress)e.GlobalAddressBytes;
-                dbEntity.FromStateVersion = e.StateVersion;
 
-                dbContext.TmpEntities.Add(dbEntity);
+                dbContext.Entities.Add(dbEntity);
 
                 e.Resolve(dbEntity);
             }
@@ -441,33 +458,33 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         // step 3: insert all newly seen substates first as some substates we want to delete might not even exist yet!
         {
-            TmpResourceManagerSubstate CreateResourceManagerSubstate(UppedSubstate us)
+            ResourceManagerSubstate CreateResourceManagerSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetResourceManagerSubstate();
 
                 metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
 
-                return new TmpResourceManagerSubstate
+                return new ResourceManagerSubstate
                 {
                     TotalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos),
                     FungibleDivisibility = data.FungibleDivisibility,
                 };
             }
 
-            TmpComponentStateSubstate CreateComponentStateSubstate(UppedSubstate us)
+            ComponentStateSubstate CreateComponentStateSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetComponentStateSubstate();
 
-                return new TmpComponentStateSubstate();
+                return new ComponentStateSubstate();
             }
 
-            TmpVaultSubstate CreateTmpVaultSubstate(UppedSubstate us)
+            VaultSubstate CreateTmpVaultSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetVaultSubstate();
 
                 // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
 
-                var substate = new TmpVaultSubstate();
+                var substate = new VaultSubstate();
 
                 // TODO ugh...
                 var resourceAmount = data.ResourceAmount.ActualInstance;
@@ -498,35 +515,35 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 throw new Exception("bla bla bla bla x9"); // TODO fix me
             }
 
-            TmpKeyValueStoreEntrySubstate CreateKeyValueStoreEntrySubstate(UppedSubstate us)
+            KeyValueStoreEntrySubstate CreateKeyValueStoreEntrySubstate(UppedSubstate us)
             {
                 // TODO handle referenced_entities properly (not sure if we can ensure references types have been seen)
 
-                return new TmpKeyValueStoreEntrySubstate();
+                return new KeyValueStoreEntrySubstate();
             }
 
             foreach (var us in uppedSubstates)
             {
-                TmpBaseSubstate dbSubstate = us.Type switch
+                Substate dbSubstate = us.Type switch
                 {
-                    SubstateType.System => new TmpSystemSubstate(),
+                    SubstateType.System => new SystemSubstate(),
                     SubstateType.ResourceManager => CreateResourceManagerSubstate(us),
-                    SubstateType.ComponentInfo => new TmpComponentInfoSubstate(),
+                    SubstateType.ComponentInfo => new ComponentInfoSubstate(),
                     SubstateType.ComponentState => CreateComponentStateSubstate(us),
-                    SubstateType.Package => new TmpPackageSubstate(),
+                    SubstateType.Package => new PackageSubstate(),
                     SubstateType.Vault => CreateTmpVaultSubstate(us),
-                    SubstateType.NonFungible => new TmpNonFungibleSubstate(),
+                    SubstateType.NonFungible => new NonFungibleSubstate(),
                     SubstateType.KeyValueStoreEntry => CreateKeyValueStoreEntrySubstate(us),
                     _ => throw new Exception("bla bla bla x3"), // TODO fix me
                 };
 
-                dbSubstate.Key = us.Key;
-                dbSubstate.EntityId = us.ReferencedEntity.DatabaseId;
                 dbSubstate.FromStateVersion = us.StateVersion;
+                dbSubstate.Key = us.Key.ConvertFromHex();
+                dbSubstate.EntityId = us.ReferencedEntity.DatabaseId;
                 dbSubstate.DataHash = us.DataHash;
                 dbSubstate.Version = us.Version;
 
-                dbContext.TmpSubstates.Add(dbSubstate);
+                dbContext.Substates.Add(dbSubstate);
 
                 us.Resolve(dbSubstate);
             }
@@ -571,7 +588,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
             var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
                 $@"
-UPDATE tmp_entities AS e
+UPDATE entities AS e
 SET parent_id = data.parent_id, owner_ancestor_id = data.owner_ancestor_id, global_ancestor_id = data.global_ancestor_id
 FROM (
     SELECT * FROM UNNEST({idsParameter}, {parentIdsParameter}, {ownerIdsParameter}, {globalIdsParameter}) d(id, parent_id, owner_ancestor_id, global_ancestor_id)
@@ -587,27 +604,27 @@ WHERE e.id = data.id
 
         // step 5: now, that we're sure all the substates exists we can remove some of them
         {
-            var substateKeys = new List<string>();
+            var substateKeys = new List<byte[]>();
             var entityIds = new List<long>();
             var versions = new List<long>();
             var toStateVersions = new List<long>();
 
             foreach (var ds in downedSubstates)
             {
-                substateKeys.Add(ds.Key);
+                substateKeys.Add(ds.Key.ConvertFromHex());
                 entityIds.Add(ds.ReferencedEntity.DatabaseId);
                 versions.Add(ds.Version);
                 toStateVersions.Add(ds.StateVersion);
             }
 
-            var substateIdsParameter = new NpgsqlParameter("@substate_keys", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = substateKeys };
+            var substateIdsParameter = new NpgsqlParameter("@substate_keys", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = substateKeys };
             var entityIdsParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = entityIds };
             var versionsParameter = new NpgsqlParameter("@versions", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = versions };
             var toStateVersionsParameter = new NpgsqlParameter("@to_state_versions", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = toStateVersions };
 
             var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
                 $@"
-UPDATE tmp_substates AS s
+UPDATE substates AS s
 SET is_deleted = true, to_state_version = data.to_state_version
 FROM (
     SELECT * FROM UNNEST({substateIdsParameter}, {entityIdsParameter}, {versionsParameter}, {toStateVersionsParameter}) d(key, entity_id, version, to_state_version)
@@ -624,25 +641,25 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
         // step 6: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
         {
             var fungibles = fungibleResourceChanges
-                .Select(e => new TmpOwnerEntityFungibleResourceBalanceHistory
+                .Select(e => new EntityFungibleResourceHistory
                 {
+                    FromStateVersion = e.StateVersion,
                     OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
                     GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
                     FungibleResourceEntityId = e.ResourceEntity.DatabaseId,
                     Balance = e.Balance,
-                    FromStateVersion = e.StateVersion,
                 })
                 .ToList();
 
             var nonFungibles = nonFungibleResourceChanges
-                .Select(e => new TmpOwnerEntityNonFungibleResourceIdsHistory
+                .Select(e => new EntityNonFungibleResourceHistory
                 {
+                    FromStateVersion = e.StateVersion,
                     OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
                     GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
                     NonFungibleResourceEntityId = e.ResourceEntity.DatabaseId,
                     IdsCount = e.Ids.Count,
                     Ids = e.Ids.Select(id => referencedEntities[id].DatabaseId).ToArray(),
-                    FromStateVersion = e.StateVersion,
                 })
                 .ToList();
 
@@ -658,18 +675,18 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                         values.Add(value);
                     }
 
-                    return new TmpEntityMetadataHistory
+                    return new EntityMetadataHistory
                     {
+                        FromStateVersion = e.StateVersion,
                         EntityId = e.ResourceEntity.DatabaseId,
                         Keys = keys.ToArray(),
                         Values = values.ToArray(),
-                        FromStateVersion = e.StateVersion,
                     };
                 });
 
-            await dbContext.TmpOwnerEntityFungibleResourceBalanceHistory.AddRangeAsync(fungibles, token);
-            await dbContext.TmpOwnerEntityNonFungibleResourceIdsHistory.AddRangeAsync(nonFungibles, token);
-            await dbContext.TmpEntityMetadataHistory.AddRangeAsync(metadata, token);
+            await dbContext.EntityFungibleResourceHistory.AddRangeAsync(fungibles, token);
+            await dbContext.EntityNonFungibleResourceHistory.AddRangeAsync(nonFungibles, token);
+            await dbContext.EntityMetadataHistory.AddRangeAsync(metadata, token);
             await dbContext.SaveChangesAsync(token);
         }
     }

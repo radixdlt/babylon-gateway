@@ -68,14 +68,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-// TODO owner_entity -> vault_entity ?
-
-[Table("tmp_entity_fungible_resource_balance_history")]
-public class TmpOwnerEntityFungibleResourceBalanceHistory
+[Table("entity_fungible_resource_history")]
+public class EntityFungibleResourceHistory
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
     [Column("owner_entity_id")]
     public long OwnerEntityId { get; set; }
@@ -88,7 +89,4 @@ public class TmpOwnerEntityFungibleResourceBalanceHistory
 
     [Column("balance")]
     public TokenAmount Balance { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
 }

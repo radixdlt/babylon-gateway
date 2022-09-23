@@ -62,60 +62,33 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("tmp_entities")]
-internal abstract class TmpBaseEntity
+[Table("entity_non_fungible_resource_history")]
+public class EntityNonFungibleResourceHistory
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
 
-    [Column("address")]
-    public RadixAddress Address { get; set; }
-
-    [Column("global_address")]
-    public RadixAddress? GlobalAddress { get; set; }
-
-    [Column("parent_id")]
-    public long? ParentId { get; set; }
-
-    [Column("owner_ancestor_id")]
-    public long? OwnerAncestorId { get; set; }
-
-    [Column("global_ancestor_id")]
-    public long? GlobalAncestorId { get; set; }
-
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
-}
 
-internal class TmpSystemEntity : TmpBaseEntity
-{
-}
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
 
-internal class TmpResourceManagerEntity : TmpBaseEntity
-{
-}
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
 
-internal class TmpComponentEntity : TmpBaseEntity
-{
-    [Column("kind")]
-    public string Kind { get; set; }
-}
+    [Column("non_fungible_resource_entity_id")]
+    public long NonFungibleResourceEntityId { get; set; }
 
-internal class TmpPackageEntity : TmpBaseEntity
-{
-}
+    [Column("ids_count")]
+    public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
 
-internal class TmpKeyValueStoreEntity : TmpBaseEntity
-{
-}
-
-internal class TmpVaultEntity : TmpBaseEntity
-{
+    [Column("ids")]
+    public long[] Ids { get; set; }
 }

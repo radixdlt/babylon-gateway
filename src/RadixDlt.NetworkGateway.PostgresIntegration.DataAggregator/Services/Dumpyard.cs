@@ -68,12 +68,13 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Substate = RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
 {
-    private TmpBaseEntity? _databaseEntity;
+    private Entity? _databaseEntity;
     private ReferencedEntity? _parent;
     private long? _parentId;
     private long? _ownerAncestorId;
@@ -116,7 +117,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         GlobalAddressBytes = Convert.FromHexString(addressBytes);
     }
 
-    public void Resolve(TmpBaseEntity entity)
+    public void Resolve(Entity entity)
     {
         _databaseEntity = entity;
         _parentId = entity.ParentId;
@@ -136,7 +137,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         _parent = parent;
     }
 
-    private TmpBaseEntity GetDatabaseEntity()
+    private Entity GetDatabaseEntity()
     {
         var de = _databaseEntity ?? throw new Exception("bla bla"); // TODO fix me
 
@@ -162,11 +163,11 @@ internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, Su
 {
 }
 
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, Substate Data)
+internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data)
 {
-    public TmpBaseSubstate? DatabaseSubstate { get; private set; }
+    public Substate? DatabaseSubstate { get; private set; }
 
-    public void Resolve(TmpBaseSubstate substate)
+    public void Resolve(Substate substate)
     {
         DatabaseSubstate = substate;
     }
