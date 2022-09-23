@@ -118,19 +118,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
-        /// <param name="key">The hex-encoded bytes of its key (required).</param>
+        /// <param name="keyHex">The hex-encoded bytes of its key (required).</param>
         /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="dataStruct">dataStruct.</param>
-        public KeyValueStoreEntrySubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string key = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
+        public KeyValueStoreEntrySubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string keyHex = default(string), bool isDeleted = default(bool), DataStruct dataStruct = default(DataStruct))
         {
             this.EntityType = entityType;
             this.SubstateType = substateType;
-            // to ensure "key" is required (not null)
-            if (key == null)
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("key is a required property for KeyValueStoreEntrySubstate and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for KeyValueStoreEntrySubstate and cannot be null");
             }
-            this.Key = key;
+            this.KeyHex = keyHex;
             this.IsDeleted = isDeleted;
             this.DataStruct = dataStruct;
         }
@@ -139,8 +139,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The hex-encoded bytes of its key
         /// </summary>
         /// <value>The hex-encoded bytes of its key</value>
-        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
-        public string Key { get; set; }
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Gets or Sets IsDeleted
@@ -164,7 +164,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class KeyValueStoreEntrySubstate {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  DataStruct: ").Append(DataStruct).Append("\n");
             sb.Append("}\n");
@@ -211,9 +211,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
-                    this.Key == input.Key ||
-                    (this.Key != null &&
-                    this.Key.Equals(input.Key))
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 ) && 
                 (
                     this.IsDeleted == input.IsDeleted ||
@@ -237,9 +237,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                if (this.Key != null)
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.DataStruct != null)

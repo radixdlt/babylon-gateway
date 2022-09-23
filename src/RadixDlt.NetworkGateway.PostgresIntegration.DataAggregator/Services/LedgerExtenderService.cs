@@ -295,16 +295,16 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
                     var sid = upSubstate.SubstateId;
-                    var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
-                    var us = new UppedSubstate(re, sid.SubstateKey, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
+                    var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
+                    var us = new UppedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
                     if (us.Data.ActualInstance is IOwner owner)
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
-                            referencedEntities.GetOrAdd(oe.EntityAddress, _ => new ReferencedEntity(oe.EntityAddress, oe.EntityType, stateVersion)).IsChildOf(re);
+                            referencedEntities.GetOrAdd(oe.EntityAddressHex, _ => new ReferencedEntity(oe.EntityAddressHex, oe.EntityType, stateVersion)).IsChildOf(re);
 
-                            childToParentEntities.Add(oe.EntityAddress, sid.EntityAddress);
+                            childToParentEntities.Add(oe.EntityAddressHex, sid.EntityAddressHex);
                         }
                     }
 
@@ -325,8 +325,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 foreach (var downSubstate in stateUpdates.DownSubstates)
                 {
                     var sid = downSubstate.SubstateId;
-                    var re = referencedEntities.GetOrAdd(sid.EntityAddress, _ => new ReferencedEntity(sid.EntityAddress, sid.EntityType, stateVersion));
-                    var ds = new DownedSubstate(re, sid.SubstateKey, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
+                    var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
+                    var ds = new DownedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
 
                     downedSubstates.Add(ds);
                 }
@@ -335,12 +335,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 {
                     // TODO not sure how to handle those; not sure what they even are
 
-                    referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddress, _ => new ReferencedEntity(downVirtualSubstate.EntityAddress, downVirtualSubstate.EntityType, stateVersion));
+                    referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddressHex, _ => new ReferencedEntity(downVirtualSubstate.EntityAddressHex, downVirtualSubstate.EntityType, stateVersion));
                 }
 
                 foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                 {
-                    referencedEntities[newGlobalEntity.EntityAddress].Globalize(newGlobalEntity.GlobalAddressBytes);
+                    referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex);
                 }
             }
         }
@@ -489,7 +489,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
                     var resourceEntity = referencedEntities[resourceAddress];
 
-                    nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIds, us.StateVersion));
+                    nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIdsHex, us.StateVersion));
 
                     return substate;
                 }

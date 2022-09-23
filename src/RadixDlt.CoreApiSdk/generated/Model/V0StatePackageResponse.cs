@@ -91,58 +91,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DownSubstate
+    /// V0StatePackageResponse
     /// </summary>
-    [DataContract(Name = "DownSubstate")]
-    public partial class DownSubstate : IEquatable<DownSubstate>, IValidatableObject
+    [DataContract(Name = "V0StatePackageResponse")]
+    public partial class V0StatePackageResponse : IEquatable<V0StatePackageResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StatePackageResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DownSubstate() { }
+        protected V0StatePackageResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StatePackageResponse" /> class.
         /// </summary>
-        /// <param name="substateId">substateId (required).</param>
-        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
-        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
-        public DownSubstate(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), long version = default(long))
+        /// <param name="package">package (required).</param>
+        public V0StatePackageResponse(Substate package = default(Substate))
         {
-            // to ensure "substateId" is required (not null)
-            if (substateId == null)
+            // to ensure "package" is required (not null)
+            if (package == null)
             {
-                throw new ArgumentNullException("substateId is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("package is a required property for V0StatePackageResponse and cannot be null");
             }
-            this.SubstateId = substateId;
-            // to ensure "substateDataHash" is required (not null)
-            if (substateDataHash == null)
-            {
-                throw new ArgumentNullException("substateDataHash is a required property for DownSubstate and cannot be null");
-            }
-            this.SubstateDataHash = substateDataHash;
-            this._Version = version;
+            this.Package = package;
         }
 
         /// <summary>
-        /// Gets or Sets SubstateId
+        /// Gets or Sets Package
         /// </summary>
-        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateId SubstateId { get; set; }
-
-        /// <summary>
-        /// The hex-encoded single-SHA256 hash of the substate data bytes
-        /// </summary>
-        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
-        [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateDataHash { get; set; }
-
-        /// <summary>
-        /// An integer between 0 and 10^13, counting the number of times the substate was updated
-        /// </summary>
-        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        [DataMember(Name = "package", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Package { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,10 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DownSubstate {\n");
-            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
-            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class V0StatePackageResponse {\n");
+            sb.Append("  Package: ").Append(Package).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DownSubstate);
+            return this.Equals(input as V0StatePackageResponse);
         }
 
         /// <summary>
-        /// Returns true if DownSubstate instances are equal
+        /// Returns true if V0StatePackageResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of DownSubstate to be compared</param>
+        /// <param name="input">Instance of V0StatePackageResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DownSubstate input)
+        public bool Equals(V0StatePackageResponse input)
         {
             if (input == null)
             {
@@ -191,18 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SubstateId == input.SubstateId ||
-                    (this.SubstateId != null &&
-                    this.SubstateId.Equals(input.SubstateId))
-                ) && 
-                (
-                    this.SubstateDataHash == input.SubstateDataHash ||
-                    (this.SubstateDataHash != null &&
-                    this.SubstateDataHash.Equals(input.SubstateDataHash))
-                ) && 
-                (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.Package == input.Package ||
+                    (this.Package != null &&
+                    this.Package.Equals(input.Package))
                 );
         }
 
@@ -215,15 +181,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SubstateId != null)
+                if (this.Package != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Package.GetHashCode();
                 }
-                if (this.SubstateDataHash != null)
-                {
-                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 return hashCode;
             }
         }
@@ -235,18 +196,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (long) maximum
-            if (this._Version > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 100000000000000.", new [] { "_Version" });
-            }
-
-            // _Version (long) minimum
-            if (this._Version < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
-            }
-
             yield break;
         }
     }

@@ -117,40 +117,40 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="SubstateId" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityAddress">The hex-encoded bytes of the entity address (required).</param>
+        /// <param name="entityAddressHex">The hex-encoded bytes of the entity address (required).</param>
         /// <param name="substateType">substateType (required).</param>
-        /// <param name="substateKey">The hex-encoded bytes of the substate key, under the entity (required).</param>
-        public SubstateId(EntityType entityType = default(EntityType), string entityAddress = default(string), SubstateType substateType = default(SubstateType), string substateKey = default(string))
+        /// <param name="substateKeyHex">The hex-encoded bytes of the substate key, under the entity (required).</param>
+        public SubstateId(EntityType entityType = default(EntityType), string entityAddressHex = default(string), SubstateType substateType = default(SubstateType), string substateKeyHex = default(string))
         {
             this.EntityType = entityType;
-            // to ensure "entityAddress" is required (not null)
-            if (entityAddress == null)
+            // to ensure "entityAddressHex" is required (not null)
+            if (entityAddressHex == null)
             {
-                throw new ArgumentNullException("entityAddress is a required property for SubstateId and cannot be null");
+                throw new ArgumentNullException("entityAddressHex is a required property for SubstateId and cannot be null");
             }
-            this.EntityAddress = entityAddress;
+            this.EntityAddressHex = entityAddressHex;
             this.SubstateType = substateType;
-            // to ensure "substateKey" is required (not null)
-            if (substateKey == null)
+            // to ensure "substateKeyHex" is required (not null)
+            if (substateKeyHex == null)
             {
-                throw new ArgumentNullException("substateKey is a required property for SubstateId and cannot be null");
+                throw new ArgumentNullException("substateKeyHex is a required property for SubstateId and cannot be null");
             }
-            this.SubstateKey = substateKey;
+            this.SubstateKeyHex = substateKeyHex;
         }
 
         /// <summary>
         /// The hex-encoded bytes of the entity address
         /// </summary>
         /// <value>The hex-encoded bytes of the entity address</value>
-        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddress { get; set; }
+        [DataMember(Name = "entity_address_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddressHex { get; set; }
 
         /// <summary>
         /// The hex-encoded bytes of the substate key, under the entity
         /// </summary>
         /// <value>The hex-encoded bytes of the substate key, under the entity</value>
-        [DataMember(Name = "substate_key", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateKey { get; set; }
+        [DataMember(Name = "substate_key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SubstateKeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -161,9 +161,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class SubstateId {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  EntityAddressHex: ").Append(EntityAddressHex).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  SubstateKey: ").Append(SubstateKey).Append("\n");
+            sb.Append("  SubstateKeyHex: ").Append(SubstateKeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -204,18 +204,18 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityAddress == input.EntityAddress ||
-                    (this.EntityAddress != null &&
-                    this.EntityAddress.Equals(input.EntityAddress))
+                    this.EntityAddressHex == input.EntityAddressHex ||
+                    (this.EntityAddressHex != null &&
+                    this.EntityAddressHex.Equals(input.EntityAddressHex))
                 ) && 
                 (
                     this.SubstateType == input.SubstateType ||
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
-                    this.SubstateKey == input.SubstateKey ||
-                    (this.SubstateKey != null &&
-                    this.SubstateKey.Equals(input.SubstateKey))
+                    this.SubstateKeyHex == input.SubstateKeyHex ||
+                    (this.SubstateKeyHex != null &&
+                    this.SubstateKeyHex.Equals(input.SubstateKeyHex))
                 );
         }
 
@@ -229,14 +229,14 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityAddress != null)
+                if (this.EntityAddressHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddressHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                if (this.SubstateKey != null)
+                if (this.SubstateKeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateKey.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SubstateKeyHex.GetHashCode();
                 }
                 return hashCode;
             }

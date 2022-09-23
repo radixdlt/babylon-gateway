@@ -123,7 +123,7 @@ public static class TransactionSummarisationGenerator
 
         if (transaction.NotarizedTransaction != null)
         {
-            payloadHash = transaction.NotarizedTransaction.NotarySignature.GetEcdsaSecp256k1Signature().SignatureBytes.ConvertFromHex();
+            payloadHash = transaction.NotarizedTransaction.NotarySignature.GetEcdsaSecp256k1Signature().SignatureHex.ConvertFromHex();
             intentHash = transaction.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex();
             signedIntentHash = transaction.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex();
         }

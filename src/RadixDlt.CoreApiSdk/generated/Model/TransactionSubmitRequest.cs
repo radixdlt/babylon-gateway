@@ -105,8 +105,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="notarizedTransaction">A hex-encoded, compiled notarized transaction. (required).</param>
-        public TransactionSubmitRequest(string network = default(string), string notarizedTransaction = default(string))
+        /// <param name="notarizedTransactionHex">A hex-encoded, compiled notarized transaction. (required).</param>
+        public TransactionSubmitRequest(string network = default(string), string notarizedTransactionHex = default(string))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -114,12 +114,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("network is a required property for TransactionSubmitRequest and cannot be null");
             }
             this.Network = network;
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "notarizedTransactionHex" is required (not null)
+            if (notarizedTransactionHex == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("notarizedTransactionHex is a required property for TransactionSubmitRequest and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.NotarizedTransactionHex = notarizedTransactionHex;
         }
 
         /// <summary>
@@ -133,8 +133,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// A hex-encoded, compiled notarized transaction.
         /// </summary>
         /// <value>A hex-encoded, compiled notarized transaction.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        [DataMember(Name = "notarized_transaction_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string NotarizedTransactionHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,7 +145,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionSubmitRequest {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("  NotarizedTransactionHex: ").Append(NotarizedTransactionHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -187,9 +187,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Network.Equals(input.Network))
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.NotarizedTransactionHex == input.NotarizedTransactionHex ||
+                    (this.NotarizedTransactionHex != null &&
+                    this.NotarizedTransactionHex.Equals(input.NotarizedTransactionHex))
                 );
         }
 
@@ -206,9 +206,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
-                if (this.NotarizedTransaction != null)
+                if (this.NotarizedTransactionHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NotarizedTransactionHex.GetHashCode();
                 }
                 return hashCode;
             }

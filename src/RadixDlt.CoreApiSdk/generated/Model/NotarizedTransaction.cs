@@ -105,10 +105,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
         /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash. (required).</param>
-        /// <param name="payload">The hex-encoded full notarized transaction payload (required).</param>
+        /// <param name="payloadHex">The hex-encoded full notarized transaction payload (required).</param>
         /// <param name="signedIntent">signedIntent (required).</param>
         /// <param name="notarySignature">notarySignature (required).</param>
-        public NotarizedTransaction(string hash = default(string), string payload = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
+        public NotarizedTransaction(string hash = default(string), string payloadHex = default(string), SignedTransactionIntent signedIntent = default(SignedTransactionIntent), Signature notarySignature = default(Signature))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -116,12 +116,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("hash is a required property for NotarizedTransaction and cannot be null");
             }
             this.Hash = hash;
-            // to ensure "payload" is required (not null)
-            if (payload == null)
+            // to ensure "payloadHex" is required (not null)
+            if (payloadHex == null)
             {
-                throw new ArgumentNullException("payload is a required property for NotarizedTransaction and cannot be null");
+                throw new ArgumentNullException("payloadHex is a required property for NotarizedTransaction and cannot be null");
             }
-            this.Payload = payload;
+            this.PayloadHex = payloadHex;
             // to ensure "signedIntent" is required (not null)
             if (signedIntent == null)
             {
@@ -147,8 +147,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The hex-encoded full notarized transaction payload
         /// </summary>
         /// <value>The hex-encoded full notarized transaction payload</value>
-        [DataMember(Name = "payload", IsRequired = true, EmitDefaultValue = true)]
-        public string Payload { get; set; }
+        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Gets or Sets SignedIntent
@@ -171,7 +171,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NotarizedTransaction {\n");
             sb.Append("  Hash: ").Append(Hash).Append("\n");
-            sb.Append("  Payload: ").Append(Payload).Append("\n");
+            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
             sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
             sb.Append("  NotarySignature: ").Append(NotarySignature).Append("\n");
             sb.Append("}\n");
@@ -215,9 +215,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Hash.Equals(input.Hash))
                 ) && 
                 (
-                    this.Payload == input.Payload ||
-                    (this.Payload != null &&
-                    this.Payload.Equals(input.Payload))
+                    this.PayloadHex == input.PayloadHex ||
+                    (this.PayloadHex != null &&
+                    this.PayloadHex.Equals(input.PayloadHex))
                 ) && 
                 (
                     this.SignedIntent == input.SignedIntent ||
@@ -244,9 +244,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Hash.GetHashCode();
                 }
-                if (this.Payload != null)
+                if (this.PayloadHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Payload.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
                 }
                 if (this.SignedIntent != null)
                 {

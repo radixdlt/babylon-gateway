@@ -107,8 +107,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="hash">The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash.  (required).</param>
         /// <param name="header">header (required).</param>
         /// <param name="manifest">The decompiled transaction manifest (required).</param>
-        /// <param name="blobs">A map of the hex-encoded blob hash, to hex-encoded blob content (required).</param>
-        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string manifest = default(string), Dictionary<string, string> blobs = default(Dictionary<string, string>))
+        /// <param name="blobsHex">A map of the hex-encoded blob hash, to hex-encoded blob content (required).</param>
+        public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), string manifest = default(string), Dictionary<string, string> blobsHex = default(Dictionary<string, string>))
         {
             // to ensure "hash" is required (not null)
             if (hash == null)
@@ -128,12 +128,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("manifest is a required property for TransactionIntent and cannot be null");
             }
             this.Manifest = manifest;
-            // to ensure "blobs" is required (not null)
-            if (blobs == null)
+            // to ensure "blobsHex" is required (not null)
+            if (blobsHex == null)
             {
-                throw new ArgumentNullException("blobs is a required property for TransactionIntent and cannot be null");
+                throw new ArgumentNullException("blobsHex is a required property for TransactionIntent and cannot be null");
             }
-            this.Blobs = blobs;
+            this.BlobsHex = blobsHex;
         }
 
         /// <summary>
@@ -160,8 +160,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// A map of the hex-encoded blob hash, to hex-encoded blob content
         /// </summary>
         /// <value>A map of the hex-encoded blob hash, to hex-encoded blob content</value>
-        [DataMember(Name = "blobs", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, string> Blobs { get; set; }
+        [DataMember(Name = "blobs_hex", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> BlobsHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -174,7 +174,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Hash: ").Append(Hash).Append("\n");
             sb.Append("  Header: ").Append(Header).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
-            sb.Append("  Blobs: ").Append(Blobs).Append("\n");
+            sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -226,10 +226,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Manifest.Equals(input.Manifest))
                 ) && 
                 (
-                    this.Blobs == input.Blobs ||
-                    this.Blobs != null &&
-                    input.Blobs != null &&
-                    this.Blobs.SequenceEqual(input.Blobs)
+                    this.BlobsHex == input.BlobsHex ||
+                    this.BlobsHex != null &&
+                    input.BlobsHex != null &&
+                    this.BlobsHex.SequenceEqual(input.BlobsHex)
                 );
         }
 
@@ -254,9 +254,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
                 }
-                if (this.Blobs != null)
+                if (this.BlobsHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blobs.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlobsHex.GetHashCode();
                 }
                 return hashCode;
             }

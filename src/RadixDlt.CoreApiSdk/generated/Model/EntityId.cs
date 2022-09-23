@@ -111,24 +111,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityId" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityAddress">The hex-encoded bytes of the entity address (required).</param>
-        public EntityId(EntityType entityType = default(EntityType), string entityAddress = default(string))
+        /// <param name="entityAddressHex">The hex-encoded bytes of the entity address (required).</param>
+        public EntityId(EntityType entityType = default(EntityType), string entityAddressHex = default(string))
         {
             this.EntityType = entityType;
-            // to ensure "entityAddress" is required (not null)
-            if (entityAddress == null)
+            // to ensure "entityAddressHex" is required (not null)
+            if (entityAddressHex == null)
             {
-                throw new ArgumentNullException("entityAddress is a required property for EntityId and cannot be null");
+                throw new ArgumentNullException("entityAddressHex is a required property for EntityId and cannot be null");
             }
-            this.EntityAddress = entityAddress;
+            this.EntityAddressHex = entityAddressHex;
         }
 
         /// <summary>
         /// The hex-encoded bytes of the entity address
         /// </summary>
         /// <value>The hex-encoded bytes of the entity address</value>
-        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddress { get; set; }
+        [DataMember(Name = "entity_address_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddressHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,7 +139,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityId {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
+            sb.Append("  EntityAddressHex: ").Append(EntityAddressHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityAddress == input.EntityAddress ||
-                    (this.EntityAddress != null &&
-                    this.EntityAddress.Equals(input.EntityAddress))
+                    this.EntityAddressHex == input.EntityAddressHex ||
+                    (this.EntityAddressHex != null &&
+                    this.EntityAddressHex.Equals(input.EntityAddressHex))
                 );
         }
 
@@ -196,9 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityAddress != null)
+                if (this.EntityAddressHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddressHex.GetHashCode();
                 }
                 return hashCode;
             }

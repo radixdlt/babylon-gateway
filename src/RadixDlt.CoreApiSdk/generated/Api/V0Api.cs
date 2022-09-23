@@ -92,6 +92,24 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Read component data
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <returns>V0StateComponentResponse</returns>
+        V0StateComponentResponse V0StateComponentPost(V0StateComponentRequest v0StateComponentRequest);
+
+        /// <summary>
+        /// Read component data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <returns>ApiResponse of V0StateComponentResponse</returns>
+        ApiResponse<V0StateComponentResponse> V0StateComponentPostWithHttpInfo(V0StateComponentRequest v0StateComponentRequest);
+        /// <summary>
         /// Read Current Epoch
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -107,6 +125,60 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <returns>ApiResponse of V0StateEpochResponse</returns>
         ApiResponse<V0StateEpochResponse> V0StateEpochPostWithHttpInfo();
+        /// <summary>
+        /// Read non-fungible data
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <returns>V0StateNonFungibleResponse</returns>
+        V0StateNonFungibleResponse V0StateNonFungiblePost(V0StateNonFungibleRequest v0StateNonFungibleRequest);
+
+        /// <summary>
+        /// Read non-fungible data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <returns>ApiResponse of V0StateNonFungibleResponse</returns>
+        ApiResponse<V0StateNonFungibleResponse> V0StateNonFungiblePostWithHttpInfo(V0StateNonFungibleRequest v0StateNonFungibleRequest);
+        /// <summary>
+        /// Read package data
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <returns>V0StatePackageResponse</returns>
+        V0StatePackageResponse V0StatePackagePost(V0StatePackageRequest v0StatePackageRequest);
+
+        /// <summary>
+        /// Read package data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <returns>ApiResponse of V0StatePackageResponse</returns>
+        ApiResponse<V0StatePackageResponse> V0StatePackagePostWithHttpInfo(V0StatePackageRequest v0StatePackageRequest);
+        /// <summary>
+        /// Read resource data
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <returns>V0StateResourceResponse</returns>
+        V0StateResourceResponse V0StateResourcePost(V0StateResourceRequest v0StateResourceRequest);
+
+        /// <summary>
+        /// Read resource data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <returns>ApiResponse of V0StateResourceResponse</returns>
+        ApiResponse<V0StateResourceResponse> V0StateResourcePostWithHttpInfo(V0StateResourceRequest v0StateResourceRequest);
         /// <summary>
         /// Read Committed Transaction
         /// </summary>
@@ -171,6 +243,29 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
+        /// Read component data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateComponentResponse</returns>
+        System.Threading.Tasks.Task<V0StateComponentResponse> V0StateComponentPostAsync(V0StateComponentRequest v0StateComponentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Read component data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateComponentResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<V0StateComponentResponse>> V0StateComponentPostWithHttpInfoAsync(V0StateComponentRequest v0StateComponentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
         /// Read Current Epoch
         /// </summary>
         /// <remarks>
@@ -191,6 +286,75 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (V0StateEpochResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<V0StateEpochResponse>> V0StateEpochPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Read non-fungible data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateNonFungibleResponse</returns>
+        System.Threading.Tasks.Task<V0StateNonFungibleResponse> V0StateNonFungiblePostAsync(V0StateNonFungibleRequest v0StateNonFungibleRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Read non-fungible data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateNonFungibleResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<V0StateNonFungibleResponse>> V0StateNonFungiblePostWithHttpInfoAsync(V0StateNonFungibleRequest v0StateNonFungibleRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Read package data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StatePackageResponse</returns>
+        System.Threading.Tasks.Task<V0StatePackageResponse> V0StatePackagePostAsync(V0StatePackageRequest v0StatePackageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Read package data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StatePackageResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<V0StatePackageResponse>> V0StatePackagePostWithHttpInfoAsync(V0StatePackageRequest v0StatePackageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Read resource data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateResourceResponse</returns>
+        System.Threading.Tasks.Task<V0StateResourceResponse> V0StateResourcePostAsync(V0StateResourceRequest v0StateResourceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Read resource data
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateResourceResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<V0StateResourceResponse>> V0StateResourcePostWithHttpInfoAsync(V0StateResourceRequest v0StateResourceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Read Committed Transaction
         /// </summary>
@@ -474,6 +638,123 @@ namespace RadixDlt.CoreApiSdk.Api
         }
 
         /// <summary>
+        /// Read component data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <returns>V0StateComponentResponse</returns>
+        public V0StateComponentResponse V0StateComponentPost(V0StateComponentRequest v0StateComponentRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateComponentResponse> localVarResponse = V0StateComponentPostWithHttpInfo(v0StateComponentRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read component data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <returns>ApiResponse of V0StateComponentResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateComponentResponse> V0StateComponentPostWithHttpInfo(V0StateComponentRequest v0StateComponentRequest)
+        {
+            // verify the required parameter 'v0StateComponentRequest' is set
+            if (v0StateComponentRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StateComponentRequest' when calling V0Api->V0StateComponentPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StateComponentRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<V0StateComponentResponse>("/v0/state/component", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateComponentPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read component data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateComponentResponse</returns>
+        public async System.Threading.Tasks.Task<V0StateComponentResponse> V0StateComponentPostAsync(V0StateComponentRequest v0StateComponentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateComponentResponse> localVarResponse = await V0StateComponentPostWithHttpInfoAsync(v0StateComponentRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read component data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateComponentRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateComponentResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateComponentResponse>> V0StateComponentPostWithHttpInfoAsync(V0StateComponentRequest v0StateComponentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'v0StateComponentRequest' is set
+            if (v0StateComponentRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StateComponentRequest' when calling V0Api->V0StateComponentPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StateComponentRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<V0StateComponentResponse>("/v0/state/component", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateComponentPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
         /// Read Current Epoch 
         /// </summary>
         /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -568,6 +849,357 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("V0StateEpochPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read non-fungible data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <returns>V0StateNonFungibleResponse</returns>
+        public V0StateNonFungibleResponse V0StateNonFungiblePost(V0StateNonFungibleRequest v0StateNonFungibleRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateNonFungibleResponse> localVarResponse = V0StateNonFungiblePostWithHttpInfo(v0StateNonFungibleRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read non-fungible data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <returns>ApiResponse of V0StateNonFungibleResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateNonFungibleResponse> V0StateNonFungiblePostWithHttpInfo(V0StateNonFungibleRequest v0StateNonFungibleRequest)
+        {
+            // verify the required parameter 'v0StateNonFungibleRequest' is set
+            if (v0StateNonFungibleRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StateNonFungibleRequest' when calling V0Api->V0StateNonFungiblePost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StateNonFungibleRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<V0StateNonFungibleResponse>("/v0/state/non-fungible", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateNonFungiblePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read non-fungible data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateNonFungibleResponse</returns>
+        public async System.Threading.Tasks.Task<V0StateNonFungibleResponse> V0StateNonFungiblePostAsync(V0StateNonFungibleRequest v0StateNonFungibleRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateNonFungibleResponse> localVarResponse = await V0StateNonFungiblePostWithHttpInfoAsync(v0StateNonFungibleRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read non-fungible data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateNonFungibleRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateNonFungibleResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateNonFungibleResponse>> V0StateNonFungiblePostWithHttpInfoAsync(V0StateNonFungibleRequest v0StateNonFungibleRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'v0StateNonFungibleRequest' is set
+            if (v0StateNonFungibleRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StateNonFungibleRequest' when calling V0Api->V0StateNonFungiblePost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StateNonFungibleRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<V0StateNonFungibleResponse>("/v0/state/non-fungible", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateNonFungiblePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read package data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <returns>V0StatePackageResponse</returns>
+        public V0StatePackageResponse V0StatePackagePost(V0StatePackageRequest v0StatePackageRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StatePackageResponse> localVarResponse = V0StatePackagePostWithHttpInfo(v0StatePackageRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read package data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <returns>ApiResponse of V0StatePackageResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<V0StatePackageResponse> V0StatePackagePostWithHttpInfo(V0StatePackageRequest v0StatePackageRequest)
+        {
+            // verify the required parameter 'v0StatePackageRequest' is set
+            if (v0StatePackageRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StatePackageRequest' when calling V0Api->V0StatePackagePost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StatePackageRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<V0StatePackageResponse>("/v0/state/package", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StatePackagePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read package data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StatePackageResponse</returns>
+        public async System.Threading.Tasks.Task<V0StatePackageResponse> V0StatePackagePostAsync(V0StatePackageRequest v0StatePackageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StatePackageResponse> localVarResponse = await V0StatePackagePostWithHttpInfoAsync(v0StatePackageRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read package data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StatePackageRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StatePackageResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<V0StatePackageResponse>> V0StatePackagePostWithHttpInfoAsync(V0StatePackageRequest v0StatePackageRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'v0StatePackageRequest' is set
+            if (v0StatePackageRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StatePackageRequest' when calling V0Api->V0StatePackagePost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StatePackageRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<V0StatePackageResponse>("/v0/state/package", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StatePackagePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read resource data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <returns>V0StateResourceResponse</returns>
+        public V0StateResourceResponse V0StateResourcePost(V0StateResourceRequest v0StateResourceRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateResourceResponse> localVarResponse = V0StateResourcePostWithHttpInfo(v0StateResourceRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read resource data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <returns>ApiResponse of V0StateResourceResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateResourceResponse> V0StateResourcePostWithHttpInfo(V0StateResourceRequest v0StateResourceRequest)
+        {
+            // verify the required parameter 'v0StateResourceRequest' is set
+            if (v0StateResourceRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StateResourceRequest' when calling V0Api->V0StateResourcePost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StateResourceRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<V0StateResourceResponse>("/v0/state/resource", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateResourcePost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Read resource data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of V0StateResourceResponse</returns>
+        public async System.Threading.Tasks.Task<V0StateResourceResponse> V0StateResourcePostAsync(V0StateResourceRequest v0StateResourceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateResourceResponse> localVarResponse = await V0StateResourcePostWithHttpInfoAsync(v0StateResourceRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Read resource data 
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="v0StateResourceRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (V0StateResourceResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<V0StateResourceResponse>> V0StateResourcePostWithHttpInfoAsync(V0StateResourceRequest v0StateResourceRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'v0StateResourceRequest' is set
+            if (v0StateResourceRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'v0StateResourceRequest' when calling V0Api->V0StateResourcePost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = v0StateResourceRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<V0StateResourceResponse>("/v0/state/resource", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StateResourcePost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

@@ -111,52 +111,52 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="GlobalEntityId" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityAddress">The hex-encoded bytes of the entity address (required).</param>
-        /// <param name="globalAddressBytes">The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future. (required).</param>
-        /// <param name="globalAddressStr">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        public GlobalEntityId(EntityType entityType = default(EntityType), string entityAddress = default(string), string globalAddressBytes = default(string), string globalAddressStr = default(string))
+        /// <param name="entityAddressHex">The hex-encoded bytes of the entity address (required).</param>
+        /// <param name="globalAddressHex">The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future. (required).</param>
+        /// <param name="globalAddress">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        public GlobalEntityId(EntityType entityType = default(EntityType), string entityAddressHex = default(string), string globalAddressHex = default(string), string globalAddress = default(string))
         {
             this.EntityType = entityType;
-            // to ensure "entityAddress" is required (not null)
-            if (entityAddress == null)
+            // to ensure "entityAddressHex" is required (not null)
+            if (entityAddressHex == null)
             {
-                throw new ArgumentNullException("entityAddress is a required property for GlobalEntityId and cannot be null");
+                throw new ArgumentNullException("entityAddressHex is a required property for GlobalEntityId and cannot be null");
             }
-            this.EntityAddress = entityAddress;
-            // to ensure "globalAddressBytes" is required (not null)
-            if (globalAddressBytes == null)
+            this.EntityAddressHex = entityAddressHex;
+            // to ensure "globalAddressHex" is required (not null)
+            if (globalAddressHex == null)
             {
-                throw new ArgumentNullException("globalAddressBytes is a required property for GlobalEntityId and cannot be null");
+                throw new ArgumentNullException("globalAddressHex is a required property for GlobalEntityId and cannot be null");
             }
-            this.GlobalAddressBytes = globalAddressBytes;
-            // to ensure "globalAddressStr" is required (not null)
-            if (globalAddressStr == null)
+            this.GlobalAddressHex = globalAddressHex;
+            // to ensure "globalAddress" is required (not null)
+            if (globalAddress == null)
             {
-                throw new ArgumentNullException("globalAddressStr is a required property for GlobalEntityId and cannot be null");
+                throw new ArgumentNullException("globalAddress is a required property for GlobalEntityId and cannot be null");
             }
-            this.GlobalAddressStr = globalAddressStr;
+            this.GlobalAddress = globalAddress;
         }
 
         /// <summary>
         /// The hex-encoded bytes of the entity address
         /// </summary>
         /// <value>The hex-encoded bytes of the entity address</value>
-        [DataMember(Name = "entity_address", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddress { get; set; }
+        [DataMember(Name = "entity_address_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityAddressHex { get; set; }
 
         /// <summary>
         /// The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future.
         /// </summary>
         /// <value>The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future.</value>
-        [DataMember(Name = "global_address_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string GlobalAddressBytes { get; set; }
+        [DataMember(Name = "global_address_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddressHex { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
         /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
-        [DataMember(Name = "global_address_str", IsRequired = true, EmitDefaultValue = true)]
-        public string GlobalAddressStr { get; set; }
+        [DataMember(Name = "global_address", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -167,9 +167,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class GlobalEntityId {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityAddress: ").Append(EntityAddress).Append("\n");
-            sb.Append("  GlobalAddressBytes: ").Append(GlobalAddressBytes).Append("\n");
-            sb.Append("  GlobalAddressStr: ").Append(GlobalAddressStr).Append("\n");
+            sb.Append("  EntityAddressHex: ").Append(EntityAddressHex).Append("\n");
+            sb.Append("  GlobalAddressHex: ").Append(GlobalAddressHex).Append("\n");
+            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,19 +210,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityAddress == input.EntityAddress ||
-                    (this.EntityAddress != null &&
-                    this.EntityAddress.Equals(input.EntityAddress))
+                    this.EntityAddressHex == input.EntityAddressHex ||
+                    (this.EntityAddressHex != null &&
+                    this.EntityAddressHex.Equals(input.EntityAddressHex))
                 ) && 
                 (
-                    this.GlobalAddressBytes == input.GlobalAddressBytes ||
-                    (this.GlobalAddressBytes != null &&
-                    this.GlobalAddressBytes.Equals(input.GlobalAddressBytes))
+                    this.GlobalAddressHex == input.GlobalAddressHex ||
+                    (this.GlobalAddressHex != null &&
+                    this.GlobalAddressHex.Equals(input.GlobalAddressHex))
                 ) && 
                 (
-                    this.GlobalAddressStr == input.GlobalAddressStr ||
-                    (this.GlobalAddressStr != null &&
-                    this.GlobalAddressStr.Equals(input.GlobalAddressStr))
+                    this.GlobalAddress == input.GlobalAddress ||
+                    (this.GlobalAddress != null &&
+                    this.GlobalAddress.Equals(input.GlobalAddress))
                 );
         }
 
@@ -236,17 +236,17 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityAddress != null)
+                if (this.EntityAddressHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityAddressHex.GetHashCode();
                 }
-                if (this.GlobalAddressBytes != null)
+                if (this.GlobalAddressHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.GlobalAddressBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GlobalAddressHex.GetHashCode();
                 }
-                if (this.GlobalAddressStr != null)
+                if (this.GlobalAddress != null)
                 {
-                    hashCode = (hashCode * 59) + this.GlobalAddressStr.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
                 }
                 return hashCode;
             }

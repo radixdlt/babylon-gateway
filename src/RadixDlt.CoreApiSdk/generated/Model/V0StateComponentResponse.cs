@@ -91,58 +91,76 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// DownSubstate
+    /// V0StateComponentResponse
     /// </summary>
-    [DataContract(Name = "DownSubstate")]
-    public partial class DownSubstate : IEquatable<DownSubstate>, IValidatableObject
+    [DataContract(Name = "V0StateComponentResponse")]
+    public partial class V0StateComponentResponse : IEquatable<V0StateComponentResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StateComponentResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected DownSubstate() { }
+        protected V0StateComponentResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="DownSubstate" /> class.
+        /// Initializes a new instance of the <see cref="V0StateComponentResponse" /> class.
         /// </summary>
-        /// <param name="substateId">substateId (required).</param>
-        /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
-        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
-        public DownSubstate(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), long version = default(long))
+        /// <param name="info">info (required).</param>
+        /// <param name="state">state (required).</param>
+        /// <param name="ownedVaults">Any vaults owned directly or indirectly by the component (required).</param>
+        /// <param name="descendentIds">Any descendent nodes owned directly or indirectly by the component (required).</param>
+        public V0StateComponentResponse(Substate info = default(Substate), Substate state = default(Substate), List<Substate> ownedVaults = default(List<Substate>), List<V0StateComponentDescendentId> descendentIds = default(List<V0StateComponentDescendentId>))
         {
-            // to ensure "substateId" is required (not null)
-            if (substateId == null)
+            // to ensure "info" is required (not null)
+            if (info == null)
             {
-                throw new ArgumentNullException("substateId is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("info is a required property for V0StateComponentResponse and cannot be null");
             }
-            this.SubstateId = substateId;
-            // to ensure "substateDataHash" is required (not null)
-            if (substateDataHash == null)
+            this.Info = info;
+            // to ensure "state" is required (not null)
+            if (state == null)
             {
-                throw new ArgumentNullException("substateDataHash is a required property for DownSubstate and cannot be null");
+                throw new ArgumentNullException("state is a required property for V0StateComponentResponse and cannot be null");
             }
-            this.SubstateDataHash = substateDataHash;
-            this._Version = version;
+            this.State = state;
+            // to ensure "ownedVaults" is required (not null)
+            if (ownedVaults == null)
+            {
+                throw new ArgumentNullException("ownedVaults is a required property for V0StateComponentResponse and cannot be null");
+            }
+            this.OwnedVaults = ownedVaults;
+            // to ensure "descendentIds" is required (not null)
+            if (descendentIds == null)
+            {
+                throw new ArgumentNullException("descendentIds is a required property for V0StateComponentResponse and cannot be null");
+            }
+            this.DescendentIds = descendentIds;
         }
 
         /// <summary>
-        /// Gets or Sets SubstateId
+        /// Gets or Sets Info
         /// </summary>
-        [DataMember(Name = "substate_id", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateId SubstateId { get; set; }
+        [DataMember(Name = "info", IsRequired = true, EmitDefaultValue = true)]
+        public Substate Info { get; set; }
 
         /// <summary>
-        /// The hex-encoded single-SHA256 hash of the substate data bytes
+        /// Gets or Sets State
         /// </summary>
-        /// <value>The hex-encoded single-SHA256 hash of the substate data bytes</value>
-        [DataMember(Name = "substate_data_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string SubstateDataHash { get; set; }
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        public Substate State { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 10^13, counting the number of times the substate was updated
+        /// Any vaults owned directly or indirectly by the component
         /// </summary>
-        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        /// <value>Any vaults owned directly or indirectly by the component</value>
+        [DataMember(Name = "owned_vaults", IsRequired = true, EmitDefaultValue = true)]
+        public List<Substate> OwnedVaults { get; set; }
+
+        /// <summary>
+        /// Any descendent nodes owned directly or indirectly by the component
+        /// </summary>
+        /// <value>Any descendent nodes owned directly or indirectly by the component</value>
+        [DataMember(Name = "descendent_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<V0StateComponentDescendentId> DescendentIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -151,10 +169,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class DownSubstate {\n");
-            sb.Append("  SubstateId: ").Append(SubstateId).Append("\n");
-            sb.Append("  SubstateDataHash: ").Append(SubstateDataHash).Append("\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class V0StateComponentResponse {\n");
+            sb.Append("  Info: ").Append(Info).Append("\n");
+            sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  OwnedVaults: ").Append(OwnedVaults).Append("\n");
+            sb.Append("  DescendentIds: ").Append(DescendentIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,15 +194,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as DownSubstate);
+            return this.Equals(input as V0StateComponentResponse);
         }
 
         /// <summary>
-        /// Returns true if DownSubstate instances are equal
+        /// Returns true if V0StateComponentResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of DownSubstate to be compared</param>
+        /// <param name="input">Instance of V0StateComponentResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(DownSubstate input)
+        public bool Equals(V0StateComponentResponse input)
         {
             if (input == null)
             {
@@ -191,18 +210,26 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.SubstateId == input.SubstateId ||
-                    (this.SubstateId != null &&
-                    this.SubstateId.Equals(input.SubstateId))
+                    this.Info == input.Info ||
+                    (this.Info != null &&
+                    this.Info.Equals(input.Info))
                 ) && 
                 (
-                    this.SubstateDataHash == input.SubstateDataHash ||
-                    (this.SubstateDataHash != null &&
-                    this.SubstateDataHash.Equals(input.SubstateDataHash))
+                    this.State == input.State ||
+                    (this.State != null &&
+                    this.State.Equals(input.State))
                 ) && 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.OwnedVaults == input.OwnedVaults ||
+                    this.OwnedVaults != null &&
+                    input.OwnedVaults != null &&
+                    this.OwnedVaults.SequenceEqual(input.OwnedVaults)
+                ) && 
+                (
+                    this.DescendentIds == input.DescendentIds ||
+                    this.DescendentIds != null &&
+                    input.DescendentIds != null &&
+                    this.DescendentIds.SequenceEqual(input.DescendentIds)
                 );
         }
 
@@ -215,15 +242,22 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.SubstateId != null)
+                if (this.Info != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Info.GetHashCode();
                 }
-                if (this.SubstateDataHash != null)
+                if (this.State != null)
                 {
-                    hashCode = (hashCode * 59) + this.SubstateDataHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                if (this.OwnedVaults != null)
+                {
+                    hashCode = (hashCode * 59) + this.OwnedVaults.GetHashCode();
+                }
+                if (this.DescendentIds != null)
+                {
+                    hashCode = (hashCode * 59) + this.DescendentIds.GetHashCode();
+                }
                 return hashCode;
             }
         }
@@ -235,18 +269,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // _Version (long) maximum
-            if (this._Version > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value less than or equal to 100000000000000.", new [] { "_Version" });
-            }
-
-            // _Version (long) minimum
-            if (this._Version < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for _Version, must be a value greater than or equal to 0.", new [] { "_Version" });
-            }
-
             yield break;
         }
     }

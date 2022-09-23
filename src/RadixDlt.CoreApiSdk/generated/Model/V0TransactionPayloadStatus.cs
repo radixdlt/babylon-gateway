@@ -146,7 +146,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="payloadHash">payloadHash (required).</param>
         /// <param name="status">The status of the transaction payload, as per this node (required).</param>
-        public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum))
+        /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
+        public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum), string errorMessage = default(string))
         {
             // to ensure "payloadHash" is required (not null)
             if (payloadHash == null)
@@ -155,6 +156,7 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.PayloadHash = payloadHash;
             this.Status = status;
+            this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
@@ -162,6 +164,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
         public string PayloadHash { get; set; }
+
+        /// <summary>
+        /// An explanation for the error, if failed or rejected
+        /// </summary>
+        /// <value>An explanation for the error, if failed or rejected</value>
+        [DataMember(Name = "error_message", EmitDefaultValue = true)]
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -173,6 +182,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class V0TransactionPayloadStatus {\n");
             sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -216,6 +226,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
+                ) && 
+                (
+                    this.ErrorMessage == input.ErrorMessage ||
+                    (this.ErrorMessage != null &&
+                    this.ErrorMessage.Equals(input.ErrorMessage))
                 );
         }
 
@@ -233,6 +248,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                if (this.ErrorMessage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                }
                 return hashCode;
             }
         }
