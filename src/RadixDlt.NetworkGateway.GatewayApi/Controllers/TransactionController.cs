@@ -140,6 +140,7 @@ public sealed class TransactionController : ControllerBase
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
+    // TODO decide how do we want to model /this endpoint in our OAS
     [HttpPost("preview")]
     public async Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token)
     {
