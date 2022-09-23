@@ -62,11 +62,11 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -84,13 +84,11 @@ internal class PreviewService : IPreviewService
 {
     private readonly ICoreApiHandler _coreApiHandler;
     private readonly IEnumerable<IPreviewServiceObserver> _observers;
-    private readonly ILogger _logger;
 
-    public PreviewService(ICoreApiHandler coreApiHandler, IEnumerable<IPreviewServiceObserver> observers, ILogger<PreviewService> logger)
+    public PreviewService(ICoreApiHandler coreApiHandler, IEnumerable<IPreviewServiceObserver> observers)
     {
         _coreApiHandler = coreApiHandler;
         _observers = observers;
-        _logger = logger;
     }
 
     public async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
@@ -115,31 +113,27 @@ internal class PreviewService : IPreviewService
 
     private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
-        // TODO consider this a mock/dumb implementation for testing purposes only
+        // todo consider this a mock/dumb implementation for testing purposes only
 
         var result = await _coreApiHandler.PreviewTransaction(
             new CoreModel.TransactionPreviewRequest(
                 _coreApiHandler.GetNetworkIdentifier(),
                 request.Manifest,
-                request.Blobs,
+                request.BlobsHex,
                 request.CostUnitLimit,
                 request.TipPercentage,
                 request.Nonce,
-                new List<CoreModel.PublicKey>(),
+                request.SignerPublicKeys.Select(pk => pk.ActualInstance switch
+                {
+                    GatewayModel.EcdsaSecp256k1PublicKey ecdsa => new CoreModel.PublicKey(new CoreModel.EcdsaSecp256k1PublicKey(CoreModel.PublicKeyType.EcdsaSecp256k1, ecdsa.KeyHex)),
+                    GatewayModel.EddsaEd25519PublicKey eddsa => new CoreModel.PublicKey(new CoreModel.EddsaEd25519PublicKey(CoreModel.PublicKeyType.EddsaEd25519, eddsa.KeyHex)),
+                    _ => throw new Exception("fix me"),
+                }).ToList(),
                 new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan)
             ),
             token
         );
 
-        // TODO implement
-        _logger.LogInformation("Temporary logging entire payload: {Result}", result);
-
-        var receipt = new GatewayModel.TransactionReceipt("TBD");
-        var changes = new List<GatewayModel.ResourceChange>
-        {
-            new("TBD"),
-        };
-
-        return new GatewayModel.TransactionPreviewResponse(receipt, changes);
+        return new GatewayModel.TransactionPreviewResponse(result);
     }
 }

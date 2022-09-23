@@ -104,48 +104,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewResponse" /> class.
         /// </summary>
-        /// <param name="receipt">receipt (required).</param>
-        /// <param name="resourceChanges">resourceChanges (required).</param>
-        /// <param name="logs">logs (required).</param>
-        public TransactionPreviewResponse(TransactionReceipt receipt = default(TransactionReceipt), List<ResourceChange> resourceChanges = default(List<ResourceChange>), List<TransactionPreviewResponseLogsInner> logs = default(List<TransactionPreviewResponseLogsInner>))
+        /// <param name="coreApiResponse">coreApiResponse (required).</param>
+        public TransactionPreviewResponse(Object coreApiResponse = default(Object))
         {
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            // to ensure "coreApiResponse" is required (not null)
+            if (coreApiResponse == null)
             {
-                throw new ArgumentNullException("receipt is a required property for TransactionPreviewResponse and cannot be null");
+                throw new ArgumentNullException("coreApiResponse is a required property for TransactionPreviewResponse and cannot be null");
             }
-            this.Receipt = receipt;
-            // to ensure "resourceChanges" is required (not null)
-            if (resourceChanges == null)
-            {
-                throw new ArgumentNullException("resourceChanges is a required property for TransactionPreviewResponse and cannot be null");
-            }
-            this.ResourceChanges = resourceChanges;
-            // to ensure "logs" is required (not null)
-            if (logs == null)
-            {
-                throw new ArgumentNullException("logs is a required property for TransactionPreviewResponse and cannot be null");
-            }
-            this.Logs = logs;
+            this.CoreApiResponse = coreApiResponse;
         }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// Gets or Sets CoreApiResponse
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionReceipt Receipt { get; set; }
-
-        /// <summary>
-        /// Gets or Sets ResourceChanges
-        /// </summary>
-        [DataMember(Name = "resource_changes", IsRequired = true, EmitDefaultValue = true)]
-        public List<ResourceChange> ResourceChanges { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Logs
-        /// </summary>
-        [DataMember(Name = "logs", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionPreviewResponseLogsInner> Logs { get; set; }
+        [DataMember(Name = "core_api_response", IsRequired = true, EmitDefaultValue = true)]
+        public Object CoreApiResponse { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,9 +129,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewResponse {\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
-            sb.Append("  ResourceChanges: ").Append(ResourceChanges).Append("\n");
-            sb.Append("  Logs: ").Append(Logs).Append("\n");
+            sb.Append("  CoreApiResponse: ").Append(CoreApiResponse).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,21 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
-                ) && 
-                (
-                    this.ResourceChanges == input.ResourceChanges ||
-                    this.ResourceChanges != null &&
-                    input.ResourceChanges != null &&
-                    this.ResourceChanges.SequenceEqual(input.ResourceChanges)
-                ) && 
-                (
-                    this.Logs == input.Logs ||
-                    this.Logs != null &&
-                    input.Logs != null &&
-                    this.Logs.SequenceEqual(input.Logs)
+                    this.CoreApiResponse == input.CoreApiResponse ||
+                    (this.CoreApiResponse != null &&
+                    this.CoreApiResponse.Equals(input.CoreApiResponse))
                 );
         }
 
@@ -221,17 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Receipt != null)
+                if (this.CoreApiResponse != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
-                }
-                if (this.ResourceChanges != null)
-                {
-                    hashCode = (hashCode * 59) + this.ResourceChanges.GetHashCode();
-                }
-                if (this.Logs != null)
-                {
-                    hashCode = (hashCode * 59) + this.Logs.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CoreApiResponse.GetHashCode();
                 }
                 return hashCode;
             }

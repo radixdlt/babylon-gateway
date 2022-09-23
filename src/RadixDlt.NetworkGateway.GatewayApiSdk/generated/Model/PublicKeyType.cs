@@ -91,113 +91,23 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceChange
+    /// Defines PublicKeyType
     /// </summary>
-    [DataContract(Name = "ResourceChange")]
-    public partial class ResourceChange : IEquatable<ResourceChange>, IValidatableObject
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PublicKeyType
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceChange" /> class.
+        /// Enum EcdsaSecp256k1 for value: EcdsaSecp256k1
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ResourceChange() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceChange" /> class.
-        /// </summary>
-        /// <param name="tbd">tbd (required).</param>
-        public ResourceChange(string tbd = default(string))
-        {
-            // to ensure "tbd" is required (not null)
-            if (tbd == null)
-            {
-                throw new ArgumentNullException("tbd is a required property for ResourceChange and cannot be null");
-            }
-            this.Tbd = tbd;
-        }
+        [EnumMember(Value = "EcdsaSecp256k1")]
+        EcdsaSecp256k1 = 1,
 
         /// <summary>
-        /// Gets or Sets Tbd
+        /// Enum EddsaEd25519 for value: EddsaEd25519
         /// </summary>
-        [DataMember(Name = "tbd", IsRequired = true, EmitDefaultValue = true)]
-        public string Tbd { get; set; }
+        [EnumMember(Value = "EddsaEd25519")]
+        EddsaEd25519 = 2
 
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceChange {\n");
-            sb.Append("  Tbd: ").Append(Tbd).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as ResourceChange);
-        }
-
-        /// <summary>
-        /// Returns true if ResourceChange instances are equal
-        /// </summary>
-        /// <param name="input">Instance of ResourceChange to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(ResourceChange input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Tbd == input.Tbd ||
-                    (this.Tbd != null &&
-                    this.Tbd.Equals(input.Tbd))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                if (this.Tbd != null)
-                {
-                    hashCode = (hashCode * 59) + this.Tbd.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

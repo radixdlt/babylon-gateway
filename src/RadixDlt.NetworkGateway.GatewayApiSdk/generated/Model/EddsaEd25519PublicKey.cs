@@ -91,35 +91,44 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// The transaction execution receipt
+    /// EddsaEd25519PublicKey
     /// </summary>
-    [DataContract(Name = "TransactionReceipt")]
-    public partial class TransactionReceipt : IEquatable<TransactionReceipt>, IValidatableObject
+    [DataContract(Name = "EddsaEd25519PublicKey")]
+    public partial class EddsaEd25519PublicKey : IEquatable<EddsaEd25519PublicKey>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public PublicKeyType KeyType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EddsaEd25519PublicKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionReceipt() { }
+        protected EddsaEd25519PublicKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionReceipt" /> class.
+        /// Initializes a new instance of the <see cref="EddsaEd25519PublicKey" /> class.
         /// </summary>
-        /// <param name="tbd">tbd (required).</param>
-        public TransactionReceipt(string tbd = default(string))
+        /// <param name="keyType">keyType (required).</param>
+        /// <param name="keyHex">The hex-encoded compressed EdDSA Ed25519 public key (32 bytes) (required).</param>
+        public EddsaEd25519PublicKey(PublicKeyType keyType = default(PublicKeyType), string keyHex = default(string))
         {
-            // to ensure "tbd" is required (not null)
-            if (tbd == null)
+            this.KeyType = keyType;
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("tbd is a required property for TransactionReceipt and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for EddsaEd25519PublicKey and cannot be null");
             }
-            this.Tbd = tbd;
+            this.KeyHex = keyHex;
         }
 
         /// <summary>
-        /// Gets or Sets Tbd
+        /// The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)
         /// </summary>
-        [DataMember(Name = "tbd", IsRequired = true, EmitDefaultValue = true)]
-        public string Tbd { get; set; }
+        /// <value>The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +137,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionReceipt {\n");
-            sb.Append("  Tbd: ").Append(Tbd).Append("\n");
+            sb.Append("class EddsaEd25519PublicKey {\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionReceipt);
+            return this.Equals(input as EddsaEd25519PublicKey);
         }
 
         /// <summary>
-        /// Returns true if TransactionReceipt instances are equal
+        /// Returns true if EddsaEd25519PublicKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionReceipt to be compared</param>
+        /// <param name="input">Instance of EddsaEd25519PublicKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionReceipt input)
+        public bool Equals(EddsaEd25519PublicKey input)
         {
             if (input == null)
             {
@@ -166,9 +176,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Tbd == input.Tbd ||
-                    (this.Tbd != null &&
-                    this.Tbd.Equals(input.Tbd))
+                    this.KeyType == input.KeyType ||
+                    this.KeyType.Equals(input.KeyType)
+                ) && 
+                (
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 );
         }
 
@@ -181,9 +195,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Tbd != null)
+                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Tbd.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
                 return hashCode;
             }
@@ -196,6 +211,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // KeyHex (string) maxLength
+            if (this.KeyHex != null && this.KeyHex.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be less than 64.", new [] { "KeyHex" });
+            }
+
+            // KeyHex (string) minLength
+            if (this.KeyHex != null && this.KeyHex.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be greater than 64.", new [] { "KeyHex" });
+            }
+
             yield break;
         }
     }

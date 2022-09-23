@@ -91,48 +91,44 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionPreviewResponseLogsInner
+    /// EcdsaSecp256k1PublicKey
     /// </summary>
-    [DataContract(Name = "TransactionPreviewResponse_logs_inner")]
-    public partial class TransactionPreviewResponseLogsInner : IEquatable<TransactionPreviewResponseLogsInner>, IValidatableObject
+    [DataContract(Name = "EcdsaSecp256k1PublicKey")]
+    public partial class EcdsaSecp256k1PublicKey : IEquatable<EcdsaSecp256k1PublicKey>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewResponseLogsInner" /> class.
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public PublicKeyType KeyType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1PublicKey" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionPreviewResponseLogsInner() { }
+        protected EcdsaSecp256k1PublicKey() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewResponseLogsInner" /> class.
+        /// Initializes a new instance of the <see cref="EcdsaSecp256k1PublicKey" /> class.
         /// </summary>
-        /// <param name="level">level (required).</param>
-        /// <param name="message">message (required).</param>
-        public TransactionPreviewResponseLogsInner(string level = default(string), string message = default(string))
+        /// <param name="keyType">keyType (required).</param>
+        /// <param name="keyHex">The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes) (required).</param>
+        public EcdsaSecp256k1PublicKey(PublicKeyType keyType = default(PublicKeyType), string keyHex = default(string))
         {
-            // to ensure "level" is required (not null)
-            if (level == null)
+            this.KeyType = keyType;
+            // to ensure "keyHex" is required (not null)
+            if (keyHex == null)
             {
-                throw new ArgumentNullException("level is a required property for TransactionPreviewResponseLogsInner and cannot be null");
+                throw new ArgumentNullException("keyHex is a required property for EcdsaSecp256k1PublicKey and cannot be null");
             }
-            this.Level = level;
-            // to ensure "message" is required (not null)
-            if (message == null)
-            {
-                throw new ArgumentNullException("message is a required property for TransactionPreviewResponseLogsInner and cannot be null");
-            }
-            this.Message = message;
+            this.KeyHex = keyHex;
         }
 
         /// <summary>
-        /// Gets or Sets Level
+        /// The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
         /// </summary>
-        [DataMember(Name = "level", IsRequired = true, EmitDefaultValue = true)]
-        public string Level { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Message
-        /// </summary>
-        [DataMember(Name = "message", IsRequired = true, EmitDefaultValue = true)]
-        public string Message { get; set; }
+        /// <value>The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)</value>
+        [DataMember(Name = "key_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +137,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionPreviewResponseLogsInner {\n");
-            sb.Append("  Level: ").Append(Level).Append("\n");
-            sb.Append("  Message: ").Append(Message).Append("\n");
+            sb.Append("class EcdsaSecp256k1PublicKey {\n");
+            sb.Append("  KeyType: ").Append(KeyType).Append("\n");
+            sb.Append("  KeyHex: ").Append(KeyHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionPreviewResponseLogsInner);
+            return this.Equals(input as EcdsaSecp256k1PublicKey);
         }
 
         /// <summary>
-        /// Returns true if TransactionPreviewResponseLogsInner instances are equal
+        /// Returns true if EcdsaSecp256k1PublicKey instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionPreviewResponseLogsInner to be compared</param>
+        /// <param name="input">Instance of EcdsaSecp256k1PublicKey to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionPreviewResponseLogsInner input)
+        public bool Equals(EcdsaSecp256k1PublicKey input)
         {
             if (input == null)
             {
@@ -180,14 +176,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Level == input.Level ||
-                    (this.Level != null &&
-                    this.Level.Equals(input.Level))
+                    this.KeyType == input.KeyType ||
+                    this.KeyType.Equals(input.KeyType)
                 ) && 
                 (
-                    this.Message == input.Message ||
-                    (this.Message != null &&
-                    this.Message.Equals(input.Message))
+                    this.KeyHex == input.KeyHex ||
+                    (this.KeyHex != null &&
+                    this.KeyHex.Equals(input.KeyHex))
                 );
         }
 
@@ -200,13 +195,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Level != null)
+                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                if (this.KeyHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Level.GetHashCode();
-                }
-                if (this.Message != null)
-                {
-                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();
                 }
                 return hashCode;
             }
@@ -219,6 +211,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // KeyHex (string) maxLength
+            if (this.KeyHex != null && this.KeyHex.Length > 66)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be less than 66.", new [] { "KeyHex" });
+            }
+
+            // KeyHex (string) minLength
+            if (this.KeyHex != null && this.KeyHex.Length < 66)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for KeyHex, length must be greater than 66.", new [] { "KeyHex" });
+            }
+
             yield break;
         }
     }

@@ -105,13 +105,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
         /// <param name="manifest">A transaction manifest. sbor encoded, and then hex encoded. (required).</param>
-        /// <param name="blobs">An array of hex-encoded blob data.</param>
-        /// <param name="costUnitLimit">Maximum number of cost units available for transaction execution. (required).</param>
-        /// <param name="tipPercentage">The validator tip. (required).</param>
-        /// <param name="nonce">The nonce value to use for execution. (required).</param>
-        /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers, in a compressed format, hex encoded. (required).</param>
+        /// <param name="blobsHex">An array of hex-encoded blob data (optional).</param>
+        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution (required).</param>
+        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
+        /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique. (required).</param>
+        /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string manifest = default(string), List<string> blobs = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<string> signerPublicKeys = default(List<string>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string manifest = default(string), List<string> blobsHex = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "manifest" is required (not null)
             if (manifest == null)
@@ -139,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("flags is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Flags = flags;
-            this.Blobs = blobs;
+            this.BlobsHex = blobsHex;
         }
 
         /// <summary>
@@ -150,39 +150,39 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Manifest { get; set; }
 
         /// <summary>
-        /// An array of hex-encoded blob data
+        /// An array of hex-encoded blob data (optional)
         /// </summary>
-        /// <value>An array of hex-encoded blob data</value>
-        [DataMember(Name = "blobs", EmitDefaultValue = true)]
-        public List<string> Blobs { get; set; }
+        /// <value>An array of hex-encoded blob data (optional)</value>
+        [DataMember(Name = "blobs_hex", EmitDefaultValue = true)]
+        public List<string> BlobsHex { get; set; }
 
         /// <summary>
-        /// Maximum number of cost units available for transaction execution.
+        /// An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution
         /// </summary>
-        /// <value>Maximum number of cost units available for transaction execution.</value>
+        /// <value>An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
         public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// The validator tip.
+        /// An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>The validator tip.</value>
+        /// <value>An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
         public long TipPercentage { get; set; }
 
         /// <summary>
-        /// The nonce value to use for execution.
+        /// A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.
         /// </summary>
-        /// <value>The nonce value to use for execution.</value>
+        /// <value>A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
         public string Nonce { get; set; }
 
         /// <summary>
-        /// A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
+        /// A list of public keys to be used as transaction signers
         /// </summary>
-        /// <value>A list of public keys to be used as transaction signers, in a compressed format, hex encoded.</value>
+        /// <value>A list of public keys to be used as transaction signers</value>
         [DataMember(Name = "signer_public_keys", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> SignerPublicKeys { get; set; }
+        public List<PublicKey> SignerPublicKeys { get; set; }
 
         /// <summary>
         /// Gets or Sets Flags
@@ -199,7 +199,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewRequest {\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
-            sb.Append("  Blobs: ").Append(Blobs).Append("\n");
+            sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  Nonce: ").Append(Nonce).Append("\n");
@@ -246,10 +246,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Manifest.Equals(input.Manifest))
                 ) && 
                 (
-                    this.Blobs == input.Blobs ||
-                    this.Blobs != null &&
-                    input.Blobs != null &&
-                    this.Blobs.SequenceEqual(input.Blobs)
+                    this.BlobsHex == input.BlobsHex ||
+                    this.BlobsHex != null &&
+                    input.BlobsHex != null &&
+                    this.BlobsHex.SequenceEqual(input.BlobsHex)
                 ) && 
                 (
                     this.CostUnitLimit == input.CostUnitLimit ||
@@ -290,9 +290,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Manifest.GetHashCode();
                 }
-                if (this.Blobs != null)
+                if (this.BlobsHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Blobs.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlobsHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
@@ -319,6 +319,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // CostUnitLimit (long) maximum
+            if (this.CostUnitLimit > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitLimit (long) minimum
+            if (this.CostUnitLimit < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
+            }
+
+            // TipPercentage (long) maximum
+            if (this.TipPercentage > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
+            }
+
+            // TipPercentage (long) minimum
+            if (this.TipPercentage < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
+            }
+
             yield break;
         }
     }
