@@ -107,15 +107,15 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
 
-    public DbSet<TmpBaseEntity> TmpEntities => Set<TmpBaseEntity>();
+    public DbSet<Entity> Entities => Set<Entity>();
 
-    public DbSet<TmpBaseSubstate> TmpSubstates => Set<TmpBaseSubstate>();
+    public DbSet<Substate> Substates => Set<Substate>();
 
-    public DbSet<TmpOwnerEntityFungibleResourceBalanceHistory> TmpOwnerEntityFungibleResourceBalanceHistory => Set<TmpOwnerEntityFungibleResourceBalanceHistory>();
+    public DbSet<EntityFungibleResourceHistory> EntityFungibleResourceHistory => Set<EntityFungibleResourceHistory>();
 
-    public DbSet<TmpOwnerEntityNonFungibleResourceIdsHistory> TmpOwnerEntityNonFungibleResourceIdsHistory => Set<TmpOwnerEntityNonFungibleResourceIdsHistory>();
+    public DbSet<EntityNonFungibleResourceHistory> EntityNonFungibleResourceHistory => Set<EntityNonFungibleResourceHistory>();
 
-    public DbSet<TmpEntityMetadataHistory> TmpEntityMetadataHistory => Set<TmpEntityMetadataHistory>();
+    public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -135,29 +135,29 @@ internal abstract class CommonDbContext : DbContext
         HookupJoinTables(modelBuilder);
 
         // Configure temporary types
-        modelBuilder.Entity<TmpBaseEntity>()
+        modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("type")
-            .HasValue<TmpSystemEntity>("system")
-            .HasValue<TmpResourceManagerEntity>("resource_manager")
-            .HasValue<TmpComponentEntity>("component")
-            .HasValue<TmpPackageEntity>("package")
-            .HasValue<TmpKeyValueStoreEntity>("key_value_store")
-            .HasValue<TmpVaultEntity>("vault");
+            .HasValue<SystemEntity>("system")
+            .HasValue<ResourceManagerEntity>("resource_manager")
+            .HasValue<ComponentEntity>("component")
+            .HasValue<PackageEntity>("package")
+            .HasValue<ValueStoreEntity>("key_value_store")
+            .HasValue<VaultEntity>("vault");
 
-        modelBuilder.Entity<TmpBaseSubstate>()
+        modelBuilder.Entity<Substate>()
             .HasDiscriminator<string>("type")
-            .HasValue<TmpSystemSubstate>("system")
-            .HasValue<TmpResourceManagerSubstate>("resource_manager")
-            .HasValue<TmpComponentInfoSubstate>("component_info")
-            .HasValue<TmpComponentStateSubstate>("component_state")
-            .HasValue<TmpPackageSubstate>("package")
-            .HasValue<TmpVaultSubstate>("vault")
-            .HasValue<TmpNonFungibleSubstate>("non_fungible")
-            .HasValue<TmpKeyValueStoreEntrySubstate>("key_value_store_entry");
+            .HasValue<SystemSubstate>("system")
+            .HasValue<ResourceManagerSubstate>("resource_manager")
+            .HasValue<ComponentInfoSubstate>("component_info")
+            .HasValue<ComponentStateSubstate>("component_state")
+            .HasValue<PackageSubstate>("package")
+            .HasValue<VaultSubstate>("vault")
+            .HasValue<NonFungibleSubstate>("non_fungible")
+            .HasValue<KeyValueStoreEntrySubstate>("key_value_store_entry");
 
-        modelBuilder.Entity<TmpOwnerEntityFungibleResourceBalanceHistory>();
+        modelBuilder.Entity<EntityFungibleResourceHistory>();
 
-        modelBuilder.Entity<TmpOwnerEntityNonFungibleResourceIdsHistory>();
+        modelBuilder.Entity<EntityNonFungibleResourceHistory>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
