@@ -68,21 +68,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("tmp_substates")]
-internal class TmpBaseSubstate
+[Table("substates")]
+internal class Substate
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
-
-    [Column("key")]
-    public string Key { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
 
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
@@ -90,27 +81,27 @@ internal class TmpBaseSubstate
     [Column("to_state_version")]
     public long? ToStateVersion { get; set; }
 
+    [Column("key")]
+    public byte[] Key { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
+
     [Column("data_hash")]
     public byte[] DataHash { get; set; }
 
     [Column("version")]
-    public long Version { get; set; } = 0;
-
-    public TmpBaseSubstate()
-    {
-    }
-
-    protected TmpBaseSubstate(byte[] dataHash)
-    {
-        DataHash = dataHash;
-    }
+    public long Version { get; set; }
 }
 
-internal class TmpSystemSubstate : TmpBaseSubstate
+internal class SystemSubstate : Substate
 {
 }
 
-internal class TmpResourceManagerSubstate : TmpBaseSubstate
+internal class ResourceManagerSubstate : Substate
 {
     [Column("total_supply")]
     public TokenAmount TotalSupply { get; set; }
@@ -119,28 +110,28 @@ internal class TmpResourceManagerSubstate : TmpBaseSubstate
     public int FungibleDivisibility { get; set; }
 }
 
-internal class TmpComponentInfoSubstate : TmpBaseSubstate
+internal class ComponentInfoSubstate : Substate
 {
 }
 
-internal class TmpComponentStateSubstate : TmpBaseSubstate
+internal class ComponentStateSubstate : Substate
 {
 }
 
-internal class TmpPackageSubstate : TmpBaseSubstate
+internal class PackageSubstate : Substate
 {
 }
 
-internal class TmpVaultSubstate : TmpBaseSubstate
+internal class VaultSubstate : Substate
 {
     [Column("amount")]
     public TokenAmount Amount { get; set; }
 }
 
-internal class TmpNonFungibleSubstate : TmpBaseSubstate
+internal class NonFungibleSubstate : Substate
 {
 }
 
-internal class TmpKeyValueStoreEntrySubstate : TmpBaseSubstate
+internal class KeyValueStoreEntrySubstate : Substate
 {
 }

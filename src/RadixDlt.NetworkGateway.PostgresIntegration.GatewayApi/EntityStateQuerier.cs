@@ -88,11 +88,15 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     public async Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
     {
+        // TODO general idea how to change code below:
+        // add extra table containing all resources given entity posses, then change all of those queries from
+        // SELECT DISTINCT ON to simple WHERE + LIMIT 1 per resource
+
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
         // TODO add proper pagination support
 
-        var entity = await _dbContext.TmpEntities
+        var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState._Version)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
@@ -105,11 +109,11 @@ internal class EntityStateQuerier : IEntityStateQuerier
         string hrp;
 
         // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
-        if (entity is TmpResourceManagerEntity)
+        if (entity is ResourceManagerEntity)
         {
             hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
         }
-        else if (entity is TmpComponentEntity component)
+        else if (entity is ComponentEntity component)
         {
             hrp = component.Kind switch
             {
@@ -128,10 +132,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
-        var fungibleBalanceHistory = await _dbContext.TmpOwnerEntityFungibleResourceBalanceHistory
+        var fungibleBalanceHistory = await _dbContext.EntityFungibleResourceHistory
             .FromSqlInterpolated($@"
 SELECT DISTINCT ON (owner_entity_id, fungible_resource_entity_id) *
-FROM tmp_entity_fungible_resource_balance_history
+FROM entity_fungible_resource_history
 WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
 ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .ToListAsync(token);
@@ -139,10 +143,10 @@ ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include(ids.length) - but no INCLUDE(ids) as its just too big
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, ids" (first x elements of ids actually)
         // TODO or maybe we don't even want to return actual NF ids here?
-        var nonFungibleIdsHistory = await _dbContext.TmpOwnerEntityNonFungibleResourceIdsHistory
+        var nonFungibleIdsHistory = await _dbContext.EntityNonFungibleResourceHistory
             .FromSqlInterpolated($@"
 SELECT DISTINCT ON (owner_entity_id, non_fungible_resource_entity_id) *
-FROM tmp_entity_non_fungible_resource_ids_history
+FROM entity_non_fungible_resource_history
 WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
 ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DESC")
             .ToListAsync(token);
@@ -153,7 +157,7 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
             .Distinct()
             .ToList();
 
-        var resources = await _dbContext.TmpEntities
+        var resources = await _dbContext.Entities
             .Where(e => referencedEntityIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
@@ -188,7 +192,7 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
     {
         // TODO just some quick and naive implementation
 
-        var entity = await _dbContext.TmpEntities
+        var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState._Version)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
@@ -201,11 +205,11 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
         string hrp;
 
         // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
-        if (entity is TmpResourceManagerEntity)
+        if (entity is ResourceManagerEntity)
         {
             hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
         }
-        else if (entity is TmpComponentEntity component)
+        else if (entity is ComponentEntity component)
         {
             hrp = component.Kind switch
             {
@@ -220,10 +224,10 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
         }
 
         var metadata = new Dictionary<string, string>();
-        var metadataHistory = await _dbContext.TmpEntityMetadataHistory
+        var metadataHistory = await _dbContext.EntityMetadataHistory
             .FromSqlInterpolated($@"
 SELECT DISTINCT ON (entity_id) *
-FROM tmp_entity_metadata
+FROM entity_metadata_history
 WHERE entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
 ORDER BY entity_id, from_state_version DESC")
             .FirstOrDefaultAsync(token);

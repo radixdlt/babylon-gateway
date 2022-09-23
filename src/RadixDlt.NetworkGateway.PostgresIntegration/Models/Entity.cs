@@ -62,27 +62,60 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Commons;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("tmp_entity_metadata_history")]
-public class TmpEntityMetadataHistory
+[Table("entities")]
+internal abstract class Entity
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
 
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("keys")]
-    public string[] Keys { get; set; }
-
-    [Column("values")]
-    public string[] Values { get; set; }
-
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
+
+    [Column("address")]
+    public RadixAddress Address { get; set; }
+
+    [Column("global_address")]
+    public RadixAddress? GlobalAddress { get; set; }
+
+    [Column("parent_id")]
+    public long? ParentId { get; set; }
+
+    [Column("owner_ancestor_id")]
+    public long? OwnerAncestorId { get; set; }
+
+    [Column("global_ancestor_id")]
+    public long? GlobalAncestorId { get; set; }
+}
+
+internal class SystemEntity : Entity
+{
+}
+
+internal class ResourceManagerEntity : Entity
+{
+}
+
+internal class ComponentEntity : Entity
+{
+    [Column("kind")]
+    public string Kind { get; set; } // TODO rename
+}
+
+internal class PackageEntity : Entity
+{
+}
+
+internal class ValueStoreEntity : Entity
+{
+}
+
+internal class VaultEntity : Entity
+{
 }
