@@ -68,11 +68,15 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class TransactionIdentifierValidator : AbstractValidator<TransactionIdentifier>
+internal class TransactionLookupIdentifierValidator : AbstractValidator<TransactionLookupIdentifier>
 {
-    public TransactionIdentifierValidator()
+    public TransactionLookupIdentifierValidator()
     {
-        RuleFor(x => x.Hash)
+        RuleFor(x => x.Origin)
+            .NotNull()
+            .IsInEnum();
+
+        RuleFor(x => x.ValueHex)
             .NotNull()
             .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
     }

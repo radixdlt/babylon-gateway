@@ -78,7 +78,7 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
-internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQuerier
+internal class SubmissionTrackingService : ISubmissionTrackingService
 {
     private readonly ReadWriteDbContext _dbContext;
     private readonly IEnumerable<ISubmissionTrackingServiceObserver> _observers;
@@ -168,7 +168,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService, IMempoolQ
         await _dbContext.SaveChangesAsync(token);
     }
 
-    public async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash, CancellationToken token = default)
+    private async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash, CancellationToken token = default)
     {
         return await _dbContext.MempoolTransactions
             .Where(t => t.PayloadHash == transactionIdentifierHash)

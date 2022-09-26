@@ -72,6 +72,8 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 
+// TODO don't like route/type "state" name
+
 [ApiController]
 [Route("state")]
 [TypeFilter(typeof(ExceptionFilter))]

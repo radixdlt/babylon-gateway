@@ -81,18 +81,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration;
 internal class TransactionQuerier : ITransactionQuerier
 {
     private readonly ReadOnlyDbContext _dbContext;
+    private readonly ReadWriteDbContext _rwDbContext;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly IMempoolQuerier _mempoolQuerier;
 
-    public TransactionQuerier(
-        ReadOnlyDbContext dbContext,
-        INetworkConfigurationProvider networkConfigurationProvider,
-        IMempoolQuerier mempoolQuerier
-    )
+    public TransactionQuerier(ReadOnlyDbContext dbContext, ReadWriteDbContext rwDbContext, INetworkConfigurationProvider networkConfigurationProvider)
     {
         _dbContext = dbContext;
+        _rwDbContext = rwDbContext;
         _networkConfigurationProvider = networkConfigurationProvider;
-        _mempoolQuerier = mempoolQuerier;
     }
 
     public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
@@ -133,19 +129,31 @@ internal class TransactionQuerier : ITransactionQuerier
     }
 
     public async Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier,
+        Gateway.TransactionLookupIdentifier lookup,
         Gateway.LedgerState ledgerState,
         CancellationToken token = default)
     {
-        var stateVersion = await _dbContext.LedgerTransactions
-            .Where(lt =>
-                lt.ResultantStateVersion <= ledgerState._Version
-                && (
-                    lt.PayloadHash == transactionIdentifier.Bytes
-                    || lt.SignedTransactionHash == transactionIdentifier.Bytes
-                    || lt.IntentHash == transactionIdentifier.Bytes
-                )
-            )
+        var hash = lookup.ValueHex.ConvertFromHex();
+        var query = _dbContext.LedgerTransactions.Where(lt => lt.ResultantStateVersion <= ledgerState._Version);
+
+        switch (lookup.Origin)
+        {
+            case Gateway.TransactionLookupOrigin.Intent:
+                query = query.Where(lt => lt.IntentHash == hash);
+                break;
+            case Gateway.TransactionLookupOrigin.SignedIntent:
+                query = query.Where(lt => lt.SignedTransactionHash == hash); // TODO fix me
+                break;
+            case Gateway.TransactionLookupOrigin.Notarized:
+                throw new NotImplementedException("fix me"); // TODO fix me
+            case Gateway.TransactionLookupOrigin.Payload:
+                query = query.Where(lt => lt.PayloadHash == hash);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException("fix me"); // TODO fix me
+        }
+
+        var stateVersion = await query
             .Select(lt => lt.ResultantStateVersion)
             .SingleOrDefaultAsync(token);
 
@@ -154,15 +162,31 @@ internal class TransactionQuerier : ITransactionQuerier
             (await GetTransactions(new List<long> { stateVersion }, token)).First();
     }
 
-    public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier,
-        CancellationToken token = default
-    )
+    public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default)
     {
-        // We lookup the mempool transaction using the _submissionTrackingService which is bound to the
+        var hash = lookup.ValueHex.ConvertFromHex();
+        var query = _rwDbContext.MempoolTransactions.AsQueryable();
+
+        switch (lookup.Origin)
+        {
+            case Gateway.TransactionLookupOrigin.Intent:
+                query = query.Where(mt => mt.IntentHash == hash);
+                break;
+            case Gateway.TransactionLookupOrigin.SignedIntent:
+                throw new NotImplementedException("fix me"); // TODO fix me
+            case Gateway.TransactionLookupOrigin.Notarized:
+                throw new NotImplementedException("fix me"); // TODO fix me
+            case Gateway.TransactionLookupOrigin.Payload:
+                query = query.Where(lt => lt.PayloadHash == hash);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException("fix me"); // TODO fix me
+        }
+
+        // We lookup the mempool transaction using the _rwDbContext which is bound to the
         // ReadWriteDbContext so that it gets the most recent details -- to ensure that submitted transactions
         // are immediately shown as pending.
-        var mempoolTransaction = await _mempoolQuerier.GetMempoolTransaction(transactionIdentifier.Bytes, token);
+        var mempoolTransaction = await query.SingleOrDefaultAsync(token);
 
         if (mempoolTransaction is null)
         {
@@ -292,7 +316,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
-            ledgerTransaction.PayloadHash.AsGatewayTransactionIdentifier(),
+            new Gateway.TransactionIdentifier("fix me"), // TODO fix me (ledgerTransaction.PayloadHash.AsGatewayTransactionIdentifier()),
             new List<Gateway.Action>(), // TODO: Remove
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(

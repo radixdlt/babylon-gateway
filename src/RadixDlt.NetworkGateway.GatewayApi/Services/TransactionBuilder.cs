@@ -85,7 +85,6 @@ public sealed record MappedTransaction(
 /// </summary>
 internal class TransactionBuilder
 {
-    private readonly IValidations _validations;
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly Gateway.LedgerState _ledgerState;
     private readonly ValidatedAccountAddress _feePayer;
@@ -96,13 +95,11 @@ internal class TransactionBuilder
     private Dictionary<string, TokenAmount> _feePayerBalanceChanges = new();
 
     public TransactionBuilder(
-        IValidations validations,
         INetworkConfigurationProvider networkConfigurationProvider,
         Gateway.LedgerState ledgerState,
         ValidatedAccountAddress feePayer
     )
     {
-        _validations = validations;
         _networkConfigurationProvider = networkConfigurationProvider;
         _ledgerState = ledgerState;
         _feePayer = feePayer;
