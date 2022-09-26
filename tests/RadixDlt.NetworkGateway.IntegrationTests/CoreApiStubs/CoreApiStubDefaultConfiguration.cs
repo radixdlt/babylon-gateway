@@ -192,8 +192,8 @@ public class CoreApiStubDefaultConfiguration
             });
 
         NetworkStatusResponse = new NetworkStatusResponse(
-            new CommittedStateIdentifier(),
-            new CommittedStateIdentifier(),
-            new CommittedStateIdentifier());
+            new CommittedStateIdentifier(1L),
+            new CommittedStateIdentifier(1L),
+            new CommittedStateIdentifier(1L));
     }
 }
