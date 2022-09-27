@@ -134,7 +134,9 @@ public class TransactionEndpointTests
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStubs = gatewayRunner.ArrangeMempoolTransactionStatusTest(
+        var coreApiStubs = gatewayRunner
+            .MockGenesis()
+            .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeFailed),
             TransactionStatus.StatusEnum.FAILED);
         var transactionIdentifier =
@@ -144,7 +146,8 @@ public class TransactionEndpointTests
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result.ActAsync<TransactionStatusResponse>("/transaction/status", content);
 
         // Assert
         var status = payload.Transaction.TransactionStatus.Status;
@@ -157,7 +160,9 @@ public class TransactionEndpointTests
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
 
-        var coreApiStubs = gatewayRunner.ArrangeMempoolTransactionStatusTest(
+        var coreApiStubs = gatewayRunner
+            .MockGenesis()
+            .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeConfirmed),
             TransactionStatus.StatusEnum.CONFIRMED);
         var transactionIdentifier =
@@ -167,7 +172,8 @@ public class TransactionEndpointTests
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result.ActAsync<TransactionStatusResponse>("/transaction/status", content);
 
         // Assert
         var status = payload.Transaction.TransactionStatus.Status;
@@ -179,7 +185,9 @@ public class TransactionEndpointTests
     {
         // Arrange
         var gatewayRunner = new GatewayTestsRunner();
-        var coreApiStubs = gatewayRunner.ArrangeMempoolTransactionStatusTest(
+        var coreApiStubs = gatewayRunner
+            .MockGenesis()
+            .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBePending),
             TransactionStatus.StatusEnum.PENDING);
         var transactionIdentifier =
@@ -189,7 +197,9 @@ public class TransactionEndpointTests
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        var payload = await gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result
+            .ActAsync<TransactionStatusResponse>("/transaction/status", content);
 
         // Assert
         var status = payload.Transaction.TransactionStatus.Status;
