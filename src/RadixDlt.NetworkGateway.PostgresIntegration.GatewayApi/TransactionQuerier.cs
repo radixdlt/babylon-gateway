@@ -316,7 +316,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStateVersion: ledgerTransaction.ResultantStateVersion
             ),
-            new Gateway.TransactionIdentifier("fix me"), // TODO fix me (ledgerTransaction.PayloadHash.AsGatewayTransactionIdentifier()),
+            new Gateway.TransactionIdentifier(ledgerTransaction.PayloadHash.ToHex()), // TODO invalid one, fix me
             new List<Gateway.Action>(), // TODO: Remove
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(

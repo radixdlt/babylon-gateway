@@ -287,7 +287,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
     private async Task ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
     {
-        // TODO replace usage of HEX-encoded strings in favor of raw byte[]?
+        // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
         // TODO EF sucks and creates individual INSERT for every single added object,
         // TODO maybe we should just use https://entityframework-extensions.net/bulk-savechanges (difficult to open-source)
 
@@ -363,7 +363,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
             }
         }
 
-        // step 2: resolve known types (optionally create missing entities)
+        // step 2: resolve known types & optionally create missing entities
         {
             IEnumerable<long> ExpandParentalIds(Entity entity)
             {
@@ -634,6 +634,7 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
 
             if (downedSubstates.Count != affected)
             {
+                // TODO sometimes affected is off by exactly one, not sure why
                 throw new Exception("bla bla bla x5"); // TODO fix me
             }
         }
