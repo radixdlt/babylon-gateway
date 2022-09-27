@@ -63,6 +63,8 @@
  */
 
 using FluentAssertions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -102,7 +104,32 @@ public class TransactionEndpointTests
         payload.LedgerState._Version.Should().Be(1);
     }
 
-    [Fact(Skip = "Dsiabled until MempoolTrackerWorker is re-enabled")]
+    [Fact]
+    public async Task TestTransactionPreviewShouldPass()
+    {
+        // Arrange
+        var gatewayRunner = new GatewayTestsRunner();
+        var coreApiStub = gatewayRunner
+            .MockGenesis()
+            .ArrangeTransactionPreviewTest(nameof(TestTransactionPreviewShouldPass));
+
+        var json = coreApiStub.CoreApiStubDefaultConfiguration.TransactionPreviewRequest.ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // Act
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result
+            .ActAsync<TransactionPreviewResponse>("/transaction/preview", content);
+
+        var coreApiPayload = JsonConvert.DeserializeObject<RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse>(payload.CoreApiResponse.ToString()!);
+
+        // Assert
+        coreApiPayload.ShouldNotBeNull();
+        coreApiPayload.Receipt.ShouldNotBeNull();
+        coreApiPayload.Receipt.Status.Should().Be(CoreApiSdk.Model.TransactionStatus.Succeeded);
+    }
+
+    [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
     public async Task MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
@@ -124,7 +151,7 @@ public class TransactionEndpointTests
         status.Should().Be(TransactionStatus.StatusEnum.FAILED);
     }
 
-    [Fact(Skip = "Dsiabled until MempoolTrackerWorker is re-enabled")]
+    [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
     public async Task MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
@@ -147,7 +174,7 @@ public class TransactionEndpointTests
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     }
 
-    [Fact(Skip = "Dsiabled until MempoolTrackerWorker is re-enabled")]
+    [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
     public async Task MempoolTransactionStatusShouldBePending()
     {
         // Arrange

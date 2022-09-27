@@ -1,11 +1,17 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using EcdsaSecp256k1PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.EcdsaSecp256k1PublicKey;
+using PublicKeyType = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKeyType;
+using TransactionPreviewRequestFlags = RadixDlt.CoreApiSdk.Model.TransactionPreviewRequestFlags;
 using TransactionStatus = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionStatus;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
@@ -105,7 +111,30 @@ public class GatewayTestsRunner
         _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
         TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
 
-        // set custom gatewayApi and openSchemaApi versions
+        // set custom transaction data
+
+        return _coreApiStub;
+    }
+
+    public CoreApiStub ArrangeTransactionPreviewTest(string databaseName)
+    {
+        _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
+        TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+
+        // set preview request
+        _coreApiStub.CoreApiStubDefaultConfiguration.TransactionPreviewRequest = new GatewayApiSdk.Model.TransactionPreviewRequest(
+            manifest: new ManifestBuilder().CallMethod("021c77780d10210ec9f0ea4a372ab39e09f2222c07c9fb6e5cfc81", "CALL_FUNCTION").Build(),
+            blobsHex: new List<string>() { "blob hex" },
+            costUnitLimit: 1L,
+            tipPercentage: 5L,
+            nonce: "nonce",
+            signerPublicKeys: new List<GatewayApiSdk.Model.PublicKey>()
+            {
+                new(new EcdsaSecp256k1PublicKey(
+                    keyType: PublicKeyType.EcdsaSecp256k1,
+                    keyHex: "010000000000000000000000000000000000000000000000000001")),
+            },
+            flags: new GatewayApiSdk.Model.TransactionPreviewRequestFlags(unlimitedLoan: false));
 
         return _coreApiStub;
     }

@@ -50,7 +50,9 @@ public class CoreApiStubDefaultConfiguration
 
     public string SubmitTransaction { get; set; }
 
-    public CoreApiSdk.Model.TransactionPreviewResponse TransactionPreviewResponse { get; set; }
+    public RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequest TransactionPreviewRequest { get; set; }
+
+    public TransactionPreviewResponse TransactionPreviewResponse { get; set; }
 
     public TransactionReceipt TransactionReceipt { get; set; }
 
