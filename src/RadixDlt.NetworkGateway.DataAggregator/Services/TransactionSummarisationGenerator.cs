@@ -65,6 +65,7 @@
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Commons.StaticHelpers;
 using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -116,8 +117,8 @@ public static class TransactionSummarisationGenerator
             : roundTimestamp;
 
         // TODO invalid, those are just placeholders
-        var transactionAccumulator = BitConverter.GetBytes(transaction.StateVersion);
-        var payloadHash = BitConverter.GetBytes(transaction.StateVersion);
+        var transactionAccumulator = HashingHelper.Sha256Twice(BitConverter.GetBytes(transaction.StateVersion));
+        var payloadHash = HashingHelper.Sha256Twice(BitConverter.GetBytes(transaction.StateVersion * -1));
         var intentHash = payloadHash;
         var signedIntentHash = payloadHash;
 
