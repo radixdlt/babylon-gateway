@@ -138,7 +138,7 @@ public class TransactionEndpointTests
             nameof(MempoolTransactionStatusShouldBeFailed),
             TransactionStatus.StatusEnum.FAILED);
         var transactionIdentifier =
-            new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
         var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -161,7 +161,7 @@ public class TransactionEndpointTests
             nameof(MempoolTransactionStatusShouldBeConfirmed),
             TransactionStatus.StatusEnum.CONFIRMED);
         var transactionIdentifier =
-            new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
         var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -183,7 +183,7 @@ public class TransactionEndpointTests
             nameof(MempoolTransactionStatusShouldBePending),
             TransactionStatus.StatusEnum.PENDING);
         var transactionIdentifier =
-            new TransactionIdentifier(coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
 
         var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -238,7 +238,8 @@ public class TransactionEndpointTests
                 "/transaction/recent",
                 JsonContent.Create(new RecentTransactionsRequest()));
 
-        var transactionIdentifier = recentTransactions.Transactions[0].TransactionIdentifier;
+        var hash = recentTransactions.Transactions[0].TransactionIdentifier.Hash;
+        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, hash);
         var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
