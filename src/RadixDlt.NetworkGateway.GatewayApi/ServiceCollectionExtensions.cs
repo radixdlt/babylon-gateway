@@ -128,7 +128,6 @@ public static class ServiceCollectionExtensions
         // semi-regularly
         services.TryAddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>();
         services.TryAddSingleton<INetworkAddressConfigProvider>(x => x.GetRequiredService<INetworkConfigurationProvider>());
-        services.TryAddSingleton<IValidations, Validations>();
         services.TryAddSingleton<IExceptionHandler, ExceptionHandler>();
         services.TryAddSingleton<IValidationErrorHandler, ValidationErrorHandler>();
         services.TryAddSingleton<ICoreNodesSelectorService, CoreNodesSelectorService>();

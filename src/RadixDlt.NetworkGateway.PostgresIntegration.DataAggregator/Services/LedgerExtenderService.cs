@@ -282,7 +282,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
             }
         });
 
-        return new ProcessTransactionReport(123, 321, 123, 321);
+        return new ProcessTransactionReport(123, 321, 123, 321); // TODO fix those
     }
 
     private async Task ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)

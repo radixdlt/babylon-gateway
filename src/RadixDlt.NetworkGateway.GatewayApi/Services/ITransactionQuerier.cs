@@ -78,19 +78,11 @@ public interface ITransactionQuerier
         Gateway.LedgerState? fromLedgerState,
         CancellationToken token = default);
 
-    Task<TransactionPageWithTotal> GetAccountTransactions(
-        AccountTransactionPageRequest request,
-        Gateway.LedgerState ledgerState,
-        CancellationToken token = default);
+    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier,
-        Gateway.LedgerState ledgerState,
-        CancellationToken token = default);
+    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(
-        ValidatedTransactionIdentifier transactionIdentifier,
-        CancellationToken token = default);
+    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
 
 [DataContract]

@@ -70,12 +70,12 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 internal class TransactionStatusRequestValidator : AbstractValidator<TransactionStatusRequest>
 {
     public TransactionStatusRequestValidator(
-        TransactionIdentifierValidator transactionIdentifierValidator,
+        TransactionLookupIdentifierValidator transactionLookupIdentifierValidator,
         PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
         RuleFor(x => x.TransactionIdentifier)
             .NotNull()
-            .SetValidator(transactionIdentifierValidator);
+            .SetValidator(transactionLookupIdentifierValidator);
 
         RuleFor(x => x.AtStateIdentifier)
             .SetValidator(partialLedgerStateIdentifierValidator);

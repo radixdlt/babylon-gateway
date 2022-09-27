@@ -88,6 +88,10 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     public async Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
     {
+        // TODO general idea how to change code below:
+        // add extra table containing all resources given entity posses, then change all of those queries from
+        // SELECT DISTINCT ON to simple WHERE + LIMIT 1 per resource
+
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
         // TODO add proper pagination support

@@ -62,9 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
@@ -73,11 +70,6 @@ namespace RadixDlt.NetworkGateway.GatewayApi;
 
 public static class ApiIdentifiers
 {
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this ValidatedTokenAmount tokenAmount)
-    {
-        return new Gateway.TokenAmount(tokenAmount.Amount.ToSubUnitString(), tokenAmount.Rri.AsGatewayTokenIdentifier());
-    }
-
     public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Gateway.TokenIdentifier tokenIdentifier)
     {
         return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
@@ -95,57 +87,8 @@ public static class ApiIdentifiers
             : $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // public static Gateway.TokenAmount AsGatewayTokenAmount(this CoreModel.ResourceAmount resourceAmount)
-    // {
-    //     if (resourceAmount.ResourceIdentifier is not CoreModel.TokenResourceIdentifier tokenResourceIdentifier)
-    //     {
-    //         throw new InvalidCoreApiResponseException(
-    //             "Expected a response from the core API to have a tokenResourceIdentifier but it was another kind of resourceIdentifier"
-    //         );
-    //     }
-    //
-    //     return new Gateway.TokenAmount(resourceAmount.Value, tokenResourceIdentifier.Rri.AsGatewayTokenIdentifier());
-    // }
-
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, string rri)
-    {
-        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), rri.AsGatewayTokenIdentifier());
-    }
-
-    public static Gateway.ValidatorIdentifier AsGatewayValidatorIdentifier(this string validatorAddress)
-    {
-        return new Gateway.ValidatorIdentifier(validatorAddress);
-    }
-
     public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this string rri)
     {
         return new Gateway.TokenIdentifier(rri);
-    }
-
-    public static Gateway.AccountIdentifier AsGatewayAccountIdentifier(this string accountAddress)
-    {
-        return new Gateway.AccountIdentifier(accountAddress);
-    }
-
-    public static Gateway.AccountIdentifier? AsOptionalGatewayAccountIdentifier(this string? accountAddress)
-    {
-        return accountAddress == null ? null : new Gateway.AccountIdentifier(accountAddress);
-    }
-
-    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this string hexTransactionId)
-    {
-        return new Gateway.TransactionIdentifier(hexTransactionId);
-    }
-
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this CoreModel.TransactionIdentifier transactionIdentifier)
-    // {
-    //     return new Gateway.TransactionIdentifier(transactionIdentifier.Hash);
-    // }
-
-    public static Gateway.TransactionIdentifier AsGatewayTransactionIdentifier(this byte[] transactionIdentifierHash)
-    {
-        return new Gateway.TransactionIdentifier(transactionIdentifierHash.ToHex());
     }
 }
