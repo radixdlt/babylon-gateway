@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionStatusRequest(TransactionIdentifier transactionIdentifier = default(TransactionIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        public TransactionStatusRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
             // to ensure "transactionIdentifier" is required (not null)
             if (transactionIdentifier == null)
@@ -121,7 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets TransactionIdentifier
         /// </summary>
         [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIdentifier TransactionIdentifier { get; set; }
+        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
 
         /// <summary>
         /// Gets or Sets AtStateIdentifier

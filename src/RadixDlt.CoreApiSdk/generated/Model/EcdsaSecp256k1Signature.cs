@@ -111,24 +111,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EcdsaSecp256k1Signature" /> class.
         /// </summary>
         /// <param name="keyType">keyType (required).</param>
-        /// <param name="signatureBytes">A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format. (required).</param>
-        public EcdsaSecp256k1Signature(PublicKeyType keyType = default(PublicKeyType), string signatureBytes = default(string))
+        /// <param name="signatureHex">A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format. (required).</param>
+        public EcdsaSecp256k1Signature(PublicKeyType keyType = default(PublicKeyType), string signatureHex = default(string))
         {
             this.KeyType = keyType;
-            // to ensure "signatureBytes" is required (not null)
-            if (signatureBytes == null)
+            // to ensure "signatureHex" is required (not null)
+            if (signatureHex == null)
             {
-                throw new ArgumentNullException("signatureBytes is a required property for EcdsaSecp256k1Signature and cannot be null");
+                throw new ArgumentNullException("signatureHex is a required property for EcdsaSecp256k1Signature and cannot be null");
             }
-            this.SignatureBytes = signatureBytes;
+            this.SignatureHex = signatureHex;
         }
 
         /// <summary>
         /// A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.
         /// </summary>
         /// <value>A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.</value>
-        [DataMember(Name = "signature_bytes", IsRequired = true, EmitDefaultValue = true)]
-        public string SignatureBytes { get; set; }
+        [DataMember(Name = "signature_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string SignatureHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,7 +139,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EcdsaSecp256k1Signature {\n");
             sb.Append("  KeyType: ").Append(KeyType).Append("\n");
-            sb.Append("  SignatureBytes: ").Append(SignatureBytes).Append("\n");
+            sb.Append("  SignatureHex: ").Append(SignatureHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.KeyType.Equals(input.KeyType)
                 ) && 
                 (
-                    this.SignatureBytes == input.SignatureBytes ||
-                    (this.SignatureBytes != null &&
-                    this.SignatureBytes.Equals(input.SignatureBytes))
+                    this.SignatureHex == input.SignatureHex ||
+                    (this.SignatureHex != null &&
+                    this.SignatureHex.Equals(input.SignatureHex))
                 );
         }
 
@@ -196,9 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
-                if (this.SignatureBytes != null)
+                if (this.SignatureHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.SignatureBytes.GetHashCode();
+                    hashCode = (hashCode * 59) + this.SignatureHex.GetHashCode();
                 }
                 return hashCode;
             }
@@ -211,16 +211,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // SignatureBytes (string) maxLength
-            if (this.SignatureBytes != null && this.SignatureBytes.Length > 130)
+            // SignatureHex (string) maxLength
+            if (this.SignatureHex != null && this.SignatureHex.Length > 130)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureBytes, length must be less than 130.", new [] { "SignatureBytes" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureHex, length must be less than 130.", new [] { "SignatureHex" });
             }
 
-            // SignatureBytes (string) minLength
-            if (this.SignatureBytes != null && this.SignatureBytes.Length < 130)
+            // SignatureHex (string) minLength
+            if (this.SignatureHex != null && this.SignatureHex.Length < 130)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureBytes, length must be greater than 130.", new [] { "SignatureBytes" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignatureHex, length must be greater than 130.", new [] { "SignatureHex" });
             }
 
             yield break;

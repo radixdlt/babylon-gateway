@@ -70,5 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IEntityStateQuerier
 {
-    Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+
+    Task<EntityDetailsResponse> EntityDetailsSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
 }

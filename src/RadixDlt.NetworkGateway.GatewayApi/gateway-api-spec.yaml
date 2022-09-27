@@ -154,9 +154,9 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
-  /state/tmp-entity:
+  /entity/resources:
     post:
-      summary: Component State
+      summary: Entity Resources
       description: |
         TBD
       tags:
@@ -166,14 +166,40 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/ComponentStateRequest"
+              "$ref": "#/components/schemas/EntityResourcesRequest"
       responses:
         '200':
-          description: Component State
+          description: Entity Resources
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/ComponentStateResponse"
+                "$ref": "#/components/schemas/EntityResourcesResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+  /entity/details:
+    post:
+      summary: Entity Details
+      description: |
+        TBD
+      tags:
+        - State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/EntityDetailsRequest"
+      responses:
+        '200':
+          description: Entity Details
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EntityDetailsResponse"
         '500':
           description: Gateway Error
           content:
@@ -182,7 +208,27 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
-    ComponentStateRequest:
+    ResultSetCursor:
+      type: object
+      required:
+        - total_count
+        - results
+      properties:
+        total_count:
+          description: TBD (make it nullable when we're dealing with unknown result set sizes?)
+          type: number
+        previous_cursor:
+          description: TBD (maybe we should use HATEOAS-like permalinks?)
+          type: string
+          nullable: true
+        next_cursor:
+          description: TBD (maybe we should use HATEOAS-like permalinks?)
+          type: string
+          nullable: true
+        results:
+          type: array
+          items: { } # any type of items
+    EntityResourcesRequest:
       type: object
       required:
         - address
@@ -192,21 +238,39 @@ components:
           type: string
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
-    ComponentStateResponse:
+    EntityResourcesResponse:
       type: object
       required:
         - address
+        - fungible_resources
         - non_fungible_resources
       properties:
         address:
           description: The Bech32m-encoded human readable version of the entity's global address
           type: string
+        fungible_resources:
+          allOf:
+            - $ref: "#/components/schemas/ResultSetCursor"
+            - type: object
+              required:
+                - results
+              properties:
+                results:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EntityStateResponseFungibleResource"
         non_fungible_resources:
-          description: TBD
-          type: array
-          items:
-            $ref: "#/components/schemas/ComponentStateResponseNonFungibleResource"
-    ComponentStateResponseNonFungibleResource:
+          allOf:
+            - $ref: "#/components/schemas/ResultSetCursor"
+            - type: object
+              required:
+                - results
+              properties:
+                results:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EntityStateResponseNonFungibleResource"
+    EntityStateResponseFungibleResource:
       type: object
       required:
         - address
@@ -220,6 +284,17 @@ components:
           description: |
             A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
             the total supply of this resource.
+    EntityStateResponseNonFungibleResource:
+      type: object
+      required:
+        - address
+        - amount
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the resource's global address
+          type: string
+        amount:
+          type: number
     TransferTokens:
       allOf:
         - "$ref": "#/components/schemas/Action"
@@ -235,6 +310,30 @@ components:
               "$ref": "#/components/schemas/AccountIdentifier"
             amount:
               "$ref": "#/components/schemas/TokenAmount"
+    EntityDetailsRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the entity's global address
+          type: string
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+    EntityDetailsResponse:
+      type: object
+      required:
+        - address
+        - metadata
+      properties:
+        address:
+          description: The Bech32m-encoded human readable version of the resource's global address
+          type: string
+        metadata:
+          description: TBD
+          type: object
+          additionalProperties:
+            type: string
     AccountStakeEntry:
       type: object
       required:
@@ -409,20 +508,31 @@ components:
         manifest:
           description: A transaction manifest. sbor encoded, and then hex encoded.
           type: string
-        cost_unit_limit:
-          type: integer
-          description: Maximum number of cost units available for transaction execution.
-        tip_percentage:
-          type: integer
-          description: The validator tip.
-        nonce:
-          type: string
-          description: The nonce value to use for execution.
-        signer_public_keys:
+        blobs_hex:
+          description: An array of hex-encoded blob data (optional)
           type: array
           items:
             type: string
-          description: A list of public keys to be used as transaction signers, in a compressed format, hex encoded.
+        cost_unit_limit:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution
+        tip_percentage:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of "1" corresponds to 1% of the fee.
+        nonce:
+          type: string
+          description: A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.
+        signer_public_keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicKey"
+          description: A list of public keys to be used as transaction signers
         flags:
           type: object
           required:
@@ -430,40 +540,13 @@ components:
           properties:
             unlimited_loan:
               type: boolean
-      example:
-        manifest: TBD
-        cost_unit_limit: TBD
-        tip_percentage: TBD
-        nonce: TBD
-        signer_public_keys:
-          - TBD
-        flags:
-          unlimited_loan: true
     TransactionPreviewResponse:
       type: object
       required:
-        - receipt
-        - resource_changes
-        - logs
+        - core_api_response
       properties:
-        receipt:
-          "$ref": "#/components/schemas/TransactionReceipt"
-        resource_changes:
-          type: array
-          items:
-            "$ref": "#/components/schemas/ResourceChange"
-        logs:
-          type: array
-          items:
-            type: object
-            required:
-              - level
-              - message
-            properties:
-              level:
-                type: string
-              message:
-                type: string
+        core_api_response:
+          type: object
     TransactionSubmitRequest:
       type: object
       required:
@@ -570,7 +653,7 @@ components:
         - transaction_identifier
       properties:
         transaction_identifier:
-          $ref: "#/components/schemas/TransactionIdentifier"
+          $ref: "#/components/schemas/TransactionLookupIdentifier"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
@@ -665,21 +748,6 @@ components:
         message:
           description: The message bytes, hex encoded.
           type: string
-    TransactionReceipt:
-      type: object
-      description: The transaction execution receipt
-      required:
-        - tbd
-      properties:
-        tbd:
-          type: string
-    ResourceChange:
-      type: object
-      required:
-        - tbd
-      properties:
-        tbd:
-          type: string
     TokenAmount:
       type: object
       required:
@@ -740,6 +808,23 @@ components:
           pattern: "^[0123456789abcdef]{64}$"
           maxLength: 64
           minLength: 64
+    TransactionLookupOrigin:
+      type: string
+      enum:
+        - intent
+        - signed_intent
+        - notarized
+        - payload
+    TransactionLookupIdentifier:
+      type: object
+      required:
+        - origin
+        - value_hex
+      properties:
+        origin:
+          $ref: "#/components/schemas/TransactionLookupOrigin"
+        value_hex:
+          type: string
     ErrorResponse:
       type: object
       required:
@@ -1042,3 +1127,44 @@ components:
             transaction_not_found:
               description: The transaction identifier which was not found.
               $ref: "#/components/schemas/TransactionIdentifier"
+    PublicKeyType:
+      type: string
+      enum:
+        - EcdsaSecp256k1
+        - EddsaEd25519
+    PublicKey:
+      oneOf:
+        - $ref: '#/components/schemas/EcdsaSecp256k1PublicKey'
+        - $ref: '#/components/schemas/EddsaEd25519PublicKey'
+      discriminator:
+        propertyName: key_type
+        mapping:
+          # NOTE: These need to match PublicKeyType
+          EcdsaSecp256k1: '#/components/schemas/EcdsaSecp256k1PublicKey'
+          EddsaEd25519: '#/components/schemas/EddsaEd25519PublicKey'
+    EcdsaSecp256k1PublicKey:
+      type: object
+      required:
+        - key_type
+        - key_hex
+      properties:
+        key_type:
+          $ref: '#/components/schemas/PublicKeyType'
+        key_hex:
+          type: string
+          minLength: 66
+          maxLength: 66
+          description: The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
+    EddsaEd25519PublicKey:
+      type: object
+      required:
+        - key_type
+        - key_hex
+      properties:
+        key_type:
+          $ref: '#/components/schemas/PublicKeyType'
+        key_hex:
+          type: string
+          minLength: 64
+          maxLength: 64
+          description: The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)

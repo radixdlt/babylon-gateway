@@ -118,25 +118,25 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
-        /// <param name="code">The hex-encoded package code (required).</param>
-        public PackageSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string code = default(string))
+        /// <param name="codeHex">The hex-encoded package code (required).</param>
+        public PackageSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string codeHex = default(string))
         {
             this.EntityType = entityType;
             this.SubstateType = substateType;
-            // to ensure "code" is required (not null)
-            if (code == null)
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("code is a required property for PackageSubstate and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for PackageSubstate and cannot be null");
             }
-            this.Code = code;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
         /// The hex-encoded package code
         /// </summary>
         /// <value>The hex-encoded package code</value>
-        [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
-        public string Code { get; set; }
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -148,7 +148,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class PackageSubstate {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  Code: ").Append(Code).Append("\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -193,9 +193,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
-                    this.Code == input.Code ||
-                    (this.Code != null &&
-                    this.Code.Equals(input.Code))
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -210,9 +210,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                if (this.Code != null)
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Code.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }

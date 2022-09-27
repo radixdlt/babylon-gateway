@@ -96,7 +96,7 @@ public class TransactionEndpointTests
 
         // Arrange
         var recentTransactions = await GetRecentTransactions(client);
-        var transactionIdentifier = recentTransactions.Transactions[0].TransactionIdentifier;
+        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, recentTransactions.Transactions[0].TransactionIdentifier.Hash); // TODO not sure if valid origin
 
         // Act
         string json = new TransactionStatusRequest(transactionIdentifier).ToJson();

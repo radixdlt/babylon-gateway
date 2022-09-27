@@ -120,26 +120,28 @@ public sealed class TransactionController : ControllerBase
     [HttpPost("status")]
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
     {
-        var transactionIdentifier = request.TransactionIdentifier.Hash.ToTransactionIdentifier();
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(transactionIdentifier, ledgerState, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, token);
 
         if (committedTransaction != null)
         {
             return new TransactionStatusResponse(ledgerState, committedTransaction);
         }
 
-        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(transactionIdentifier, token);
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(request.TransactionIdentifier, token);
 
         if (mempoolTransaction != null)
         {
             return new TransactionStatusResponse(ledgerState, mempoolTransaction);
         }
 
-        throw new TransactionNotFoundException(request.TransactionIdentifier);
+        var tmp = new TransactionIdentifier("map TransactionLookupIdentifier to TransactionIdentifier or drop latter altogether"); // TODO fix me
+
+        throw new TransactionNotFoundException(tmp);
     }
 
+    // TODO decide how do we want to model /this endpoint in our OAS
     [HttpPost("preview")]
     public async Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token)
     {

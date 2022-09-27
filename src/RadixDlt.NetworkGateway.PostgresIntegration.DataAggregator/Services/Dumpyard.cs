@@ -68,28 +68,39 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Substate = RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
 {
-    private TmpBaseEntity? _databaseEntity;
+    private Entity? _databaseEntity;
     private ReferencedEntity? _parent;
     private long? _parentId;
-    private long? _ownerId;
-    private long? _globalId;
+    private long? _ownerAncestorId;
+    private long? _globalAncestorId;
 
     public byte[]? GlobalAddressBytes { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
-    public long DatabaseOwnerId
+    public long DatabaseOwnerAncestorId
     {
         get
         {
             EnsureParentalIdsResolved();
 
-            return _ownerId.Value;
+            return _ownerAncestorId.Value;
+        }
+    }
+
+    public long DatabaseGlobalAncestorId
+    {
+        get
+        {
+            EnsureParentalIdsResolved();
+
+            return _globalAncestorId.Value;
         }
     }
 
@@ -106,16 +117,19 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         GlobalAddressBytes = Convert.FromHexString(addressBytes);
     }
 
-    public void Resolve(TmpBaseEntity entity)
+    public void Resolve(Entity entity)
     {
         _databaseEntity = entity;
+        _parentId = entity.ParentId;
+        _ownerAncestorId = entity.OwnerAncestorId;
+        _globalAncestorId = entity.GlobalAncestorId;
     }
 
     public void ResolveParentalIds(long parentId, long ownerId, long globalId)
     {
         _parentId = parentId;
-        _ownerId = ownerId;
-        _globalId = globalId;
+        _ownerAncestorId = ownerId;
+        _globalAncestorId = globalId;
     }
 
     public void IsChildOf(ReferencedEntity parent)
@@ -123,22 +137,22 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         _parent = parent;
     }
 
-    private TmpBaseEntity GetDatabaseEntity()
+    private Entity GetDatabaseEntity()
     {
-        var de = _databaseEntity ?? throw new Exception("bla bla");
+        var de = _databaseEntity ?? throw new Exception("bla bla"); // TODO fix me
 
         if (de.Id == 0)
         {
-            throw new Exception("bla bla bla bla x6");
+            throw new Exception("bla bla bla bla x6"); // TODO fix me
         }
 
         return de;
     }
 
-    [MemberNotNull(nameof(_parentId), nameof(_ownerId), nameof(_globalId))]
+    [MemberNotNull(nameof(_parentId), nameof(_ownerAncestorId), nameof(_globalAncestorId))]
     private void EnsureParentalIdsResolved()
     {
-        if (_parentId == null || _ownerId == null || _globalId == null)
+        if (_parentId == null || _ownerAncestorId == null || _globalAncestorId == null)
         {
             throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgotten to call ResolveParentalIds(long, long, long)?");
         }
@@ -149,19 +163,21 @@ internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, Su
 {
 }
 
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, Substate Data)
+internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data)
 {
-    public TmpBaseSubstate? DatabaseSubstate { get; private set; }
+    public Substate? DatabaseSubstate { get; private set; }
 
-    public void Resolve(TmpBaseSubstate substate)
+    public void Resolve(Substate substate)
     {
         DatabaseSubstate = substate;
     }
 }
 
-internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion)
-{
-}
+internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
+
+internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
+
+internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
 internal static class DictionaryExtensions
 {

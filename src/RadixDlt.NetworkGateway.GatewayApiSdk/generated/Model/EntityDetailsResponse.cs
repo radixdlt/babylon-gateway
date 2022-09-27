@@ -91,35 +91,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResourceChange
+    /// EntityDetailsResponse
     /// </summary>
-    [DataContract(Name = "ResourceChange")]
-    public partial class ResourceChange : IEquatable<ResourceChange>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponse")]
+    public partial class EntityDetailsResponse : IEquatable<EntityDetailsResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceChange" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResourceChange() { }
+        protected EntityDetailsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceChange" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
         /// </summary>
-        /// <param name="tbd">tbd (required).</param>
-        public ResourceChange(string tbd = default(string))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="metadata">TBD (required).</param>
+        public EntityDetailsResponse(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>))
         {
-            // to ensure "tbd" is required (not null)
-            if (tbd == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("tbd is a required property for ResourceChange and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityDetailsResponse and cannot be null");
             }
-            this.Tbd = tbd;
+            this.Address = address;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata is a required property for EntityDetailsResponse and cannot be null");
+            }
+            this.Metadata = metadata;
         }
 
         /// <summary>
-        /// Gets or Sets Tbd
+        /// The Bech32m-encoded human readable version of the resource&#39;s global address
         /// </summary>
-        [DataMember(Name = "tbd", IsRequired = true, EmitDefaultValue = true)]
-        public string Tbd { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <value>TBD</value>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResourceChange {\n");
-            sb.Append("  Tbd: ").Append(Tbd).Append("\n");
+            sb.Append("class EntityDetailsResponse {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResourceChange);
+            return this.Equals(input as EntityDetailsResponse);
         }
 
         /// <summary>
-        /// Returns true if ResourceChange instances are equal
+        /// Returns true if EntityDetailsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResourceChange to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResourceChange input)
+        public bool Equals(EntityDetailsResponse input)
         {
             if (input == null)
             {
@@ -166,9 +182,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Tbd == input.Tbd ||
-                    (this.Tbd != null &&
-                    this.Tbd.Equals(input.Tbd))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.Metadata == input.Metadata ||
+                    this.Metadata != null &&
+                    input.Metadata != null &&
+                    this.Metadata.SequenceEqual(input.Metadata)
                 );
         }
 
@@ -181,9 +203,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Tbd != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Tbd.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.Metadata != null)
+                {
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

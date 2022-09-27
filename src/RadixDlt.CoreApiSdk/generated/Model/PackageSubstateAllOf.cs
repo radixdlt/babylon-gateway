@@ -104,23 +104,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="code">The hex-encoded package code (required).</param>
-        public PackageSubstateAllOf(string code = default(string))
+        /// <param name="codeHex">The hex-encoded package code (required).</param>
+        public PackageSubstateAllOf(string codeHex = default(string))
         {
-            // to ensure "code" is required (not null)
-            if (code == null)
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("code is a required property for PackageSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for PackageSubstateAllOf and cannot be null");
             }
-            this.Code = code;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
         /// The hex-encoded package code
         /// </summary>
         /// <value>The hex-encoded package code</value>
-        [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
-        public string Code { get; set; }
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,7 +130,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class PackageSubstateAllOf {\n");
-            sb.Append("  Code: ").Append(Code).Append("\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,9 +167,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Code == input.Code ||
-                    (this.Code != null &&
-                    this.Code.Equals(input.Code))
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -182,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Code != null)
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Code.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }

@@ -72,11 +72,13 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Controllers;
 
+// TODO don't like route/type "state" name
+
 [ApiController]
 [Route("state")]
 [TypeFilter(typeof(ExceptionFilter))]
 [TypeFilter(typeof(InvalidModelStateFilter))]
-public class StateController
+public class StateController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;
@@ -87,12 +89,21 @@ public class StateController
         _entityStateQuerier = entityStateQuerier;
     }
 
-    [HttpPost("tmp-entity")]
-    public async Task<ComponentStateResponse> TmpEntity(ComponentStateRequest request, CancellationToken token = default)
+    [HttpPost("resources")]
+    public async Task<EntityResourcesResponse> Resources(EntityResourcesRequest request, CancellationToken token = default)
     {
         var address = RadixBech32.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return await _entityStateQuerier.TmpAccountResourcesSnapshot(address.Data, ledgerState, token);
+        return await _entityStateQuerier.EntityResourcesSnapshot(address.Data, ledgerState, token);
+    }
+
+    [HttpPost("details")]
+    public async Task<EntityDetailsResponse> Details(EntityDetailsRequest request, CancellationToken token = default)
+    {
+        var address = RadixBech32.Decode(request.Address);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        return await _entityStateQuerier.EntityDetailsSnapshot(address.Data, ledgerState, token);
     }
 }

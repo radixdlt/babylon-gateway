@@ -62,18 +62,76 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal class TransactionIdentifierValidator : AbstractValidator<TransactionIdentifier>
+[Table("substates")]
+internal class Substate
 {
-    public TransactionIdentifierValidator()
-    {
-        RuleFor(x => x.Hash)
-            .NotNull()
-            .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
-    }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("to_state_version")]
+    public long? ToStateVersion { get; set; }
+
+    [Column("key")]
+    public byte[] Key { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
+
+    [Column("data_hash")]
+    public byte[] DataHash { get; set; }
+
+    [Column("version")]
+    public long Version { get; set; }
+}
+
+internal class SystemSubstate : Substate
+{
+}
+
+internal class ResourceManagerSubstate : Substate
+{
+    [Column("total_supply")]
+    public TokenAmount TotalSupply { get; set; }
+
+    [Column("fungible_divisibility")]
+    public int FungibleDivisibility { get; set; }
+}
+
+internal class ComponentInfoSubstate : Substate
+{
+}
+
+internal class ComponentStateSubstate : Substate
+{
+}
+
+internal class PackageSubstate : Substate
+{
+}
+
+internal class VaultSubstate : Substate
+{
+    [Column("amount")]
+    public TokenAmount Amount { get; set; }
+}
+
+internal class NonFungibleSubstate : Substate
+{
+}
+
+internal class KeyValueStoreEntrySubstate : Substate
+{
 }

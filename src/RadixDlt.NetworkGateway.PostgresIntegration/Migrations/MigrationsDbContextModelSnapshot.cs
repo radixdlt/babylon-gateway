@@ -230,6 +230,157 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("account_validator_stake_history");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("Address")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("address");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<byte[]>("GlobalAddress")
+                        .HasColumnType("bytea")
+                        .HasColumnName("global_address");
+
+                    b.Property<long?>("GlobalAncestorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("global_ancestor_id");
+
+                    b.Property<long?>("OwnerAncestorId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_ancestor_id");
+
+                    b.Property<long?>("ParentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("parent_id");
+
+                    b.Property<string>("type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator<string>("type").HasValue("Entity");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<BigInteger>("Balance")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("balance");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("FungibleResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fungible_resource_entity_id");
+
+                    b.Property<long>("GlobalEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("global_entity_id");
+
+                    b.Property<long>("OwnerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("entity_fungible_resource_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMetadataHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<string[]>("Keys")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("keys");
+
+                    b.Property<string[]>("Values")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("values");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("entity_metadata_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("GlobalEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("global_entity_id");
+
+                    b.Property<long[]>("Ids")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("ids");
+
+                    b.Property<long>("IdsCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ids_count");
+
+                    b.Property<long>("NonFungibleResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_resource_entity_id");
+
+                    b.Property<long>("OwnerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("entity_non_fungible_resource_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
                 {
                     b.Property<int>("Id")
@@ -529,52 +680,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("resource_supply_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("address");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<byte[]>("GlobalAddress")
-                        .HasColumnType("bytea")
-                        .HasColumnName("global_address");
-
-                    b.Property<long?>("GlobalAncestorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("global_ancestor_id");
-
-                    b.Property<long?>("OwnerAncestorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("owner_ancestor_id");
-
-                    b.Property<long?>("ParentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("parent_id");
-
-                    b.Property<string>("type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("tmp_entities");
-
-                    b.HasDiscriminator<string>("type").HasValue("TmpBaseEntity");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -600,9 +706,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<string>("Key")
+                    b.Property<byte[]>("Key")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("bytea")
                         .HasColumnName("key");
 
                     b.Property<long?>("ToStateVersion")
@@ -619,45 +725,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
-                    b.HasDiscriminator<string>("type").HasValue("TmpBaseSubstate");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpOwnerEntityFungibleResourceBalanceHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<BigInteger>("Balance")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("balance");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("FungibleResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("fungible_resource_entity_id");
-
-                    b.Property<long>("OwnerEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("owner_entity_id");
-
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("tmp_entity_fungible_resource_balance_history");
+                    b.HasDiscriminator<string>("type").HasValue("Substate");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator", b =>
@@ -747,90 +817,86 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("validator_stake_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpComponentEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentEntity", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.ToTable("tmp_entities");
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("component");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpComponentInfoSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentInfoSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
-                    b.HasDiscriminator().HasValue("componentinfo");
+                    b.HasDiscriminator().HasValue("component_info");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpComponentStateSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentStateSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
-                    b.HasDiscriminator().HasValue("componentstate");
+                    b.HasDiscriminator().HasValue("component_state");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpKeyValueStoreEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntrySubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
-                    b.ToTable("tmp_entities");
+                    b.ToTable("substates");
 
-                    b.HasDiscriminator().HasValue("keyvaluestore");
+                    b.HasDiscriminator().HasValue("key_value_store_entry");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpKeyValueStoreEntrySubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
-                    b.HasDiscriminator().HasValue("keyvaluestoreentry");
+                    b.HasDiscriminator().HasValue("non_fungible");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpNonFungibleSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageEntity", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.ToTable("tmp_substates");
-
-                    b.HasDiscriminator().HasValue("nonfungible");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpPackageEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
-
-                    b.ToTable("tmp_entities");
+                    b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("package");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpPackageSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
                     b.HasDiscriminator().HasValue("package");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpResourceManagerEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerEntity", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.ToTable("tmp_entities");
+                    b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("resourcemanager");
+                    b.HasDiscriminator().HasValue("resource_manager");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpResourceManagerSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
                     b.Property<int>("FungibleDivisibility")
                         .HasColumnType("integer")
@@ -841,48 +907,57 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("numeric(1000,0)")
                         .HasColumnName("total_supply");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
-                    b.HasDiscriminator().HasValue("resourcemanager");
+                    b.HasDiscriminator().HasValue("resource_manager");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpSystemEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemEntity", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.ToTable("tmp_entities");
+                    b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("system");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpSystemSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
                     b.HasDiscriminator().HasValue("system");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpVaultEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValueStoreEntity", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseEntity");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.ToTable("tmp_entities");
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("key_value_store");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("vault");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpVaultSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultSubstate", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.TmpBaseSubstate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
 
                     b.Property<BigInteger>("Amount")
                         .HasPrecision(1000)
                         .HasColumnType("numeric(1000,0)")
                         .HasColumnName("amount");
 
-                    b.ToTable("tmp_substates");
+                    b.ToTable("substates");
 
                     b.HasDiscriminator().HasValue("vault");
                 });

@@ -76,6 +76,77 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "entities",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    address = table.Column<byte[]>(type: "bytea", nullable: false),
+                    global_address = table.Column<byte[]>(type: "bytea", nullable: true),
+                    parent_id = table.Column<long>(type: "bigint", nullable: true),
+                    owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    kind = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entities", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_fungible_resource_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    global_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_fungible_resource_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_metadata_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    keys = table.Column<string[]>(type: "text[]", nullable: false),
+                    values = table.Column<string[]>(type: "text[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_metadata_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_non_fungible_resource_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    global_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    ids_count = table.Column<long>(type: "bigint", nullable: false),
+                    ids = table.Column<long[]>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_non_fungible_resource_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "mempool_transactions",
                 columns: table => new
                 {
@@ -133,52 +204,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "tmp_entities",
+                name: "substates",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    address = table.Column<string>(type: "text", nullable: false),
-                    global_address = table.Column<byte[]>(type: "bytea", nullable: true),
-                    parent_id = table.Column<long>(type: "bigint", nullable: true),
-                    owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_tmp_entities", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "tmp_entity_fungible_resource_balance_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_tmp_entity_fungible_resource_balance_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "tmp_substates",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    key = table.Column<string>(type: "text", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     to_state_version = table.Column<long>(type: "bigint", nullable: true),
+                    key = table.Column<byte[]>(type: "bytea", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     data_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     version = table.Column<long>(type: "bigint", nullable: false),
                     type = table.Column<string>(type: "text", nullable: false),
@@ -188,7 +223,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_tmp_substates", x => x.id);
+                    table.PrimaryKey("PK_substates", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -717,6 +752,18 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "account_validator_stake_history");
 
             migrationBuilder.DropTable(
+                name: "entities");
+
+            migrationBuilder.DropTable(
+                name: "entity_fungible_resource_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_metadata_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_non_fungible_resource_history");
+
+            migrationBuilder.DropTable(
                 name: "ledger_status");
 
             migrationBuilder.DropTable(
@@ -729,13 +776,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "resource_supply_history");
 
             migrationBuilder.DropTable(
-                name: "tmp_entities");
-
-            migrationBuilder.DropTable(
-                name: "tmp_entity_fungible_resource_balance_history");
-
-            migrationBuilder.DropTable(
-                name: "tmp_substates");
+                name: "substates");
 
             migrationBuilder.DropTable(
                 name: "validator_proposal_records");

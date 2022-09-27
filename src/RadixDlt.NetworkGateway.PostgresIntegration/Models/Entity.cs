@@ -62,85 +62,60 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Numerics;
+using RadixDlt.NetworkGateway.Commons;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("tmp_substates")]
-internal class TmpBaseSubstate
+[Table("entities")]
+internal abstract class Entity
 {
     [Key]
     [Column("id")]
     public long Id { get; set; }
 
-    [Column("key")]
-    public string Key { get; set; }
-
-    [Column("entity_id")]
-    public long EntityId { get; set; }
-
-    [Column("is_deleted")]
-    public bool IsDeleted { get; set; }
-
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("to_state_version")]
-    public long? ToStateVersion { get; set; }
+    [Column("address")]
+    public RadixAddress Address { get; set; }
 
-    [Column("data_hash")]
-    public byte[] DataHash { get; set; }
+    [Column("global_address")]
+    public RadixAddress? GlobalAddress { get; set; }
 
-    [Column("version")]
-    public long Version { get; set; } = 0;
+    [Column("parent_id")]
+    public long? ParentId { get; set; }
 
-    public TmpBaseSubstate()
-    {
-    }
+    [Column("owner_ancestor_id")]
+    public long? OwnerAncestorId { get; set; }
 
-    protected TmpBaseSubstate(byte[] dataHash)
-    {
-        DataHash = dataHash;
-    }
+    [Column("global_ancestor_id")]
+    public long? GlobalAncestorId { get; set; }
 }
 
-internal class TmpSystemSubstate : TmpBaseSubstate
+internal class SystemEntity : Entity
 {
 }
 
-internal class TmpResourceManagerSubstate : TmpBaseSubstate
-{
-    [Column("total_supply")]
-    public TokenAmount TotalSupply { get; set; }
-
-    [Column("fungible_divisibility")]
-    public int FungibleDivisibility { get; set; }
-}
-
-internal class TmpComponentInfoSubstate : TmpBaseSubstate
+internal class ResourceManagerEntity : Entity
 {
 }
 
-internal class TmpComponentStateSubstate : TmpBaseSubstate
+internal class ComponentEntity : Entity
+{
+    [Column("kind")]
+    public string Kind { get; set; } // TODO rename
+}
+
+internal class PackageEntity : Entity
 {
 }
 
-internal class TmpPackageSubstate : TmpBaseSubstate
+internal class ValueStoreEntity : Entity
 {
 }
 
-internal class TmpVaultSubstate : TmpBaseSubstate
-{
-    [Column("amount")]
-    public TokenAmount Amount { get; set; }
-}
-
-internal class TmpNonFungibleSubstate : TmpBaseSubstate
-{
-}
-
-internal class TmpKeyValueStoreEntrySubstate : TmpBaseSubstate
+internal class VaultEntity : Entity
 {
 }

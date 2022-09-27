@@ -86,47 +86,159 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<ComponentStateResponse> TmpAccountResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
     {
+        // TODO general idea how to change code below:
+        // add extra table containing all resources given entity posses, then change all of those queries from
+        // SELECT DISTINCT ON to simple WHERE + LIMIT 1 per resource
+
         // TODO just some quick and naive implementation
         // TODO we will denormalize a lot to improve performance and reduce complexity
+        // TODO add proper pagination support
 
-        var entity = await _dbContext.TmpEntities
+        var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState._Version)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
-        // TODO account only?
-        if (entity == null || entity.GetType() != typeof(TmpComponentEntity))
+        if (entity == null)
         {
-            throw new Exception("zzz zzz zzz x1");
+            // TODO just not found
+            throw new Exception("xxxx");
         }
 
-        var fungibleBalanceHistory = await _dbContext.TmpOwnerEntityFungibleResourceBalanceHistory
+        string hrp;
+
+        // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
+        if (entity is ResourceManagerEntity)
+        {
+            hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
+        }
+        else if (entity is ComponentEntity component)
+        {
+            hrp = component.Kind switch
+            {
+                "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
+                "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
+                _ => throw new Exception("fix me"), // TODO fix me
+            };
+        }
+        else
+        {
+            throw new Exception("unsupported entity type"); // TODO fix me
+        }
+
+        // TODO those DISTINCT ON queries are going to be slow because we have to fetch everything first, ideally we should change it to somehow just fetch first element form index and stop immediately
+        // TODO as we support "lookup by global" and "lookup by owner" we must duplicate some keys
+
+        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
+        // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
+        var fungibleBalanceHistory = await _dbContext.EntityFungibleResourceHistory
             .FromSqlInterpolated($@"
 SELECT DISTINCT ON (owner_entity_id, fungible_resource_entity_id) *
-FROM tmp_entity_fungible_resource_balance_history
+FROM entity_fungible_resource_history
 WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
 ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
             .ToListAsync(token);
 
-        var uniqueResources = fungibleBalanceHistory.Select(h => h.FungibleResourceEntityId).Distinct();
+        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include(ids.length) - but no INCLUDE(ids) as its just too big
+        // TODO this one might benefit form "*" => "fungible_resource_entity_id, ids" (first x elements of ids actually)
+        // TODO or maybe we don't even want to return actual NF ids here?
+        var nonFungibleIdsHistory = await _dbContext.EntityNonFungibleResourceHistory
+            .FromSqlInterpolated($@"
+SELECT DISTINCT ON (owner_entity_id, non_fungible_resource_entity_id) *
+FROM entity_non_fungible_resource_history
+WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
+ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DESC")
+            .ToListAsync(token);
 
-        var resources = await _dbContext.TmpEntities
-            .Where(e => uniqueResources.Contains(e.Id))
+        var referencedEntityIds = fungibleBalanceHistory
+            .Select(h => h.FungibleResourceEntityId)
+            .Concat(nonFungibleIdsHistory.Select(h => h.NonFungibleResourceEntityId))
+            .Distinct()
+            .ToList();
+
+        var resources = await _dbContext.Entities
+            .Where(e => referencedEntityIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
-        var nonFungibles = new List<ComponentStateResponseNonFungibleResource>();
+        var fungibles = new List<EntityStateResponseFungibleResource>();
 
         foreach (var fbh in fungibleBalanceHistory)
         {
-            var r = resources[fbh.FungibleResourceEntityId];
-            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, r.GlobalAddress);
+            var rga = resources[fbh.FungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
 
-            nonFungibles.Add(new ComponentStateResponseNonFungibleResource(ra, fbh.Balance.ToSubUnitString()));
+            fungibles.Add(new EntityStateResponseFungibleResource(ra, fbh.Balance.ToSubUnitString()));
         }
 
-        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().AccountHrp, address);
+        var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
 
-        return new ComponentStateResponse(adr, nonFungibles);
+        foreach (var nfih in nonFungibleIdsHistory)
+        {
+            var rga = resources[nfih.NonFungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
+
+            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, nfih.IdsCount));
+        }
+
+        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
+        var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibleBalanceHistory.Count, null, "TBD (currently everything is returned)", fungibles);
+        var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibleIdsHistory.Count, null, "TBD (currently everything is returned)", nonFungibles);
+
+        return new EntityResourcesResponse(adr, fungiblesPagination, nonFungiblesPagination);
+    }
+
+    public async Task<EntityDetailsResponse> EntityDetailsSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    {
+        // TODO just some quick and naive implementation
+
+        var entity = await _dbContext.Entities
+            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
+
+        if (entity == null)
+        {
+            // TODO just not found
+            throw new Exception("xxxx");
+        }
+
+        string hrp;
+
+        // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
+        if (entity is ResourceManagerEntity)
+        {
+            hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
+        }
+        else if (entity is ComponentEntity component)
+        {
+            hrp = component.Kind switch
+            {
+                "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
+                "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
+                _ => throw new Exception("fix me"), // TODO fix me
+            };
+        }
+        else
+        {
+            throw new Exception("unsupported entity type"); // TODO fix me
+        }
+
+        var metadata = new Dictionary<string, string>();
+        var metadataHistory = await _dbContext.EntityMetadataHistory
+            .FromSqlInterpolated($@"
+SELECT DISTINCT ON (entity_id) *
+FROM entity_metadata_history
+WHERE entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
+ORDER BY entity_id, from_state_version DESC")
+            .FirstOrDefaultAsync(token);
+
+        if (metadataHistory != null)
+        {
+            metadata = metadataHistory.Keys.Zip(metadata.Values).ToDictionary(z => z.First, z => z.Second);
+        }
+
+        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
+
+        return new EntityDetailsResponse(adr, metadata);
     }
 }

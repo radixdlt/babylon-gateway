@@ -104,17 +104,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="nfId">The hex-encoded bytes of its non-fungible id (required).</param>
+        /// <param name="nfIdHex">The hex-encoded bytes of its non-fungible id (required).</param>
         /// <param name="isDeleted">isDeleted (required).</param>
         /// <param name="nonFungibleData">nonFungibleData.</param>
-        public NonFungibleSubstateAllOf(string nfId = default(string), bool isDeleted = default(bool), NonFungibleData nonFungibleData = default(NonFungibleData))
+        public NonFungibleSubstateAllOf(string nfIdHex = default(string), bool isDeleted = default(bool), NonFungibleData nonFungibleData = default(NonFungibleData))
         {
-            // to ensure "nfId" is required (not null)
-            if (nfId == null)
+            // to ensure "nfIdHex" is required (not null)
+            if (nfIdHex == null)
             {
-                throw new ArgumentNullException("nfId is a required property for NonFungibleSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("nfIdHex is a required property for NonFungibleSubstateAllOf and cannot be null");
             }
-            this.NfId = nfId;
+            this.NfIdHex = nfIdHex;
             this.IsDeleted = isDeleted;
             this.NonFungibleData = nonFungibleData;
         }
@@ -123,8 +123,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// The hex-encoded bytes of its non-fungible id
         /// </summary>
         /// <value>The hex-encoded bytes of its non-fungible id</value>
-        [DataMember(Name = "nf_id", IsRequired = true, EmitDefaultValue = true)]
-        public string NfId { get; set; }
+        [DataMember(Name = "nf_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string NfIdHex { get; set; }
 
         /// <summary>
         /// Gets or Sets IsDeleted
@@ -146,7 +146,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleSubstateAllOf {\n");
-            sb.Append("  NfId: ").Append(NfId).Append("\n");
+            sb.Append("  NfIdHex: ").Append(NfIdHex).Append("\n");
             sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("  NonFungibleData: ").Append(NonFungibleData).Append("\n");
             sb.Append("}\n");
@@ -185,9 +185,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NfId == input.NfId ||
-                    (this.NfId != null &&
-                    this.NfId.Equals(input.NfId))
+                    this.NfIdHex == input.NfIdHex ||
+                    (this.NfIdHex != null &&
+                    this.NfIdHex.Equals(input.NfIdHex))
                 ) && 
                 (
                     this.IsDeleted == input.IsDeleted ||
@@ -209,9 +209,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NfId != null)
+                if (this.NfIdHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NfId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NfIdHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.NonFungibleData != null)

@@ -62,13 +62,31 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.Commons.Numerics;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-internal interface IMempoolQuerier
+[Table("entity_fungible_resource_history")]
+public class EntityFungibleResourceHistory
 {
-    Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash, CancellationToken token = default);
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
+
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
+
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
+
+    [Column("fungible_resource_entity_id")]
+    public long FungibleResourceEntityId { get; set; }
+
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
 }

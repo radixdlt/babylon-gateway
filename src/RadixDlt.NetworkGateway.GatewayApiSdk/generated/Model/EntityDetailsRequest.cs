@@ -91,27 +91,27 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ComponentStateRequest
+    /// EntityDetailsRequest
     /// </summary>
-    [DataContract(Name = "ComponentStateRequest")]
-    public partial class ComponentStateRequest : IEquatable<ComponentStateRequest>, IValidatableObject
+    [DataContract(Name = "EntityDetailsRequest")]
+    public partial class EntityDetailsRequest : IEquatable<EntityDetailsRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentStateRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ComponentStateRequest() { }
+        protected EntityDetailsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentStateRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsRequest" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public ComponentStateRequest(string address = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        public EntityDetailsRequest(string address = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for ComponentStateRequest and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityDetailsRequest and cannot be null");
             }
             this.Address = address;
             this.AtStateIdentifier = atStateIdentifier;
@@ -137,7 +137,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ComponentStateRequest {\n");
+            sb.Append("class EntityDetailsRequest {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
@@ -160,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ComponentStateRequest);
+            return this.Equals(input as EntityDetailsRequest);
         }
 
         /// <summary>
-        /// Returns true if ComponentStateRequest instances are equal
+        /// Returns true if EntityDetailsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of ComponentStateRequest to be compared</param>
+        /// <param name="input">Instance of EntityDetailsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ComponentStateRequest input)
+        public bool Equals(EntityDetailsRequest input)
         {
             if (input == null)
             {

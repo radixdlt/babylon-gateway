@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.Commons.Numerics;
@@ -106,11 +107,15 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
 
-    public DbSet<TmpBaseEntity> TmpEntities => Set<TmpBaseEntity>();
+    public DbSet<Entity> Entities => Set<Entity>();
 
-    public DbSet<TmpBaseSubstate> TmpSubstates => Set<TmpBaseSubstate>();
+    public DbSet<Substate> Substates => Set<Substate>();
 
-    public DbSet<TmpOwnerEntityFungibleResourceBalanceHistory> TmpOwnerEntityFungibleResourceBalanceHistory => Set<TmpOwnerEntityFungibleResourceBalanceHistory>();
+    public DbSet<EntityFungibleResourceHistory> EntityFungibleResourceHistory => Set<EntityFungibleResourceHistory>();
+
+    public DbSet<EntityNonFungibleResourceHistory> EntityNonFungibleResourceHistory => Set<EntityNonFungibleResourceHistory>();
+
+    public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -130,27 +135,29 @@ internal abstract class CommonDbContext : DbContext
         HookupJoinTables(modelBuilder);
 
         // Configure temporary types
-        modelBuilder.Entity<TmpBaseEntity>()
+        modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("type")
-            .HasValue<TmpSystemEntity>("system")
-            .HasValue<TmpResourceManagerEntity>("resourcemanager")
-            .HasValue<TmpComponentEntity>("component")
-            .HasValue<TmpPackageEntity>("package")
-            .HasValue<TmpKeyValueStoreEntity>("keyvaluestore")
-            .HasValue<TmpVaultEntity>("vault");
+            .HasValue<SystemEntity>("system")
+            .HasValue<ResourceManagerEntity>("resource_manager")
+            .HasValue<ComponentEntity>("component")
+            .HasValue<PackageEntity>("package")
+            .HasValue<ValueStoreEntity>("key_value_store")
+            .HasValue<VaultEntity>("vault");
 
-        modelBuilder.Entity<TmpBaseSubstate>()
+        modelBuilder.Entity<Substate>()
             .HasDiscriminator<string>("type")
-            .HasValue<TmpSystemSubstate>("system")
-            .HasValue<TmpResourceManagerSubstate>("resourcemanager")
-            .HasValue<TmpComponentInfoSubstate>("componentinfo")
-            .HasValue<TmpComponentStateSubstate>("componentstate")
-            .HasValue<TmpPackageSubstate>("package")
-            .HasValue<TmpVaultSubstate>("vault")
-            .HasValue<TmpNonFungibleSubstate>("nonfungible")
-            .HasValue<TmpKeyValueStoreEntrySubstate>("keyvaluestoreentry");
+            .HasValue<SystemSubstate>("system")
+            .HasValue<ResourceManagerSubstate>("resource_manager")
+            .HasValue<ComponentInfoSubstate>("component_info")
+            .HasValue<ComponentStateSubstate>("component_state")
+            .HasValue<PackageSubstate>("package")
+            .HasValue<VaultSubstate>("vault")
+            .HasValue<NonFungibleSubstate>("non_fungible")
+            .HasValue<KeyValueStoreEntrySubstate>("key_value_store_entry");
 
-        modelBuilder.Entity<TmpOwnerEntityFungibleResourceBalanceHistory>();
+        modelBuilder.Entity<EntityFungibleResourceHistory>();
+
+        modelBuilder.Entity<EntityNonFungibleResourceHistory>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -159,6 +166,9 @@ internal abstract class CommonDbContext : DbContext
             .HaveConversion<TokenAmountToBigIntegerConverter>()
             .HaveColumnType("numeric")
             .HavePrecision(1000, 0);
+
+        configurationBuilder.Properties<RadixAddress>()
+            .HaveConversion<RadixAddressToByteArrayConverter>();
 
         configurationBuilder.Properties<MempoolTransactionStatus>()
             .HaveConversion<MempoolTransactionStatusValueConverter>();
