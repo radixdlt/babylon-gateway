@@ -101,7 +101,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [JsonConstructorAttribute]
         protected TransactionPreviewRequest() { }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionPreviewRequest" /> class.
         /// </summary>
@@ -320,6 +319,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // CostUnitLimit (long) maximum
+            if (this.CostUnitLimit > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value less than or equal to 4294967295.", new [] { "CostUnitLimit" });
+            }
+
+            // CostUnitLimit (long) minimum
+            if (this.CostUnitLimit < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for CostUnitLimit, must be a value greater than or equal to 0.", new [] { "CostUnitLimit" });
+            }
+
+            // TipPercentage (long) maximum
+            if (this.TipPercentage > (long)4294967295)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value less than or equal to 4294967295.", new [] { "TipPercentage" });
+            }
+
+            // TipPercentage (long) minimum
+            if (this.TipPercentage < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for TipPercentage, must be a value greater than or equal to 0.", new [] { "TipPercentage" });
+            }
+
             yield break;
         }
     }
