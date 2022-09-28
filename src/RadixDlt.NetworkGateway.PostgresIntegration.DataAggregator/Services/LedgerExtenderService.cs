@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -800,27 +801,27 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 timers.Add("step6_update", sw.Elapsed);
             }
 
-            // TODO super temp, read from SEQ! (setval(getval + N)) - this is not super safe on its own but we're guaranteed DA is running in single instance (no concurrency)
-            var metadata_pk = 1_000_000;
-            var resource_pk = 1_000_000;
-            var agg_pk = 1_000_000;
             var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
 
-            timers.Add("step6_pre", sw.Elapsed);
+            var sequences = await dbConn.QueryFirstAsync<SequenceHolder>(
+                @"
+SELECT
+    setval('entity_metadata_history_id_seq', nextval('entity_metadata_history_id_seq') + @MetadataCount + 1) AS MetadataSequence,
+    setval('entity_resource_aggregate_history_id_seq', nextval('entity_resource_aggregate_history_id_seq') + @AggregatesCount + 1) AS ResourceAggregatesSequence,
+    setval('entity_resource_history_id_seq', nextval('entity_resource_history_id_seq') + @ResourcesCount + 1) AS ResourcesSequence",
+                new
+                {
+                    MetadataCount = metadata.Count,
+                    AggregatesCount = aggregates.Count,
+                    ResourcesCount = fungibles.Count + nonFungibles.Count,
+                });
 
-            await Task.WhenAll(
-                WriteAggHist(dbConn, aggregates, token),
-                WriteResHist(dbConn, fungibles, nonFungibles, token),
-                WriteMetaDataHist(dbConn, metadata, token));
-
-            async Task WriteAggHist(NpgsqlConnection dbConn, List<EntityResourceAggregateHistory> aggregates, CancellationToken token)
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_ids, non_fungible_resource_ids) FROM STDIN (FORMAT BINARY)", token))
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_ids, non_fungible_resource_ids) FROM STDIN (FORMAT BINARY)", token);
-
                 foreach (var aggregate in aggregates)
                 {
                     await writer.StartRowAsync(token);
-                    await writer.WriteAsync(agg_pk++, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(sequences.ResourceAggregatesSequence++, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(aggregate.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(aggregate.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(aggregate.IsMostRecent, NpgsqlDbType.Boolean, token);
@@ -831,15 +832,14 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 await writer.CompleteAsync(token);
             }
 
-            async Task WriteResHist(NpgsqlConnection dbConn, List<EntityFungibleResourceHistory> fungibles, List<EntityNonFungibleResourceHistory> nonFungibles, CancellationToken token)
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, type, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token))
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, type, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token);
                 var type = "fungible";
 
                 foreach (var fungible in fungibles)
                 {
                     await writer.StartRowAsync(token);
-                    await writer.WriteAsync(resource_pk++, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(sequences.ResourcesSequence++, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.OwnerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.GlobalEntityId, NpgsqlDbType.Bigint, token);
@@ -855,7 +855,7 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 foreach (var nonFungible in nonFungibles)
                 {
                     await writer.StartRowAsync(token);
-                    await writer.WriteAsync(resource_pk++, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(sequences.ResourcesSequence++, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.OwnerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.GlobalEntityId, NpgsqlDbType.Bigint, token);
@@ -869,14 +869,12 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 await writer.CompleteAsync(token);
             }
 
-            async Task WriteMetaDataHist(NpgsqlConnection dbConn, List<EntityMetadataHistory> metadata, CancellationToken token)
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, keys, values) FROM STDIN (FORMAT BINARY)", token))
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_metadata_history (id, from_state_version, entity_id, keys, values) FROM STDIN (FORMAT BINARY)", token);
-
                 foreach (var md in metadata)
                 {
                     await writer.StartRowAsync(token);
-                    await writer.WriteAsync(metadata_pk++, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(sequences.MetadataSequence++, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.Keys, NpgsqlDbType.Array | NpgsqlDbType.Text, token);
@@ -894,6 +892,15 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
         }
 
         return new ProcessTransactionsReport(timers, notes);
+    }
+
+    private class SequenceHolder
+    {
+        public long MetadataSequence { get; set; }
+
+        public long ResourceAggregatesSequence { get; set; }
+
+        public long ResourcesSequence { get; set; }
     }
 
     private async Task CreateOrUpdateLedgerStatus(
