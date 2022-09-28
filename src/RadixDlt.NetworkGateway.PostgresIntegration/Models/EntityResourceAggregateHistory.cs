@@ -62,13 +62,15 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_non_fungible_resource_history")]
-public class EntityNonFungibleResourceHistory
+[Table("entity_resource_aggregate_history")]
+[Index(nameof(EntityId), nameof(FromStateVersion))]
+public class EntityResourceAggregateHistory
 {
     [Key]
     [Column("id")]
@@ -77,18 +79,17 @@ public class EntityNonFungibleResourceHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("owner_entity_id")]
-    public long OwnerEntityId { get; set; }
+    [Column("entity_id")]
+    public long EntityId { get; set; }
 
-    [Column("global_entity_id")]
-    public long GlobalEntityId { get; set; }
+    [Column("is_most_recent")]
+    public bool IsMostRecent { get; set; }
 
-    [Column("non_fungible_resource_entity_id")]
-    public long NonFungibleResourceEntityId { get; set; }
+    [Column("fungible_resource_ids")]
+    public long[] FungibleResourceIds { get; set; }
 
-    [Column("ids_count")]
-    public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
+    // TODO add fungible balances so that we can use this table alone?
 
-    [Column("ids")]
-    public long[] Ids { get; set; }
+    [Column("non_fungible_resource_ids")]
+    public long[] NonFungibleResourceIds { get; set; }
 }

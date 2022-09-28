@@ -62,14 +62,17 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_fungible_resource_history")]
-public class EntityFungibleResourceHistory
+[Table("entity_resource_history")]
+[Index(nameof(OwnerEntityId), nameof(FromStateVersion))]
+[Index(nameof(GlobalEntityId), nameof(FromStateVersion))]
+internal abstract class EntityResourceHistory
 {
     [Key]
     [Column("id")]
@@ -84,9 +87,21 @@ public class EntityFungibleResourceHistory
     [Column("global_entity_id")]
     public long GlobalEntityId { get; set; }
 
-    [Column("fungible_resource_entity_id")]
-    public long FungibleResourceEntityId { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
 
+internal class EntityFungibleResourceHistory : EntityResourceHistory
+{
     [Column("balance")]
     public TokenAmount Balance { get; set; }
+}
+
+internal class EntityNonFungibleResourceHistory : EntityResourceHistory
+{
+    [Column("ids_count")]
+    public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
+
+    [Column("ids")]
+    public long[] Ids { get; set; }
 }

@@ -270,44 +270,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Address");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Address"), "hash");
+
+                    b.HasIndex("GlobalAddress");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator<string>("type").HasValue("Entity");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<BigInteger>("Balance")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("balance");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("FungibleResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("fungible_resource_entity_id");
-
-                    b.Property<long>("GlobalEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("global_entity_id");
-
-                    b.Property<long>("OwnerEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("owner_entity_id");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("entity_fungible_resource_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMetadataHistory", b =>
@@ -342,7 +313,47 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_metadata_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long[]>("FungibleResourceIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("fungible_resource_ids");
+
+                    b.Property<bool>("IsMostRecent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_most_recent");
+
+                    b.Property<long[]>("NonFungibleResourceIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("non_fungible_resource_ids");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.HasIndex("IsMostRecent", "EntityId");
+
+                    b.ToTable("entity_resource_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -359,26 +370,27 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("global_entity_id");
 
-                    b.Property<long[]>("Ids")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("ids");
-
-                    b.Property<long>("IdsCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("ids_count");
-
-                    b.Property<long>("NonFungibleResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_resource_entity_id");
-
                     b.Property<long>("OwnerEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("owner_entity_id");
 
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<string>("type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("entity_non_fungible_resource_history");
+                    b.HasIndex("GlobalEntityId", "FromStateVersion");
+
+                    b.HasIndex("OwnerEntityId", "FromStateVersion");
+
+                    b.ToTable("entity_resource_history");
+
+                    b.HasDiscriminator<string>("type").HasValue("EntityResourceHistory");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
@@ -725,6 +737,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EntityId", "Version");
+
                     b.ToTable("substates");
 
                     b.HasDiscriminator<string>("type").HasValue("Substate");
@@ -847,6 +861,38 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("substates");
 
                     b.HasDiscriminator().HasValue("component_state");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
+
+                    b.Property<BigInteger>("Balance")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("balance");
+
+                    b.ToTable("entity_resource_history");
+
+                    b.HasDiscriminator().HasValue("fungible");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
+
+                    b.Property<long[]>("Ids")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("ids");
+
+                    b.Property<long>("IdsCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ids_count");
+
+                    b.ToTable("entity_resource_history");
+
+                    b.HasDiscriminator().HasValue("non_fungible");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntrySubstate", b =>

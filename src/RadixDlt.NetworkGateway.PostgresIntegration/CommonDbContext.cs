@@ -111,9 +111,9 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<Substate> Substates => Set<Substate>();
 
-    public DbSet<EntityFungibleResourceHistory> EntityFungibleResourceHistory => Set<EntityFungibleResourceHistory>();
+    public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
-    public DbSet<EntityNonFungibleResourceHistory> EntityNonFungibleResourceHistory => Set<EntityNonFungibleResourceHistory>();
+    public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
 
     public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
 
@@ -144,6 +144,9 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<ValueStoreEntity>("key_value_store")
             .HasValue<VaultEntity>("vault");
 
+        modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.Address).HasMethod("hash");
+
         modelBuilder.Entity<Substate>()
             .HasDiscriminator<string>("type")
             .HasValue<SystemSubstate>("system")
@@ -155,9 +158,16 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<NonFungibleSubstate>("non_fungible")
             .HasValue<KeyValueStoreEntrySubstate>("key_value_store_entry");
 
-        modelBuilder.Entity<EntityFungibleResourceHistory>();
+        modelBuilder.Entity<Substate>()
+            .HasIndex(e => new { e.EntityId, e.Version });
 
-        modelBuilder.Entity<EntityNonFungibleResourceHistory>();
+        modelBuilder.Entity<EntityResourceHistory>()
+            .HasDiscriminator<string>("type")
+            .HasValue<EntityFungibleResourceHistory>("fungible")
+            .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
+
+        modelBuilder.Entity<EntityResourceAggregateHistory>()
+            .HasIndex(e => new { e.IsMostRecent, e.EntityId }); // TODO filter out IsMostRecent=false?
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

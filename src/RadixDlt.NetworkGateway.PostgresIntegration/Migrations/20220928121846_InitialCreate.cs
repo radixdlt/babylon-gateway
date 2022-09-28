@@ -96,23 +96,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "entity_fungible_resource_history",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    global_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_entity_fungible_resource_history", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "entity_metadata_history",
                 columns: table => new
                 {
@@ -129,7 +112,24 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "entity_non_fungible_resource_history",
+                name: "entity_resource_aggregate_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_most_recent = table.Column<bool>(type: "boolean", nullable: false),
+                    fungible_resource_ids = table.Column<long[]>(type: "bigint[]", nullable: false),
+                    non_fungible_resource_ids = table.Column<long[]>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_entity_resource_aggregate_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "entity_resource_history",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -137,13 +137,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     global_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    ids_count = table.Column<long>(type: "bigint", nullable: false),
-                    ids = table.Column<long[]>(type: "bigint[]", nullable: false)
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    ids_count = table.Column<long>(type: "bigint", nullable: true),
+                    ids = table.Column<long[]>(type: "bigint[]", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_entity_non_fungible_resource_history", x => x.id);
+                    table.PrimaryKey("PK_entity_resource_history", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -636,6 +638,37 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "from_state_version");
 
             migrationBuilder.CreateIndex(
+                name: "IX_entities_address",
+                table: "entities",
+                column: "address")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entities_global_address",
+                table: "entities",
+                column: "global_address");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_resource_aggregate_history_entity_id_from_state_vers~",
+                table: "entity_resource_aggregate_history",
+                columns: new[] { "entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_resource_aggregate_history_is_most_recent_entity_id",
+                table: "entity_resource_aggregate_history",
+                columns: new[] { "is_most_recent", "entity_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_resource_history_global_entity_id_from_state_version",
+                table: "entity_resource_history",
+                columns: new[] { "global_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_resource_history_owner_entity_id_from_state_version",
+                table: "entity_resource_history",
+                columns: new[] { "owner_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_status_top_of_ledger_state_version",
                 table: "ledger_status",
                 column: "top_of_ledger_state_version");
@@ -701,6 +734,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexInclude", new[] { "id" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_substates_entity_id_version",
+                table: "substates",
+                columns: new[] { "entity_id", "version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_validator_proposal_records_last_updated_state_version",
                 table: "validator_proposal_records",
                 column: "last_updated_state_version");
@@ -755,13 +793,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "entities");
 
             migrationBuilder.DropTable(
-                name: "entity_fungible_resource_history");
-
-            migrationBuilder.DropTable(
                 name: "entity_metadata_history");
 
             migrationBuilder.DropTable(
-                name: "entity_non_fungible_resource_history");
+                name: "entity_resource_aggregate_history");
+
+            migrationBuilder.DropTable(
+                name: "entity_resource_history");
 
             migrationBuilder.DropTable(
                 name: "ledger_status");

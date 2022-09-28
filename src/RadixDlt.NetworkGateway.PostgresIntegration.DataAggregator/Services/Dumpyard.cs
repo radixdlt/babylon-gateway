@@ -179,6 +179,84 @@ internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, Refer
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
+internal record AggregateChange
+{
+    public long StateVersion { get; }
+
+    public List<long> FungibleIds { get; } = new();
+
+    public List<long> NonFungibleIds { get; } = new();
+
+    public List<long> RemovedNonFungibleIds { get; } = new();
+
+    public bool IsMostRecent { get; private set; }
+
+    public bool Persistable { get; private set; }
+
+    public AggregateChange(long stateVersion)
+        : this(stateVersion, Array.Empty<long>(), Array.Empty<long>())
+    {
+        Persistable = true;
+    }
+
+    public AggregateChange(long stateVersion, ICollection<long> fungibleIds, ICollection<long> nonFungibleIds)
+    {
+        StateVersion = stateVersion;
+        FungibleIds = new List<long>(fungibleIds);
+        NonFungibleIds = new List<long>(nonFungibleIds);
+    }
+
+    public void AppendFungible(long id)
+    {
+        if (!FungibleIds.Contains(id))
+        {
+            FungibleIds.Add(id);
+        }
+    }
+
+    public void AppendNonFungible(long id)
+    {
+        if (!NonFungibleIds.Contains(id))
+        {
+            NonFungibleIds.Add(id);
+        }
+    }
+
+    public void RemoveNonFungible(long id)
+    {
+        if (!RemovedNonFungibleIds.Contains(id))
+        {
+            RemovedNonFungibleIds.Add(id);
+        }
+    }
+
+    public void Merge(AggregateChange other)
+    {
+        foreach (var id in other.FungibleIds)
+        {
+            AppendFungible(id);
+        }
+
+        foreach (var id in other.NonFungibleIds)
+        {
+            AppendNonFungible(id);
+        }
+
+        foreach (var id in other.RemovedNonFungibleIds)
+        {
+            RemoveNonFungible(id);
+        }
+    }
+
+    public void Resolve()
+    {
+        foreach (var id in RemovedNonFungibleIds)
+        {
+            NonFungibleIds.Remove(id);
+        }
+    }
+}
+
 internal static class DictionaryExtensions
 {
     public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
