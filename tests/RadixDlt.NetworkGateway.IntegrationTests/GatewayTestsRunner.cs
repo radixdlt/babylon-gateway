@@ -27,7 +27,7 @@ public class GatewayTestsRunner : IDisposable
 
     public async Task<GatewayTestsRunner> WaitUntilAllTransactionsAreIngested(TimeSpan? timeout = null)
     {
-        timeout ??= TimeSpan.FromSeconds(5);
+        timeout ??= TimeSpan.FromSeconds(30);
 
         await Task.Delay(timeout.Value);
 
