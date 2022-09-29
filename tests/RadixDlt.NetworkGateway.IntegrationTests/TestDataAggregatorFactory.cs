@@ -105,11 +105,35 @@ public class TestDataAggregatorFactory
             .ConfigureAppConfiguration(
                 (context, config) =>
                 {
+                    // connection string
                     config.AddInMemoryCollection(new[]
                     {
                         new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", dbConnectionString),
                         new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
                         new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
+                    });
+
+                    // "Logging": {
+                    //     "LogLevel": {
+                    //         "Default": "Information",
+                    //         "Microsoft.AspNetCore": "Warning",
+                    //         "Microsoft.Hosting.Lifetime": "Information",
+                    //         "Microsoft.EntityFrameworkCore.Database.Command": "Warning",
+                    //         "Microsoft.EntityFrameworkCore.Infrastructure": "Warning",
+                    //         "System.Net.Http.HttpClient.ICoreApiProvider.LogicalHandler": "Warning",
+                    //         "System.Net.Http.HttpClient.ICoreApiProvider.ClientHandler": "Warning",
+                    //     },
+                    // },
+                    // logging
+                    config.AddInMemoryCollection(new[]
+                    {
+                        new KeyValuePair<string, string>("Logging:LogLevel:Default", "Warning"),
+                        new KeyValuePair<string, string>("Logging:LogLevel:Microsoft.AspNetCore", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.Hosting.Lifetime", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Database.Command", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Infrastructure", "Warning"),
+                        new KeyValuePair<string, string>("System.Net.Http.HttpClient.ICoreApiProvider.LogicalHandler", "Warning"),
+                        new KeyValuePair<string, string>("System.Net.Http.HttpClient.ICoreApiProvider.ClientHandler", "Warning"),
                     });
 
                     // mempool
