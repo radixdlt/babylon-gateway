@@ -77,13 +77,16 @@ public class GatewayEndpointTests
     public async Task TestGatewayApiVersions()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner();
+
         var coreApiStub = gatewayRunner
             .MockGenesis()
             .ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
 
         // Act
-        var payload = await gatewayRunner.ActAsync<GatewayResponse>("/gateway", JsonContent.Create(new object()));
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result
+            .ActAsync<GatewayResponse>("/gateway", JsonContent.Create(new object()));
 
         // Assert
         payload.GatewayApi.ShouldNotBeNull();
@@ -93,5 +96,7 @@ public class GatewayEndpointTests
 
         payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
         payload.GatewayApi.OpenApiSchemaVersion.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
+
+        gatewayRunner.TearDown();
     }
 }

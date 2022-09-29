@@ -1,6 +1,5 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
 using System;
-using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 

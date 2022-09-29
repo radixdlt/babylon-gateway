@@ -24,6 +24,8 @@ public class CoreApiStubDefaultConfiguration
 
     public CommittedTransactionsResponse CommittedTransactionsResponse { get; set; }
 
+    public CommittedTransactionsResponse CommittedGenesisTransactionsResponse { get; set; }
+
     public CoreNodeHealthResult CoreNodeHealthResult { get; set; }
 
     public string CoreVersion { get; set; }
@@ -151,7 +153,7 @@ public class CoreApiStubDefaultConfiguration
                         "address string"),
                 }));
 
-        TransactionPreviewResponse = new RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse(
+        TransactionPreviewResponse = new TransactionPreviewResponse(
             TransactionReceipt,
             new List<ResourceChange>()
             {

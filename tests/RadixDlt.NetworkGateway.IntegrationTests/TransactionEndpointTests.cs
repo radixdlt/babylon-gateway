@@ -64,7 +64,6 @@
 
 using FluentAssertions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -83,7 +82,8 @@ public class TransactionEndpointTests
     public async Task TestTransactionRecent()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner();
+
         var coreApiStub = gatewayRunner
             .MockGenesis()
             .ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
@@ -102,13 +102,16 @@ public class TransactionEndpointTests
         payload.LedgerState.ShouldNotBeNull();
         payload.LedgerState.Network.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
+
+        gatewayRunner.TearDown();
     }
 
     [Fact]
     public async Task TestTransactionPreviewShouldPass()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner();
+
         var coreApiStub = gatewayRunner
             .MockGenesis()
             .ArrangeTransactionPreviewTest(nameof(TestTransactionPreviewShouldPass));
@@ -127,6 +130,8 @@ public class TransactionEndpointTests
         coreApiPayload.ShouldNotBeNull();
         coreApiPayload.Receipt.ShouldNotBeNull();
         coreApiPayload.Receipt.Status.Should().Be(CoreApiSdk.Model.TransactionStatus.Succeeded);
+
+        gatewayRunner.TearDown();
     }
 
     [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
@@ -235,7 +240,7 @@ public class TransactionEndpointTests
     public async Task SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner();
 
         var coreApiStubs = gatewayRunner.MockGenesis()
             .ArrangeSubmittedTransactionStatusTest(
@@ -258,5 +263,7 @@ public class TransactionEndpointTests
         // Assert
         var status = payload.Transaction.TransactionStatus.Status;
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+
+        gatewayRunner.TearDown();
     }
 }

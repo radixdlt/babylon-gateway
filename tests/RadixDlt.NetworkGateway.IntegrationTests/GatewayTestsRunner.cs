@@ -1,7 +1,5 @@
-using Newtonsoft.Json;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Model;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -11,14 +9,14 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using EcdsaSecp256k1PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.EcdsaSecp256k1PublicKey;
 using PublicKeyType = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKeyType;
-using TransactionPreviewRequestFlags = RadixDlt.CoreApiSdk.Model.TransactionPreviewRequestFlags;
 using TransactionStatus = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionStatus;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public class GatewayTestsRunner
+public class GatewayTestsRunner : IDisposable
 {
-    private HttpClient? _client;
+    private TestGatewayApiFactory? _gatewayApiFactory;
+    private TestDataAggregatorFactory? _dataAggregatorFactory;
 
     private CoreApiStub _coreApiStub;
 
@@ -43,12 +41,12 @@ public class GatewayTestsRunner
             throw new Exception("Gateway api uri is missing.");
         }
 
-        if (_client == null)
+        if (_gatewayApiFactory == null)
         {
             throw new Exception("Gateway http client is not initialized.");
         }
 
-        using var response = await _client.PostAsync(requestUri, content);
+        using var response = await _gatewayApiFactory.Client.PostAsync(requestUri, content);
 
         var payload = await response.ParseToObjectAndAssert<T>();
 
@@ -57,9 +55,52 @@ public class GatewayTestsRunner
 
     public GatewayTestsRunner MockGenesis()
     {
-        var json = System.IO.File.ReadAllText("genesis.json");
+        var (tokenEntity, tokens) = new FungibleResourceBuilder()
+            .WithResourceName("XRD Tokens")
+            .WithFixedAddress("resource_tdx_21_1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqvmpphj")
+            .Build();
 
-        _coreApiStub.CoreApiStubDefaultConfiguration.CommittedTransactionsResponse = JsonConvert.DeserializeObject<CommittedTransactionsResponse>(json);
+        _coreApiStub.GlobalEntities.Add(tokenEntity);
+        _coreApiStub.GlobalEntities.AddStateUpdates(tokens);
+
+        var (vaultEntity, vault) = new VaultBuilder()
+            .WithVaultName("SysFaucet Vault")
+            .WithFungibleTokens(tokenEntity.GlobalAddress)
+            .Build();
+
+        _coreApiStub.GlobalEntities.Add(vaultEntity); // only for testing purposes, vault is not a global entity!
+
+        _coreApiStub.GlobalEntities.AddStateUpdates(vault);
+        var (packageEntity, package) = new PackageBuilder()
+            .WithBlueprints(new List<IBlueprint> { new SysFaucetBlueprint() })
+            .Build();
+
+        _coreApiStub.GlobalEntities.Add(packageEntity);
+        _coreApiStub.GlobalEntities.AddStateUpdates(package);
+
+        var (componentEntity, component) = new ComponentBuilder()
+            .WithComponentName("SysFaucet component")
+            .WithComponentInfoSubstate(packageEntity.GlobalAddress, packageEntity.Name)
+            .WithVault(vaultEntity.EntityAddressHex)
+            .Build();
+
+        _coreApiStub.GlobalEntities.Add(componentEntity);
+        _coreApiStub.GlobalEntities.AddStateUpdates(component);
+
+        var transactionReceipt = new TransactionReceiptBuilder().WithStateUpdates(_coreApiStub.GlobalEntities.StateUpdates).Build();
+
+        _coreApiStub.CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse = new(
+            fromStateVersion: 1L,
+            toStateVersion: 1L,
+            maxStateVersion: 363L,
+            transactions: new List<CommittedTransaction>()
+            {
+                new(
+                    stateVersion: 1L, notarizedTransaction: null,
+                    receipt: transactionReceipt
+                ),
+            }
+        );
 
         return this;
     }
@@ -82,24 +123,21 @@ public class GatewayTestsRunner
                 break;
         }
 
-        _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
-        TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+        Initialize(databaseName);
 
         return _coreApiStub;
     }
 
     public CoreApiStub ArrangeSubmittedTransactionStatusTest(string databaseName)
     {
-        _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
-        TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+        Initialize(databaseName);
 
         return _coreApiStub;
     }
 
     public CoreApiStub ArrangeGatewayVersionsTest(string databaseName)
     {
-        _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
-        TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+        Initialize(databaseName);
 
         // set custom gatewayApi and openSchemaApi versions
 
@@ -108,8 +146,7 @@ public class GatewayTestsRunner
 
     public CoreApiStub ArrangeTransactionRecentTest(string databaseName)
     {
-        _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
-        TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+        Initialize(databaseName);
 
         // set custom transaction data
 
@@ -118,8 +155,7 @@ public class GatewayTestsRunner
 
     public CoreApiStub ArrangeTransactionPreviewTest(string databaseName)
     {
-        _client = TestGatewayApiFactory.Create(_coreApiStub, databaseName).Client;
-        TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+        Initialize(databaseName);
 
         // set preview request
         _coreApiStub.CoreApiStubDefaultConfiguration.TransactionPreviewRequest = new GatewayApiSdk.Model.TransactionPreviewRequest(
@@ -137,5 +173,34 @@ public class GatewayTestsRunner
             flags: new GatewayApiSdk.Model.TransactionPreviewRequestFlags(unlimitedLoan: false));
 
         return _coreApiStub;
+    }
+
+    public void Initialize(string databaseName)
+    {
+        _gatewayApiFactory = TestGatewayApiFactory.Create(_coreApiStub, databaseName);
+        _dataAggregatorFactory = TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+    }
+
+    // Tear down
+    public void TearDown()
+    {
+        if (_dataAggregatorFactory != null)
+        {
+            _dataAggregatorFactory.Server.Dispose();
+            _dataAggregatorFactory.Dispose();
+            _dataAggregatorFactory = null;
+        }
+
+        if (_gatewayApiFactory != null)
+        {
+            _gatewayApiFactory.Server.Dispose();
+            _gatewayApiFactory.Dispose();
+            _gatewayApiFactory = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        TearDown();
     }
 }
