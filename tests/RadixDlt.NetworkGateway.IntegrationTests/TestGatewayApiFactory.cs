@@ -129,6 +129,7 @@ public class TestGatewayApiFactory
                 services.AddSingleton<ITransactionLogReader>(_coreApiStub);
                 // services.AddSingleton<ICoreApiProvider>(_coreApiStub);
                 services.AddSingleton<ICoreApiHandler>(_coreApiStub);
+                services.AddSingleton<ICapturedConfigProvider>(_coreApiStub);
 
                 var sp = services.BuildServiceProvider();
 

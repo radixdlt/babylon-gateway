@@ -2,15 +2,22 @@
 
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ICoreApiProvider = RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders.ICoreApiProvider;
+using TransactionPreviewRequest = RadixDlt.CoreApiSdk.Model.TransactionPreviewRequest;
+using TransactionPreviewResponse = RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse;
+using TransactionSubmitRequest = RadixDlt.CoreApiSdk.Model.TransactionSubmitRequest;
+using TransactionSubmitResponse = RadixDlt.CoreApiSdk.Model.TransactionSubmitResponse;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 
@@ -20,7 +27,8 @@ public class CoreApiStub :
     ITransactionLogReader,
     ICoreApiProvider,
     GatewayApi.CoreCommunications.ICoreApiProvider,
-    ICoreApiHandler
+    ICoreApiHandler,
+    ICapturedConfigProvider
 {
     private bool _genesisWasIngested = false;
 
@@ -89,4 +97,35 @@ public class CoreApiStub :
     }
 
     #endregion
+
+    public async Task<CapturedConfig> CaptureConfiguration()
+    {
+        var networkConfiguration = MapNetworkConfigurationResponse(CoreApiStubDefaultConfiguration.NetworkConfigurationResponse);
+
+        return await Task.FromResult(new CapturedConfig(
+            networkConfiguration.NetworkDefinition.NetworkName,
+            networkConfiguration.WellKnownAddresses.XrdAddress,
+            networkConfiguration.NetworkAddressHrps.ToAddressHrps(),
+            new TokenIdentifier(networkConfiguration.WellKnownAddresses.XrdAddress)
+        ));
+    }
+
+    private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
+    {
+        return new NetworkConfiguration
+        {
+            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.Network },
+            NetworkAddressHrps = new NetworkAddressHrps
+            {
+                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
+                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
+                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
+                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
+            },
+            WellKnownAddresses = new WellKnownAddresses
+            {
+                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
+            },
+        };
+    }
 }
