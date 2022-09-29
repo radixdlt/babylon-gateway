@@ -144,7 +144,6 @@ public class TestGatewayApiFactory
                 dbReadyOnlyContext.Database.EnsureDeleted();
 
                 // This function will also run migrations!
-                dbReadyOnlyContext.Database.Migrate();
                 dbReadyOnlyContext.Database.EnsureCreated();
 
                 services.PostConfigure<NetworkOptions>(o =>
