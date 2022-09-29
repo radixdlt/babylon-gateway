@@ -94,7 +94,7 @@ public class CoreApiStubDefaultConfiguration
         NetworkConfigurationResponse = new NetworkConfigurationResponse(
             new NetworkConfigurationResponseVersion(CoreVersion, ApiVersion),
             NetworkName,
-            "_dr"
+            "loc"
         );
 
         SubmitTransaction =
@@ -102,7 +102,7 @@ public class CoreApiStubDefaultConfiguration
 
         var stateUpdatesList = new List<StateUpdates>();
 
-        var (tokenEntity, tokenStates) = new FungibleResourceBuilder()
+        var (tokenEntity, tokenStates) = new FungibleResourceBuilder(NetworkConfigurationResponse)
             .WithResourceName("PreviewToken")
             .WithFixedAddress("resource_loc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqjw23a7")
             .Build();

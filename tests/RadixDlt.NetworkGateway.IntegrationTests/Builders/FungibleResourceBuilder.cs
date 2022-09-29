@@ -1,15 +1,23 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class FungibleResourceBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
-    private string _resourceAddress = "resource_tdx_21_1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqvmpphj";
+    private string _resourceAddress = string.Empty;
 
     private string _resourceName = string.Empty;
+
+    public FungibleResourceBuilder(NetworkConfigurationResponse networkConfiguration)
+    {
+        // generate something like: resource_loc_1qqwknku2
+        _resourceAddress = AddressHelper.GenerateRandomAddress("resource_" + networkConfiguration.NetworkHrpSuffix);
+    }
 
     public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {

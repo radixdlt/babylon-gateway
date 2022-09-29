@@ -27,7 +27,7 @@ public class GatewayTestsRunner : IDisposable
 
     public async Task<GatewayTestsRunner> WaitUntilAllTransactionsAreIngested(TimeSpan? timeout = null)
     {
-        timeout ??= TimeSpan.FromSeconds(10);
+        timeout ??= TimeSpan.FromSeconds(5);
 
         await Task.Delay(timeout.Value);
 
@@ -55,15 +55,16 @@ public class GatewayTestsRunner : IDisposable
 
     public GatewayTestsRunner MockGenesis()
     {
-        var (tokenEntity, tokens) = new FungibleResourceBuilder()
+        var networkConfiguration = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse;
+
+        var (tokenEntity, tokens) = new FungibleResourceBuilder(networkConfiguration)
             .WithResourceName("XRD Tokens")
-            .WithFixedAddress("resource_tdx_21_1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqvmpphj")
             .Build();
 
         _coreApiStub.GlobalEntities.Add(tokenEntity);
         _coreApiStub.GlobalEntities.AddStateUpdates(tokens);
 
-        var (vaultEntity, vault) = new VaultBuilder()
+        var (vaultEntity, vault) = new VaultBuilder(_coreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse)
             .WithVaultName("SysFaucet Vault")
             .WithFungibleTokens(tokenEntity.GlobalAddress)
             .Build();
@@ -78,7 +79,7 @@ public class GatewayTestsRunner : IDisposable
         _coreApiStub.GlobalEntities.Add(packageEntity);
         _coreApiStub.GlobalEntities.AddStateUpdates(package);
 
-        var (componentEntity, component) = new ComponentBuilder()
+        var (componentEntity, component) = new ComponentBuilder(_coreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse)
             .WithComponentName("SysFaucet component")
             .WithComponentInfoSubstate(packageEntity.GlobalAddress, packageEntity.Name)
             .WithVault(vaultEntity.EntityAddressHex)
@@ -129,6 +130,13 @@ public class GatewayTestsRunner : IDisposable
     }
 
     public CoreApiStub ArrangeSubmittedTransactionStatusTest(string databaseName)
+    {
+        Initialize(databaseName);
+
+        return _coreApiStub;
+    }
+
+    public CoreApiStub ArrangeSubmitTransactionTest(string databaseName)
     {
         Initialize(databaseName);
 

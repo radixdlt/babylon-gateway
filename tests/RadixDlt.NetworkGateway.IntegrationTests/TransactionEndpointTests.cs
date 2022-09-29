@@ -211,16 +211,19 @@ public class TransactionEndpointTests
         status.Should().Be(TransactionStatus.StatusEnum.PENDING);
     }
 
-    [Fact(Skip = "Valid transaction payload is required")]
+    [Fact]
     public async Task TestTransactionSubmit()
     {
-        var coreApiStub = new CoreApiStub();
-
-        var client = TestGatewayApiFactory.Create(coreApiStub, nameof(TestTransactionSubmit)).Client;
-
         // Arrange
+        var gatewayRunner = new GatewayTestsRunner();
+
+        var coreApiStubs = gatewayRunner
+            .MockGenesis()
+            .ArrangeSubmitTransactionTest(
+                nameof(TestTransactionSubmit));
+
         var hexTransaction = Convert
-            .ToHexString(Encoding.UTF8.GetBytes(coreApiStub.CoreApiStubDefaultConfiguration.SubmitTransaction))
+            .ToHexString(Encoding.UTF8.GetBytes(coreApiStubs.CoreApiStubDefaultConfiguration.SubmitTransaction))
             .ToLowerInvariant();
 
         var json = new TransactionSubmitRequest(hexTransaction).ToJson();
@@ -228,15 +231,18 @@ public class TransactionEndpointTests
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        var response = await client.PostAsync("/transaction/submit", content);
+        var payload = await gatewayRunner
+            .WaitUntilAllTransactionsAreIngested().Result
+            .ActAsync<TransactionSubmitResponse>("/transaction/submit", content);
 
         // Assert
-        var payload = await response.ParseToObjectAndAssert<TransactionSubmitResponse>();
-
         payload.Duplicate.Should().Be(false);
+
+        // TODO: should also return intent hash
+        // payload.IntentHash.ShouldNoBreNull();
     }
 
-    [Fact]
+    [Fact(Skip ="TransactionSubmitResponse and/or RecentTransactionsResponse should return IntentHash")]
     public async Task SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
@@ -248,6 +254,7 @@ public class TransactionEndpointTests
 
         // Act
         var recentTransactions = await gatewayRunner
+            .MockGenesis()
             .WaitUntilAllTransactionsAreIngested().Result
             .ActAsync<RecentTransactionsResponse>(
                 "/transaction/recent",

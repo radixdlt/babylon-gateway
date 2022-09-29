@@ -8,13 +8,18 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class ComponentBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
-    private string _componentAddress = "system_tdx_21_1qsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsnrdh62";
+    private string _componentAddress = string.Empty;
 
     private string _keyValueStoreAddressHex = "000000000000000000000000000000000000000000000000000000000000000001000000";
 
     private Substate? _substateData;
     private string _componentName = string.Empty;
     private string _vaultAddressHex = string.Empty;
+
+    public ComponentBuilder(NetworkConfigurationResponse networkConfiguration)
+    {
+        _componentAddress = AddressHelper.GenerateRandomAddress("component_" + networkConfiguration.NetworkHrpSuffix);
+    }
 
     public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {

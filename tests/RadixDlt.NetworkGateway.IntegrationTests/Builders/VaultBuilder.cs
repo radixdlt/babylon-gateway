@@ -6,7 +6,13 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class VaultBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
-    private string _vaultAddressHex = "000000000000000000000000000000000000000000000000000000000000000000000000";
+    private string _vaultAddressHex = string.Empty;
+
+    public VaultBuilder(NetworkConfigurationResponse networkConfiguration)
+    {
+        var vaultAddress = AddressHelper.GenerateRandomAddress("component_" + networkConfiguration.NetworkHrpSuffix);
+        _vaultAddressHex = AddressHelper.AddressToHex(vaultAddress);
+    }
 
     private string _resourceAddress = string.Empty;
     private string _vaultName = string.Empty;
