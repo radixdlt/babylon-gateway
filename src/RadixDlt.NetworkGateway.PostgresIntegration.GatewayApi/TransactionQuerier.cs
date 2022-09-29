@@ -222,15 +222,9 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private async Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState, CancellationToken token)
+    private Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState, CancellationToken token)
     {
-        return await _dbContext.AccountTransactions
-            .Where(at =>
-                at.Account.Address == accountAddress.Address
-                && at.ResultantStateVersion <= ledgerState._Version
-                && !at.LedgerTransaction.IsStartOfEpoch
-            )
-            .CountAsync(token);
+        throw new NotImplementedException();
     }
 
     private async Task<List<long>> GetRecentUserTransactionStateVersions(
@@ -271,23 +265,12 @@ internal class TransactionQuerier : ITransactionQuerier
         }
     }
 
-    private async Task<List<long>> GetAccountTransactionStateVersions(
+    private Task<List<long>> GetAccountTransactionStateVersions(
         AccountTransactionPageRequest request,
         Gateway.LedgerState ledgerState,
         CancellationToken token)
     {
-        var stateVersionUpperBound = request.Cursor?.StateVersionBoundary ?? ledgerState._Version;
-
-        return await _dbContext.AccountTransactions
-            .Where(at =>
-                at.Account.Address == request.AccountAddress.Address
-                && at.ResultantStateVersion <= stateVersionUpperBound
-                && at.IsUserTransaction
-            )
-            .OrderByDescending(at => at.ResultantStateVersion)
-            .Take(request.PageSize + 1)
-            .Select(at => at.ResultantStateVersion)
-            .ToListAsync(token);
+        throw new NotImplementedException();
     }
 
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
