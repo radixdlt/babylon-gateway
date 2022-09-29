@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Addressing;
@@ -234,10 +233,10 @@ INNER JOIN LATERAL (
         var metadata = new Dictionary<string, string>();
         var metadataHistory = await _dbContext.EntityMetadataHistory
             .FromSqlInterpolated($@"
-SELECT DISTINCT ON (entity_id) *
+SELECT *
 FROM entity_metadata_history
 WHERE entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
-ORDER BY entity_id, from_state_version DESC")
+ORDER BY from_state_version DESC")
             .FirstOrDefaultAsync(token);
 
         if (metadataHistory != null)

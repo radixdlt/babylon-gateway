@@ -117,6 +117,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
 
+    public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -134,7 +136,6 @@ internal abstract class CommonDbContext : DbContext
         HookupRecords(modelBuilder);
         HookupJoinTables(modelBuilder);
 
-        // Configure temporary types
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("type")
             .HasValue<SystemEntity>("system")

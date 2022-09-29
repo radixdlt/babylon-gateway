@@ -149,6 +149,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "fungible_resource_supply_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_fungible_resource_supply_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "mempool_transactions",
                 columns: table => new
                 {
@@ -669,6 +686,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "owner_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_fungible_resource_supply_history_resource_entity_id_from_st~",
+                table: "fungible_resource_supply_history",
+                columns: new[] { "resource_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ledger_status_top_of_ledger_state_version",
                 table: "ledger_status",
                 column: "top_of_ledger_state_version");
@@ -800,6 +822,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "entity_resource_history");
+
+            migrationBuilder.DropTable(
+                name: "fungible_resource_supply_history");
 
             migrationBuilder.DropTable(
                 name: "ledger_status");

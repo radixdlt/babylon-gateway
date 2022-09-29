@@ -303,6 +303,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var fungibleResourceChanges = new List<FungibleResourceChange>();
         var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
         var metadataChanges = new List<MetadataChange>();
+        var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
 
         // step 1: scan for any referenced entities
         {
@@ -365,7 +366,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                 {
-                    referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex);
+                    referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex, newGlobalEntity.GlobalAddress, _networkConfigurationProvider.GetAddressHrps());
                 }
             }
 
@@ -380,22 +381,9 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
             ComponentEntity CreateComponentEntity(ReferencedEntity re)
             {
-                // TODO use some enum or something!
-
-                var kind = "normal";
-
-                if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().AccountHrp))
-                {
-                    kind = "account";
-                }
-                else if (re.Address.StartsWith(_networkConfigurationProvider.GetAddressHrps().ValidatorHrp))
-                {
-                    kind = "validator";
-                }
-
                 return new ComponentEntity
                 {
-                    Kind = kind,
+                    Kind = re.ComponentKind ?? "unknown", // TODO shouldn't we throw or something?
                 };
             }
 
@@ -438,7 +426,7 @@ WHERE id IN(
 
                 dbEntity.FromStateVersion = e.StateVersion;
                 dbEntity.Address = e.Address.ConvertFromHex();
-                dbEntity.GlobalAddress = e.GlobalAddressBytes == null ? null : (RadixAddress)e.GlobalAddressBytes;
+                dbEntity.GlobalAddress = e.GlobalAddress == null ? null : (RadixAddress)e.GlobalAddress;
 
                 dbContext.Entities.Add(dbEntity);
 
@@ -461,12 +449,14 @@ WHERE id IN(
             ResourceManagerSubstate CreateResourceManagerSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetResourceManagerSubstate();
+                var totalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos);
 
                 metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
+                fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(us.ReferencedEntity, totalSupply, TokenAmount.Zero, TokenAmount.Zero, us.StateVersion)); // TODO support mint & burnt
 
                 return new ResourceManagerSubstate
                 {
-                    TotalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos),
+                    TotalSupply = totalSupply,
                     FungibleDivisibility = data.FungibleDivisibility,
                 };
             }
@@ -724,6 +714,17 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
                 })
                 .ToList();
 
+            var fungibleSupplies = fungibleResourceSupplyChanges
+                .Select(e => new FungibleResourceSupplyHistory
+                {
+                    FromStateVersion = e.StateVersion,
+                    ResourceEntityId = e.ResourceEntity.DatabaseId,
+                    TotalSupply = e.TotalSupply,
+                    TotalMinted = e.TotalMinted,
+                    TotalBurnt = e.TotalBurnt,
+                })
+                .ToList();
+
             var aggregateDeltaIds = aggregateDelta.Keys.ToList();
             var existingAggregates = await dbContext.EntityResourceAggregateHistory
                 .Where(e => e.IsMostRecent)
@@ -808,12 +809,14 @@ WHERE s.key = data.key AND s.entity_id = data.entity_id AND s.version = data.ver
 SELECT
     setval('entity_metadata_history_id_seq', nextval('entity_metadata_history_id_seq') + @MetadataCount + 1) AS MetadataSequence,
     setval('entity_resource_aggregate_history_id_seq', nextval('entity_resource_aggregate_history_id_seq') + @AggregatesCount + 1) AS ResourceAggregatesSequence,
-    setval('entity_resource_history_id_seq', nextval('entity_resource_history_id_seq') + @ResourcesCount + 1) AS ResourcesSequence",
+    setval('entity_resource_history_id_seq', nextval('entity_resource_history_id_seq') + @ResourcesCount + 1) AS ResourcesSequence,
+    setval('fungible_resource_supply_history_id_seq', nextval('fungible_resource_supply_history_id_seq') + @ResourcesCount + 1) AS FungibleSupplySequence",
                 new
                 {
                     MetadataCount = metadata.Count,
                     AggregatesCount = aggregates.Count,
                     ResourcesCount = fungibles.Count + nonFungibles.Count,
+                    FungibleSupplySequence = fungibleSupplies.Count,
                 });
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_ids, non_fungible_resource_ids) FROM STDIN (FORMAT BINARY)", token))
@@ -884,6 +887,22 @@ SELECT
                 await writer.CompleteAsync(token);
             }
 
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY fungible_resource_supply_history (id, from_state_version, resource_entity_id, total_supply, total_minted, total_burnt) FROM STDIN (FORMAT BINARY)", token))
+            {
+                foreach (var fs in fungibleSupplies)
+                {
+                    await writer.StartRowAsync(token);
+                    await writer.WriteAsync(sequences.FungibleSupplySequence++, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(fs.FromStateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(fs.ResourceEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(fs.TotalSupply.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(fs.TotalMinted.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(fs.TotalBurnt.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                }
+
+                await writer.CompleteAsync(token);
+            }
+
             notes.Add("step6_aggCnt", aggregates.Count.ToString());
             notes.Add("step6_funCnt", fungibles.Count.ToString());
             notes.Add("step6_nonFunCnt", nonFungibles.Count.ToString());
@@ -901,6 +920,8 @@ SELECT
         public long ResourceAggregatesSequence { get; set; }
 
         public long ResourcesSequence { get; set; }
+
+        public long FungibleSupplySequence { get; set; }
     }
 
     private async Task CreateOrUpdateLedgerStatus(

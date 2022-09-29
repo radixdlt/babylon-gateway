@@ -63,6 +63,9 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -80,7 +83,9 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     private long? _ownerAncestorId;
     private long? _globalAncestorId;
 
-    public byte[]? GlobalAddressBytes { get; private set; }
+    public RadixAddress? GlobalAddress { get; private set; }
+
+    public string? ComponentKind { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
@@ -112,9 +117,23 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
 
-    public void Globalize(string addressBytes)
+    public void Globalize(string addressHex, string address, AddressHrps networkHrps)
     {
-        GlobalAddressBytes = Convert.FromHexString(addressBytes);
+        // TODO we probably want to differentiate all possible HRPs
+
+        var kind = "normal";
+
+        if (addressHex.StartsWith(networkHrps.AccountHrp))
+        {
+            kind = "account";
+        }
+        else if (addressHex.StartsWith(networkHrps.ValidatorHrp))
+        {
+            kind = "validator";
+        }
+
+        GlobalAddress = addressHex.ConvertFromHex();
+        ComponentKind = kind;
     }
 
     public void Resolve(Entity entity)
@@ -178,6 +197,8 @@ internal record FungibleResourceChange(ReferencedEntity SubstateEntity, Referenc
 internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
+
+internal record FungibleResourceSupply(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, TokenAmount TotalMinted, TokenAmount TotalBurnt, long StateVersion);
 
 internal record AggregateChange
 {
