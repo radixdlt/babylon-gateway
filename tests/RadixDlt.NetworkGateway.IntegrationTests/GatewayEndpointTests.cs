@@ -67,12 +67,12 @@ using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http.Json;
 using System.Reflection;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
+[Collection("Gateway Api integration tests")]
 public class GatewayEndpointTests
 {
     private readonly ITestOutputHelper _testConsole;

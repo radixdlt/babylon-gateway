@@ -63,7 +63,6 @@
  */
 
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -72,12 +71,12 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
+[Collection("Gateway Api integration tests")]
 public class TransactionEndpointTests
 {
     private readonly ITestOutputHelper _testConsole;
