@@ -2,6 +2,7 @@ using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ public class GatewayTestsRunner : IDisposable
         var networkConfiguration = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse;
 
         var (tokenEntity, tokens) = new FungibleResourceBuilder(networkConfiguration)
-            .WithResourceName("XRD Tokens")
+            .WithResourceName("XRD")
             .Build();
 
         _coreApiStub.GlobalEntities.Add(tokenEntity);
@@ -72,17 +73,20 @@ public class GatewayTestsRunner : IDisposable
         _coreApiStub.GlobalEntities.Add(vaultEntity); // only for testing purposes, vault is not a global entity!
 
         _coreApiStub.GlobalEntities.AddStateUpdates(vault);
+
         var (packageEntity, package) = new PackageBuilder()
             .WithBlueprints(new List<IBlueprint> { new SysFaucetBlueprint() })
+            .WithFixedAddress(GenesisData.SysFaucetPackageAddress)
             .Build();
 
         _coreApiStub.GlobalEntities.Add(packageEntity);
         _coreApiStub.GlobalEntities.AddStateUpdates(package);
 
+        // TODO: KeyValueStore builder !!!
         var (componentEntity, component) = new ComponentBuilder(_coreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse)
-            .WithComponentName("SysFaucet component")
-            .WithComponentInfoSubstate(packageEntity.GlobalAddress, packageEntity.Name)
-            .WithVault(vaultEntity.EntityAddressHex)
+            .WithComponentName(GenesisData.SysFaucetBlueprintName)
+            .WithComponentInfoSubstate(GenesisData.SysFaucetInfoSubstate)
+            .WithComponentStateSubstate(GenesisData.SysFaucetStateSubstate(vaultEntity.EntityAddressHex, "000000000000000000000000000000000000000000000000000000000000000001000000"))
             .Build();
 
         _coreApiStub.GlobalEntities.Add(componentEntity);
@@ -102,6 +106,21 @@ public class GatewayTestsRunner : IDisposable
                 ),
             }
         );
+
+        return this;
+    }
+
+    public GatewayTestsRunner WithAccount(string accountName, string token, long balance)
+    {
+        var (accountEntity, account) = new AccountBuilder(_coreApiStub.CoreApiStubDefaultConfiguration, _coreApiStub.GlobalEntities)
+            .WithAccountName(accountName)
+            .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
+            .WithTokenName(token)
+            .WithBalance(balance)
+            .Build();
+
+        _coreApiStub.GlobalEntities.Add(accountEntity);
+        _coreApiStub.GlobalEntities.AddStateUpdates(account);
 
         return this;
     }
@@ -176,7 +195,7 @@ public class GatewayTestsRunner : IDisposable
             {
                 new(new EcdsaSecp256k1PublicKey(
                     keyType: PublicKeyType.EcdsaSecp256k1,
-                    keyHex: "010000000000000000000000000000000000000000000000000001")),
+                    keyHex: "010000000000000000000000000000001")),
             },
             flags: new GatewayApiSdk.Model.TransactionPreviewRequestFlags(unlimitedLoan: false));
 
@@ -188,7 +207,7 @@ public class GatewayTestsRunner : IDisposable
         _gatewayApiFactory = TestGatewayApiFactory.Create(_coreApiStub, databaseName);
 
         // allow db creation
-        Task t = WaitAsync(TimeSpan.FromSeconds(30));
+        Task t = WaitAsync(TimeSpan.FromSeconds(10));
         t.Wait();
 
         _dataAggregatorFactory = TestDataAggregatorFactory.Create(_coreApiStub, databaseName);

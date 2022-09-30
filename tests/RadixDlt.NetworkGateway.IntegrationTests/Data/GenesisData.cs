@@ -1,7 +1,60 @@
-﻿namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
+﻿using Newtonsoft.Json.Linq;
+using RadixDlt.CoreApiSdk.Model;
+using System.Collections.Generic;
 
-public static class GenesisBinaryData
+namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
+
+public static class GenesisData
 {
+    public static string SysFaucetPackageAddress
+    {
+        get
+        {
+            return "package_tdx_21_1qyqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsc9ekjt";
+        }
+    }
+
+    public static string SysFaucetBlueprintName
+    {
+        get
+        {
+            return "SysFaucet";
+        }
+    }
+
+    public static ComponentInfoSubstate SysFaucetInfoSubstate
+    {
+        get
+        {
+            return new ComponentInfoSubstate(
+                entityType: EntityType.Component,
+                substateType: SubstateType.ComponentInfo,
+                packageAddress: SysFaucetPackageAddress,
+                blueprintName: SysFaucetBlueprintName
+            );
+        }
+    }
+
+    public static ComponentStateSubstate SysFaucetStateSubstate(string vaultAddressHex, string keyValueStoreAddressHex)
+    {
+        return new ComponentStateSubstate(
+            entityType: EntityType.Component,
+            substateType: SubstateType.ComponentState,
+            dataStruct: new DataStruct(
+                structData: new SborData(
+                    dataHex: "1002000000b3240000000000000000000000000000000000000000000000000000000000000000000000000000008324000000000000000000000000000000000000000000000000000000000000000000000001000000",
+                    dataJson: JObject.Parse($"{{\"fields\": [{{\"bytes\": \"{vaultAddressHex}\", \"type\": \"Custom\", \"type_id\": 179}}, {{\"bytes\": \"{keyValueStoreAddressHex}\", \"type\": \"Custom\", \"type_id\": 131}}], \"type\": \"Struct\"}}")
+                ),
+                ownedEntities: new List<EntityId>()
+                {
+                    new(entityType: EntityType.Vault, entityAddressHex: vaultAddressHex),
+                    new(entityType: EntityType.KeyValueStore, entityAddressHex: keyValueStoreAddressHex),
+                },
+                referencedEntities: new List<EntityId>()
+            )
+        );
+    }
+
     public static string SysFaucetCodeHex
     {
         get

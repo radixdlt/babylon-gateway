@@ -36,4 +36,12 @@ public static class AddressHelper
 
         return RadixBech32.Bech32EncodeRawAddressData(hrpSuffix, Encoding.Default.GetBytes(addressData));
     }
+
+    public static string GenerateRandomPublicKey()
+    {
+        byte[] publicKey = new byte[33];
+        new Random().NextBytes(publicKey);
+
+        return Convert.ToHexString(publicKey).ToLower();
+    }
 }

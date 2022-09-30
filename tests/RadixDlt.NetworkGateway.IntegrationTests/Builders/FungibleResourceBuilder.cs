@@ -61,7 +61,7 @@ public class FungibleResourceBuilder : IBuilder<(TestGlobalEntity TestGlobalEnti
                         },
                         totalSupplyAttos: "1000000000000000000000000000000")
                 ),
-                substateHex: GenesisBinaryData.FungibleResourceCodeHex,
+                substateHex: GenesisData.FungibleResourceCodeHex,
                 substateDataHash: "3dc43a58c5cc27bba7d9a96966c8d66a230c781ec04f936bf10130688ed887cf"
             ),
         };

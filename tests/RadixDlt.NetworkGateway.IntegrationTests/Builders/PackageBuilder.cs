@@ -48,9 +48,9 @@ public class PackageBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, State
                     actualInstance: new PackageSubstate(
                         entityType: EntityType.Package,
                         substateType: SubstateType.Package,
-                        codeHex: GenesisBinaryData.SysFaucetCodeHex)
+                        codeHex: GenesisData.SysFaucetCodeHex)
                 ),
-                substateHex: GenesisBinaryData.SysFaucetSubstateHex,
+                substateHex: GenesisData.SysFaucetSubstateHex,
                 substateDataHash: "ccceea5952ca631dcf65146141884a6fbeb0b3b0535fee3d58124a5e9823cb53"
             ),
         };
