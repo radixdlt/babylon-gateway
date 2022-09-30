@@ -15,13 +15,14 @@ jobs:
       postgres:
         image: postgres:14.5-alpine
         env:
+          POSTGRES_DB: postgres
           POSTGRES_USER: db_dev_superuser
           POSTGRES_PASSWORD: db_dev_password
           POSTGRES_PORT: 5432
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd pg_isready -U $POSTGRES_USER -d $POSTGRES_DB || exit 1
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
