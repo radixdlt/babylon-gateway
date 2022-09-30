@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.DataAggregatorRunner;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using System.Collections.Generic;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
@@ -82,18 +83,21 @@ public class TestDataAggregatorFactory
     private readonly CoreApiStub _coreApiStub;
 
     private readonly string _databaseName;
+    private readonly ITestOutputHelper _testConsole;
 
-    private TestDataAggregatorFactory(CoreApiStub coreApiStub, string databaseName)
+    private TestDataAggregatorFactory(CoreApiStub coreApiStub, string databaseName, ITestOutputHelper testConsole)
     {
         _coreApiStub = coreApiStub;
         _databaseName = databaseName;
+        _testConsole = testConsole;
 
         CreateClient();
     }
 
-    public static TestDataAggregatorFactory Create(CoreApiStub coreApiStub, string databaseName)
+    public static TestDataAggregatorFactory Create(CoreApiStub coreApiStub, string databaseName, ITestOutputHelper testConsole)
     {
-        return new TestDataAggregatorFactory(coreApiStub, databaseName);
+        testConsole.WriteLine("Creating TestDataAggregatorFactory");
+        return new TestDataAggregatorFactory(coreApiStub, databaseName, testConsole);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -175,6 +179,8 @@ public class TestDataAggregatorFactory
             )
             .ConfigureTestServices(services =>
             {
+                _testConsole.WriteLine("Injecting core api stubs");
+
                 // inject core stubs
                 services.AddSingleton<INetworkConfigurationReader>(_coreApiStub);
                 services.AddSingleton<ITransactionLogReader>(_coreApiStub);

@@ -241,14 +241,14 @@ public class GatewayTestsRunner : IDisposable
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
         _testConsole.WriteLine("Initializing TestGatewayApiFactory");
-        _gatewayApiFactory = TestGatewayApiFactory.Create(_coreApiStub, databaseName);
+        _gatewayApiFactory = TestGatewayApiFactory.Create(_coreApiStub, databaseName, _testConsole);
 
         // allow db creation
         Task t = WaitAsync(TimeSpan.FromSeconds(10));
         t.Wait();
 
         _testConsole.WriteLine("Initializing TestDataAggregatorFactory");
-        _dataAggregatorFactory = TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
+        _dataAggregatorFactory = TestDataAggregatorFactory.Create(_coreApiStub, databaseName, _testConsole);
     }
 
     // Tear down

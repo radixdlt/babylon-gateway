@@ -83,20 +83,23 @@ public class GatewayEndpointTests
     }
 
     [Fact]
-    public async Task TestGatewayApiVersions()
+    public void TestGatewayApiVersions()
     {
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
         var coreApiStub = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
             .MockGenesis()
             .ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
 
         // Act
-        var payload = await gatewayRunner
+        var task = gatewayRunner
             .WaitUntilAllTransactionsAreIngested().Result
             .ActAsync<GatewayResponse>("/gateway", JsonContent.Create(new object()));
+
+        task.Wait();
+        var payload = task.Result;
 
         // Assert
         payload.GatewayApi.ShouldNotBeNull();

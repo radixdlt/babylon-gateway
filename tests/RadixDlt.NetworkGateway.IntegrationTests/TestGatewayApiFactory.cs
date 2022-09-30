@@ -79,6 +79,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 using System.Collections.Generic;
 using System.Net.Http;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
@@ -88,20 +89,23 @@ public class TestGatewayApiFactory
     private readonly CoreApiStub _coreApiStub;
 
     private readonly string _databaseName;
+    private readonly ITestOutputHelper _testConsole;
 
-    private TestGatewayApiFactory(CoreApiStub coreApiStub, string databaseName)
+    private TestGatewayApiFactory(CoreApiStub coreApiStub, string databaseName, ITestOutputHelper testConsole)
     {
         _coreApiStub = coreApiStub;
         _databaseName = databaseName;
+        _testConsole = testConsole;
 
         Client = CreateClient();
     }
 
     public HttpClient Client { get; }
 
-    public static TestGatewayApiFactory Create(CoreApiStub coreApiStub, string databaseName)
+    public static TestGatewayApiFactory Create(CoreApiStub coreApiStub, string databaseName, ITestOutputHelper testConsole)
     {
-        return new TestGatewayApiFactory(coreApiStub, databaseName);
+        testConsole.WriteLine("Creating TestGatewayApiFactory");
+        return new TestGatewayApiFactory(coreApiStub, databaseName, testConsole);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -123,6 +127,8 @@ public class TestGatewayApiFactory
             )
             .ConfigureTestServices(services =>
             {
+                _testConsole.WriteLine("Injecting core api stubs");
+
                 // inject core stubs
                 services.AddSingleton<ICoreNodeHealthChecker>(_coreApiStub);
                 services.AddSingleton<INetworkConfigurationReader>(_coreApiStub);
@@ -142,10 +148,14 @@ public class TestGatewayApiFactory
 
                 var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
+                _testConsole.WriteLine($"Ensuring the database {_databaseName} does not exist");
                 dbReadyOnlyContext.Database.EnsureDeleted();
 
+                _testConsole.WriteLine($"EnsureCreated() - creating the {_databaseName} database and executing migrations...");
                 // This function will also run migrations!
                 dbReadyOnlyContext.Database.EnsureCreated();
+
+                _testConsole.WriteLine($"The {_databaseName} database is created. Moving on...");
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
