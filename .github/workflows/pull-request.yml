@@ -22,11 +22,11 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
+      - name: Run postgres docker
+        run: docker run -d --rm --name pgsql-dev -e POSTGRES_USER=db_dev_superuser -e POSTGRES_PASSWORD=db_dev_password -p 5432:5432 postgres
       - name: Unit tests
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
-      - name: Run postgres docker
-        run: docker run -d --rm --name pgsql-dev -e POSTGRES_USER=db_dev_superuser -e POSTGRES_PASSWORD=db_dev_password -p 5432:5432 postgres
       - name: Integration tests
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --verbosity normal -l "console;verbosity=detailed" --filter RadixDlt.NetworkGateway.IntegrationTests
