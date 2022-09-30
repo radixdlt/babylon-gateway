@@ -33,7 +33,7 @@ public class AccountBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, State
         // TODO: create a new resource if not 'XRD'
         // if XRD: (https://github.com/0xOmarA/PTE-programmatic-interactions/blob/main/src/main.rs)
         // find the entity and get its address
-        // Create a new down/ up state to free 'tokenBalance' tokens from SystFaucet vault
+        // Create a new down/up state to free 'tokenBalance' tokens from SystFaucet vault
         // update GlobalEntities.StateUpdates
         var (tokenEntity, tokens) = new FungibleResourceBuilder(_defaultConfig.NetworkConfigurationResponse)
             .WithResourceName(_tokenName)
