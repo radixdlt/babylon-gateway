@@ -117,11 +117,22 @@ public class TestGatewayApiFactory
             .ConfigureAppConfiguration(
                 (_, config) =>
                 {
+                    // connection string
                     config.AddInMemoryCollection(new[]
                     {
                         new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", dbConnectionString),
                         new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
                         new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
+                    });
+
+                    // logging
+                    config.AddInMemoryCollection(new[]
+                    {
+                        new KeyValuePair<string, string>("Logging:LogLevel:Default", "Warning"),
+                        new KeyValuePair<string, string>("Logging:LogLevel:Microsoft.AspNetCore", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Database.Command", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Infrastructure", "Warning"),
+                        new KeyValuePair<string, string>("RadixDlt.NetworkGateway.GatewayApi.Endpoints.ExceptionHandler", "Debug"),
                     });
                 }
             )
