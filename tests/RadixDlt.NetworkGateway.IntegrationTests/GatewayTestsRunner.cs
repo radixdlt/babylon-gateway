@@ -280,7 +280,7 @@ public class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine($"\n{new string('-', 50)}");
         _testConsole.WriteLine($"{testName} test");
-        _testConsole.WriteLine($"{new string('-', 40)}");
+        _testConsole.WriteLine($"{new string('-', 50)}");
 
         return this;
     }
