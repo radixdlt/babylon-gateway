@@ -11,16 +11,6 @@ jobs:
     strategy:
       matrix:
         dotnet-version: ['6.0.x']
-    services:
-      postgres:
-        image: postgres:14.5-alpine
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_USER: db_dev_superuser
-          POSTGRES_PASSWORD: db_dev_password
-          POSTGRES_PORT: 5432
-        ports:
-          - 5432:5432
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -35,6 +25,8 @@ jobs:
       - name: Unit tests
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
+      - name: Run postgres docker
+        run: docker run -d --rm --name pgsql-dev -e POSTGRES_USER=db_dev_superuser -e POSTGRES_PASSWORD=db_dev_password -p 5432:5432 postgres
       - name: Integration tests
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --verbosity normal -l "console;verbosity=detailed" --filter RadixDlt.NetworkGateway.IntegrationTests
