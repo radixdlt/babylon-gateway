@@ -27,7 +27,9 @@ public class GatewayTestsRunner : IDisposable
 
     public async Task<GatewayTestsRunner> WaitUntilAllTransactionsAreIngested(TimeSpan? timeout = null)
     {
-        await WaitAsync(timeout);
+        timeout ??= TimeSpan.FromSeconds(10);
+
+        await WaitAsync(timeout.Value);
 
         return this;
     }
@@ -186,7 +188,7 @@ public class GatewayTestsRunner : IDisposable
         _gatewayApiFactory = TestGatewayApiFactory.Create(_coreApiStub, databaseName);
 
         // allow db creation
-        Task t = WaitAsync(TimeSpan.FromSeconds(5));
+        Task t = WaitAsync(TimeSpan.FromSeconds(30));
 
         _dataAggregatorFactory = TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
     }
@@ -214,10 +216,8 @@ public class GatewayTestsRunner : IDisposable
         TearDown();
     }
 
-    private async Task WaitAsync(TimeSpan? timeout = null)
+    private async Task WaitAsync(TimeSpan timeout)
     {
-        timeout ??= TimeSpan.FromSeconds(10);
-
-        await Task.Delay(timeout.Value);
+        await Task.Delay(timeout);
     }
 }
