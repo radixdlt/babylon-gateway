@@ -189,6 +189,7 @@ public class GatewayTestsRunner : IDisposable
 
         // allow db creation
         Task t = WaitAsync(TimeSpan.FromSeconds(30));
+        t.Wait();
 
         _dataAggregatorFactory = TestDataAggregatorFactory.Create(_coreApiStub, databaseName);
     }
