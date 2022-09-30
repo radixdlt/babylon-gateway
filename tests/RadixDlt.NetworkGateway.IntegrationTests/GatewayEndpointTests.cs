@@ -66,20 +66,30 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 public class GatewayEndpointTests
 {
+    private readonly ITestOutputHelper _testConsole;
+
+    public GatewayEndpointTests(ITestOutputHelper testConsole)
+    {
+        _testConsole = testConsole;
+    }
+
     [Fact]
     public async Task TestGatewayApiVersions()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
         var coreApiStub = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
 

@@ -63,27 +63,38 @@
  */
 
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 public class TransactionEndpointTests
 {
+    private readonly ITestOutputHelper _testConsole;
+
+    public TransactionEndpointTests(ITestOutputHelper testConsole)
+    {
+        _testConsole = testConsole;
+    }
+
     [Fact]
     public async Task TestTransactionRecent()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
         var coreApiStub = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
 
@@ -109,9 +120,10 @@ public class TransactionEndpointTests
     public async Task TestTransactionPreviewShouldPass()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
         var coreApiStub = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeTransactionPreviewTest(nameof(TestTransactionPreviewShouldPass));
 
@@ -137,8 +149,9 @@ public class TransactionEndpointTests
     public async Task MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        var gatewayRunner = new GatewayTestsRunner(_testConsole);
         var coreApiStubs = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeFailed),
@@ -162,9 +175,10 @@ public class TransactionEndpointTests
     public async Task MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
         var coreApiStubs = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeConfirmed),
@@ -188,8 +202,9 @@ public class TransactionEndpointTests
     public async Task MempoolTransactionStatusShouldBePending()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        var gatewayRunner = new GatewayTestsRunner(_testConsole);
         var coreApiStubs = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBePending),
@@ -214,9 +229,10 @@ public class TransactionEndpointTests
     public async Task TestTransactionSubmit()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner();
+        var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
         var coreApiStubs = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
             .MockGenesis()
             .ArrangeSubmitTransactionTest(
                 nameof(TestTransactionSubmit));
@@ -245,15 +261,16 @@ public class TransactionEndpointTests
     public async Task SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner();
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
 
-        var coreApiStubs = gatewayRunner.MockGenesis()
+        var coreApiStubs = gatewayRunner
+            .WithTestHeader(MethodBase.GetCurrentMethod()!.NameFromAsync())
+            .MockGenesis()
             .ArrangeSubmittedTransactionStatusTest(
             nameof(SubmittedTransactionStatusShouldBeConfirmed));
 
         // Act
         var recentTransactions = await gatewayRunner
-            .MockGenesis()
             .WaitUntilAllTransactionsAreIngested().Result
             .ActAsync<RecentTransactionsResponse>(
                 "/transaction/recent",
