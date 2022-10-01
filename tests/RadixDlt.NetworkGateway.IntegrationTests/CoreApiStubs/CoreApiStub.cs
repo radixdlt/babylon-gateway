@@ -30,9 +30,9 @@ public class CoreApiStub :
     ICoreApiHandler,
     ICapturedConfigProvider
 {
-    private bool _genesisWasIngested = false;
+    private bool _isGenesisIngested;
 
-    public TestGlobalEntities GlobalEntities { get; set; } = new TestGlobalEntities();
+    public TestGlobalEntities GlobalEntities { get; set; } = new();
 
     public CoreApiStubDefaultConfiguration CoreApiStubDefaultConfiguration { get; } = new();
 
@@ -68,9 +68,9 @@ public class CoreApiStub :
 
     public Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        if (!_genesisWasIngested && CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse != null)
+        if (!_isGenesisIngested && CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse != null)
         {
-            _genesisWasIngested = true;
+            _isGenesisIngested = true;
             return Task.FromResult(CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse);
         }
 

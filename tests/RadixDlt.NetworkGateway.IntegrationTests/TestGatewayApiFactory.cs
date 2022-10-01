@@ -65,7 +65,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -159,14 +158,11 @@ public class TestGatewayApiFactory
 
                 var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
-                _testConsole.WriteLine($"Ensuring the database {_databaseName} does not exist");
                 dbReadyOnlyContext.Database.EnsureDeleted();
 
-                _testConsole.WriteLine($"EnsureCreated() - creating the {_databaseName} database and executing migrations...");
+                _testConsole.WriteLine($"Creating {_databaseName} database and executing migrations...");
                 // This function will also run migrations!
                 dbReadyOnlyContext.Database.EnsureCreated();
-
-                _testConsole.WriteLine($"The {_databaseName} database is created. Moving on...");
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {

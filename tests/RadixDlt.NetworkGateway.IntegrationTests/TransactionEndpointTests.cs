@@ -65,8 +65,10 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
@@ -90,11 +92,9 @@ public class TransactionEndpointTests
     public void TestTransactionRecent()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
 
         var coreApiStub = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
 
         // Act
@@ -114,28 +114,29 @@ public class TransactionEndpointTests
         payload.LedgerState.ShouldNotBeNull();
         payload.LedgerState.Network.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
-
-        gatewayRunner.TearDown();
     }
 
     [Fact]
     public void TestTransactionPreviewShouldPass()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
-
-        var coreApiStub = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
-            .ArrangeTransactionPreviewTest(nameof(TestTransactionPreviewShouldPass));
-
-        var json = coreApiStub.CoreApiStubDefaultConfiguration.TransactionPreviewRequest.ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name)
+            .TransactionPreviewBuild(
+                manifest: new ManifestBuilder().CallMethod("021c77780d10210ec9f0ea4a372ab39e09f2222c07c9fb6e5cfc81", "CALL_FUNCTION").Build(),
+                costUnitLimit: 0L,
+                tipPercentage: 0L,
+                nonce: "nonce",
+                signerPublicKeys: new List<PublicKey>
+                {
+                    new(new EcdsaSecp256k1PublicKey(
+                        PublicKeyType.EddsaEd25519, "010000000000000000000000000000001")),
+                },
+                flags: new TransactionPreviewRequestFlags(false)
+            );
 
         // Act
         var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result
-            .ActAsync<TransactionPreviewResponse>("/transaction/preview", content);
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionPreviewResponse>();
 
         task.Wait();
         var payload = task.Result;
@@ -146,18 +147,14 @@ public class TransactionEndpointTests
         coreApiPayload.ShouldNotBeNull();
         coreApiPayload.Receipt.ShouldNotBeNull();
         coreApiPayload.Receipt.Status.Should().Be(CoreApiSdk.Model.TransactionStatus.Succeeded);
-
-        gatewayRunner.TearDown();
     }
 
     [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
     public void MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
         var coreApiStubs = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeFailed),
             TransactionStatus.StatusEnum.FAILED);
@@ -183,11 +180,9 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
 
         var coreApiStubs = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBeConfirmed),
             TransactionStatus.StatusEnum.CONFIRMED);
@@ -213,10 +208,8 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBePending()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
         var coreApiStubs = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeMempoolTransactionStatusTest(
             nameof(MempoolTransactionStatusShouldBePending),
             TransactionStatus.StatusEnum.PENDING);
@@ -243,11 +236,9 @@ public class TransactionEndpointTests
     public void TestTransactionSubmit()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
 
         var coreApiStubs = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeSubmitTransactionTest(
                 nameof(TestTransactionSubmit));
 
@@ -272,19 +263,15 @@ public class TransactionEndpointTests
 
         // TODO: should also return intent hash
         // payload.IntentHash.ShouldNoBreNull();
-
-        gatewayRunner.TearDown();
     }
 
     [Fact(Skip ="TransactionSubmitResponse and/or RecentTransactionsResponse should return IntentHash")]
     public void SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
 
         var coreApiStubs = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeSubmittedTransactionStatusTest(
             nameof(SubmittedTransactionStatusShouldBeConfirmed));
 
@@ -310,7 +297,5 @@ public class TransactionEndpointTests
         // Assert
         var status = payload.Transaction.TransactionStatus.Status;
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
-
-        gatewayRunner.TearDown();
     }
 }

@@ -86,11 +86,9 @@ public class GatewayEndpointTests
     public void TestGatewayApiVersions()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole);
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
 
         var coreApiStub = gatewayRunner
-            .WithTestHeader(MethodBase.GetCurrentMethod()!.Name)
-            .MockGenesis()
             .ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
 
         // Act
@@ -109,7 +107,5 @@ public class GatewayEndpointTests
 
         payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
         payload.GatewayApi.OpenApiSchemaVersion.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
-
-        gatewayRunner.TearDown();
     }
 }
