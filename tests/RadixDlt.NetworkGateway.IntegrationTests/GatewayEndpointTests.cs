@@ -86,16 +86,11 @@ public class GatewayEndpointTests
     public void TestGatewayApiVersions()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-
-        var coreApiStub = gatewayRunner
-            .ArrangeGatewayVersionsTest(nameof(TestGatewayApiVersions));
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeGatewayVersionsTest();
 
         // Act
         var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result
-            .ActAsync<GatewayResponse>("/gateway", JsonContent.Create(new object()));
-
+            .RunAndWaitUntilAllTransactionsAreIngested<GatewayResponse>();
         task.Wait();
         var payload = task.Result;
 
@@ -103,9 +98,9 @@ public class GatewayEndpointTests
         payload.GatewayApi.ShouldNotBeNull();
 
         payload.GatewayApi._Version.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion);
+        payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion);
 
         payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
     }
 }

@@ -1,9 +1,12 @@
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
@@ -12,6 +15,51 @@ public partial class GatewayTestsRunner : IDisposable
     public void Dispose()
     {
         TearDown();
+    }
+
+    public async Task<T> RunAndWaitUntilAllTransactionsAreIngested<T>(TimeSpan? timeout = null)
+    {
+        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.NameFromAsync());
+
+        // wait a bit
+        timeout ??= TimeSpan.FromSeconds(10);
+        await WaitAsync(timeout.Value);
+
+        // make the api call
+        var payload = await ActAsync<T>(_request.RequestUri, _request.Content);
+
+        return payload;
+    }
+
+    private async Task<T> ActAsync<T>(string? requestUri, HttpContent? content)
+    {
+        if (requestUri == null)
+        {
+            throw new Exception("Gateway api uri is missing.");
+        }
+
+        if (_gatewayApiFactory == null)
+        {
+            throw new Exception("Gateway http client is not initialized.");
+        }
+
+        using var response = await _gatewayApiFactory.Client.PostAsync(requestUri, content);
+
+        var payload = await response.ParseToObjectAndAssert<T>();
+
+        return payload;
+    }
+
+    private void WriteTestHeader()
+    {
+        _testConsole.WriteLine($"\n{new string('-', 50)}");
+        _testConsole.WriteLine($"{_testName} test");
+        _testConsole.WriteLine($"{new string('-', 50)}");
+    }
+
+    private async Task WaitAsync(TimeSpan timeout)
+    {
+        await Task.Delay(timeout);
     }
 
     private GatewayTestsRunner PrepareEnvironment()

@@ -92,18 +92,11 @@ public class TransactionEndpointTests
     public void TestTransactionRecent()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-
-        var coreApiStub = gatewayRunner
-            .ArrangeTransactionRecentTest(nameof(TestTransactionRecent));
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name)
+            .ArrangeTransactionRecentTest();
 
         // Act
-        var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result
-            .ActAsync<RecentTransactionsResponse>(
-            "/transaction/recent",
-            JsonContent.Create(new RecentTransactionsRequest()));
-
+        var task = gatewayRunner.RunAndWaitUntilAllTransactionsAreIngested<RecentTransactionsResponse>();
         task.Wait();
         var payload = task.Result;
 
@@ -112,7 +105,7 @@ public class TransactionEndpointTests
         payload.Transactions.Count.Should().BeGreaterThan(0);
 
         payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(coreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
+        payload.LedgerState.Network.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
     }
 
@@ -153,20 +146,11 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-        var coreApiStubs = gatewayRunner
-            .ArrangeMempoolTransactionStatusTest(
-            nameof(MempoolTransactionStatusShouldBeFailed),
-            TransactionStatus.StatusEnum.FAILED);
-        var transactionIdentifier =
-            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
-
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
 
         // Act
         var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
 
         task.Wait();
         var payload = task.Result;
@@ -180,21 +164,11 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-
-        var coreApiStubs = gatewayRunner
-            .ArrangeMempoolTransactionStatusTest(
-            nameof(MempoolTransactionStatusShouldBeConfirmed),
-            TransactionStatus.StatusEnum.CONFIRMED);
-        var transactionIdentifier =
-            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
-
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
 
         // Act
         var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
 
         task.Wait();
         var payload = task.Result;
@@ -208,21 +182,11 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBePending()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-        var coreApiStubs = gatewayRunner
-            .ArrangeMempoolTransactionStatusTest(
-            nameof(MempoolTransactionStatusShouldBePending),
-            TransactionStatus.StatusEnum.PENDING);
-        var transactionIdentifier =
-            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, coreApiStubs.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
-
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
 
         // Act
         var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result
-            .ActAsync<TransactionStatusResponse>("/transaction/status", content);
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
 
         task.Wait();
         var payload = task.Result;
@@ -236,24 +200,11 @@ public class TransactionEndpointTests
     public void TestTransactionSubmit()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-
-        var coreApiStubs = gatewayRunner
-            .ArrangeSubmitTransactionTest(
-                nameof(TestTransactionSubmit));
-
-        var hexTransaction = Convert
-            .ToHexString(Encoding.UTF8.GetBytes(coreApiStubs.CoreApiStubDefaultConfiguration.SubmitTransaction))
-            .ToLowerInvariant();
-
-        var json = new TransactionSubmitRequest(hexTransaction).ToJson();
-
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeSubmitTransactionTest();
 
         // Act
         var task = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result
-            .ActAsync<TransactionSubmitResponse>("/transaction/submit", content);
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionSubmitResponse>();
 
         task.Wait();
         var payload = task.Result;
@@ -269,28 +220,17 @@ public class TransactionEndpointTests
     public void SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name);
-
-        var coreApiStubs = gatewayRunner
-            .ArrangeSubmittedTransactionStatusTest(
-            nameof(SubmittedTransactionStatusShouldBeConfirmed));
+        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeTransactionRecentTest();
 
         // Act
         var taskRecent = gatewayRunner
-            .WaitUntilAllTransactionsAreIngested().Result
-            .ActAsync<RecentTransactionsResponse>(
-                "/transaction/recent",
-                JsonContent.Create(new RecentTransactionsRequest()));
+            .RunAndWaitUntilAllTransactionsAreIngested<RecentTransactionsResponse>();
 
         taskRecent.Wait();
         var recentTransactions = taskRecent.Result;
 
-        var hash = recentTransactions.Transactions[0].TransactionIdentifier.Hash;
-        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, hash);
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var taskAct = gatewayRunner.ActAsync<TransactionStatusResponse>("/transaction/status", content);
+        var taskAct = gatewayRunner.ArrangeSubmittedTransactionStatusTest(recentTransactions)
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
         taskAct.Wait();
         var payload = taskAct.Result;
 
