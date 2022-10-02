@@ -69,14 +69,12 @@ public partial class GatewayTestsRunner : IDisposable
 
         MockGenesis();
 
-        _testConsole.WriteLine("Initializing TestGatewayApiFactory");
         _gatewayApiFactory = TestGatewayApiFactory.Create(CoreApiStub, databaseName, _testConsole);
 
         // allow db creation
         var t = WaitAsync(TimeSpan.FromSeconds(10));
         t.Wait();
 
-        _testConsole.WriteLine("Initializing TestDataAggregatorFactory");
         _dataAggregatorFactory = TestDataAggregatorFactory.Create(CoreApiStub, databaseName, _testConsole);
     }
 
