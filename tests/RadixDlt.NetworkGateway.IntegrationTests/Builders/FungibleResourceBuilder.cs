@@ -1,25 +1,24 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class FungibleResourceBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
-    private string _resourceAddress = string.Empty;
+    private string _resourceAddress;
 
     private string _resourceName = string.Empty;
 
-    public FungibleResourceBuilder(NetworkConfigurationResponse networkConfiguration)
+    public FungibleResourceBuilder(CoreApiStubDefaultConfiguration defaultConfig)
     {
         // generate something like: resource_loc_1qqwknku2
-        _resourceAddress = AddressHelper.GenerateRandomAddress("resource_" + networkConfiguration.NetworkHrpSuffix);
+        _resourceAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.ResourceHrp);
     }
 
-    public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {
         var downSubstates = new List<DownSubstate>();
 

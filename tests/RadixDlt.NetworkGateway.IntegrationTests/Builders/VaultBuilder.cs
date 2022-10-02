@@ -1,23 +1,24 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class VaultBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class VaultBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
-    private string _vaultAddressHex = string.Empty;
+    private string _vaultAddressHex;
 
-    public VaultBuilder(NetworkConfigurationResponse networkConfiguration)
+    public VaultBuilder(CoreApiStubDefaultConfiguration defaultConfig)
     {
-        var vaultAddress = AddressHelper.GenerateRandomAddress("component_" + networkConfiguration.NetworkHrpSuffix);
+        var vaultAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.NormalComponentHrp);
         _vaultAddressHex = AddressHelper.AddressToHex(vaultAddress);
     }
 
     private string _resourceAddress = string.Empty;
     private string _vaultName = string.Empty;
 
-    public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {
         var downSubstates = new List<DownSubstate>();
 

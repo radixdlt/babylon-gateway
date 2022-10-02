@@ -2,6 +2,7 @@ using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Net.Http;
@@ -17,24 +18,25 @@ namespace RadixDlt.NetworkGateway.IntegrationTests;
 public partial class GatewayTestsRunner
 {
     private readonly ITestOutputHelper _testConsole;
-    private readonly string _testName; // also a database name
 
     private TestDataAggregatorFactory? _dataAggregatorFactory;
     private TestGatewayApiFactory? _gatewayApiFactory;
 
     private (string? RequestUri, HttpContent? Content) _request;
 
-    public GatewayTestsRunner(ITestOutputHelper testConsole, string testName)
+    public GatewayTestsRunner(
+        NetworkDefinition networkDefinition,
+        string testName,
+        ITestOutputHelper testConsole)
     {
+        // clean up and initialize
+        CoreApiStub = new CoreApiStub { CoreApiStubDefaultConfiguration = { NetworkDefinition = networkDefinition } };
+
         _testConsole = testConsole;
-        _testName = testName;
 
-        WriteTestHeader();
+        WriteTestHeader(testName);
 
-        // clean up global entities and request/response data
-        CoreApiStub = new CoreApiStub();
-
-        PrepareEnvironment();
+        Initialize(testName);
     }
 
     public CoreApiStub CoreApiStub { get; }
@@ -45,7 +47,9 @@ public partial class GatewayTestsRunner
 
         _testConsole.WriteLine($"Account: {accountName}, {token} {balance}");
 
-        var (accountEntity, account) = new AccountBuilder(CoreApiStub.CoreApiStubDefaultConfiguration, CoreApiStub.GlobalEntities)
+        var (accountEntity, account) = new AccountBuilder(
+                CoreApiStub.CoreApiStubDefaultConfiguration,
+                CoreApiStub.GlobalEntities)
             .WithAccountName(accountName)
             .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
             .WithTokenName(token)
@@ -107,11 +111,9 @@ public partial class GatewayTestsRunner
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var hexTransaction = Convert
-            .ToHexString(Encoding.UTF8.GetBytes(CoreApiStub.CoreApiStubDefaultConfiguration.SubmitTransaction)).ToLowerInvariant();
-
-        var json = new TransactionSubmitRequest(hexTransaction).ToJson();
+        var json = new TransactionSubmitRequest(new Transactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
+
         _request = ("/transaction/submit", content);
 
         return this;
@@ -121,7 +123,7 @@ public partial class GatewayTestsRunner
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _request = ("gateway", JsonContent.Create(new object()));
+        _request = ("/gateway", JsonContent.Create(new object()));
 
         // set custom gatewayApi and openSchemaApi versions
 

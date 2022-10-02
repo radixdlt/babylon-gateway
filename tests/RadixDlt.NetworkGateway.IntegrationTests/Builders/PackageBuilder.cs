@@ -1,4 +1,5 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
@@ -7,12 +8,17 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class PackageBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class PackageBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
     private List<IBlueprint> _blueprints = new();
-    private string _packageAddress = "package_tdx_21_1qyqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsc9ekjt";
+    private string _packageAddress;
 
-    public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public PackageBuilder(CoreApiStubDefaultConfiguration defaultConfig)
+    {
+        _packageAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.PackageHrp);
+    }
+
+    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {
         if (!_blueprints.Any())
         {

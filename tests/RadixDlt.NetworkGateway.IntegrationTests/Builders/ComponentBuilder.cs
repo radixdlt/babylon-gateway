@@ -1,26 +1,49 @@
-﻿using Newtonsoft.Json.Linq;
-using RadixDlt.CoreApiSdk.Model;
+﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class ComponentBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public enum ComponentHrp
 {
-    private string _componentAddress = string.Empty;
+    NormalComponentHrp,
+    AccountComponentHrp,
+    SystemComponentHrp,
+}
+
+public class ComponentBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+{
+    private string _componentAddress;
 
     private Substate? _componentInfoSubstateData;
     private Substate? _componentStateSubstateData;
     private string _componentName = string.Empty;
-    private string _vaultAddressHex = string.Empty;
 
-    public ComponentBuilder(NetworkConfigurationResponse networkConfiguration)
+    public ComponentBuilder(CoreApiStubDefaultConfiguration defaultConfig, ComponentHrp componentHrp = ComponentHrp.NormalComponentHrp)
     {
-        _componentAddress = AddressHelper.GenerateRandomAddress("component_" + networkConfiguration.NetworkHrpSuffix);
+        string strComponentHrp;
+
+        switch (componentHrp)
+        {
+            case ComponentHrp.AccountComponentHrp:
+                strComponentHrp = defaultConfig.NetworkDefinition.AccountComponentHrp;
+                break;
+            case ComponentHrp.NormalComponentHrp:
+                strComponentHrp = defaultConfig.NetworkDefinition.NormalComponentHrp;
+                break;
+            case ComponentHrp.SystemComponentHrp:
+                strComponentHrp = defaultConfig.NetworkDefinition.SystemComponentHrp;
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+
+        _componentAddress = AddressHelper.GenerateRandomAddress(strComponentHrp);
     }
 
-    public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {
         if (_componentInfoSubstateData == null && _componentStateSubstateData == null)
         {
@@ -127,8 +150,6 @@ public class ComponentBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, Sta
 
     public ComponentBuilder WithVault(string vaultAddressHex)
     {
-        _vaultAddressHex = vaultAddressHex;
-
         return this;
     }
 }

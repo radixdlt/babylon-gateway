@@ -188,7 +188,7 @@ public class TestDataAggregatorFactory
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkName;
+                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
                         o.DisableCoreApiHttpsCertificateChecks = false;
                         o.CoreApiNodes = new List<CoreApiNode>
                         {

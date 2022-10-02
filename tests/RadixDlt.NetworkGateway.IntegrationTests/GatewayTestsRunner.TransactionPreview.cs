@@ -41,7 +41,7 @@ public partial class GatewayTestsRunner
         // build TransactionPreviewResponse
         var stateUpdatesList = new List<StateUpdates>();
 
-        var (_, tokenStates) = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse)
+        var (_, tokenStates) = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithResourceName("PreviewToken")
             .WithFixedAddress("resource_loc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqjw23a7")
             .Build();
@@ -67,6 +67,7 @@ public partial class GatewayTestsRunner
             {
                 new("level: debug", "message"),
             });
+
         return this;
     }
 }

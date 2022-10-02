@@ -2,11 +2,11 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class ManifestBuilder : IBuilder<string>
+public class ManifestBuilder : BuilderBase<string>
 {
-    private List<string> _instructions = new();
+    private readonly List<string> _instructions = new();
 
-    public string Build()
+    public override string Build()
     {
         return string.Join(";", _instructions);
     }

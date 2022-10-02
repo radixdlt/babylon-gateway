@@ -26,6 +26,7 @@ public partial class GatewayTestsRunner : IDisposable
         await WaitAsync(timeout.Value);
 
         // make the api call
+        _testConsole.WriteLine($"Sending a POST request to '{_request.RequestUri}'");
         var payload = await ActAsync<T>(_request.RequestUri, _request.Content);
 
         return payload;
@@ -50,10 +51,10 @@ public partial class GatewayTestsRunner : IDisposable
         return payload;
     }
 
-    private void WriteTestHeader()
+    private void WriteTestHeader(string testName)
     {
         _testConsole.WriteLine($"\n{new string('-', 50)}");
-        _testConsole.WriteLine($"{_testName} test");
+        _testConsole.WriteLine($"{testName} test");
         _testConsole.WriteLine($"{new string('-', 50)}");
     }
 
@@ -62,21 +63,11 @@ public partial class GatewayTestsRunner : IDisposable
         await Task.Delay(timeout);
     }
 
-    private GatewayTestsRunner PrepareEnvironment()
-    {
-        _testConsole.WriteLine("Preparing SUT");
-
-        MockGenesis();
-
-        var databaseName = _testName;
-        Initialize(databaseName);
-
-        return this;
-    }
-
     private void Initialize(string databaseName)
     {
-        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+        _testConsole.WriteLine("Setting up SUT");
+
+        MockGenesis();
 
         _testConsole.WriteLine("Initializing TestGatewayApiFactory");
         _gatewayApiFactory = TestGatewayApiFactory.Create(CoreApiStub, databaseName, _testConsole);
@@ -113,10 +104,8 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var networkConfiguration = CoreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse;
-
         _testConsole.WriteLine("XRD resource");
-        var (tokenEntity, tokens) = new FungibleResourceBuilder(networkConfiguration)
+        var (tokenEntity, tokens) = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithResourceName("XRD")
             .Build();
 
@@ -124,7 +113,7 @@ public partial class GatewayTestsRunner : IDisposable
         CoreApiStub.GlobalEntities.AddStateUpdates(tokens);
 
         _testConsole.WriteLine("SysFaucet vault");
-        var (vaultEntity, vault) = new VaultBuilder(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse)
+        var (vaultEntity, vault) = new VaultBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithVaultName("SysFaucet vault")
             .WithFungibleTokens(tokenEntity.GlobalAddress)
             .Build();
@@ -134,7 +123,7 @@ public partial class GatewayTestsRunner : IDisposable
         CoreApiStub.GlobalEntities.AddStateUpdates(vault);
 
         _testConsole.WriteLine("SysFaucet package");
-        var (packageEntity, package) = new PackageBuilder()
+        var (packageEntity, package) = new PackageBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithBlueprints(new List<IBlueprint> { new SysFaucetBlueprint() })
             .WithFixedAddress(GenesisData.SysFaucetPackageAddress)
             .Build();
@@ -144,7 +133,7 @@ public partial class GatewayTestsRunner : IDisposable
 
         // TODO: KeyValueStore builder !!!
         _testConsole.WriteLine("SysFaucet component");
-        var (componentEntity, component) = new ComponentBuilder(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkConfigurationResponse)
+        var (componentEntity, component) = new ComponentBuilder(CoreApiStub.CoreApiStubDefaultConfiguration, ComponentHrp.SystemComponentHrp)
             .WithComponentName(GenesisData.SysFaucetBlueprintName)
             .WithComponentInfoSubstate(GenesisData.SysFaucetInfoSubstate)
             .WithComponentStateSubstate(

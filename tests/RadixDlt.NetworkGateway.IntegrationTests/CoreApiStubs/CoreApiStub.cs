@@ -63,7 +63,7 @@ public class CoreApiStub :
 
     string ICoreApiHandler.GetNetworkIdentifier()
     {
-        return CoreApiStubDefaultConfiguration.NetworkName;
+        return CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
     }
 
     public Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)

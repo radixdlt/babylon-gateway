@@ -3,11 +3,11 @@ using System;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class BlueprintBuilder : IBuilder<StateUpdates>
+public class BlueprintBuilder : BuilderBase<StateUpdates>
 {
     private Type _blueprintType = null!;
 
-    public StateUpdates Build()
+    public override StateUpdates Build()
     {
         if (_blueprintType == null)
         {

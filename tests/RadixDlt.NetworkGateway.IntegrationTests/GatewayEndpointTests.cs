@@ -64,6 +64,7 @@
 
 using FluentAssertions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Net.Http.Json;
 using System.Reflection;
@@ -76,17 +77,19 @@ namespace RadixDlt.NetworkGateway.IntegrationTests;
 public class GatewayEndpointTests
 {
     private readonly ITestOutputHelper _testConsole;
+    private readonly NetworkDefinition _networkDefinition;
 
     public GatewayEndpointTests(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
+        _networkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
     [Fact]
     public void TestGatewayApiVersions()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeGatewayVersionsTest();
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeGatewayVersionsTest();
 
         // Act
         var task = gatewayRunner

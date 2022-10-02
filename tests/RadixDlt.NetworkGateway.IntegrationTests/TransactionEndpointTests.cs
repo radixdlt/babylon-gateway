@@ -66,6 +66,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
@@ -82,17 +83,19 @@ namespace RadixDlt.NetworkGateway.IntegrationTests;
 public class TransactionEndpointTests
 {
     private readonly ITestOutputHelper _testConsole;
+    private readonly NetworkDefinition _networkDefinition;
 
     public TransactionEndpointTests(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
+        _networkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
     [Fact]
     public void TestTransactionRecent()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name)
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .ArrangeTransactionRecentTest();
 
         // Act
@@ -105,7 +108,7 @@ public class TransactionEndpointTests
         payload.Transactions.Count.Should().BeGreaterThan(0);
 
         payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.NetworkName);
+        payload.LedgerState.Network.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName);
         payload.LedgerState._Version.Should().Be(1);
     }
 
@@ -113,7 +116,7 @@ public class TransactionEndpointTests
     public void TestTransactionPreviewShouldPass()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name)
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .TransactionPreviewBuild(
                 manifest: new ManifestBuilder().CallMethod("021c77780d10210ec9f0ea4a372ab39e09f2222c07c9fb6e5cfc81", "CALL_FUNCTION").Build(),
                 costUnitLimit: 0L,
@@ -146,7 +149,7 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
 
         // Act
         var task = gatewayRunner
@@ -164,7 +167,7 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
 
         // Act
         var task = gatewayRunner
@@ -182,7 +185,7 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBePending()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
+        var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
 
         // Act
         var task = gatewayRunner
@@ -200,7 +203,7 @@ public class TransactionEndpointTests
     public void TestTransactionSubmit()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeSubmitTransactionTest();
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeSubmitTransactionTest();
 
         // Act
         var task = gatewayRunner
@@ -220,7 +223,7 @@ public class TransactionEndpointTests
     public void SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_testConsole, MethodBase.GetCurrentMethod()!.Name).ArrangeTransactionRecentTest();
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeTransactionRecentTest();
 
         // Act
         var taskRecent = gatewayRunner

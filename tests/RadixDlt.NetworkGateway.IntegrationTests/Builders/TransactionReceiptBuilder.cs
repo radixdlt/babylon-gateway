@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class TransactionReceiptBuilder : IBuilder<TransactionReceipt>
+public class TransactionReceiptBuilder : BuilderBase<TransactionReceipt>
 {
     private TransactionStatus _transactionStatus;
     private FeeSummary? _feeSummary;
     private StateUpdates? _stateUpdates;
 
-    public TransactionReceipt Build()
+    public override TransactionReceipt Build()
     {
         if (_feeSummary == null)
         {

@@ -166,7 +166,7 @@ public class TestGatewayApiFactory
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkName;
+                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
                         o.IgnoreNonSyncedNodes = false;
                         o.CoreApiNodes = new List<CoreApiNode>
                         {

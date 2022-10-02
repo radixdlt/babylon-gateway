@@ -2,9 +2,9 @@
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class TransactionBuilder : IBuilder<TransactionInfo>
+public class TransactionBuilder : BuilderBase<TransactionInfo>
 {
-    public TransactionInfo Build()
+    public override TransactionInfo Build()
     {
         throw new System.NotImplementedException();
     }

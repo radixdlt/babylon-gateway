@@ -2,12 +2,11 @@
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class AccountBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
 {
     private readonly CoreApiStubDefaultConfiguration _defaultConfig;
     private readonly TestGlobalEntities _globalEntities;
@@ -26,7 +25,7 @@ public class AccountBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, State
         _accountPublicKey = AddressHelper.GenerateRandomPublicKey();
     }
 
-    public (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
     {
         var keyValueStoreAddressHex = "000000000000000000000000000000000000000000000000000000000000000001000000";
 
@@ -35,14 +34,14 @@ public class AccountBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, State
         // find the entity and get its address
         // Create a new down/up state to free 'tokenBalance' tokens from SystFaucet vault
         // update GlobalEntities.StateUpdates
-        var (tokenEntity, tokens) = new FungibleResourceBuilder(_defaultConfig.NetworkConfigurationResponse)
+        var (tokenEntity, tokens) = new FungibleResourceBuilder(_defaultConfig)
             .WithResourceName(_tokenName)
             .Build();
 
         _globalEntities.Add(tokenEntity);
         _globalEntities.AddStateUpdates(tokens);
 
-        var (vaultEntity, vault) = new VaultBuilder(_defaultConfig.NetworkConfigurationResponse)
+        var (vaultEntity, vault) = new VaultBuilder(_defaultConfig)
             .WithVaultName(_accountName)
             .WithFungibleTokens(tokenEntity.EntityAddressHex)
             .Build();
@@ -67,7 +66,7 @@ public class AccountBuilder : IBuilder<(TestGlobalEntity TestGlobalEntity, State
             )
         );
 
-        return new ComponentBuilder(_defaultConfig.NetworkConfigurationResponse)
+        return new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
             .WithComponentName($"_component_{_accountName}")
             .WithComponentStateSubstate(componentStateSubstateData)
             .WithVault(vaultEntity.EntityAddressHex) // TODO: is it used?
