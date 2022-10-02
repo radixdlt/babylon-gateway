@@ -43,7 +43,6 @@ public partial class GatewayTestsRunner
 
         var (_, tokenStates) = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithResourceName("PreviewToken")
-            .WithFixedAddress("resource_loc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqjw23a7")
             .Build();
 
         stateUpdatesList.Add(tokenStates);

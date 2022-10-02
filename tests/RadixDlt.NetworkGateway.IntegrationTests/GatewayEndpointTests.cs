@@ -89,7 +89,9 @@ public class GatewayEndpointTests
     public void TestGatewayApiVersions()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeGatewayVersionsTest();
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeGatewayVersionsTest();
 
         // Act
         var task = gatewayRunner

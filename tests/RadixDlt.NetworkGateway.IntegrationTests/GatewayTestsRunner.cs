@@ -9,18 +9,19 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 using TransactionStatus = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionStatus;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public partial class GatewayTestsRunner
+public partial class GatewayTestsRunner : IDisposable
 {
     private readonly ITestOutputHelper _testConsole;
 
     private TestDataAggregatorFactory? _dataAggregatorFactory;
     private TestGatewayApiFactory? _gatewayApiFactory;
+
+    private string _databaseName;
 
     private (string? RequestUri, HttpContent? Content) _request;
 
@@ -33,10 +34,11 @@ public partial class GatewayTestsRunner
         CoreApiStub = new CoreApiStub { CoreApiStubDefaultConfiguration = { NetworkDefinition = networkDefinition } };
 
         _testConsole = testConsole;
+        _databaseName = testName;
 
         WriteTestHeader(testName);
 
-        Initialize(testName);
+        _databaseName = testName;
     }
 
     public CoreApiStub CoreApiStub { get; }

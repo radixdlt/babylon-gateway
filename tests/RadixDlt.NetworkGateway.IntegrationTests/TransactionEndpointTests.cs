@@ -96,6 +96,7 @@ public class TransactionEndpointTests
     {
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
             .ArrangeTransactionRecentTest();
 
         // Act
@@ -117,6 +118,7 @@ public class TransactionEndpointTests
     {
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
             .TransactionPreviewBuild(
                 manifest: new ManifestBuilder().CallMethod("021c77780d10210ec9f0ea4a372ab39e09f2222c07c9fb6e5cfc81", "CALL_FUNCTION").Build(),
                 costUnitLimit: 0L,
@@ -149,7 +151,9 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeFailed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
 
         // Act
         var task = gatewayRunner
@@ -167,7 +171,9 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
 
         // Act
         var task = gatewayRunner
@@ -185,7 +191,9 @@ public class TransactionEndpointTests
     public void MempoolTransactionStatusShouldBePending()
     {
         // Arrange
-        var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
+        var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
 
         // Act
         var task = gatewayRunner
@@ -203,7 +211,9 @@ public class TransactionEndpointTests
     public void TestTransactionSubmit()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeSubmitTransactionTest();
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeSubmitTransactionTest();
 
         // Act
         var task = gatewayRunner
@@ -223,7 +233,9 @@ public class TransactionEndpointTests
     public void SubmittedTransactionStatusShouldBeConfirmed()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole).ArrangeTransactionRecentTest();
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeTransactionRecentTest();
 
         // Act
         var taskRecent = gatewayRunner
