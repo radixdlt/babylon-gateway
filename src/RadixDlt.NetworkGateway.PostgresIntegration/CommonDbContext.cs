@@ -91,8 +91,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<Entity> Entities => Set<Entity>();
 
-    public DbSet<Substate> Substates => Set<Substate>();
-
     public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
     public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
@@ -125,20 +123,6 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address).HasMethod("hash");
-
-        modelBuilder.Entity<Substate>()
-            .HasDiscriminator<string>("type")
-            .HasValue<SystemSubstate>("system")
-            .HasValue<ResourceManagerSubstate>("resource_manager")
-            .HasValue<ComponentInfoSubstate>("component_info")
-            .HasValue<ComponentStateSubstate>("component_state")
-            .HasValue<PackageSubstate>("package")
-            .HasValue<VaultSubstate>("vault")
-            .HasValue<NonFungibleSubstate>("non_fungible")
-            .HasValue<KeyValueStoreEntrySubstate>("key_value_store_entry");
-
-        modelBuilder.Entity<Substate>()
-            .HasIndex(e => new { e.EntityId, e.Version });
 
         modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("type")

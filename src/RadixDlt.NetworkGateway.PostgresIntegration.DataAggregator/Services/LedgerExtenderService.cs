@@ -84,15 +84,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ComponentInfoSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentInfoSubstate;
-using ComponentStateSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentStateSubstate;
-using KeyValueStoreEntrySubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntrySubstate;
-using NonFungibleSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleSubstate;
-using PackageSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageSubstate;
-using ResourceManagerSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerSubstate;
-using Substate = RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate;
-using SystemSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemSubstate;
-using VaultSubstate = RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultSubstate;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -143,6 +134,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
             + preparationReport.MempoolTransactionsTouchedRecords
             + preparationReport.PreparationEntriesTouched
             + ledgerExtensionReport.EntriesWritten;
+
+        _logger.LogInformation("XXXXX total = {Total}", processTransactionReport.Total);
 
         return new CommitTransactionsReport(
             ledgerExtension.TransactionData.Count,
@@ -538,41 +531,30 @@ WHERE id IN(
             timers.Add("step2_total", sw.Elapsed);
         }
 
-        // TODO drop entire "substate" db concept, just scan them
         // step 3: scan all substates to figure out changes
         {
             var sw = Stopwatch.StartNew();
             var c = 0;
 
-            ResourceManagerSubstate CreateResourceManagerSubstate(UppedSubstate us)
+            void HandleResourceManagerSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetResourceManagerSubstate();
                 var totalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos);
 
                 metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
                 fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(us.ReferencedEntity, totalSupply, TokenAmount.Zero, TokenAmount.Zero, us.StateVersion)); // TODO support mint & burnt
-
-                return new ResourceManagerSubstate
-                {
-                    TotalSupply = totalSupply,
-                    FungibleDivisibility = data.FungibleDivisibility,
-                };
             }
 
-            ComponentStateSubstate CreateComponentStateSubstate(UppedSubstate us)
+            void HandleComponentStateSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetComponentStateSubstate();
-
-                return new ComponentStateSubstate();
             }
 
-            VaultSubstate CreateTmpVaultSubstate(UppedSubstate us)
+            void HandleVaultSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetVaultSubstate();
 
                 // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
-
-                var substate = new VaultSubstate();
 
                 // TODO ugh...
                 var resourceAmount = data.ResourceAmount.ActualInstance;
@@ -580,14 +562,14 @@ WHERE id IN(
 
                 if (resourceAmount is FungibleResourceAmount fra)
                 {
-                    substate.Amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
+                    var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
 
                     var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
                     var resourceEntity = referencedEntities[resourceAddress];
 
-                    fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, substate.Amount, us.StateVersion));
+                    fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, amount, us.StateVersion));
 
-                    return substate;
+                    return;
                 }
 
                 if (resourceAmount is NonFungibleResourceAmount nfra)
@@ -597,39 +579,48 @@ WHERE id IN(
 
                     nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIdsHex, us.StateVersion));
 
-                    return substate;
+                    return;
                 }
 
                 throw new Exception("bla bla bla bla x9"); // TODO fix me
             }
 
-            KeyValueStoreEntrySubstate CreateKeyValueStoreEntrySubstate(UppedSubstate us)
+            void HandleKeyValueStoreEntrySubstate(UppedSubstate us)
             {
                 // TODO handle referenced_entities properly (not sure if we can ensure references types have been seen)
-
-                return new KeyValueStoreEntrySubstate();
             }
 
             foreach (var us in uppedSubstates)
             {
-                Substate dbSubstate = us.Type switch
+                switch (us.Type)
                 {
-                    SubstateType.System => new SystemSubstate(),
-                    SubstateType.ResourceManager => CreateResourceManagerSubstate(us),
-                    SubstateType.ComponentInfo => new ComponentInfoSubstate(),
-                    SubstateType.ComponentState => CreateComponentStateSubstate(us),
-                    SubstateType.Package => new PackageSubstate(),
-                    SubstateType.Vault => CreateTmpVaultSubstate(us),
-                    SubstateType.NonFungible => new NonFungibleSubstate(),
-                    SubstateType.KeyValueStoreEntry => CreateKeyValueStoreEntrySubstate(us),
-                    _ => throw new Exception("bla bla bla x3"), // TODO fix me
-                };
-
-                dbSubstate.FromStateVersion = us.StateVersion;
-                dbSubstate.Key = us.Key.ConvertFromHex();
-                dbSubstate.EntityId = us.ReferencedEntity.DatabaseId;
-                dbSubstate.DataHash = us.DataHash;
-                dbSubstate.Version = us.Version;
+                    case SubstateType.System:
+                        // TODO handle somehow
+                        break;
+                    case SubstateType.ResourceManager:
+                        HandleResourceManagerSubstate(us);
+                        break;
+                    case SubstateType.ComponentInfo:
+                        // TODO handle somehow
+                        break;
+                    case SubstateType.ComponentState:
+                        HandleComponentStateSubstate(us);
+                        break;
+                    case SubstateType.Package:
+                        // TODO handle somehow
+                        break;
+                    case SubstateType.Vault:
+                        HandleVaultSubstate(us);
+                        break;
+                    case SubstateType.NonFungible:
+                        // TODO handle somehow
+                        break;
+                    case SubstateType.KeyValueStoreEntry:
+                        HandleKeyValueStoreEntrySubstate(us);
+                        break;
+                    default:
+                        throw new Exception("bleh"); // TODO fix me
+                }
 
                 c++;
             }

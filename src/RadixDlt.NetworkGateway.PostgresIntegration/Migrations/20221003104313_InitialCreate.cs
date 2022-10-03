@@ -223,29 +223,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "substates",
-                columns: table => new
-                {
-                    id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    to_state_version = table.Column<long>(type: "bigint", nullable: true),
-                    key = table.Column<byte[]>(type: "bytea", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
-                    data_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    version = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    fungible_divisibility = table.Column<int>(type: "integer", nullable: true),
-                    amount = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_substates", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ledger_transactions",
                 columns: table => new
                 {
@@ -371,11 +348,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_mempool_transactions_status",
                 table: "mempool_transactions",
                 column: "status");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_substates_entity_id_version",
-                table: "substates",
-                columns: new[] { "entity_id", "version" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -403,9 +375,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "network_configuration");
-
-            migrationBuilder.DropTable(
-                name: "substates");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");
