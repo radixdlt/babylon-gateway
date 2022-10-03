@@ -120,7 +120,7 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<ResourceManagerEntity>("resource_manager")
             .HasValue<ComponentEntity>("component")
             .HasValue<PackageEntity>("package")
-            .HasValue<ValueStoreEntity>("key_value_store")
+            .HasValue<ValueStoreEntity>("value_store")
             .HasValue<VaultEntity>("vault");
 
         modelBuilder.Entity<Entity>()

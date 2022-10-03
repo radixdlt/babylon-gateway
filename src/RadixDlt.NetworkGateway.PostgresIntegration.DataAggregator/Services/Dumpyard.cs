@@ -71,7 +71,6 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Substate = RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -79,35 +78,38 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 {
     private Entity? _databaseEntity;
     private ReferencedEntity? _parent;
-    private long? _parentId;
-    private long? _ownerAncestorId;
-    private long? _globalAncestorId;
 
     public RadixAddress? GlobalAddress { get; private set; }
 
-    public string? ComponentKind { get; private set; }
-
     public long DatabaseId => GetDatabaseEntity().Id;
 
-    public long DatabaseOwnerAncestorId
-    {
-        get
-        {
-            EnsureParentalIdsResolved();
+    public long? DatabaseParentId => GetDatabaseEntity().ParentId;
 
-            return _ownerAncestorId.Value;
+    public long? DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId;
+
+    public long? DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId;
+
+    public IEnumerable<long> TmpGetIds()
+    {
+        yield return GetDatabaseEntity().Id;
+
+        if (_databaseEntity?.ParentId.HasValue == true)
+        {
+            yield return _databaseEntity.ParentId.Value;
+        }
+
+        if (_databaseEntity?.OwnerAncestorId.HasValue == true)
+        {
+            yield return _databaseEntity.OwnerAncestorId.Value;
+        }
+
+        if (_databaseEntity?.GlobalAncestorId.HasValue == true)
+        {
+            yield return _databaseEntity.GlobalAncestorId.Value;
         }
     }
 
-    public long DatabaseGlobalAncestorId
-    {
-        get
-        {
-            EnsureParentalIdsResolved();
-
-            return _globalAncestorId.Value;
-        }
-    }
+    public string? ComponentKind { get; private set; }
 
     // TODO not sure if this logic is valid?
     public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
@@ -139,16 +141,13 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     public void Resolve(Entity entity)
     {
         _databaseEntity = entity;
-        _parentId = entity.ParentId;
-        _ownerAncestorId = entity.OwnerAncestorId;
-        _globalAncestorId = entity.GlobalAncestorId;
     }
 
     public void ResolveParentalIds(long parentId, long ownerId, long globalId)
     {
-        _parentId = parentId;
-        _ownerAncestorId = ownerId;
-        _globalAncestorId = globalId;
+        GetDatabaseEntity().ParentId = parentId;
+        GetDatabaseEntity().OwnerAncestorId = ownerId;
+        GetDatabaseEntity().GlobalAncestorId = globalId;
     }
 
     public void IsChildOf(ReferencedEntity parent)
@@ -167,30 +166,13 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
         return de;
     }
-
-    [MemberNotNull(nameof(_parentId), nameof(_ownerAncestorId), nameof(_globalAncestorId))]
-    private void EnsureParentalIdsResolved()
-    {
-        if (_parentId == null || _ownerAncestorId == null || _globalAncestorId == null)
-        {
-            throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgotten to call ResolveParentalIds(long, long, long)?");
-        }
-    }
 }
 
 internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion)
 {
 }
 
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data)
-{
-    public Substate? DatabaseSubstate { get; private set; }
-
-    public void Resolve(Substate substate)
-    {
-        DatabaseSubstate = substate;
-    }
-}
+internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data);
 
 internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
 
