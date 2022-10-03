@@ -1,7 +1,8 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
+namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 
 public class TestGlobalEntities : List<TestGlobalEntity>
 {

@@ -2,7 +2,9 @@
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
@@ -11,6 +13,7 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
     private string _resourceAddress;
 
     private string _resourceName = string.Empty;
+    private long _totalTokensSupply = 1000000;
 
     public FungibleResourceBuilder(CoreApiStubDefaultConfiguration defaultConfig)
     {
@@ -53,12 +56,12 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
                         fungibleDivisibility: 18,
                         metadata: new List<ResourceManagerSubstateAllOfMetadata>()
                         {
-                            new ResourceManagerSubstateAllOfMetadata("name", "Radix"),
-                            new ResourceManagerSubstateAllOfMetadata("symbol", "XRD"),
-                            new ResourceManagerSubstateAllOfMetadata("url", "https://tokens.radixdlt.com"),
-                            new ResourceManagerSubstateAllOfMetadata("description", "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."),
+                            new("name", "Radix"),
+                            new("symbol", "XRD"),
+                            new("url", "https://tokens.radixdlt.com"),
+                            new("description", "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."),
                         },
-                        totalSupplyAttos: "1000000000000000000000000000000")
+                        totalSupplyAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, 18)), CultureInfo.InvariantCulture))
                 ),
                 substateHex: GenesisData.FungibleResourceCodeHex,
                 substateDataHash: "3dc43a58c5cc27bba7d9a96966c8d66a230c781ec04f936bf10130688ed887cf"
@@ -78,6 +81,13 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
     public FungibleResourceBuilder WithResourceName(string resourceName)
     {
         _resourceName = resourceName;
+
+        return this;
+    }
+
+    public FungibleResourceBuilder WithTotalSupply(long totalTokensSupply)
+    {
+        _totalTokensSupply = totalTokensSupply;
 
         return this;
     }

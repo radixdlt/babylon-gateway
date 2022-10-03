@@ -66,6 +66,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
@@ -252,5 +253,35 @@ public class TransactionEndpointTests
         // Assert
         var status = payload.Transaction.TransactionStatus.Status;
         status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    }
+
+    [Fact]
+    public void TokensTransferFromAccountAtoBShouldSucceed()
+    {
+        // Arrange
+        var accountA = AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp);
+        var accountB = AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp);
+
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .WithAccount(accountA, "XRD", 1000)
+            .WithAccount(accountB, "XRD", 0)
+            .MockTokensTransfer(accountA, accountB, "XRD", 200);
+
+        // Act
+        var task = gatewayRunner
+            .RunAndWaitUntilAllTransactionsAreIngested<TransactionSubmitResponse>();
+
+        task.Wait();
+        var payload = task.Result;
+
+        // Assert
+        payload.Duplicate.Should().Be(false);
+
+        // TODO: should also return intent hash
+        // payload.IntentHash.ShouldNoBreNull();
+
+        gatewayRunner.GetAccountBalance(accountA).Should().Be(800);
+        gatewayRunner.GetAccountBalance(accountB).Should().Be(200);
     }
 }

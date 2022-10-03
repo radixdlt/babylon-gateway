@@ -1,3 +1,4 @@
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
@@ -5,12 +6,16 @@ using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
 using Xunit.Abstractions;
 using TransactionStatus = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionStatus;
+using TransactionSubmitRequest = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionSubmitRequest;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
@@ -43,17 +48,17 @@ public partial class GatewayTestsRunner : IDisposable
 
     public CoreApiStub CoreApiStub { get; }
 
-    public GatewayTestsRunner WithAccount(string accountName, string token, long balance)
+    public GatewayTestsRunner WithAccount(string accountAddress, string token, long balance)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _testConsole.WriteLine($"Account: {accountName}, {token} {balance}");
+        _testConsole.WriteLine($"Account: {accountAddress}, {token} {balance}");
 
         var (accountEntity, account) = new AccountBuilder(
                 CoreApiStub.CoreApiStubDefaultConfiguration,
                 CoreApiStub.GlobalEntities)
-            .WithAccountName(accountName)
             .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
+            .WithFixedAddress(accountAddress)
             .WithTokenName(token)
             .WithBalance(balance)
             .Build();
@@ -144,5 +149,67 @@ public partial class GatewayTestsRunner : IDisposable
         // set custom transaction data
 
         return this;
+    }
+
+    public GatewayTestsRunner MockTokensTransfer(string fromAccount, string toAccount, string tokenName, int amountToTransfer)
+    {
+        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+
+        var json = new TransactionSubmitRequest(new Transactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        _request = ("/transaction/submit", content);
+
+        // since we don't send a real transaction, accounts should be updated in memory store?
+
+        // take tokens from account A
+        UpdateAccountBalance(fromAccount, amountToTransfer * (-1));
+
+        // deposit tokens to account B
+        UpdateAccountBalance(toAccount, amountToTransfer);
+
+        return this;
+    }
+
+    public long GetAccountBalance(string accountAddress)
+    {
+        var account = CoreApiStub.GlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
+
+        var accountEntityAddressHex = account!.EntityAddressHex;
+
+        var accountUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
+
+        var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+
+        var vaultUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
+
+        var vaultResourceAmount = ((vaultUpSubstate!.SubstateData.ActualInstance as VaultSubstate)!).ResourceAmount.ActualInstance as FungibleResourceAmount;
+
+        // TODO: divisibility??? Optimize and make it a separate function
+        var attos = double.Parse(vaultResourceAmount!.AmountAttos);
+        var tokens = attos / Math.Pow(10, 18);
+
+        return Convert.ToInt64(tokens);
+    }
+
+    public void UpdateAccountBalance(string accountAddress, long amountToTransfer)
+    {
+        var account = CoreApiStub.GlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
+
+        var accountEntityAddressHex = account!.EntityAddressHex;
+
+        var accountUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
+
+        var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+
+        var vaultUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
+
+        var vaultResourceAmount = ((vaultUpSubstate!.SubstateData.ActualInstance as VaultSubstate)!).ResourceAmount.ActualInstance as FungibleResourceAmount;
+
+        // TODO: divisibility??? Optimize and make it a separate function
+        var attos = double.Parse(vaultResourceAmount!.AmountAttos);
+        var newTokenBalance = attos + (amountToTransfer * Math.Pow(10, 18));
+        var newAttos = Convert.ToDecimal(newTokenBalance, CultureInfo.InvariantCulture);
+        vaultResourceAmount!.AmountAttos = newAttos.ToString(CultureInfo.InvariantCulture);
     }
 }

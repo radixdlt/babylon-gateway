@@ -14,7 +14,7 @@ public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
     private string _accountAddress = string.Empty;
 
     private string _accountName = string.Empty;
-    private string _accountPublicKey = string.Empty;
+    private string _accountPublicKey;
     private long _tokensBalance;
     private string _tokenName = string.Empty;
 
@@ -36,6 +36,7 @@ public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
         // update GlobalEntities.StateUpdates
         var (tokenEntity, tokens) = new FungibleResourceBuilder(_defaultConfig)
             .WithResourceName(_tokenName)
+            .WithTotalSupply(_tokensBalance)
             .Build();
 
         _globalEntities.Add(tokenEntity);
@@ -44,6 +45,7 @@ public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
         var (vaultEntity, vault) = new VaultBuilder(_defaultConfig)
             .WithVaultName(_accountName)
             .WithFungibleTokens(tokenEntity.EntityAddressHex)
+            .WithTotalSupply(_tokensBalance)
             .Build();
 
         _globalEntities.Add(vaultEntity);
@@ -66,11 +68,16 @@ public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
             )
         );
 
-        return new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
+        var (accountEntity, account) = new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
             .WithComponentName($"_component_{_accountName}")
             .WithComponentStateSubstate(componentStateSubstateData)
+            .WithFixedAddress(_accountAddress)
             .WithVault(vaultEntity.EntityAddressHex) // TODO: is it used?
             .Build();
+
+        accountEntity.AccountPublicKey = _accountPublicKey;
+
+        return (accountEntity, account);
     }
 
     public AccountBuilder WithFixedAddress(string accountAddress)

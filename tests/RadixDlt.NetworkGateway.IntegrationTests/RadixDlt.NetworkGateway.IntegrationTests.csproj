@@ -28,8 +28,4 @@
     <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiTestServer\RadixDlt.NetworkGateway.GatewayApiTestServer.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="CoreApiStubs" />
-  </ItemGroup>
-
 </Project>
