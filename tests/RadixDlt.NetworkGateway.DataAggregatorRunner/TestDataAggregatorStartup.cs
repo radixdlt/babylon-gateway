@@ -62,34 +62,43 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.DataAggregator;
+using RadixDlt.NetworkGateway.PostgresIntegration;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.DataAggregatorRunner;
 
-public static class TestJsonExtensions
+public class TestDataAggregatorStartup
 {
-    public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+    public void ConfigureServices(IServiceCollection services)
     {
-        responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
+        services
+            .AddNetworkGatewayDataAggregator()
+            .AddPostgresPersistence();
 
-        var mediaTypeHeader = MediaTypeHeaderValue.Parse(responseMessage.Content.Headers.ContentType?.ToString());
+        services
+            .AddControllers()
+            .AddControllersAsServices()
+            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 
-        mediaTypeHeader.ShouldNotBeNull();
+        services
+            .AddHealthChecks();
+    }
 
-        mediaTypeHeader.MediaType.Should().BeEquivalentTo("application/json");
-
-        mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
-
-        var json = await responseMessage.Content.ReadAsStringAsync();
-
-        var payload = JsonConvert.DeserializeObject<TResponse>(json);
-
-        payload.ShouldNotBeNull();
-
-        return payload;
+    public void Configure(IApplicationBuilder application, ILogger<TestDataAggregatorStartup> logger)
+    {
+        application
+            .UseAuthentication()
+            .UseAuthorization()
+            .UseCors()
+            .UseRouting()
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health");
+                endpoints.MapControllers();
+            });
     }
 }

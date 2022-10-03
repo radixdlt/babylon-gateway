@@ -64,98 +64,123 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiTestServer;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.PostgresIntegration;
-using RadixDlt.NetworkGateway.TestDependencies;
-using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
+namespace RadixDlt.NetworkGateway.IntegrationTests;
+
+public class TestGatewayApiFactory
+    : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<TestGatewayApiFactory>
 {
-    [CollectionDefinition("TestsInitialization")]
-    public class TestInitializationFactory
-        : WebApplicationFactory<TestGatewayApiStartup>, ICollectionFixture<TestInitializationFactory>
+    private readonly CoreApiStub _coreApiStub;
+
+    private readonly string _databaseName;
+    private readonly ITestOutputHelper _testConsole;
+
+    private TestGatewayApiFactory(CoreApiStub coreApiStub, string databaseName, ITestOutputHelper testConsole)
     {
-        private readonly string _databaseName;
+        _coreApiStub = coreApiStub;
+        _databaseName = databaseName;
+        _testConsole = testConsole;
 
-        public TestInitializationFactory(string databaseName)
-        {
-            _databaseName = databaseName;
-        }
+        Client = CreateClient();
+    }
 
-        public static HttpClient CreateClient(string databaseName)
-        {
-            return new TestInitializationFactory(databaseName).CreateClient();
-        }
+    public HttpClient Client { get; }
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            string dbConnectionString = $"Host=127.0.0.1:5432;Database={_databaseName};Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+    public static TestGatewayApiFactory Create(CoreApiStub coreApiStub, string databaseName, ITestOutputHelper testConsole)
+    {
+        testConsole.WriteLine("Creating TestGatewayApiFactory");
+        return new TestGatewayApiFactory(coreApiStub, databaseName, testConsole);
+    }
 
-            builder
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        var dbConnectionString =
+            $"Host=127.0.0.1:5432;Database={_databaseName};Username=db_dev_superuser;Password=db_dev_password;Include Error Detail=true";
+
+        builder
             .ConfigureAppConfiguration(
-                    (context, config) =>
+                (_, config) =>
+                {
+                    // connection string
+                    config.AddInMemoryCollection(new[]
                     {
-                        config.AddInMemoryCollection(new[]
-                        {
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", dbConnectionString),
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
-                            new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
-                        });
-                    }
+                        new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadOnly", dbConnectionString),
+                        new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayReadWrite", dbConnectionString),
+                        new KeyValuePair<string, string>("ConnectionStrings:NetworkGatewayMigrations", dbConnectionString),
+                    });
+
+                    // logging
+                    config.AddInMemoryCollection(new[]
+                    {
+                        new KeyValuePair<string, string>("Logging:LogLevel:Default", "Warning"),
+                        new KeyValuePair<string, string>("Logging:LogLevel:Microsoft.AspNetCore", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Database.Command", "Warning"),
+                        new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Infrastructure", "Warning"),
+                        new KeyValuePair<string, string>("RadixDlt.NetworkGateway.GatewayApi.Endpoints.ExceptionHandler", "Debug"),
+                    });
+                }
             )
-            .ConfigureServices(services =>
+            .ConfigureTestServices(services =>
             {
+                _testConsole.WriteLine("Injecting core api stubs");
+
+                // inject core stubs
+                services.AddSingleton<ICoreNodeHealthChecker>(_coreApiStub);
+                services.AddSingleton<INetworkConfigurationReader>(_coreApiStub);
+                services.AddSingleton<ITransactionLogReader>(_coreApiStub);
+                // services.AddSingleton<ICoreApiProvider>(_coreApiStub);
+                services.AddSingleton<ICoreApiHandler>(_coreApiStub);
+                services.AddSingleton<ICapturedConfigProvider>(_coreApiStub);
+
                 var sp = services.BuildServiceProvider();
 
-                using (var scope = sp.CreateScope())
-                {
-                    var scopedServices = scope.ServiceProvider;
+                using var scope = sp.CreateScope();
 
-                    var logger = scopedServices
-                        .GetRequiredService<ILogger<TestInitializationFactory>>();
+                var scopedServices = scope.ServiceProvider;
 
-                    var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
+                var logger = scopedServices
+                    .GetRequiredService<ILogger<TestGatewayApiFactory>>();
 
-                    dbReadyOnlyContext.Database.EnsureDeleted();
+                var dbReadyOnlyContext = scopedServices.GetRequiredService<ReadOnlyDbContext>();
 
-                    // This function will also run migrations!
-                    dbReadyOnlyContext.Database.EnsureCreated();
+                dbReadyOnlyContext.Database.EnsureDeleted();
 
-                    try
-                    {
-                        DbSeedHelper.InitializeDbForTests(dbReadyOnlyContext);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, $"An error occurred when initializing the database for tests. Error: {ex.Message}");
-                    }
-                }
+                _testConsole.WriteLine($"Creating {_databaseName} database and executing migrations...");
+                // This function will also run migrations!
+                dbReadyOnlyContext.Database.EnsureCreated();
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = DbSeedHelper.NetworkName;
+                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
                         o.IgnoreNonSyncedNodes = false;
-                        o.CoreApiNodes = new List<CoreApiNode>()
+                        o.CoreApiNodes = new List<CoreApiNode>
                         {
-                            new CoreApiNode() { CoreApiAddress = "http://localhost:3333/core", Name = "node1", Enabled = true },
+                            _coreApiStub.CoreApiStubDefaultConfiguration.GatewayCoreApiNode,
                         };
                     }
                 );
 
                 services.PostConfigure<EndpointOptions>(o =>
                 {
-                    o.GatewayApiVersion = "3.0.0";
-                    o.GatewayOpenApiSchemaVersion = "2.0.0";
+                    o.GatewayApiVersion = _coreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion;
+                    o.GatewayOpenApiSchemaVersion = _coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion;
                     o.MaxPageSize = 30;
                 });
             });
-        }
     }
 }

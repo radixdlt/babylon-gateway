@@ -377,3 +377,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/.idea/.idea.babylon-gateway/.idea/riderMarkupCache.xml

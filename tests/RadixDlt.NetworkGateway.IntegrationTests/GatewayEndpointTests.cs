@@ -63,33 +63,49 @@
  */
 
 using FluentAssertions;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System.Net.Http.Json;
+using System.Reflection;
+using Xunit;
+using Xunit.Abstractions;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public static class TestJsonExtensions
+[Collection("Gateway Api integration tests")]
+public class GatewayEndpointTests
 {
-    public static async Task<TResponse> ParseToObjectAndAssert<TResponse>(this HttpResponseMessage responseMessage)
+    private readonly ITestOutputHelper _testConsole;
+    private readonly NetworkDefinition _networkDefinition;
+
+    public GatewayEndpointTests(ITestOutputHelper testConsole)
     {
-        responseMessage.EnsureSuccessStatusCode(); // Status Code 200-299
+        _testConsole = testConsole;
+        _networkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
+    }
 
-        var mediaTypeHeader = MediaTypeHeaderValue.Parse(responseMessage.Content.Headers.ContentType?.ToString());
+    [Fact]
+    public void TestGatewayApiVersions()
+    {
+        // Arrange
+        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .ArrangeGatewayVersionsTest();
 
-        mediaTypeHeader.ShouldNotBeNull();
+        // Act
+        var task = gatewayRunner
+            .RunAndWaitUntilAllTransactionsAreIngested<GatewayResponse>();
+        task.Wait();
+        var payload = task.Result;
 
-        mediaTypeHeader.MediaType.Should().BeEquivalentTo("application/json");
+        // Assert
+        payload.GatewayApi.ShouldNotBeNull();
 
-        mediaTypeHeader.CharSet.Should().BeEquivalentTo("utf-8");
+        payload.GatewayApi._Version.ShouldNotBeNull();
+        payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion);
 
-        var json = await responseMessage.Content.ReadAsStringAsync();
-
-        var payload = JsonConvert.DeserializeObject<TResponse>(json);
-
-        payload.ShouldNotBeNull();
-
-        return payload;
+        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
+        payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
     }
 }

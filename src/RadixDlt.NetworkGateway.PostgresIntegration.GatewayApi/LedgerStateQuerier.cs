@@ -113,8 +113,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         var ledgerStatus = await GetLedgerStatus(token);
         return new GatewayResponse(
             new GatewayApiVersions(
-                _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion,
-                _endpointOptionsMonitor.CurrentValue.GatewayApiVersion
+                _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
+                _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
             ),
             new LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),

@@ -62,32 +62,26 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Net.Http.Json;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
-using Xunit;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.GatewayApiTestServer;
 
-public class GatewayEndpointTests
+public static class Program
 {
-    [Fact]
-    public async Task TestGatewayApiVersions()
+    public static async Task Main(string[] args)
     {
-        var client = TestInitializationFactory.CreateClient(nameof(TestGatewayApiVersions));
+        using var host = CreateHostBuilder(args).Build();
 
-        using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
-
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
-
-        payload.GatewayApi.ShouldNotBeNull();
-
-        payload.GatewayApi._Version.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be("2.0.0");
-
-        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be("3.0.0");
+        await host.RunAsync();
     }
+
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder
+                    .UseStartup<TestGatewayApiStartup>();
+            });
 }
