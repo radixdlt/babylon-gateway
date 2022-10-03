@@ -83,31 +83,9 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
-    public long? DatabaseParentId => GetDatabaseEntity().ParentId;
+    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new Exception("impossible bla bla bla");
 
-    public long? DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId;
-
-    public long? DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId;
-
-    public IEnumerable<long> TmpGetIds()
-    {
-        yield return GetDatabaseEntity().Id;
-
-        if (_databaseEntity?.ParentId.HasValue == true)
-        {
-            yield return _databaseEntity.ParentId.Value;
-        }
-
-        if (_databaseEntity?.OwnerAncestorId.HasValue == true)
-        {
-            yield return _databaseEntity.OwnerAncestorId.Value;
-        }
-
-        if (_databaseEntity?.GlobalAncestorId.HasValue == true)
-        {
-            yield return _databaseEntity.GlobalAncestorId.Value;
-        }
-    }
+    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
 
     public string? ComponentKind { get; private set; }
 
@@ -276,4 +254,27 @@ internal static class DictionaryExtensions
 
         return value;
     }
+}
+
+internal class SequencesHolder
+{
+    public long EntitySequence { get; set; }
+
+    public long EntityMetadataHistorySequence { get; set; }
+
+    public long EntityResourceAggregateHistorySequence { get; set; }
+
+    public long EntityResourceHistorySequence { get; set; }
+
+    public long FungibleResourceSupplyHistorySequence { get; set; }
+
+    public long NextEntity => EntitySequence++;
+
+    public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
+
+    public long NextEntityResourceAggregateHistory => EntityResourceAggregateHistorySequence++;
+
+    public long NextEntityResourceHistory => EntityResourceHistorySequence++;
+
+    public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
 }

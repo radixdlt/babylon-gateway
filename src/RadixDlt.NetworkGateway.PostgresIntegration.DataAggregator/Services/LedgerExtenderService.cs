@@ -125,7 +125,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
     )
     {
         var preparationReport = await PrepareForLedgerExtension(ledgerExtension, token);
-
         var ledgerExtensionReport = await ExtendLedger(ledgerExtension, new SyncTarget { TargetStateVersion = latestSyncTarget.TargetStateVersion }, token);
         var processTransactionReport = ledgerExtensionReport.ProcessTransactionsReport;
 
@@ -135,22 +134,15 @@ internal class LedgerExtenderService : ILedgerExtenderService
             + preparationReport.PreparationEntriesTouched
             + ledgerExtensionReport.EntriesWritten;
 
-        _logger.LogInformation("XXXXX total = {Total}", processTransactionReport.Total);
-
         return new CommitTransactionsReport(
             ledgerExtension.TransactionData.Count,
             ledgerExtensionReport.FinalTransactionSummary,
             preparationReport.RawTxnPersistenceMs,
             preparationReport.MempoolTransactionUpdateMs,
-            // TODO fix those
-            321,
-            321,
-            321,
-            321,
-            // processTransactionReport.TransactionContentHandlingMs,
-            // processTransactionReport.DbDependenciesLoadingMs,
-            // processTransactionReport.TransactionContentDbActionsCount,
-            // processTransactionReport.LocalDbContextActionsMs,
+            (long)processTransactionReport.ContentHandlingDuration.TotalMilliseconds,
+            (long)processTransactionReport.DbReadDuration.TotalMilliseconds,
+            -1, // TODO unused
+            -1, // TODO unused
             ledgerExtensionReport.DbPersistenceMs,
             dbEntriesWritten
         );
@@ -235,28 +227,27 @@ internal class LedgerExtenderService : ILedgerExtenderService
     private async Task<LedgerExtensionReport> ExtendLedger(ConsistentLedgerExtension ledgerExtension, SyncTarget latestSyncTarget, CancellationToken token)
     {
         // Create own context for ledger extension unit of work
-        await using var ledgerExtensionDbContext = await _dbContextFactory.CreateDbContextAsync(token);
-        await using var tx = await ledgerExtensionDbContext.Database.BeginTransactionAsync(token);
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+        await using var tx = await dbContext.Database.BeginTransactionAsync(token);
 
         try
         {
-            var processTransactionReport = await BulkProcessTransactionDependenciesAndEntityCreation(
-                ledgerExtensionDbContext,
-                ledgerExtension.TransactionData,
-                token
-            );
-
+            var processTransactionsReport = await ProcessTransactions(dbContext, ledgerExtension.TransactionData, token);
             var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;
 
-            await CreateOrUpdateLedgerStatus(ledgerExtensionDbContext, finalTransactionSummary, latestSyncTarget, token);
+            await CreateOrUpdateLedgerStatus(dbContext, finalTransactionSummary, latestSyncTarget, token);
 
-            var (ledgerExtensionEntriesWritten, dbPersistenceMs) = await CodeStopwatch.TimeInMs(
-                () => ledgerExtensionDbContext.SaveChangesAsync(token)
+            var (remainingRowsTouched, remainingDbDuration) = await CodeStopwatch.TimeInMs(
+                () => dbContext.SaveChangesAsync(token)
             );
 
             await tx.CommitAsync(token);
 
-            return new LedgerExtensionReport(processTransactionReport, finalTransactionSummary, ledgerExtensionEntriesWritten, dbPersistenceMs);
+            return new LedgerExtensionReport(
+                processTransactionsReport,
+                finalTransactionSummary,
+                processTransactionsReport.RowsTouched + remainingRowsTouched,
+                ((long)processTransactionsReport.DbWriteDuration.TotalMilliseconds) + remainingDbDuration);
         }
         catch (Exception)
         {
@@ -266,27 +257,22 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private async Task<ProcessTransactionsReport> BulkProcessTransactionDependenciesAndEntityCreation(
-        ReadWriteDbContext dbContext,
-        List<CommittedTransactionData> transactions,
-        CancellationToken cancellationToken
-    )
-    {
-        return await ProcessTransactions(dbContext, transactions, cancellationToken);
-    }
-
-    private record ProcessTransactionsReport(Dictionary<string, TimeSpan> Timers, Dictionary<string, string> Notes)
-    {
-        public TimeSpan Total => TimeSpan.FromMilliseconds(Timers.Where(t => t.Key.EndsWith("_total")).Select(t => t.Value.TotalMilliseconds).Sum());
-    }
+    private record ProcessTransactionsReport(int RowsTouched, TimeSpan DbReadDuration, TimeSpan DbWriteDuration, TimeSpan ContentHandlingDuration);
 
     private async Task<ProcessTransactionsReport> ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
     {
-        var notes = new Dictionary<string, string>(); // TODO replace with proper Activity at some point
-        var timers = new Dictionary<string, TimeSpan>(); // TODO replace with proper Activity at some point
+        // TODO further improvements:
+        // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
+        // - we must somehow benefit from EF-stored configuration (type mapping etc.)
+
+        // TODO replace with proper Activity at some point
+        var rowsInserted = 0;
+        var rowsUpdated = 0;
+        var dbReadDuration = TimeSpan.Zero;
+        var dbWriteDuration = TimeSpan.Zero;
+        var outerStopwatch = Stopwatch.StartNew();
 
         // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
-
         var referencedEntities = new Dictionary<string, ReferencedEntity>();
         var downedSubstates = new List<DownedSubstate>();
         var uppedSubstates = new List<UppedSubstate>();
@@ -299,8 +285,10 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         SequencesHolder sequences;
 
-        // step 0: load current sequences status
+        // step: load current sequences
         {
+            var sw = Stopwatch.StartNew();
+
             sequences = await dbConn.QueryFirstAsync<SequencesHolder>(
                 @"
 SELECT
@@ -309,12 +297,12 @@ SELECT
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
     nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence");
+
+            dbReadDuration += sw.Elapsed;
         }
 
-        // step 1: scan for any referenced entities
+        // step: scan for any referenced entities
         {
-            var sw = Stopwatch.StartNew();
-
             var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
 
             foreach (var transactionData in transactionsData)
@@ -376,6 +364,8 @@ SELECT
                 }
             }
 
+            var sw = Stopwatch.StartNew();
+
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, payload_hash, intent_hash, signed_hash, transaction_accumulator, message, fee_paid, epoch, index_in_epoch, round_in_epoch, is_user_transaction, is_start_of_epoch, is_start_of_round, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
             {
                 foreach (var lt in ledgerTransactions)
@@ -402,15 +392,12 @@ SELECT
                 await writer.CompleteAsync(token);
             }
 
-            notes.Add("step1_count", transactionsData.Count.ToString());
-            timers.Add("step1_total", sw.Elapsed);
+            rowsInserted += ledgerTransactions.Count;
+            dbWriteDuration += sw.Elapsed;
         }
 
-        // step 2: resolve known types & optionally create missing entities
+        // step: resolve known types & optionally create missing entities
         {
-            var sw = Stopwatch.StartNew();
-            var c = 0;
-
             ComponentEntity CreateComponentEntity(ReferencedEntity re)
             {
                 return new ComponentEntity
@@ -422,6 +409,7 @@ SELECT
             var entityAddresses = referencedEntities.Keys.Select(x => x.ConvertFromHex()).ToList();
             var entityAddressesParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
 
+            var sw = Stopwatch.StartNew();
             var knownDbEntities = await dbContext.Entities
                 .FromSqlInterpolated($@"
 SELECT *
@@ -434,8 +422,7 @@ WHERE id IN(
                 .AsNoTracking()
                 .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
 
-            notes.Add("step2_loadCount", knownDbEntities.Count.ToString());
-            timers.Add("step2_load", sw.Elapsed);
+            dbReadDuration += sw.Elapsed;
 
             var dbEntities = new List<Entity>();
 
@@ -466,8 +453,6 @@ WHERE id IN(
 
                 e.Resolve(dbEntity);
                 dbEntities.Add(dbEntity);
-
-                c++;
             }
 
             foreach (var (childAddress, parentAddress) in childToParentEntities)
@@ -487,6 +472,8 @@ WHERE id IN(
 
                 referencedEntities[childAddress].ResolveParentalIds(referencedEntities[parentAddress].DatabaseId, ownerAncestor.DatabaseId, globalAncestor.DatabaseId);
             }
+
+            sw = Stopwatch.StartNew();
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, parent_id, owner_ancestor_id, global_ancestor_id, type, kind) FROM STDIN (FORMAT BINARY)", token))
             {
@@ -527,15 +514,12 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            notes.Add("step2_saveCount", c.ToString());
-            timers.Add("step2_total", sw.Elapsed);
+            rowsInserted += dbEntities.Count;
+            dbWriteDuration += sw.Elapsed;
         }
 
-        // step 3: scan all substates to figure out changes
+        // step: scan all substates to figure out changes
         {
-            var sw = Stopwatch.StartNew();
-            var c = 0;
-
             void HandleResourceManagerSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetResourceManagerSubstate();
@@ -621,34 +605,25 @@ WHERE id IN(
                     default:
                         throw new Exception("bleh"); // TODO fix me
                 }
-
-                c++;
             }
-
-            notes.Add("step3_saveCount", c.ToString());
-            timers.Add("step3_total", sw.Elapsed);
         }
 
-        // step 6: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
+        // step: now that all the fundamental data is inserted (entities & substates) we can insert some denormalized data
         {
-            var sw = Stopwatch.StartNew();
-
             // entity_id => state_version => resource_id[] (added or removed)
             var aggregateDelta = new Dictionary<long, Dictionary<long, AggregateChange>>();
 
             var fungibles = fungibleResourceChanges
                 .Select(e =>
                 {
-                    foreach (var id in e.SubstateEntity.TmpGetIds())
-                    {
-                        aggregateDelta.GetOrAdd(id, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendFungible(e.ResourceEntity.DatabaseId);
-                    }
+                    aggregateDelta.GetOrAdd(e.SubstateEntity.DatabaseOwnerAncestorId, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendFungible(e.ResourceEntity.DatabaseId);
+                    aggregateDelta.GetOrAdd(e.SubstateEntity.DatabaseGlobalAncestorId, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendFungible(e.ResourceEntity.DatabaseId);
 
                     return new EntityFungibleResourceHistory
                     {
                         FromStateVersion = e.StateVersion,
-                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId ?? throw new Exception("impossible"), // TODO fix me
-                        GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId ?? throw new Exception("impossible"), // TODO fix me
+                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
+                        GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.ResourceEntity.DatabaseId,
                         Balance = e.Balance,
                     };
@@ -660,16 +635,14 @@ WHERE id IN(
                 {
                     // TODO handle removal (is_deleted)
 
-                    foreach (var id in e.SubstateEntity.TmpGetIds())
-                    {
-                        aggregateDelta.GetOrAdd(id, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendNonFungible(e.ResourceEntity.DatabaseId);
-                    }
+                    aggregateDelta.GetOrAdd(e.SubstateEntity.DatabaseOwnerAncestorId, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendNonFungible(e.ResourceEntity.DatabaseId);
+                    aggregateDelta.GetOrAdd(e.SubstateEntity.DatabaseGlobalAncestorId, _ => new Dictionary<long, AggregateChange>()).GetOrAdd(e.StateVersion, _ => new AggregateChange(e.StateVersion)).AppendNonFungible(e.ResourceEntity.DatabaseId);
 
                     return new EntityNonFungibleResourceHistory
                     {
                         FromStateVersion = e.StateVersion,
-                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId ?? throw new Exception("impossible"), // TODO fix me
-                        GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId ?? throw new Exception("impossible"), // TODO fix me
+                        OwnerEntityId = e.SubstateEntity.DatabaseOwnerAncestorId,
+                        GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.ResourceEntity.DatabaseId,
                         IdsCount = e.Ids.Count,
                         Ids = e.Ids.Select(id => referencedEntities[id].DatabaseId).ToArray(),
@@ -710,12 +683,15 @@ WHERE id IN(
                 })
                 .ToList();
 
+            var sw = Stopwatch.StartNew();
             var aggregateDeltaIds = aggregateDelta.Keys.ToList();
             var existingAggregates = await dbContext.EntityResourceAggregateHistory
                 .AsNoTracking()
                 .Where(e => e.IsMostRecent)
                 .Where(e => aggregateDeltaIds.Contains(e.EntityId))
                 .ToDictionaryAsync(e => e.EntityId, token);
+
+            dbReadDuration += sw.Elapsed;
 
             var aggregates = new List<EntityResourceAggregateHistory>();
             var lastAggregateByEntity = new Dictionary<long, EntityResourceAggregateHistory>();
@@ -769,6 +745,8 @@ WHERE id IN(
                 aggregate.IsMostRecent = true;
             }
 
+            sw = Stopwatch.StartNew();
+
             if (existingAggregates.Any())
             {
                 // update only those aggregates that will be modified in next step
@@ -786,10 +764,8 @@ WHERE id IN(
                         throw new Exception("bla bla bla x6"); // TODO fix me
                     }
 
-                    notes.Add("step6_updateAffected", affected.ToString());
+                    rowsUpdated += affected;
                 }
-
-                timers.Add("step6_update", sw.Elapsed);
             }
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_ids, non_fungible_resource_ids) FROM STDIN (FORMAT BINARY)", token))
@@ -876,14 +852,11 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            notes.Add("step6_aggCnt", aggregates.Count.ToString());
-            notes.Add("step6_funCnt", fungibles.Count.ToString());
-            notes.Add("step6_nonFunCnt", nonFungibles.Count.ToString());
-            notes.Add("step6_metaCnt", metadata.Count.ToString());
-            timers.Add("step6_total", sw.Elapsed);
+            rowsInserted += aggregates.Count + fungibles.Count + nonFungibles.Count + metadata.Count;
+            dbWriteDuration += sw.Elapsed;
         }
 
-        // step 7: update sequences
+        // step: update sequences
         {
             var sw = Stopwatch.StartNew();
 
@@ -904,33 +877,12 @@ SELECT
                     FungibleResourceSupplyHistorySequence = sequences.FungibleResourceSupplyHistorySequence,
                 });
 
-            timers.Add("step7_total", sw.Elapsed);
+            dbWriteDuration += sw.Elapsed;
         }
 
-        return new ProcessTransactionsReport(timers, notes);
-    }
+        var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
 
-    private class SequencesHolder
-    {
-        public long EntitySequence { get; set; }
-
-        public long EntityMetadataHistorySequence { get; set; }
-
-        public long EntityResourceAggregateHistorySequence { get; set; }
-
-        public long EntityResourceHistorySequence { get; set; }
-
-        public long FungibleResourceSupplyHistorySequence { get; set; }
-
-        public long NextEntity => EntitySequence++;
-
-        public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
-
-        public long NextEntityResourceAggregateHistory => EntityResourceAggregateHistorySequence++;
-
-        public long NextEntityResourceHistory => EntityResourceHistorySequence++;
-
-        public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
+        return new ProcessTransactionsReport(rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration);
     }
 
     private async Task CreateOrUpdateLedgerStatus(
