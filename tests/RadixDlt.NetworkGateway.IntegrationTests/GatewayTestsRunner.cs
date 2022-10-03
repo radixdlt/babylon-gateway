@@ -155,6 +155,8 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
+        _testConsole.WriteLine($"Transferring {amountToTransfer} tokens from account: {fromAccount} to account {toAccount}");
+
         var json = new TransactionSubmitRequest(new Transactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -173,6 +175,8 @@ public partial class GatewayTestsRunner : IDisposable
 
     public long GetAccountBalance(string accountAddress)
     {
+        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+
         var account = CoreApiStub.GlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
 
         var accountEntityAddressHex = account!.EntityAddressHex;
@@ -188,6 +192,8 @@ public partial class GatewayTestsRunner : IDisposable
         // TODO: divisibility??? Optimize and make it a separate function
         var attos = double.Parse(vaultResourceAmount!.AmountAttos);
         var tokens = attos / Math.Pow(10, 18);
+
+        _testConsole.WriteLine($"Account: {accountAddress} balance: {tokens}");
 
         return Convert.ToInt64(tokens);
     }
