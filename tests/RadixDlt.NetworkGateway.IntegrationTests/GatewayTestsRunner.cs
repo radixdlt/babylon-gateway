@@ -22,10 +22,10 @@ public partial class GatewayTestsRunner : IDisposable
 {
     private readonly ITestOutputHelper _testConsole;
 
+    private readonly string _databaseName;
+
     private TestDataAggregatorFactory? _dataAggregatorFactory;
     private TestGatewayApiFactory? _gatewayApiFactory;
-
-    private string _databaseName;
 
     private (string? RequestUri, HttpContent? Content) _request;
 
@@ -38,6 +38,7 @@ public partial class GatewayTestsRunner : IDisposable
         CoreApiStub = new CoreApiStub { CoreApiStubDefaultConfiguration = { NetworkDefinition = networkDefinition } };
 
         StateUpdatesStore = new StateUpdatesStore();
+        TransactionStreamStore = new TransactionStreamStore(CoreApiStub, StateUpdatesStore, testConsole);
 
         _testConsole = testConsole;
         _databaseName = testName;
@@ -50,6 +51,8 @@ public partial class GatewayTestsRunner : IDisposable
     public CoreApiStub CoreApiStub { get; }
 
     public StateUpdatesStore StateUpdatesStore { get; }
+
+    public TransactionStreamStore TransactionStreamStore { get; }
 
     public GatewayTestsRunner WithAccount(string accountAddress, string token, long balance)
     {
@@ -102,7 +105,7 @@ public partial class GatewayTestsRunner : IDisposable
         return this;
     }
 
-    public GatewayTestsRunner ArrangeSubmittedTransactionStatusTest(RecentTransactionsResponse recentTransactions)
+    public GatewayTestsRunner ArrangeTransactionStatusTest(RecentTransactionsResponse recentTransactions)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
@@ -120,7 +123,7 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var json = new TransactionSubmitRequest(new Transactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
+        var json = new TransactionSubmitRequest(new HexTransactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         _request = ("/transaction/submit", content);
@@ -139,7 +142,7 @@ public partial class GatewayTestsRunner : IDisposable
         return this;
     }
 
-    public GatewayTestsRunner ArrangeTransactionRecentTest()
+    public GatewayTestsRunner ArrangeRecentTransactionTest()
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
@@ -159,7 +162,7 @@ public partial class GatewayTestsRunner : IDisposable
 
         _testConsole.WriteLine($"Transferring {amountToTransfer} tokens from account: {fromAccount} to account {toAccount}");
 
-        var json = new TransactionSubmitRequest(new Transactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
+        var json = new TransactionSubmitRequest(new HexTransactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         _request = ("/transaction/submit", content);

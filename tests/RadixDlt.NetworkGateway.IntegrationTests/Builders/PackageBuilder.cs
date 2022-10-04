@@ -31,14 +31,11 @@ public class PackageBuilder : BuilderBase<StateUpdates>
 
         var newGlobalEntities = new List<GlobalEntityId>()
         {
-            new TestGlobalEntity()
-            {
-                EntityType = EntityType.Package,
-                EntityAddressHex = AddressHelper.AddressToHex(_packageAddress),
-                GlobalAddressHex = AddressHelper.AddressToHex(_packageAddress),
-                GlobalAddress = _packageAddress,
-                Name = string.Join(",", _blueprints.Select(b => b.Name)),
-            },
+            new GlobalEntityId(
+                entityType: EntityType.Package,
+                entityAddressHex: AddressHelper.AddressToHex(_packageAddress),
+                globalAddressHex: AddressHelper.AddressToHex(_packageAddress),
+                globalAddress: _packageAddress),
         };
 
         var upSubstates = new List<UpSubstate>()

@@ -25,6 +25,16 @@ public class StateUpdatesStore
             stateUpdatesList.SelectMany(s => s.NewGlobalEntities).ToList());
     }
 
+    public static string ToJson(List<StateUpdates> stateUpdatesList)
+    {
+        return Combine(stateUpdatesList).ToJson();
+    }
+
+    public string ToJson()
+    {
+        return Combine(_stateUpdatesList).ToJson();
+    }
+
     public void AddStateUpdates(StateUpdates stateUpdates)
     {
         _stateUpdatesList.Add(stateUpdates);

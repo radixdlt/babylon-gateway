@@ -98,7 +98,7 @@ public class TransactionEndpointTests
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .ArrangeTransactionRecentTest();
+            .ArrangeRecentTransactionTest();
 
         // Act
         var task = gatewayRunner.RunAndWaitUntilAllTransactionsAreIngested<RecentTransactionsResponse>();
@@ -241,7 +241,7 @@ public class TransactionEndpointTests
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .ArrangeTransactionRecentTest();
+            .ArrangeRecentTransactionTest();
 
         // Act
         var taskRecent = gatewayRunner
@@ -250,7 +250,7 @@ public class TransactionEndpointTests
         taskRecent.Wait();
         var recentTransactions = taskRecent.Result;
 
-        var taskAct = gatewayRunner.ArrangeSubmittedTransactionStatusTest(recentTransactions)
+        var taskAct = gatewayRunner.ArrangeTransactionStatusTest(recentTransactions)
             .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
         taskAct.Wait();
         var payload = taskAct.Result;

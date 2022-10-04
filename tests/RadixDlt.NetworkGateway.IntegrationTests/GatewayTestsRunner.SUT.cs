@@ -34,55 +34,7 @@ public partial class GatewayTestsRunner
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _testConsole.WriteLine("XRD resource");
-        var tokens = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
-            .WithResourceName("XRD")
-            .WithTotalSupply(10000000000)
-            .Build();
-
-        StateUpdatesStore.AddStateUpdates(tokens);
-
-        _testConsole.WriteLine("SysFaucet vault");
-        var vault = new VaultBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
-            .WithVaultName("SysFaucet vault")
-            .WithFungibleTokens(tokens.NewGlobalEntities[0].GlobalAddress)
-            .WithFungibleTokensTotalSupply(10000000000)
-            .WithFungibleTokensDivisibility(18)
-            .Build();
-
-        StateUpdatesStore.AddStateUpdates(vault);
-
-        _testConsole.WriteLine("SysFaucet package");
-        var package = new PackageBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
-            .WithBlueprints(new List<IBlueprint> { new SysFaucetBlueprint() })
-            .WithFixedAddress(GenesisData.SysFaucetPackageAddress)
-            .Build();
-
-        StateUpdatesStore.AddStateUpdates(package);
-
-        // TODO: KeyValueStore builder !!!
-        _testConsole.WriteLine("SysFaucet component");
-        var component = new ComponentBuilder(CoreApiStub.CoreApiStubDefaultConfiguration, ComponentHrp.SystemComponentHrp)
-            .WithComponentName(GenesisData.SysFaucetBlueprintName)
-            .WithComponentInfoSubstate(GenesisData.SysFaucetInfoSubstate)
-            .WithComponentStateSubstate(
-                GenesisData.SysFaucetStateSubstate(vault.NewGlobalEntities[0].EntityAddressHex, "000000000000000000000000000000000000000000000000000000000000000001000000"))
-            .Build();
-
-        StateUpdatesStore.AddStateUpdates(component);
-
-        _testConsole.WriteLine("Transaction receipt");
-        var transactionReceipt = new TransactionReceiptBuilder().WithStateUpdates(StateUpdatesStore.StateUpdates).Build();
-
-        CoreApiStub.CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse = new CommittedTransactionsResponse(
-            1L,
-            1L,
-            1L,
-            new List<CommittedTransaction>
-            {
-                new(1L, null, transactionReceipt),
-            }
-        );
+        TransactionStreamStore.GenerateGenesisTransaction();
 
         return this;
     }

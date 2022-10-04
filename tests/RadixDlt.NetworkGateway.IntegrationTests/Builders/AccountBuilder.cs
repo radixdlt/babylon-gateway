@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Collections.Generic;
 
@@ -13,7 +14,6 @@ public class AccountBuilder : BuilderBase<StateUpdates>
 
     private string _accountAddress = string.Empty;
     private string _accountName = string.Empty;
-    private string _accountPublicKey;
     private long _tokensBalance;
     private string _tokenName = string.Empty;
 
@@ -21,7 +21,7 @@ public class AccountBuilder : BuilderBase<StateUpdates>
     {
         _defaultConfig = defaultConfig;
         _stateUpdatesStore = stateUpdatesStore;
-        _accountPublicKey = AddressHelper.GenerateRandomPublicKey();
+        AddressHelper.GenerateRandomPublicKey();
     }
 
     public override StateUpdates Build()
@@ -48,25 +48,20 @@ public class AccountBuilder : BuilderBase<StateUpdates>
 
         _stateUpdatesStore.AddStateUpdates(vault);
 
+        var dataStruct = new KeyValueStoreBuilder()
+            .WithDataStructField(vault.NewGlobalEntities[0].EntityAddressHex, "Custom", ScryptoType.Vault)
+            .WithDataStructField(keyValueStoreAddressHex, "Custom", ScryptoType.KeyValueStore)
+            .WithOwnedEntity(EntityType.Vault, vault.NewGlobalEntities[0].EntityAddressHex)
+            .WithOwnedEntity(EntityType.KeyValueStore, keyValueStoreAddressHex)
+            .Build();
+
         var componentStateSubstateData = new ComponentStateSubstate(
             entityType: EntityType.Component,
             substateType: SubstateType.ComponentState,
-            dataStruct: new DataStruct(
-                structData: new SborData(
-                    dataHex: "1002000000b3240000000000000000000000000000000000000000000000000000000000000000000000000000008324000000000000000000000000000000000000000000000000000000000000000000000001000000",
-                    dataJson: JObject.Parse($"{{\"fields\": [{{\"bytes\": \"{vault.NewGlobalEntities[0].EntityAddressHex}\", \"type\": \"Custom\", \"type_id\": 179}}, {{\"bytes\": \"{keyValueStoreAddressHex}\", \"type\": \"Custom\", \"type_id\": 131}}], \"type\": \"Struct\"}}")
-                ),
-                ownedEntities: new List<EntityId>()
-                {
-                    new(entityType: EntityType.Vault, entityAddressHex: vault.NewGlobalEntities[0].EntityAddressHex),
-                    new(entityType: EntityType.KeyValueStore, entityAddressHex: keyValueStoreAddressHex),
-                },
-                referencedEntities: new List<EntityId>()
-            )
+            dataStruct: dataStruct
         );
 
         var account = new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
-            .WithComponentName($"_component_{_accountName}")
             .WithComponentStateSubstate(componentStateSubstateData)
             .WithFixedAddress(_accountAddress)
             .WithVault(vault.NewGlobalEntities[0].EntityAddressHex) // TODO: is it used?
@@ -84,8 +79,6 @@ public class AccountBuilder : BuilderBase<StateUpdates>
 
     public AccountBuilder WithPublicKey(string publicKey)
     {
-        _accountPublicKey = publicKey;
-
         return this;
     }
 

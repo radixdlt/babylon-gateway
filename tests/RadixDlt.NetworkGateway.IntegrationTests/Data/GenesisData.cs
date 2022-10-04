@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
@@ -37,21 +38,17 @@ public static class GenesisData
 
     public static ComponentStateSubstate SysFaucetStateSubstate(string vaultAddressHex, string keyValueStoreAddressHex)
     {
+        var dataStruct = new KeyValueStoreBuilder()
+            .WithDataStructField(vaultAddressHex, "Custom", ScryptoType.Vault)
+            .WithDataStructField(keyValueStoreAddressHex, "Custom", ScryptoType.KeyValueStore)
+            .WithOwnedEntity(EntityType.Vault, vaultAddressHex)
+            .WithOwnedEntity(EntityType.KeyValueStore, keyValueStoreAddressHex)
+            .Build();
+
         return new ComponentStateSubstate(
             entityType: EntityType.Component,
             substateType: SubstateType.ComponentState,
-            dataStruct: new DataStruct(
-                structData: new SborData(
-                    dataHex: "1002000000b3240000000000000000000000000000000000000000000000000000000000000000000000000000008324000000000000000000000000000000000000000000000000000000000000000000000001000000",
-                    dataJson: JObject.Parse($"{{\"fields\": [{{\"bytes\": \"{vaultAddressHex}\", \"type\": \"Custom\", \"type_id\": 179}}, {{\"bytes\": \"{keyValueStoreAddressHex}\", \"type\": \"Custom\", \"type_id\": 131}}], \"type\": \"Struct\"}}")
-                ),
-                ownedEntities: new List<EntityId>()
-                {
-                    new(entityType: EntityType.Vault, entityAddressHex: vaultAddressHex),
-                    new(entityType: EntityType.KeyValueStore, entityAddressHex: keyValueStoreAddressHex),
-                },
-                referencedEntities: new List<EntityId>()
-            )
+            dataStruct: dataStruct
         );
     }
 

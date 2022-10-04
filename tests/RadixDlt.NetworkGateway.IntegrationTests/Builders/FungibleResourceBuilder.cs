@@ -30,14 +30,11 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
 
         var newGlobalEntities = new List<GlobalEntityId>()
         {
-            new TestGlobalEntity()
-            {
-                EntityType = EntityType.ResourceManager,
-                EntityAddressHex = AddressHelper.AddressToHex(_resourceAddress),
-                GlobalAddressHex = AddressHelper.AddressToHex(_resourceAddress),
-                GlobalAddress = _resourceAddress,
-                Name = _resourceName,
-            },
+            new GlobalEntityId(
+                entityType: EntityType.ResourceManager,
+                entityAddressHex: AddressHelper.AddressToHex(_resourceAddress),
+                globalAddressHex: AddressHelper.AddressToHex(_resourceAddress),
+                globalAddress: _resourceAddress),
         };
 
         var upSubstates = new List<UpSubstate>()

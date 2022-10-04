@@ -30,14 +30,11 @@ public class VaultBuilder : BuilderBase<StateUpdates>
 
         var newGlobalEntities = new List<GlobalEntityId>()
         {
-            new TestGlobalEntity()
-            {
-                Name = _vaultName,
-                EntityType = EntityType.Vault,
-                GlobalAddress = AddressHelper.AddressFromHex(_vaultAddressHex),
-                EntityAddressHex = _vaultAddressHex,
-                GlobalAddressHex = _vaultAddressHex,
-            },
+            new GlobalEntityId(
+                entityType: EntityType.Vault,
+                entityAddressHex: _vaultAddressHex,
+                globalAddressHex: _vaultAddressHex,
+                globalAddress: AddressHelper.AddressFromHex(_vaultAddressHex)),
         };
 
         var upSubstates = new List<UpSubstate>()

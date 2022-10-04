@@ -5,11 +5,11 @@ using System.Text;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
 
-public class Transactions
+public class HexTransactions
 {
     private readonly CoreApiStubDefaultConfiguration _defaultConfig;
 
-    public Transactions(CoreApiStubDefaultConfiguration defaultConfig)
+    public HexTransactions(CoreApiStubDefaultConfiguration defaultConfig)
     {
         _defaultConfig = defaultConfig;
     }
