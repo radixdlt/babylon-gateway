@@ -62,60 +62,26 @@
  * permissions under this License.
  */
 
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Npgsql;
+using NpgsqlTypes;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-/// <summary>
-/// A base class for History tracked in the database, with explicit keys and entry types.
-///
-/// The Key and Entry types should together define the type, alongside the FromStateVersion and ToStateVersion fields.
-///
-/// Marking these allows for carefully considering the types to make history creation easier -- and to preempt
-/// static interfaces.
-/// </summary>
-/// <typeparam name="TKey">A record type indicating the grouping key which is used to aggregate history together.</typeparam>
-/// <typeparam name="TEntry">A record type indicating the history entry - these are the items which change over time.</typeparam>
-/// <typeparam name="TChange">A class which is used to aggregate a diff to the last history entry.</typeparam>
-internal abstract class HistoryBase<TKey, TEntry, TChange> : HistoryBase
+internal static class NpgsqlBinaryImporterExtensions
 {
-}
+    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    {
+        return value.HasValue
+            ? writer.WriteAsync(value.Value, npgsqlDbType, cancellationToken)
+            : writer.WriteNullAsync(cancellationToken);
+    }
 
-/// <summary>
-/// A base class for History tracked in the database.
-///
-/// Current state is given by ToStateVersion = null - but generally speaking, you should be reading at a given
-/// already-committed state version, to ensure that the history you read is atomic against that stateVersion.
-/// (Or at least, it is atomic assuming the ledger isn't mid-reversion, but at that point, all bets are off).
-///
-/// There should be indexes with to_state_version null (to pull "latest") and against from_state_version
-/// (to easily pull history at a given state version). The former could/should be replaced with the latter with
-/// a little work.
-///
-/// You will likely also want to add a query in DbQueryExtensions to help with querying against a given state version.
-/// It may also be worthwhile to create a TableValuedFunction with this SQL to make direct-SQL-querying easier.
-/// </summary>
-internal abstract class HistoryBase
-{
-    /// <summary>
-    /// The first state version where this version of history applied.
-    /// </summary>
-    [Column(name: "from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [ForeignKey(nameof(FromStateVersion))]
-    public LedgerTransaction FromLedgerTransaction { get; set; }
-
-    /// <summary>
-    /// The last state version where this version of history applied. This endpoint is inclusive.
-    /// IE there should be a new History with New.FromStateVersion = Prev.ToStateVersion + 1.
-    /// </summary>
-    [Column(name: "to_state_version")]
-    [ConcurrencyCheck] // Ensure that the same history can't be updated by two different state versions somehow
-    public long? ToStateVersion { get; set; }
-
-    // OnModelCreating: Further define relationship to LedgerTransaction (no cascade delete - needs careful clean-up on reversion)
-    [ForeignKey(nameof(ToStateVersion))]
-    public LedgerTransaction? ToLedgerTransaction { get; set; }
+    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, byte[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    {
+        return value != null
+            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
+            : writer.WriteNullAsync(cancellationToken);
+    }
 }

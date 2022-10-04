@@ -62,20 +62,34 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-/// <summary>
-/// Adds normalization to resources, to increase DB performance.
-/// </summary>
-[Table("resources")]
-// OnModelCreating: Create unique index on rri
-internal class Resource : NormalizedEntityBase
+[Table("entity_resource_aggregate_history")]
+[Index(nameof(EntityId), nameof(FromStateVersion))]
+public class EntityResourceAggregateHistory
 {
-    [Column(name: "engine_address")]
-    public byte[] RadixEngineAddress { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    [Column(name: "rri")]
-    public string ResourceIdentifier { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("entity_id")]
+    public long EntityId { get; set; }
+
+    [Column("is_most_recent")]
+    public bool IsMostRecent { get; set; }
+
+    [Column("fungible_resource_ids")]
+    public long[] FungibleResourceIds { get; set; }
+
+    // TODO add fungible balances so that we can use this table alone?
+
+    [Column("non_fungible_resource_ids")]
+    public long[] NonFungibleResourceIds { get; set; }
 }

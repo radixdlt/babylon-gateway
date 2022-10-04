@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -86,7 +87,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityResourcesResponse> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO general idea how to change code below:
         // add extra table containing all resources given entity posses, then change all of those queries from
@@ -119,7 +120,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
             {
                 "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
                 "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
-                _ => throw new Exception("fix me"), // TODO fix me
+                _ => _networkConfigurationProvider.GetAddressHrps().AccountHrp, // TODO fix me
             };
         }
         else
@@ -127,68 +128,74 @@ internal class EntityStateQuerier : IEntityStateQuerier
             throw new Exception("unsupported entity type"); // TODO fix me
         }
 
-        // TODO those DISTINCT ON queries are going to be slow because we have to fetch everything first, ideally we should change it to somehow just fetch first element form index and stop immediately
-        // TODO as we support "lookup by global" and "lookup by owner" we must duplicate some keys
+        // TODO add support for owner_entity_id OR global_entity_id
+        // TODO add lookup indexes for both of those variants
 
+        // TODO this has been recently replaced with EF-based inheritance, but we might want to get back to two separate tables instead of discriminator column
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
-        var fungibleBalanceHistory = await _dbContext.EntityFungibleResourceHistory
+
+        var dbResources = await _dbContext.EntityResourceHistory
             .FromSqlInterpolated($@"
-SELECT DISTINCT ON (owner_entity_id, fungible_resource_entity_id) *
-FROM entity_fungible_resource_history
-WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
-ORDER BY owner_entity_id, fungible_resource_entity_id, from_state_version DESC")
+WITH aggregate_history AS (
+    SELECT fungible_resource_ids, non_fungible_resource_ids
+    FROM entity_resource_aggregate_history
+    WHERE from_state_version <= {ledgerState._Version} AND entity_id = {entity.Id}
+    ORDER BY from_state_version DESC
+    LIMIT 1
+),
+unnested_aggregate_history AS (
+    SELECT UNNEST(fungible_resource_ids || non_fungible_resource_ids) AS resource_id
+    FROM aggregate_history
+)
+SELECT erh.*
+FROM unnested_aggregate_history uah
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_resource_history
+    WHERE from_state_version <= {ledgerState._Version} AND owner_entity_id = {entity.Id} AND resource_entity_id = uah.resource_id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) erh ON true;
+")
             .ToListAsync(token);
 
-        // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include(ids.length) - but no INCLUDE(ids) as its just too big
-        // TODO this one might benefit form "*" => "fungible_resource_entity_id, ids" (first x elements of ids actually)
-        // TODO or maybe we don't even want to return actual NF ids here?
-        var nonFungibleIdsHistory = await _dbContext.EntityNonFungibleResourceHistory
-            .FromSqlInterpolated($@"
-SELECT DISTINCT ON (owner_entity_id, non_fungible_resource_entity_id) *
-FROM entity_non_fungible_resource_history
-WHERE owner_entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
-ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DESC")
-            .ToListAsync(token);
-
-        var referencedEntityIds = fungibleBalanceHistory
-            .Select(h => h.FungibleResourceEntityId)
-            .Concat(nonFungibleIdsHistory.Select(h => h.NonFungibleResourceEntityId))
-            .Distinct()
-            .ToList();
+        var referencedEntityIds = dbResources.Select(h => h.ResourceEntityId).ToList();
 
         var resources = await _dbContext.Entities
             .Where(e => referencedEntityIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
         var fungibles = new List<EntityStateResponseFungibleResource>();
-
-        foreach (var fbh in fungibleBalanceHistory)
-        {
-            var rga = resources[fbh.FungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
-            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
-
-            fungibles.Add(new EntityStateResponseFungibleResource(ra, fbh.Balance.ToSubUnitString()));
-        }
-
         var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
 
-        foreach (var nfih in nonFungibleIdsHistory)
+        foreach (var dbResource in dbResources)
         {
-            var rga = resources[nfih.NonFungibleResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
+            var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
             var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
 
-            nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, nfih.IdsCount));
+            if (dbResource is EntityFungibleResourceHistory efrh)
+            {
+                fungibles.Add(new EntityStateResponseFungibleResource(ra, efrh.Balance.ToSubUnitString()));
+            }
+            else if (dbResource is EntityNonFungibleResourceHistory enfrh)
+            {
+                nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, enfrh.IdsCount));
+            }
+            else
+            {
+                throw new Exception("bla bla bla"); // TODO fix me
+            }
         }
 
         var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
-        var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibleBalanceHistory.Count, null, "TBD (currently everything is returned)", fungibles);
-        var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibleIdsHistory.Count, null, "TBD (currently everything is returned)", nonFungibles);
+        var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibles.Count, null, "TBD (currently everything is returned)", fungibles);
+        var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibles.Count, null, "TBD (currently everything is returned)", nonFungibles);
 
         return new EntityResourcesResponse(adr, fungiblesPagination, nonFungiblesPagination);
     }
 
-    public async Task<EntityDetailsResponse> EntityDetailsSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityDetailsResponse> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
 
@@ -226,10 +233,10 @@ ORDER BY owner_entity_id, non_fungible_resource_entity_id, from_state_version DE
         var metadata = new Dictionary<string, string>();
         var metadataHistory = await _dbContext.EntityMetadataHistory
             .FromSqlInterpolated($@"
-SELECT DISTINCT ON (entity_id) *
+SELECT *
 FROM entity_metadata_history
 WHERE entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
-ORDER BY entity_id, from_state_version DESC")
+ORDER BY from_state_version DESC")
             .FirstOrDefaultAsync(token);
 
         if (metadataHistory != null)

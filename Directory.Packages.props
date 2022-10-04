@@ -7,9 +7,9 @@
     <!-- PUBLIC NUGET: Microsoft -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
@@ -17,13 +17,14 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 
     <!-- PUBLIC NUGET: Non-Microsoft -->
+    <PackageVersion Include="Dapper" Version="2.0.123" />
     <PackageVersion Include="FluentAssertions" Version="6.7.0" />
     <PackageVersion Include="FluentValidation" Version="11.2.0" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.1" />
     <PackageVersion Include="JsonSubTypes" Version="1.9.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Polly" Version="7.2.3" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.6" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />

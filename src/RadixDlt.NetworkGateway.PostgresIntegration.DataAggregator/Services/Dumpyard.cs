@@ -63,12 +63,14 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Substate = RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -76,33 +78,16 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 {
     private Entity? _databaseEntity;
     private ReferencedEntity? _parent;
-    private long? _parentId;
-    private long? _ownerAncestorId;
-    private long? _globalAncestorId;
 
-    public byte[]? GlobalAddressBytes { get; private set; }
+    public RadixAddress? GlobalAddress { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
-    public long DatabaseOwnerAncestorId
-    {
-        get
-        {
-            EnsureParentalIdsResolved();
+    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new Exception("impossible bla bla bla");
 
-            return _ownerAncestorId.Value;
-        }
-    }
+    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
 
-    public long DatabaseGlobalAncestorId
-    {
-        get
-        {
-            EnsureParentalIdsResolved();
-
-            return _globalAncestorId.Value;
-        }
-    }
+    public string? ComponentKind { get; private set; }
 
     // TODO not sure if this logic is valid?
     public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
@@ -112,24 +97,35 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
 
-    public void Globalize(string addressBytes)
+    public void Globalize(string addressHex, string address, AddressHrps networkHrps)
     {
-        GlobalAddressBytes = Convert.FromHexString(addressBytes);
+        // TODO we probably want to differentiate all possible HRPs
+
+        var kind = "normal";
+
+        if (addressHex.StartsWith(networkHrps.AccountHrp))
+        {
+            kind = "account";
+        }
+        else if (addressHex.StartsWith(networkHrps.ValidatorHrp))
+        {
+            kind = "validator";
+        }
+
+        GlobalAddress = addressHex.ConvertFromHex();
+        ComponentKind = kind;
     }
 
     public void Resolve(Entity entity)
     {
         _databaseEntity = entity;
-        _parentId = entity.ParentId;
-        _ownerAncestorId = entity.OwnerAncestorId;
-        _globalAncestorId = entity.GlobalAncestorId;
     }
 
     public void ResolveParentalIds(long parentId, long ownerId, long globalId)
     {
-        _parentId = parentId;
-        _ownerAncestorId = ownerId;
-        _globalAncestorId = globalId;
+        GetDatabaseEntity().ParentId = parentId;
+        GetDatabaseEntity().OwnerAncestorId = ownerId;
+        GetDatabaseEntity().GlobalAncestorId = globalId;
     }
 
     public void IsChildOf(ReferencedEntity parent)
@@ -148,36 +144,99 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
         return de;
     }
-
-    [MemberNotNull(nameof(_parentId), nameof(_ownerAncestorId), nameof(_globalAncestorId))]
-    private void EnsureParentalIdsResolved()
-    {
-        if (_parentId == null || _ownerAncestorId == null || _globalAncestorId == null)
-        {
-            throw new InvalidOperationException("Parental identifiers not resolved yet, have you forgotten to call ResolveParentalIds(long, long, long)?");
-        }
-    }
 }
 
 internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion)
 {
 }
 
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data)
-{
-    public Substate? DatabaseSubstate { get; private set; }
-
-    public void Resolve(Substate substate)
-    {
-        DatabaseSubstate = substate;
-    }
-}
+internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data);
 
 internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
 
 internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
+
+internal record FungibleResourceSupply(ReferencedEntity ResourceEntity, TokenAmount TotalSupply, TokenAmount TotalMinted, TokenAmount TotalBurnt, long StateVersion);
+
+internal record AggregateChange
+{
+    public long StateVersion { get; }
+
+    public List<long> FungibleIds { get; } = new();
+
+    public List<long> NonFungibleIds { get; } = new();
+
+    public List<long> RemovedNonFungibleIds { get; } = new();
+
+    public bool IsMostRecent { get; private set; }
+
+    public bool Persistable { get; private set; }
+
+    public AggregateChange(long stateVersion)
+        : this(stateVersion, Array.Empty<long>(), Array.Empty<long>())
+    {
+        Persistable = true;
+    }
+
+    public AggregateChange(long stateVersion, ICollection<long> fungibleIds, ICollection<long> nonFungibleIds)
+    {
+        StateVersion = stateVersion;
+        FungibleIds = new List<long>(fungibleIds);
+        NonFungibleIds = new List<long>(nonFungibleIds);
+    }
+
+    public void AppendFungible(long id)
+    {
+        if (!FungibleIds.Contains(id))
+        {
+            FungibleIds.Add(id);
+        }
+    }
+
+    public void AppendNonFungible(long id)
+    {
+        if (!NonFungibleIds.Contains(id))
+        {
+            NonFungibleIds.Add(id);
+        }
+    }
+
+    public void RemoveNonFungible(long id)
+    {
+        if (!RemovedNonFungibleIds.Contains(id))
+        {
+            RemovedNonFungibleIds.Add(id);
+        }
+    }
+
+    public void Merge(AggregateChange other)
+    {
+        foreach (var id in other.FungibleIds)
+        {
+            AppendFungible(id);
+        }
+
+        foreach (var id in other.NonFungibleIds)
+        {
+            AppendNonFungible(id);
+        }
+
+        foreach (var id in other.RemovedNonFungibleIds)
+        {
+            RemoveNonFungible(id);
+        }
+    }
+
+    public void Resolve()
+    {
+        foreach (var id in RemovedNonFungibleIds)
+        {
+            NonFungibleIds.Remove(id);
+        }
+    }
+}
 
 internal static class DictionaryExtensions
 {
@@ -195,4 +254,27 @@ internal static class DictionaryExtensions
 
         return value;
     }
+}
+
+internal class SequencesHolder
+{
+    public long EntitySequence { get; set; }
+
+    public long EntityMetadataHistorySequence { get; set; }
+
+    public long EntityResourceAggregateHistorySequence { get; set; }
+
+    public long EntityResourceHistorySequence { get; set; }
+
+    public long FungibleResourceSupplyHistorySequence { get; set; }
+
+    public long NextEntity => EntitySequence++;
+
+    public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
+
+    public long NextEntityResourceAggregateHistory => EntityResourceAggregateHistorySequence++;
+
+    public long NextEntityResourceHistory => EntityResourceHistorySequence++;
+
+    public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
 }

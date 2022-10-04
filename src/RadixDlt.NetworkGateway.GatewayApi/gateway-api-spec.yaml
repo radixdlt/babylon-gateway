@@ -216,7 +216,7 @@ components:
       properties:
         total_count:
           description: TBD (make it nullable when we're dealing with unknown result set sizes?)
-          type: number
+          type: integer
         previous_cursor:
           description: TBD (maybe we should use HATEOAS-like permalinks?)
           type: string

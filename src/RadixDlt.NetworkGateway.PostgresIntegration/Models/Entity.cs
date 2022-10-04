@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -69,6 +70,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entities")]
+[Index(nameof(Address))]
+[Index(nameof(GlobalAddress))] // TODO skip nulls?
 internal abstract class Entity
 {
     [Key]

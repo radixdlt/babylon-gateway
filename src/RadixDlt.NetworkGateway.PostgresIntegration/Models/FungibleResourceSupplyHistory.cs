@@ -62,14 +62,16 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entity_fungible_resource_history")]
-public class EntityFungibleResourceHistory
+[Table("fungible_resource_supply_history")]
+[Index(nameof(ResourceEntityId), nameof(FromStateVersion))] // TODO does it make any difference if we define index with from_state_version DESC?
+internal class FungibleResourceSupplyHistory
 {
     [Key]
     [Column("id")]
@@ -78,15 +80,15 @@ public class EntityFungibleResourceHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("owner_entity_id")]
-    public long OwnerEntityId { get; set; }
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
 
-    [Column("global_entity_id")]
-    public long GlobalEntityId { get; set; }
+    [Column("total_supply")]
+    public TokenAmount TotalSupply { get; set; }
 
-    [Column("fungible_resource_entity_id")]
-    public long FungibleResourceEntityId { get; set; }
+    [Column("total_minted")]
+    public TokenAmount TotalMinted { get; set; }
 
-    [Column("balance")]
-    public TokenAmount Balance { get; set; }
+    [Column("total_burnt")]
+    public TokenAmount TotalBurnt { get; set; }
 }

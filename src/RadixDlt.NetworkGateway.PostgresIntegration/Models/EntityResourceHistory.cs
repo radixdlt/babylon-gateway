@@ -62,20 +62,46 @@
  * permissions under this License.
  */
 
+using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Commons.Numerics;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-/// <summary>
-/// Adds normalization to validator addresses, to potentially increase DB performance.
-/// </summary>
-[Table("validators")]
-// OnModelCreating: Create unique index on validator address
-internal class Validator : NormalizedEntityBase
+[Table("entity_resource_history")]
+[Index(nameof(OwnerEntityId), nameof(FromStateVersion))]
+[Index(nameof(GlobalEntityId), nameof(FromStateVersion))]
+internal abstract class EntityResourceHistory
 {
-    [Column(name: "address")]
-    public string Address { get; set; }
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    [Column(name: "public_key")]
-    public byte[] PublicKey { get; set; }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
+
+    [Column("owner_entity_id")]
+    public long OwnerEntityId { get; set; }
+
+    [Column("global_entity_id")]
+    public long GlobalEntityId { get; set; }
+
+    [Column("resource_entity_id")]
+    public long ResourceEntityId { get; set; }
+}
+
+internal class EntityFungibleResourceHistory : EntityResourceHistory
+{
+    [Column("balance")]
+    public TokenAmount Balance { get; set; }
+}
+
+internal class EntityNonFungibleResourceHistory : EntityResourceHistory
+{
+    [Column("ids_count")]
+    public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
+
+    [Column("ids")]
+    public long[] Ids { get; set; }
 }

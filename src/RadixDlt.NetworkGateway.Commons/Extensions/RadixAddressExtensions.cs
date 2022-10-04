@@ -62,115 +62,17 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Commons.Numerics;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace RadixDlt.NetworkGateway.Commons.Extensions;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
-
-/// <summary>
-/// Tracks total supply of a resource over time.
-/// </summary>
-// OnModelCreating: Indexes defined there.
-// OnModelCreating: Composite primary key is defined there.
-[Table("resource_supply_history")]
-internal class ResourceSupplyHistory : HistoryBase<Resource, ResourceSupply, ResourceSupplyChange>
+public static class RadixAddressExtensions
 {
-    [Column(name: "resource_id")]
-    public long ResourceId { get; set; }
-
-    [ForeignKey(nameof(ResourceId))]
-    public Resource Resource { get; set; }
-
-    // [Owned] below
-    public ResourceSupply ResourceSupply { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ResourceSupplyHistory"/> class.
-    /// The StateVersions should be set separately.
-    /// </summary>
-    public ResourceSupplyHistory(Resource key, ResourceSupply resourceSupply)
+    public static byte[]? AsByteArray(this RadixAddress? ra)
     {
-        Resource = key;
-        ResourceSupply = resourceSupply;
-    }
-
-    public static ResourceSupplyHistory FromPreviousEntry(
-        Resource key,
-        ResourceSupply? previousSupply,
-        ResourceSupplyChange change
-    )
-    {
-        var prev = previousSupply ?? ResourceSupply.Default();
-        return new ResourceSupplyHistory(key, new ResourceSupply
+        if (ra == null)
         {
-            TotalSupply = prev.TotalSupply + change.Minted - change.Burned,
-            TotalMinted = prev.TotalMinted + change.Minted,
-            TotalBurnt = prev.TotalBurnt + change.Burned,
-        });
-    }
-
-    private ResourceSupplyHistory()
-    {
-    }
-}
-
-/// <summary>
-/// A mutable class to aggregate changes.
-/// </summary>
-internal class ResourceSupplyChange
-{
-    public TokenAmount Minted { get; set; }
-
-    public TokenAmount Burned { get; set; }
-
-    public static ResourceSupplyChange From(TokenAmount change)
-    {
-        var newVal = Default();
-        newVal.Aggregate(change);
-        return newVal;
-    }
-
-    public static ResourceSupplyChange Default()
-    {
-        return new ResourceSupplyChange();
-    }
-
-    public void Aggregate(TokenAmount change)
-    {
-        if (change.IsZero())
-        {
-            return;
+            return null;
         }
 
-        if (change.IsPositive())
-        {
-            Minted += change;
-        }
-        else
-        {
-            Burned -= change;
-        }
-    }
-}
-
-[Owned]
-public record ResourceSupply
-{
-    [Column("total_supply")]
-    public TokenAmount TotalSupply { get; set; }
-
-    [Column("total_minted")]
-    public TokenAmount TotalMinted { get; set; }
-
-    [Column("total_burnt")]
-    public TokenAmount TotalBurnt { get; set; }
-
-    public static ResourceSupply Default()
-    {
-        return new ResourceSupply
-        {
-            TotalSupply = TokenAmount.Zero, TotalMinted = TokenAmount.Zero, TotalBurnt = TokenAmount.Zero,
-        };
+        return (byte[])ra;
     }
 }
