@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class PackageBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class PackageBuilder : BuilderBase<StateUpdates>
 {
     private List<IBlueprint> _blueprints = new();
     private string _packageAddress;
@@ -18,7 +18,7 @@ public class PackageBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
         _packageAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.PackageHrp);
     }
 
-    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override StateUpdates Build()
     {
         if (!_blueprints.Any())
         {
@@ -29,16 +29,17 @@ public class PackageBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var globalEntityId = new TestGlobalEntity()
+        var newGlobalEntities = new List<GlobalEntityId>()
         {
-            EntityType = EntityType.Package,
-            EntityAddressHex = AddressHelper.AddressToHex(_packageAddress),
-            GlobalAddressHex = AddressHelper.AddressToHex(_packageAddress),
-            GlobalAddress = _packageAddress,
-            Name = string.Join(",", _blueprints.Select(b => b.Name)),
+            new TestGlobalEntity()
+            {
+                EntityType = EntityType.Package,
+                EntityAddressHex = AddressHelper.AddressToHex(_packageAddress),
+                GlobalAddressHex = AddressHelper.AddressToHex(_packageAddress),
+                GlobalAddress = _packageAddress,
+                Name = string.Join(",", _blueprints.Select(b => b.Name)),
+            },
         };
-
-        var newGlobalEntities = new List<GlobalEntityId>() { globalEntityId, };
 
         var upSubstates = new List<UpSubstate>()
         {
@@ -61,7 +62,7 @@ public class PackageBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
             ),
         };
 
-        return (globalEntityId, new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities));
+        return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities);
     }
 
     public PackageBuilder WithBlueprints(List<IBlueprint> blueprints)

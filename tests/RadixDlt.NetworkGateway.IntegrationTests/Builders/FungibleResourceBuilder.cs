@@ -8,12 +8,13 @@ using System.Globalization;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class FungibleResourceBuilder : BuilderBase<StateUpdates>
 {
     private string _resourceAddress;
 
     private string _resourceName = string.Empty;
     private long _totalTokensSupply = 1000000;
+    private int _fungibleDivisibility = 18;
 
     public FungibleResourceBuilder(CoreApiStubDefaultConfiguration defaultConfig)
     {
@@ -21,22 +22,23 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
         _resourceAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.ResourceHrp);
     }
 
-    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override StateUpdates Build()
     {
         var downSubstates = new List<DownSubstate>();
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var globalEntityId = new TestGlobalEntity()
+        var newGlobalEntities = new List<GlobalEntityId>()
         {
-            EntityType = EntityType.ResourceManager,
-            EntityAddressHex = AddressHelper.AddressToHex(_resourceAddress),
-            GlobalAddressHex = AddressHelper.AddressToHex(_resourceAddress),
-            GlobalAddress = _resourceAddress,
-            Name = _resourceName,
+            new TestGlobalEntity()
+            {
+                EntityType = EntityType.ResourceManager,
+                EntityAddressHex = AddressHelper.AddressToHex(_resourceAddress),
+                GlobalAddressHex = AddressHelper.AddressToHex(_resourceAddress),
+                GlobalAddress = _resourceAddress,
+                Name = _resourceName,
+            },
         };
-
-        var newGlobalEntities = new List<GlobalEntityId>() { globalEntityId, };
 
         var upSubstates = new List<UpSubstate>()
         {
@@ -53,7 +55,7 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
                         entityType: EntityType.ResourceManager,
                         substateType: SubstateType.ResourceManager,
                         resourceType: ResourceType.Fungible,
-                        fungibleDivisibility: 18,
+                        fungibleDivisibility: _fungibleDivisibility,
                         metadata: new List<ResourceManagerSubstateAllOfMetadata>()
                         {
                             new("name", "Radix"),
@@ -61,14 +63,14 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
                             new("url", "https://tokens.radixdlt.com"),
                             new("description", "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."),
                         },
-                        totalSupplyAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, 18)), CultureInfo.InvariantCulture))
+                        totalSupplyAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, _fungibleDivisibility)), CultureInfo.InvariantCulture))
                 ),
                 substateHex: GenesisData.FungibleResourceCodeHex,
                 substateDataHash: "3dc43a58c5cc27bba7d9a96966c8d66a230c781ec04f936bf10130688ed887cf"
             ),
         };
 
-        return (globalEntityId, new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities));
+        return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities);
     }
 
     public FungibleResourceBuilder WithFixedAddress(string resourceAddress)
@@ -88,6 +90,13 @@ public class FungibleResourceBuilder : BuilderBase<(TestGlobalEntity TestGlobalE
     public FungibleResourceBuilder WithTotalSupply(long totalTokensSupply)
     {
         _totalTokensSupply = totalTokensSupply;
+
+        return this;
+    }
+
+    public FungibleResourceBuilder WithFungibleDivisibility(int fungibleDivisibility)
+    {
+        _fungibleDivisibility = fungibleDivisibility;
 
         return this;
     }

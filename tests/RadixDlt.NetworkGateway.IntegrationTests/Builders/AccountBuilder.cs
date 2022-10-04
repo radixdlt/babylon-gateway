@@ -6,26 +6,25 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class AccountBuilder : BuilderBase<StateUpdates>
 {
     private readonly CoreApiStubDefaultConfiguration _defaultConfig;
-    private readonly TestGlobalEntities _globalEntities;
+    private readonly StateUpdatesStore _stateUpdatesStore;
 
     private string _accountAddress = string.Empty;
-
     private string _accountName = string.Empty;
     private string _accountPublicKey;
     private long _tokensBalance;
     private string _tokenName = string.Empty;
 
-    public AccountBuilder(CoreApiStubDefaultConfiguration defaultConfig, TestGlobalEntities globalEntities)
+    public AccountBuilder(CoreApiStubDefaultConfiguration defaultConfig, StateUpdatesStore stateUpdatesStore)
     {
         _defaultConfig = defaultConfig;
-        _globalEntities = globalEntities;
+        _stateUpdatesStore = stateUpdatesStore;
         _accountPublicKey = AddressHelper.GenerateRandomPublicKey();
     }
 
-    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override StateUpdates Build()
     {
         var keyValueStoreAddressHex = "000000000000000000000000000000000000000000000000000000000000000001000000";
 
@@ -34,22 +33,20 @@ public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
         // find the entity and get its address
         // Create a new down/up state to free 'tokenBalance' tokens from SystFaucet vault
         // update GlobalEntities.StateUpdates
-        var (tokenEntity, tokens) = new FungibleResourceBuilder(_defaultConfig)
+        var tokens = new FungibleResourceBuilder(_defaultConfig)
             .WithResourceName(_tokenName)
             .WithTotalSupply(_tokensBalance)
             .Build();
 
-        _globalEntities.Add(tokenEntity);
-        _globalEntities.AddStateUpdates(tokens);
+        _stateUpdatesStore.AddStateUpdates(tokens);
 
-        var (vaultEntity, vault) = new VaultBuilder(_defaultConfig)
+        var vault = new VaultBuilder(_defaultConfig)
             .WithVaultName(_accountName)
-            .WithFungibleTokens(tokenEntity.EntityAddressHex)
-            .WithTotalSupply(_tokensBalance)
+            .WithFungibleTokens(tokens.NewGlobalEntities[0].EntityAddressHex)
+            .WithFungibleTokensTotalSupply(_tokensBalance)
             .Build();
 
-        _globalEntities.Add(vaultEntity);
-        _globalEntities.AddStateUpdates(vault);
+        _stateUpdatesStore.AddStateUpdates(vault);
 
         var componentStateSubstateData = new ComponentStateSubstate(
             entityType: EntityType.Component,
@@ -57,27 +54,25 @@ public class AccountBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, St
             dataStruct: new DataStruct(
                 structData: new SborData(
                     dataHex: "1002000000b3240000000000000000000000000000000000000000000000000000000000000000000000000000008324000000000000000000000000000000000000000000000000000000000000000000000001000000",
-                    dataJson: JObject.Parse($"{{\"fields\": [{{\"bytes\": \"{vaultEntity.EntityAddressHex}\", \"type\": \"Custom\", \"type_id\": 179}}, {{\"bytes\": \"{keyValueStoreAddressHex}\", \"type\": \"Custom\", \"type_id\": 131}}], \"type\": \"Struct\"}}")
+                    dataJson: JObject.Parse($"{{\"fields\": [{{\"bytes\": \"{vault.NewGlobalEntities[0].EntityAddressHex}\", \"type\": \"Custom\", \"type_id\": 179}}, {{\"bytes\": \"{keyValueStoreAddressHex}\", \"type\": \"Custom\", \"type_id\": 131}}], \"type\": \"Struct\"}}")
                 ),
                 ownedEntities: new List<EntityId>()
                 {
-                    new(entityType: EntityType.Vault, entityAddressHex: vaultEntity.EntityAddressHex),
+                    new(entityType: EntityType.Vault, entityAddressHex: vault.NewGlobalEntities[0].EntityAddressHex),
                     new(entityType: EntityType.KeyValueStore, entityAddressHex: keyValueStoreAddressHex),
                 },
                 referencedEntities: new List<EntityId>()
             )
         );
 
-        var (accountEntity, account) = new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
+        var account = new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
             .WithComponentName($"_component_{_accountName}")
             .WithComponentStateSubstate(componentStateSubstateData)
             .WithFixedAddress(_accountAddress)
-            .WithVault(vaultEntity.EntityAddressHex) // TODO: is it used?
+            .WithVault(vault.NewGlobalEntities[0].EntityAddressHex) // TODO: is it used?
             .Build();
 
-        accountEntity.AccountPublicKey = _accountPublicKey;
-
-        return (accountEntity, account);
+        return account;
     }
 
     public AccountBuilder WithFixedAddress(string accountAddress)

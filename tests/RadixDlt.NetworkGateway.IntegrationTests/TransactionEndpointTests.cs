@@ -117,11 +117,16 @@ public class TransactionEndpointTests
     [Fact]
     public void TestTransactionPreviewShouldPass()
     {
-        // Arrange
+        // Arrange A2B Transfer preview
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .TransactionPreviewBuild(
-                manifest: new ManifestBuilder().CallMethod("021c77780d10210ec9f0ea4a372ab39e09f2222c07c9fb6e5cfc81", "CALL_FUNCTION").Build(),
+                manifest: new ManifestBuilder()
+                    .WithLockFeeMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.SystemComponentHrp), "10")
+                    .WithWithdrawByAmountMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp), "100", AddressHelper.GenerateRandomAddress(_networkDefinition.ResourceHrp))
+                    .WithTakeFromWorktopByAmountMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.ResourceHrp), "100", "bucket1")
+                    .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp), "bucket1")
+                    .Build(),
                 costUnitLimit: 0L,
                 tipPercentage: 0L,
                 nonce: "nonce",

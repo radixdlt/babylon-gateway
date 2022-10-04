@@ -1,5 +1,6 @@
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
@@ -25,7 +26,7 @@ public partial class GatewayTestsRunner
         // build TransactionPreviewRequest
         CoreApiStub.CoreApiStubDefaultConfiguration.TransactionPreviewRequest = new TransactionPreviewRequest(
             manifest: manifest,
-            blobsHex: new List<string> { "blob hex" },
+            blobsHex: new List<string>(),
             costUnitLimit: costUnitLimit,
             tipPercentage: tipPercentage,
             nonce: nonce,
@@ -41,14 +42,14 @@ public partial class GatewayTestsRunner
         // build TransactionPreviewResponse
         var stateUpdatesList = new List<StateUpdates>();
 
-        var (_, tokenStates) = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
+        var tokenStates = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithResourceName("PreviewToken")
             .Build();
 
         stateUpdatesList.Add(tokenStates);
 
         TransactionReceipt transactionReceipt = new TransactionReceiptBuilder()
-            .WithStateUpdates(stateUpdatesList.Combine())
+            .WithStateUpdates(StateUpdatesStore.Combine(stateUpdatesList))
             .WithTransactionStatus(TransactionStatus.Succeeded)
             .Build();
 

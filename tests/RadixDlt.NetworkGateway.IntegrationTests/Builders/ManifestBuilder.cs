@@ -8,13 +8,34 @@ public class ManifestBuilder : BuilderBase<string>
 
     public override string Build()
     {
-        return string.Join(";", _instructions);
+        return string.Join(";\n", _instructions);
     }
 
-    public ManifestBuilder CallMethod(string componentAddress, string methodName, string[]? args = null)
+    public ManifestBuilder WithLockFeeMethod(string componentAddress, string lockFee)
     {
-        _instructions.Add($"\"component_address\":\"{componentAddress}\",\"method_name\":\"{methodName}\",\"arguments\":[{args}]");
+        _instructions.Add($"CALL_METHOD ComponentAddress(\"{componentAddress}\") \"lock_fee\" Decimal(\"{lockFee}\")");
 
         return this;
-}
+    }
+
+    public ManifestBuilder WithWithdrawByAmountMethod(string componentAddress, string withdrawByAmount, string fromResourceAddress)
+    {
+        _instructions.Add($"CALL_METHOD ComponentAddress(\"{componentAddress}\") \"withdraw_by_amount\" Decimal(\"{withdrawByAmount}\") ResourceAddress (\"{fromResourceAddress})\"");
+
+        return this;
+    }
+
+    public ManifestBuilder WithTakeFromWorktopByAmountMethod(string resourceAddress, string amount, string bucketName)
+    {
+        _instructions.Add($"TAKE_FROM_WORKTOP_BY_AMOUNT Decimal(\"{amount}\") ResourceAddress(\"{resourceAddress}\") Bucket(\"{bucketName}\")");
+
+        return this;
+    }
+
+    public ManifestBuilder WithDepositToAccountMethod(string accountAddress, string bucketName)
+    {
+        _instructions.Add($"CALL_METHOD ComponentAddress(\"{accountAddress}\") \"deposit\" Bucket(\"{bucketName}\")");
+
+        return this;
+    }
 }

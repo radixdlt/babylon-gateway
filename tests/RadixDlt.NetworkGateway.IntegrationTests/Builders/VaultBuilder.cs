@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
-public class VaultBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class VaultBuilder : BuilderBase<StateUpdates>
 {
     private string _vaultAddressHex;
 
@@ -20,14 +20,25 @@ public class VaultBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, Stat
     private string _resourceAddress = string.Empty;
     private string _vaultName = string.Empty;
     private long _totalTokensSupply = 1000000;
+    private long _fungibleDivisibility = 18;
 
-    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override StateUpdates Build()
     {
         var downSubstates = new List<DownSubstate>();
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var newGlobalEntities = new List<GlobalEntityId>();
+        var newGlobalEntities = new List<GlobalEntityId>()
+        {
+            new TestGlobalEntity()
+            {
+                Name = _vaultName,
+                EntityType = EntityType.Vault,
+                GlobalAddress = AddressHelper.AddressFromHex(_vaultAddressHex),
+                EntityAddressHex = _vaultAddressHex,
+                GlobalAddressHex = _vaultAddressHex,
+            },
+        };
 
         var upSubstates = new List<UpSubstate>()
         {
@@ -47,23 +58,14 @@ public class VaultBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, Stat
                             new FungibleResourceAmount(
                                 resourceType: ResourceType.Fungible,
                                 resourceAddress: _resourceAddress,
-                                amountAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, 18)), CultureInfo.InvariantCulture))))
+                                amountAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, _fungibleDivisibility)), CultureInfo.InvariantCulture))))
                 ),
                 substateHex: "11050000005661756c74010000001001000000110800000046756e6769626c6504000000b61b000000000000000000000000000000000000000000000000000000000004071232a10a00000000a12000000000000040eaed7446d09c2c9f0c00000000000000000000000000000000000000",
                 substateDataHash: "16727d810c5684cdfe732101b8075b69964fafc8b0632a5d6d1a7c193214e991"
             ),
         };
 
-        var globalEntity = new TestGlobalEntity()
-        {
-            Name = _vaultName,
-            EntityType = EntityType.Vault,
-            GlobalAddress = AddressHelper.AddressFromHex(_vaultAddressHex),
-            EntityAddressHex = _vaultAddressHex,
-            GlobalAddressHex = _vaultAddressHex,
-        };
-
-        return (globalEntity, new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities));
+        return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities);
     }
 
     public VaultBuilder WithFixedAddress(string vaultAddress)
@@ -87,9 +89,16 @@ public class VaultBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, Stat
         return this;
     }
 
-    public VaultBuilder WithTotalSupply(long totalTokensSupply)
+    public VaultBuilder WithFungibleTokensTotalSupply(long totalTokensSupply)
     {
         _totalTokensSupply = totalTokensSupply;
+
+        return this;
+    }
+
+    public VaultBuilder WithFungibleTokensDivisibility(long fungibleDivisibility)
+    {
+        _fungibleDivisibility = fungibleDivisibility;
 
         return this;
     }

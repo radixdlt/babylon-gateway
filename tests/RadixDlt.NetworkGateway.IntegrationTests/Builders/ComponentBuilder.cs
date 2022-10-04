@@ -13,7 +13,7 @@ public enum ComponentHrp
     SystemComponentHrp,
 }
 
-public class ComponentBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates)>
+public class ComponentBuilder : BuilderBase<StateUpdates>
 {
     private string _componentAddress;
 
@@ -43,7 +43,7 @@ public class ComponentBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, 
         _componentAddress = AddressHelper.GenerateRandomAddress(strComponentHrp);
     }
 
-    public override (TestGlobalEntity TestGlobalEntity, StateUpdates StateUpdates) Build()
+    public override StateUpdates Build()
     {
         if (_componentInfoSubstateData == null && _componentStateSubstateData == null)
         {
@@ -54,16 +54,17 @@ public class ComponentBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, 
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var globalEntityId = new TestGlobalEntity()
+        var newGlobalEntities = new List<GlobalEntityId>()
         {
-            EntityType = EntityType.Component,
-            EntityAddressHex = AddressHelper.AddressToHex(_componentAddress),
-            GlobalAddressHex = AddressHelper.AddressToHex(_componentAddress),
-            GlobalAddress = _componentAddress,
-            Name = _componentName,
+            new TestGlobalEntity()
+            {
+                EntityType = EntityType.Component,
+                EntityAddressHex = AddressHelper.AddressToHex(_componentAddress),
+                GlobalAddressHex = AddressHelper.AddressToHex(_componentAddress),
+                GlobalAddress = _componentAddress,
+                Name = _componentName,
+            },
         };
-
-        var newGlobalEntities = new List<GlobalEntityId>() { globalEntityId };
 
         var upSubstates = new List<UpSubstate>();
 
@@ -103,7 +104,7 @@ public class ComponentBuilder : BuilderBase<(TestGlobalEntity TestGlobalEntity, 
             );
         }
 
-        return (globalEntityId, new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities));
+        return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities);
     }
 
     public ComponentBuilder WithFixedAddress(string componentAddress)

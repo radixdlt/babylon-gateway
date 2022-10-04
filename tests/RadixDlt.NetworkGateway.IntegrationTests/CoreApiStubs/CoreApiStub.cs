@@ -31,8 +31,6 @@ public class CoreApiStub :
 {
     private bool _isGenesisIngested;
 
-    public TestGlobalEntities GlobalEntities { get; set; } = new();
-
     public CoreApiStubDefaultConfiguration CoreApiStubDefaultConfiguration { get; } = new();
 
     #region injected stubs

@@ -38,6 +38,8 @@ public partial class GatewayTestsRunner : IDisposable
         // clean up and initialize
         CoreApiStub = new CoreApiStub { CoreApiStubDefaultConfiguration = { NetworkDefinition = networkDefinition } };
 
+        StateUpdatesStore = new StateUpdatesStore();
+
         _testConsole = testConsole;
         _databaseName = testName;
 
@@ -48,23 +50,24 @@ public partial class GatewayTestsRunner : IDisposable
 
     public CoreApiStub CoreApiStub { get; }
 
+    public StateUpdatesStore StateUpdatesStore { get; }
+
     public GatewayTestsRunner WithAccount(string accountAddress, string token, long balance)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
         _testConsole.WriteLine($"Account: {accountAddress}, {token} {balance}");
 
-        var (accountEntity, account) = new AccountBuilder(
+        var account = new AccountBuilder(
                 CoreApiStub.CoreApiStubDefaultConfiguration,
-                CoreApiStub.GlobalEntities)
+                StateUpdatesStore)
             .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
             .WithFixedAddress(accountAddress)
             .WithTokenName(token)
             .WithBalance(balance)
             .Build();
 
-        CoreApiStub.GlobalEntities.Add(accountEntity);
-        CoreApiStub.GlobalEntities.AddStateUpdates(account);
+        StateUpdatesStore.AddStateUpdates(account);
 
         return this;
     }
@@ -177,15 +180,15 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var account = CoreApiStub.GlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
+        var account = StateUpdatesStore.StateUpdates.NewGlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
 
         var accountEntityAddressHex = account!.EntityAddressHex;
 
-        var accountUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
+        var accountUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
 
         var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
 
-        var vaultUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
+        var vaultUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
 
         var vaultResourceAmount = ((vaultUpSubstate!.SubstateData.ActualInstance as VaultSubstate)!).ResourceAmount.ActualInstance as FungibleResourceAmount;
 
@@ -200,15 +203,15 @@ public partial class GatewayTestsRunner : IDisposable
 
     public void UpdateAccountBalance(string accountAddress, long amountToTransfer)
     {
-        var account = CoreApiStub.GlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
+        var account = StateUpdatesStore.StateUpdates.NewGlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
 
         var accountEntityAddressHex = account!.EntityAddressHex;
 
-        var accountUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
+        var accountUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.FindLast(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
 
         var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
 
-        var vaultUpSubstate = CoreApiStub.GlobalEntities.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
+        var vaultUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
 
         var vaultResourceAmount = ((vaultUpSubstate!.SubstateData.ActualInstance as VaultSubstate)!).ResourceAmount.ActualInstance as FungibleResourceAmount;
 

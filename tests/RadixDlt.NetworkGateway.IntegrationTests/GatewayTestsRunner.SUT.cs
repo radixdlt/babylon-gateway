@@ -35,46 +35,44 @@ public partial class GatewayTestsRunner
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
         _testConsole.WriteLine("XRD resource");
-        var (tokenEntity, tokens) = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
+        var tokens = new FungibleResourceBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithResourceName("XRD")
+            .WithTotalSupply(10000000000)
             .Build();
 
-        CoreApiStub.GlobalEntities.Add(tokenEntity);
-        CoreApiStub.GlobalEntities.AddStateUpdates(tokens);
+        StateUpdatesStore.AddStateUpdates(tokens);
 
         _testConsole.WriteLine("SysFaucet vault");
-        var (vaultEntity, vault) = new VaultBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
+        var vault = new VaultBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithVaultName("SysFaucet vault")
-            .WithFungibleTokens(tokenEntity.GlobalAddress)
+            .WithFungibleTokens(tokens.NewGlobalEntities[0].GlobalAddress)
+            .WithFungibleTokensTotalSupply(10000000000)
+            .WithFungibleTokensDivisibility(18)
             .Build();
 
-        CoreApiStub.GlobalEntities.Add(vaultEntity); // only for testing purposes, vault is not a global entity!
-
-        CoreApiStub.GlobalEntities.AddStateUpdates(vault);
+        StateUpdatesStore.AddStateUpdates(vault);
 
         _testConsole.WriteLine("SysFaucet package");
-        var (packageEntity, package) = new PackageBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
+        var package = new PackageBuilder(CoreApiStub.CoreApiStubDefaultConfiguration)
             .WithBlueprints(new List<IBlueprint> { new SysFaucetBlueprint() })
             .WithFixedAddress(GenesisData.SysFaucetPackageAddress)
             .Build();
 
-        CoreApiStub.GlobalEntities.Add(packageEntity);
-        CoreApiStub.GlobalEntities.AddStateUpdates(package);
+        StateUpdatesStore.AddStateUpdates(package);
 
         // TODO: KeyValueStore builder !!!
         _testConsole.WriteLine("SysFaucet component");
-        var (componentEntity, component) = new ComponentBuilder(CoreApiStub.CoreApiStubDefaultConfiguration, ComponentHrp.SystemComponentHrp)
+        var component = new ComponentBuilder(CoreApiStub.CoreApiStubDefaultConfiguration, ComponentHrp.SystemComponentHrp)
             .WithComponentName(GenesisData.SysFaucetBlueprintName)
             .WithComponentInfoSubstate(GenesisData.SysFaucetInfoSubstate)
             .WithComponentStateSubstate(
-                GenesisData.SysFaucetStateSubstate(vaultEntity.EntityAddressHex, "000000000000000000000000000000000000000000000000000000000000000001000000"))
+                GenesisData.SysFaucetStateSubstate(vault.NewGlobalEntities[0].EntityAddressHex, "000000000000000000000000000000000000000000000000000000000000000001000000"))
             .Build();
 
-        CoreApiStub.GlobalEntities.Add(componentEntity);
-        CoreApiStub.GlobalEntities.AddStateUpdates(component);
+        StateUpdatesStore.AddStateUpdates(component);
 
         _testConsole.WriteLine("Transaction receipt");
-        var transactionReceipt = new TransactionReceiptBuilder().WithStateUpdates(CoreApiStub.GlobalEntities.StateUpdates).Build();
+        var transactionReceipt = new TransactionReceiptBuilder().WithStateUpdates(StateUpdatesStore.StateUpdates).Build();
 
         CoreApiStub.CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse = new CommittedTransactionsResponse(
             1L,
