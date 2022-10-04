@@ -29,4 +29,21 @@ public class StateUpdatesStore
     {
         _stateUpdatesList.Add(stateUpdates);
     }
+
+    public GlobalEntityId GetGlobalEntity(string globalAddress)
+    {
+        return StateUpdates.NewGlobalEntities.Find(ge => ge.GlobalAddress == globalAddress)!;
+    }
+
+    public UpSubstate GetLastUpstateByGlobalAddress(string globalAddress)
+    {
+        var entityAddressHex = StateUpdates.NewGlobalEntities.FindLast(ge => ge.GlobalAddress == globalAddress)!.EntityAddressHex;
+
+        return GetLastUpstateByEntityAddressHex(entityAddressHex);
+    }
+
+    public UpSubstate GetLastUpstateByEntityAddressHex(string entityAddressHex)
+    {
+        return StateUpdates.UpSubstates.FindLast(us => us.SubstateId.EntityAddressHex == entityAddressHex)!;
+    }
 }

@@ -6,7 +6,6 @@ using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -180,17 +179,14 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var account = StateUpdatesStore.StateUpdates.NewGlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
+        var accountUpSubstate = StateUpdatesStore.GetLastUpstateByGlobalAddress(accountAddress);
 
-        var accountEntityAddressHex = account!.EntityAddressHex;
-
-        var accountUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
-
+        // TODO: finds only the 1st vault!!!
         var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
 
-        var vaultUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
+        var vaultUpSubstate = StateUpdatesStore.GetLastUpstateByEntityAddressHex(vaultEntityAddressHex);
 
-        var vaultResourceAmount = ((vaultUpSubstate!.SubstateData.ActualInstance as VaultSubstate)!).ResourceAmount.ActualInstance as FungibleResourceAmount;
+        var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
 
         // TODO: divisibility??? Optimize and make it a separate function
         var attos = double.Parse(vaultResourceAmount!.AmountAttos);
@@ -203,17 +199,13 @@ public partial class GatewayTestsRunner : IDisposable
 
     public void UpdateAccountBalance(string accountAddress, long amountToTransfer)
     {
-        var account = StateUpdatesStore.StateUpdates.NewGlobalEntities.Find(ge => ge.GlobalAddress == accountAddress);
-
-        var accountEntityAddressHex = account!.EntityAddressHex;
-
-        var accountUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.FindLast(us => us.SubstateId.EntityAddressHex == accountEntityAddressHex);
+        var accountUpSubstate = StateUpdatesStore.GetLastUpstateByGlobalAddress(accountAddress);
 
         var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
 
-        var vaultUpSubstate = StateUpdatesStore.StateUpdates.UpSubstates.Find(us => us.SubstateId.EntityAddressHex == vaultEntityAddressHex);
+        var vaultUpSubstate = StateUpdatesStore.GetLastUpstateByEntityAddressHex(vaultEntityAddressHex);
 
-        var vaultResourceAmount = ((vaultUpSubstate!.SubstateData.ActualInstance as VaultSubstate)!).ResourceAmount.ActualInstance as FungibleResourceAmount;
+        var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
 
         // TODO: divisibility??? Optimize and make it a separate function
         var attos = double.Parse(vaultResourceAmount!.AmountAttos);
