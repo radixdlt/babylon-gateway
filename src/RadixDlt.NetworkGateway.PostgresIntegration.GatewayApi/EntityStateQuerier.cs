@@ -109,12 +109,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         string hrp;
 
-        // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
-        if (entity is ResourceManagerEntity)
-        {
-            hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
-        }
-        else if (entity is ComponentEntity component)
+        if (entity is ComponentEntity component)
         {
             hrp = component.Kind switch
             {

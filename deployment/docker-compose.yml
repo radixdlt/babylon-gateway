@@ -70,7 +70,6 @@ services:
       ASPNETCORE_URLS: "http://*:80" # Binds to 80 on all interfaces
       CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
       PrometheusMetricsPort: "1234"
-      MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
       ConnectionStrings__NetworkGatewayReadWrite: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
       DataAggregator__Network__NetworkName: "${NETWORK_NAME}"
       DataAggregator__Network__DisableCoreApiHttpsCertificateChecks: "${DISABLE_CORE_API_CERTIFICATE_CHECKS}"
@@ -115,7 +114,6 @@ services:
       ASPNETCORE_URLS: "http://*:80" # Binds to 80 on all interfaces
       CustomJsonConfigurationFilePath: "/home/radixdlt/network-gateway/config.json"
       PrometheusMetricsPort: "1235"
-      MaxWaitForDbOnStartupMs: "${MAX_DB_WAIT_MS_ON_START}" # Wait for PostGres to boot up
       EnableSwagger: "${ENABLE_SWAGGER}"
       ConnectionStrings__NetworkGatewayReadOnly: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
       ConnectionStrings__NetworkGatewayReadWrite: "Host=postgres_db:5432;Database=${POSTGRES_DB_NAME};Username=${POSTGRES_SUPERUSER};Password=${POSTGRES_SUPERUSER_PASSWORD}"
