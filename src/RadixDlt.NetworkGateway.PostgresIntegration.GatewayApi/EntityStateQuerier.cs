@@ -87,44 +87,26 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<EntityResourcesResponse> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
     {
-        // TODO general idea how to change code below:
-        // add extra table containing all resources given entity posses, then change all of those queries from
-        // SELECT DISTINCT ON to simple WHERE + LIMIT 1 per resource
-
-        // TODO just some quick and naive implementation
-        // TODO we will denormalize a lot to improve performance and reduce complexity
-        // TODO add proper pagination support
+        // const int resourcesPerType = 5; // TODO add proper pagination support
+        // const string referenceColumn = "global_entity_id"; // TODO or "owner_entity_id"
 
         var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState._Version)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
-        if (entity == null)
+        if (entity is not ComponentEntity ce)
         {
-            // TODO just not found
-            throw new Exception("xxxx");
+            return null;
         }
 
-        string hrp;
+        var hrp = GetHrpByEntity(ce);
 
-        if (entity is ComponentEntity component)
+        if (hrp == null)
         {
-            hrp = component.Kind switch
-            {
-                "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
-                "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
-                _ => _networkConfigurationProvider.GetAddressHrps().AccountHrp, // TODO fix me
-            };
+            return null;
         }
-        else
-        {
-            throw new Exception("unsupported entity type"); // TODO fix me
-        }
-
-        // TODO add support for owner_entity_id OR global_entity_id
-        // TODO add lookup indexes for both of those variants
 
         // TODO this has been recently replaced with EF-based inheritance, but we might want to get back to two separate tables instead of discriminator column
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
@@ -135,7 +117,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 WITH aggregate_history AS (
     SELECT fungible_resource_ids, non_fungible_resource_ids
     FROM entity_resource_aggregate_history
-    WHERE from_state_version <= {ledgerState._Version} AND entity_id = {entity.Id}
+    WHERE from_state_version <= {ledgerState._Version} AND entity_id = {ce.Id}
     ORDER BY from_state_version DESC
     LIMIT 1
 ),
@@ -148,7 +130,7 @@ FROM unnested_aggregate_history uah
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_resource_history
-    WHERE from_state_version <= {ledgerState._Version} AND owner_entity_id = {entity.Id} AND resource_entity_id = uah.resource_id
+    WHERE from_state_version <= {ledgerState._Version} AND global_entity_id = {ce.Id} AND resource_entity_id = uah.resource_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) erh ON true;
@@ -190,7 +172,7 @@ INNER JOIN LATERAL (
         return new EntityResourcesResponse(adr, fungiblesPagination, nonFungiblesPagination);
     }
 
-    public async Task<EntityDetailsResponse> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
+    public async Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
 
@@ -200,47 +182,51 @@ INNER JOIN LATERAL (
 
         if (entity == null)
         {
-            // TODO just not found
-            throw new Exception("xxxx");
+            return null;
         }
 
-        string hrp;
+        var hrp = GetHrpByEntity(entity);
 
-        // TODO we need to keep track of "what subtype" (component => account, system, validator; resource => fungible, non-fungible) we're dealing with
-        if (entity is ResourceManagerEntity)
+        if (hrp == null)
         {
-            hrp = _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
-        }
-        else if (entity is ComponentEntity component)
-        {
-            hrp = component.Kind switch
-            {
-                "account" => _networkConfigurationProvider.GetAddressHrps().AccountHrp,
-                "validator" => _networkConfigurationProvider.GetAddressHrps().ValidatorHrp,
-                _ => throw new Exception("fix me"), // TODO fix me
-            };
-        }
-        else
-        {
-            throw new Exception("unsupported entity type"); // TODO fix me
+            return null;
         }
 
         var metadata = new Dictionary<string, string>();
         var metadataHistory = await _dbContext.EntityMetadataHistory
-            .FromSqlInterpolated($@"
-SELECT *
-FROM entity_metadata_history
-WHERE entity_id = {entity.Id} AND from_state_version <= {ledgerState._Version}
-ORDER BY from_state_version DESC")
+            .Where(e => e.EntityId == entity.Id && e.FromStateVersion <= ledgerState._Version)
+            .OrderByDescending(e => e.FromStateVersion)
             .FirstOrDefaultAsync(token);
 
         if (metadataHistory != null)
         {
-            metadata = metadataHistory.Keys.Zip(metadata.Values).ToDictionary(z => z.First, z => z.Second);
+            metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
 
         var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
 
         return new EntityDetailsResponse(adr, metadata);
+    }
+
+    private string? GetHrpByEntity(Entity entity)
+    {
+        if (entity is ResourceManagerEntity)
+        {
+            return _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
+        }
+
+        if (entity is ComponentEntity ce)
+        {
+            // TODO use enum or something
+            switch (ce.Kind)
+            {
+                case "account":
+                    return _networkConfigurationProvider.GetAddressHrps().AccountHrp;
+                case "validator":
+                    return _networkConfigurationProvider.GetAddressHrps().ValidatorHrp;
+            }
+        }
+
+        return null;
     }
 }

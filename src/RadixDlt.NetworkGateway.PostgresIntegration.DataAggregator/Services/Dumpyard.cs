@@ -103,11 +103,11 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
         var kind = "normal";
 
-        if (addressHex.StartsWith(networkHrps.AccountHrp))
+        if (address.StartsWith(networkHrps.AccountHrp))
         {
             kind = "account";
         }
-        else if (addressHex.StartsWith(networkHrps.ValidatorHrp))
+        else if (address.StartsWith(networkHrps.ValidatorHrp))
         {
             kind = "validator";
         }
