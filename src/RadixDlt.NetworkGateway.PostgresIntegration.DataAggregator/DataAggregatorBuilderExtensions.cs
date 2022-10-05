@@ -106,7 +106,7 @@ public static class DataAggregatorBuilderExtensions
     {
         builder.Services
             .AddHealthChecks()
-            .AddDbContextCheck<ReadWriteDbContext>("network_gateway_data_aggregator_database_readwrite_connection");
+            .AddDbContextCheck<ReadWriteDbContext>();
 
         return builder;
     }
