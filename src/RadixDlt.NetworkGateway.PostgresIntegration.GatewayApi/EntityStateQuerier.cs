@@ -192,6 +192,33 @@ INNER JOIN LATERAL (
             return null;
         }
 
+        EntityDetailsResponseDetails details;
+
+        if (entity is ResourceManagerEntity rme)
+        {
+            // TODO how to detect between fungible and non-fun? Kind property or something?
+
+            var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
+                .Where(e => e.FromStateVersion <= ledgerState._Version && e.ResourceEntityId == rme.Id)
+                .OrderByDescending(e => e.FromStateVersion)
+                .FirstOrDefaultAsync(token);
+
+            if (supplyHistory == null)
+            {
+                return null; // TODO handle somehow
+            }
+
+            details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(supplyHistory.TotalSupply.ToString()));
+        }
+        else if (entity is ComponentEntity { Kind: "account" })
+        {
+            return null; // TODO handle somehow
+        }
+        else
+        {
+            return null;
+        }
+
         var metadata = new Dictionary<string, string>();
         var metadataHistory = await _dbContext.EntityMetadataHistory
             .Where(e => e.EntityId == entity.Id && e.FromStateVersion <= ledgerState._Version)
@@ -205,7 +232,7 @@ INNER JOIN LATERAL (
 
         var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
 
-        return new EntityDetailsResponse(adr, metadata);
+        return new EntityDetailsResponse(adr, metadata, details);
     }
 
     private string? GetHrpByEntity(Entity entity)

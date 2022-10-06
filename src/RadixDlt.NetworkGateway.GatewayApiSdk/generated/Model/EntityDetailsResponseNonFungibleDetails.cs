@@ -91,63 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponse
+    /// EntityDetailsResponseNonFungibleDetails
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponse")]
-    public partial class EntityDetailsResponse : IEquatable<EntityDetailsResponse>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseNonFungibleDetails")]
+    public partial class EntityDetailsResponseNonFungibleDetails : IEquatable<EntityDetailsResponseNonFungibleDetails>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponse() { }
+        protected EntityDetailsResponseNonFungibleDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="metadata">TBD (required).</param>
-        /// <param name="details">details (required).</param>
-        public EntityDetailsResponse(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
+        /// <param name="tbd">tbd (required).</param>
+        public EntityDetailsResponseNonFungibleDetails(string tbd = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "tbd" is required (not null)
+            if (tbd == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityDetailsResponse and cannot be null");
+                throw new ArgumentNullException("tbd is a required property for EntityDetailsResponseNonFungibleDetails and cannot be null");
             }
-            this.Address = address;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for EntityDetailsResponse and cannot be null");
-            }
-            this.Metadata = metadata;
-            // to ensure "details" is required (not null)
-            if (details == null)
-            {
-                throw new ArgumentNullException("details is a required property for EntityDetailsResponse and cannot be null");
-            }
-            this.Details = details;
+            this.Tbd = tbd;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource&#39;s global address
+        /// Gets or Sets Tbd
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// TBD
-        /// </summary>
-        /// <value>TBD</value>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public Dictionary<string, string> Metadata { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Details
-        /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseDetails Details { get; set; }
+        [DataMember(Name = "tbd", IsRequired = true, EmitDefaultValue = true)]
+        public string Tbd { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,10 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponse {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("class EntityDetailsResponseNonFungibleDetails {\n");
+            sb.Append("  Tbd: ").Append(Tbd).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponse);
+            return this.Equals(input as EntityDetailsResponseNonFungibleDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponse instances are equal
+        /// Returns true if EntityDetailsResponseNonFungibleDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponse to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseNonFungibleDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponse input)
+        public bool Equals(EntityDetailsResponseNonFungibleDetails input)
         {
             if (input == null)
             {
@@ -196,20 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.Metadata == input.Metadata ||
-                    this.Metadata != null &&
-                    input.Metadata != null &&
-                    this.Metadata.SequenceEqual(input.Metadata)
-                ) && 
-                (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.Tbd == input.Tbd ||
+                    (this.Tbd != null &&
+                    this.Tbd.Equals(input.Tbd))
                 );
         }
 
@@ -222,17 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Tbd != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
-                }
-                if (this.Details != null)
-                {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Tbd.GetHashCode();
                 }
                 return hashCode;
             }

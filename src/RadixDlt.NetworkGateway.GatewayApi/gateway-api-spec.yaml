@@ -325,6 +325,7 @@ components:
       required:
         - address
         - metadata
+        - details
       properties:
         address:
           description: The Bech32m-encoded human readable version of the resource's global address
@@ -334,6 +335,35 @@ components:
           type: object
           additionalProperties:
             type: string
+        details:
+          oneOf:
+            - "$ref": "#/components/schemas/EntityDetailsResponseFungibleDetails"
+            - "$ref": "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
+          discriminator:
+            propertyName: resource_type
+            mapping:
+              # NOTE: These need to match PublicKeyType
+              fungible: "#/components/schemas/EntityDetailsResponseFungibleDetails"
+              non_fungible: "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
+    ResourceType:
+      type: string
+      enum:
+        - fungible
+        - non_fungible
+    EntityDetailsResponseFungibleDetails:
+      type: object
+      required:
+        - total_supply_attos
+      properties:
+        total_supply_attos:
+          type: string
+    EntityDetailsResponseNonFungibleDetails:
+      type: object
+      required:
+        - tbd
+      properties:
+        tbd:
+          type: string
     AccountStakeEntry:
       type: object
       required:
