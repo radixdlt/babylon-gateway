@@ -146,10 +146,6 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     }
 }
 
-internal record DownedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion)
-{
-}
-
 internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data);
 
 internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
@@ -170,9 +166,7 @@ internal record AggregateChange
 
     public List<long> RemovedNonFungibleIds { get; } = new();
 
-    public bool IsMostRecent { get; private set; }
-
-    public bool Persistable { get; private set; }
+    public bool Persistable { get; }
 
     public AggregateChange(long stateVersion)
         : this(stateVersion, Array.Empty<long>(), Array.Empty<long>())

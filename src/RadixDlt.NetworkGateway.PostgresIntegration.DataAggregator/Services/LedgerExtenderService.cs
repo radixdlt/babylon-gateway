@@ -274,7 +274,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
         var referencedEntities = new Dictionary<string, ReferencedEntity>();
-        var downedSubstates = new List<DownedSubstate>();
         var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
         var fungibleResourceChanges = new List<FungibleResourceChange>();
@@ -346,9 +345,6 @@ SELECT
                 {
                     var sid = downSubstate.SubstateId;
                     var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
-                    var ds = new DownedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
-
-                    downedSubstates.Add(ds);
                 }
 
                 foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
