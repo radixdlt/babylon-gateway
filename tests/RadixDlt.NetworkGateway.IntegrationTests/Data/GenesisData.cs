@@ -1,17 +1,66 @@
 ﻿using Newtonsoft.Json.Linq;
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
 
 public static class GenesisData
 {
+    private static string _sysFaucetPackageAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).PackageHrp);
+
+    private static string _sysFaucetComponentAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).SystemComponentHrp);
+
+    private static string _accountPackageAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).PackageHrp);
+
+    private static string _genesisResourceManagerAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).ResourceHrp);
+
+    public static string AccountPackageAddress
+    {
+        get
+        {
+            return _accountPackageAddress;
+        }
+
+        set
+        {
+            _accountPackageAddress = value;
+        }
+    }
+
+    public static string AccountBlueprintName
+    {
+        get
+        {
+            return "Account";
+        }
+    }
+
     public static string SysFaucetPackageAddress
     {
         get
         {
-            return "package_tdx_21_1qyqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsc9ekjt";
+            return _sysFaucetPackageAddress;
+        }
+
+        set
+        {
+            _sysFaucetPackageAddress = value;
+        }
+    }
+
+    public static string SysFaucetComponentAddress
+    {
+        get
+        {
+            return _sysFaucetComponentAddress;
+        }
+
+        set
+        {
+            _sysFaucetComponentAddress = value;
         }
     }
 
@@ -32,6 +81,43 @@ public static class GenesisData
                 substateType: SubstateType.ComponentInfo,
                 packageAddress: SysFaucetPackageAddress,
                 blueprintName: SysFaucetBlueprintName
+            );
+        }
+    }
+
+    public static string GenesisResourceManagerAddress
+    {
+        get
+        {
+            return _genesisResourceManagerAddress;
+        }
+
+        set
+        {
+            _genesisResourceManagerAddress = value;
+        }
+    }
+
+    public static string GenesisAmountAttos
+    {
+        get
+        {
+            return "1000000000000000000000000000";
+        }
+    }
+
+    public static FeeSummary GenesisFeeSummary
+    {
+        get
+        {
+            return new FeeSummary(
+                costUnitConsumed: 0,
+                costUnitLimit: 10000000,
+                costUnitPriceAttos: "1000000000000",
+                loanFullyRepaid: true,
+                tipPercentage: 0,
+                xrdBurnedAttos: "0",
+                xrdTippedAttos: "0"
             );
         }
     }

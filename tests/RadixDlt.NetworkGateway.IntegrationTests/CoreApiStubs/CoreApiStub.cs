@@ -29,8 +29,6 @@ public class CoreApiStub :
     ICoreApiHandler,
     ICapturedConfigProvider
 {
-    private bool _isGenesisIngested;
-
     public CoreApiStubDefaultConfiguration CoreApiStubDefaultConfiguration { get; } = new();
 
     #region injected stubs
@@ -65,18 +63,7 @@ public class CoreApiStub :
 
     public Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        if (!_isGenesisIngested && CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse != null)
-        {
-            _isGenesisIngested = true;
-            return Task.FromResult(CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse);
-        }
-
-        if (CoreApiStubDefaultConfiguration.CommittedTransactionsResponse != null)
-        {
-            return Task.FromResult(CoreApiStubDefaultConfiguration.CommittedTransactionsResponse);
-        }
-
-        return Task.FromResult(new CommittedTransactionsResponse(transactions: new List<CommittedTransaction>()));
+        return Task.FromResult(CoreApiStubDefaultConfiguration.CommittedTransactionsResponse);
     }
 
     public Task<TransactionPreviewResponse> PreviewTransaction(

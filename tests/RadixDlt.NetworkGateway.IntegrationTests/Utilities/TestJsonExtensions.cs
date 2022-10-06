@@ -64,6 +64,7 @@
 
 using FluentAssertions;
 using Newtonsoft.Json;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -91,5 +92,20 @@ public static class TestJsonExtensions
         payload.ShouldNotBeNull();
 
         return payload;
+    }
+
+    public static async Task<bool> TryParse<TResponse>(this HttpResponseMessage responseMessage)
+    {
+        try
+        {
+            var json = await responseMessage.Content.ReadAsStringAsync();
+            var payload = JsonConvert.DeserializeObject<TResponse>(json);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

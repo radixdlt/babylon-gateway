@@ -17,10 +17,8 @@ public class VaultBuilder : BuilderBase<StateUpdates>
         _vaultAddressHex = AddressHelper.AddressToHex(vaultAddress);
     }
 
-    private string _resourceAddress = string.Empty;
-    private string _vaultName = string.Empty;
-    private long _totalTokensSupply = 1000000;
-    private long _fungibleDivisibility = 18;
+    private string _fungibleTokensResourceAddress = string.Empty;
+    private string _fungibleTokensAmountAttos = string.Empty;
 
     public override StateUpdates Build()
     {
@@ -30,7 +28,7 @@ public class VaultBuilder : BuilderBase<StateUpdates>
 
         var newGlobalEntities = new List<GlobalEntityId>()
         {
-            new GlobalEntityId(
+            new(
                 entityType: EntityType.Vault,
                 entityAddressHex: _vaultAddressHex,
                 globalAddressHex: _vaultAddressHex,
@@ -54,8 +52,8 @@ public class VaultBuilder : BuilderBase<StateUpdates>
                         resourceAmount: new ResourceAmount(
                             new FungibleResourceAmount(
                                 resourceType: ResourceType.Fungible,
-                                resourceAddress: _resourceAddress,
-                                amountAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, _fungibleDivisibility)), CultureInfo.InvariantCulture))))
+                                resourceAddress: _fungibleTokensResourceAddress,
+                                amountAttos: _fungibleTokensAmountAttos)))
                 ),
                 substateHex: "11050000005661756c74010000001001000000110800000046756e6769626c6504000000b61b000000000000000000000000000000000000000000000000000000000004071232a10a00000000a12000000000000040eaed7446d09c2c9f0c00000000000000000000000000000000000000",
                 substateDataHash: "16727d810c5684cdfe732101b8075b69964fafc8b0632a5d6d1a7c193214e991"
@@ -72,30 +70,16 @@ public class VaultBuilder : BuilderBase<StateUpdates>
         return this;
     }
 
-    public VaultBuilder WithFungibleTokens(string resourceAddress)
+    public VaultBuilder WithFungibleTokensResourceAddress(string fungibleTokensResourceAddress)
     {
-        _resourceAddress = resourceAddress;
+        _fungibleTokensResourceAddress = fungibleTokensResourceAddress;
 
         return this;
     }
 
-    public VaultBuilder WithVaultName(string vaultName)
+    public VaultBuilder WithFungibleResourceAmountAttos(string fungibleTokensAmountAttos)
     {
-        _vaultName = vaultName;
-
-        return this;
-    }
-
-    public VaultBuilder WithFungibleTokensTotalSupply(long totalTokensSupply)
-    {
-        _totalTokensSupply = totalTokensSupply;
-
-        return this;
-    }
-
-    public VaultBuilder WithFungibleTokensDivisibility(long fungibleDivisibility)
-    {
-        _fungibleDivisibility = fungibleDivisibility;
+        _fungibleTokensAmountAttos = fungibleTokensAmountAttos;
 
         return this;
     }

@@ -66,8 +66,8 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Net.Http.Json;
 using System.Reflection;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -91,21 +91,23 @@ public class GatewayEndpointTests
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .ArrangeGatewayVersionsTest();
+            .MockGatewayVersions();
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<GatewayResponse>();
+            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(callback: ValidateResponse);
         task.Wait();
-        var payload = task.Result;
 
-        // Assert
-        payload.GatewayApi.ShouldNotBeNull();
+        // Assert (callback method)
+        void ValidateResponse(GatewayResponse payload)
+        {
+            payload.GatewayApi.ShouldNotBeNull();
 
-        payload.GatewayApi._Version.ShouldNotBeNull();
-        payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion);
+            payload.GatewayApi._Version.ShouldNotBeNull();
+            payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion);
 
-        payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
-        payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
+            payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
+            payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion);
+        }
     }
 }

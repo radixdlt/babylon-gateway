@@ -1,9 +1,7 @@
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Builders;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
+using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -17,26 +15,80 @@ public partial class GatewayTestsRunner
         TearDown();
     }
 
-    public async Task<T> RunAndWaitUntilAllTransactionsAreIngested<T>(TimeSpan? timeout = null)
+    public GatewayTestsRunner MockGenesis()
+    {
+        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+
+        _transactionStreamStore.QueueGenesisTransaction();
+
+        return this;
+    }
+
+    public async Task RunAndWaitUntilAllTransactionsIngested<T>(Action<T>? callback = null)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.NameFromAsync());
 
         Initialize(_databaseName);
 
-        // make the api call
-        _testConsole.WriteLine($"Sending a POST request to '{_request.RequestUri}'");
-        var payload = await ActAsync<T>(_request.RequestUri, _request.Content);
+        // run all pending transactions in the queue
+        while (true)
+        {
+            var pendingTransaction = _transactionStreamStore.GetPendingTransaction();
 
-        return payload;
+            if (pendingTransaction == null)
+            {
+                _testConsole.WriteLine($"No pending transactions found. Exiting...");
+                return;
+            }
+
+            _testConsole.WriteLine($"Sending '{pendingTransaction!.Request.RequestUri}' POST request");
+
+            var response = await ActAsync(pendingTransaction.Request.RequestUri, pendingTransaction.Request.Content);
+
+            if (pendingTransaction.Request.MarkAsCommitted)
+            {
+                _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
+
+                var t = WaitAsync(TimeSpan.FromSeconds(5));
+                t.Wait();
+            }
+
+            _transactionStreamStore.MarkPendingTransactionAsCompleted(pendingTransaction);
+
+            var canParse = await response.TryParse<T>();
+
+            if (canParse)
+            {
+                callback?.Invoke(await response.ParseToObjectAndAssert<T>());
+            }
+        }
     }
 
-    public GatewayTestsRunner MockGenesis()
+    public void SaveStateUpdatesToFile()
     {
-        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+        var statesDump = JsonConvert.SerializeObject(
+            _transactionStreamStore,
+            new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+            });
 
-        TransactionStreamStore.GenerateGenesisTransaction();
+        File.WriteAllText(_databaseName + ".log", statesDump);
+    }
 
-        return this;
+    private async Task<HttpResponseMessage> ActAsync(string? requestUri, HttpContent? content)
+    {
+        if (requestUri == null)
+        {
+            throw new Exception("Gateway api uri is missing.");
+        }
+
+        if (_gatewayApiFactory == null)
+        {
+            throw new Exception("Gateway http client is not initialized.");
+        }
+
+        return await _gatewayApiFactory.Client.PostAsync(requestUri, content);
     }
 
     private async Task<T> ActAsync<T>(string? requestUri, HttpContent? content)
@@ -65,16 +117,17 @@ public partial class GatewayTestsRunner
         _testConsole.WriteLine($"{new string('-', 50)}");
     }
 
-    private async Task WaitAsync(TimeSpan timeout)
+    private async Task WaitAsync(TimeSpan? timeout)
     {
-        await Task.Delay(timeout);
+        timeout ??= TimeSpan.FromSeconds(10);
+        await Task.Delay((TimeSpan)timeout);
     }
 
     private void Initialize(string databaseName)
     {
         _testConsole.WriteLine("Setting up SUT");
 
-        if (CoreApiStub.CoreApiStubDefaultConfiguration.CommittedGenesisTransactionsResponse == null)
+        if (CoreApiStub.CoreApiStubDefaultConfiguration.CommittedTransactionsResponse == null)
         {
             throw new Exception("Call MockGenesis() to initialize the SUT");
         }

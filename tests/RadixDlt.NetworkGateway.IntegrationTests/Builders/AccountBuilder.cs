@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using RadixDlt.CoreApiSdk.Model;
+﻿using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -10,16 +9,18 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 public class AccountBuilder : BuilderBase<StateUpdates>
 {
     private readonly CoreApiStubDefaultConfiguration _defaultConfig;
+    private readonly List<StateUpdates> _stateUpdatesList;
     private readonly StateUpdatesStore _stateUpdatesStore;
 
     private string _accountAddress = string.Empty;
-    private string _accountName = string.Empty;
-    private long _tokensBalance;
     private string _tokenName = string.Empty;
+    private string _totalAmountAttos = string.Empty;
+    private ComponentInfoSubstate? _componentInfoSubstate;
 
-    public AccountBuilder(CoreApiStubDefaultConfiguration defaultConfig, StateUpdatesStore stateUpdatesStore)
+    public AccountBuilder(CoreApiStubDefaultConfiguration defaultConfig, List<StateUpdates> stateUpdatesList, StateUpdatesStore stateUpdatesStore)
     {
         _defaultConfig = defaultConfig;
+        _stateUpdatesList = stateUpdatesList;
         _stateUpdatesStore = stateUpdatesStore;
         AddressHelper.GenerateRandomPublicKey();
     }
@@ -33,20 +34,20 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         // find the entity and get its address
         // Create a new down/up state to free 'tokenBalance' tokens from SystFaucet vault
         // update GlobalEntities.StateUpdates
-        var tokens = new FungibleResourceBuilder(_defaultConfig)
-            .WithResourceName(_tokenName)
-            .WithTotalSupply(_tokensBalance)
-            .Build();
 
-        _stateUpdatesStore.AddStateUpdates(tokens);
+        // var tokens = new FungibleResourceBuilder(_defaultConfig)
+        //     .WithResourceName(_tokenName)
+        //     .WithTotalSupplyAttos(_totalAmountAttos)
+        //     .Build();
+
+        var tokens = _stateUpdatesStore.GetGlobalEntity(GenesisData.GenesisResourceManagerAddress);
 
         var vault = new VaultBuilder(_defaultConfig)
-            .WithVaultName(_accountName)
-            .WithFungibleTokens(tokens.NewGlobalEntities[0].EntityAddressHex)
-            .WithFungibleTokensTotalSupply(_tokensBalance)
+            .WithFungibleTokensResourceAddress(tokens.EntityAddressHex)
+            .WithFungibleResourceAmountAttos(_totalAmountAttos)
             .Build();
 
-        _stateUpdatesStore.AddStateUpdates(vault);
+        _stateUpdatesList.Add(vault);
 
         var dataStruct = new KeyValueStoreBuilder()
             .WithDataStructField(vault.NewGlobalEntities[0].EntityAddressHex, "Custom", ScryptoType.Vault)
@@ -62,9 +63,9 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         );
 
         var account = new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
+            .WithComponentInfoSubstate(_componentInfoSubstate!)
             .WithComponentStateSubstate(componentStateSubstateData)
             .WithFixedAddress(_accountAddress)
-            .WithVault(vault.NewGlobalEntities[0].EntityAddressHex) // TODO: is it used?
             .Build();
 
         return account;
@@ -82,13 +83,6 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         return this;
     }
 
-    public AccountBuilder WithAccountName(string accountName)
-    {
-        _accountName = accountName;
-
-        return this;
-    }
-
     public AccountBuilder WithTokenName(string tokenName)
     {
         _tokenName = tokenName;
@@ -96,10 +90,17 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         return this;
     }
 
-    public AccountBuilder WithBalance(long tokensBalance)
+    public AccountBuilder WithTotalAmountAttos(string totalAmountAttos)
     {
-     _tokensBalance = tokensBalance;
+        _totalAmountAttos = totalAmountAttos;
 
-     return this;
+        return this;
+    }
+
+    public AccountBuilder WithComponentInfoSubstate(ComponentInfoSubstate componentInfoSubstate)
+    {
+        _componentInfoSubstate = componentInfoSubstate;
+
+        return this;
     }
 }

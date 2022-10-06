@@ -21,8 +21,6 @@ public class CoreApiStubDefaultConfiguration
 
     public CommittedTransactionsResponse CommittedTransactionsResponse { get; set; }
 
-    public CommittedTransactionsResponse CommittedGenesisTransactionsResponse { get; set; }
-
     public CoreNodeHealthResult CoreNodeHealthResult { get; set; }
 
     public string CoreVersion { get; set; }

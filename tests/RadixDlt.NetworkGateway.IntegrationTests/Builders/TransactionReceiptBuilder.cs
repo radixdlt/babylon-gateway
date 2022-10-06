@@ -26,8 +26,7 @@ public class TransactionReceiptBuilder : BuilderBase<TransactionReceipt>
             status: _transactionStatus,
             feeSummary: _feeSummary,
             stateUpdates: _stateUpdates,
-            output: new List<SborData>(),
-            errorMessage: "error"
+            output: new List<SborData>()
         );
     }
 

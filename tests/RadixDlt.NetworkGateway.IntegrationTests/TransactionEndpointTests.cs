@@ -75,6 +75,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -98,20 +99,24 @@ public class TransactionEndpointTests
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .ArrangeRecentTransactionTest();
+            .MockRecentTransactions();
 
         // Act
-        var task = gatewayRunner.RunAndWaitUntilAllTransactionsAreIngested<RecentTransactionsResponse>();
+        var task = gatewayRunner
+            .RunAndWaitUntilAllTransactionsIngested<RecentTransactionsResponse>(callback: ValidateResponse);
         task.Wait();
-        var payload = task.Result;
 
-        // Assert
-        payload.Transactions.ShouldNotBeNull();
-        payload.Transactions.Count.Should().BeGreaterThan(0);
+        // Assert (callback method)
+        void ValidateResponse(RecentTransactionsResponse payload)
+        {
+            _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
+            payload.Transactions.ShouldNotBeNull();
+            payload.Transactions.Count.Should().BeGreaterThan(0);
 
-        payload.LedgerState.ShouldNotBeNull();
-        payload.LedgerState.Network.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName);
-        payload.LedgerState._Version.Should().Be(1);
+            payload.LedgerState.ShouldNotBeNull();
+            payload.LedgerState.Network.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName);
+            payload.LedgerState._Version.Should().Be(1);
+        }
     }
 
     [Fact]
@@ -120,98 +125,87 @@ public class TransactionEndpointTests
         // Arrange A2B Transfer preview
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .TransactionPreviewBuild(
-                manifest: new ManifestBuilder()
-                    .WithLockFeeMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.SystemComponentHrp), "10")
-                    .WithWithdrawByAmountMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp), "100", AddressHelper.GenerateRandomAddress(_networkDefinition.ResourceHrp))
-                    .WithTakeFromWorktopByAmountMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.ResourceHrp), "100", "bucket1")
-                    .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp), "bucket1")
-                    .Build(),
-                costUnitLimit: 0L,
-                tipPercentage: 0L,
-                nonce: "nonce",
-                signerPublicKeys: new List<PublicKey>
-                {
-                    new(new EcdsaSecp256k1PublicKey(
-                        PublicKeyType.EddsaEd25519, "010000000000000000000000000000001")),
-                },
-                flags: new TransactionPreviewRequestFlags(false)
-            );
+            .MockA2BTransferPreviewTransaction();
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionPreviewResponse>();
-
+            .RunAndWaitUntilAllTransactionsIngested<TransactionPreviewResponse>(callback: ValidateResponse);
         task.Wait();
-        var payload = task.Result;
 
-        var coreApiPayload = JsonConvert.DeserializeObject<RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse>(payload.CoreApiResponse.ToString()!);
+        // Assert (callback method)
+        void ValidateResponse(TransactionPreviewResponse payload)
+        {
+            _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
+            var coreApiPayload = JsonConvert.DeserializeObject<RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse>(payload.CoreApiResponse.ToString()!);
 
-        // Assert
-        coreApiPayload.ShouldNotBeNull();
-        coreApiPayload.Receipt.ShouldNotBeNull();
-        coreApiPayload.Receipt.Status.Should().Be(CoreApiSdk.Model.TransactionStatus.Succeeded);
+            // Assert
+            coreApiPayload.ShouldNotBeNull();
+            coreApiPayload.Receipt.ShouldNotBeNull();
+            coreApiPayload.Receipt.Status.Should().Be(CoreApiSdk.Model.TransactionStatus.Succeeded);
+        }
+
+        gatewayRunner.SaveStateUpdatesToFile();
     }
 
-    [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
-    public void MempoolTransactionStatusShouldBeFailed()
-    {
-        // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
-            .MockGenesis()
-            .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
-
-        // Act
-        var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
-
-        task.Wait();
-        var payload = task.Result;
-
-        // Assert
-        var status = payload.Transaction.TransactionStatus.Status;
-        status.Should().Be(TransactionStatus.StatusEnum.FAILED);
-    }
-
-    [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
-    public void MempoolTransactionStatusShouldBeConfirmed()
-    {
-        // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
-            .MockGenesis()
-            .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
-
-        // Act
-        var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
-
-        task.Wait();
-        var payload = task.Result;
-
-        // Assert
-        var status = payload.Transaction.TransactionStatus.Status;
-        status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
-    }
-
-    [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
-    public void MempoolTransactionStatusShouldBePending()
-    {
-        // Arrange
-        var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
-            .MockGenesis()
-            .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
-
-        // Act
-        var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
-
-        task.Wait();
-        var payload = task.Result;
-
-        // Assert
-        var status = payload.Transaction.TransactionStatus.Status;
-        status.Should().Be(TransactionStatus.StatusEnum.PENDING);
-    }
+    // [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
+    // public void MempoolTransactionStatusShouldBeFailed()
+    // {
+    //     // Arrange
+    //     using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+    //         .MockGenesis()
+    //         .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.FAILED);
+    //
+    //     // Act
+    //     var task = gatewayRunner
+    //         .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
+    //
+    //     task.Wait();
+    //     var payload = task.Result;
+    //
+    //     // Assert
+    //     var status = payload.Transaction.TransactionStatus.Status;
+    //     status.Should().Be(TransactionStatus.StatusEnum.FAILED);
+    // }
+    //
+    // [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
+    // public void MempoolTransactionStatusShouldBeConfirmed()
+    // {
+    //     // Arrange
+    //     using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+    //         .MockGenesis()
+    //         .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.CONFIRMED);
+    //
+    //     // Act
+    //     var task = gatewayRunner
+    //         .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
+    //
+    //     task.Wait();
+    //     var payload = task.Result;
+    //
+    //     // Assert
+    //     var status = payload.Transaction.TransactionStatus.Status;
+    //     status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    // }
+    //
+    // [Fact(Skip = "Disabled until MempoolTrackerWorker is re-enabled")]
+    // public void MempoolTransactionStatusShouldBePending()
+    // {
+    //     // Arrange
+    //     var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+    //         .MockGenesis()
+    //         .ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum.PENDING);
+    //
+    //     // Act
+    //     var task = gatewayRunner
+    //         .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
+    //
+    //     task.Wait();
+    //     var payload = task.Result;
+    //
+    //     // Assert
+    //     var status = payload.Transaction.TransactionStatus.Status;
+    //     status.Should().Be(TransactionStatus.StatusEnum.PENDING);
+    // }
 
     [Fact]
     public void TestTransactionSubmit()
@@ -219,46 +213,48 @@ public class TransactionEndpointTests
         // Arrange
         using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .ArrangeSubmitTransactionTest();
+            .MockSubmitTransaction();
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionSubmitResponse>();
-
+            .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(callback: ValidateResponse);
         task.Wait();
-        var payload = task.Result;
 
-        // Assert
-        payload.Duplicate.Should().Be(false);
+        // Assert (callback method)
+        void ValidateResponse(TransactionSubmitResponse payload)
+        {
+            _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
+            payload.Duplicate.Should().Be(false);
 
-        // TODO: should also return intent hash
-        // payload.IntentHash.ShouldNoBreNull();
+            // TODO: should also return intent hash
+            // payload.IntentHash.ShouldNoBreNull();
+        }
     }
 
-    [Fact(Skip ="TransactionSubmitResponse and/or RecentTransactionsResponse should return IntentHash")]
-    public void SubmittedTransactionStatusShouldBeConfirmed()
-    {
-        // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
-            .MockGenesis()
-            .ArrangeRecentTransactionTest();
-
-        // Act
-        var taskRecent = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<RecentTransactionsResponse>();
-
-        taskRecent.Wait();
-        var recentTransactions = taskRecent.Result;
-
-        var taskAct = gatewayRunner.ArrangeTransactionStatusTest(recentTransactions)
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
-        taskAct.Wait();
-        var payload = taskAct.Result;
-
-        // Assert
-        var status = payload.Transaction.TransactionStatus.Status;
-        status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
-    }
+    // [Fact(Skip ="TransactionSubmitResponse and/or RecentTransactionsResponse should return IntentHash")]
+    // public void SubmittedTransactionStatusShouldBeConfirmed()
+    // {
+    //     // Arrange
+    //     using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+    //         .MockGenesis()
+    //         .MockRecentTransactions();
+    //
+    //     // Act
+    //     var taskRecent = gatewayRunner
+    //         .RunAndWaitUntilAllTransactionsAreIngested<RecentTransactionsResponse>();
+    //
+    //     taskRecent.Wait();
+    //     var recentTransactions = taskRecent.Result;
+    //
+    //     var taskAct = gatewayRunner.ArrangeTransactionStatusTest(recentTransactions)
+    //         .RunAndWaitUntilAllTransactionsAreIngested<TransactionStatusResponse>();
+    //     taskAct.Wait();
+    //     var payload = taskAct.Result;
+    //
+    //     // Assert
+    //     var status = payload.Transaction.TransactionStatus.Status;
+    //     status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+    // }
 
     [Fact]
     public void TokensTransferFromAccountAtoBShouldSucceed()
@@ -273,20 +269,23 @@ public class TransactionEndpointTests
             .WithAccount(accountB, "XRD", 0)
             .MockTokensTransfer(accountA, accountB, "XRD", 200);
 
-        // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsAreIngested<TransactionSubmitResponse>();
-
+            .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(callback: ValidateResponse);
         task.Wait();
-        var payload = task.Result;
 
-        // Assert
-        payload.Duplicate.Should().Be(false);
+        // Assert (callback method)
+        void ValidateResponse(TransactionSubmitResponse payload)
+        {
+            _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
+            payload.Duplicate.Should().Be(false);
 
-        // TODO: should also return intent hash
-        // payload.IntentHash.ShouldNoBreNull();
+            // TODO: should also return intent hash
+            // payload.IntentHash.ShouldNoBreNull();
 
-        gatewayRunner.GetAccountBalance(accountA).Should().Be(800);
-        gatewayRunner.GetAccountBalance(accountB).Should().Be(200);
+            gatewayRunner.GetAccountBalance(accountA).Should().Be(800);
+            gatewayRunner.GetAccountBalance(accountB).Should().Be(200);
+        }
+
+        gatewayRunner.SaveStateUpdatesToFile();
     }
 }

@@ -66,7 +66,7 @@ public class KeyValueStoreBuilder : BuilderBase<DataStruct>
         var dataHex = Convert.ToHexString(Encoding.UTF8.GetBytes(strJson));
 
         var dataStruct = new DataStruct(
-            structData: new SborData(dataHex, strJson),
+            structData: new SborData(dataHex, JObject.Parse(strJson)),
             ownedEntities: _ownedEntities,
             referencedEntities: new List<EntityId>());
 

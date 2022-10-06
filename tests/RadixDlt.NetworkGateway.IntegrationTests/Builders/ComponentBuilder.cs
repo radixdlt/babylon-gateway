@@ -17,9 +17,9 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 {
     private string _componentAddress;
 
-    private Substate? _substate;
-    private EntityType _entityType = EntityType.Component;
-    private SubstateType _substateType = SubstateType.System;
+    private Substate? _componentInfoSubstate;
+    private Substate? _componentStateSubstate;
+    private Substate? _componentSystemSubstate;
 
     public ComponentBuilder(CoreApiStubDefaultConfiguration defaultConfig, ComponentHrp componentHrp = ComponentHrp.NormalComponentHrp)
     {
@@ -45,7 +45,9 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
     public override StateUpdates Build()
     {
-        if (_substate == null && _substate == null)
+        if (_componentInfoSubstate == null &&
+            _componentStateSubstate == null &&
+            _componentSystemSubstate == null)
         {
             throw new NullReferenceException("No sub state found.");
         }
@@ -54,28 +56,84 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var newGlobalEntities = new List<GlobalEntityId>()
+        var newGlobalEntities = new List<GlobalEntityId>();
+
+        if (_componentInfoSubstate != null)
         {
-            new GlobalEntityId(
-                entityType: _entityType,
+            newGlobalEntities.Add(new(
+                entityType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
                 entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
                 globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddress: _componentAddress),
-        };
+                globalAddress: _componentAddress));
+        }
+
+        if (_componentStateSubstate != null)
+        {
+            newGlobalEntities.Add(new(
+                entityType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
+                entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
+                globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
+                globalAddress: _componentAddress));
+        }
+
+        if (_componentSystemSubstate != null)
+        {
+            newGlobalEntities.Add(new(
+                entityType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
+                entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
+                globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
+                globalAddress: _componentAddress));
+        }
 
         var upSubstates = new List<UpSubstate>();
 
-        if (_substate != null)
+        if (_componentInfoSubstate != null)
         {
             upSubstates.Add(
                 new UpSubstate(
                     substateId: new SubstateId(
-                        entityType: _entityType,
+                        entityType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
                         entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                        substateType: _substateType,
+                        substateType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).SubstateType,
                         substateKeyHex: "00"
                     ),
-                    substateData: _substate,
+                    substateData: _componentInfoSubstate,
+                    substateHex: "110d000000436f6d706f6e656e74496e666f010000001003000000801b0000000100000000000000000000000000000000000000000000000000010c09000000537973466175636574301000000000",
+                    substateDataHash: "bdd0d7acd8e2436ba42f830f6e732ad287576abc6770df397cc356f780bfe9f2",
+                    version: 0L
+                )
+            );
+        }
+
+        if (_componentStateSubstate != null)
+        {
+            upSubstates.Add(
+                new UpSubstate(
+                    substateId: new SubstateId(
+                        entityType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
+                        entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
+                        substateType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).SubstateType,
+                        substateKeyHex: "00"
+                    ),
+                    substateData: _componentStateSubstate,
+                    substateHex: "110d000000436f6d706f6e656e74496e666f010000001003000000801b0000000100000000000000000000000000000000000000000000000000010c09000000537973466175636574301000000000",
+                    substateDataHash: "bdd0d7acd8e2436ba42f830f6e732ad287576abc6770df397cc356f780bfe9f2",
+                    version: 0L
+                )
+            );
+        }
+
+        if (_componentSystemSubstate != null)
+        {
+            upSubstates.Add(
+                new UpSubstate(
+                    substateId: new SubstateId(
+                        entityType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
+                        entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
+                        substateType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).SubstateType,
+                        substateKeyHex: "00"
+                    ),
+                    substateData: _componentSystemSubstate,
                     substateHex: "110d000000436f6d706f6e656e74496e666f010000001003000000801b0000000100000000000000000000000000000000000000000000000000010c09000000537973466175636574301000000000",
                     substateDataHash: "bdd0d7acd8e2436ba42f830f6e732ad287576abc6770df397cc356f780bfe9f2",
                     version: 0L
@@ -95,13 +153,10 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
     public ComponentBuilder WithComponentInfoSubstate(string packageAddress, string blueprintName = "")
     {
-        _entityType = EntityType.Component;
-        _substateType = SubstateType.ComponentInfo;
-
-        _substate = new Substate(
+        _componentInfoSubstate = new Substate(
             actualInstance: new ComponentInfoSubstate(
-                entityType: _entityType,
-                substateType: _substateType,
+                entityType: EntityType.Component,
+                substateType: SubstateType.ComponentInfo,
                 packageAddress: packageAddress,
                 blueprintName: blueprintName
             )
@@ -112,37 +167,23 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
     public ComponentBuilder WithComponentInfoSubstate(ComponentInfoSubstate componentInfoSubstate)
     {
-        _entityType = EntityType.Component;
-        _substateType = SubstateType.ComponentInfo;
-
-        _substate = new Substate(componentInfoSubstate);
+        _componentInfoSubstate = new Substate(componentInfoSubstate);
 
         return this;
     }
 
     public ComponentBuilder WithComponentStateSubstate(ComponentStateSubstate componentStateSubstate)
     {
-        _entityType = EntityType.Component;
-        _substateType = SubstateType.ComponentState;
-
-        _substate = new Substate(componentStateSubstate);
+        _componentStateSubstate = new Substate(componentStateSubstate);
 
         return this;
     }
 
     public ComponentBuilder WithSystemStateSubstate(long epoch)
     {
-        _entityType = EntityType.System;
-        _substateType = SubstateType.System;
+        _componentSystemSubstate = new Substate(new SystemSubstate(
+            EntityType.System, SubstateType.System, epoch));
 
-        _substate = new Substate(new SystemSubstate(
-            _entityType, _substateType, epoch));
-
-        return this;
-    }
-
-    public ComponentBuilder WithVault(string vaultAddressHex)
-    {
         return this;
     }
 }

@@ -11,15 +11,16 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 public class FungibleResourceBuilder : BuilderBase<StateUpdates>
 {
     private string _resourceAddress;
-
-    private string _resourceName = string.Empty;
-    private long _totalTokensSupply = 1000000;
+    private string _resourceAddressHex;
+    private string _resourceName = "XRD";
+    private string _totalSupplyAttos = string.Empty;
     private int _fungibleDivisibility = 18;
 
     public FungibleResourceBuilder(CoreApiStubDefaultConfiguration defaultConfig)
     {
         // generate something like: resource_loc_1qqwknku2
         _resourceAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.ResourceHrp);
+        _resourceAddressHex = AddressHelper.AddressToHex(_resourceAddress);
     }
 
     public override StateUpdates Build()
@@ -32,8 +33,8 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
         {
             new GlobalEntityId(
                 entityType: EntityType.ResourceManager,
-                entityAddressHex: AddressHelper.AddressToHex(_resourceAddress),
-                globalAddressHex: AddressHelper.AddressToHex(_resourceAddress),
+                entityAddressHex: _resourceAddressHex,
+                globalAddressHex: _resourceAddressHex,
                 globalAddress: _resourceAddress),
         };
 
@@ -42,7 +43,7 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
             new(
                 substateId: new SubstateId(
                     entityType: EntityType.ResourceManager,
-                    entityAddressHex: AddressHelper.AddressToHex(_resourceAddress),
+                    entityAddressHex: _resourceAddressHex,
                     substateType: SubstateType.ResourceManager,
                     substateKeyHex: "00"
                 ),
@@ -60,7 +61,7 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
                             new("url", "https://tokens.radixdlt.com"),
                             new("description", "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."),
                         },
-                        totalSupplyAttos: Convert.ToString(Convert.ToDecimal(_totalTokensSupply * Math.Pow(10, _fungibleDivisibility)), CultureInfo.InvariantCulture))
+                        totalSupplyAttos: _totalSupplyAttos)
                 ),
                 substateHex: GenesisData.FungibleResourceCodeHex,
                 substateDataHash: "3dc43a58c5cc27bba7d9a96966c8d66a230c781ec04f936bf10130688ed887cf"
@@ -73,7 +74,7 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
     public FungibleResourceBuilder WithFixedAddress(string resourceAddress)
     {
         _resourceAddress = resourceAddress;
-
+        _resourceAddressHex = AddressHelper.AddressToHex(_resourceAddress);
         return this;
     }
 
@@ -84,9 +85,9 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
         return this;
     }
 
-    public FungibleResourceBuilder WithTotalSupply(long totalTokensSupply)
+    public FungibleResourceBuilder WithTotalSupplyAttos(string totalSupplyAttos)
     {
-        _totalTokensSupply = totalTokensSupply;
+        _totalSupplyAttos = totalSupplyAttos;
 
         return this;
     }

@@ -1,19 +1,24 @@
+using FluentAssertions;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
 using Xunit.Abstractions;
-using TransactionStatus = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionStatus;
+using EcdsaSecp256k1PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.EcdsaSecp256k1PublicKey;
+using PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKey;
+using PublicKeyType = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKeyType;
+using TransactionPreviewRequestFlags = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequestFlags;
 using TransactionSubmitRequest = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionSubmitRequest;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
@@ -22,12 +27,14 @@ public partial class GatewayTestsRunner : IDisposable
 {
     private readonly ITestOutputHelper _testConsole;
 
+    private readonly StateUpdatesStore _stateUpdatesStore;
+
+    private readonly TestTransactionStreamStore _transactionStreamStore;
+
     private readonly string _databaseName;
 
     private TestDataAggregatorFactory? _dataAggregatorFactory;
     private TestGatewayApiFactory? _gatewayApiFactory;
-
-    private (string? RequestUri, HttpContent? Content) _request;
 
     public GatewayTestsRunner(
         NetworkDefinition networkDefinition,
@@ -37,121 +44,93 @@ public partial class GatewayTestsRunner : IDisposable
         // clean up and initialize
         CoreApiStub = new CoreApiStub { CoreApiStubDefaultConfiguration = { NetworkDefinition = networkDefinition } };
 
-        StateUpdatesStore = new StateUpdatesStore();
-        TransactionStreamStore = new TransactionStreamStore(CoreApiStub, StateUpdatesStore, testConsole);
-
         _testConsole = testConsole;
         _databaseName = testName;
 
-        WriteTestHeader(testName);
+        _stateUpdatesStore = new StateUpdatesStore(_testConsole);
+        _transactionStreamStore = new TestTransactionStreamStore(CoreApiStub, _stateUpdatesStore, testConsole);
 
-        _databaseName = testName;
+        WriteTestHeader(testName);
     }
 
     public CoreApiStub CoreApiStub { get; }
-
-    public StateUpdatesStore StateUpdatesStore { get; }
-
-    public TransactionStreamStore TransactionStreamStore { get; }
 
     public GatewayTestsRunner WithAccount(string accountAddress, string token, long balance)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _testConsole.WriteLine($"Account: {accountAddress}, {token} {balance}");
+        _testConsole.WriteLine($"Account: {accountAddress}, {token}, {balance}");
 
-        var account = new AccountBuilder(
-                CoreApiStub.CoreApiStubDefaultConfiguration,
-                StateUpdatesStore)
-            .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
-            .WithFixedAddress(accountAddress)
-            .WithTokenName(token)
-            .WithBalance(balance)
-            .Build();
-
-        StateUpdatesStore.AddStateUpdates(account);
+        _transactionStreamStore.QueueAccountTransaction(accountAddress, token, balance);
 
         return this;
     }
 
-    public GatewayTestsRunner ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum expectedStatus)
+    // public GatewayTestsRunner ArrangeMempoolTransactionStatusTest(TransactionStatus.StatusEnum expectedStatus)
+    // {
+    //     _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+    //
+    //     switch (expectedStatus)
+    //     {
+    //         case TransactionStatus.StatusEnum.FAILED:
+    //             CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
+    //                 MempoolTransactionStatus.Failed;
+    //             break;
+    //         case TransactionStatus.StatusEnum.PENDING:
+    //             CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
+    //                 MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
+    //             break;
+    //         case TransactionStatus.StatusEnum.CONFIRMED:
+    //             CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
+    //                 MempoolTransactionStatus.Committed;
+    //             break;
+    //     }
+    //
+    //     var transactionIdentifier =
+    //         new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+    //
+    //     var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+    //     var content = new StringContent(json, Encoding.UTF8, "application/json");
+    //
+    //     _request = ("/transaction/status", content);
+    //
+    //     return this;
+    // }
+
+    // public GatewayTestsRunner ArrangeTransactionStatusTest(RecentTransactionsResponse recentTransactions)
+    // {
+    //     _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+    //
+    //     var hash = recentTransactions.Transactions[0].TransactionIdentifier.Hash;
+    //     var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, hash);
+    //     var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
+    //     var content = new StringContent(json, Encoding.UTF8, "application/json");
+    //
+    //     _request = ("/transaction/status", content);
+    //
+    //     return this;
+    // }
+
+    public GatewayTestsRunner MockSubmitTransaction()
+    {
+        // TODO: submit what?
+        return this;
+    }
+
+    public GatewayTestsRunner MockGatewayVersions()
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        switch (expectedStatus)
-        {
-            case TransactionStatus.StatusEnum.FAILED:
-                CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
-                    MempoolTransactionStatus.Failed;
-                break;
-            case TransactionStatus.StatusEnum.PENDING:
-                CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
-                    MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
-                break;
-            case TransactionStatus.StatusEnum.CONFIRMED:
-                CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
-                    MempoolTransactionStatus.Committed;
-                break;
-        }
-
-        var transactionIdentifier =
-            new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
-
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _request = ("/transaction/status", content);
+        _transactionStreamStore.QueueGatewayVersions();
 
         return this;
     }
 
-    public GatewayTestsRunner ArrangeTransactionStatusTest(RecentTransactionsResponse recentTransactions)
+    public GatewayTestsRunner MockRecentTransactions()
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var hash = recentTransactions.Transactions[0].TransactionIdentifier.Hash;
-        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, hash);
-        var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _request = ("/transaction/status", content);
-
-        return this;
-    }
-
-    public GatewayTestsRunner ArrangeSubmitTransactionTest()
-    {
-        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
-
-        var json = new TransactionSubmitRequest(new HexTransactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _request = ("/transaction/submit", content);
-
-        return this;
-    }
-
-    public GatewayTestsRunner ArrangeGatewayVersionsTest()
-    {
-        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
-
-        _request = ("/gateway", JsonContent.Create(new object()));
-
-        // set custom gatewayApi and openSchemaApi versions
-
-        return this;
-    }
-
-    public GatewayTestsRunner ArrangeRecentTransactionTest()
-    {
-        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
-
-        var json = new RecentTransactionsRequest().ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _request = ("/transaction/recent", content);
-
-        // set custom transaction data
+        _transactionStreamStore.QueueRecentTransaction();
 
         return this;
     }
@@ -160,20 +139,7 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _testConsole.WriteLine($"Transferring {amountToTransfer} tokens from account: {fromAccount} to account {toAccount}");
-
-        var json = new TransactionSubmitRequest(new HexTransactions(CoreApiStub.CoreApiStubDefaultConfiguration).SubmitTransactionHex).ToJson();
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        _request = ("/transaction/submit", content);
-
-        // since we don't send a real transaction, accounts should be updated in memory store?
-
-        // take tokens from account A
-        UpdateAccountBalance(fromAccount, amountToTransfer * (-1));
-
-        // deposit tokens to account B
-        UpdateAccountBalance(toAccount, amountToTransfer);
+        _transactionStreamStore.QueueTokensTransferTransaction(fromAccount, toAccount, tokenName, amountToTransfer);
 
         return this;
     }
@@ -182,12 +148,12 @@ public partial class GatewayTestsRunner : IDisposable
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var accountUpSubstate = StateUpdatesStore.GetLastUpstateByGlobalAddress(accountAddress);
+        var accountUpSubstate = _stateUpdatesStore.GetLastUpSubstateByEntityAddress(accountAddress);
 
         // TODO: finds only the 1st vault!!!
         var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
 
-        var vaultUpSubstate = StateUpdatesStore.GetLastUpstateByEntityAddressHex(vaultEntityAddressHex);
+        var vaultUpSubstate = _stateUpdatesStore.GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
 
         var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
 
@@ -200,20 +166,26 @@ public partial class GatewayTestsRunner : IDisposable
         return Convert.ToInt64(tokens);
     }
 
-    public void UpdateAccountBalance(string accountAddress, long amountToTransfer)
+    public GatewayTestsRunner MockA2BTransferPreviewTransaction()
     {
-        var accountUpSubstate = StateUpdatesStore.GetLastUpstateByGlobalAddress(accountAddress);
+        var manifest = new ManifestBuilder()
+            .WithLockFeeMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.SystemComponentHrp), "10")
+            .WithWithdrawByAmountMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.AccountComponentHrp), "100",
+                AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.ResourceHrp))
+            .WithTakeFromWorktopByAmountMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.ResourceHrp), "100", "bucket1")
+            .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.AccountComponentHrp), "bucket1")
+            .Build();
 
-        var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+        var signerPublicKeys = new List<PublicKey>
+        {
+            new(new EcdsaSecp256k1PublicKey(
+                PublicKeyType.EcdsaSecp256k1, "010000000000000000000000000000001")),
+        };
 
-        var vaultUpSubstate = StateUpdatesStore.GetLastUpstateByEntityAddressHex(vaultEntityAddressHex);
+        var flags = new TransactionPreviewRequestFlags(unlimitedLoan: false);
 
-        var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
+        _transactionStreamStore.QueuePreviewTransaction(manifest, costUnitLimit: 0L, tipPercentage: 0L, nonce: string.Empty, signerPublicKeys: signerPublicKeys, flags: flags);
 
-        // TODO: divisibility??? Optimize and make it a separate function
-        var attos = double.Parse(vaultResourceAmount!.AmountAttos);
-        var newTokenBalance = attos + (amountToTransfer * Math.Pow(10, 18));
-        var newAttos = Convert.ToDecimal(newTokenBalance, CultureInfo.InvariantCulture);
-        vaultResourceAmount!.AmountAttos = newAttos.ToString(CultureInfo.InvariantCulture);
+        return this;
     }
 }

@@ -20,11 +20,6 @@ public class PackageBuilder : BuilderBase<StateUpdates>
 
     public override StateUpdates Build()
     {
-        if (!_blueprints.Any())
-        {
-            throw new ArgumentException("No blueprints found.");
-        }
-
         var downSubstates = new List<DownSubstate>();
 
         var downVirtualSubstates = new List<SubstateId>();
