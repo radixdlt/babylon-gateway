@@ -100,7 +100,7 @@ jobs:
 
   # TODO: Reinstate once deployment is configured
   # TODO: Only radixdlt members to trigger these events
- deploy-pr:
+  deploy-pr:
    runs-on: ubuntu-22.04
    needs: publish-docker
    steps:
