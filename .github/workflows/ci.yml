@@ -106,7 +106,7 @@ jobs:
     steps:
       - name: Trigger deployment event ${{ github.ref }}
         env:
-          NAMESPACE: "gilganet"
+          NAMESPACE: "ng-gilganet"
           EVENT_TYPE: "ng_babylon_dev"
         run: |
           curl --silent --show-error --fail --location --request POST 'https://github-worker.radixdlt.com/repos/radixdlt/${{secrets.DISPATCH_REPO}}/dispatches' \
