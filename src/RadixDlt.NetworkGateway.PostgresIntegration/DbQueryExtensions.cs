@@ -81,8 +81,8 @@ internal static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.ResultantStateVersion <= beforeStateVersion)
-            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .Where(lt => lt.StateVersion <= beforeStateVersion)
+            .OrderByDescending(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -90,8 +90,8 @@ internal static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.ResultantStateVersion >= afterStateVersion)
-            .OrderBy(lt => lt.ResultantStateVersion)
+            .Where(lt => lt.StateVersion >= afterStateVersion)
+            .OrderBy(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -101,7 +101,7 @@ internal static class DbQueryExtensions
         return dbContext.LedgerTransactions
             .Where(lt => lt.RoundTimestamp <= timestamp)
             .OrderByDescending(lt => lt.RoundTimestamp)
-            .ThenByDescending(lt => lt.ResultantStateVersion)
+            .ThenByDescending(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -111,7 +111,7 @@ internal static class DbQueryExtensions
         return dbContext.LedgerTransactions
             .Where(lt => lt.RoundTimestamp >= timestamp)
             .OrderBy(lt => lt.RoundTimestamp)
-            .ThenBy(lt => lt.ResultantStateVersion)
+            .ThenBy(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -120,7 +120,7 @@ internal static class DbQueryExtensions
     {
         return dbContext.LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch <= round && lt.IsStartOfRound)
-            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .OrderByDescending(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -129,7 +129,7 @@ internal static class DbQueryExtensions
     {
         return dbContext.LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IsStartOfRound)
-            .OrderBy(lt => lt.ResultantStateVersion)
+            .OrderBy(lt => lt.StateVersion)
             .Take(1);
     }
 }

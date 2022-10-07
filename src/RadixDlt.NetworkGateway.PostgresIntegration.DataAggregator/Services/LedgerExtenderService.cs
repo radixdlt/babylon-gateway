@@ -78,6 +78,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -182,6 +183,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
 
         var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
+            td.TransactionSummary.StateVersion,
             td.TransactionSummary.PayloadHash,
             td.TransactionContents
         )).ToList();
@@ -273,8 +275,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var outerStopwatch = Stopwatch.StartNew();
 
         // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
-        var referencedEntities = new Dictionary<string, ReferencedEntity>();
-        var downedSubstates = new List<DownedSubstate>();
+        var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
+        var referencedEntities = new ReferencedEntityDictionary();
         var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
         var fungibleResourceChanges = new List<FungibleResourceChange>();
@@ -303,8 +305,6 @@ SELECT
 
         // step: scan for any referenced entities
         {
-            var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
-
             foreach (var transactionData in transactionsData)
             {
                 ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transactionData));
@@ -346,9 +346,6 @@ SELECT
                 {
                     var sid = downSubstate.SubstateId;
                     var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
-                    var ds = new DownedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, downSubstate._Version, Convert.FromHexString(downSubstate.SubstateDataHash), stateVersion);
-
-                    downedSubstates.Add(ds);
                 }
 
                 foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
@@ -363,37 +360,6 @@ SELECT
                     referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex, newGlobalEntity.GlobalAddress, _networkConfigurationProvider.GetAddressHrps());
                 }
             }
-
-            var sw = Stopwatch.StartNew();
-
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, payload_hash, intent_hash, signed_hash, transaction_accumulator, message, fee_paid, epoch, index_in_epoch, round_in_epoch, is_user_transaction, is_start_of_epoch, is_start_of_round, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
-            {
-                foreach (var lt in ledgerTransactions)
-                {
-                    await writer.StartRowAsync(token);
-                    await writer.WriteAsync(lt.ResultantStateVersion, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(lt.PayloadHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.IntentHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.SignedTransactionHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
-                    await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
-                    await writer.WriteAsync(lt.IsStartOfEpoch, NpgsqlDbType.Boolean, token);
-                    await writer.WriteAsync(lt.IsStartOfRound, NpgsqlDbType.Boolean, token);
-                    await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
-                    await writer.WriteAsync(lt.CreatedTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
-                    await writer.WriteAsync(lt.NormalizedRoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
-                }
-
-                await writer.CompleteAsync(token);
-            }
-
-            rowsInserted += ledgerTransactions.Count;
-            dbWriteDuration += sw.Elapsed;
         }
 
         // step: resolve known types & optionally create missing entities
@@ -514,7 +480,38 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            rowsInserted += dbEntities.Count;
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, payload_hash, intent_hash, signed_hash, transaction_accumulator, is_user_transaction, message, fee_paid, tip_paid, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
+            {
+                var statusConverter = new LedgerTransactionStatusValueConverter().ConvertToProvider;
+
+                foreach (var lt in ledgerTransactions)
+                {
+                    await writer.StartRowAsync(token);
+                    await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(statusConverter(lt.Status), NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(lt.PayloadHash, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.IntentHash, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.SignedTransactionHash, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
+                    await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(lt.IsStartOfEpoch, NpgsqlDbType.Boolean, token);
+                    await writer.WriteAsync(lt.IsStartOfRound, NpgsqlDbType.Boolean, token);
+                    await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
+                    await writer.WriteAsync(lt.CreatedTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
+                    await writer.WriteAsync(lt.NormalizedRoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
+                }
+
+                await writer.CompleteAsync(token);
+            }
+
+            rowsInserted += dbEntities.Count + ledgerTransactions.Count;
             dbWriteDuration += sw.Elapsed;
         }
 

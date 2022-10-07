@@ -62,20 +62,32 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace DataAggregator;
 
-public sealed class InvalidActionException : ValidationException
+[ApiController]
+[Route("")]
+public class RootController : ControllerBase
 {
-    public InvalidActionException(Gateway.Action invalidAction, string userFacingMessage, string internalMessage)
-        : base(new InvalidActionError(invalidAction), userFacingMessage, internalMessage)
+    private readonly ISystemStatusService _systemStatusService;
+
+    public RootController(ISystemStatusService systemStatusService)
     {
+        _systemStatusService = systemStatusService;
     }
 
-    public InvalidActionException(Gateway.Action invalidAction, string userFacingMessage)
-        : base(new InvalidActionError(invalidAction), userFacingMessage)
+    [HttpGet("")]
+    public JsonResult GetRootResponse()
     {
+        var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
+
+        return new JsonResult(new
+        {
+            docs = "https://docs.radixdlt.com",
+            repo = "https://github.com/radixdlt/babylon-gateway",
+            ledger_commit_health = healthReport,
+        }) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
     }
 }

@@ -102,7 +102,7 @@ public static class ServiceCollectionExtensions
             .AddValidatableOptionsAtSection<AcceptableLedgerLagOptions, AcceptableLedgerLagOptionsValidator>("GatewayApi:AcceptableLedgerLag");
 
         services
-            .AddValidatorsFromAssemblyContaining(typeof(ServiceCollectionExtensions))
+            .AddValidatorsFromAssemblyContaining(typeof(ServiceCollectionExtensions), includeInternalTypes: true)
             .AddFluentValidationAutoValidation(o =>
             {
                 // our own validators replicate all the basic rules defined by System.ComponentModel.DataAnnotations

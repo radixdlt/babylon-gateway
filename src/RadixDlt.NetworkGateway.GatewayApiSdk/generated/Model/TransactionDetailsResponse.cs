@@ -91,48 +91,61 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// CannotStakeErrorAllOf
+    /// TransactionDetailsResponse
     /// </summary>
-    [DataContract(Name = "CannotStakeError_allOf")]
-    public partial class CannotStakeErrorAllOf : IEquatable<CannotStakeErrorAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionDetailsResponse")]
+    public partial class TransactionDetailsResponse : IEquatable<TransactionDetailsResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CannotStakeErrorAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CannotStakeErrorAllOf() { }
+        protected TransactionDetailsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CannotStakeErrorAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponse" /> class.
         /// </summary>
-        /// <param name="owner">owner (required).</param>
-        /// <param name="user">user (required).</param>
-        public CannotStakeErrorAllOf(AccountIdentifier owner = default(AccountIdentifier), AccountIdentifier user = default(AccountIdentifier))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="transaction">transaction (required).</param>
+        /// <param name="details">details (required).</param>
+        public TransactionDetailsResponse(LedgerState ledgerState = default(LedgerState), TransactionInfo transaction = default(TransactionInfo), TransactionDetails details = default(TransactionDetails))
         {
-            // to ensure "owner" is required (not null)
-            if (owner == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("owner is a required property for CannotStakeErrorAllOf and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for TransactionDetailsResponse and cannot be null");
             }
-            this.Owner = owner;
-            // to ensure "user" is required (not null)
-            if (user == null)
+            this.LedgerState = ledgerState;
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
             {
-                throw new ArgumentNullException("user is a required property for CannotStakeErrorAllOf and cannot be null");
+                throw new ArgumentNullException("transaction is a required property for TransactionDetailsResponse and cannot be null");
             }
-            this.User = user;
+            this.Transaction = transaction;
+            // to ensure "details" is required (not null)
+            if (details == null)
+            {
+                throw new ArgumentNullException("details is a required property for TransactionDetailsResponse and cannot be null");
+            }
+            this.Details = details;
         }
 
         /// <summary>
-        /// Gets or Sets Owner
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "owner", IsRequired = true, EmitDefaultValue = true)]
-        public AccountIdentifier Owner { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets User
+        /// Gets or Sets Transaction
         /// </summary>
-        [DataMember(Name = "user", IsRequired = true, EmitDefaultValue = true)]
-        public AccountIdentifier User { get; set; }
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionInfo Transaction { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Details
+        /// </summary>
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +154,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CannotStakeErrorAllOf {\n");
-            sb.Append("  Owner: ").Append(Owner).Append("\n");
-            sb.Append("  User: ").Append(User).Append("\n");
+            sb.Append("class TransactionDetailsResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +178,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CannotStakeErrorAllOf);
+            return this.Equals(input as TransactionDetailsResponse);
         }
 
         /// <summary>
-        /// Returns true if CannotStakeErrorAllOf instances are equal
+        /// Returns true if TransactionDetailsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of CannotStakeErrorAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CannotStakeErrorAllOf input)
+        public bool Equals(TransactionDetailsResponse input)
         {
             if (input == null)
             {
@@ -180,14 +194,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Owner == input.Owner ||
-                    (this.Owner != null &&
-                    this.Owner.Equals(input.Owner))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.User == input.User ||
-                    (this.User != null &&
-                    this.User.Equals(input.User))
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
+                ) && 
+                (
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -200,13 +219,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Owner != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Owner.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.User != null)
+                if (this.Transaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.User.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                }
+                if (this.Details != null)
+                {
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

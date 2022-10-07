@@ -96,7 +96,7 @@ public class TransactionEndpointTests
 
         // Arrange
         var recentTransactions = await GetRecentTransactions(client);
-        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, recentTransactions.Transactions[0].TransactionIdentifier.Hash); // TODO not sure if valid origin
+        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, recentTransactions.Transactions[0].IntentHashHex); // TODO not sure if valid origin
 
         // Act
         string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
@@ -106,9 +106,11 @@ public class TransactionEndpointTests
         // Assert
         var payload = await response.ParseToObjectAndAssert<TransactionStatusResponse>();
 
-        payload.Transaction.TransactionIdentifier.Hash.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
-        payload.Transaction.TransactionStatus.LedgerStateVersion.Should().Be(1);
-        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
+        payload.Transaction.TransactionStatus.StateVersion.Should().Be(1);
+        payload.Transaction.TransactionStatus.Status.Should().Be(TransactionStatus.StatusEnum.Succeeded);
+        payload.Transaction.PayloadHashHex.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+        payload.Transaction.IntentHashHex.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
+        payload.Transaction.TransactionAccumulatorHex.Length.Should().Be(NetworkGatewayConstants.Transaction.IdentifierHashLength);
     }
 
     [Fact]

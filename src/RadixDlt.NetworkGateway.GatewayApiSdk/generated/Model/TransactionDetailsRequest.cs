@@ -91,65 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// UnstakeTokensAllOf
+    /// TransactionDetailsRequest
     /// </summary>
-    [DataContract(Name = "UnstakeTokens_allOf")]
-    public partial class UnstakeTokensAllOf : IEquatable<UnstakeTokensAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionDetailsRequest")]
+    public partial class TransactionDetailsRequest : IEquatable<TransactionDetailsRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnstakeTokensAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected UnstakeTokensAllOf() { }
+        protected TransactionDetailsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnstakeTokensAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsRequest" /> class.
         /// </summary>
-        /// <param name="fromValidator">fromValidator (required).</param>
-        /// <param name="toAccount">toAccount (required).</param>
-        /// <param name="amount">amount.</param>
-        /// <param name="unstakePercentage">The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current active stake at the given LedgerState. To be explicit, the referenced active state does not include pending stake, pending unstake or locked unstake. .</param>
-        public UnstakeTokensAllOf(ValidatorIdentifier fromValidator = default(ValidatorIdentifier), AccountIdentifier toAccount = default(AccountIdentifier), TokenAmount amount = default(TokenAmount), decimal unstakePercentage = default(decimal))
+        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        public TransactionDetailsRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
-            // to ensure "fromValidator" is required (not null)
-            if (fromValidator == null)
+            // to ensure "transactionIdentifier" is required (not null)
+            if (transactionIdentifier == null)
             {
-                throw new ArgumentNullException("fromValidator is a required property for UnstakeTokensAllOf and cannot be null");
+                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionDetailsRequest and cannot be null");
             }
-            this.FromValidator = fromValidator;
-            // to ensure "toAccount" is required (not null)
-            if (toAccount == null)
-            {
-                throw new ArgumentNullException("toAccount is a required property for UnstakeTokensAllOf and cannot be null");
-            }
-            this.ToAccount = toAccount;
-            this.Amount = amount;
-            this.UnstakePercentage = unstakePercentage;
+            this.TransactionIdentifier = transactionIdentifier;
+            this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets FromValidator
+        /// Gets or Sets TransactionIdentifier
         /// </summary>
-        [DataMember(Name = "from_validator", IsRequired = true, EmitDefaultValue = true)]
-        public ValidatorIdentifier FromValidator { get; set; }
+        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
 
         /// <summary>
-        /// Gets or Sets ToAccount
+        /// Gets or Sets AtStateIdentifier
         /// </summary>
-        [DataMember(Name = "to_account", IsRequired = true, EmitDefaultValue = true)]
-        public AccountIdentifier ToAccount { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Amount
-        /// </summary>
-        [DataMember(Name = "amount", EmitDefaultValue = true)]
-        public TokenAmount Amount { get; set; }
-
-        /// <summary>
-        /// The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current active stake at the given LedgerState. To be explicit, the referenced active state does not include pending stake, pending unstake or locked unstake. 
-        /// </summary>
-        /// <value>The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current active stake at the given LedgerState. To be explicit, the referenced active state does not include pending stake, pending unstake or locked unstake. </value>
-        [DataMember(Name = "unstake_percentage", EmitDefaultValue = true)]
-        public decimal UnstakePercentage { get; set; }
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -158,11 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class UnstakeTokensAllOf {\n");
-            sb.Append("  FromValidator: ").Append(FromValidator).Append("\n");
-            sb.Append("  ToAccount: ").Append(ToAccount).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
-            sb.Append("  UnstakePercentage: ").Append(UnstakePercentage).Append("\n");
+            sb.Append("class TransactionDetailsRequest {\n");
+            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as UnstakeTokensAllOf);
+            return this.Equals(input as TransactionDetailsRequest);
         }
 
         /// <summary>
-        /// Returns true if UnstakeTokensAllOf instances are equal
+        /// Returns true if TransactionDetailsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of UnstakeTokensAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UnstakeTokensAllOf input)
+        public bool Equals(TransactionDetailsRequest input)
         {
             if (input == null)
             {
@@ -199,23 +175,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.FromValidator == input.FromValidator ||
-                    (this.FromValidator != null &&
-                    this.FromValidator.Equals(input.FromValidator))
+                    this.TransactionIdentifier == input.TransactionIdentifier ||
+                    (this.TransactionIdentifier != null &&
+                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
                 ) && 
                 (
-                    this.ToAccount == input.ToAccount ||
-                    (this.ToAccount != null &&
-                    this.ToAccount.Equals(input.ToAccount))
-                ) && 
-                (
-                    this.Amount == input.Amount ||
-                    (this.Amount != null &&
-                    this.Amount.Equals(input.Amount))
-                ) && 
-                (
-                    this.UnstakePercentage == input.UnstakePercentage ||
-                    this.UnstakePercentage.Equals(input.UnstakePercentage)
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -228,19 +195,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.FromValidator != null)
+                if (this.TransactionIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.FromValidator.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
                 }
-                if (this.ToAccount != null)
+                if (this.AtStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.ToAccount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
-                if (this.Amount != null)
-                {
-                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.UnstakePercentage.GetHashCode();
                 return hashCode;
             }
         }
@@ -252,18 +214,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // UnstakePercentage (decimal) maximum
-            if (this.UnstakePercentage > (decimal)100)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for UnstakePercentage, must be a value less than or equal to 100.", new [] { "UnstakePercentage" });
-            }
-
-            // UnstakePercentage (decimal) minimum
-            if (this.UnstakePercentage < (decimal)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for UnstakePercentage, must be a value greater than or equal to 0.", new [] { "UnstakePercentage" });
-            }
-
             yield break;
         }
     }

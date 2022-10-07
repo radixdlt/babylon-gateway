@@ -148,6 +148,9 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<MempoolTransactionFailureReason>()
             .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
+
+        configurationBuilder.Properties<LedgerTransactionStatus>()
+            .HaveConversion<LedgerTransactionStatusValueConverter>();
     }
 
     private static void HookupSingleEntries(ModelBuilder modelBuilder)
@@ -172,14 +175,14 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);
 
-        // Because ResultantStateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
+        // Because StateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
         // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")
         // This is a lighter (lossy) index where the indexed data is correlated with the linear order of the table
         // See also https://www.postgresql.org/docs/current/indexes-types.html
 
         // Fast filter for just user transactions
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.ResultantStateVersion })
+            .HasIndex(lt => lt.StateVersion)
             .IsUnique()
             .HasFilter("is_user_transaction = true")
             .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_user_transactions");

@@ -62,19 +62,11 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.Commons.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-
-public sealed class NotEnoughTokensForUnstakeException : ValidationException
+public enum LedgerTransactionStatus
 {
-    public NotEnoughTokensForUnstakeException(TokenAmount requestedAmount, AccountStakeEntry stake, AccountStakeEntry pendingStake)
-        : base(new NotEnoughTokensForUnstakeError(requestedAmount, stake, pendingStake), GetErrorMessage(requestedAmount, stake, pendingStake))
-    {
-    }
-
-    public static string GetErrorMessage(TokenAmount requestedAmount, AccountStakeEntry stake, AccountStakeEntry pendingStake)
-    {
-        return $"You requested to unstake {requestedAmount.AsXrdString()} but only have estimated {stake.DelegatedStake.AsXrdString()} staked. You also have {pendingStake.DelegatedStake.AsXrdString()} stake pending, which will be available to unstake at the end of the next epoch. Epochs last approx 30 minutes.";
-    }
+    Succeeded,
+    Failed,
+    Rejected,
 }

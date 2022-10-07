@@ -62,19 +62,22 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Model;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-public sealed class NotEnoughNativeTokensForFeeException : ValidationException
+internal class LedgerTransactionStatusValueConverter : EnumTypeValueConverterBase<LedgerTransactionStatus>
 {
-    public NotEnoughNativeTokensForFeeException(TokenAmount requiredAmount, TokenAmount availableAmount)
-        : base(new NotEnoughNativeTokensForFeesError(requiredAmount, availableAmount), GetErrorMessage(requiredAmount, availableAmount))
+    private static readonly Dictionary<LedgerTransactionStatus, string> _conversion = new()
     {
-    }
+        { LedgerTransactionStatus.Succeeded, "SUCCEEDED" },
+        { LedgerTransactionStatus.Failed, "FAILED" },
+        { LedgerTransactionStatus.Rejected, "REJECTED" },
+    };
 
-    public static string GetErrorMessage(TokenAmount requiredAmount, TokenAmount availableAmount)
+    public LedgerTransactionStatusValueConverter()
+        : base(_conversion, Invert(_conversion))
     {
-        return $"After any other transfers, the account needs {requiredAmount.AsXrdString()} for fees, but only has {availableAmount.AsXrdString()} available";
     }
 }

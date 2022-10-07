@@ -67,7 +67,6 @@ using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -121,12 +120,11 @@ public sealed class TransactionController : ControllerBase
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, false, token);
 
         if (committedTransaction != null)
         {
-            return new TransactionStatusResponse(ledgerState, committedTransaction);
+            return new TransactionStatusResponse(ledgerState, committedTransaction.Info);
         }
 
         var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(request.TransactionIdentifier, token);
@@ -136,9 +134,28 @@ public sealed class TransactionController : ControllerBase
             return new TransactionStatusResponse(ledgerState, mempoolTransaction);
         }
 
-        var tmp = new TransactionIdentifier("map TransactionLookupIdentifier to TransactionIdentifier or drop latter altogether"); // TODO fix me
+        throw new TransactionNotFoundException(request.TransactionIdentifier);
+    }
 
-        throw new TransactionNotFoundException(tmp);
+    [HttpPost("details")]
+    public async Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
+
+        if (committedTransaction != null)
+        {
+            return new TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
+        }
+
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(request.TransactionIdentifier, token);
+
+        if (mempoolTransaction != null)
+        {
+            return new TransactionDetailsResponse(ledgerState, mempoolTransaction);
+        }
+
+        throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
     // TODO decide how do we want to model /this endpoint in our OAS

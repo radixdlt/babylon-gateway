@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -72,6 +73,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
 {
     public static class DbSeedHelper
     {
+        public static readonly FakeClock Clock = new FakeClock(); // TODO we probably want to use specific time instant rather "now"
+
         public static readonly string NetworkName = "integrationtestsnet";
 
         public static readonly byte[] DefaultHash = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
@@ -104,26 +107,30 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
 
         private static List<LedgerTransaction> GetSeedingLedgerTransactions(RawTransaction rawTransaction)
         {
-            return new List<LedgerTransaction>()
+            return new List<LedgerTransaction>
             {
-                new LedgerTransaction(
-                    resultantStateVersion: 1,
-                    payloadHash: rawTransaction.TransactionPayloadHash,
-                    intentHash: DefaultHash,
-                    signedTransactionHash: DefaultHash,
-                    transactionAccumulator: DefaultHash,
-                    message: DefaultHash,
-                    feePaid: TokenAmount.Zero,
-                    epoch: 1,
-                    indexInEpoch: 0,
-                    roundInEpoch: 0,
-                    isStartOfEpoch: true,
-                    isStartOfRound: true,
-                    roundTimestamp: new FakeClock().UtcNow,
-                    createdTimestamp: new FakeClock().UtcNow,
-                    normalizedRoundTimestamp: new FakeClock().UtcNow)
+                new LedgerTransaction
                 {
-                     RawTransaction = rawTransaction,
+                    StateVersion = 1,
+                    Status = LedgerTransactionStatus.Succeeded,
+                    PayloadHash = rawTransaction.TransactionPayloadHash,
+                    IntentHash = DefaultHash,
+                    SignedTransactionHash = DefaultHash,
+                    TransactionAccumulator = DefaultHash,
+                    IsUserTransaction = false,
+                    Message = DefaultHash,
+                    FeePaid = TokenAmount.Zero,
+                    TipPaid = TokenAmount.Zero,
+                    Epoch = 1,
+                    IndexInEpoch = 0,
+                    RoundInEpoch = 0,
+                    IsStartOfEpoch = true,
+                    IsStartOfRound = true,
+                    RoundTimestamp = Clock.UtcNow,
+                    CreatedTimestamp = Clock.UtcNow,
+                    NormalizedRoundTimestamp = Clock.UtcNow,
+
+                    RawTransaction = rawTransaction,
                 },
             };
         }

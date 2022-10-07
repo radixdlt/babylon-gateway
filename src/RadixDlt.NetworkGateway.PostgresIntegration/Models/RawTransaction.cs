@@ -73,8 +73,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("raw_transactions")]
 internal class RawTransaction
 {
-    public RawTransaction(byte[] transactionPayloadHash, byte[] payload)
+    public RawTransaction(long stateVersion, byte[] transactionPayloadHash, byte[] payload)
     {
+        StateVersion = stateVersion;
         TransactionPayloadHash = transactionPayloadHash;
         Payload = payload;
     }
@@ -85,8 +86,11 @@ internal class RawTransaction
     }
 
     [Key]
-    [Column(name: "transaction_payload_hash")]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [Column("state_version")]
+    public long StateVersion { get; set; }
+
+    [Column("transaction_payload_hash")]
     public byte[] TransactionPayloadHash { get; set; }
 
     /// <summary>

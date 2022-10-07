@@ -91,40 +91,58 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// MessageTooLongErrorAllOf
+    /// TransactionDetails
     /// </summary>
-    [DataContract(Name = "MessageTooLongError_allOf")]
-    public partial class MessageTooLongErrorAllOf : IEquatable<MessageTooLongErrorAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionDetails")]
+    public partial class TransactionDetails : IEquatable<TransactionDetails>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageTooLongErrorAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected MessageTooLongErrorAllOf() { }
+        protected TransactionDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageTooLongErrorAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
         /// </summary>
-        /// <param name="lengthLimit">The maximum byte length of the message, as per current transaction rules. (required).</param>
-        /// <param name="attemptedLength">The byte length of the message in the transaction. (required).</param>
-        public MessageTooLongErrorAllOf(int lengthLimit = default(int), int attemptedLength = default(int))
+        /// <param name="rawHex">The raw transaction payload, hex encoded. (required).</param>
+        /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
+        /// <param name="messageHex">The message bytes, hex encoded..</param>
+        public TransactionDetails(string rawHex = default(string), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
         {
-            this.LengthLimit = lengthLimit;
-            this.AttemptedLength = attemptedLength;
+            // to ensure "rawHex" is required (not null)
+            if (rawHex == null)
+            {
+                throw new ArgumentNullException("rawHex is a required property for TransactionDetails and cannot be null");
+            }
+            this.RawHex = rawHex;
+            // to ensure "referencedGlobalEntities" is required (not null)
+            if (referencedGlobalEntities == null)
+            {
+                throw new ArgumentNullException("referencedGlobalEntities is a required property for TransactionDetails and cannot be null");
+            }
+            this.ReferencedGlobalEntities = referencedGlobalEntities;
+            this.MessageHex = messageHex;
         }
 
         /// <summary>
-        /// The maximum byte length of the message, as per current transaction rules.
+        /// The raw transaction payload, hex encoded.
         /// </summary>
-        /// <value>The maximum byte length of the message, as per current transaction rules.</value>
-        [DataMember(Name = "length_limit", IsRequired = true, EmitDefaultValue = true)]
-        public int LengthLimit { get; set; }
+        /// <value>The raw transaction payload, hex encoded.</value>
+        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string RawHex { get; set; }
 
         /// <summary>
-        /// The byte length of the message in the transaction.
+        /// Gets or Sets ReferencedGlobalEntities
         /// </summary>
-        /// <value>The byte length of the message in the transaction.</value>
-        [DataMember(Name = "attempted_length", IsRequired = true, EmitDefaultValue = true)]
-        public int AttemptedLength { get; set; }
+        [DataMember(Name = "referenced_global_entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> ReferencedGlobalEntities { get; set; }
+
+        /// <summary>
+        /// The message bytes, hex encoded.
+        /// </summary>
+        /// <value>The message bytes, hex encoded.</value>
+        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
+        public string MessageHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -133,9 +151,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class MessageTooLongErrorAllOf {\n");
-            sb.Append("  LengthLimit: ").Append(LengthLimit).Append("\n");
-            sb.Append("  AttemptedLength: ").Append(AttemptedLength).Append("\n");
+            sb.Append("class TransactionDetails {\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
+            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -156,15 +175,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as MessageTooLongErrorAllOf);
+            return this.Equals(input as TransactionDetails);
         }
 
         /// <summary>
-        /// Returns true if MessageTooLongErrorAllOf instances are equal
+        /// Returns true if TransactionDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of MessageTooLongErrorAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(MessageTooLongErrorAllOf input)
+        public bool Equals(TransactionDetails input)
         {
             if (input == null)
             {
@@ -172,12 +191,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LengthLimit == input.LengthLimit ||
-                    this.LengthLimit.Equals(input.LengthLimit)
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
-                    this.AttemptedLength == input.AttemptedLength ||
-                    this.AttemptedLength.Equals(input.AttemptedLength)
+                    this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
+                    this.ReferencedGlobalEntities != null &&
+                    input.ReferencedGlobalEntities != null &&
+                    this.ReferencedGlobalEntities.SequenceEqual(input.ReferencedGlobalEntities)
+                ) && 
+                (
+                    this.MessageHex == input.MessageHex ||
+                    (this.MessageHex != null &&
+                    this.MessageHex.Equals(input.MessageHex))
                 );
         }
 
@@ -190,8 +217,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.LengthLimit.GetHashCode();
-                hashCode = (hashCode * 59) + this.AttemptedLength.GetHashCode();
+                if (this.RawHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                }
+                if (this.ReferencedGlobalEntities != null)
+                {
+                    hashCode = (hashCode * 59) + this.ReferencedGlobalEntities.GetHashCode();
+                }
+                if (this.MessageHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

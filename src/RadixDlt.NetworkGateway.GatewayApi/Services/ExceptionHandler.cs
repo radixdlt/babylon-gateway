@@ -65,7 +65,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons.Exceptions;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
@@ -117,26 +116,26 @@ internal class ExceptionHandler : IExceptionHandler
     {
         switch (exception)
         {
-            case InvalidTransactionException invalidTransactionException:
-                var mappedCoreApiException = ExtractKnownGatewayExceptionFromWrappedCoreApiExceptionOrNull(invalidTransactionException.WrappedCoreApiException);
-                if (mappedCoreApiException != null)
-                {
-                    _logger.Log(
-                        _knownGatewayErrorLogLevel,
-                        mappedCoreApiException,
-                        "Recognised / mapped exception from upstream core API [RequestTrace={TraceId}]",
-                        traceId
-                    );
-                    return mappedCoreApiException;
-                }
-
-                _logger.Log(
-                    _knownGatewayErrorLogLevel,
-                    exception,
-                    "General invalid transaction exception [RequestTrace={TraceId}]",
-                    traceId
-                );
-                return invalidTransactionException;
+            // case InvalidTransactionException invalidTransactionException:
+            //     var mappedCoreApiException = ExtractKnownGatewayExceptionFromWrappedCoreApiExceptionOrNull(invalidTransactionException.WrappedCoreApiException);
+            //     if (mappedCoreApiException != null)
+            //     {
+            //         _logger.Log(
+            //             _knownGatewayErrorLogLevel,
+            //             mappedCoreApiException,
+            //             "Recognised / mapped exception from upstream core API [RequestTrace={TraceId}]",
+            //             traceId
+            //         );
+            //         return mappedCoreApiException;
+            //     }
+            //
+            //     _logger.Log(
+            //         _knownGatewayErrorLogLevel,
+            //         exception,
+            //         "General invalid transaction exception [RequestTrace={TraceId}]",
+            //         traceId
+            //     );
+            //     return invalidTransactionException;
 
             case KnownGatewayErrorException knownGatewayErrorException:
                 _logger.Log(

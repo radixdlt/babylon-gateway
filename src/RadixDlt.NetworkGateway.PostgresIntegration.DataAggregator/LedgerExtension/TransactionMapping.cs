@@ -62,9 +62,12 @@
  * permissions under this License.
  */
 
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -73,31 +76,42 @@ internal static class TransactionMapping
     public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
     {
         var (transaction, summary, _) = transactionData;
+        var feePaid = TokenAmount.FromSubUnitsString(transaction.Receipt.FeeSummary.XrdBurnedAttos);
+        var tipPaid = TokenAmount.FromSubUnitsString(transaction.Receipt.FeeSummary.XrdTippedAttos);
 
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // var fee = transaction.Metadata.Fee == null
-        //     ? TokenAmount.Zero
-        //     : TokenAmount.FromSubUnitsString(transaction.Metadata.Fee.Value);
-        var fee = TokenAmount.Zero;
-
-        return new LedgerTransaction(
-            resultantStateVersion: summary.StateVersion,
-            payloadHash: summary.PayloadHash,
-            intentHash: summary.IntentHash,
-            signedTransactionHash: summary.SignedTransactionHash,
-            transactionAccumulator: summary.TransactionAccumulator,
+        return new LedgerTransaction
+        {
+            StateVersion = summary.StateVersion,
+            Status = ToLedgerStatus(transaction.Receipt.Status),
+            PayloadHash = summary.PayloadHash,
+            IntentHash = summary.IntentHash,
+            SignedTransactionHash = summary.SignedTransactionHash,
+            TransactionAccumulator = summary.TransactionAccumulator,
+            IsUserTransaction = feePaid != TokenAmount.Zero,
             // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
             // message: transaction.Metadata.Message?.ConvertFromHex(),
-            message: null,
-            feePaid: fee,
-            epoch: summary.Epoch,
-            indexInEpoch: summary.IndexInEpoch,
-            roundInEpoch: summary.RoundInEpoch,
-            isStartOfEpoch: summary.IsStartOfEpoch,
-            isStartOfRound: summary.IsStartOfRound,
-            roundTimestamp: summary.RoundTimestamp,
-            createdTimestamp: summary.CreatedTimestamp,
-            normalizedRoundTimestamp: summary.NormalizedRoundTimestamp
-        );
+            Message = null,
+            FeePaid = feePaid,
+            TipPaid = tipPaid,
+            Epoch = summary.Epoch,
+            IndexInEpoch = summary.IndexInEpoch,
+            RoundInEpoch = summary.RoundInEpoch,
+            IsStartOfEpoch = summary.IsStartOfEpoch,
+            IsStartOfRound = summary.IsStartOfRound,
+            RoundTimestamp = summary.RoundTimestamp,
+            CreatedTimestamp = summary.CreatedTimestamp,
+            NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp,
+        };
+    }
+
+    private static LedgerTransactionStatus ToLedgerStatus(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
+            TransactionStatus.Failed => LedgerTransactionStatus.Failed,
+            TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
     }
 }

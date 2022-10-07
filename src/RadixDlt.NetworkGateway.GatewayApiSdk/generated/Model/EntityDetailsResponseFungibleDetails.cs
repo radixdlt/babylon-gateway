@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
@@ -92,56 +91,82 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TokenNotFoundError
+    /// EntityDetailsResponseFungibleDetails
     /// </summary>
-    [DataContract(Name = "TokenNotFoundError")]
-    [JsonConverter(typeof(JsonSubtypes), "Type")]
-    [JsonSubtypes.KnownSubType(typeof(BelowMinimumStakeError), "BelowMinimumStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(CannotStakeError), "CannotStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(CouldNotConstructFeesError), "CouldNotConstructFeesError")]
-    [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidAccountAddressError), "InvalidAccountAddressError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidActionError), "InvalidActionError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTokenRRIError), "InvalidTokenRRIError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTokenSymbolError), "InvalidTokenSymbolError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidValidatorAddressError), "InvalidValidatorAddressError")]
-    [JsonSubtypes.KnownSubType(typeof(MessageTooLongError), "MessageTooLongError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughNativeTokensForFeesError), "NotEnoughNativeTokensForFeesError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForStakeError), "NotEnoughTokensForStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForTransferError), "NotEnoughTokensForTransferError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForUnstakeError), "NotEnoughTokensForUnstakeError")]
-    [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
-    [JsonSubtypes.KnownSubType(typeof(TokenNotFoundError), "TokenNotFoundError")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class TokenNotFoundError : GatewayError, IEquatable<TokenNotFoundError>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseFungibleDetails")]
+    public partial class EntityDetailsResponseFungibleDetails : IEquatable<EntityDetailsResponseFungibleDetails>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenNotFoundError" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TokenNotFoundError() { }
+        protected EntityDetailsResponseFungibleDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenNotFoundError" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
         /// </summary>
-        /// <param name="tokenNotFound">tokenNotFound (required).</param>
-        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;TokenNotFoundError&quot;).</param>
-        public TokenNotFoundError(TokenIdentifier tokenNotFound = default(TokenIdentifier), string type = "TokenNotFoundError") : base(type)
+        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="isFungible">isFungible (required).</param>
+        /// <param name="totalSupplyAttos">totalSupplyAttos (required).</param>
+        /// <param name="totalMintedAttos">totalMintedAttos (required).</param>
+        /// <param name="totalBurntAttos">totalBurntAttos (required).</param>
+        public EntityDetailsResponseFungibleDetails(string resourceType = default(string), bool isFungible = default(bool), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
         {
-            // to ensure "tokenNotFound" is required (not null)
-            if (tokenNotFound == null)
+            // to ensure "resourceType" is required (not null)
+            if (resourceType == null)
             {
-                throw new ArgumentNullException("tokenNotFound is a required property for TokenNotFoundError and cannot be null");
+                throw new ArgumentNullException("resourceType is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
             }
-            this.TokenNotFound = tokenNotFound;
+            this.ResourceType = resourceType;
+            this.IsFungible = isFungible;
+            // to ensure "totalSupplyAttos" is required (not null)
+            if (totalSupplyAttos == null)
+            {
+                throw new ArgumentNullException("totalSupplyAttos is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+            }
+            this.TotalSupplyAttos = totalSupplyAttos;
+            // to ensure "totalMintedAttos" is required (not null)
+            if (totalMintedAttos == null)
+            {
+                throw new ArgumentNullException("totalMintedAttos is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+            }
+            this.TotalMintedAttos = totalMintedAttos;
+            // to ensure "totalBurntAttos" is required (not null)
+            if (totalBurntAttos == null)
+            {
+                throw new ArgumentNullException("totalBurntAttos is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+            }
+            this.TotalBurntAttos = totalBurntAttos;
         }
 
         /// <summary>
-        /// Gets or Sets TokenNotFound
+        /// Gets or Sets ResourceType
         /// </summary>
-        [DataMember(Name = "token_not_found", IsRequired = true, EmitDefaultValue = true)]
-        public TokenIdentifier TokenNotFound { get; set; }
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsFungible
+        /// </summary>
+        [DataMember(Name = "is_fungible", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsFungible { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TotalSupplyAttos
+        /// </summary>
+        [DataMember(Name = "total_supply_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupplyAttos { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TotalMintedAttos
+        /// </summary>
+        [DataMember(Name = "total_minted_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalMintedAttos { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TotalBurntAttos
+        /// </summary>
+        [DataMember(Name = "total_burnt_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalBurntAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -150,9 +175,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TokenNotFoundError {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  TokenNotFound: ").Append(TokenNotFound).Append("\n");
+            sb.Append("class EntityDetailsResponseFungibleDetails {\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  IsFungible: ").Append(IsFungible).Append("\n");
+            sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
+            sb.Append("  TotalMintedAttos: ").Append(TotalMintedAttos).Append("\n");
+            sb.Append("  TotalBurntAttos: ").Append(TotalBurntAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -161,7 +189,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -173,25 +201,44 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TokenNotFoundError);
+            return this.Equals(input as EntityDetailsResponseFungibleDetails);
         }
 
         /// <summary>
-        /// Returns true if TokenNotFoundError instances are equal
+        /// Returns true if EntityDetailsResponseFungibleDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of TokenNotFoundError to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseFungibleDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TokenNotFoundError input)
+        public bool Equals(EntityDetailsResponseFungibleDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.TokenNotFound == input.TokenNotFound ||
-                    (this.TokenNotFound != null &&
-                    this.TokenNotFound.Equals(input.TokenNotFound))
+                    this.ResourceType == input.ResourceType ||
+                    (this.ResourceType != null &&
+                    this.ResourceType.Equals(input.ResourceType))
+                ) && 
+                (
+                    this.IsFungible == input.IsFungible ||
+                    this.IsFungible.Equals(input.IsFungible)
+                ) && 
+                (
+                    this.TotalSupplyAttos == input.TotalSupplyAttos ||
+                    (this.TotalSupplyAttos != null &&
+                    this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
+                ) && 
+                (
+                    this.TotalMintedAttos == input.TotalMintedAttos ||
+                    (this.TotalMintedAttos != null &&
+                    this.TotalMintedAttos.Equals(input.TotalMintedAttos))
+                ) && 
+                (
+                    this.TotalBurntAttos == input.TotalBurntAttos ||
+                    (this.TotalBurntAttos != null &&
+                    this.TotalBurntAttos.Equals(input.TotalBurntAttos))
                 );
         }
 
@@ -203,10 +250,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.TokenNotFound != null)
+                int hashCode = 41;
+                if (this.ResourceType != null)
                 {
-                    hashCode = (hashCode * 59) + this.TokenNotFound.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.IsFungible.GetHashCode();
+                if (this.TotalSupplyAttos != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();
+                }
+                if (this.TotalMintedAttos != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalMintedAttos.GetHashCode();
+                }
+                if (this.TotalBurntAttos != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalBurntAttos.GetHashCode();
                 }
                 return hashCode;
             }
@@ -219,20 +279,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            return this.BaseValidate(validationContext);
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        protected IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> BaseValidate(ValidationContext validationContext)
-        {
-            foreach (var x in base.BaseValidate(validationContext))
-            {
-                yield return x;
-            }
             yield break;
         }
     }

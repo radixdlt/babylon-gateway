@@ -103,22 +103,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public enum StatusEnum
         {
             /// <summary>
-            /// Enum PENDING for value: PENDING
+            /// Enum Succeeded for value: succeeded
             /// </summary>
-            [EnumMember(Value = "PENDING")]
-            PENDING = 1,
+            [EnumMember(Value = "succeeded")]
+            Succeeded = 1,
 
             /// <summary>
-            /// Enum CONFIRMED for value: CONFIRMED
+            /// Enum Failed for value: failed
             /// </summary>
-            [EnumMember(Value = "CONFIRMED")]
-            CONFIRMED = 2,
+            [EnumMember(Value = "failed")]
+            Failed = 2,
 
             /// <summary>
-            /// Enum FAILED for value: FAILED
+            /// Enum Rejected for value: rejected
             /// </summary>
-            [EnumMember(Value = "FAILED")]
-            FAILED = 3
+            [EnumMember(Value = "rejected")]
+            Rejected = 3,
+
+            /// <summary>
+            /// Enum Pending for value: pending
+            /// </summary>
+            [EnumMember(Value = "pending")]
+            Pending = 4
 
         }
 
@@ -136,27 +142,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatus" /> class.
         /// </summary>
+        /// <param name="stateVersion">stateVersion.</param>
         /// <param name="status">status (required).</param>
         /// <param name="confirmedTime">confirmedTime.</param>
-        /// <param name="ledgerStateVersion">ledgerStateVersion.</param>
-        public TransactionStatus(StatusEnum status = default(StatusEnum), string confirmedTime = default(string), long ledgerStateVersion = default(long))
+        public TransactionStatus(long stateVersion = default(long), StatusEnum status = default(StatusEnum), DateTimeOffset? confirmedTime = default(DateTimeOffset?))
         {
             this.Status = status;
+            this.StateVersion = stateVersion;
             this.ConfirmedTime = confirmedTime;
-            this.LedgerStateVersion = ledgerStateVersion;
         }
+
+        /// <summary>
+        /// Gets or Sets StateVersion
+        /// </summary>
+        [DataMember(Name = "state_version", EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
         /// Gets or Sets ConfirmedTime
         /// </summary>
         [DataMember(Name = "confirmed_time", EmitDefaultValue = true)]
-        public string ConfirmedTime { get; set; }
-
-        /// <summary>
-        /// Gets or Sets LedgerStateVersion
-        /// </summary>
-        [DataMember(Name = "ledger_state_version", EmitDefaultValue = true)]
-        public long LedgerStateVersion { get; set; }
+        public DateTimeOffset? ConfirmedTime { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -166,9 +172,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatus {\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  ConfirmedTime: ").Append(ConfirmedTime).Append("\n");
-            sb.Append("  LedgerStateVersion: ").Append(LedgerStateVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -205,6 +211,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
+                ) && 
+                (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
                 ) && 
@@ -212,10 +222,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ConfirmedTime == input.ConfirmedTime ||
                     (this.ConfirmedTime != null &&
                     this.ConfirmedTime.Equals(input.ConfirmedTime))
-                ) && 
-                (
-                    this.LedgerStateVersion == input.LedgerStateVersion ||
-                    this.LedgerStateVersion.Equals(input.LedgerStateVersion)
                 );
         }
 
@@ -228,12 +234,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 if (this.ConfirmedTime != null)
                 {
                     hashCode = (hashCode * 59) + this.ConfirmedTime.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.LedgerStateVersion.GetHashCode();
                 return hashCode;
             }
         }

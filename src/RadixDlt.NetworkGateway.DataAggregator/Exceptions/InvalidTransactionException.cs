@@ -67,7 +67,7 @@ using System;
 namespace RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 
 public record struct TransactionOpLocator(
-    long ResultantStateVersion,
+    long StateVersion,
     string TransactionIdHash,
     int? OperationGroupIndex,
     int? OperationIndexInGroup
@@ -82,18 +82,18 @@ public sealed class InvalidTransactionException : Exception
         TransactionOpLocator transactionOpLocator,
         string message
     )
-        : this(transactionOpLocator.ResultantStateVersion, transactionOpLocator.TransactionIdHash, transactionOpLocator.OperationGroupIndex, transactionOpLocator.OperationIndexInGroup, message)
+        : this(transactionOpLocator.StateVersion, transactionOpLocator.TransactionIdHash, transactionOpLocator.OperationGroupIndex, transactionOpLocator.OperationIndexInGroup, message)
     {
     }
 
     private InvalidTransactionException(
-        long resultantStateVersion,
+        long stateVersion,
         string transactionIdHash,
         int? operationGroupIndex,
         int? operationIndexInGroup,
         string message
     )
-        : base($"[ResultantStateVersion={resultantStateVersion}, TransactionId={transactionIdHash}, OpGroupIndex={operationGroupIndex}, OpIndex={operationIndexInGroup}] {message}")
+        : base($"[StateVersion={stateVersion}, TransactionId={transactionIdHash}, OpGroupIndex={operationGroupIndex}, OpIndex={operationIndexInGroup}] {message}")
     {
     }
 }

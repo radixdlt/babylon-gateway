@@ -105,19 +105,6 @@ internal class TransactionBuilder
         _feePayer = feePayer;
     }
 
-    /// <summary>
-    /// Should only be called once per instance of TransactionBuilder.
-    /// </summary>
-    public async Task<MappedTransaction> MapAndValidateActions(List<Gateway.Action> requestActions, CancellationToken token = default)
-    {
-        // TODO - This will probably need to actually create and compile the manifest?
-        var fakeManifest = string.Join(", ", requestActions.Select(a => a.Type));
-
-        await Task.Delay(1, token); // Fix for compile warning in this placeholder method
-
-        return new MappedTransaction(fakeManifest, _feePayerBeforeBalances, _feePayerBalanceChanges);
-    }
-
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action, CancellationToken token = default)
     // {

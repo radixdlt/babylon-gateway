@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
@@ -92,69 +91,56 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// BelowMinimumStakeError
+    /// EntityDetailsResponseNonFungibleDetails
     /// </summary>
-    [DataContract(Name = "BelowMinimumStakeError")]
-    [JsonConverter(typeof(JsonSubtypes), "Type")]
-    [JsonSubtypes.KnownSubType(typeof(BelowMinimumStakeError), "BelowMinimumStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(CannotStakeError), "CannotStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(CouldNotConstructFeesError), "CouldNotConstructFeesError")]
-    [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidAccountAddressError), "InvalidAccountAddressError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidActionError), "InvalidActionError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTokenRRIError), "InvalidTokenRRIError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTokenSymbolError), "InvalidTokenSymbolError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidValidatorAddressError), "InvalidValidatorAddressError")]
-    [JsonSubtypes.KnownSubType(typeof(MessageTooLongError), "MessageTooLongError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughNativeTokensForFeesError), "NotEnoughNativeTokensForFeesError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForStakeError), "NotEnoughTokensForStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForTransferError), "NotEnoughTokensForTransferError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForUnstakeError), "NotEnoughTokensForUnstakeError")]
-    [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
-    [JsonSubtypes.KnownSubType(typeof(TokenNotFoundError), "TokenNotFoundError")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class BelowMinimumStakeError : GatewayError, IEquatable<BelowMinimumStakeError>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseNonFungibleDetails")]
+    public partial class EntityDetailsResponseNonFungibleDetails : IEquatable<EntityDetailsResponseNonFungibleDetails>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BelowMinimumStakeError" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected BelowMinimumStakeError() { }
+        protected EntityDetailsResponseNonFungibleDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="BelowMinimumStakeError" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
         /// </summary>
-        /// <param name="requestedAmount">requestedAmount (required).</param>
-        /// <param name="minimumAmount">minimumAmount (required).</param>
-        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;BelowMinimumStakeError&quot;).</param>
-        public BelowMinimumStakeError(TokenAmount requestedAmount = default(TokenAmount), TokenAmount minimumAmount = default(TokenAmount), string type = "BelowMinimumStakeError") : base(type)
+        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="isFungible">isFungible (required).</param>
+        /// <param name="tbd">tbd (required).</param>
+        public EntityDetailsResponseNonFungibleDetails(string resourceType = default(string), bool isFungible = default(bool), string tbd = default(string))
         {
-            // to ensure "requestedAmount" is required (not null)
-            if (requestedAmount == null)
+            // to ensure "resourceType" is required (not null)
+            if (resourceType == null)
             {
-                throw new ArgumentNullException("requestedAmount is a required property for BelowMinimumStakeError and cannot be null");
+                throw new ArgumentNullException("resourceType is a required property for EntityDetailsResponseNonFungibleDetails and cannot be null");
             }
-            this.RequestedAmount = requestedAmount;
-            // to ensure "minimumAmount" is required (not null)
-            if (minimumAmount == null)
+            this.ResourceType = resourceType;
+            this.IsFungible = isFungible;
+            // to ensure "tbd" is required (not null)
+            if (tbd == null)
             {
-                throw new ArgumentNullException("minimumAmount is a required property for BelowMinimumStakeError and cannot be null");
+                throw new ArgumentNullException("tbd is a required property for EntityDetailsResponseNonFungibleDetails and cannot be null");
             }
-            this.MinimumAmount = minimumAmount;
+            this.Tbd = tbd;
         }
 
         /// <summary>
-        /// Gets or Sets RequestedAmount
+        /// Gets or Sets ResourceType
         /// </summary>
-        [DataMember(Name = "requested_amount", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount RequestedAmount { get; set; }
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceType { get; set; }
 
         /// <summary>
-        /// Gets or Sets MinimumAmount
+        /// Gets or Sets IsFungible
         /// </summary>
-        [DataMember(Name = "minimum_amount", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount MinimumAmount { get; set; }
+        [DataMember(Name = "is_fungible", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsFungible { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Tbd
+        /// </summary>
+        [DataMember(Name = "tbd", IsRequired = true, EmitDefaultValue = true)]
+        public string Tbd { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -163,10 +149,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class BelowMinimumStakeError {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  RequestedAmount: ").Append(RequestedAmount).Append("\n");
-            sb.Append("  MinimumAmount: ").Append(MinimumAmount).Append("\n");
+            sb.Append("class EntityDetailsResponseNonFungibleDetails {\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  IsFungible: ").Append(IsFungible).Append("\n");
+            sb.Append("  Tbd: ").Append(Tbd).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,7 +161,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -187,30 +173,34 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as BelowMinimumStakeError);
+            return this.Equals(input as EntityDetailsResponseNonFungibleDetails);
         }
 
         /// <summary>
-        /// Returns true if BelowMinimumStakeError instances are equal
+        /// Returns true if EntityDetailsResponseNonFungibleDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of BelowMinimumStakeError to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseNonFungibleDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(BelowMinimumStakeError input)
+        public bool Equals(EntityDetailsResponseNonFungibleDetails input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.RequestedAmount == input.RequestedAmount ||
-                    (this.RequestedAmount != null &&
-                    this.RequestedAmount.Equals(input.RequestedAmount))
-                ) && base.Equals(input) && 
+                    this.ResourceType == input.ResourceType ||
+                    (this.ResourceType != null &&
+                    this.ResourceType.Equals(input.ResourceType))
+                ) && 
                 (
-                    this.MinimumAmount == input.MinimumAmount ||
-                    (this.MinimumAmount != null &&
-                    this.MinimumAmount.Equals(input.MinimumAmount))
+                    this.IsFungible == input.IsFungible ||
+                    this.IsFungible.Equals(input.IsFungible)
+                ) && 
+                (
+                    this.Tbd == input.Tbd ||
+                    (this.Tbd != null &&
+                    this.Tbd.Equals(input.Tbd))
                 );
         }
 
@@ -222,14 +212,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.RequestedAmount != null)
+                int hashCode = 41;
+                if (this.ResourceType != null)
                 {
-                    hashCode = (hashCode * 59) + this.RequestedAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
                 }
-                if (this.MinimumAmount != null)
+                hashCode = (hashCode * 59) + this.IsFungible.GetHashCode();
+                if (this.Tbd != null)
                 {
-                    hashCode = (hashCode * 59) + this.MinimumAmount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Tbd.GetHashCode();
                 }
                 return hashCode;
             }
@@ -242,20 +233,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            return this.BaseValidate(validationContext);
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        protected IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> BaseValidate(ValidationContext validationContext)
-        {
-            foreach (var x in base.BaseValidate(validationContext))
-            {
-                yield return x;
-            }
             yield break;
         }
     }

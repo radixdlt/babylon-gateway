@@ -62,19 +62,31 @@
  * permissions under this License.
  */
 
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
+namespace GatewayApi;
 
-public sealed class BelowMinimumStakeException : ValidationException
+[ApiController]
+[Route("")]
+public class RootController : ControllerBase
 {
-    public BelowMinimumStakeException(Gateway.TokenAmount requestedAmount, Gateway.TokenAmount minimumAmount)
-        : base(new Gateway.BelowMinimumStakeError(requestedAmount, minimumAmount), BuildErrorMessage(requestedAmount, minimumAmount))
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+
+    public RootController(ILedgerStateQuerier ledgerStateQuerier)
     {
+        _ledgerStateQuerier = ledgerStateQuerier;
     }
 
-    private static string BuildErrorMessage(Gateway.TokenAmount requestedAmount, Gateway.TokenAmount minimumAmount)
+    [HttpGet("")]
+    public async Task<IActionResult> GetRootResponse()
     {
-        return $"You must stake at least {minimumAmount.AsXrdString()} but you requested to stake {requestedAmount.AsXrdString()}";
+        return Ok(new
+        {
+            docs = "https://docs.radixdlt.com",
+            repo = "https://github.com/radixdlt/babylon-gateway",
+            gateway = await _ledgerStateQuerier.GetGatewayState(),
+        });
     }
 }

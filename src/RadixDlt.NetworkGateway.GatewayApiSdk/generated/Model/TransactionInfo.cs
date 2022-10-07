@@ -105,11 +105,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionInfo" /> class.
         /// </summary>
         /// <param name="transactionStatus">transactionStatus (required).</param>
-        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
-        /// <param name="actions">actions (required).</param>
+        /// <param name="payloadHashHex">payloadHashHex (required).</param>
+        /// <param name="intentHashHex">intentHashHex (required).</param>
+        /// <param name="transactionAccumulatorHex">transactionAccumulatorHex (required).</param>
         /// <param name="feePaid">feePaid (required).</param>
-        /// <param name="metadata">metadata (required).</param>
-        public TransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), TransactionIdentifier transactionIdentifier = default(TransactionIdentifier), List<Action> actions = default(List<Action>), TokenAmount feePaid = default(TokenAmount), TransactionMetadata metadata = default(TransactionMetadata))
+        public TransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string transactionAccumulatorHex = default(string), TokenAmount feePaid = default(TokenAmount))
         {
             // to ensure "transactionStatus" is required (not null)
             if (transactionStatus == null)
@@ -117,30 +117,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("transactionStatus is a required property for TransactionInfo and cannot be null");
             }
             this.TransactionStatus = transactionStatus;
-            // to ensure "transactionIdentifier" is required (not null)
-            if (transactionIdentifier == null)
+            // to ensure "payloadHashHex" is required (not null)
+            if (payloadHashHex == null)
             {
-                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionInfo and cannot be null");
+                throw new ArgumentNullException("payloadHashHex is a required property for TransactionInfo and cannot be null");
             }
-            this.TransactionIdentifier = transactionIdentifier;
-            // to ensure "actions" is required (not null)
-            if (actions == null)
+            this.PayloadHashHex = payloadHashHex;
+            // to ensure "intentHashHex" is required (not null)
+            if (intentHashHex == null)
             {
-                throw new ArgumentNullException("actions is a required property for TransactionInfo and cannot be null");
+                throw new ArgumentNullException("intentHashHex is a required property for TransactionInfo and cannot be null");
             }
-            this.Actions = actions;
+            this.IntentHashHex = intentHashHex;
+            // to ensure "transactionAccumulatorHex" is required (not null)
+            if (transactionAccumulatorHex == null)
+            {
+                throw new ArgumentNullException("transactionAccumulatorHex is a required property for TransactionInfo and cannot be null");
+            }
+            this.TransactionAccumulatorHex = transactionAccumulatorHex;
             // to ensure "feePaid" is required (not null)
             if (feePaid == null)
             {
                 throw new ArgumentNullException("feePaid is a required property for TransactionInfo and cannot be null");
             }
             this.FeePaid = feePaid;
-            // to ensure "metadata" is required (not null)
-            if (metadata == null)
-            {
-                throw new ArgumentNullException("metadata is a required property for TransactionInfo and cannot be null");
-            }
-            this.Metadata = metadata;
         }
 
         /// <summary>
@@ -150,28 +150,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TransactionStatus TransactionStatus { get; set; }
 
         /// <summary>
-        /// Gets or Sets TransactionIdentifier
+        /// Gets or Sets PayloadHashHex
         /// </summary>
-        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIdentifier TransactionIdentifier { get; set; }
+        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets Actions
+        /// Gets or Sets IntentHashHex
         /// </summary>
-        [DataMember(Name = "actions", IsRequired = true, EmitDefaultValue = true)]
-        public List<Action> Actions { get; set; }
+        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHashHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TransactionAccumulatorHex
+        /// </summary>
+        [DataMember(Name = "transaction_accumulator_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string TransactionAccumulatorHex { get; set; }
 
         /// <summary>
         /// Gets or Sets FeePaid
         /// </summary>
         [DataMember(Name = "fee_paid", IsRequired = true, EmitDefaultValue = true)]
         public TokenAmount FeePaid { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Metadata
-        /// </summary>
-        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionMetadata Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -182,10 +182,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionInfo {\n");
             sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
-            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
-            sb.Append("  Actions: ").Append(Actions).Append("\n");
+            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
+            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  TransactionAccumulatorHex: ").Append(TransactionAccumulatorHex).Append("\n");
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -227,25 +227,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.TransactionStatus.Equals(input.TransactionStatus))
                 ) && 
                 (
-                    this.TransactionIdentifier == input.TransactionIdentifier ||
-                    (this.TransactionIdentifier != null &&
-                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
+                    this.PayloadHashHex == input.PayloadHashHex ||
+                    (this.PayloadHashHex != null &&
+                    this.PayloadHashHex.Equals(input.PayloadHashHex))
                 ) && 
                 (
-                    this.Actions == input.Actions ||
-                    this.Actions != null &&
-                    input.Actions != null &&
-                    this.Actions.SequenceEqual(input.Actions)
+                    this.IntentHashHex == input.IntentHashHex ||
+                    (this.IntentHashHex != null &&
+                    this.IntentHashHex.Equals(input.IntentHashHex))
+                ) && 
+                (
+                    this.TransactionAccumulatorHex == input.TransactionAccumulatorHex ||
+                    (this.TransactionAccumulatorHex != null &&
+                    this.TransactionAccumulatorHex.Equals(input.TransactionAccumulatorHex))
                 ) && 
                 (
                     this.FeePaid == input.FeePaid ||
                     (this.FeePaid != null &&
                     this.FeePaid.Equals(input.FeePaid))
-                ) && 
-                (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
                 );
         }
 
@@ -262,21 +261,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
                 }
-                if (this.TransactionIdentifier != null)
+                if (this.PayloadHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
                 }
-                if (this.Actions != null)
+                if (this.IntentHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Actions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                }
+                if (this.TransactionAccumulatorHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.TransactionAccumulatorHex.GetHashCode();
                 }
                 if (this.FeePaid != null)
                 {
                     hashCode = (hashCode * 59) + this.FeePaid.GetHashCode();
-                }
-                if (this.Metadata != null)
-                {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

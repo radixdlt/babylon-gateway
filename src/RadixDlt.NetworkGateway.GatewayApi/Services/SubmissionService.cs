@@ -122,7 +122,7 @@ internal class SubmissionService : ISubmissionService
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 
-        var notarizedTransaction = request.NotarizedTransactionBytes;
+        var notarizedTransaction = request.NotarizedTransaction.ConvertFromHex();
 
         try
         {

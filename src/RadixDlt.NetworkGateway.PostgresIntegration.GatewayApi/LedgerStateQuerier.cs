@@ -118,7 +118,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             ),
             new LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
-                ledgerStatus.TopOfLedgerTransaction.ResultantStateVersion,
+                ledgerStatus.TopOfLedgerTransaction.StateVersion,
                 ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
@@ -358,7 +358,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         var lt = await query
             .Select(lt => new
             {
-                lt.ResultantStateVersion,
+                lt.StateVersion,
                 lt.RoundTimestamp,
                 lt.Epoch,
                 lt.RoundInEpoch,
@@ -368,7 +368,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return lt == null ? null : new LedgerStateReport(
             new LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
-                lt.ResultantStateVersion,
+                lt.StateVersion,
                 lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 lt.Epoch,
                 lt.RoundInEpoch
