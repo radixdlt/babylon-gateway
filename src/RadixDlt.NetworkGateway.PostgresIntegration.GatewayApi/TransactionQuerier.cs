@@ -319,7 +319,7 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         return new LookupResult(MapToGatewayAccountTransaction(ledgerTransaction), new Gateway.TransactionDetails(
             rawHex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
-            referencedEntities: referencedEntities.Select(re =>
+            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re =>
             {
                 // TODO ok, we definitely need some civilized way to do it time after time
                 var hrps = _networkConfigurationProvider.GetAddressHrps();
@@ -339,7 +339,7 @@ internal class TransactionQuerier : ITransactionQuerier
                     _ => throw new ArgumentOutOfRangeException(nameof(re)),
                 };
 
-                return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, re.Address);
+                return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, re.GlobalAddress!);
             }).ToList(),
             messageHex: ledgerTransaction.Message?.ToHex()
         ));

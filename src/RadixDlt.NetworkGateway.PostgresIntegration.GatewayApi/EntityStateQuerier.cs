@@ -197,6 +197,7 @@ INNER JOIN LATERAL (
         if (entity is ResourceManagerEntity rme)
         {
             // TODO how to detect between fungible and non-fun? Kind property or something?
+            // TODO current solution based on supplyHistory == null is just a dirty hack!
 
             var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
                 .Where(e => e.FromStateVersion <= ledgerState._Version && e.ResourceEntityId == rme.Id)
@@ -205,10 +206,20 @@ INNER JOIN LATERAL (
 
             if (supplyHistory == null)
             {
-                return null; // TODO handle somehow
+                details = new EntityDetailsResponseDetails(new EntityDetailsResponseNonFungibleDetails(
+                    resourceType: ResourceType.NonFungible.ToString(),
+                    isFungible: false,
+                    tbd: "unknown"));
             }
-
-            details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(supplyHistory.TotalSupply.ToString()));
+            else
+            {
+                details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(
+                    resourceType: ResourceType.Fungible.ToString(),
+                    isFungible: true,
+                    totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
+                    totalMintedAttos: supplyHistory.TotalMinted.ToString(),
+                    totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
+            }
         }
         else if (entity is ComponentEntity { Kind: "account" })
         {

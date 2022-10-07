@@ -105,8 +105,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="isFungible">isFungible (required).</param>
         /// <param name="tbd">tbd (required).</param>
-        public EntityDetailsResponseNonFungibleDetails(string resourceType = default(string), string tbd = default(string))
+        public EntityDetailsResponseNonFungibleDetails(string resourceType = default(string), bool isFungible = default(bool), string tbd = default(string))
         {
             // to ensure "resourceType" is required (not null)
             if (resourceType == null)
@@ -114,6 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("resourceType is a required property for EntityDetailsResponseNonFungibleDetails and cannot be null");
             }
             this.ResourceType = resourceType;
+            this.IsFungible = isFungible;
             // to ensure "tbd" is required (not null)
             if (tbd == null)
             {
@@ -127,6 +129,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceType { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsFungible
+        /// </summary>
+        [DataMember(Name = "is_fungible", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsFungible { get; set; }
 
         /// <summary>
         /// Gets or Sets Tbd
@@ -143,6 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseNonFungibleDetails {\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("  IsFungible: ").Append(IsFungible).Append("\n");
             sb.Append("  Tbd: ").Append(Tbd).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -185,6 +194,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ResourceType.Equals(input.ResourceType))
                 ) && 
                 (
+                    this.IsFungible == input.IsFungible ||
+                    this.IsFungible.Equals(input.IsFungible)
+                ) && 
+                (
                     this.Tbd == input.Tbd ||
                     (this.Tbd != null &&
                     this.Tbd.Equals(input.Tbd))
@@ -204,6 +217,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsFungible.GetHashCode();
                 if (this.Tbd != null)
                 {
                     hashCode = (hashCode * 59) + this.Tbd.GetHashCode();

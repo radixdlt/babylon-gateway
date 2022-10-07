@@ -361,7 +361,6 @@ components:
           discriminator:
             propertyName: resource_type
             mapping:
-              # NOTE: These need to match PublicKeyType
               fungible: "#/components/schemas/EntityDetailsResponseFungibleDetails"
               non_fungible: "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
     ResourceType:
@@ -373,20 +372,32 @@ components:
       type: object
       required:
         - resource_type
+        - is_fungible
         - total_supply_attos
+        - total_minted_attos
+        - total_burnt_attos
       properties:
         resource_type:
           type: string
+        is_fungible:
+          type: boolean
         total_supply_attos:
+          type: string
+        total_minted_attos:
+          type: string
+        total_burnt_attos:
           type: string
     EntityDetailsResponseNonFungibleDetails:
       type: object
       required:
         - resource_type
+        - is_fungible
         - tbd
       properties:
         resource_type:
           type: string
+        is_fungible:
+          type: boolean
         tbd:
           type: string
     RecentTransactionsRequest:
@@ -695,12 +706,12 @@ components:
       type: object
       required:
         - raw_hex
-        - referenced_entities
+        - referenced_global_entities
       properties:
         raw_hex:
           description: The raw transaction payload, hex encoded.
           type: string
-        referenced_entities:
+        referenced_global_entities:
           type: array
           items:
             type: string
