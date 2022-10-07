@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                 {
                     Id = 1,
                     TopOfLedgerStateVersion = 1,
-                    SyncTarget = new SyncTarget() { TargetStateVersion = 1 },
+                    TargetStateVersion = 1,
                     LastUpdated = new FakeClock().UtcNow,
                     TopOfLedgerTransaction = topTransaction,
                 },
@@ -157,9 +157,9 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                 new NetworkConfiguration()
                 {
                     Id = 1,
-                    NetworkDefinition = new NetworkDefinition() { NetworkName = NetworkName },
-                    NetworkAddressHrps = new NetworkAddressHrps() { AccountHrp = "ddx", ResourceHrpSuffix = "_dr", ValidatorHrp = "dv", NodeHrp = "dn" },
-                    WellKnownAddresses = new WellKnownAddresses() { XrdAddress = "xrd_dr1qyrs8qwl" },
+                    NetworkName = NetworkName,
+                    NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition() { AccountComponentHrp = "ddx", ResourceHrp = "_dr", ValidatorHrp = "dv", NodeHrp = "dn" },
+                    NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses() { XrdAddress = "xrd_dr1qyrs8qwl" },
                 },
             }.ToArray();
         }

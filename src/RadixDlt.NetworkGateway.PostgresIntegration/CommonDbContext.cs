@@ -116,7 +116,9 @@ internal abstract class CommonDbContext : DbContext
             .HasDiscriminator<string>("type")
             .HasValue<SystemEntity>("system")
             .HasValue<ResourceManagerEntity>("resource_manager")
-            .HasValue<ComponentEntity>("component")
+            .HasValue<NormalComponentEntity>("normal_component")
+            .HasValue<AccountComponentEntity>("account_component")
+            .HasValue<SystemComponentEntity>("system_component")
             .HasValue<PackageEntity>("package")
             .HasValue<ValueStoreEntity>("value_store")
             .HasValue<VaultEntity>("vault");

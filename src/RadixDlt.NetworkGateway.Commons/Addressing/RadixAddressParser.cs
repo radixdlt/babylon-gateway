@@ -88,7 +88,7 @@ public static class RadixAddressParser
     // }
 
     public static bool TryParse(
-        AddressHrps hrps,
+        HrpDefinition hrpDefinition,
         string address,
         [NotNullWhen(true)] out OlympiaRadixAddress? radixAddress,
         [NotNullWhen(false)] out string? errorMessage
@@ -96,7 +96,7 @@ public static class RadixAddressParser
     {
         try
         {
-            radixAddress = Parse(hrps, address);
+            radixAddress = Parse(hrpDefinition, address);
             errorMessage = null;
             return true;
         }
@@ -109,7 +109,7 @@ public static class RadixAddressParser
     }
 
     public static bool TryParseAccountAddress(
-        AddressHrps hrps,
+        HrpDefinition hrpDefinition,
         string address,
         [NotNullWhen(true)] out AccountAddress? accountAddress,
         [NotNullWhen(false)] out string? errorMessage
@@ -117,7 +117,7 @@ public static class RadixAddressParser
     {
         try
         {
-            accountAddress = ParseAccountAddress(hrps, address);
+            accountAddress = ParseAccountAddress(hrpDefinition, address);
             errorMessage = null;
             return true;
         }
@@ -130,7 +130,7 @@ public static class RadixAddressParser
     }
 
     public static bool TryParseValidatorAddress(
-        AddressHrps hrps,
+        HrpDefinition hrpDefinition,
         string address,
         [NotNullWhen(true)] out ValidatorAddress? validatorAddress,
         [NotNullWhen(false)] out string? errorMessage
@@ -138,7 +138,7 @@ public static class RadixAddressParser
     {
         try
         {
-            validatorAddress = ParseValidatorAddress(hrps, address);
+            validatorAddress = ParseValidatorAddress(hrpDefinition, address);
             errorMessage = null;
             return true;
         }
@@ -151,7 +151,7 @@ public static class RadixAddressParser
     }
 
     public static bool TryParseResourceAddress(
-        AddressHrps hrps,
+        HrpDefinition hrpDefinition,
         string address,
         [NotNullWhen(true)] out ResourceAddress? resourceAddress,
         [NotNullWhen(false)] out string? errorMessage
@@ -159,7 +159,7 @@ public static class RadixAddressParser
     {
         try
         {
-            resourceAddress = ParseResourceAddress(hrps, address);
+            resourceAddress = ParseResourceAddress(hrpDefinition, address);
             errorMessage = null;
             return true;
         }
@@ -171,74 +171,74 @@ public static class RadixAddressParser
         }
     }
 
-    private static AccountAddress ParseAccountAddress(AddressHrps hrps, string address)
+    private static AccountAddress ParseAccountAddress(HrpDefinition hrpDefinition, string address)
     {
         var (addressHrp, addressData, _) = RadixBech32.Decode(address);
 
-        if (addressHrp != hrps.AccountHrp)
+        if (addressHrp != hrpDefinition.AccountComponent)
         {
-            throw new AddressException($"Address HRP was {addressHrp} but didn't match account HRP {hrps.AccountHrp}");
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match account HRP {hrpDefinition.AccountComponent}");
         }
 
         return GetAccountAddressFromAddressData(addressData);
     }
 
-    private static ResourceAddress ParseResourceAddress(AddressHrps hrps, string address)
+    private static ResourceAddress ParseResourceAddress(HrpDefinition hrpDefinition, string address)
     {
         var (addressHrp, addressData, _) = RadixBech32.Decode(address);
 
-        if (!addressHrp.EndsWith(hrps.ResourceHrpSuffix))
+        if (!addressHrp.EndsWith(hrpDefinition.Resource))
         {
-            throw new AddressException($"Address HRP was {addressHrp} but didn't match end with resource HRP suffix {hrps.ResourceHrpSuffix}");
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match end with resource HRP suffix {hrpDefinition.Resource}");
         }
 
         return GetResourceAddressFromAddressData(addressData);
     }
 
-    private static ValidatorAddress ParseValidatorAddress(AddressHrps hrps, string address)
+    private static ValidatorAddress ParseValidatorAddress(HrpDefinition hrpDefinition, string address)
     {
         var (addressHrp, addressData, _) = RadixBech32.Decode(address);
 
-        if (addressHrp != hrps.ValidatorHrp)
+        if (addressHrp != hrpDefinition.Validator)
         {
-            throw new AddressException($"Address HRP was {addressHrp} but didn't match validator HRP {hrps.ValidatorHrp}");
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match validator HRP {hrpDefinition.Validator}");
         }
 
         return GetValidatorAddressFromAddressData(addressData);
     }
 
-    private static NodeAddress ParseNodeAddress(AddressHrps hrps, string address)
+    private static NodeAddress ParseNodeAddress(HrpDefinition hrpDefinition, string address)
     {
         var (addressHrp, addressData, _) = RadixBech32.Decode(address);
 
-        if (addressHrp != hrps.NodeHrp)
+        if (addressHrp != hrpDefinition.Node)
         {
-            throw new AddressException($"Address HRP was {addressHrp} but didn't match node HRP {hrps.NodeHrp}");
+            throw new AddressException($"Address HRP was {addressHrp} but didn't match node HRP {hrpDefinition.Node}");
         }
 
         return GetNodeAddressFromAddressData(addressData);
     }
 
-    private static OlympiaRadixAddress Parse(AddressHrps hrps, string address)
+    private static OlympiaRadixAddress Parse(HrpDefinition hrpDefinition, string address)
     {
         var (addressHrp, addressData, _) = RadixBech32.Decode(address);
 
-        if (addressHrp == hrps.AccountHrp)
+        if (addressHrp == hrpDefinition.AccountComponent)
         {
             return GetAccountAddressFromAddressData(addressData);
         }
 
-        if (addressHrp.EndsWith(hrps.ResourceHrpSuffix))
+        if (addressHrp.EndsWith(hrpDefinition.Resource))
         {
             return GetResourceAddressFromAddressData(addressData);
         }
 
-        if (addressHrp == hrps.ValidatorHrp)
+        if (addressHrp == hrpDefinition.Validator)
         {
             return GetValidatorAddressFromAddressData(addressData);
         }
 
-        if (addressHrp == hrps.NodeHrp)
+        if (addressHrp == hrpDefinition.Node)
         {
             return GetNodeAddressFromAddressData(addressData);
         }

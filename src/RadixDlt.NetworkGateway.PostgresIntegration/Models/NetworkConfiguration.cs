@@ -71,38 +71,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("network_configuration")]
 internal class NetworkConfiguration : SingleEntryBase
 {
-    // [Owned] below
-    public NetworkDefinition NetworkDefinition { get; set; }
+    [Column("network_name")]
+    public string NetworkName { get; set; }
 
     // [Owned] below
-    public NetworkAddressHrps NetworkAddressHrps { get; set; }
+    public NetworkConfigurationHrpDefinition NetworkConfigurationHrpDefinition { get; set; }
 
     // [Owned] below
-    public WellKnownAddresses WellKnownAddresses { get; set; }
+    public NetworkConfigurationWellKnownAddresses NetworkConfigurationWellKnownAddresses { get; set; }
 
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
-        return NetworkDefinition == other.NetworkDefinition
-               && NetworkAddressHrps == other.NetworkAddressHrps
-               && WellKnownAddresses == other.WellKnownAddresses;
+        return NetworkName == other.NetworkName
+               && NetworkConfigurationHrpDefinition == other.NetworkConfigurationHrpDefinition
+               && NetworkConfigurationWellKnownAddresses == other.NetworkConfigurationWellKnownAddresses;
     }
 }
 
 [Owned]
-public record NetworkDefinition
+internal class NetworkConfigurationHrpDefinition
 {
-    [Column("network_name")]
-    public string NetworkName { get; set; }
-}
+    [Column("package_hrp")]
+    public string PackageHrp { get; set; }
 
-[Owned]
-public record NetworkAddressHrps
-{
-    [Column("account_hrp")]
-    public string AccountHrp { get; set; }
+    [Column("normal_component_hrp")]
+    public string NormalComponentHrp { get; set; }
 
-    [Column("resource_hrp_suffix")]
-    public string ResourceHrpSuffix { get; set; }
+    [Column("account_component_hrp")]
+    public string AccountComponentHrp { get; set; }
+
+    [Column("system_component_hrp")]
+    public string SystemComponentHrp { get; set; }
+
+    [Column("resource_hrp")]
+    public string ResourceHrp { get; set; }
 
     [Column("validator_hrp")]
     public string ValidatorHrp { get; set; }
@@ -110,20 +112,18 @@ public record NetworkAddressHrps
     [Column("node_hrp")]
     public string NodeHrp { get; set; }
 
-    public AddressHrps ToAddressHrps()
+    public HrpDefinition CreateDefinition()
     {
-        return new AddressHrps(
-            AccountHrp,
-            ResourceHrpSuffix,
-            ValidatorHrp,
-            NodeHrp
-        );
+        return new HrpDefinition(PackageHrp, NormalComponentHrp, AccountComponentHrp, SystemComponentHrp, ResourceHrp, ValidatorHrp, NodeHrp);
     }
 }
 
 [Owned]
-public record WellKnownAddresses
+internal class NetworkConfigurationWellKnownAddresses
 {
     [Column("xrd_address")]
     public string XrdAddress { get; set; }
+
+    // TODO use RadixAddress over string?
+    // TODO add more? (account_package, faucet, ecdsa_*)
 }

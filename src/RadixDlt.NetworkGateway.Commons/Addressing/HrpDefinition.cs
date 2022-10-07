@@ -64,4 +64,12 @@
 
 namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
-public sealed record AddressHrps(string AccountHrp, string ResourceHrpSuffix, string ValidatorHrp, string NodeHrp);
+public sealed record HrpDefinition(
+    string Package,
+    string NormalComponent,
+    string AccountComponent,
+    string SystemComponent,
+    string Resource,
+    string Validator,
+    string Node
+);

@@ -65,7 +65,6 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.CoreApiSdk.Model;
@@ -74,7 +73,6 @@ using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.Commons.Utilities;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -90,7 +88,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class LedgerExtenderService : ILedgerExtenderService
 {
-    private readonly IOptionsMonitor<TransactionAssertionsOptions> _transactionAssertionsOptionsMonitor;
     private readonly ILogger<LedgerExtenderService> _logger;
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IRawTransactionWriter _rawTransactionWriter;
@@ -98,14 +95,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
     private readonly IClock _clock;
 
     public LedgerExtenderService(
-        IOptionsMonitor<TransactionAssertionsOptions> transactionAssertionsOptionsMonitor,
         ILogger<LedgerExtenderService> logger,
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IRawTransactionWriter rawTransactionWriter,
         INetworkConfigurationProvider networkConfigurationProvider,
         IClock clock)
     {
-        _transactionAssertionsOptionsMonitor = transactionAssertionsOptionsMonitor;
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _rawTransactionWriter = rawTransactionWriter;
@@ -116,17 +111,14 @@ internal class LedgerExtenderService : ILedgerExtenderService
     public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
         return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, _clock, token);
     }
 
-    public async Task<CommitTransactionsReport> CommitTransactions(
-        ConsistentLedgerExtension ledgerExtension,
-        SyncTargetCarrier latestSyncTarget,
-        CancellationToken token
-    )
+    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token)
     {
         var preparationReport = await PrepareForLedgerExtension(ledgerExtension, token);
-        var ledgerExtensionReport = await ExtendLedger(ledgerExtension, new SyncTarget { TargetStateVersion = latestSyncTarget.TargetStateVersion }, token);
+        var ledgerExtensionReport = await ExtendLedger(ledgerExtension, latestSyncTarget.TargetStateVersion, token);
         var processTransactionReport = ledgerExtensionReport.ProcessTransactionsReport;
 
         var dbEntriesWritten =
@@ -160,10 +152,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
     /// <summary>
     ///  This should be idempotent - ie can be repeated if the main commit task fails.
     /// </summary>
-    private async Task<PreparationForLedgerExtensionReport> PrepareForLedgerExtension(
-        ConsistentLedgerExtension ledgerExtension,
-        CancellationToken token
-    )
+    private async Task<PreparationForLedgerExtensionReport> PrepareForLedgerExtension(ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
@@ -210,6 +199,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
     private async Task EnsureDbLedgerIsInitialized(CancellationToken token)
     {
         var created = await _networkConfigurationProvider.SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(token);
+
         if (created)
         {
             _logger.LogInformation(
@@ -226,7 +216,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         long DbPersistenceMs
     );
 
-    private async Task<LedgerExtensionReport> ExtendLedger(ConsistentLedgerExtension ledgerExtension, SyncTarget latestSyncTarget, CancellationToken token)
+    private async Task<LedgerExtensionReport> ExtendLedger(ConsistentLedgerExtension ledgerExtension, long latestSyncTarget, CancellationToken token)
     {
         // Create own context for ledger extension unit of work
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
@@ -259,7 +249,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
     }
 
-    private record ProcessTransactionsReport(int RowsTouched, TimeSpan DbReadDuration, TimeSpan DbWriteDuration, TimeSpan ContentHandlingDuration);
+    private record ProcessTransactionsReport(
+        int RowsTouched,
+        TimeSpan DbReadDuration,
+        TimeSpan DbWriteDuration,
+        TimeSpan ContentHandlingDuration
+    );
 
     private async Task<ProcessTransactionsReport> ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
     {
@@ -283,8 +278,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
         var metadataChanges = new List<MetadataChange>();
         var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
-
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
+
         SequencesHolder sequences;
 
         // step: load current sequences
@@ -345,7 +340,8 @@ SELECT
                 foreach (var downSubstate in stateUpdates.DownSubstates)
                 {
                     var sid = downSubstate.SubstateId;
-                    var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
+
+                    referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
                 }
 
                 foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
@@ -357,19 +353,26 @@ SELECT
 
                 foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
                 {
-                    referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex, newGlobalEntity.GlobalAddress, _networkConfigurationProvider.GetAddressHrps());
+                    referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex, newGlobalEntity.GlobalAddress);
                 }
             }
         }
 
         // step: resolve known types & optionally create missing entities
         {
-            ComponentEntity CreateComponentEntity(ReferencedEntity re)
+            ComponentEntity CreateComponentEntity(ReferencedEntity re, HrpDefinition hrp)
             {
-                return new ComponentEntity
+                if (re.GlobalHrpAddress?.StartsWith(hrp.AccountComponent) == true)
                 {
-                    Kind = re.ComponentKind ?? "unknown", // TODO shouldn't we throw or something?
-                };
+                    return new AccountComponentEntity();
+                }
+
+                if (re.GlobalHrpAddress?.StartsWith(hrp.SystemComponent) == true)
+                {
+                    return new SystemComponentEntity();
+                }
+
+                return new NormalComponentEntity();
             }
 
             var entityAddresses = referencedEntities.Keys.Select(x => x.ConvertFromHex()).ToList();
@@ -405,11 +408,11 @@ WHERE id IN(
                 {
                     EntityType.System => new SystemEntity(),
                     EntityType.ResourceManager => new ResourceManagerEntity(),
-                    EntityType.Component => CreateComponentEntity(e),
+                    EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
                     EntityType.Package => new PackageEntity(),
                     EntityType.Vault => new VaultEntity(),
                     EntityType.KeyValueStore => new ValueStoreEntity(),
-                    _ => throw new Exception("bla bla bla x2"), // TODO fix me
+                    _ => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, null),
                 };
 
                 dbEntity.Id = sequences.NextEntity;
@@ -441,15 +444,16 @@ WHERE id IN(
 
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, parent_id, owner_ancestor_id, global_ancestor_id, type, kind) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, parent_id, owner_ancestor_id, global_ancestor_id, type) FROM STDIN (FORMAT BINARY)", token))
             {
                 // TODO ouh, we must somehow reuse information already held by EF
-
                 var typeMapping = new Dictionary<Type, string>
                 {
                     [typeof(SystemEntity)] = "system",
                     [typeof(ResourceManagerEntity)] = "resource_manager",
-                    [typeof(ComponentEntity)] = "component",
+                    [typeof(NormalComponentEntity)] = "normal_component",
+                    [typeof(AccountComponentEntity)] = "account_component",
+                    [typeof(SystemComponentEntity)] = "system_component",
                     [typeof(PackageEntity)] = "package",
                     [typeof(ValueStoreEntity)] = "value_store",
                     [typeof(VaultEntity)] = "vault",
@@ -466,15 +470,6 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity.OwnerAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(typeMapping[dbEntity.GetType()], NpgsqlDbType.Text, token);
-
-                    if (dbEntity is ComponentEntity ce)
-                    {
-                        await writer.WriteAsync(ce.Kind, NpgsqlDbType.Text, token);
-                    }
-                    else
-                    {
-                        await writer.WriteNullAsync(token);
-                    }
                 }
 
                 await writer.CompleteAsync(token);
@@ -885,7 +880,7 @@ SELECT
     private async Task CreateOrUpdateLedgerStatus(
         ReadWriteDbContext dbContext,
         TransactionSummary finalTransactionSummary,
-        SyncTarget latestSyncTarget,
+        long latestSyncTarget,
         CancellationToken token
     )
     {
@@ -899,6 +894,6 @@ SELECT
 
         ledgerStatus.LastUpdated = _clock.UtcNow;
         ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
-        ledgerStatus.SyncTarget = latestSyncTarget;
+        ledgerStatus.TargetStateVersion = latestSyncTarget;
     }
 }

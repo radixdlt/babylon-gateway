@@ -87,8 +87,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     parent_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    kind = table.Column<string>(type: "text", nullable: true)
+                    type = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -199,8 +198,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
                     network_name = table.Column<string>(type: "text", nullable: false),
-                    account_hrp = table.Column<string>(type: "text", nullable: false),
-                    resource_hrp_suffix = table.Column<string>(type: "text", nullable: false),
+                    package_hrp = table.Column<string>(type: "text", nullable: false),
+                    normal_component_hrp = table.Column<string>(type: "text", nullable: false),
+                    account_component_hrp = table.Column<string>(type: "text", nullable: false),
+                    system_component_hrp = table.Column<string>(type: "text", nullable: false),
+                    resource_hrp = table.Column<string>(type: "text", nullable: false),
                     validator_hrp = table.Column<string>(type: "text", nullable: false),
                     node_hrp = table.Column<string>(type: "text", nullable: false),
                     xrd_address = table.Column<string>(type: "text", nullable: false)

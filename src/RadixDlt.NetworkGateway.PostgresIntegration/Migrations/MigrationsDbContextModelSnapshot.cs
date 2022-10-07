@@ -300,6 +300,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_updated");
 
+                    b.Property<long>("TargetStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("sync_status_target_state_version");
+
                     b.Property<long>("TopOfLedgerStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("top_of_ledger_state_version");
@@ -518,6 +522,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<string>("NetworkName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("network_name");
+
                     b.HasKey("Id");
 
                     b.ToTable("network_configuration");
@@ -544,18 +553,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("raw_transactions");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<string>("Kind")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("kind");
-
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("component");
+                    b.HasDiscriminator().HasValue("account_component");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
@@ -590,6 +594,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("non_fungible");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NormalComponentEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("normal_component");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
@@ -606,6 +619,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("resource_manager");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemComponentEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("system_component");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemEntity", b =>
@@ -644,26 +666,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_ledger_status_top_transactions_state_version");
 
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.SyncTarget", "SyncTarget", b1 =>
-                        {
-                            b1.Property<int>("LedgerStatusId")
-                                .HasColumnType("integer");
-
-                            b1.Property<long>("TargetStateVersion")
-                                .HasColumnType("bigint")
-                                .HasColumnName("sync_status_target_state_version");
-
-                            b1.HasKey("LedgerStatusId");
-
-                            b1.ToTable("ledger_status");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LedgerStatusId");
-                        });
-
-                    b.Navigation("SyncTarget")
-                        .IsRequired();
-
                     b.Navigation("TopOfLedgerTransaction");
                 });
 
@@ -680,25 +682,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
                 {
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkAddressHrps", "NetworkAddressHrps", b1 =>
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfigurationHrpDefinition", "NetworkConfigurationHrpDefinition", b1 =>
                         {
                             b1.Property<int>("NetworkConfigurationId")
                                 .HasColumnType("integer");
 
-                            b1.Property<string>("AccountHrp")
+                            b1.Property<string>("AccountComponentHrp")
                                 .IsRequired()
                                 .HasColumnType("text")
-                                .HasColumnName("account_hrp");
+                                .HasColumnName("account_component_hrp");
 
                             b1.Property<string>("NodeHrp")
                                 .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("node_hrp");
 
-                            b1.Property<string>("ResourceHrpSuffix")
+                            b1.Property<string>("NormalComponentHrp")
                                 .IsRequired()
                                 .HasColumnType("text")
-                                .HasColumnName("resource_hrp_suffix");
+                                .HasColumnName("normal_component_hrp");
+
+                            b1.Property<string>("PackageHrp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("package_hrp");
+
+                            b1.Property<string>("ResourceHrp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("resource_hrp");
+
+                            b1.Property<string>("SystemComponentHrp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("system_component_hrp");
 
                             b1.Property<string>("ValidatorHrp")
                                 .IsRequired()
@@ -713,25 +730,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasForeignKey("NetworkConfigurationId");
                         });
 
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkDefinition", "NetworkDefinition", b1 =>
-                        {
-                            b1.Property<int>("NetworkConfigurationId")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("NetworkName")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("network_name");
-
-                            b1.HasKey("NetworkConfigurationId");
-
-                            b1.ToTable("network_configuration");
-
-                            b1.WithOwner()
-                                .HasForeignKey("NetworkConfigurationId");
-                        });
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.WellKnownAddresses", "WellKnownAddresses", b1 =>
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfigurationWellKnownAddresses", "NetworkConfigurationWellKnownAddresses", b1 =>
                         {
                             b1.Property<int>("NetworkConfigurationId")
                                 .HasColumnType("integer");
@@ -749,13 +748,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasForeignKey("NetworkConfigurationId");
                         });
 
-                    b.Navigation("NetworkAddressHrps")
+                    b.Navigation("NetworkConfigurationHrpDefinition")
                         .IsRequired();
 
-                    b.Navigation("NetworkDefinition")
-                        .IsRequired();
-
-                    b.Navigation("WellKnownAddresses")
+                    b.Navigation("NetworkConfigurationWellKnownAddresses")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

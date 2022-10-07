@@ -319,28 +319,7 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         return new LookupResult(MapToGatewayAccountTransaction(ledgerTransaction), new Gateway.TransactionDetails(
             rawHex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
-            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re =>
-            {
-                // TODO ok, we definitely need some civilized way to do it time after time
-                var hrps = _networkConfigurationProvider.GetAddressHrps();
-                var hrp = re switch
-                {
-                    ComponentEntity ce => ce.Kind switch
-                    {
-                        "account" => hrps.AccountHrp,
-                        "validator" => hrps.ValidatorHrp,
-                        _ => "unknown", // TODO fix me
-                    },
-                    PackageEntity => _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix,
-                    ResourceManagerEntity => hrps.ResourceHrpSuffix,
-                    SystemEntity => "unknown", // TODO fix me
-                    ValueStoreEntity => "unknown", // TODO fix me
-                    VaultEntity => "unknown", // TODO fix me
-                    _ => throw new ArgumentOutOfRangeException(nameof(re)),
-                };
-
-                return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, re.GlobalAddress!);
-            }).ToList(),
+            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.HrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
             messageHex: ledgerTransaction.Message?.ToHex()
         ));
     }

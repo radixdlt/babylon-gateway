@@ -64,6 +64,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Commons.Addressing;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -95,6 +97,31 @@ internal abstract class Entity
 
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
+
+    public string HrpAddress(HrpDefinition hrp)
+    {
+        return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, SelectHrp(hrp), Address);
+    }
+
+    public string? HrpGlobalAddress(HrpDefinition hrp)
+    {
+        return GlobalAddress == null
+            ? null
+            : RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, SelectHrp(hrp), Address);
+    }
+
+    private string SelectHrp(HrpDefinition hrp)
+    {
+        return this switch
+        {
+            PackageEntity => hrp.Package,
+            NormalComponentEntity => hrp.NormalComponent,
+            AccountComponentEntity => hrp.AccountComponent,
+            SystemComponentEntity => hrp.SystemComponent,
+            ResourceManagerEntity => hrp.Resource,
+            _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
+        };
+    }
 }
 
 internal class SystemEntity : Entity
@@ -105,10 +132,20 @@ internal class ResourceManagerEntity : Entity
 {
 }
 
-internal class ComponentEntity : Entity
+internal abstract class ComponentEntity : Entity
 {
-    [Column("kind")]
-    public string Kind { get; set; } // TODO rename
+}
+
+internal class NormalComponentEntity : ComponentEntity
+{
+}
+
+internal class AccountComponentEntity : ComponentEntity
+{
+}
+
+internal class SystemComponentEntity : ComponentEntity
+{
 }
 
 internal class PackageEntity : Entity
