@@ -78,6 +78,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -182,6 +183,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
 
         var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
+            td.TransactionSummary.StateVersion,
             td.TransactionSummary.PayloadHash,
             td.TransactionContents
         )).ToList();
@@ -362,22 +364,26 @@ SELECT
 
             var sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, payload_hash, intent_hash, signed_hash, transaction_accumulator, message, fee_paid, epoch, index_in_epoch, round_in_epoch, is_user_transaction, is_start_of_epoch, is_start_of_round, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, payload_hash, intent_hash, signed_hash, transaction_accumulator, is_user_transaction, message, fee_paid, tip_paid, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
             {
+                var statusConverter = new LedgerTransactionStatusValueConverter().ConvertToProvider;
+
                 foreach (var lt in ledgerTransactions)
                 {
                     await writer.StartRowAsync(token);
-                    await writer.WriteAsync(lt.ResultantStateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(statusConverter(lt.Status), NpgsqlDbType.Text, token);
                     await writer.WriteAsync(lt.PayloadHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.IntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.SignedTransactionHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
                     await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
                     await writer.WriteAsync(lt.IsStartOfEpoch, NpgsqlDbType.Boolean, token);
                     await writer.WriteAsync(lt.IsStartOfRound, NpgsqlDbType.Boolean, token);
                     await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);

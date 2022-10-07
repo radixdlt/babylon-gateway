@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221003104313_InitialCreate")]
+    [Migration("20221007084149_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -315,7 +315,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
                 {
-                    b.Property<long>("ResultantStateVersion")
+                    b.Property<long>("StateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
@@ -379,12 +379,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("signed_hash");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<BigInteger>("TipPaid")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("tip_paid");
+
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_accumulator");
 
-                    b.HasKey("ResultantStateVersion");
+                    b.HasKey("StateVersion");
 
                     b.HasAlternateKey("IntentHash");
 
@@ -399,13 +409,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasDatabaseName("IX_ledger_transaction_epoch_starts")
                         .HasFilter("is_start_of_epoch = true");
 
-                    b.HasIndex("ResultantStateVersion")
+                    b.HasIndex("RoundTimestamp")
+                        .HasDatabaseName("IX_ledger_transaction_round_timestamp");
+
+                    b.HasIndex("StateVersion")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_user_transactions")
                         .HasFilter("is_user_transaction = true");
-
-                    b.HasIndex("RoundTimestamp")
-                        .HasDatabaseName("IX_ledger_transaction_round_timestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
@@ -512,16 +522,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", b =>
                 {
-                    b.Property<byte[]>("TransactionPayloadHash")
-                        .HasColumnType("bytea")
-                        .HasColumnName("transaction_payload_hash");
+                    b.Property<long>("StateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
 
                     b.Property<byte[]>("Payload")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("payload");
 
-                    b.HasKey("TransactionPayloadHash");
+                    b.Property<byte[]>("TransactionPayloadHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("transaction_payload_hash");
+
+                    b.HasKey("StateVersion");
 
                     b.ToTable("raw_transactions");
                 });
@@ -653,7 +668,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", "RawTransaction")
                         .WithMany()
-                        .HasForeignKey("PayloadHash")
+                        .HasForeignKey("StateVersion")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -134,7 +134,7 @@ internal class TransactionQuerier : ITransactionQuerier
         CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
-        var query = _dbContext.LedgerTransactions.Where(lt => lt.ResultantStateVersion <= ledgerState._Version);
+        var query = _dbContext.LedgerTransactions.Where(lt => lt.StateVersion <= ledgerState._Version);
 
         switch (lookup.Origin)
         {
@@ -154,7 +154,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         var stateVersion = await query
-            .Select(lt => lt.ResultantStateVersion)
+            .Select(lt => lt.StateVersion)
             .SingleOrDefaultAsync(token);
 
         return stateVersion == 0
@@ -240,13 +240,13 @@ internal class TransactionQuerier : ITransactionQuerier
 
             return await _dbContext.LedgerTransactions
                 .Where(lt =>
-                    lt.ResultantStateVersion >= bottomStateVersionBoundary && lt.ResultantStateVersion <= topStateVersionBoundary
+                    lt.StateVersion >= bottomStateVersionBoundary && lt.StateVersion <= topStateVersionBoundary
                     && !lt.IsStartOfEpoch
                     && !lt.IsStartOfRound
                 )
-                .OrderBy(at => at.ResultantStateVersion)
+                .OrderBy(at => at.StateVersion)
                 .Take(request.PageSize + 1)
-                .Select(at => at.ResultantStateVersion)
+                .Select(at => at.StateVersion)
                 .ToListAsync(token);
         }
         else
@@ -255,12 +255,12 @@ internal class TransactionQuerier : ITransactionQuerier
 
             return await _dbContext.LedgerTransactions
                 .Where(lt =>
-                    lt.ResultantStateVersion <= topStateVersionBoundary
+                    lt.StateVersion <= topStateVersionBoundary
                     && lt.IsUserTransaction
                 )
-                .OrderByDescending(at => at.ResultantStateVersion)
+                .OrderByDescending(at => at.StateVersion)
                 .Take(request.PageSize + 1)
-                .Select(at => at.ResultantStateVersion)
+                .Select(at => at.StateVersion)
                 .ToListAsync(token);
         }
     }
@@ -276,19 +276,13 @@ internal class TransactionQuerier : ITransactionQuerier
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
     {
         var transactions = await _dbContext.LedgerTransactions
-            .Where(lt => transactionStateVersions.Contains(lt.ResultantStateVersion))
+            .Where(lt => transactionStateVersions.Contains(lt.StateVersion))
             .Include(lt => lt.RawTransaction)
-            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .OrderByDescending(lt => lt.StateVersion)
             .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
             .ToListAsync(token);
 
-        var gatewayTransactions = new List<Gateway.TransactionInfo>();
-        foreach (var ledgerTransaction in transactions)
-        {
-            gatewayTransactions.Add(MapToGatewayAccountTransaction(ledgerTransaction));
-        }
-
-        return gatewayTransactions;
+        return transactions.Select(MapToGatewayAccountTransaction).ToList();
     }
 
     private Gateway.TransactionInfo MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
@@ -297,9 +291,9 @@ internal class TransactionQuerier : ITransactionQuerier
             new Gateway.TransactionStatus(
                 Gateway.TransactionStatus.StatusEnum.CONFIRMED,
                 confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-                ledgerStateVersion: ledgerTransaction.ResultantStateVersion
+                ledgerStateVersion: ledgerTransaction.StateVersion
             ),
-            new Gateway.TransactionIdentifier(ledgerTransaction.PayloadHash.ToHex()), // TODO invalid one, fix me
+            new Gateway.TransactionIdentifier(ledgerTransaction.IntentHash.ToHex()), // TODO invalid one, fix me
             new List<Gateway.Action>(), // TODO: Remove
             ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
             new Gateway.TransactionMetadata(

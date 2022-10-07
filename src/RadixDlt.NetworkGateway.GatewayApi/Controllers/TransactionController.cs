@@ -67,7 +67,6 @@ using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -121,7 +120,6 @@ public sealed class TransactionController : ControllerBase
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, token);
 
         if (committedTransaction != null)

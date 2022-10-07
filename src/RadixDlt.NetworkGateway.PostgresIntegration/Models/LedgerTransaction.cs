@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -79,90 +80,69 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 // OnModelCreating: We also define a composite index on (Epoch, StartOfRound [Not Null]) - to easily query when rounds happened.
 internal class LedgerTransaction
 {
-    public LedgerTransaction(long resultantStateVersion, byte[] payloadHash, byte[] intentHash, byte[] signedTransactionHash, byte[] transactionAccumulator, byte[]? message, TokenAmount feePaid, long epoch, long indexInEpoch, long roundInEpoch, bool isStartOfEpoch, bool isStartOfRound, DateTimeOffset roundTimestamp, DateTimeOffset createdTimestamp, DateTimeOffset normalizedRoundTimestamp)
-    {
-        ResultantStateVersion = resultantStateVersion;
-        PayloadHash = payloadHash;
-        IntentHash = intentHash;
-        SignedTransactionHash = signedTransactionHash;
-        TransactionAccumulator = transactionAccumulator;
-        Message = message;
-        FeePaid = feePaid;
-        Epoch = epoch;
-        IndexInEpoch = indexInEpoch;
-        RoundInEpoch = roundInEpoch;
-        IsUserTransaction = feePaid.IsZero();
-        IsStartOfEpoch = isStartOfEpoch;
-        IsStartOfRound = isStartOfRound;
-        RoundTimestamp = roundTimestamp;
-        CreatedTimestamp = createdTimestamp;
-        NormalizedRoundTimestamp = normalizedRoundTimestamp;
-    }
-
-    private LedgerTransaction()
-    {
-    }
-
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    [Column(name: "state_version")]
-    public long ResultantStateVersion { get; set; }
+    [Column("state_version")]
+    public long StateVersion { get; set; }
+
+    [Column("status")]
+    public LedgerTransactionStatus Status { get; set; }
 
     /// <summary>
     /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
     /// This shouldn't be used for user transaction tracking, because it could be mutated in transit.
     /// The intent hash should be used for tracking of user transactions.
     /// </summary>
-    [Column(name: "payload_hash")]
+    [Column("payload_hash")]
     // OnModelCreating: Also defined as an alternate key
     public byte[] PayloadHash { get; set; }
 
     /// <summary>
     /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
     /// </summary>
-    [Column(name: "intent_hash")]
+    [Column("intent_hash")]
     // OnModelCreating: Also defined as an alternate key
     public byte[] IntentHash { get; set; }
 
     /// <summary>
     /// The hash of the signed transaction, which is what the notary signs.
     /// </summary>
-    [Column(name: "signed_hash")]
+    [Column("signed_hash")]
     // OnModelCreating: Also defined as an alternate key
     public byte[] SignedTransactionHash { get; set; }
 
-    [ForeignKey(nameof(PayloadHash))]
-    public RawTransaction? RawTransaction { get; set; }
-
-    [Column(name: "transaction_accumulator")]
+    [Column("transaction_accumulator")]
     // OnModelCreating: Also defined as an alternate key
     public byte[] TransactionAccumulator { get; set; }
 
-    [Column(name: "message")]
+    /// <summary>
+    /// Currently equivalent to FeePaid != 0, but easier to filter on.
+    /// </summary>
+    [Column("is_user_transaction")]
+    public bool IsUserTransaction { get; set; }
+
+    [Column("message")]
     public byte[]? Message { get; set; }
 
     [Column("fee_paid")]
     public TokenAmount FeePaid { get; set; }
 
-    [Column(name: "epoch")]
+    [Column("tip_paid")]
+    public TokenAmount TipPaid { get; set; }
+
+    [Column("epoch")]
     public long Epoch { get; set; }
 
-    [Column(name: "index_in_epoch")]
+    [Column("index_in_epoch")]
     public long IndexInEpoch { get; set; }
 
-    [Column(name: "round_in_epoch")]
+    [Column("round_in_epoch")]
     public long RoundInEpoch { get; set; }
 
-    /// <summary>
-    /// Currently equivalent to FeePaid = 0, but easier to filter on.
-    /// </summary>
-    [Column(name: "is_user_transaction")]
-    public bool IsUserTransaction { get; set; }
-
-    [Column(name: "is_start_of_epoch")]
+    [Column("is_start_of_epoch")]
     public bool IsStartOfEpoch { get; set; }
 
-    [Column(name: "is_start_of_round")]
+    [Column("is_start_of_round")]
     public bool IsStartOfRound { get; set; }
 
     /// <summary>
@@ -170,13 +150,13 @@ internal class LedgerTransaction
     /// votes on the vertex's QC to its parent vertex. These votes come from a subset of validators performing
     /// consensus. As a consequence of this, the round timestamp is not guaranteed to be increasing.
     /// </summary>
-    [Column(name: "round_timestamp")]
+    [Column("round_timestamp")]
     public DateTimeOffset RoundTimestamp { get; set; }
 
     /// <summary>
     /// The time of the DataAggregator server when the LedgerTransaction was added to the service.
     /// </summary>
-    [Column(name: "created_timestamp")]
+    [Column("created_timestamp")]
     public DateTimeOffset CreatedTimestamp { get; set; }
 
     /// <summary>
@@ -184,8 +164,11 @@ internal class LedgerTransaction
     /// It calculates itself by clamping RoundTimestamp between the previous NormalizedTimestamp and CreatedTimestamp.
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
-    [Column(name: "normalized_timestamp")]
+    [Column("normalized_timestamp")]
     public DateTimeOffset NormalizedRoundTimestamp { get; set; }
+
+    [ForeignKey(nameof(StateVersion))]
+    public RawTransaction? RawTransaction { get; set; }
 
     public bool IsSystemTransaction => !IsUserTransaction;
 }

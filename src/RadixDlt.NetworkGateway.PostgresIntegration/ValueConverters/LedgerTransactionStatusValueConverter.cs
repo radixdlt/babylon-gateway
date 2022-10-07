@@ -62,74 +62,22 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
-using System.Linq;
+using RadixDlt.NetworkGateway.Commons.Model;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-internal static class DbQueryExtensions
+internal class LedgerTransactionStatusValueConverter : EnumTypeValueConverterBase<LedgerTransactionStatus>
 {
-    public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
-        where TDbContext : CommonDbContext
+    private static readonly Dictionary<LedgerTransactionStatus, string> _conversion = new()
     {
-        return dbContext.LedgerStatus
-            .Select(lt => lt.TopOfLedgerTransaction);
-    }
+        { LedgerTransactionStatus.Succeeded, "SUCCEEDED" },
+        { LedgerTransactionStatus.Failed, "FAILED" },
+        { LedgerTransactionStatus.Rejected, "REJECTED" },
+    };
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeStateVersion<TDbContext>(this TDbContext dbContext, long beforeStateVersion)
-        where TDbContext : CommonDbContext
+    public LedgerTransactionStatusValueConverter()
+        : base(_conversion, Invert(_conversion))
     {
-        return dbContext.LedgerTransactions
-            .Where(lt => lt.StateVersion <= beforeStateVersion)
-            .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterStateVersion<TDbContext>(this TDbContext dbContext, long afterStateVersion)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.LedgerTransactions
-            .Where(lt => lt.StateVersion >= afterStateVersion)
-            .OrderBy(lt => lt.StateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.LedgerTransactions
-            .Where(lt => lt.RoundTimestamp <= timestamp)
-            .OrderByDescending(lt => lt.RoundTimestamp)
-            .ThenByDescending(lt => lt.StateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.LedgerTransactions
-            .Where(lt => lt.RoundTimestamp >= timestamp)
-            .OrderBy(lt => lt.RoundTimestamp)
-            .ThenBy(lt => lt.StateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.LedgerTransactions
-            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch <= round && lt.IsStartOfRound)
-            .OrderByDescending(lt => lt.StateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAtEpochRound<TDbContext>(this TDbContext dbContext, long epoch, long round)
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.LedgerTransactions
-            .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IsStartOfRound)
-            .OrderBy(lt => lt.StateVersion)
-            .Take(1);
     }
 }
