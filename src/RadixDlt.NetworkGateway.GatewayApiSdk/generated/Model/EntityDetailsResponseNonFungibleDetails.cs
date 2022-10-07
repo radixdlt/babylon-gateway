@@ -104,9 +104,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
         /// </summary>
+        /// <param name="resourceType">resourceType (required).</param>
         /// <param name="tbd">tbd (required).</param>
-        public EntityDetailsResponseNonFungibleDetails(string tbd = default(string))
+        public EntityDetailsResponseNonFungibleDetails(string resourceType = default(string), string tbd = default(string))
         {
+            // to ensure "resourceType" is required (not null)
+            if (resourceType == null)
+            {
+                throw new ArgumentNullException("resourceType is a required property for EntityDetailsResponseNonFungibleDetails and cannot be null");
+            }
+            this.ResourceType = resourceType;
             // to ensure "tbd" is required (not null)
             if (tbd == null)
             {
@@ -114,6 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Tbd = tbd;
         }
+
+        /// <summary>
+        /// Gets or Sets ResourceType
+        /// </summary>
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceType { get; set; }
 
         /// <summary>
         /// Gets or Sets Tbd
@@ -129,6 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseNonFungibleDetails {\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  Tbd: ").Append(Tbd).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -166,6 +180,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.ResourceType == input.ResourceType ||
+                    (this.ResourceType != null &&
+                    this.ResourceType.Equals(input.ResourceType))
+                ) && 
+                (
                     this.Tbd == input.Tbd ||
                     (this.Tbd != null &&
                     this.Tbd.Equals(input.Tbd))
@@ -181,6 +200,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.ResourceType != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                }
                 if (this.Tbd != null)
                 {
                     hashCode = (hashCode * 59) + this.Tbd.GetHashCode();

@@ -104,9 +104,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
         /// </summary>
+        /// <param name="resourceType">resourceType (required).</param>
         /// <param name="totalSupplyAttos">totalSupplyAttos (required).</param>
-        public EntityDetailsResponseFungibleDetails(string totalSupplyAttos = default(string))
+        public EntityDetailsResponseFungibleDetails(string resourceType = default(string), string totalSupplyAttos = default(string))
         {
+            // to ensure "resourceType" is required (not null)
+            if (resourceType == null)
+            {
+                throw new ArgumentNullException("resourceType is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+            }
+            this.ResourceType = resourceType;
             // to ensure "totalSupplyAttos" is required (not null)
             if (totalSupplyAttos == null)
             {
@@ -114,6 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.TotalSupplyAttos = totalSupplyAttos;
         }
+
+        /// <summary>
+        /// Gets or Sets ResourceType
+        /// </summary>
+        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
+        public string ResourceType { get; set; }
 
         /// <summary>
         /// Gets or Sets TotalSupplyAttos
@@ -129,6 +142,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseFungibleDetails {\n");
+            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -166,6 +180,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.ResourceType == input.ResourceType ||
+                    (this.ResourceType != null &&
+                    this.ResourceType.Equals(input.ResourceType))
+                ) && 
+                (
                     this.TotalSupplyAttos == input.TotalSupplyAttos ||
                     (this.TotalSupplyAttos != null &&
                     this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
@@ -181,6 +200,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.ResourceType != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                }
                 if (this.TotalSupplyAttos != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();

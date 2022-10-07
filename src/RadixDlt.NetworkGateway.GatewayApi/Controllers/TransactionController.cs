@@ -134,9 +134,7 @@ public sealed class TransactionController : ControllerBase
             return new TransactionStatusResponse(ledgerState, mempoolTransaction);
         }
 
-        var tmp = new TransactionIdentifier("map TransactionLookupIdentifier to TransactionIdentifier or drop latter altogether"); // TODO fix me
-
-        throw new TransactionNotFoundException(tmp);
+        throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
     // TODO decide how do we want to model /this endpoint in our OAS

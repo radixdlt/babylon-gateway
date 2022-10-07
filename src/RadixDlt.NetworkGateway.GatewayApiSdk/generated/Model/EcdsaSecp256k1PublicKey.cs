@@ -96,12 +96,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "EcdsaSecp256k1PublicKey")]
     public partial class EcdsaSecp256k1PublicKey : IEquatable<EcdsaSecp256k1PublicKey>, IValidatableObject
     {
-
-        /// <summary>
-        /// Gets or Sets KeyType
-        /// </summary>
-        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
-        public PublicKeyType KeyType { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="EcdsaSecp256k1PublicKey" /> class.
         /// </summary>
@@ -112,8 +106,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="keyType">keyType (required).</param>
         /// <param name="keyHex">The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes) (required).</param>
-        public EcdsaSecp256k1PublicKey(PublicKeyType keyType = default(PublicKeyType), string keyHex = default(string))
+        public EcdsaSecp256k1PublicKey(string keyType = default(string), string keyHex = default(string))
         {
+            // to ensure "keyType" is required (not null)
+            if (keyType == null)
+            {
+                throw new ArgumentNullException("keyType is a required property for EcdsaSecp256k1PublicKey and cannot be null");
+            }
             this.KeyType = keyType;
             // to ensure "keyHex" is required (not null)
             if (keyHex == null)
@@ -122,6 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.KeyHex = keyHex;
         }
+
+        /// <summary>
+        /// Gets or Sets KeyType
+        /// </summary>
+        [DataMember(Name = "key_type", IsRequired = true, EmitDefaultValue = true)]
+        public string KeyType { get; set; }
 
         /// <summary>
         /// The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
@@ -177,7 +182,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             return 
                 (
                     this.KeyType == input.KeyType ||
-                    this.KeyType.Equals(input.KeyType)
+                    (this.KeyType != null &&
+                    this.KeyType.Equals(input.KeyType))
                 ) && 
                 (
                     this.KeyHex == input.KeyHex ||
@@ -195,7 +201,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                if (this.KeyType != null)
+                {
+                    hashCode = (hashCode * 59) + this.KeyType.GetHashCode();
+                }
                 if (this.KeyHex != null)
                 {
                     hashCode = (hashCode * 59) + this.KeyHex.GetHashCode();

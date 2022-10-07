@@ -194,28 +194,26 @@ internal class TransactionQuerier : ITransactionQuerier
         }
 
         var transactionContents = mempoolTransaction.GetTransactionContents();
+        var stateVersion = transactionContents.LedgerStateVersion ?? 0;
 
         var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
-            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(
-                Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                transactionContents.ConfirmedTime?.AsUtcIsoDateWithMillisString(),
-                transactionContents.LedgerStateVersion ?? 0
-            ),
-            MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-            MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.PENDING),
-            MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(Gateway.TransactionStatus.StatusEnum.FAILED),
+            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Succeeded, transactionContents.ConfirmedTime),
+            MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
+            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
+            MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
+            MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Failed),
             _ => throw new ArgumentOutOfRangeException(),
         };
 
         return new Gateway.TransactionInfo(
-            status,
-            new Gateway.TransactionIdentifier(mempoolTransaction.PayloadHash.ToHex()),
-            new List<Gateway.Action>(),
+            transactionStatus: status,
+            payloadHashHex: Array.Empty<byte>().ToHex(),
+            intentHashHex: Array.Empty<byte>().ToHex(),
+            transactionAccumulatorHex: Array.Empty<byte>().ToHex(),
             feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-            new Gateway.TransactionMetadata(
+            metadata: new Gateway.TransactionMetadata(
                 hex: mempoolTransaction.Payload.ToHex(),
                 message: transactionContents.MessageHex
             )
@@ -288,18 +286,26 @@ internal class TransactionQuerier : ITransactionQuerier
     private Gateway.TransactionInfo MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
     {
         return new Gateway.TransactionInfo(
-            new Gateway.TransactionStatus(
-                Gateway.TransactionStatus.StatusEnum.CONFIRMED,
-                confirmedTime: ledgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
-                ledgerStateVersion: ledgerTransaction.StateVersion
-            ),
-            new Gateway.TransactionIdentifier(ledgerTransaction.IntentHash.ToHex()), // TODO invalid one, fix me
-            new List<Gateway.Action>(), // TODO: Remove
-            ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-            new Gateway.TransactionMetadata(
+            transactionStatus: new Gateway.TransactionStatus(ledgerTransaction.StateVersion, ToGatewayStatus(ledgerTransaction.Status), ledgerTransaction.RoundTimestamp),
+            payloadHashHex: ledgerTransaction.PayloadHash.ToHex(),
+            intentHashHex: ledgerTransaction.IntentHash.ToHex(),
+            transactionAccumulatorHex: ledgerTransaction.TransactionAccumulator.ToHex(),
+            feePaid: ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
+            metadata: new Gateway.TransactionMetadata(
                 hex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
                 message: ledgerTransaction.Message?.ToHex()
             )
         );
+    }
+
+    private Gateway.TransactionStatus.StatusEnum ToGatewayStatus(LedgerTransactionStatus status)
+    {
+        return status switch
+        {
+            LedgerTransactionStatus.Succeeded => Gateway.TransactionStatus.StatusEnum.Succeeded,
+            LedgerTransactionStatus.Failed => Gateway.TransactionStatus.StatusEnum.Failed,
+            LedgerTransactionStatus.Rejected => Gateway.TransactionStatus.StatusEnum.Rejected,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
     }
 }

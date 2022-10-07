@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionNotFoundErrorAllOf" /> class.
         /// </summary>
         /// <param name="transactionNotFound">transactionNotFound (required).</param>
-        public TransactionNotFoundErrorAllOf(TransactionIdentifier transactionNotFound = default(TransactionIdentifier))
+        public TransactionNotFoundErrorAllOf(TransactionLookupIdentifier transactionNotFound = default(TransactionLookupIdentifier))
         {
             // to ensure "transactionNotFound" is required (not null)
             if (transactionNotFound == null)
@@ -119,7 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets TransactionNotFound
         /// </summary>
         [DataMember(Name = "transaction_not_found", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIdentifier TransactionNotFound { get; set; }
+        public TransactionLookupIdentifier TransactionNotFound { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
