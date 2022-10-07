@@ -91,87 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionInfo
+    /// TransactionDetailsRequest
     /// </summary>
-    [DataContract(Name = "TransactionInfo")]
-    public partial class TransactionInfo : IEquatable<TransactionInfo>, IValidatableObject
+    [DataContract(Name = "TransactionDetailsRequest")]
+    public partial class TransactionDetailsRequest : IEquatable<TransactionDetailsRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionInfo" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionInfo() { }
+        protected TransactionDetailsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionInfo" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsRequest" /> class.
         /// </summary>
-        /// <param name="transactionStatus">transactionStatus (required).</param>
-        /// <param name="payloadHashHex">payloadHashHex (required).</param>
-        /// <param name="intentHashHex">intentHashHex (required).</param>
-        /// <param name="transactionAccumulatorHex">transactionAccumulatorHex (required).</param>
-        /// <param name="feePaid">feePaid (required).</param>
-        public TransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string transactionAccumulatorHex = default(string), TokenAmount feePaid = default(TokenAmount))
+        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        public TransactionDetailsRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
-            // to ensure "transactionStatus" is required (not null)
-            if (transactionStatus == null)
+            // to ensure "transactionIdentifier" is required (not null)
+            if (transactionIdentifier == null)
             {
-                throw new ArgumentNullException("transactionStatus is a required property for TransactionInfo and cannot be null");
+                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionDetailsRequest and cannot be null");
             }
-            this.TransactionStatus = transactionStatus;
-            // to ensure "payloadHashHex" is required (not null)
-            if (payloadHashHex == null)
-            {
-                throw new ArgumentNullException("payloadHashHex is a required property for TransactionInfo and cannot be null");
-            }
-            this.PayloadHashHex = payloadHashHex;
-            // to ensure "intentHashHex" is required (not null)
-            if (intentHashHex == null)
-            {
-                throw new ArgumentNullException("intentHashHex is a required property for TransactionInfo and cannot be null");
-            }
-            this.IntentHashHex = intentHashHex;
-            // to ensure "transactionAccumulatorHex" is required (not null)
-            if (transactionAccumulatorHex == null)
-            {
-                throw new ArgumentNullException("transactionAccumulatorHex is a required property for TransactionInfo and cannot be null");
-            }
-            this.TransactionAccumulatorHex = transactionAccumulatorHex;
-            // to ensure "feePaid" is required (not null)
-            if (feePaid == null)
-            {
-                throw new ArgumentNullException("feePaid is a required property for TransactionInfo and cannot be null");
-            }
-            this.FeePaid = feePaid;
+            this.TransactionIdentifier = transactionIdentifier;
+            this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionStatus
+        /// Gets or Sets TransactionIdentifier
         /// </summary>
-        [DataMember(Name = "transaction_status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus TransactionStatus { get; set; }
+        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
 
         /// <summary>
-        /// Gets or Sets PayloadHashHex
+        /// Gets or Sets AtStateIdentifier
         /// </summary>
-        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHashHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IntentHashHex
-        /// </summary>
-        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TransactionAccumulatorHex
-        /// </summary>
-        [DataMember(Name = "transaction_accumulator_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string TransactionAccumulatorHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FeePaid
-        /// </summary>
-        [DataMember(Name = "fee_paid", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount FeePaid { get; set; }
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,12 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionInfo {\n");
-            sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
-            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
-            sb.Append("  TransactionAccumulatorHex: ").Append(TransactionAccumulatorHex).Append("\n");
-            sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
+            sb.Append("class TransactionDetailsRequest {\n");
+            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -206,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionInfo);
+            return this.Equals(input as TransactionDetailsRequest);
         }
 
         /// <summary>
-        /// Returns true if TransactionInfo instances are equal
+        /// Returns true if TransactionDetailsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionInfo to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionInfo input)
+        public bool Equals(TransactionDetailsRequest input)
         {
             if (input == null)
             {
@@ -222,29 +175,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TransactionStatus == input.TransactionStatus ||
-                    (this.TransactionStatus != null &&
-                    this.TransactionStatus.Equals(input.TransactionStatus))
+                    this.TransactionIdentifier == input.TransactionIdentifier ||
+                    (this.TransactionIdentifier != null &&
+                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
                 ) && 
                 (
-                    this.PayloadHashHex == input.PayloadHashHex ||
-                    (this.PayloadHashHex != null &&
-                    this.PayloadHashHex.Equals(input.PayloadHashHex))
-                ) && 
-                (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
-                ) && 
-                (
-                    this.TransactionAccumulatorHex == input.TransactionAccumulatorHex ||
-                    (this.TransactionAccumulatorHex != null &&
-                    this.TransactionAccumulatorHex.Equals(input.TransactionAccumulatorHex))
-                ) && 
-                (
-                    this.FeePaid == input.FeePaid ||
-                    (this.FeePaid != null &&
-                    this.FeePaid.Equals(input.FeePaid))
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -257,25 +195,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionStatus != null)
+                if (this.TransactionIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
                 }
-                if (this.PayloadHashHex != null)
+                if (this.AtStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
-                }
-                if (this.IntentHashHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
-                }
-                if (this.TransactionAccumulatorHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.TransactionAccumulatorHex.GetHashCode();
-                }
-                if (this.FeePaid != null)
-                {
-                    hashCode = (hashCode * 59) + this.FeePaid.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

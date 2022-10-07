@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221007084149_InitialCreate")]
+    [Migration("20221007105426_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -365,6 +365,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("payload_hash");
+
+                    b.Property<long[]>("ReferencedEntities")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("referenced_entities");
 
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")

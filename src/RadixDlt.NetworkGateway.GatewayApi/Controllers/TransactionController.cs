@@ -120,11 +120,11 @@ public sealed class TransactionController : ControllerBase
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, false, token);
 
         if (committedTransaction != null)
         {
-            return new TransactionStatusResponse(ledgerState, committedTransaction);
+            return new TransactionStatusResponse(ledgerState, committedTransaction.Info);
         }
 
         var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(request.TransactionIdentifier, token);
@@ -132,6 +132,27 @@ public sealed class TransactionController : ControllerBase
         if (mempoolTransaction != null)
         {
             return new TransactionStatusResponse(ledgerState, mempoolTransaction);
+        }
+
+        throw new TransactionNotFoundException(request.TransactionIdentifier);
+    }
+
+    [HttpPost("details")]
+    public async Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
+
+        if (committedTransaction != null)
+        {
+            return new TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
+        }
+
+        var mempoolTransaction = await _transactionQuerier.LookupMempoolTransaction(request.TransactionIdentifier, token);
+
+        if (mempoolTransaction != null)
+        {
+            return new TransactionDetailsResponse(ledgerState, mempoolTransaction);
         }
 
         throw new TransactionNotFoundException(request.TransactionIdentifier);

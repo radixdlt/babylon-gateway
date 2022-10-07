@@ -91,87 +91,61 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionInfo
+    /// TransactionDetailsResponse
     /// </summary>
-    [DataContract(Name = "TransactionInfo")]
-    public partial class TransactionInfo : IEquatable<TransactionInfo>, IValidatableObject
+    [DataContract(Name = "TransactionDetailsResponse")]
+    public partial class TransactionDetailsResponse : IEquatable<TransactionDetailsResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionInfo" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionInfo() { }
+        protected TransactionDetailsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionInfo" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponse" /> class.
         /// </summary>
-        /// <param name="transactionStatus">transactionStatus (required).</param>
-        /// <param name="payloadHashHex">payloadHashHex (required).</param>
-        /// <param name="intentHashHex">intentHashHex (required).</param>
-        /// <param name="transactionAccumulatorHex">transactionAccumulatorHex (required).</param>
-        /// <param name="feePaid">feePaid (required).</param>
-        public TransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string transactionAccumulatorHex = default(string), TokenAmount feePaid = default(TokenAmount))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="transaction">transaction (required).</param>
+        /// <param name="details">details (required).</param>
+        public TransactionDetailsResponse(LedgerState ledgerState = default(LedgerState), TransactionInfo transaction = default(TransactionInfo), TransactionDetails details = default(TransactionDetails))
         {
-            // to ensure "transactionStatus" is required (not null)
-            if (transactionStatus == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("transactionStatus is a required property for TransactionInfo and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for TransactionDetailsResponse and cannot be null");
             }
-            this.TransactionStatus = transactionStatus;
-            // to ensure "payloadHashHex" is required (not null)
-            if (payloadHashHex == null)
+            this.LedgerState = ledgerState;
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
             {
-                throw new ArgumentNullException("payloadHashHex is a required property for TransactionInfo and cannot be null");
+                throw new ArgumentNullException("transaction is a required property for TransactionDetailsResponse and cannot be null");
             }
-            this.PayloadHashHex = payloadHashHex;
-            // to ensure "intentHashHex" is required (not null)
-            if (intentHashHex == null)
+            this.Transaction = transaction;
+            // to ensure "details" is required (not null)
+            if (details == null)
             {
-                throw new ArgumentNullException("intentHashHex is a required property for TransactionInfo and cannot be null");
+                throw new ArgumentNullException("details is a required property for TransactionDetailsResponse and cannot be null");
             }
-            this.IntentHashHex = intentHashHex;
-            // to ensure "transactionAccumulatorHex" is required (not null)
-            if (transactionAccumulatorHex == null)
-            {
-                throw new ArgumentNullException("transactionAccumulatorHex is a required property for TransactionInfo and cannot be null");
-            }
-            this.TransactionAccumulatorHex = transactionAccumulatorHex;
-            // to ensure "feePaid" is required (not null)
-            if (feePaid == null)
-            {
-                throw new ArgumentNullException("feePaid is a required property for TransactionInfo and cannot be null");
-            }
-            this.FeePaid = feePaid;
+            this.Details = details;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionStatus
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "transaction_status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus TransactionStatus { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets PayloadHashHex
+        /// Gets or Sets Transaction
         /// </summary>
-        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHashHex { get; set; }
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionInfo Transaction { get; set; }
 
         /// <summary>
-        /// Gets or Sets IntentHashHex
+        /// Gets or Sets Details
         /// </summary>
-        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TransactionAccumulatorHex
-        /// </summary>
-        [DataMember(Name = "transaction_accumulator_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string TransactionAccumulatorHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FeePaid
-        /// </summary>
-        [DataMember(Name = "fee_paid", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount FeePaid { get; set; }
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,12 +154,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionInfo {\n");
-            sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
-            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
-            sb.Append("  TransactionAccumulatorHex: ").Append(TransactionAccumulatorHex).Append("\n");
-            sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
+            sb.Append("class TransactionDetailsResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -206,15 +178,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionInfo);
+            return this.Equals(input as TransactionDetailsResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionInfo instances are equal
+        /// Returns true if TransactionDetailsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionInfo to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionInfo input)
+        public bool Equals(TransactionDetailsResponse input)
         {
             if (input == null)
             {
@@ -222,29 +194,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TransactionStatus == input.TransactionStatus ||
-                    (this.TransactionStatus != null &&
-                    this.TransactionStatus.Equals(input.TransactionStatus))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.PayloadHashHex == input.PayloadHashHex ||
-                    (this.PayloadHashHex != null &&
-                    this.PayloadHashHex.Equals(input.PayloadHashHex))
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
                 ) && 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
-                ) && 
-                (
-                    this.TransactionAccumulatorHex == input.TransactionAccumulatorHex ||
-                    (this.TransactionAccumulatorHex != null &&
-                    this.TransactionAccumulatorHex.Equals(input.TransactionAccumulatorHex))
-                ) && 
-                (
-                    this.FeePaid == input.FeePaid ||
-                    (this.FeePaid != null &&
-                    this.FeePaid.Equals(input.FeePaid))
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -257,25 +219,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionStatus != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.PayloadHashHex != null)
+                if (this.Transaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
                 }
-                if (this.IntentHashHex != null)
+                if (this.Details != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
-                }
-                if (this.TransactionAccumulatorHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.TransactionAccumulatorHex.GetHashCode();
-                }
-                if (this.FeePaid != null)
-                {
-                    hashCode = (hashCode * 59) + this.FeePaid.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

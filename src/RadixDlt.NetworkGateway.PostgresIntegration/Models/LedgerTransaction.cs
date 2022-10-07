@@ -145,6 +145,9 @@ internal class LedgerTransaction
     [Column("is_start_of_round")]
     public bool IsStartOfRound { get; set; }
 
+    [Column("referenced_entities")]
+    public long[] ReferencedEntities { get; set; }
+
     /// <summary>
     /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the
     /// votes on the vertex's QC to its parent vertex. These votes come from a subset of validators performing

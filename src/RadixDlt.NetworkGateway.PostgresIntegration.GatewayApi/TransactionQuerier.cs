@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApi;
@@ -128,9 +129,10 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithTotal(totalCount, nextCursor, transactions);
     }
 
-    public async Task<Gateway.TransactionInfo?> LookupCommittedTransaction(
+    public async Task<LookupResult?> LookupCommittedTransaction(
         Gateway.TransactionLookupIdentifier lookup,
         Gateway.LedgerState ledgerState,
+        bool withMetadata,
         CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
@@ -157,9 +159,14 @@ internal class TransactionQuerier : ITransactionQuerier
             .Select(lt => lt.StateVersion)
             .SingleOrDefaultAsync(token);
 
-        return stateVersion == 0
-            ? null :
-            (await GetTransactions(new List<long> { stateVersion }, token)).First();
+        if (stateVersion == 0)
+        {
+            return null;
+        }
+
+        return withMetadata
+            ? await GetTransactionWithMetadata(stateVersion, token)
+            : new LookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
     public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default)
@@ -212,11 +219,7 @@ internal class TransactionQuerier : ITransactionQuerier
             payloadHashHex: Array.Empty<byte>().ToHex(),
             intentHashHex: Array.Empty<byte>().ToHex(),
             transactionAccumulatorHex: Array.Empty<byte>().ToHex(),
-            feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-            metadata: new Gateway.TransactionMetadata(
-                hex: mempoolTransaction.Payload.ToHex(),
-                message: transactionContents.MessageHex
-            )
+            feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
         );
     }
 
@@ -275,12 +278,30 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         var transactions = await _dbContext.LedgerTransactions
             .Where(lt => transactionStateVersions.Contains(lt.StateVersion))
-            .Include(lt => lt.RawTransaction)
             .OrderByDescending(lt => lt.StateVersion)
-            .AsSplitQuery() // See https://docs.microsoft.com/en-us/ef/core/querying/single-split-queries
             .ToListAsync(token);
 
         return transactions.Select(MapToGatewayAccountTransaction).ToList();
+    }
+
+    private async Task<LookupResult> GetTransactionWithMetadata(long stateVersion, CancellationToken token)
+    {
+        var transaction = await _dbContext.LedgerTransactions
+            .Where(lt => lt.StateVersion == stateVersion)
+            .Include(lt => lt.RawTransaction)
+            .OrderByDescending(lt => lt.StateVersion)
+            .FirstAsync(token);
+
+        List<Entity> referencedEntities = new List<Entity>();
+
+        if (transaction.ReferencedEntities.Any())
+        {
+            referencedEntities = await _dbContext.Entities
+                .Where(e => transaction.ReferencedEntities.Contains(e.Id))
+                .ToListAsync(token);
+        }
+
+        return MapToGatewayAccountTransactionWithMetadata(transaction, referencedEntities);
     }
 
     private Gateway.TransactionInfo MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
@@ -290,12 +311,38 @@ internal class TransactionQuerier : ITransactionQuerier
             payloadHashHex: ledgerTransaction.PayloadHash.ToHex(),
             intentHashHex: ledgerTransaction.IntentHash.ToHex(),
             transactionAccumulatorHex: ledgerTransaction.TransactionAccumulator.ToHex(),
-            feePaid: ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier()),
-            metadata: new Gateway.TransactionMetadata(
-                hex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
-                message: ledgerTransaction.Message?.ToHex()
-            )
+            feePaid: ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
         );
+    }
+
+    private LookupResult MapToGatewayAccountTransactionWithMetadata(LedgerTransaction ledgerTransaction, List<Entity> referencedEntities)
+    {
+        return new LookupResult(MapToGatewayAccountTransaction(ledgerTransaction), new Gateway.TransactionDetails(
+            rawHex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
+            referencedEntities: referencedEntities.Select(re =>
+            {
+                // TODO ok, we definitely need some civilized way to do it time after time
+                var hrps = _networkConfigurationProvider.GetAddressHrps();
+                var hrp = re switch
+                {
+                    ComponentEntity ce => ce.Kind switch
+                    {
+                        "account" => hrps.AccountHrp,
+                        "validator" => hrps.ValidatorHrp,
+                        _ => "unknown", // TODO fix me
+                    },
+                    PackageEntity => _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix,
+                    ResourceManagerEntity => hrps.ResourceHrpSuffix,
+                    SystemEntity => "unknown", // TODO fix me
+                    ValueStoreEntity => "unknown", // TODO fix me
+                    VaultEntity => "unknown", // TODO fix me
+                    _ => throw new ArgumentOutOfRangeException(nameof(re)),
+                };
+
+                return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, re.Address);
+            }).ToList(),
+            messageHex: ledgerTransaction.Message?.ToHex()
+        ));
     }
 
     private Gateway.TransactionStatus.StatusEnum ToGatewayStatus(LedgerTransactionStatus status)

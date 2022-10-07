@@ -91,45 +91,58 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionMetadata
+    /// TransactionDetails
     /// </summary>
-    [DataContract(Name = "TransactionMetadata")]
-    public partial class TransactionMetadata : IEquatable<TransactionMetadata>, IValidatableObject
+    [DataContract(Name = "TransactionDetails")]
+    public partial class TransactionDetails : IEquatable<TransactionDetails>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionMetadata" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionMetadata() { }
+        protected TransactionDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionMetadata" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
         /// </summary>
-        /// <param name="hex">The transaction payload, hex encoded. (required).</param>
-        /// <param name="message">The message bytes, hex encoded..</param>
-        public TransactionMetadata(string hex = default(string), string message = default(string))
+        /// <param name="rawHex">The raw transaction payload, hex encoded. (required).</param>
+        /// <param name="referencedEntities">referencedEntities (required).</param>
+        /// <param name="messageHex">The message bytes, hex encoded..</param>
+        public TransactionDetails(string rawHex = default(string), List<string> referencedEntities = default(List<string>), string messageHex = default(string))
         {
-            // to ensure "hex" is required (not null)
-            if (hex == null)
+            // to ensure "rawHex" is required (not null)
+            if (rawHex == null)
             {
-                throw new ArgumentNullException("hex is a required property for TransactionMetadata and cannot be null");
+                throw new ArgumentNullException("rawHex is a required property for TransactionDetails and cannot be null");
             }
-            this.Hex = hex;
-            this.Message = message;
+            this.RawHex = rawHex;
+            // to ensure "referencedEntities" is required (not null)
+            if (referencedEntities == null)
+            {
+                throw new ArgumentNullException("referencedEntities is a required property for TransactionDetails and cannot be null");
+            }
+            this.ReferencedEntities = referencedEntities;
+            this.MessageHex = messageHex;
         }
 
         /// <summary>
-        /// The transaction payload, hex encoded.
+        /// The raw transaction payload, hex encoded.
         /// </summary>
-        /// <value>The transaction payload, hex encoded.</value>
-        [DataMember(Name = "hex", IsRequired = true, EmitDefaultValue = true)]
-        public string Hex { get; set; }
+        /// <value>The raw transaction payload, hex encoded.</value>
+        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string RawHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ReferencedEntities
+        /// </summary>
+        [DataMember(Name = "referenced_entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> ReferencedEntities { get; set; }
 
         /// <summary>
         /// The message bytes, hex encoded.
         /// </summary>
         /// <value>The message bytes, hex encoded.</value>
-        [DataMember(Name = "message", EmitDefaultValue = true)]
-        public string Message { get; set; }
+        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
+        public string MessageHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -138,9 +151,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionMetadata {\n");
-            sb.Append("  Hex: ").Append(Hex).Append("\n");
-            sb.Append("  Message: ").Append(Message).Append("\n");
+            sb.Append("class TransactionDetails {\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  ReferencedEntities: ").Append(ReferencedEntities).Append("\n");
+            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -161,15 +175,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionMetadata);
+            return this.Equals(input as TransactionDetails);
         }
 
         /// <summary>
-        /// Returns true if TransactionMetadata instances are equal
+        /// Returns true if TransactionDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionMetadata to be compared</param>
+        /// <param name="input">Instance of TransactionDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionMetadata input)
+        public bool Equals(TransactionDetails input)
         {
             if (input == null)
             {
@@ -177,14 +191,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Hex == input.Hex ||
-                    (this.Hex != null &&
-                    this.Hex.Equals(input.Hex))
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
-                    this.Message == input.Message ||
-                    (this.Message != null &&
-                    this.Message.Equals(input.Message))
+                    this.ReferencedEntities == input.ReferencedEntities ||
+                    this.ReferencedEntities != null &&
+                    input.ReferencedEntities != null &&
+                    this.ReferencedEntities.SequenceEqual(input.ReferencedEntities)
+                ) && 
+                (
+                    this.MessageHex == input.MessageHex ||
+                    (this.MessageHex != null &&
+                    this.MessageHex.Equals(input.MessageHex))
                 );
         }
 
@@ -197,13 +217,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Hex != null)
+                if (this.RawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Hex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
-                if (this.Message != null)
+                if (this.ReferencedEntities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Message.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ReferencedEntities.GetHashCode();
+                }
+                if (this.MessageHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
                 }
                 return hashCode;
             }

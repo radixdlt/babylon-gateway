@@ -159,6 +159,33 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/transaction/details":
+    post:
+      operationId: getTransactionDetails
+      summary: Transaction Details
+      description: |
+        Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren't recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TransactionDetailsRequest"
+      responses:
+        '200':
+          description: Transaction Status
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TransactionDetailsResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   /entity/resources:
     post:
       operationId: getEntityResources
@@ -572,6 +599,32 @@ components:
           $ref: "#/components/schemas/LedgerState"
         transaction:
           $ref: "#/components/schemas/TransactionInfo"
+    TransactionDetailsRequest:
+      type: object
+      required:
+        - transaction_identifier
+      properties:
+        transaction_identifier:
+          $ref: "#/components/schemas/TransactionLookupIdentifier"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        transaction_identifier:
+          origin: intent
+          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+    TransactionDetailsResponse:
+      type: object
+      required:
+        - ledger_state
+        - transaction
+        - details
+      properties:
+        ledger_state:
+          $ref: "#/components/schemas/LedgerState"
+        transaction:
+          $ref: "#/components/schemas/TransactionInfo"
+        details:
+          "$ref": "#/components/schemas/TransactionDetails"
     TokenProperties:
       type: object
       required:
@@ -608,7 +661,6 @@ components:
         - intent_hash_hex
         - transaction_accumulator_hex
         - fee_paid
-        - metadata
       properties:
         transaction_status:
           "$ref": "#/components/schemas/TransactionStatus"
@@ -620,8 +672,6 @@ components:
           type: string
         fee_paid:
           $ref: "#/components/schemas/TokenAmount"
-        metadata:
-          "$ref": "#/components/schemas/TransactionMetadata"
     TransactionStatus:
       type: object
       required:
@@ -641,15 +691,20 @@ components:
           nullable: true
           type: string
           format: date-time
-    TransactionMetadata:
+    TransactionDetails:
       type: object
       required:
-        - hex
+        - raw_hex
+        - referenced_entities
       properties:
-        hex:
-          description: The transaction payload, hex encoded.
+        raw_hex:
+          description: The raw transaction payload, hex encoded.
           type: string
-        message:
+        referenced_entities:
+          type: array
+          items:
+            type: string
+        message_hex:
           description: The message bytes, hex encoded.
           type: string
     TokenAmount:

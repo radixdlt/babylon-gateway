@@ -80,10 +80,12 @@ public interface ITransactionQuerier
 
     Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, CancellationToken token = default);
+    Task<LookupResult?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, bool withMetadata, CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
+
+public record LookupResult(Gateway.TransactionInfo? Info, Gateway.TransactionDetails? Details);
 
 [DataContract]
 public sealed record CommittedTransactionPaginationCursor(long? StateVersionBoundary)

@@ -74,6 +74,24 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
+internal static class DictionaryExtensions
+{
+    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
+        where TKey : notnull
+    {
+        if (dictionary.ContainsKey(key))
+        {
+            return dictionary[key];
+        }
+
+        var value = factory(key);
+
+        dictionary[key] = value;
+
+        return value;
+    }
+}
+
 internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
 {
     private Entity? _databaseEntity;
@@ -232,21 +250,38 @@ internal record AggregateChange
     }
 }
 
-internal static class DictionaryExtensions
+internal class ReferencedEntityDictionary : Dictionary<string, ReferencedEntity>
 {
-    public static TVal GetOrAdd<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, TKey key, Func<TKey, TVal> factory)
-        where TKey : notnull
+    private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
+
+    public ReferencedEntity GetOrAdd(string key, Func<string, ReferencedEntity> factory)
     {
-        if (dictionary.ContainsKey(key))
+        if (ContainsKey(key))
         {
-            return dictionary[key];
+            return this[key];
         }
 
         var value = factory(key);
 
-        dictionary[key] = value;
+        if (!_inversed.ContainsKey(value.StateVersion))
+        {
+            _inversed[value.StateVersion] = new List<ReferencedEntity>();
+        }
+
+        this[key] = value;
+        _inversed[value.StateVersion].Add(value);
 
         return value;
+    }
+
+    public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
+    {
+        if (_inversed.ContainsKey(stateVersion))
+        {
+            return _inversed[stateVersion];
+        }
+
+        return Array.Empty<ReferencedEntity>();
     }
 }
 

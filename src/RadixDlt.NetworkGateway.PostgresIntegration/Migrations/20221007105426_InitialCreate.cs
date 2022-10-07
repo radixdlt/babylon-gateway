@@ -242,6 +242,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
                     is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
+                    referenced_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
                     round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     normalized_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
