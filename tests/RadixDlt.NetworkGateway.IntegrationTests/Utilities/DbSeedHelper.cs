@@ -115,7 +115,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                     Status = LedgerTransactionStatus.Succeeded,
                     PayloadHash = rawTransaction.TransactionPayloadHash,
                     IntentHash = DefaultHash,
-                    SignedTransactionHash = DefaultHash,
+                    SignedIntentHash = DefaultHash,
                     TransactionAccumulator = DefaultHash,
                     IsUserTransaction = false,
                     Message = DefaultHash,

@@ -475,7 +475,7 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, payload_hash, intent_hash, signed_hash, transaction_accumulator, is_user_transaction, message, fee_paid, tip_paid, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, payload_hash, intent_hash, signed_intent_hash, transaction_accumulator, is_user_transaction, message, fee_paid, tip_paid, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
             {
                 var statusConverter = new LedgerTransactionStatusValueConverter().ConvertToProvider;
 
@@ -486,7 +486,7 @@ WHERE id IN(
                     await writer.WriteAsync(statusConverter(lt.Status), NpgsqlDbType.Text, token);
                     await writer.WriteAsync(lt.PayloadHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.IntentHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.SignedTransactionHash, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(lt.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
                     await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);

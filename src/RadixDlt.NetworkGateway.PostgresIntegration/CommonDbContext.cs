@@ -172,7 +172,7 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.IntentHash);
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.SignedTransactionHash);
+            .HasAlternateKey(lt => lt.SignedIntentHash);
 
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);

@@ -139,7 +139,7 @@ public static class TransactionSummarisationGenerator
             IsStartOfRound: isStartOfRound,
             PayloadHash: payloadHash,
             IntentHash: intentHash,
-            SignedTransactionHash: signedIntentHash,
+            SignedIntentHash: signedIntentHash,
             TransactionAccumulator: transactionAccumulator,
             RoundTimestamp: roundTimestamp,
             CreatedTimestamp: createdTimestamp,

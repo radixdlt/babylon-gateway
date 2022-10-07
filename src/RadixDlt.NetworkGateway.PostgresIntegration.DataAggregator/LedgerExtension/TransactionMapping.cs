@@ -85,7 +85,7 @@ internal static class TransactionMapping
             Status = ToLedgerStatus(transaction.Receipt.Status),
             PayloadHash = summary.PayloadHash,
             IntentHash = summary.IntentHash,
-            SignedTransactionHash = summary.SignedTransactionHash,
+            SignedIntentHash = summary.SignedIntentHash,
             TransactionAccumulator = summary.TransactionAccumulator,
             IsUserTransaction = feePaid != TokenAmount.Zero,
             // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently

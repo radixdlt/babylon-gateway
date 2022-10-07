@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221007145816_InitialCreate")]
+    [Migration("20221007152625_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -383,10 +383,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<byte[]>("SignedTransactionHash")
+                    b.Property<byte[]>("SignedIntentHash")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("signed_hash");
+                        .HasColumnName("signed_intent_hash");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -409,7 +409,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasAlternateKey("PayloadHash");
 
-                    b.HasAlternateKey("SignedTransactionHash");
+                    b.HasAlternateKey("SignedIntentHash");
 
                     b.HasAlternateKey("TransactionAccumulator");
 

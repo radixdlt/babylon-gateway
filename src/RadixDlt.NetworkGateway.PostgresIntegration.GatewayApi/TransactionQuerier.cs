@@ -63,7 +63,6 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.GatewayApi;
@@ -113,22 +112,6 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<TransactionPageWithTotal> GetAccountTransactions(
-        AccountTransactionPageRequest request,
-        Gateway.LedgerState ledgerState,
-        CancellationToken token = default)
-    {
-        var totalCount = await CountAccountTransactions(request.AccountAddress, ledgerState, token);
-        var transactionStateVersionsAndOneMore = await GetAccountTransactionStateVersions(request, ledgerState, token);
-        var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
-            ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
-            : null;
-
-        var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
-
-        return new TransactionPageWithTotal(totalCount, nextCursor, transactions);
-    }
-
     public async Task<LookupResult?> LookupCommittedTransaction(
         Gateway.TransactionLookupIdentifier lookup,
         Gateway.LedgerState ledgerState,
@@ -144,7 +127,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 query = query.Where(lt => lt.IntentHash == hash);
                 break;
             case Gateway.TransactionLookupOrigin.SignedIntent:
-                query = query.Where(lt => lt.SignedTransactionHash == hash); // TODO fix me
+                query = query.Where(lt => lt.SignedIntentHash == hash); // TODO fix me
                 break;
             case Gateway.TransactionLookupOrigin.Notarized:
                 throw new NotImplementedException("fix me"); // TODO fix me
@@ -223,11 +206,6 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private Task<long> CountAccountTransactions(ValidatedAccountAddress accountAddress, Gateway.LedgerState ledgerState, CancellationToken token)
-    {
-        throw new NotImplementedException();
-    }
-
     private async Task<List<long>> GetRecentUserTransactionStateVersions(
         RecentTransactionPageRequest request,
         Gateway.LedgerState atLedgerState,
@@ -264,14 +242,6 @@ internal class TransactionQuerier : ITransactionQuerier
                 .Select(at => at.StateVersion)
                 .ToListAsync(token);
         }
-    }
-
-    private Task<List<long>> GetAccountTransactionStateVersions(
-        AccountTransactionPageRequest request,
-        Gateway.LedgerState ledgerState,
-        CancellationToken token)
-    {
-        throw new NotImplementedException();
     }
 
     private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)

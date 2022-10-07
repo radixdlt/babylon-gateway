@@ -233,7 +233,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     status = table.Column<string>(type: "text", nullable: false),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    signed_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     is_user_transaction = table.Column<bool>(type: "boolean", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
@@ -254,7 +254,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
                     table.UniqueConstraint("AK_ledger_transactions_intent_hash", x => x.intent_hash);
                     table.UniqueConstraint("AK_ledger_transactions_payload_hash", x => x.payload_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_signed_hash", x => x.signed_hash);
+                    table.UniqueConstraint("AK_ledger_transactions_signed_intent_hash", x => x.signed_intent_hash);
                     table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
                     table.ForeignKey(
                         name: "FK_ledger_transactions_raw_transactions_state_version",

@@ -381,10 +381,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<byte[]>("SignedTransactionHash")
+                    b.Property<byte[]>("SignedIntentHash")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("signed_hash");
+                        .HasColumnName("signed_intent_hash");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -407,7 +407,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasAlternateKey("PayloadHash");
 
-                    b.HasAlternateKey("SignedTransactionHash");
+                    b.HasAlternateKey("SignedIntentHash");
 
                     b.HasAlternateKey("TransactionAccumulator");
 
