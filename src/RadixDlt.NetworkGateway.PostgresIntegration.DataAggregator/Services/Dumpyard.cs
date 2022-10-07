@@ -64,7 +64,6 @@
 
 using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.Commons.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -99,13 +98,13 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public RadixAddress? GlobalAddress { get; private set; }
 
+    public string? GlobalHrpAddress { get; private set; }
+
     public long DatabaseId => GetDatabaseEntity().Id;
 
     public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new Exception("impossible bla bla bla");
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
-
-    public string? ComponentKind { get; private set; }
 
     // TODO not sure if this logic is valid?
     public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
@@ -115,23 +114,10 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
 
-    public void Globalize(string addressHex, string address, AddressHrps networkHrps)
+    public void Globalize(string addressHex, string hrpAddress)
     {
-        // TODO we probably want to differentiate all possible HRPs
-
-        var kind = "normal";
-
-        if (address.StartsWith(networkHrps.AccountHrp))
-        {
-            kind = "account";
-        }
-        else if (address.StartsWith(networkHrps.ValidatorHrp))
-        {
-            kind = "validator";
-        }
-
         GlobalAddress = addressHex.ConvertFromHex();
-        ComponentKind = kind;
+        GlobalHrpAddress = hrpAddress;
     }
 
     public void Resolve(Entity entity)

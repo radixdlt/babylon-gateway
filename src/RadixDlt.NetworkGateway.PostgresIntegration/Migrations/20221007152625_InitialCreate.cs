@@ -87,8 +87,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     parent_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    kind = table.Column<string>(type: "text", nullable: true)
+                    type = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -199,8 +198,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
                     network_name = table.Column<string>(type: "text", nullable: false),
-                    account_hrp = table.Column<string>(type: "text", nullable: false),
-                    resource_hrp_suffix = table.Column<string>(type: "text", nullable: false),
+                    package_hrp = table.Column<string>(type: "text", nullable: false),
+                    normal_component_hrp = table.Column<string>(type: "text", nullable: false),
+                    account_component_hrp = table.Column<string>(type: "text", nullable: false),
+                    system_component_hrp = table.Column<string>(type: "text", nullable: false),
+                    resource_hrp = table.Column<string>(type: "text", nullable: false),
                     validator_hrp = table.Column<string>(type: "text", nullable: false),
                     node_hrp = table.Column<string>(type: "text", nullable: false),
                     xrd_address = table.Column<string>(type: "text", nullable: false)
@@ -231,7 +233,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     status = table.Column<string>(type: "text", nullable: false),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    signed_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
                     is_user_transaction = table.Column<bool>(type: "boolean", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
@@ -252,7 +254,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
                     table.UniqueConstraint("AK_ledger_transactions_intent_hash", x => x.intent_hash);
                     table.UniqueConstraint("AK_ledger_transactions_payload_hash", x => x.payload_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_signed_hash", x => x.signed_hash);
+                    table.UniqueConstraint("AK_ledger_transactions_signed_intent_hash", x => x.signed_intent_hash);
                     table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
                     table.ForeignKey(
                         name: "FK_ledger_transactions_raw_transactions_state_version",

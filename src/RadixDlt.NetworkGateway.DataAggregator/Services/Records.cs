@@ -76,7 +76,7 @@ public sealed record TransactionSummary(
     bool IsStartOfRound,
     byte[] PayloadHash,
     byte[] IntentHash,
-    byte[] SignedTransactionHash,
+    byte[] SignedIntentHash,
     byte[] TransactionAccumulator,
     DateTimeOffset RoundTimestamp,
     DateTimeOffset CreatedTimestamp,

@@ -107,9 +107,9 @@ internal class LedgerTransaction
     /// <summary>
     /// The hash of the signed transaction, which is what the notary signs.
     /// </summary>
-    [Column("signed_hash")]
+    [Column("signed_intent_hash")]
     // OnModelCreating: Also defined as an alternate key
-    public byte[] SignedTransactionHash { get; set; }
+    public byte[] SignedIntentHash { get; set; }
 
     [Column("transaction_accumulator")]
     // OnModelCreating: Also defined as an alternate key

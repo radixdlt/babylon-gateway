@@ -81,7 +81,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public sealed record CapturedConfig(string NetworkName, string XrdAddress, AddressHrps AddressHrps, TokenIdentifier XrdTokenIdentifier);
+public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition, TokenIdentifier XrdTokenIdentifier);
 
 public interface ICapturedConfigProvider
 {
@@ -113,9 +113,9 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
-    public AddressHrps GetAddressHrps()
+    public HrpDefinition GetHrpDefinition()
     {
-        return GetCapturedConfig().AddressHrps;
+        return GetCapturedConfig().HrpDefinition;
     }
 
     public string GetXrdAddress()

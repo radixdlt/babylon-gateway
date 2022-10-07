@@ -62,6 +62,6 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Commons.Addressing;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-public sealed record AddressHrps(string AccountHrp, string ResourceHrpSuffix, string ValidatorHrp, string NodeHrp);
+public sealed record ValidatedHex(string AsString, byte[] Bytes);

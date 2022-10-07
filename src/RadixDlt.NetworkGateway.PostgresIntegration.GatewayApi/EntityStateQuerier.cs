@@ -101,13 +101,6 @@ internal class EntityStateQuerier : IEntityStateQuerier
             return null;
         }
 
-        var hrp = GetHrpByEntity(ce);
-
-        if (hrp == null)
-        {
-            return null;
-        }
-
         // TODO this has been recently replaced with EF-based inheritance, but we might want to get back to two separate tables instead of discriminator column
         // TODO this one might need index, think: (owner_entity_id, from_state_version, fungible_resource_entity_id) include (balance)
         // TODO this one might benefit form "*" => "fungible_resource_entity_id, balance"
@@ -149,7 +142,7 @@ INNER JOIN LATERAL (
         foreach (var dbResource in dbResources)
         {
             var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
-            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix, rga);
+            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
             if (dbResource is EntityFungibleResourceHistory efrh)
             {
@@ -165,11 +158,10 @@ INNER JOIN LATERAL (
             }
         }
 
-        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
         var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibles.Count, null, "TBD (currently everything is returned)", fungibles);
         var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibles.Count, null, "TBD (currently everything is returned)", nonFungibles);
 
-        return new EntityResourcesResponse(adr, fungiblesPagination, nonFungiblesPagination);
+        return new EntityResourcesResponse(entity.HrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
     }
 
     public async Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
@@ -181,13 +173,6 @@ INNER JOIN LATERAL (
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
         if (entity == null)
-        {
-            return null;
-        }
-
-        var hrp = GetHrpByEntity(entity);
-
-        if (hrp == null)
         {
             return null;
         }
@@ -221,7 +206,7 @@ INNER JOIN LATERAL (
                     totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
             }
         }
-        else if (entity is ComponentEntity { Kind: "account" })
+        else if (entity is AccountComponentEntity)
         {
             return null; // TODO handle somehow
         }
@@ -241,30 +226,6 @@ INNER JOIN LATERAL (
             metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
 
-        var adr = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, address);
-
-        return new EntityDetailsResponse(adr, metadata, details);
-    }
-
-    private string? GetHrpByEntity(Entity entity)
-    {
-        if (entity is ResourceManagerEntity)
-        {
-            return _networkConfigurationProvider.GetAddressHrps().ResourceHrpSuffix;
-        }
-
-        if (entity is ComponentEntity ce)
-        {
-            // TODO use enum or something
-            switch (ce.Kind)
-            {
-                case "account":
-                    return _networkConfigurationProvider.GetAddressHrps().AccountHrp;
-                case "validator":
-                    return _networkConfigurationProvider.GetAddressHrps().ValidatorHrp;
-            }
-        }
-
-        return null;
+        return new EntityDetailsResponse(entity.HrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 }

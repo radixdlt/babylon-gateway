@@ -81,11 +81,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 /// </summary>
 internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
-    private record CapturedConfig(
-        NetworkConfiguration NetworkConfiguration,
-        AddressHrps AddressHrps,
-        string NetworkName
-    );
+    private record CapturedConfig(NetworkConfiguration NetworkConfiguration, HrpDefinition HrpDefinition, string NetworkName);
 
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly ILogger<NetworkConfigurationProvider> _logger;
@@ -93,10 +89,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     private readonly object _writeLock = new();
     private CapturedConfig? _capturedConfig;
 
-    public NetworkConfigurationProvider(
-        IDbContextFactory<ReadWriteDbContext> dbContextFactory,
-        ILogger<NetworkConfigurationProvider> logger
-    )
+    public NetworkConfigurationProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory, ILogger<NetworkConfigurationProvider> logger)
     {
         _dbContextFactory = dbContextFactory;
         _logger = logger;
@@ -123,21 +116,17 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         }
     }
 
-    public async Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(
-        CancellationToken token = default
-    )
+    public async Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default)
     {
         var currentConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
+
         if (currentConfiguration != null)
         {
             EnsureNetworkConfigurationCaptured(currentConfiguration);
 
-            _logger.LogInformation(
-                "Network configuration for network {NetworkName} loaded from database",
-                currentConfiguration.NetworkDefinition.NetworkName
-            );
+            _logger.LogInformation("Network configuration for network {NetworkName} loaded from database", currentConfiguration.NetworkName);
 
-            return currentConfiguration.NetworkDefinition.NetworkName;
+            return currentConfiguration.NetworkName;
         }
 
         _logger.LogInformation("Network configuration not loaded from database (db ledger likely empty)");
@@ -148,6 +137,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public async Task<bool> SaveLedgerNetworkConfigurationToDatabaseOnInitIfNotExists(CancellationToken token)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
         if (await dbContext.NetworkConfiguration.AsNoTracking().AnyAsync(token))
         {
             return false;
@@ -163,29 +153,34 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkName;
     }
 
-    public AddressHrps GetAddressHrps()
+    public HrpDefinition GetHrpDefinition()
     {
-        return GetCapturedConfig().AddressHrps;
+        return GetCapturedConfig().HrpDefinition;
     }
 
     public string GetXrdAddress()
     {
-        return GetCapturedConfig().NetworkConfiguration.WellKnownAddresses.XrdAddress;
+        return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress;
     }
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
     {
+        var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
+
         return new NetworkConfiguration
         {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.Network },
-            NetworkAddressHrps = new NetworkAddressHrps
+            NetworkName = networkConfiguration.Network,
+            NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition
             {
-                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
-                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
-                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
-                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
+                PackageHrp = $"package_{hrpSuffix}",
+                NormalComponentHrp = $"component_{hrpSuffix}",
+                AccountComponentHrp = $"account_{hrpSuffix}",
+                SystemComponentHrp = $"system_{hrpSuffix}",
+                ResourceHrp = $"resource_{hrpSuffix}",
+                ValidatorHrp = $"validator_{hrpSuffix}",
+                NodeHrp = $"node_{hrpSuffix}",
             },
-            WellKnownAddresses = new WellKnownAddresses
+            NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
             {
                 XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
             },
@@ -208,8 +203,8 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
             _capturedConfig = new CapturedConfig(
                 inputNetworkConfiguration,
-                inputNetworkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-                inputNetworkConfiguration.NetworkDefinition.NetworkName
+                inputNetworkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
+                inputNetworkConfiguration.NetworkName
             );
         }
     }
@@ -217,6 +212,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     private async Task<NetworkConfiguration?> GetCurrentLedgerNetworkConfigurationFromDb(CancellationToken token)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
+
         return await dbContext.NetworkConfiguration.AsNoTracking().SingleOrDefaultAsync(token);
     }
 }

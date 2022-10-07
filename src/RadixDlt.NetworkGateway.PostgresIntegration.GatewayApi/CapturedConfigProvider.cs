@@ -90,10 +90,10 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
         }
 
         return new CapturedConfig(
-            networkConfiguration.NetworkDefinition.NetworkName,
-            networkConfiguration.WellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-            new TokenIdentifier(networkConfiguration.WellKnownAddresses.XrdAddress)
+            networkConfiguration.NetworkName,
+            networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
+            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
+            new TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
         );
     }
 }

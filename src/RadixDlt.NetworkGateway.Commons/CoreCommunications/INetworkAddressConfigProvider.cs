@@ -68,7 +68,7 @@ namespace RadixDlt.NetworkGateway.Commons.CoreCommunications;
 
 public interface INetworkAddressConfigProvider
 {
-    AddressHrps GetAddressHrps();
+    HrpDefinition GetHrpDefinition();
 
     string GetXrdAddress();
 }

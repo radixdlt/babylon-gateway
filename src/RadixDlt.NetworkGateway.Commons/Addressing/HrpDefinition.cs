@@ -62,68 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreModel = RadixDlt.CoreApiSdk.Model;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
+namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
-
-public sealed record MappedTransaction(
-    string TransactionManifest, // TODO - Or something? Possibly need to have some way of serializing manifests for signing
-    Dictionary<string, TokenAmount> BeforeAccountBalancesByRri,
-    Dictionary<string, TokenAmount> AccountBalanceChangesByRri
+public sealed record HrpDefinition(
+    string Package,
+    string NormalComponent,
+    string AccountComponent,
+    string SystemComponent,
+    string Resource,
+    string Validator,
+    string Node
 );
-
-/// <summary>
-/// A stateful class for building a transaction and checking it's valid against the current version of state.
-/// </summary>
-internal class TransactionBuilder
-{
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly Gateway.LedgerState _ledgerState;
-    private readonly ValidatedAccountAddress _feePayer;
-
-    // Pseudo-Variables
-    private Dictionary<string, TokenAmount> _feePayerBeforeBalances = new();
-    private Dictionary<string, TokenAmount> _feePayerCurrentBalances = new();
-    private Dictionary<string, TokenAmount> _feePayerBalanceChanges = new();
-
-    public TransactionBuilder(
-        INetworkConfigurationProvider networkConfigurationProvider,
-        Gateway.LedgerState ledgerState,
-        ValidatedAccountAddress feePayer
-    )
-    {
-        _networkConfigurationProvider = networkConfigurationProvider;
-        _ledgerState = ledgerState;
-        _feePayer = feePayer;
-    }
-
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // private async Task<CoreModel.OperationGroup> MapAction(Gateway.Action action, CancellationToken token = default)
-    // {
-    //     await Task.Delay(1, token); // Fix for compile warning in this placeholder method
-    //     return action switch
-    //     {
-    //         Gateway.TransferTokens transferTokens => MapTransferTokens(transferTokens),
-    //         Gateway.BurnTokens burnTokens => await MapBurnTokens(burnTokens),
-    //         Gateway.MintTokens mintTokens => await MapMintTokens(mintTokens),
-    //         Gateway.StakeTokens stakeTokens => await MapStakeTokens(stakeTokens),
-    //         Gateway.UnstakeTokens unstakeTokens => await MapUnstakeTokens(unstakeTokens),
-    //         Gateway.CreateTokenDefinition createTokenDefinition => await MapCreateTokenDefinition(createTokenDefinition),
-    //         Gateway.RegisterValidator registerValidator => MapRegisterValidator(registerValidator),
-    //         Gateway.UnregisterValidator unregisterValidator => MapUnregisterValidator(unregisterValidator),
-    //         /* Users can supply a type which validates as an action (because it has a string type), but not as a type
-    //            which matches the discriminator, so the deserializer doesn't deserialize it into one of the subtypes
-    //            above. This error catches these issues */
-    //         not null => throw new InvalidActionException(action, $"Action type of {action.Type} is not supported"),
-    //         _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unhandled action type"),
-    //     };
-    // }
-}

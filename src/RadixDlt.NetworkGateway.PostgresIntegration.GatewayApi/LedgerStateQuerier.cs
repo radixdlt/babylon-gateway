@@ -123,7 +123,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new TargetLedgerState(ledgerStatus.SyncTarget.TargetStateVersion)
+            new TargetLedgerState(ledgerStatus.TargetStateVersion)
         );
     }
 
