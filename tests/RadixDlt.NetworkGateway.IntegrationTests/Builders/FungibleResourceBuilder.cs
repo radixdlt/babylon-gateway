@@ -16,10 +16,10 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
     private string _totalSupplyAttos = string.Empty;
     private int _fungibleDivisibility = 18;
 
-    public FungibleResourceBuilder(CoreApiStubDefaultConfiguration defaultConfig)
+    public FungibleResourceBuilder()
     {
         // generate something like: resource_loc_1qqwknku2
-        _resourceAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.ResourceHrp);
+        _resourceAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.ResourceHrp);
         _resourceAddressHex = AddressHelper.AddressToHex(_resourceAddress);
     }
 
@@ -75,6 +75,16 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
     {
         _resourceAddress = resourceAddress;
         _resourceAddressHex = AddressHelper.AddressToHex(_resourceAddress);
+        return this;
+    }
+
+    public FungibleResourceBuilder WithFixedAddressHex(string resourceAddressHex)
+    {
+        _resourceAddressHex = resourceAddressHex;
+
+        _resourceAddress = AddressHelper.AddressFromHex(
+            _resourceAddressHex,
+            GenesisData.NetworkDefinition.ResourceHrp);
         return this;
     }
 

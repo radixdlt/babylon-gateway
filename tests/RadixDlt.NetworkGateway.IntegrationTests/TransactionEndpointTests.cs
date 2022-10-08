@@ -65,17 +65,10 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -85,19 +78,18 @@ namespace RadixDlt.NetworkGateway.IntegrationTests;
 public class TransactionEndpointTests
 {
     private readonly ITestOutputHelper _testConsole;
-    private readonly NetworkDefinition _networkDefinition;
 
     public TransactionEndpointTests(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
-        _networkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
+        GenesisData.NetworkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
     [Fact]
     public void TestTransactionRecent()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .MockRecentTransactions();
 
@@ -107,14 +99,14 @@ public class TransactionEndpointTests
         task.Wait();
 
         // Assert (callback method)
-        void ValidateResponse(RecentTransactionsResponse payload)
+        void ValidateResponse(RecentTransactionsResponse payload, string intentHash)
         {
             _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
             payload.Transactions.ShouldNotBeNull();
             payload.Transactions.Count.Should().BeGreaterThan(0);
 
             payload.LedgerState.ShouldNotBeNull();
-            payload.LedgerState.Network.Should().Be(gatewayRunner.CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName);
+            payload.LedgerState.Network.Should().Be(GenesisData.NetworkDefinition.LogicalName);
             payload.LedgerState._Version.Should().Be(1);
         }
     }
@@ -123,7 +115,7 @@ public class TransactionEndpointTests
     public void TestTransactionPreviewShouldPass()
     {
         // Arrange A2B Transfer preview
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .MockA2BTransferPreviewTransaction();
 
@@ -133,7 +125,7 @@ public class TransactionEndpointTests
         task.Wait();
 
         // Assert (callback method)
-        void ValidateResponse(TransactionPreviewResponse payload)
+        void ValidateResponse(TransactionPreviewResponse payload, string intentHash)
         {
             _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
             var coreApiPayload = JsonConvert.DeserializeObject<RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse>(payload.CoreApiResponse.ToString()!);
@@ -211,7 +203,7 @@ public class TransactionEndpointTests
     public void TestTransactionSubmit()
     {
         // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .MockSubmitTransaction();
 
@@ -221,7 +213,7 @@ public class TransactionEndpointTests
         task.Wait();
 
         // Assert (callback method)
-        void ValidateResponse(TransactionSubmitResponse payload)
+        void ValidateResponse(TransactionSubmitResponse payload, string intentHash)
         {
             _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
             payload.Duplicate.Should().Be(false);
@@ -260,30 +252,38 @@ public class TransactionEndpointTests
     public void TokensTransferFromAccountAtoBShouldSucceed()
     {
         // Arrange
-        var accountA = AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp);
-        var accountB = AddressHelper.GenerateRandomAddress(_networkDefinition.AccountComponentHrp);
+        var accountAAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
+        var accountAPublicKey = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+        // var createAccountATransactionIntentHash = "f3949c58ea6f9c1e5bb0b917ae190d4a695527e842acda44bc1e18a5fc801b2d";
 
-        using var gatewayRunner = new GatewayTestsRunner(_networkDefinition, MethodBase.GetCurrentMethod()!.Name, _testConsole)
+        var accountBAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
+        var accountBPublicKey = "03c00b2b2cfa2320d267f2cf2b43a8ac26d7e986f83d95038e927f3df383a470df";
+        // var createAccountBTransactionIntentHash = "61ece2bbb206421642b1e4a6df6086ebf7a02e5d326a80cb2b886a0f5b0265c3";
+
+        var tokensTransferTransactionIntentHash = "b06099131de839a7b381ef6d9ac3748dd6d7e3536c4a5a5299557585b2ed5f96";
+
+        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .WithAccount(accountA, "XRD", 1000)
-            .WithAccount(accountB, "XRD", 0)
-            .MockTokensTransfer(accountA, accountB, "XRD", 200);
+            .WithAccount(accountAAddress, accountAPublicKey, "XRD")
+            .WithAccount(accountBAddress, accountBPublicKey, "XRD")
+            .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
 
         var task = gatewayRunner
             .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(callback: ValidateResponse);
         task.Wait();
 
         // Assert (callback method)
-        void ValidateResponse(TransactionSubmitResponse payload)
+        void ValidateResponse(TransactionSubmitResponse payload, string intentHash)
         {
             _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
             payload.Duplicate.Should().Be(false);
 
-            // TODO: should also return intent hash
-            // payload.IntentHash.ShouldNoBreNull();
+            if (intentHash == tokensTransferTransactionIntentHash)
+            {
+                gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
 
-            gatewayRunner.GetAccountBalance(accountA).Should().Be(800);
-            gatewayRunner.GetAccountBalance(accountB).Should().Be(200);
+                gatewayRunner.GetAccountBalance(accountBAddress).Should().Be(1200);
+            }
         }
 
         gatewayRunner.SaveStateUpdatesToFile();

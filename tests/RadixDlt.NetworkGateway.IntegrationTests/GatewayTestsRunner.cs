@@ -1,25 +1,17 @@
-using FluentAssertions;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Reflection;
-using System.Text;
 using Xunit.Abstractions;
 using EcdsaSecp256k1PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.EcdsaSecp256k1PublicKey;
 using PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKey;
 using PublicKeyType = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKeyType;
 using TransactionPreviewRequestFlags = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequestFlags;
-using TransactionSubmitRequest = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionSubmitRequest;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
@@ -37,31 +29,32 @@ public partial class GatewayTestsRunner : IDisposable
     private TestGatewayApiFactory? _gatewayApiFactory;
 
     public GatewayTestsRunner(
-        NetworkDefinition networkDefinition,
         string testName,
         ITestOutputHelper testConsole)
     {
-        // clean up and initialize
-        CoreApiStub = new CoreApiStub { CoreApiStubDefaultConfiguration = { NetworkDefinition = networkDefinition } };
-
         _testConsole = testConsole;
         _databaseName = testName;
 
-        _stateUpdatesStore = new StateUpdatesStore(_testConsole);
-        _transactionStreamStore = new TestTransactionStreamStore(CoreApiStub, _stateUpdatesStore, testConsole);
-
         WriteTestHeader(testName);
+
+        _stateUpdatesStore = new StateUpdatesStore(_testConsole);
+
+        var requestsAndResponses = new CoreApiStubRequestsAndResponses();
+
+        _transactionStreamStore = new TestTransactionStreamStore(requestsAndResponses, _stateUpdatesStore, testConsole);
+
+        CoreApiStub = new CoreApiStub(requestsAndResponses, _transactionStreamStore);
     }
 
     public CoreApiStub CoreApiStub { get; }
 
-    public GatewayTestsRunner WithAccount(string accountAddress, string token, long balance)
+    public GatewayTestsRunner WithAccount(string accountAddress, string publicKey, string token, long tokenAmount = 1000, int lockFee = 10)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _testConsole.WriteLine($"Account: {accountAddress}, {token}, {balance}");
+        _testConsole.WriteLine($"Account: {accountAddress}, {token}, {tokenAmount}");
 
-        _transactionStreamStore.QueueAccountTransaction(accountAddress, token, balance);
+        _transactionStreamStore.QueueCreateAccountTransaction(accountAddress, publicKey, token, lockFee);
 
         return this;
     }
@@ -73,21 +66,21 @@ public partial class GatewayTestsRunner : IDisposable
     //     switch (expectedStatus)
     //     {
     //         case TransactionStatus.StatusEnum.FAILED:
-    //             CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
+    //             CoreApiStub.RequestsAndResponses.MempoolTransactionStatus =
     //                 MempoolTransactionStatus.Failed;
     //             break;
     //         case TransactionStatus.StatusEnum.PENDING:
-    //             CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
+    //             CoreApiStub.RequestsAndResponses.MempoolTransactionStatus =
     //                 MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
     //             break;
     //         case TransactionStatus.StatusEnum.CONFIRMED:
-    //             CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionStatus =
+    //             CoreApiStub.RequestsAndResponses.MempoolTransactionStatus =
     //                 MempoolTransactionStatus.Committed;
     //             break;
     //     }
     //
     //     var transactionIdentifier =
-    //         new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, CoreApiStub.CoreApiStubDefaultConfiguration.MempoolTransactionHash);
+    //         new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, CoreApiStub.RequestsAndResponses.MempoolTransactionHash);
     //
     //     var json = new TransactionStatusRequest(transactionIdentifier).ToJson();
     //     var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -135,45 +128,43 @@ public partial class GatewayTestsRunner : IDisposable
         return this;
     }
 
-    public GatewayTestsRunner MockTokensTransfer(string fromAccount, string toAccount, string tokenName, int amountToTransfer)
+    public GatewayTestsRunner MockTokensTransfer(string fromAccount, string toAccount, string tokenName, int amountToTransfer, string tokensTransferTransactionIntentHash)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        _transactionStreamStore.QueueTokensTransferTransaction(fromAccount, toAccount, tokenName, amountToTransfer);
+        _transactionStreamStore.QueueTokensTransferTransaction(fromAccount, toAccount, tokenName, amountToTransfer, tokensTransferTransactionIntentHash);
 
         return this;
     }
 
-    public long GetAccountBalance(string accountAddress)
+    public double GetAccountBalance(string accountAddress)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var accountUpSubstate = _stateUpdatesStore.GetLastUpSubstateByEntityAddress(accountAddress);
+        var accountUpSubstate = _stateUpdatesStore.StateUpdates.GetLastUpSubstateByEntityAddress(accountAddress);
 
         // TODO: finds only the 1st vault!!!
-        var vaultEntityAddressHex = ((accountUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+        var vaultEntityAddressHex = (accountUpSubstate?.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
 
-        var vaultUpSubstate = _stateUpdatesStore.GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
+        var vaultUpSubstate = _stateUpdatesStore.StateUpdates.GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
 
         var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
 
-        // TODO: divisibility??? Optimize and make it a separate function
-        var attos = double.Parse(vaultResourceAmount!.AmountAttos);
-        var tokens = attos / Math.Pow(10, 18);
+        var tokens = TokenAttosConverter.Attos2Tokens(TokenAttosConverter.ParseAttosFromString(vaultResourceAmount!.AmountAttos));
 
         _testConsole.WriteLine($"Account: {accountAddress} balance: {tokens}");
 
-        return Convert.ToInt64(tokens);
+        return Math.Round(tokens, 4);
     }
 
     public GatewayTestsRunner MockA2BTransferPreviewTransaction()
     {
         var manifest = new ManifestBuilder()
-            .WithLockFeeMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.SystemComponentHrp), "10")
-            .WithWithdrawByAmountMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.AccountComponentHrp), "100",
-                AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.ResourceHrp))
-            .WithTakeFromWorktopByAmountMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.ResourceHrp), "100", "bucket1")
-            .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(CoreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.AccountComponentHrp), "bucket1")
+            .WithLockFeeMethod(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.SystemComponentHrp), "1")
+            .WithWithdrawByAmountMethod(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp), "100",
+                AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.ResourceHrp))
+            .WithTakeFromWorktopByAmountMethod(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.ResourceHrp), "100", "bucket1")
+            .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp), "bucket1")
             .Build();
 
         var signerPublicKeys = new List<PublicKey>

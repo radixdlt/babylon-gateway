@@ -10,9 +10,9 @@ using TransactionSubmitResponse = RadixDlt.CoreApiSdk.Model.TransactionSubmitRes
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 
-public class CoreApiStubDefaultConfiguration
+public class CoreApiStubRequestsAndResponses
 {
-    public CoreApiStubDefaultConfiguration()
+    public CoreApiStubRequestsAndResponses()
     {
         CreateDefault();
     }
@@ -39,28 +39,24 @@ public class CoreApiStubDefaultConfiguration
 
     public MempoolTransactionStatus MempoolTransactionStatus { get; set; }
 
-    public NetworkDefinition NetworkDefinition { get; set; }
-
     public NetworkConfigurationResponse NetworkConfigurationResponse
     {
         get
         {
             return new NetworkConfigurationResponse(
                 new NetworkConfigurationResponseVersion(CoreVersion, ApiVersion),
-                NetworkDefinition.LogicalName,
-                NetworkDefinition.HrpSuffix);
+                GenesisData.NetworkDefinition.LogicalName,
+                GenesisData.NetworkDefinition.HrpSuffix);
         }
     }
 
     public NetworkStatusResponse NetworkStatusResponse { get; set; }
 
-    public RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequest TransactionPreviewRequest { get; set; }
-
     public TransactionPreviewResponse TransactionPreviewResponse { get; set; }
 
     public TransactionSubmitResponse TransactionSubmitResponse { get; set; }
 
-    public void CreateDefault()
+    private void CreateDefault()
     {
         CoreVersion = "1.0";
 

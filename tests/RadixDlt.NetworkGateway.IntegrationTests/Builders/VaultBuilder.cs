@@ -1,5 +1,6 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
@@ -11,29 +12,30 @@ public class VaultBuilder : BuilderBase<StateUpdates>
 {
     private string _vaultAddressHex;
 
-    public VaultBuilder(CoreApiStubDefaultConfiguration defaultConfig)
+    public VaultBuilder()
     {
-        var vaultAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.NormalComponentHrp);
+        var vaultAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.NormalComponentHrp);
         _vaultAddressHex = AddressHelper.AddressToHex(vaultAddress);
     }
 
     private string _fungibleTokensResourceAddress = string.Empty;
     private string _fungibleTokensAmountAttos = string.Empty;
+    private DownSubstate? _downSubstate;
 
     public override StateUpdates Build()
     {
+        var version = 0L;
+
         var downSubstates = new List<DownSubstate>();
+
+        if (_downSubstate != null)
+        {
+            version = _downSubstate._Version;
+        }
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var newGlobalEntities = new List<GlobalEntityId>()
-        {
-            new(
-                entityType: EntityType.Vault,
-                entityAddressHex: _vaultAddressHex,
-                globalAddressHex: _vaultAddressHex,
-                globalAddress: AddressHelper.AddressFromHex(_vaultAddressHex)),
-        };
+        var newGlobalEntities = new List<GlobalEntityId>();
 
         var upSubstates = new List<UpSubstate>()
         {
@@ -44,7 +46,7 @@ public class VaultBuilder : BuilderBase<StateUpdates>
                     substateType: SubstateType.Vault,
                     substateKeyHex: "00"
                 ),
-                version: 0L,
+                version: version,
                 substateData: new Substate(
                     actualInstance: new VaultSubstate(
                         entityType: EntityType.Vault,
@@ -63,9 +65,9 @@ public class VaultBuilder : BuilderBase<StateUpdates>
         return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, newGlobalEntities);
     }
 
-    public VaultBuilder WithFixedAddress(string vaultAddress)
+    public VaultBuilder WithFixedAddressHex(string vaultAddressHex)
     {
-        _vaultAddressHex = vaultAddress;
+        _vaultAddressHex = vaultAddressHex;
 
         return this;
     }
@@ -80,6 +82,13 @@ public class VaultBuilder : BuilderBase<StateUpdates>
     public VaultBuilder WithFungibleResourceAmountAttos(string fungibleTokensAmountAttos)
     {
         _fungibleTokensAmountAttos = fungibleTokensAmountAttos;
+
+        return this;
+    }
+
+    public VaultBuilder WithDownState(DownSubstate downSubstate)
+    {
+        _downSubstate = downSubstate;
 
         return this;
     }

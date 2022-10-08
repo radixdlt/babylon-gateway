@@ -1,4 +1,6 @@
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
@@ -9,6 +11,20 @@ public class ManifestBuilder : BuilderBase<string>
     public override string Build()
     {
         return string.Join(";\n", _instructions);
+    }
+
+    public ManifestBuilder WithCallMethod(string componentAddress, string methodName, string[]? args = null)
+    {
+        var instruction = $"CALL_METHOD ComponentAddress(\"{componentAddress}\") \"{methodName}\"";
+
+        if (args != null)
+        {
+            instruction += $" {string.Join(" ", args)}";
+        }
+
+        _instructions.Add(instruction);
+
+        return this;
     }
 
     public ManifestBuilder WithLockFeeMethod(string componentAddress, string lockFee)
@@ -25,6 +41,13 @@ public class ManifestBuilder : BuilderBase<string>
         return this;
     }
 
+    public ManifestBuilder WithTakeFromWorktop(string resourceAddress, string bucketName)
+    {
+        _instructions.Add($"TAKE_FROM_WORKTOP ResourceAddress(\"{resourceAddress}\") Bucket(\"{bucketName}\")");
+
+        return this;
+    }
+
     public ManifestBuilder WithTakeFromWorktopByAmountMethod(string resourceAddress, string amount, string bucketName)
     {
         _instructions.Add($"TAKE_FROM_WORKTOP_BY_AMOUNT Decimal(\"{amount}\") ResourceAddress(\"{resourceAddress}\") Bucket(\"{bucketName}\")");
@@ -35,6 +58,15 @@ public class ManifestBuilder : BuilderBase<string>
     public ManifestBuilder WithDepositToAccountMethod(string accountAddress, string bucketName)
     {
         _instructions.Add($"CALL_METHOD ComponentAddress(\"{accountAddress}\") \"deposit\" Bucket(\"{bucketName}\")");
+
+        return this;
+    }
+
+    public ManifestBuilder WithNewAccountWithNonFungibleResource(string publicKey, string bucketName)
+    {
+        string deriveNonFungibleAddress = "000000000000000000000000000000000000000000000000000002300721000000";
+
+        _instructions.Add($"CALL_FUNCTION PackageAddress(\"GenesisData.AccountPackageAddress\") \"Account\" \"new_with_resource\" Enum(\"Protected\", Enum(\"ProofRule\", Enum(\"Require\", Enum(\"StaticNonFungible\", NonFungibleAddress(\"{deriveNonFungibleAddress}{publicKey}\"))))) Bucket(\"{bucketName}\")");
 
         return this;
     }

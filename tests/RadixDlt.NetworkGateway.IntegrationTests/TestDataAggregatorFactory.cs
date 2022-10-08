@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregatorRunner;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
@@ -188,11 +189,11 @@ public class TestDataAggregatorFactory
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
+                        o.NetworkName = GenesisData.NetworkDefinition.LogicalName;
                         o.DisableCoreApiHttpsCertificateChecks = false;
                         o.CoreApiNodes = new List<CoreApiNode>
                         {
-                            _coreApiStub.CoreApiStubDefaultConfiguration.DataAggregatorCoreApiNode,
+                            _coreApiStub.RequestsAndResponses.DataAggregatorCoreApiNode,
                         };
                     }
                 );

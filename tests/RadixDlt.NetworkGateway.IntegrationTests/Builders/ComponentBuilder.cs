@@ -1,5 +1,6 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
@@ -16,31 +17,32 @@ public enum ComponentHrp
 public class ComponentBuilder : BuilderBase<StateUpdates>
 {
     private string _componentAddress;
+    private string _componentAddressHex;
+    private string _componentAddressHrp;
 
     private Substate? _componentInfoSubstate;
     private Substate? _componentStateSubstate;
     private Substate? _componentSystemSubstate;
 
-    public ComponentBuilder(CoreApiStubDefaultConfiguration defaultConfig, ComponentHrp componentHrp = ComponentHrp.NormalComponentHrp)
+    public ComponentBuilder(ComponentHrp componentHrp = ComponentHrp.NormalComponentHrp)
     {
-        string strComponentHrp;
-
         switch (componentHrp)
         {
             case ComponentHrp.AccountComponentHrp:
-                strComponentHrp = defaultConfig.NetworkDefinition.AccountComponentHrp;
+                _componentAddressHrp = GenesisData.NetworkDefinition.AccountComponentHrp;
                 break;
             case ComponentHrp.NormalComponentHrp:
-                strComponentHrp = defaultConfig.NetworkDefinition.NormalComponentHrp;
+                _componentAddressHrp = GenesisData.NetworkDefinition.NormalComponentHrp;
                 break;
             case ComponentHrp.SystemComponentHrp:
-                strComponentHrp = defaultConfig.NetworkDefinition.SystemComponentHrp;
+                _componentAddressHrp = GenesisData.NetworkDefinition.SystemComponentHrp;
                 break;
             default:
                 throw new NotImplementedException();
         }
 
-        _componentAddress = AddressHelper.GenerateRandomAddress(strComponentHrp);
+        _componentAddress = AddressHelper.GenerateRandomAddress(_componentAddressHrp);
+        _componentAddressHex = AddressHelper.AddressToHex(_componentAddress);
     }
 
     public override StateUpdates Build()
@@ -147,6 +149,18 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
     public ComponentBuilder WithFixedAddress(string componentAddress)
     {
         _componentAddress = componentAddress;
+        _componentAddressHex = AddressHelper.AddressToHex(_componentAddress);
+
+        return this;
+    }
+
+    public ComponentBuilder WithFixedAddressHex(string componentAddressHex)
+    {
+        _componentAddressHex = componentAddressHex;
+
+        _componentAddress = AddressHelper.AddressFromHex(
+            _componentAddressHex,
+            _componentAddressHrp);
 
         return this;
     }

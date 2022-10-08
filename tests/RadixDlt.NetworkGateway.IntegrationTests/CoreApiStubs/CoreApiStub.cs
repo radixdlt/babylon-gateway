@@ -8,11 +8,13 @@ using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ICoreApiProvider = RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders.ICoreApiProvider;
+using NetworkDefinition = RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkDefinition;
 using TransactionPreviewRequest = RadixDlt.CoreApiSdk.Model.TransactionPreviewRequest;
 using TransactionPreviewResponse = RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse;
 using TransactionSubmitRequest = RadixDlt.CoreApiSdk.Model.TransactionSubmitRequest;
@@ -29,13 +31,21 @@ public class CoreApiStub :
     ICoreApiHandler,
     ICapturedConfigProvider
 {
-    public CoreApiStubDefaultConfiguration CoreApiStubDefaultConfiguration { get; } = new();
+    private readonly TestTransactionStreamStore _transactionStreamStore;
+
+    public CoreApiStubRequestsAndResponses RequestsAndResponses { get; }
+
+    public CoreApiStub(CoreApiStubRequestsAndResponses coreApiStubRequestsAndResponses, TestTransactionStreamStore transactionStreamStore)
+    {
+        _transactionStreamStore = transactionStreamStore;
+        RequestsAndResponses = coreApiStubRequestsAndResponses;
+    }
 
     #region injected stubs
 
-    public CoreApiNode CoreApiNode => CoreApiStubDefaultConfiguration.GatewayCoreApiNode;
+    public CoreApiNode CoreApiNode => RequestsAndResponses.GatewayCoreApiNode;
 
-    public StatusApi StatusApi => new StatusApiStub(CoreApiStubDefaultConfiguration.NetworkStatusResponse);
+    public StatusApi StatusApi => new StatusApiStub(RequestsAndResponses.NetworkStatusResponse);
 
     public TransactionApi TransactionApi { get; }
 
@@ -43,48 +53,48 @@ public class CoreApiStub :
 
     public Task<CoreNodeHealthResult> CheckCoreNodeHealth(CancellationToken cancellationToken)
     {
-        return Task.FromResult(CoreApiStubDefaultConfiguration.CoreNodeHealthResult);
+        return Task.FromResult(RequestsAndResponses.CoreNodeHealthResult);
     }
 
     public CoreApiNode GetCoreNodeConnectedTo()
     {
-        return CoreApiStubDefaultConfiguration.GatewayCoreApiNode;
+        return RequestsAndResponses.GatewayCoreApiNode;
     }
 
     public Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return Task.FromResult(CoreApiStubDefaultConfiguration.NetworkConfigurationResponse);
+        return Task.FromResult(RequestsAndResponses.NetworkConfigurationResponse);
     }
 
     string ICoreApiHandler.GetNetworkIdentifier()
     {
-        return CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
+        return GenesisData.NetworkDefinition.LogicalName;
     }
 
     public Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
-        return Task.FromResult(CoreApiStubDefaultConfiguration.CommittedTransactionsResponse);
+        return _transactionStreamStore.GetTransactions(stateVersion, count);
     }
 
     public Task<TransactionPreviewResponse> PreviewTransaction(
         TransactionPreviewRequest request,
         CancellationToken token = default)
     {
-        return Task.FromResult(CoreApiStubDefaultConfiguration.TransactionPreviewResponse);
+        return Task.FromResult(RequestsAndResponses.TransactionPreviewResponse);
     }
 
     public Task<TransactionSubmitResponse> SubmitTransaction(
         TransactionSubmitRequest request,
         CancellationToken token = default)
     {
-        return Task.FromResult(CoreApiStubDefaultConfiguration.TransactionSubmitResponse);
+        return Task.FromResult(RequestsAndResponses.TransactionSubmitResponse);
     }
 
     #endregion
 
     public async Task<CapturedConfig> CaptureConfiguration()
     {
-        var networkConfiguration = MapNetworkConfigurationResponse(CoreApiStubDefaultConfiguration.NetworkConfigurationResponse);
+        var networkConfiguration = MapNetworkConfigurationResponse(RequestsAndResponses.NetworkConfigurationResponse);
 
         return await Task.FromResult(new CapturedConfig(
             networkConfiguration.NetworkDefinition.NetworkName,

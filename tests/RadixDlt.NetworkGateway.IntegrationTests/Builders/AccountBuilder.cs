@@ -8,18 +8,16 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class AccountBuilder : BuilderBase<StateUpdates>
 {
-    private readonly CoreApiStubDefaultConfiguration _defaultConfig;
     private readonly List<StateUpdates> _stateUpdatesList;
     private readonly StateUpdatesStore _stateUpdatesStore;
 
     private string _accountAddress = string.Empty;
-    private string _tokenName = string.Empty;
     private string _totalAmountAttos = string.Empty;
     private ComponentInfoSubstate? _componentInfoSubstate;
+    private string _tokenName = string.Empty;
 
-    public AccountBuilder(CoreApiStubDefaultConfiguration defaultConfig, List<StateUpdates> stateUpdatesList, StateUpdatesStore stateUpdatesStore)
+    public AccountBuilder(List<StateUpdates> stateUpdatesList, StateUpdatesStore stateUpdatesStore)
     {
-        _defaultConfig = defaultConfig;
         _stateUpdatesList = stateUpdatesList;
         _stateUpdatesStore = stateUpdatesStore;
         AddressHelper.GenerateRandomPublicKey();
@@ -35,14 +33,17 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         // Create a new down/up state to free 'tokenBalance' tokens from SystFaucet vault
         // update GlobalEntities.StateUpdates
 
-        // var tokens = new FungibleResourceBuilder(_defaultConfig)
+        // var tokens = new FungibleResourceBuilder()
         //     .WithResourceName(_tokenName)
         //     .WithTotalSupplyAttos(_totalAmountAttos)
         //     .Build();
 
-        var tokens = _stateUpdatesStore.GetGlobalEntity(GenesisData.GenesisResourceManagerAddress);
+        var tokens = _stateUpdatesStore.StateUpdates.GetGlobalEntity(GenesisData.GenesisResourceManagerAddress);
 
-        var vault = new VaultBuilder(_defaultConfig)
+        var vaultAddressHex = AddressHelper.AddressToHex(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.ResourceHrp));
+
+        var vault = new VaultBuilder()
+            .WithFixedAddressHex(vaultAddressHex)
             .WithFungibleTokensResourceAddress(tokens.EntityAddressHex)
             .WithFungibleResourceAmountAttos(_totalAmountAttos)
             .Build();
@@ -50,9 +51,9 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         _stateUpdatesList.Add(vault);
 
         var dataStruct = new KeyValueStoreBuilder()
-            .WithDataStructField(vault.NewGlobalEntities[0].EntityAddressHex, "Custom", ScryptoType.Vault)
+            .WithDataStructField(vaultAddressHex, "Custom", ScryptoType.Vault)
             .WithDataStructField(keyValueStoreAddressHex, "Custom", ScryptoType.KeyValueStore)
-            .WithOwnedEntity(EntityType.Vault, vault.NewGlobalEntities[0].EntityAddressHex)
+            .WithOwnedEntity(EntityType.Vault, vaultAddressHex)
             .WithOwnedEntity(EntityType.KeyValueStore, keyValueStoreAddressHex)
             .Build();
 
@@ -62,7 +63,7 @@ public class AccountBuilder : BuilderBase<StateUpdates>
             dataStruct: dataStruct
         );
 
-        var account = new ComponentBuilder(_defaultConfig, ComponentHrp.AccountComponentHrp)
+        var account = new ComponentBuilder(ComponentHrp.AccountComponentHrp)
             .WithComponentInfoSubstate(_componentInfoSubstate!)
             .WithComponentStateSubstate(componentStateSubstateData)
             .WithFixedAddress(_accountAddress)

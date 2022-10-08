@@ -74,6 +74,7 @@ using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiTestServer;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -166,19 +167,19 @@ public class TestGatewayApiFactory
 
                 services.PostConfigure<NetworkOptions>(o =>
                     {
-                        o.NetworkName = _coreApiStub.CoreApiStubDefaultConfiguration.NetworkDefinition.LogicalName;
+                        o.NetworkName = GenesisData.NetworkDefinition.LogicalName;
                         o.IgnoreNonSyncedNodes = false;
                         o.CoreApiNodes = new List<CoreApiNode>
                         {
-                            _coreApiStub.CoreApiStubDefaultConfiguration.GatewayCoreApiNode,
+                            _coreApiStub.RequestsAndResponses.GatewayCoreApiNode,
                         };
                     }
                 );
 
                 services.PostConfigure<EndpointOptions>(o =>
                 {
-                    o.GatewayApiVersion = _coreApiStub.CoreApiStubDefaultConfiguration.GatewayApiVersion;
-                    o.GatewayOpenApiSchemaVersion = _coreApiStub.CoreApiStubDefaultConfiguration.GatewayOpenApiSchemaVersion;
+                    o.GatewayApiVersion = _coreApiStub.RequestsAndResponses.GatewayApiVersion;
+                    o.GatewayOpenApiSchemaVersion = _coreApiStub.RequestsAndResponses.GatewayOpenApiSchemaVersion;
                     o.MaxPageSize = 30;
                 });
             });

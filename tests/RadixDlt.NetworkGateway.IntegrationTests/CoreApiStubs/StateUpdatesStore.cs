@@ -1,10 +1,12 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
+using System.Numerics;
+using System.Text;
 using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
@@ -37,110 +39,32 @@ public class StateUpdatesStore
         _stateUpdatesList.Add(stateUpdates);
     }
 
-    public GlobalEntityId GetGlobalEntity(string globalAddress)
-    {
-        return StateUpdates.NewGlobalEntities.Find(ge => ge.GlobalAddress == globalAddress)!;
-    }
-
-    public UpSubstate GetLastUpSubstateByEntityAddress(string entityAddress)
-    {
-        var entityAddressHex = StateUpdates.NewGlobalEntities.FindLast(ge => ge.GlobalAddress == entityAddress)!.EntityAddressHex;
-
-        return GetLastUpSubstateByEntityAddressHex(entityAddressHex);
-    }
-
-    public UpSubstate GetLastUpSubstateByEntityAddressHex(string entityAddressHex)
-    {
-        return StateUpdates.UpSubstates.FindLast(us => us.SubstateId.EntityAddressHex == entityAddressHex)!;
-    }
-
-    public DownSubstate GetLastDownSubstateByEntityAddress(string entityAddress)
-    {
-        var entityAddressHex = StateUpdates.NewGlobalEntities.FindLast(ge => ge.GlobalAddress == entityAddress)!.EntityAddressHex;
-
-        return GetLastDownSubstateByEntityAddressHex(entityAddressHex);
-    }
-
-    public DownSubstate GetLastDownSubstateByEntityAddressHex(string entityAddressHex)
-    {
-        return StateUpdates.DownSubstates.FindLast(us => us.SubstateId.EntityAddressHex == entityAddressHex)!;
-    }
-
-    public UpSubstate GetComponentVaultUpSubstateByEntityAddress(string entityAddress)
-    {
-        var componentUpSubstate = GetLastUpSubstateByEntityAddress(entityAddress);
-
-        var vaultEntityAddressHex = ((componentUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
-
-        return GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
-    }
-
-    public DownSubstate GetComponentVaultDownSubstateByEntityAddress(string entityAddress)
-    {
-        var componentUpSubstate = GetLastUpSubstateByEntityAddress(entityAddress);
-
-        var vaultEntityAddressHex = ((componentUpSubstate!.SubstateData.ActualInstance as ComponentStateSubstate)!).OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
-
-        return GetLastDownSubstateByEntityAddressHex(vaultEntityAddressHex);
-    }
-
-    public ResourceManagerSubstate GetFungibleResourceUpSubstateByEntityAddress(string entityAddress)
-    {
-        var resourceUpSubstate = GetLastUpSubstateByEntityAddress(entityAddress);
-
-        return (resourceUpSubstate.SubstateData.ActualInstance as ResourceManagerSubstate)!;
-    }
-
-    public int GetFungibleResourceDivisibilityEntityAddress(string entityAddress)
-    {
-        var vaultUpSubstate = GetComponentVaultUpSubstateByEntityAddress(entityAddress);
-
-        var vaultSubstate = vaultUpSubstate.SubstateData.GetVaultSubstate();
-
-        var xrdResourceAddress = vaultSubstate.PointedResources.First();
-
-        var resourceUpSubstate = GetLastUpSubstateByEntityAddressHex(xrdResourceAddress.Address);
-
-        var resourceManagerSubstate = resourceUpSubstate.SubstateData.ActualInstance as ResourceManagerSubstate;
-
-        return resourceManagerSubstate!.FungibleDivisibility;
-    }
-
     public FeeSummary LockFee()
     {
         // calculate fees
         // state updates when complete
 
         // find token divisibility
-        var divisibility = GetFungibleResourceDivisibilityEntityAddress(GenesisData.SysFaucetComponentAddress);
+        var divisibility = StateUpdates.GetFungibleResourceDivisibilityEntityAddress(GenesisData.SysFaucetComponentAddress);
 
         var feeSummary = CalculateFeeSummary();
-        var feeAmount = Math.Round(feeSummary.CostUnitConsumed / Math.Pow(10, divisibility), 4);
+
+        var paidFeeAttos = feeSummary.CostUnitConsumed * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
+        var feeAmount = TokenAttosConverter.Attos2Tokens(paidFeeAttos);
 
         _testConsole.WriteLine($"Locking fee: {feeAmount} xrd");
 
         return feeSummary;
     }
 
-    public StateUpdates GetFreeTokens(FeeSummary feeSummary, long amount, out string totalAttos)
+    public StateUpdates TakeTokensFromVault(string componentAddress, FeeSummary feeSummary, double xrdAmount, out string newTotalAttos)
     {
-        _testConsole.WriteLine($"Getting free tokens from the faucet");
+        // a default value of free XRD tokens
+        var tokenAmountAttos = TokenAttosConverter.Tokens2Attos(xrdAmount);
 
-        var vaultDownSubstate = GetComponentVaultDownSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
+        var vaultDownSubstate = StateUpdates.GetLastVaultDownSubstateByEntityAddress(componentAddress);
 
-        var vaultUpSubstate = GetComponentVaultUpSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
-
-        var vaultSubstate = vaultUpSubstate.SubstateData.GetVaultSubstate();
-
-        var xrdResourceAddress = vaultSubstate.PointedResources.First();
-
-        var resourceDownSubstate = GetLastDownSubstateByEntityAddressHex(xrdResourceAddress.Address);
-
-        var resourceUpSubstate = GetLastUpSubstateByEntityAddressHex(xrdResourceAddress.Address);
-
-        var resourceManagerSubstate = resourceUpSubstate.SubstateData.ActualInstance as ResourceManagerSubstate;
-
-        int divisibility = resourceManagerSubstate!.FungibleDivisibility;
+        var vaultUpSubstate = StateUpdates.GetLastVaultUpSubstateByEntityAddress(componentAddress);
 
         var downVirtualSubstates = new List<SubstateId>();
         var downSubstates = new List<DownSubstate?>();
@@ -150,44 +74,49 @@ public class StateUpdatesStore
         // create a new down state with the 'old' balance
         // create a new up state with the new balance and increase its state version
 
-        // new resource total
-
-        var downSubstate = resourceDownSubstate.CloneSubstate();
-        if (downSubstate != null)
-        {
-            downSubstate._Version += 1;
-            downSubstates.Add(downSubstate);
-        }
-
-        var fees = feeSummary.CostUnitConsumed * long.Parse(feeSummary.CostUnitPriceAttos);
-        var total = amount * Math.Pow(10, divisibility) /*+ fees */; // TODO account is debited without fees?
-        totalAttos = Convert.ToDecimal(total).ToString(CultureInfo.InvariantCulture);
-
-        var attos = double.Parse(resourceManagerSubstate.TotalSupplyAttos);
-        var newAttosBalance = attos - (amount * Math.Pow(10, divisibility)) - fees;
-
-        var upSubstate = resourceUpSubstate.CloneSubstate();
-        upSubstate.SubstateData.GetResourceManagerSubstate().TotalSupplyAttos = Convert.ToDecimal(newAttosBalance).ToString(CultureInfo.InvariantCulture);
-        upSubstate._Version += 1;
-        upSubstates.Add(upSubstate);
-
         // new vault total
 
-        downSubstate = vaultDownSubstate.CloneSubstate();
-        if (downSubstate != null)
+        // add new vault down substate
+        var newVaultDownSubstate = vaultDownSubstate.CloneSubstate();
+        if (newVaultDownSubstate != null)
         {
-            downSubstate._Version += 1;
-            downSubstates.Add(downSubstate);
+            newVaultDownSubstate._Version = vaultUpSubstate._Version;
+        }
+        else
+        {
+            newVaultDownSubstate = new DownSubstate(
+                new SubstateId(
+                    EntityType.Vault,
+                    StateUpdates.GetFungibleResoureAddressHexByEntityAddress(componentAddress),
+                    SubstateType.Vault,
+                    Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
+                ), substateDataHash: "hash", vaultUpSubstate._Version
+            );
         }
 
-        var vaultResourceAmount = vaultSubstate.ResourceAmount.GetFungibleResourceAmount();
-        attos = double.Parse(vaultResourceAmount.AmountAttos);
-        newAttosBalance = attos - (amount * Math.Pow(10, divisibility)) - fees;
-        vaultResourceAmount!.AmountAttos = Convert.ToDecimal(newAttosBalance).ToString(CultureInfo.InvariantCulture);
+        downSubstates.Add(newVaultDownSubstate);
 
-        upSubstate = resourceUpSubstate.CloneSubstate();
-        upSubstate._Version = upSubstate._Version + 1;
-        upSubstates.Add(upSubstate);
+        // add new vault up state
+        var newVaultUpSubstate = vaultUpSubstate.CloneSubstate();
+        newVaultUpSubstate._Version += 1;
+
+        var newVaultSubstate = newVaultUpSubstate.SubstateData.GetVaultSubstate();
+
+        var vaultResourceAmount = newVaultSubstate.ResourceAmount.GetFungibleResourceAmount();
+        var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
+
+        var feesAttos = feeSummary.CostUnitConsumed
+                        * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
+
+        _testConsole.WriteLine($"Paid fees {TokenAttosConverter.Attos2Tokens(feesAttos)} xrd");
+
+        var newAttosBalance = vaultResourceAmountAttos - tokenAmountAttos - feesAttos;
+
+        vaultResourceAmount!.AmountAttos = newAttosBalance.ToString();
+
+        newTotalAttos = tokenAmountAttos.ToString();
+
+        upSubstates.Add(newVaultUpSubstate);
 
         return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, globalEntityIds);
     }
@@ -197,31 +126,32 @@ public class StateUpdatesStore
         Random rnd = new Random();
 
         var tipPercentage = rnd.Next(0, 5); // percents
-        var costXrdConsumed = Math.Round(rnd.NextDouble(), 2) * 100000;
+        var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);
 
-        var costUnitConsumed = Convert.ToInt64(costXrdConsumed);
-        var xrdBurnedAttos = Convert.ToDecimal(costUnitConsumed * long.Parse(GenesisData.GenesisFeeSummary.CostUnitPriceAttos));
-        var xrdTippedAttos = Convert.ToDecimal(costUnitConsumed * long.Parse(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100);
+        var xrdBurnedAttos = costUnitConsumed * TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos);
+
+        var xrdTippedAttos = costUnitConsumed *
+            TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100;
 
         return new FeeSummary(
             loanFullyRepaid: true,
             costUnitLimit: GenesisData.GenesisFeeSummary.CostUnitLimit,
-            costUnitConsumed: costUnitConsumed,
+            costUnitConsumed: (long)costUnitConsumed,
             costUnitPriceAttos: GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
             tipPercentage: tipPercentage,
-            xrdBurnedAttos: xrdBurnedAttos.ToString(CultureInfo.InvariantCulture),
-            xrdTippedAttos: xrdTippedAttos.ToString(CultureInfo.InvariantCulture)
+            xrdBurnedAttos: xrdBurnedAttos.ToString(),
+            xrdTippedAttos: xrdTippedAttos.ToString()
         );
     }
 
     public void UpdateAccountBalance(string accountAddress, long amountToTransfer, FeeSummary? feeSummary)
     {
-        var vaultUpSubstate = GetComponentVaultUpSubstateByEntityAddress(accountAddress);
+        var vaultUpSubstate = StateUpdates.GetLastVaultUpSubstateByEntityAddress(accountAddress);
 
         var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
 
         // find token divisibility
-        var divisibility = GetFungibleResourceDivisibilityEntityAddress(accountAddress);
+        var divisibility = StateUpdates.GetFungibleResourceDivisibilityEntityAddress(accountAddress);
 
         var paidFeeAttos = feeSummary == null ? 0 : feeSummary.CostUnitConsumed * long.Parse(feeSummary.CostUnitPriceAttos);
 

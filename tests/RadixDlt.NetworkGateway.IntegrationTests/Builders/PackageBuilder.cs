@@ -12,10 +12,13 @@ public class PackageBuilder : BuilderBase<StateUpdates>
 {
     private List<IBlueprint> _blueprints = new();
     private string _packageAddress;
+    private string _packageAddressHex;
 
-    public PackageBuilder(CoreApiStubDefaultConfiguration defaultConfig)
+    public PackageBuilder()
     {
-        _packageAddress = AddressHelper.GenerateRandomAddress(defaultConfig.NetworkDefinition.PackageHrp);
+        _packageAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.PackageHrp);
+
+        _packageAddressHex = AddressHelper.AddressToHex(_packageAddress);
     }
 
     public override StateUpdates Build()
@@ -28,8 +31,8 @@ public class PackageBuilder : BuilderBase<StateUpdates>
         {
             new GlobalEntityId(
                 entityType: EntityType.Package,
-                entityAddressHex: AddressHelper.AddressToHex(_packageAddress),
-                globalAddressHex: AddressHelper.AddressToHex(_packageAddress),
+                entityAddressHex: _packageAddressHex,
+                globalAddressHex: _packageAddressHex,
                 globalAddress: _packageAddress),
         };
 
@@ -38,7 +41,7 @@ public class PackageBuilder : BuilderBase<StateUpdates>
             new(
                 substateId: new SubstateId(
                     entityType: EntityType.Package,
-                    entityAddressHex: AddressHelper.AddressToHex(_packageAddress),
+                    entityAddressHex: _packageAddressHex,
                     substateType: SubstateType.Package,
                     substateKeyHex: "00"
                 ),
@@ -67,6 +70,19 @@ public class PackageBuilder : BuilderBase<StateUpdates>
     public PackageBuilder WithFixedAddress(string packageAddress)
     {
         _packageAddress = packageAddress;
+
+        _packageAddressHex = AddressHelper.AddressToHex(_packageAddress);
+
+        return this;
+    }
+
+    public PackageBuilder WithFixedAddressHex(string packageAddressHex)
+    {
+        _packageAddressHex = packageAddressHex;
+
+        _packageAddress = AddressHelper.AddressFromHex(
+            _packageAddressHex,
+            GenesisData.NetworkDefinition.PackageHrp);
 
         return this;
     }

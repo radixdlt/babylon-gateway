@@ -9,24 +9,23 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
 
 public static class GenesisData
 {
-    private static string _sysFaucetPackageAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).PackageHrp);
-
-    private static string _sysFaucetComponentAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).SystemComponentHrp);
-
-    private static string _accountPackageAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).PackageHrp);
-
-    private static string _genesisResourceManagerAddress = AddressHelper.GenerateRandomAddress(NetworkDefinition.Get(NetworkEnum.IntegrationTests).ResourceHrp);
+    public static NetworkDefinition NetworkDefinition { get; set; } = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
 
     public static string AccountPackageAddress
     {
         get
         {
-            return _accountPackageAddress;
+            return AddressHelper.AddressFromHex(
+                AccountPackageAddressHex,
+                NetworkDefinition.AccountComponentHrp);
         }
+    }
 
-        set
+    public static string AccountPackageAddressHex
+    {
+        get
         {
-            _accountPackageAddress = value;
+            return "010000000000000000000000000000000000000000000000000003";
         }
     }
 
@@ -42,12 +41,17 @@ public static class GenesisData
     {
         get
         {
-            return _sysFaucetPackageAddress;
+            return AddressHelper.AddressFromHex(
+                SysFaucetPackageAddressHex,
+                NetworkDefinition.SystemComponentHrp);
         }
+    }
 
-        set
+    public static string SysFaucetPackageAddressHex
+    {
+        get
         {
-            _sysFaucetPackageAddress = value;
+            return "010000000000000000000000000000000000000000000000000001";
         }
     }
 
@@ -55,12 +59,17 @@ public static class GenesisData
     {
         get
         {
-            return _sysFaucetComponentAddress;
+            return AddressHelper.AddressFromHex(
+                SysFaucetComponentAddressHex,
+                NetworkDefinition.SystemComponentHrp);
         }
+    }
 
-        set
+    public static string SysFaucetComponentAddressHex
+    {
+        get
         {
-            _sysFaucetComponentAddress = value;
+            return "040000000000000000000000000000000000000000000000000001";
         }
     }
 
@@ -89,12 +98,25 @@ public static class GenesisData
     {
         get
         {
-            return _genesisResourceManagerAddress;
+            return AddressHelper.AddressFromHex(
+                GenesisResourceManagerAddressHex,
+                NetworkDefinition.ResourceHrp);
         }
+    }
 
-        set
+    public static string GenesisResourceManagerAddressHex
+    {
+        get
         {
-            _genesisResourceManagerAddress = value;
+            return "000000000000000000000000000000000000000000000000000004";
+        }
+    }
+
+    public static string GenesisXrdVaultAddressHex
+    {
+        get
+        {
+            return "000000000000000000000000000000000000000000000000000000000000000000000000";
         }
     }
 

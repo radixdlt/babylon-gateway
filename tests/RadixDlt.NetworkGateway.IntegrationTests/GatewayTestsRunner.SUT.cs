@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.IO;
@@ -24,7 +25,7 @@ public partial class GatewayTestsRunner
         return this;
     }
 
-    public async Task RunAndWaitUntilAllTransactionsIngested<T>(Action<T>? callback = null)
+    public async Task RunAndWaitUntilAllTransactionsIngested<T>(Action<T, string>? callback = null)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.NameFromAsync());
 
@@ -47,7 +48,7 @@ public partial class GatewayTestsRunner
 
             if (pendingTransaction.Request.MarkAsCommitted)
             {
-                _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
+                var committedTransaction = _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
 
                 var t = WaitAsync(TimeSpan.FromSeconds(5));
                 t.Wait();
@@ -59,7 +60,10 @@ public partial class GatewayTestsRunner
 
             if (canParse)
             {
-                callback?.Invoke(await response.ParseToObjectAndAssert<T>());
+                if (pendingTransaction.IntentHash != null)
+                {
+                    callback?.Invoke(await response.ParseToObjectAndAssert<T>(), pendingTransaction.IntentHash);
+                }
             }
         }
     }
@@ -127,7 +131,7 @@ public partial class GatewayTestsRunner
     {
         _testConsole.WriteLine("Setting up SUT");
 
-        if (CoreApiStub.CoreApiStubDefaultConfiguration.CommittedTransactionsResponse == null)
+        if (_transactionStreamStore.CommittedTransactions.Count == 0)
         {
             throw new Exception("Call MockGenesis() to initialize the SUT");
         }
