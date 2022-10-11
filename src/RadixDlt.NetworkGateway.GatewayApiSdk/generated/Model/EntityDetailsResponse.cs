@@ -106,7 +106,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
         /// <param name="metadata">TBD (required).</param>
-        public EntityDetailsResponse(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>))
+        /// <param name="details">details (required).</param>
+        public EntityDetailsResponse(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -120,6 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for EntityDetailsResponse and cannot be null");
             }
             this.Metadata = metadata;
+            // to ensure "details" is required (not null)
+            if (details == null)
+            {
+                throw new ArgumentNullException("details is a required property for EntityDetailsResponse and cannot be null");
+            }
+            this.Details = details;
         }
 
         /// <summary>
@@ -137,6 +144,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Dictionary<string, string> Metadata { get; set; }
 
         /// <summary>
+        /// Gets or Sets Details
+        /// </summary>
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public EntityDetailsResponseDetails Details { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -146,6 +159,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityDetailsResponse {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -191,6 +205,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Metadata != null &&
                     input.Metadata != null &&
                     this.Metadata.SequenceEqual(input.Metadata)
+                ) && 
+                (
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -210,6 +229,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Metadata != null)
                 {
                     hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                }
+                if (this.Details != null)
+                {
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

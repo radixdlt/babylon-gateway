@@ -82,153 +82,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.8")
+                .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Account", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("address");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<byte[]>("PublicKey")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("public_key");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Address")
-                        .IsUnique();
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Address"), new[] { "Id" });
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.ToTable("accounts");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourceBalanceHistory", b =>
-                {
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<long>("ResourceId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("resource_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
-                    b.HasKey("AccountId", "ResourceId", "FromStateVersion");
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.HasIndex("ToStateVersion");
-
-                    b.HasIndex("AccountId", "FromStateVersion");
-
-                    b.HasIndex("AccountId", "ResourceId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_account_resource_balance_history_current_balance")
-                        .HasFilter("to_state_version is null");
-
-                    b.HasIndex("ResourceId", "FromStateVersion");
-
-                    b.HasIndex("ResourceId", "AccountId", "FromStateVersion");
-
-                    b.ToTable("account_resource_balance_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountTransaction", b =>
-                {
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<long>("ResultantStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("state_version");
-
-                    b.Property<bool>("IsFeePayer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_fee_payer");
-
-                    b.Property<bool>("IsUserTransaction")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_user_transaction");
-
-                    b.HasKey("AccountId", "ResultantStateVersion");
-
-                    b.HasIndex("ResultantStateVersion");
-
-                    b.HasIndex("AccountId", "ResultantStateVersion")
-                        .IsUnique()
-                        .HasDatabaseName("IX_account_transaction_user_transactions")
-                        .HasFilter("is_user_transaction = true");
-
-                    b.ToTable("account_transactions");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountValidatorStakeHistory", b =>
-                {
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
-                    b.HasKey("AccountId", "ValidatorId", "FromStateVersion");
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.HasIndex("ToStateVersion");
-
-                    b.HasIndex("AccountId", "FromStateVersion");
-
-                    b.HasIndex("AccountId", "ValidatorId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_account_validator_stake_history_current_stake")
-                        .HasFilter("to_state_version is null");
-
-                    b.HasIndex("ValidatorId", "FromStateVersion");
-
-                    b.HasIndex("ValidatorId", "AccountId", "FromStateVersion");
-
-                    b.ToTable("account_validator_stake_history");
-                });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity", b =>
                 {
@@ -270,44 +127,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Address");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Address"), "hash");
+
+                    b.HasIndex("GlobalAddress");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator<string>("type").HasValue("Entity");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<BigInteger>("Balance")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("balance");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long>("FungibleResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("fungible_resource_entity_id");
-
-                    b.Property<long>("GlobalEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("global_entity_id");
-
-                    b.Property<long>("OwnerEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("owner_entity_id");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("entity_fungible_resource_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMetadataHistory", b =>
@@ -342,7 +170,47 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_metadata_history");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceAggregateHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("entity_id");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long[]>("FungibleResourceIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("fungible_resource_ids");
+
+                    b.Property<bool>("IsMostRecent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_most_recent");
+
+                    b.Property<long[]>("NonFungibleResourceIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("non_fungible_resource_ids");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId", "FromStateVersion");
+
+                    b.HasIndex("IsMostRecent", "EntityId");
+
+                    b.ToTable("entity_resource_aggregate_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -359,26 +227,66 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("global_entity_id");
 
-                    b.Property<long[]>("Ids")
-                        .IsRequired()
-                        .HasColumnType("bigint[]")
-                        .HasColumnName("ids");
-
-                    b.Property<long>("IdsCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("ids_count");
-
-                    b.Property<long>("NonFungibleResourceEntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_resource_entity_id");
-
                     b.Property<long>("OwnerEntityId")
                         .HasColumnType("bigint")
                         .HasColumnName("owner_entity_id");
 
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<string>("type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("entity_non_fungible_resource_history");
+                    b.HasIndex("GlobalEntityId", "FromStateVersion");
+
+                    b.HasIndex("OwnerEntityId", "FromStateVersion");
+
+                    b.ToTable("entity_resource_history");
+
+                    b.HasDiscriminator<string>("type").HasValue("EntityResourceHistory");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FungibleResourceSupplyHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_entity_id");
+
+                    b.Property<BigInteger>("TotalBurnt")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("total_burnt");
+
+                    b.Property<BigInteger>("TotalMinted")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("total_minted");
+
+                    b.Property<BigInteger>("TotalSupply")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("total_supply");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceEntityId", "FromStateVersion");
+
+                    b.ToTable("fungible_resource_supply_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
@@ -391,6 +299,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_updated");
+
+                    b.Property<long>("TargetStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("sync_status_target_state_version");
 
                     b.Property<long>("TopOfLedgerStateVersion")
                         .HasColumnType("bigint")
@@ -405,7 +317,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
                 {
-                    b.Property<long>("ResultantStateVersion")
+                    b.Property<long>("StateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
@@ -456,6 +368,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("payload_hash");
 
+                    b.Property<long[]>("ReferencedEntities")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("referenced_entities");
+
                     b.Property<long>("RoundInEpoch")
                         .HasColumnType("bigint")
                         .HasColumnName("round_in_epoch");
@@ -464,23 +381,33 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<byte[]>("SignedTransactionHash")
+                    b.Property<byte[]>("SignedIntentHash")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("signed_hash");
+                        .HasColumnName("signed_intent_hash");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<BigInteger>("TipPaid")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("tip_paid");
 
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_accumulator");
 
-                    b.HasKey("ResultantStateVersion");
+                    b.HasKey("StateVersion");
 
                     b.HasAlternateKey("IntentHash");
 
                     b.HasAlternateKey("PayloadHash");
 
-                    b.HasAlternateKey("SignedTransactionHash");
+                    b.HasAlternateKey("SignedIntentHash");
 
                     b.HasAlternateKey("TransactionAccumulator");
 
@@ -489,13 +416,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasDatabaseName("IX_ledger_transaction_epoch_starts")
                         .HasFilter("is_start_of_epoch = true");
 
-                    b.HasIndex("ResultantStateVersion")
+                    b.HasIndex("RoundTimestamp")
+                        .HasDatabaseName("IX_ledger_transaction_round_timestamp");
+
+                    b.HasIndex("StateVersion")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_user_transactions")
                         .HasFilter("is_user_transaction = true");
-
-                    b.HasIndex("RoundTimestamp")
-                        .HasDatabaseName("IX_ledger_transaction_round_timestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
@@ -595,6 +522,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<string>("NetworkName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("network_name");
+
                     b.HasKey("Id");
 
                     b.ToTable("network_configuration");
@@ -602,269 +534,73 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", b =>
                 {
-                    b.Property<byte[]>("TransactionPayloadHash")
-                        .HasColumnType("bytea")
-                        .HasColumnName("transaction_payload_hash");
+                    b.Property<long>("StateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("state_version");
 
                     b.Property<byte[]>("Payload")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("payload");
 
-                    b.HasKey("TransactionPayloadHash");
+                    b.Property<byte[]>("TransactionPayloadHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("transaction_payload_hash");
+
+                    b.HasKey("StateVersion");
 
                     b.ToTable("raw_transactions");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Resource", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<byte[]>("RadixEngineAddress")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("engine_address");
-
-                    b.Property<string>("ResourceIdentifier")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("rri");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.HasIndex("ResourceIdentifier")
-                        .IsUnique();
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ResourceIdentifier"), new[] { "Id" });
-
-                    b.ToTable("resources");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceSupplyHistory", b =>
-                {
-                    b.Property<long>("ResourceId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("resource_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
-                    b.HasKey("ResourceId", "FromStateVersion");
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.HasIndex("ResourceId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_resource_supply_history_current_supply")
-                        .HasFilter("to_state_version is null");
-
-                    b.HasIndex("ToStateVersion");
-
-                    b.ToTable("resource_supply_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<byte[]>("DataHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("data_hash");
-
-                    b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<byte[]>("Key")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("key");
-
-                    b.Property<long?>("ToStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
-                    b.Property<long>("Version")
-                        .HasColumnType("bigint")
-                        .HasColumnName("version");
-
-                    b.Property<string>("type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator<string>("type").HasValue("Substate");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("address");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<byte[]>("PublicKey")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("public_key");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Address")
-                        .IsUnique();
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Address"), new[] { "Id" });
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.ToTable("validators");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorProposalRecord", b =>
-                {
-                    b.Property<long>("Epoch")
-                        .HasColumnType("bigint")
-                        .HasColumnName("epoch");
-
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.Property<long>("LastUpdatedAtStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("last_updated_state_version");
-
-                    b.HasKey("Epoch", "ValidatorId");
-
-                    b.HasIndex("LastUpdatedAtStateVersion");
-
-                    b.HasIndex("ValidatorId", "Epoch");
-
-                    b.ToTable("validator_proposal_records");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorStakeHistory", b =>
-                {
-                    b.Property<long>("ValidatorId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("validator_id");
-
-                    b.Property<long>("FromStateVersion")
-                        .HasColumnType("bigint")
-                        .HasColumnName("from_state_version");
-
-                    b.Property<long?>("ToStateVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("to_state_version");
-
-                    b.HasKey("ValidatorId", "FromStateVersion");
-
-                    b.HasIndex("FromStateVersion");
-
-                    b.HasIndex("ToStateVersion");
-
-                    b.HasIndex("ValidatorId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_validator_stake_history_current_stake")
-                        .HasFilter("to_state_version is null");
-
-                    b.ToTable("validator_stake_history");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<string>("Kind")
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("account_component");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityFungibleResourceHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
+
+                    b.Property<BigInteger>("Balance")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("balance");
+
+                    b.ToTable("entity_resource_history");
+
+                    b.HasDiscriminator().HasValue("fungible");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityNonFungibleResourceHistory", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
+
+                    b.Property<long[]>("Ids")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("kind");
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("ids");
+
+                    b.Property<long>("IdsCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ids_count");
+
+                    b.ToTable("entity_resource_history");
+
+                    b.HasDiscriminator().HasValue("non_fungible");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NormalComponentEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("component");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentInfoSubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("component_info");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ComponentStateSubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("component_state");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntrySubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("key_value_store_entry");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleSubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("non_fungible");
+                    b.HasDiscriminator().HasValue("normal_component");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageEntity", b =>
@@ -872,15 +608,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
                     b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue("package");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageSubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.ToTable("substates");
 
                     b.HasDiscriminator().HasValue("package");
                 });
@@ -894,22 +621,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("resource_manager");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerSubstate", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemComponentEntity", b =>
                 {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<int>("FungibleDivisibility")
-                        .HasColumnType("integer")
-                        .HasColumnName("fungible_divisibility");
+                    b.ToTable("entities");
 
-                    b.Property<BigInteger>("TotalSupply")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("total_supply");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("resource_manager");
+                    b.HasDiscriminator().HasValue("system_component");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemEntity", b =>
@@ -921,22 +639,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("system");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemSubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("system");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValueStoreEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("key_value_store");
+                    b.HasDiscriminator().HasValue("value_store");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>
@@ -948,192 +657,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("vault");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultSubstate", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Substate");
-
-                    b.Property<BigInteger>("Amount")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("amount");
-
-                    b.ToTable("substates");
-
-                    b.HasDiscriminator().HasValue("vault");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Account", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_account_from_transaction");
-
-                    b.Navigation("FromLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountResourceBalanceHistory", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_account_resource_balance_history_from_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "ToLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("ToStateVersion")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_account_resource_balance_history_to_transaction");
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.BalanceEntry", "BalanceEntry", b1 =>
-                        {
-                            b1.Property<long>("AccountResourceBalanceHistoryAccountId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("AccountResourceBalanceHistoryResourceId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("AccountResourceBalanceHistoryFromStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<BigInteger>("Balance")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("balance");
-
-                            b1.HasKey("AccountResourceBalanceHistoryAccountId", "AccountResourceBalanceHistoryResourceId", "AccountResourceBalanceHistoryFromStateVersion");
-
-                            b1.ToTable("account_resource_balance_history");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AccountResourceBalanceHistoryAccountId", "AccountResourceBalanceHistoryResourceId", "AccountResourceBalanceHistoryFromStateVersion");
-                        });
-
-                    b.Navigation("Account");
-
-                    b.Navigation("BalanceEntry")
-                        .IsRequired();
-
-                    b.Navigation("FromLedgerTransaction");
-
-                    b.Navigation("Resource");
-
-                    b.Navigation("ToLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountTransaction", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "LedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("ResultantStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("LedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountValidatorStakeHistory", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_account_validator_stake_history_from_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "ToLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("ToStateVersion")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_account_validator_stake_history_to_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountValidatorStakeSnapshot", "StakeSnapshot", b1 =>
-                        {
-                            b1.Property<long>("AccountValidatorStakeHistoryAccountId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("AccountValidatorStakeHistoryValidatorId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("AccountValidatorStakeHistoryFromStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<BigInteger>("TotalExitingXrdStake")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_exiting_xrd_stake");
-
-                            b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_unstake_units");
-
-                            b1.Property<BigInteger>("TotalPreparedXrdStake")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_xrd_stake");
-
-                            b1.Property<BigInteger>("TotalStakeUnits")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_stake_units");
-
-                            b1.HasKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
-
-                            b1.ToTable("account_validator_stake_history");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AccountValidatorStakeHistoryAccountId", "AccountValidatorStakeHistoryValidatorId", "AccountValidatorStakeHistoryFromStateVersion");
-                        });
-
-                    b.Navigation("Account");
-
-                    b.Navigation("FromLedgerTransaction");
-
-                    b.Navigation("StakeSnapshot")
-                        .IsRequired();
-
-                    b.Navigation("ToLedgerTransaction");
-
-                    b.Navigation("Validator");
-                });
-
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerStatus", b =>
                 {
                     b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "TopOfLedgerTransaction")
@@ -1143,26 +666,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_ledger_status_top_transactions_state_version");
 
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.SyncTarget", "SyncTarget", b1 =>
-                        {
-                            b1.Property<int>("LedgerStatusId")
-                                .HasColumnType("integer");
-
-                            b1.Property<long>("TargetStateVersion")
-                                .HasColumnType("bigint")
-                                .HasColumnName("sync_status_target_state_version");
-
-                            b1.HasKey("LedgerStatusId");
-
-                            b1.ToTable("ledger_status");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LedgerStatusId");
-                        });
-
-                    b.Navigation("SyncTarget")
-                        .IsRequired();
-
                     b.Navigation("TopOfLedgerTransaction");
                 });
 
@@ -1170,7 +673,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", "RawTransaction")
                         .WithMany()
-                        .HasForeignKey("PayloadHash")
+                        .HasForeignKey("StateVersion")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1179,25 +682,40 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
                 {
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkAddressHrps", "NetworkAddressHrps", b1 =>
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfigurationHrpDefinition", "NetworkConfigurationHrpDefinition", b1 =>
                         {
                             b1.Property<int>("NetworkConfigurationId")
                                 .HasColumnType("integer");
 
-                            b1.Property<string>("AccountHrp")
+                            b1.Property<string>("AccountComponentHrp")
                                 .IsRequired()
                                 .HasColumnType("text")
-                                .HasColumnName("account_hrp");
+                                .HasColumnName("account_component_hrp");
 
                             b1.Property<string>("NodeHrp")
                                 .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("node_hrp");
 
-                            b1.Property<string>("ResourceHrpSuffix")
+                            b1.Property<string>("NormalComponentHrp")
                                 .IsRequired()
                                 .HasColumnType("text")
-                                .HasColumnName("resource_hrp_suffix");
+                                .HasColumnName("normal_component_hrp");
+
+                            b1.Property<string>("PackageHrp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("package_hrp");
+
+                            b1.Property<string>("ResourceHrp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("resource_hrp");
+
+                            b1.Property<string>("SystemComponentHrp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("system_component_hrp");
 
                             b1.Property<string>("ValidatorHrp")
                                 .IsRequired()
@@ -1212,25 +730,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasForeignKey("NetworkConfigurationId");
                         });
 
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkDefinition", "NetworkDefinition", b1 =>
-                        {
-                            b1.Property<int>("NetworkConfigurationId")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("NetworkName")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("network_name");
-
-                            b1.HasKey("NetworkConfigurationId");
-
-                            b1.ToTable("network_configuration");
-
-                            b1.WithOwner()
-                                .HasForeignKey("NetworkConfigurationId");
-                        });
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.WellKnownAddresses", "WellKnownAddresses", b1 =>
+                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfigurationWellKnownAddresses", "NetworkConfigurationWellKnownAddresses", b1 =>
                         {
                             b1.Property<int>("NetworkConfigurationId")
                                 .HasColumnType("integer");
@@ -1248,219 +748,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasForeignKey("NetworkConfigurationId");
                         });
 
-                    b.Navigation("NetworkAddressHrps")
+                    b.Navigation("NetworkConfigurationHrpDefinition")
                         .IsRequired();
 
-                    b.Navigation("NetworkDefinition")
+                    b.Navigation("NetworkConfigurationWellKnownAddresses")
                         .IsRequired();
-
-                    b.Navigation("WellKnownAddresses")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Resource", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_resource_from_transaction");
-
-                    b.Navigation("FromLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceSupplyHistory", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_resource_supply_history_from_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "ToLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("ToStateVersion")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_resource_supply_history_to_transaction");
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceSupply", "ResourceSupply", b1 =>
-                        {
-                            b1.Property<long>("ResourceSupplyHistoryResourceId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("ResourceSupplyHistoryFromStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<BigInteger>("TotalBurnt")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_burnt");
-
-                            b1.Property<BigInteger>("TotalMinted")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_minted");
-
-                            b1.Property<BigInteger>("TotalSupply")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_supply");
-
-                            b1.HasKey("ResourceSupplyHistoryResourceId", "ResourceSupplyHistoryFromStateVersion");
-
-                            b1.ToTable("resource_supply_history");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ResourceSupplyHistoryResourceId", "ResourceSupplyHistoryFromStateVersion");
-                        });
-
-                    b.Navigation("FromLedgerTransaction");
-
-                    b.Navigation("Resource");
-
-                    b.Navigation("ResourceSupply")
-                        .IsRequired();
-
-                    b.Navigation("ToLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_validator_from_transaction");
-
-                    b.Navigation("FromLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorProposalRecord", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "LastUpdatedAtLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("LastUpdatedAtStateVersion")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_validator_proposal_record_last_updated_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.ProposalRecord", "ProposalRecord", b1 =>
-                        {
-                            b1.Property<long>("ValidatorProposalRecordEpoch")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("ValidatorProposalRecordValidatorId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("ProposalsCompleted")
-                                .HasColumnType("bigint")
-                                .HasColumnName("proposals_completed");
-
-                            b1.Property<long>("ProposalsMissed")
-                                .HasColumnType("bigint")
-                                .HasColumnName("proposals_missed");
-
-                            b1.HasKey("ValidatorProposalRecordEpoch", "ValidatorProposalRecordValidatorId");
-
-                            b1.ToTable("validator_proposal_records");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorProposalRecordEpoch", "ValidatorProposalRecordValidatorId");
-                        });
-
-                    b.Navigation("LastUpdatedAtLedgerTransaction");
-
-                    b.Navigation("ProposalRecord")
-                        .IsRequired();
-
-                    b.Navigation("Validator");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorStakeHistory", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "FromLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("FromStateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_validator_stake_history_from_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", "ToLedgerTransaction")
-                        .WithMany()
-                        .HasForeignKey("ToStateVersion")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_validator_stake_history_to_transaction");
-
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.Validator", "Validator")
-                        .WithMany()
-                        .HasForeignKey("ValidatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorStakeSnapshot", "StakeSnapshot", b1 =>
-                        {
-                            b1.Property<long>("ValidatorStakeHistoryValidatorId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("ValidatorStakeHistoryFromStateVersion")
-                                .HasColumnType("bigint");
-
-                            b1.Property<BigInteger>("TotalExitingXrdStake")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_exiting_xrd_stake");
-
-                            b1.Property<BigInteger>("TotalPreparedUnStakeUnits")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_unstake_units");
-
-                            b1.Property<BigInteger>("TotalPreparedXrdStake")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_prepared_xrd_stake");
-
-                            b1.Property<BigInteger>("TotalStakeUnits")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_stake_units");
-
-                            b1.Property<BigInteger>("TotalXrdStake")
-                                .HasPrecision(1000)
-                                .HasColumnType("numeric(1000,0)")
-                                .HasColumnName("total_xrd_staked");
-
-                            b1.HasKey("ValidatorStakeHistoryValidatorId", "ValidatorStakeHistoryFromStateVersion");
-
-                            b1.ToTable("validator_stake_history");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ValidatorStakeHistoryValidatorId", "ValidatorStakeHistoryFromStateVersion");
-                        });
-
-                    b.Navigation("FromLedgerTransaction");
-
-                    b.Navigation("StakeSnapshot")
-                        .IsRequired();
-
-                    b.Navigation("ToLedgerTransaction");
-
-                    b.Navigation("Validator");
                 });
 #pragma warning restore 612, 618
         }

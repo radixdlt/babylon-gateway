@@ -78,9 +78,7 @@ public interface ITransactionQuerier
         Gateway.LedgerState? fromLedgerState,
         CancellationToken token = default);
 
-    Task<TransactionPageWithTotal> GetAccountTransactions(AccountTransactionPageRequest request, Gateway.LedgerState ledgerState, CancellationToken token = default);
-
-    Task<Gateway.TransactionInfo?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, CancellationToken token = default);
+    Task<LookupResult?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, bool withMetadata, CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
@@ -102,21 +100,14 @@ public sealed record CommittedTransactionPaginationCursor(long? StateVersionBoun
     }
 }
 
-public sealed record TransactionPageWithTotal(
-    long TotalRecords,
-    CommittedTransactionPaginationCursor? NextPageCursor,
-    List<Gateway.TransactionInfo> Transactions
+public sealed record LookupResult(
+    Gateway.TransactionInfo? Info,
+    Gateway.TransactionDetails? Details
 );
 
 public sealed record TransactionPageWithoutTotal(
     CommittedTransactionPaginationCursor? NextPageCursor,
     List<Gateway.TransactionInfo> Transactions
-);
-
-public sealed record AccountTransactionPageRequest(
-    ValidatedAccountAddress AccountAddress,
-    CommittedTransactionPaginationCursor? Cursor,
-    int PageSize
 );
 
 public sealed record RecentTransactionPageRequest(

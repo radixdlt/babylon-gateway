@@ -13,9 +13,10 @@ outputs:
     value: ${{ steps.set_variables.outputs.data-aggregator-tag }}
   gateway-api-tag:
     description: "Set API gateway image tag"
+    value: ${{ steps.set_variables.outputs.gateway-api-tag }}
   database-migrations-tag:
     description: "Set database migrations image tag"
-    value: ${{ steps.set_variables.outputs.gateway-api-tag }}
+    value: ${{ steps.set_variables.outputs.database-migrations-tag }}
   data_aggregator_tags:
     description: "Aggregator tags"
     value: ${{ steps.set_variables.outputs.data_aggregator_tags }}

@@ -78,11 +78,11 @@ internal static class TransactionSummarisation
     {
         var lastTransaction = await dbContext.LedgerTransactions
             .AsNoTracking()
-            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .OrderByDescending(lt => lt.StateVersion)
             .FirstOrDefaultAsync(token);
 
         var lastOverview = lastTransaction == null ? null : new TransactionSummary(
-            StateVersion: lastTransaction.ResultantStateVersion,
+            StateVersion: lastTransaction.StateVersion,
             Epoch: lastTransaction.Epoch,
             IndexInEpoch: lastTransaction.IndexInEpoch,
             RoundInEpoch: lastTransaction.RoundInEpoch,
@@ -90,7 +90,7 @@ internal static class TransactionSummarisation
             IsStartOfRound: lastTransaction.IsStartOfRound,
             PayloadHash: lastTransaction.PayloadHash,
             IntentHash: lastTransaction.IntentHash,
-            SignedTransactionHash: lastTransaction.SignedTransactionHash,
+            SignedIntentHash: lastTransaction.SignedIntentHash,
             TransactionAccumulator: lastTransaction.TransactionAccumulator,
             RoundTimestamp: lastTransaction.RoundTimestamp,
             CreatedTimestamp: lastTransaction.CreatedTimestamp,
@@ -112,7 +112,7 @@ internal static class TransactionSummarisation
             IsStartOfRound: false,
             PayloadHash: Array.Empty<byte>(), // Unused
             IntentHash: Array.Empty<byte>(), // Unused
-            SignedTransactionHash: Array.Empty<byte>(), // Unused
+            SignedIntentHash: Array.Empty<byte>(), // Unused
             TransactionAccumulator: new byte[32], // All 0s
             RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
             CreatedTimestamp: clock.UtcNow,

@@ -62,7 +62,10 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Commons;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -70,7 +73,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IEntityStateQuerier
 {
-    Task<EntityResourcesResponse> EntityResourcesSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
 
-    Task<EntityDetailsResponse> EntityDetailsSnapshot(byte[] address, LedgerState ledgerState, CancellationToken token = default);
+    Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
 }

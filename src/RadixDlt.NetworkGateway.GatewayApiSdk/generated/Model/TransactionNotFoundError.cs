@@ -96,24 +96,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// </summary>
     [DataContract(Name = "TransactionNotFoundError")]
     [JsonConverter(typeof(JsonSubtypes), "Type")]
-    [JsonSubtypes.KnownSubType(typeof(BelowMinimumStakeError), "BelowMinimumStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(CannotStakeError), "CannotStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(CouldNotConstructFeesError), "CouldNotConstructFeesError")]
     [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidAccountAddressError), "InvalidAccountAddressError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidActionError), "InvalidActionError")]
     [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTokenRRIError), "InvalidTokenRRIError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTokenSymbolError), "InvalidTokenSymbolError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidValidatorAddressError), "InvalidValidatorAddressError")]
-    [JsonSubtypes.KnownSubType(typeof(MessageTooLongError), "MessageTooLongError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughNativeTokensForFeesError), "NotEnoughNativeTokensForFeesError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForStakeError), "NotEnoughTokensForStakeError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForTransferError), "NotEnoughTokensForTransferError")]
-    [JsonSubtypes.KnownSubType(typeof(NotEnoughTokensForUnstakeError), "NotEnoughTokensForUnstakeError")]
     [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
-    [JsonSubtypes.KnownSubType(typeof(TokenNotFoundError), "TokenNotFoundError")]
     [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
     public partial class TransactionNotFoundError : GatewayError, IEquatable<TransactionNotFoundError>, IValidatableObject
     {
@@ -127,7 +112,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="transactionNotFound">transactionNotFound (required).</param>
         /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;TransactionNotFoundError&quot;).</param>
-        public TransactionNotFoundError(TransactionIdentifier transactionNotFound = default(TransactionIdentifier), string type = "TransactionNotFoundError") : base(type)
+        public TransactionNotFoundError(TransactionLookupIdentifier transactionNotFound = default(TransactionLookupIdentifier), string type = "TransactionNotFoundError") : base(type)
         {
             // to ensure "transactionNotFound" is required (not null)
             if (transactionNotFound == null)
@@ -141,7 +126,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets TransactionNotFound
         /// </summary>
         [DataMember(Name = "transaction_not_found", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionIdentifier TransactionNotFound { get; set; }
+        public TransactionLookupIdentifier TransactionNotFound { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

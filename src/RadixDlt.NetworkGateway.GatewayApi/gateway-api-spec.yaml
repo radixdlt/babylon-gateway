@@ -25,6 +25,7 @@ tags:
 paths:
   "/gateway":
     post:
+      operationId: getGatewayInfo
       summary: Get Gateway Info
       description: Returns the Gateway API version, network and current ledger state.
       tags:
@@ -50,6 +51,7 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/recent":
     post:
+      operationId: getRecentTransactions
       summary: Get Recent Transactions
       description: |
         Returns user-initiated transactions which have been succesfully committed to the ledger.
@@ -77,6 +79,7 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/preview":
     post:
+      operationId: previewTransaction
       summary: Preview Transaction
       description: |
         Previews transaction against the network.
@@ -103,6 +106,7 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/submit":
     post:
+      operationId: submitTransaction
       summary: Submit Transaction
       description: |
         Submits a signed transaction payload to the network.
@@ -130,6 +134,7 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/status":
     post:
+      operationId: getTransactionStatus
       summary: Transaction Status
       description: |
         Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren't recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
@@ -154,8 +159,36 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/transaction/details":
+    post:
+      operationId: getTransactionDetails
+      summary: Transaction Details
+      description: |
+        Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren't recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TransactionDetailsRequest"
+      responses:
+        '200':
+          description: Transaction Status
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TransactionDetailsResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   /entity/resources:
     post:
+      operationId: getEntityResources
       summary: Entity Resources
       description: |
         TBD
@@ -182,6 +215,7 @@ paths:
                 "$ref": "#/components/schemas/ErrorResponse"
   /entity/details:
     post:
+      operationId: getEntityDetails
       summary: Entity Details
       description: |
         TBD
@@ -216,7 +250,7 @@ components:
       properties:
         total_count:
           description: TBD (make it nullable when we're dealing with unknown result set sizes?)
-          type: number
+          type: integer
         previous_cursor:
           description: TBD (maybe we should use HATEOAS-like permalinks?)
           type: string
@@ -295,21 +329,6 @@ components:
           type: string
         amount:
           type: number
-    TransferTokens:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - from_account
-            - to_account
-            - amount
-          properties:
-            from_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-            to_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-            amount:
-              "$ref": "#/components/schemas/TokenAmount"
     EntityDetailsRequest:
       type: object
       required:
@@ -325,6 +344,7 @@ components:
       required:
         - address
         - metadata
+        - details
       properties:
         address:
           description: The Bech32m-encoded human readable version of the resource's global address
@@ -334,132 +354,52 @@ components:
           type: object
           additionalProperties:
             type: string
-    AccountStakeEntry:
+        details:
+          oneOf:
+            - "$ref": "#/components/schemas/EntityDetailsResponseFungibleDetails"
+            - "$ref": "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
+          discriminator:
+            propertyName: resource_type
+            mapping:
+              fungible: "#/components/schemas/EntityDetailsResponseFungibleDetails"
+              non_fungible: "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
+    ResourceType:
+      type: string
+      enum:
+        - fungible
+        - non_fungible
+    EntityDetailsResponseFungibleDetails:
       type: object
       required:
-        - validator_identifier
-        - delegated_stake
+        - resource_type
+        - is_fungible
+        - total_supply_attos
+        - total_minted_attos
+        - total_burnt_attos
       properties:
-        validator_identifier:
-          description: The validator to which the XRD stake is delegated.
-          "$ref": "#/components/schemas/ValidatorIdentifier"
-        delegated_stake:
-          description: The amount of XRD staked.
-          "$ref": "#/components/schemas/TokenAmount"
-    StakeTokens:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - from_account
-            - to_validator
-            - amount
-          properties:
-            from_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-            to_validator:
-              "$ref": "#/components/schemas/ValidatorIdentifier"
-            amount:
-              "$ref": "#/components/schemas/TokenAmount"
-    UnstakeTokens:
-      description: An action to unstake tokens. Exactly one of amount or unstake_percentage is required.
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - from_validator
-            - to_account
-          properties:
-            from_validator:
-              "$ref": "#/components/schemas/ValidatorIdentifier"
-            to_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-            amount:
-              description: |
-                If present, this gives the amount of XRD to unstake. This should be no more than the maximum estimated XRD of the stake position at the corresponding LedgerState. Provide a PartialLedgerStateIdentifier matching the LedgerState of the response which provided the estimate that was shared with the user; or simply use the `unstake_percentage` option.
-              "$ref": "#/components/schemas/TokenAmount"
-            unstake_percentage:
-              description: |
-                The percentage of currently staked XRD to unstake, where the proportion is a proportion of the current active stake at the given LedgerState. To be explicit, the referenced active state does not include pending stake, pending unstake or locked unstake.
-              type: number
-              minimum: 0
-              maximum: 100
-    CreateTokenDefinition:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - token_properties
-            - token_supply
-          properties:
-            token_properties:
-              "$ref": "#/components/schemas/TokenProperties"
-            token_supply:
-              "$ref": "#/components/schemas/TokenAmount"
-            to_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-    MintTokens:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - to_account
-            - amount
-          properties:
-            to_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-            amount:
-              "$ref": "#/components/schemas/TokenAmount"
-    BurnTokens:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - from_account
-            - amount
-          properties:
-            from_account:
-              "$ref": "#/components/schemas/AccountIdentifier"
-            amount:
-              "$ref": "#/components/schemas/TokenAmount"
-    RegisterValidator:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - validator
-          properties:
-            validator:
-              description: "The validator to register. The transaction will need to be signed by the validator's private key."
-              "$ref": "#/components/schemas/ValidatorIdentifier"
-    UnregisterValidator:
-      allOf:
-        - "$ref": "#/components/schemas/Action"
-        - type: object
-          required:
-            - validator
-          properties:
-            validator:
-              description: "The validator to unregister. The transaction will need to be signed by the validator's private key."
-              "$ref": "#/components/schemas/ValidatorIdentifier"
-    Action:
-      type: object
-      required:
-        - type
-      properties:
-        type:
+        resource_type:
           type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          CreateTokenDefinition: "#/components/schemas/CreateTokenDefinition"
-          TransferTokens: "#/components/schemas/TransferTokens"
-          StakeTokens: "#/components/schemas/StakeTokens"
-          UnstakeTokens: "#/components/schemas/UnstakeTokens"
-          MintTokens: "#/components/schemas/MintTokens"
-          BurnTokens: "#/components/schemas/BurnTokens"
-          RegisterValidator: "#/components/schemas/RegisterValidator"
-          UnregisterValidator: "#/components/schemas/UnregisterValidator"
+        is_fungible:
+          type: boolean
+        total_supply_attos:
+          type: string
+        total_minted_attos:
+          type: string
+        total_burnt_attos:
+          type: string
+    EntityDetailsResponseNonFungibleDetails:
+      type: object
+      required:
+        - resource_type
+        - is_fungible
+        - tbd
+      properties:
+        resource_type:
+          type: string
+        is_fungible:
+          type: boolean
+        tbd:
+          type: string
     RecentTransactionsRequest:
       type: object
       required:
@@ -658,7 +598,8 @@ components:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         transaction_identifier:
-          hash: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+          origin: intent
+          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
     TransactionStatusResponse:
       type: object
       required:
@@ -669,6 +610,32 @@ components:
           $ref: "#/components/schemas/LedgerState"
         transaction:
           $ref: "#/components/schemas/TransactionInfo"
+    TransactionDetailsRequest:
+      type: object
+      required:
+        - transaction_identifier
+      properties:
+        transaction_identifier:
+          $ref: "#/components/schemas/TransactionLookupIdentifier"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        transaction_identifier:
+          origin: intent
+          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+    TransactionDetailsResponse:
+      type: object
+      required:
+        - ledger_state
+        - transaction
+        - details
+      properties:
+        ledger_state:
+          $ref: "#/components/schemas/LedgerState"
+        transaction:
+          $ref: "#/components/schemas/TransactionInfo"
+        details:
+          "$ref": "#/components/schemas/TransactionDetails"
     TokenProperties:
       type: object
       required:
@@ -701,51 +668,54 @@ components:
       type: object
       required:
         - transaction_status
-        - transaction_identifier
-        - actions
-        - metadata
+        - payload_hash_hex
+        - intent_hash_hex
+        - transaction_accumulator_hex
         - fee_paid
       properties:
         transaction_status:
           "$ref": "#/components/schemas/TransactionStatus"
-        transaction_identifier:
-          "$ref": "#/components/schemas/TransactionIdentifier"
-        actions:
-          type: array
-          items:
-            "$ref": "#/components/schemas/Action"
+        payload_hash_hex:
+          type: string
+        intent_hash_hex:
+          type: string
+        transaction_accumulator_hex:
+          type: string
         fee_paid:
           $ref: "#/components/schemas/TokenAmount"
-        metadata:
-          "$ref": "#/components/schemas/TransactionMetadata"
     TransactionStatus:
       type: object
       required:
         - status
       properties:
+        state_version:
+          type: integer
+          format: int64
         status:
           type: string
           enum:
-            - PENDING
-            - CONFIRMED
-            - FAILED
+            - succeeded
+            - failed
+            - rejected
+            - pending
         confirmed_time:
+          nullable: true
           type: string
-        ledger_state_version:
-          type: integer
-          format: int64
-      example:
-        status: CONFIRMED
-        confirmed_time: "2021-07-27T17:35:10.726Z"
-    TransactionMetadata:
+          format: date-time
+    TransactionDetails:
       type: object
       required:
-        - hex
+        - raw_hex
+        - referenced_global_entities
       properties:
-        hex:
-          description: The transaction payload, hex encoded.
+        raw_hex:
+          description: The raw transaction payload, hex encoded.
           type: string
-        message:
+        referenced_global_entities:
+          type: array
+          items:
+            type: string
+        message_hex:
           description: The message bytes, hex encoded.
           type: string
     TokenAmount:
@@ -797,17 +767,6 @@ components:
         rri:
           description: The radix resource identifier of the token.
           type: string
-    TransactionIdentifier:
-      type: object
-      required:
-        - hash
-      properties:
-        hash:
-          description: The transaction identifier hash.
-          type: string
-          pattern: "^[0123456789abcdef]{64}$"
-          maxLength: 64
-          minLength: 64
     TransactionLookupOrigin:
       type: string
       enum:
@@ -838,7 +797,6 @@ components:
           description: A human-readable error message.
           type: string
         details:
-          description: A structured/typed details object.
           $ref: "#/components/schemas/GatewayError"
         trace_id:
           description: A GUID to be used when reporting errors, to allow correlation with the Gateway API's error logs.
@@ -854,39 +812,10 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
-          InvalidTokenRRIError: "#/components/schemas/InvalidTokenRRIError"
-          InvalidAccountAddressError: "#/components/schemas/InvalidAccountAddressError"
-          InvalidValidatorAddressError: "#/components/schemas/InvalidValidatorAddressError"
-          InvalidTokenSymbolError: "#/components/schemas/InvalidTokenSymbolError"
-          InvalidActionError: "#/components/schemas/InvalidActionError"
-          TokenNotFoundError: "#/components/schemas/TokenNotFoundError"
-          TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
-          NotEnoughNativeTokensForFeesError: "#/components/schemas/NotEnoughNativeTokensForFeesError"
-          NotEnoughTokensForTransferError: "#/components/schemas/NotEnoughTokensForTransferError"
-          NotEnoughTokensForStakeError: "#/components/schemas/NotEnoughTokensForStakeError"
-          NotEnoughTokensForUnstakeError: "#/components/schemas/NotEnoughTokensForUnstakeError"
-          BelowMinimumStakeError: "#/components/schemas/BelowMinimumStakeError"
-          CannotStakeError: "#/components/schemas/CannotStakeError"
-          MessageTooLongError: "#/components/schemas/MessageTooLongError"
-          CouldNotConstructFeesError: "#/components/schemas/CouldNotConstructFeesError"
-          InvalidRequestError: "#/components/schemas/InvalidRequestError"
           NotSyncedUpError: "#/components/schemas/NotSyncedUpError"
+          InvalidRequestError: "#/components/schemas/InvalidRequestError"
+          TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
           InternalServerError: "#/components/schemas/InternalServerError"
-    InternalServerError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - exception
-            - cause
-          properties:
-            exception:
-              description: Gives an error type which occurred within the Gateway API when serving the request.
-              type: string
-            cause:
-              description: Gives a human readable message - likely just a trace ID for reporting the error.
-              type: string
     NotSyncedUpError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -931,192 +860,20 @@ components:
           type: array
           items:
             type: string
-    InvalidActionError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_action
-          properties:
-            invalid_action:
-              description: The action which was invalid. The descriptive reason is in the main error message.
-              $ref: "#/components/schemas/Action"
-    InvalidTransactionError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_transaction
-            - message
-          properties:
-            invalid_transaction:
-              description: The transaction payload which was invalid.
-              type: string
-            message:
-              description: A descriptive reason for the invalid transaction.
-              type: string
-    NotEnoughNativeTokensForFeesError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - required_amount
-            - available_amount
-          properties:
-            required_amount:
-              description: The required amount of XRD for the fee.
-              $ref: "#/components/schemas/TokenAmount"
-            available_amount:
-              description: The available amount of XRD remaining at the point the fee was paid.
-              $ref: "#/components/schemas/TokenAmount"
-    NotEnoughTokensForTransferError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - requested_amount
-            - available_amount
-          properties:
-            requested_amount:
-              description: The requested amount of token to be transferred.
-              $ref: "#/components/schemas/TokenAmount"
-            available_amount:
-              description: The available amount of token remaining at the point the transfer action was attempted.
-              $ref: "#/components/schemas/TokenAmount"
-    NotEnoughTokensForStakeError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - requested_amount
-            - available_amount
-          properties:
-            requested_amount:
-              description: The requested amount of XRD to be staked.
-              $ref: "#/components/schemas/TokenAmount"
-            available_amount:
-              description: The available amount of XRD remaining at the point the stake action was attempted.
-              $ref: "#/components/schemas/TokenAmount"
-    NotEnoughTokensForUnstakeError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - requested_amount
-            - stake
-            - pending_stake
-          properties:
-            requested_amount:
-              description: The requested amount of XRD to be unstaked.
-              $ref: "#/components/schemas/TokenAmount"
-            stake:
-              description: The estimated amount of XRD that your delegated stake to this validator is worth at the point the stake action was attempted.
-              $ref: "#/components/schemas/AccountStakeEntry"
-            pending_stake:
-              description: The amount of XRD that you is waiting to be staked against this validator at the next epoch change, and cannot currently be unstaked.
-              $ref: "#/components/schemas/AccountStakeEntry"
-    BelowMinimumStakeError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - requested_amount
-            - minimum_amount
-          properties:
-            requested_amount:
-              description: The requested amount of XRD to be staked.
-              $ref: "#/components/schemas/TokenAmount"
-            minimum_amount:
-              description: The minimum amount of XRD you can stake.
-              $ref: "#/components/schemas/TokenAmount"
-    CannotStakeError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - owner
-            - user
-          properties:
-            owner:
-              description: The owner of the validator - if the validator has delegated stake disabled, only this account may stake.
-              $ref: "#/components/schemas/AccountIdentifier"
-            user:
-              description: The user who attempted to stake to the validator.
-              $ref: "#/components/schemas/AccountIdentifier"
-    MessageTooLongError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - length_limit
-            - attempted_length
-          properties:
-            length_limit:
-              description: The maximum byte length of the message, as per current transaction rules.
-              type: integer
-            attempted_length:
-              description: The byte length of the message in the transaction.
-              type: integer
-    CouldNotConstructFeesError:
-      allOf:
-        - "$ref": "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - attempts
-          properties:
-            attempts:
-              description: The number of attempts the system tried and failed to create a consistent transaction fee.
-              type: integer
-    InvalidTokenSymbolError:
+    InternalServerError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
         - type: object
           required:
-            - invalid_token_symbol
+            - exception
+            - cause
           properties:
-            invalid_token_symbol:
-              description: The token symbol which was invalid. A descriptive reason is given in the main error message.
+            exception:
+              description: Gives an error type which occurred within the Gateway API when serving the request.
               type: string
-    InvalidTokenRRIError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_rri
-          properties:
-            invalid_rri:
-              description: The token rri which was invalid. A descriptive reason is given in the main error message.
+            cause:
+              description: Gives a human readable message - likely just a trace ID for reporting the error.
               type: string
-    InvalidAccountAddressError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_account_address
-          properties:
-            invalid_account_address:
-              description: The account address which was invalid. A descriptive reason is given in the main error message.
-              type: string
-    InvalidValidatorAddressError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - invalid_validator_address
-          properties:
-            invalid_account_address:
-              description: The validator address which was invalid. A descriptive reason is given in the main error message.
-              type: string
-    TokenNotFoundError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - token_not_found
-          properties:
-            token_not_found:
-              description: The token rri which was not found.
-              $ref: "#/components/schemas/TokenIdentifier"
     TransactionNotFoundError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1125,8 +882,7 @@ components:
             - transaction_not_found
           properties:
             transaction_not_found:
-              description: The transaction identifier which was not found.
-              $ref: "#/components/schemas/TransactionIdentifier"
+              $ref: "#/components/schemas/TransactionLookupIdentifier"
     PublicKeyType:
       type: string
       enum:
@@ -1134,14 +890,14 @@ components:
         - EddsaEd25519
     PublicKey:
       oneOf:
-        - $ref: '#/components/schemas/EcdsaSecp256k1PublicKey'
-        - $ref: '#/components/schemas/EddsaEd25519PublicKey'
+        - $ref: "#/components/schemas/EcdsaSecp256k1PublicKey"
+        - $ref: "#/components/schemas/EddsaEd25519PublicKey"
       discriminator:
         propertyName: key_type
         mapping:
           # NOTE: These need to match PublicKeyType
-          EcdsaSecp256k1: '#/components/schemas/EcdsaSecp256k1PublicKey'
-          EddsaEd25519: '#/components/schemas/EddsaEd25519PublicKey'
+          EcdsaSecp256k1: "#/components/schemas/EcdsaSecp256k1PublicKey"
+          EddsaEd25519: "#/components/schemas/EddsaEd25519PublicKey"
     EcdsaSecp256k1PublicKey:
       type: object
       required:
@@ -1149,7 +905,7 @@ components:
         - key_hex
       properties:
         key_type:
-          $ref: '#/components/schemas/PublicKeyType'
+          type: string
         key_hex:
           type: string
           minLength: 66
@@ -1162,7 +918,7 @@ components:
         - key_hex
       properties:
         key_type:
-          $ref: '#/components/schemas/PublicKeyType'
+          type: string
         key_hex:
           type: string
           minLength: 64

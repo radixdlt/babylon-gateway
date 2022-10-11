@@ -90,20 +90,28 @@ public class StateController : ControllerBase
     }
 
     [HttpPost("resources")]
-    public async Task<EntityResourcesResponse> Resources(EntityResourcesRequest request, CancellationToken token = default)
+    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
     {
         var address = RadixBech32.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return await _entityStateQuerier.EntityResourcesSnapshot(address.Data, ledgerState, token);
+        var response = await _entityStateQuerier.EntityResourcesSnapshot(address.Data, ledgerState, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
     }
 
     [HttpPost("details")]
-    public async Task<EntityDetailsResponse> Details(EntityDetailsRequest request, CancellationToken token = default)
+    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
     {
         var address = RadixBech32.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return await _entityStateQuerier.EntityDetailsSnapshot(address.Data, ledgerState, token);
+        var response = await _entityStateQuerier.EntityDetailsSnapshot(address.Data, ledgerState, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
     }
 }

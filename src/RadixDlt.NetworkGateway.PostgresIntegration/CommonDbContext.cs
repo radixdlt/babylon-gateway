@@ -87,35 +87,17 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<AccountResourceBalanceHistory> AccountResourceBalanceHistoryEntries => Set<AccountResourceBalanceHistory>();
-
-    public DbSet<ResourceSupplyHistory> ResourceSupplyHistoryEntries => Set<ResourceSupplyHistory>();
-
-    public DbSet<ValidatorStakeHistory> ValidatorStakeHistoryEntries => Set<ValidatorStakeHistory>();
-
-    public DbSet<AccountValidatorStakeHistory> AccountValidatorStakeHistoryEntries => Set<AccountValidatorStakeHistory>();
-
-    public DbSet<ValidatorProposalRecord> ValidatorProposalRecords => Set<ValidatorProposalRecord>();
-
-    public DbSet<Account> Accounts => Set<Account>();
-
-    public DbSet<Resource> Resources => Set<Resource>();
-
-    public DbSet<Validator> Validators => Set<Validator>();
-
-    public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
-
     public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
 
     public DbSet<Entity> Entities => Set<Entity>();
 
-    public DbSet<Substate> Substates => Set<Substate>();
+    public DbSet<EntityResourceAggregateHistory> EntityResourceAggregateHistory => Set<EntityResourceAggregateHistory>();
 
-    public DbSet<EntityFungibleResourceHistory> EntityFungibleResourceHistory => Set<EntityFungibleResourceHistory>();
-
-    public DbSet<EntityNonFungibleResourceHistory> EntityNonFungibleResourceHistory => Set<EntityNonFungibleResourceHistory>();
+    public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
 
     public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
+
+    public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -129,35 +111,28 @@ internal abstract class CommonDbContext : DbContext
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupMempoolTransactions(modelBuilder);
-        HookupNormalizedEntities(modelBuilder);
-        HookupHistory(modelBuilder);
-        HookupRecords(modelBuilder);
-        HookupJoinTables(modelBuilder);
 
-        // Configure temporary types
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("type")
             .HasValue<SystemEntity>("system")
             .HasValue<ResourceManagerEntity>("resource_manager")
-            .HasValue<ComponentEntity>("component")
+            .HasValue<NormalComponentEntity>("normal_component")
+            .HasValue<AccountComponentEntity>("account_component")
+            .HasValue<SystemComponentEntity>("system_component")
             .HasValue<PackageEntity>("package")
-            .HasValue<ValueStoreEntity>("key_value_store")
+            .HasValue<ValueStoreEntity>("value_store")
             .HasValue<VaultEntity>("vault");
 
-        modelBuilder.Entity<Substate>()
+        modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.Address).HasMethod("hash");
+
+        modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("type")
-            .HasValue<SystemSubstate>("system")
-            .HasValue<ResourceManagerSubstate>("resource_manager")
-            .HasValue<ComponentInfoSubstate>("component_info")
-            .HasValue<ComponentStateSubstate>("component_state")
-            .HasValue<PackageSubstate>("package")
-            .HasValue<VaultSubstate>("vault")
-            .HasValue<NonFungibleSubstate>("non_fungible")
-            .HasValue<KeyValueStoreEntrySubstate>("key_value_store_entry");
+            .HasValue<EntityFungibleResourceHistory>("fungible")
+            .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
 
-        modelBuilder.Entity<EntityFungibleResourceHistory>();
-
-        modelBuilder.Entity<EntityNonFungibleResourceHistory>();
+        modelBuilder.Entity<EntityResourceAggregateHistory>()
+            .HasIndex(e => new { e.IsMostRecent, e.EntityId }); // TODO filter out IsMostRecent=false?
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -175,6 +150,9 @@ internal abstract class CommonDbContext : DbContext
 
         configurationBuilder.Properties<MempoolTransactionFailureReason>()
             .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
+
+        configurationBuilder.Properties<LedgerTransactionStatus>()
+            .HaveConversion<LedgerTransactionStatusValueConverter>();
     }
 
     private static void HookupSingleEntries(ModelBuilder modelBuilder)
@@ -194,19 +172,19 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.IntentHash);
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.SignedTransactionHash);
+            .HasAlternateKey(lt => lt.SignedIntentHash);
 
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);
 
-        // Because ResultantStateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
+        // Because StateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
         // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")
         // This is a lighter (lossy) index where the indexed data is correlated with the linear order of the table
         // See also https://www.postgresql.org/docs/current/indexes-types.html
 
         // Fast filter for just user transactions
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => new { lt.ResultantStateVersion })
+            .HasIndex(lt => lt.StateVersion)
             .IsUnique()
             .HasFilter("is_user_transaction = true")
             .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_user_transactions");
@@ -240,187 +218,5 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(lt => lt.Status);
 
         // TODO - We should improve these indices to match the queries we actually need to make here
-    }
-
-    private static void HookupNormalizedEntities(ModelBuilder modelBuilder)
-    {
-        HookupNormalizedEntity<Resource>(modelBuilder);
-        modelBuilder.Entity<Resource>()
-            .HasIndex(r => r.ResourceIdentifier)
-            .IncludeProperties(r => r.Id)
-            .IsUnique();
-
-        HookupNormalizedEntity<Account>(modelBuilder);
-        modelBuilder.Entity<Account>()
-            .HasIndex(r => r.Address)
-            .IncludeProperties(r => r.Id)
-            .IsUnique();
-
-        HookupNormalizedEntity<Validator>(modelBuilder);
-        modelBuilder.Entity<Validator>()
-            .HasIndex(r => r.Address)
-            .IncludeProperties(r => r.Id)
-            .IsUnique();
-    }
-
-    private static void HookupHistory(ModelBuilder modelBuilder)
-    {
-        HookUpAccountResourceBalanceHistory(modelBuilder);
-        HookUpResourceSupplyHistory(modelBuilder);
-        HookUpValidatorStakeHistory(modelBuilder);
-        HookUpAccountValidatorStakeHistory(modelBuilder);
-    }
-
-    private static void HookupRecords(ModelBuilder modelBuilder)
-    {
-        HookUpValidatorProposalRecords(modelBuilder);
-    }
-
-    private static void HookupJoinTables(ModelBuilder modelBuilder)
-    {
-        HookUpAccountTransactionJoinTable(modelBuilder);
-    }
-
-    private static void HookUpAccountResourceBalanceHistory(ModelBuilder modelBuilder)
-    {
-        HookupHistoryOf<AccountResourceBalanceHistory>(modelBuilder);
-
-        modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasKey(h => new { h.AccountId, h.ResourceId, h.FromStateVersion });
-
-        modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.AccountId, h.ResourceId })
-            .HasFilter("to_state_version is null")
-            .IsUnique()
-            .HasDatabaseName($"IX_{nameof(AccountResourceBalanceHistory).ToSnakeCase()}_current_balance");
-
-        modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.AccountId, h.FromStateVersion });
-        modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.ResourceId, h.AccountId, h.FromStateVersion });
-        modelBuilder.Entity<AccountResourceBalanceHistory>()
-            .HasIndex(h => new { h.ResourceId, h.FromStateVersion });
-    }
-
-    private static void HookUpResourceSupplyHistory(ModelBuilder modelBuilder)
-    {
-        HookupHistoryOf<ResourceSupplyHistory>(modelBuilder);
-
-        modelBuilder.Entity<ResourceSupplyHistory>()
-            .HasKey(h => new { h.ResourceId, h.FromStateVersion });
-
-        modelBuilder.Entity<ResourceSupplyHistory>()
-            .HasIndex(h => new { h.ResourceId })
-            .HasFilter("to_state_version is null")
-            .IsUnique()
-            .HasDatabaseName($"IX_{nameof(ResourceSupplyHistory).ToSnakeCase()}_current_supply");
-    }
-
-    private static void HookUpValidatorStakeHistory(ModelBuilder modelBuilder)
-    {
-        HookupHistoryOf<ValidatorStakeHistory>(modelBuilder);
-
-        modelBuilder.Entity<ValidatorStakeHistory>()
-            .HasKey(h => new { h.ValidatorId, h.FromStateVersion });
-
-        modelBuilder.Entity<ValidatorStakeHistory>()
-            .HasIndex(h => new { h.ValidatorId })
-            .HasFilter("to_state_version is null")
-            .IsUnique()
-            .HasDatabaseName($"IX_{nameof(ValidatorStakeHistory).ToSnakeCase()}_current_stake");
-    }
-
-    private static void HookUpAccountValidatorStakeHistory(ModelBuilder modelBuilder)
-    {
-        HookupHistoryOf<AccountValidatorStakeHistory>(modelBuilder);
-
-        modelBuilder.Entity<AccountValidatorStakeHistory>()
-            .HasKey(h => new { h.AccountId, h.ValidatorId, h.FromStateVersion });
-
-        modelBuilder.Entity<AccountValidatorStakeHistory>()
-            .HasIndex(h => new { h.AccountId, h.ValidatorId })
-            .HasFilter("to_state_version is null")
-            .IsUnique()
-            .HasDatabaseName($"IX_{nameof(AccountValidatorStakeHistory).ToSnakeCase()}_current_stake");
-
-        modelBuilder.Entity<AccountValidatorStakeHistory>()
-            .HasIndex(h => new { h.AccountId, h.FromStateVersion });
-        modelBuilder.Entity<AccountValidatorStakeHistory>()
-            .HasIndex(h => new { h.ValidatorId, h.AccountId, h.FromStateVersion });
-        modelBuilder.Entity<AccountValidatorStakeHistory>()
-            .HasIndex(h => new { h.ValidatorId, h.FromStateVersion });
-    }
-
-    private static void HookUpValidatorProposalRecords(ModelBuilder modelBuilder)
-    {
-        HookupRecord<ValidatorProposalRecord>(modelBuilder);
-
-        modelBuilder.Entity<ValidatorProposalRecord>()
-            .HasKey(h => new { h.Epoch, h.ValidatorId });
-
-        modelBuilder.Entity<ValidatorProposalRecord>()
-            .HasIndex(h => new { h.ValidatorId, h.Epoch });
-    }
-
-    private static void HookUpAccountTransactionJoinTable(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<AccountTransaction>()
-            .HasKey(at => new { at.AccountId, at.ResultantStateVersion });
-
-        // Fast filter for just user transactions
-        modelBuilder.Entity<AccountTransaction>()
-            .HasIndex(at => new { at.AccountId, at.ResultantStateVersion })
-            .IsUnique()
-            .HasFilter("is_user_transaction = true")
-            .HasDatabaseName($"IX_{nameof(AccountTransaction).ToSnakeCase()}_user_transactions");
-    }
-
-    private static void HookupHistoryOf<THistory>(ModelBuilder modelBuilder)
-        where THistory : HistoryBase
-    {
-        var substateNameSnakeCase = typeof(THistory).Name.ToSnakeCase();
-
-        modelBuilder.Entity<THistory>()
-            .HasOne(h => h.FromLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(h => h.FromStateVersion)
-            .OnDelete(DeleteBehavior.Cascade) // Deletes History if LedgerTransaction deleted
-            .HasConstraintName($"FK_{substateNameSnakeCase}_from_transaction");
-
-        // Note - if the Ledger is rolled back then ToStateVersions need to be manually nulled out where
-        //  ToStateVersion >= (FirstRevertedStateVersion - 1) to ensure we have the tip of the history with null
-        //  ToStateVersion.
-        modelBuilder.Entity<THistory>()
-            .HasOne(h => h.ToLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(h => h.ToStateVersion)
-            .OnDelete(DeleteBehavior.Restrict) // Null out FKs if LedgerTransaction deleted (all such dependents need to be loaded by EF Core at the time of deletion!)
-            .HasConstraintName($"FK_{substateNameSnakeCase}_to_transaction");
-    }
-
-    private static void HookupRecord<TRecord>(ModelBuilder modelBuilder)
-        where TRecord : RecordBase
-    {
-        var substateNameSnakeCase = typeof(TRecord).Name.ToSnakeCase();
-
-        modelBuilder.Entity<TRecord>()
-            .HasOne(h => h.LastUpdatedAtLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(h => h.LastUpdatedAtStateVersion)
-            .OnDelete(DeleteBehavior.NoAction) // Reversions need to be handled manually for records in general
-            .HasConstraintName($"FK_{substateNameSnakeCase}_last_updated_transaction");
-    }
-
-    private static void HookupNormalizedEntity<TNormalizedEntity>(ModelBuilder modelBuilder)
-        where TNormalizedEntity : NormalizedEntityBase
-    {
-        var substateNameSnakeCase = typeof(TNormalizedEntity).Name.ToSnakeCase();
-
-        modelBuilder.Entity<TNormalizedEntity>()
-            .HasOne(ne => ne.FromLedgerTransaction)
-            .WithMany()
-            .HasForeignKey(ne => ne.FromStateVersion)
-            .OnDelete(DeleteBehavior.Cascade) // Deletes if ledger is rolled back
-            .HasConstraintName($"FK_{substateNameSnakeCase}_from_transaction");
     }
 }

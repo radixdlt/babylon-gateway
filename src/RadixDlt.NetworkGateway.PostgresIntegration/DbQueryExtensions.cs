@@ -62,51 +62,14 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using NpgsqlTypes;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
 
 internal static class DbQueryExtensions
 {
-    public static IQueryable<Account> Account<TDbContext>(
-        this TDbContext dbContext,
-        string accountAddress,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<Account>()
-            .Where(a => a.Address == accountAddress && a.FromStateVersion <= stateVersion);
-    }
-
-    public static IQueryable<Resource> Resource<TDbContext>(
-        this TDbContext dbContext,
-        string resourceIdentifier,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<Resource>()
-            .Where(r => r.ResourceIdentifier == resourceIdentifier && r.FromStateVersion <= stateVersion);
-    }
-
-    public static IQueryable<Validator> Validator<TDbContext>(
-        this TDbContext dbContext,
-        string validatorAddress,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<Validator>()
-            .Where(v => v.Address == validatorAddress && v.FromStateVersion <= stateVersion);
-    }
-
     public static IQueryable<LedgerTransaction> GetTopLedgerTransaction<TDbContext>(this TDbContext dbContext)
         where TDbContext : CommonDbContext
     {
@@ -118,8 +81,8 @@ internal static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.ResultantStateVersion <= beforeStateVersion)
-            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .Where(lt => lt.StateVersion <= beforeStateVersion)
+            .OrderByDescending(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -127,8 +90,8 @@ internal static class DbQueryExtensions
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
-            .Where(lt => lt.ResultantStateVersion >= afterStateVersion)
-            .OrderBy(lt => lt.ResultantStateVersion)
+            .Where(lt => lt.StateVersion >= afterStateVersion)
+            .OrderBy(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -138,7 +101,7 @@ internal static class DbQueryExtensions
         return dbContext.LedgerTransactions
             .Where(lt => lt.RoundTimestamp <= timestamp)
             .OrderByDescending(lt => lt.RoundTimestamp)
-            .ThenByDescending(lt => lt.ResultantStateVersion)
+            .ThenByDescending(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -148,7 +111,7 @@ internal static class DbQueryExtensions
         return dbContext.LedgerTransactions
             .Where(lt => lt.RoundTimestamp >= timestamp)
             .OrderBy(lt => lt.RoundTimestamp)
-            .ThenBy(lt => lt.ResultantStateVersion)
+            .ThenBy(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -157,7 +120,7 @@ internal static class DbQueryExtensions
     {
         return dbContext.LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch <= round && lt.IsStartOfRound)
-            .OrderByDescending(lt => lt.ResultantStateVersion)
+            .OrderByDescending(lt => lt.StateVersion)
             .Take(1);
     }
 
@@ -166,268 +129,7 @@ internal static class DbQueryExtensions
     {
         return dbContext.LedgerTransactions
             .Where(lt => lt.Epoch == epoch && lt.RoundInEpoch >= round && lt.IsStartOfRound)
-            .OrderBy(lt => lt.ResultantStateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<AccountResourceBalanceHistory> AccountResourceBalanceHistoryForAccountIdAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        long accountId,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        var accountIdParameter = new NpgsqlParameter("@account_id", accountId);
-
-        return dbContext.Set<AccountResourceBalanceHistory>()
-            .FromSqlInterpolated($@"
-WITH PossibleResourceIds AS (
-	SELECT DISTINCT ar.resource_id FROM account_resource_balance_history ar
-	WHERE ar.account_id = {accountIdParameter}
-)
-SELECT h.*
-FROM PossibleResourceIds r
-INNER JOIN LATERAL (
-	SELECT * FROM account_resource_balance_history ar2
-	WHERE
-		ar2.account_id = {accountIdParameter}
-		AND ar2.resource_id = r.resource_id
-		AND ar2.from_state_version <= {stateVersion}
-	ORDER BY ar2.from_state_version DESC
-	LIMIT 1
-) h ON (true)
-");
-    }
-
-    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryForAccountIdValidatorIdAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        long accountId,
-        long validatorId,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<AccountValidatorStakeHistory>()
-            .Where(h => h.AccountId == accountId && h.ValidatorId == validatorId && h.FromStateVersion <= stateVersion)
-            .OrderByDescending(h => h.FromStateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<AccountValidatorStakeHistory> AccountValidatorStakeHistoryForAccountIdAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        long accountId,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        var accountIdParameter = new NpgsqlParameter("@account_id", NpgsqlDbType.Bigint) { Value = accountId };
-
-        return dbContext.Set<AccountValidatorStakeHistory>()
-            .FromSqlInterpolated($@"
-WITH PossibleValidatorIds AS (
-	SELECT DISTINCT av.validator_id FROM account_validator_stake_history av
-	WHERE av.account_id = {accountIdParameter}
-)
-SELECT h.*
-FROM PossibleValidatorIds v
-INNER JOIN LATERAL (
-	SELECT * FROM account_validator_stake_history av2
-	WHERE
-		av2.account_id = {accountIdParameter}
-		AND av2.validator_id = v.validator_id
-		AND av2.from_state_version <= {stateVersion}
-	ORDER BY av2.from_state_version DESC
-	LIMIT 1
-) h ON (h.validator_id = v.validator_id)
-");
-    }
-
-    public static IQueryable<AccountValidatorStakeHistory> NonZeroAccountValidatorStakeHistoryForValidatorIdAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        long validatorId,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        var validatorIdParameter = new NpgsqlParameter("@validator_id", NpgsqlDbType.Bigint) { Value = validatorId };
-
-        return dbContext.Set<AccountValidatorStakeHistory>()
-            .FromSqlInterpolated($@"
-WITH PossibleAccountIds AS (
-	SELECT DISTINCT av.account_id FROM account_validator_stake_history av
-	WHERE av.validator_id = {validatorIdParameter}
-    AND av.from_state_version <= {stateVersion}
-)
-SELECT h.*
-FROM PossibleAccountIds a
-INNER JOIN LATERAL (
-	SELECT * FROM account_validator_stake_history av2
-	WHERE
-		av2.account_id = a.account_id
-		AND av2.validator_id = {validatorIdParameter}
-		AND av2.from_state_version <= {stateVersion}
-        AND (
-            av2.total_stake_units > 0
-            OR av2.total_prepared_xrd_stake > 0
-            OR av2.total_prepared_unstake_units > 0
-            OR av2.total_exiting_xrd_stake > 0
-        )
-	ORDER BY av2.from_state_version DESC
-	LIMIT 1
-) h ON (h.account_id = a.account_id)
-");
-    }
-
-    public record AccountValidatorIds(long AccountId, long ValidatorId);
-
-    public static IQueryable<AccountValidatorStakeHistory> BulkAccountValidatorStakeHistoryAtVersion<TDbContext>(
-        this TDbContext dbContext,
-        List<AccountValidatorIds> accountValidatorIds,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        /*
-         * Performance Notes:
-         *
-         * This was chosen as the best query structure by comparing on mainnet (for ~200 validators) with other choices for queries:
-         * - INNER JOIN LATERAL - 2ms Execution
-         * - JOIN against GROUP BY with MAX - 200ms Execution
-         * - Using variants of PARTITION BY - 750ms-1s Execution
-         */
-
-        var accountIdsParameter = new NpgsqlParameter("@account_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint)
-             { Value = accountValidatorIds.Select(av => av.AccountId).ToList() };
-        var validatorIdsParameter = new NpgsqlParameter("@validator_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint)
-            { Value = accountValidatorIds.Select(av => av.ValidatorId).ToList() };
-        var stateVersionParameter = new NpgsqlParameter("@state_version", NpgsqlDbType.Bigint)
-            { Value = stateVersion };
-
-        // NB - UNNEST can be used to zip arrays together
-        return dbContext.Set<AccountValidatorStakeHistory>()
-            .FromSqlInterpolated($@"
-SELECT h.*
-FROM UNNEST({accountIdsParameter}, {validatorIdsParameter}) av (account_id, validator_id)
-INNER JOIN LATERAL (
-    SELECT
-        h0.*
-    FROM account_validator_stake_history h0
-	WHERE
-		h0.account_id = av.account_id AND
-		h0.validator_id = av.validator_id AND
-		h0.from_state_version <= {stateVersionParameter}
-	ORDER BY h0.from_state_version DESC
-	LIMIT 1
-) h ON (true)
-");
-    }
-
-    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorAddressesWithIncludedValidator<TDbContext>(
-        this TDbContext dbContext,
-        List<string> validatorAddresses,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Validators
-            .Where(v => validatorAddresses.Contains(v.Address) && v.FromStateVersion <= stateVersion)
-            .Select(v => v.Id)
-            .Select(validatorId =>
-                dbContext.Set<ValidatorStakeHistory>()
-                    .Where(h =>
-                        h.ValidatorId == validatorId
-                        && h.FromStateVersion <= stateVersion
-                    )
-                    .OrderByDescending(h => h.FromStateVersion)
-                    .Include(v => v.Validator)
-                    .FirstOrDefault()
-            )
-            .Where(vsh => vsh != null)
-            .Select(vsh => vsh!);
-    }
-
-    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorIds<TDbContext>(
-        this TDbContext dbContext,
-        List<long> validatorIds,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<ValidatorStakeHistory>()
-            .FromSqlInterpolated($@"
-SELECT h.*
-FROM UNNEST({validatorIds}) v (validator_id)
-INNER JOIN LATERAL (
-    SELECT
-        h0.*
-    FROM validator_stake_history h0
-	WHERE
-		h0.validator_id = v.validator_id AND
-		h0.from_state_version <= {stateVersion}
-	ORDER BY h0.from_state_version DESC
-	LIMIT 1
-) h ON (true)
-");
-    }
-
-    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForAnyValidator<TDbContext>(
-        this TDbContext dbContext,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<ValidatorStakeHistory>()
-            .FromSqlInterpolated($@"
-SELECT h.*
-FROM validators v
-INNER JOIN LATERAL (
-    SELECT *
-    FROM validator_stake_history h0
-	WHERE
-		h0.validator_id = v.id AND
-		h0.from_state_version <= {stateVersion}
-	ORDER BY h0.from_state_version DESC
-	LIMIT 1
-) h ON (h.validator_id = v.id)
-");
-    }
-
-    public static IQueryable<ValidatorStakeHistory> ValidatorStakeHistoryAtVersionForValidatorId<TDbContext>(
-        this TDbContext dbContext,
-        long validatorId,
-        long stateVersion
-    )
-        where TDbContext : CommonDbContext
-    {
-        return dbContext.Set<ValidatorStakeHistory>()
-            .Where(h =>
-                h.ValidatorId == validatorId
-                && h.FromStateVersion <= stateVersion
-            )
-            .OrderByDescending(h => h.FromStateVersion)
-            .Take(1);
-    }
-
-    public static IQueryable<ResourceSupplyHistory> ResourceSupplyHistoryAtVersionForResourceId<TDbContext>(
-        this TDbContext dbContext,
-        long stateVersion,
-        long resourceId
-    )
-        where TDbContext : CommonDbContext
-    {
-        /*
-         * NB - I previously tried to merge the rri look-up with this, but no matter the query formulation (eg Lateral Join),
-         * the query planner still often didn't use the right indexes in the right order, resulting in a very slow query
-         * as it would try to parallelize the resource id look up with the supply histoy read, which was super slow for
-         * non-XRD tokens.
-         */
-
-        return dbContext.Set<ResourceSupplyHistory>()
-            .Where(h =>
-                h.ResourceId == resourceId
-                && h.FromStateVersion <= stateVersion
-            )
-            .OrderByDescending(h => h.FromStateVersion)
+            .OrderBy(lt => lt.StateVersion)
             .Take(1);
     }
 }

@@ -82,17 +82,10 @@ internal class LedgerStatus : SingleEntryBase
     // FK Created in OnModelCreating to create an un-truncated name for the constraint
     public LedgerTransaction TopOfLedgerTransaction { get; set; }
 
-    // [Owned] below
-    public SyncTarget SyncTarget { get; set; }
+    [Column("sync_status_target_state_version")]
+    public long TargetStateVersion { get; set; }
 
     [ConcurrencyCheck]
     [Column("last_updated")]
     public DateTimeOffset LastUpdated { get; set; }
-}
-
-[Owned]
-public record SyncTarget
-{
-    [Column("sync_status_target_state_version")]
-    public long TargetStateVersion { get; set; }
 }
