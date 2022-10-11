@@ -10,14 +10,18 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class FungibleResourceBuilder : BuilderBase<StateUpdates>
 {
+    private readonly StateUpdates _stateUpdates;
+
     private string _resourceAddress;
     private string _resourceAddressHex;
     private string _resourceName = "XRD";
     private string _totalSupplyAttos = string.Empty;
     private int _fungibleDivisibility = 18;
 
-    public FungibleResourceBuilder()
+    public FungibleResourceBuilder(StateUpdates stateUpdates)
     {
+        _stateUpdates = stateUpdates;
+
         // generate something like: resource_loc_1qqwknku2
         _resourceAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.ResourceHrp);
         _resourceAddressHex = AddressHelper.AddressToHex(_resourceAddress);
@@ -29,14 +33,13 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var newGlobalEntities = new List<GlobalEntityId>()
-        {
-            new GlobalEntityId(
-                entityType: EntityType.ResourceManager,
-                entityAddressHex: _resourceAddressHex,
-                globalAddressHex: _resourceAddressHex,
-                globalAddress: _resourceAddress),
-        };
+        var newGlobalEntities = new List<GlobalEntityId>();
+
+        newGlobalEntities.GetOrAdd(new GlobalEntityId(
+            entityType: EntityType.ResourceManager,
+            entityAddressHex: _resourceAddressHex,
+            globalAddressHex: _resourceAddressHex,
+            globalAddress: _resourceAddress));
 
         var upSubstates = new List<UpSubstate>()
         {

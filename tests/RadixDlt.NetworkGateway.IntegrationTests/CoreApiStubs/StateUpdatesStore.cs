@@ -27,6 +27,12 @@ public class StateUpdatesStore
         {
             return _stateUpdatesList.Combine();
         }
+
+        set
+        {
+            _stateUpdatesList.Clear();
+            _stateUpdatesList.Add(value);
+        }
     }
 
     public string ToJson()
@@ -55,70 +61,6 @@ public class StateUpdatesStore
         _testConsole.WriteLine($"Locking fee: {feeAmount} xrd");
 
         return feeSummary;
-    }
-
-    public StateUpdates TakeTokensFromVault(string componentAddress, FeeSummary feeSummary, double xrdAmount, out string newTotalAttos)
-    {
-        // a default value of free XRD tokens
-        var tokenAmountAttos = TokenAttosConverter.Tokens2Attos(xrdAmount);
-
-        var vaultDownSubstate = StateUpdates.GetLastVaultDownSubstateByEntityAddress(componentAddress);
-
-        var vaultUpSubstate = StateUpdates.GetLastVaultUpSubstateByEntityAddress(componentAddress);
-
-        var downVirtualSubstates = new List<SubstateId>();
-        var downSubstates = new List<DownSubstate?>();
-        var upSubstates = new List<UpSubstate>();
-        var globalEntityIds = new List<GlobalEntityId>();
-
-        // create a new down state with the 'old' balance
-        // create a new up state with the new balance and increase its state version
-
-        // new vault total
-
-        // add new vault down substate
-        var newVaultDownSubstate = vaultDownSubstate.CloneSubstate();
-        if (newVaultDownSubstate != null)
-        {
-            newVaultDownSubstate._Version = vaultUpSubstate._Version;
-        }
-        else
-        {
-            newVaultDownSubstate = new DownSubstate(
-                new SubstateId(
-                    EntityType.Vault,
-                    StateUpdates.GetFungibleResoureAddressHexByEntityAddress(componentAddress),
-                    SubstateType.Vault,
-                    Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
-                ), substateDataHash: "hash", vaultUpSubstate._Version
-            );
-        }
-
-        downSubstates.Add(newVaultDownSubstate);
-
-        // add new vault up state
-        var newVaultUpSubstate = vaultUpSubstate.CloneSubstate();
-        newVaultUpSubstate._Version += 1;
-
-        var newVaultSubstate = newVaultUpSubstate.SubstateData.GetVaultSubstate();
-
-        var vaultResourceAmount = newVaultSubstate.ResourceAmount.GetFungibleResourceAmount();
-        var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
-
-        var feesAttos = feeSummary.CostUnitConsumed
-                        * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
-
-        _testConsole.WriteLine($"Paid fees {TokenAttosConverter.Attos2Tokens(feesAttos)} xrd");
-
-        var newAttosBalance = vaultResourceAmountAttos - tokenAmountAttos - feesAttos;
-
-        vaultResourceAmount!.AmountAttos = newAttosBalance.ToString();
-
-        newTotalAttos = tokenAmountAttos.ToString();
-
-        upSubstates.Add(newVaultUpSubstate);
-
-        return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, globalEntityIds);
     }
 
     public FeeSummary CalculateFeeSummary()

@@ -61,7 +61,7 @@ public class CoreApiStub :
 
     public Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        return Task.FromResult(RequestsAndResponses.NetworkConfigurationResponse);
+        return _transactionStreamStore.GetNetworkConfiguration(token);
     }
 
     string ICoreApiHandler.GetNetworkIdentifier()
@@ -92,7 +92,7 @@ public class CoreApiStub :
 
     public async Task<CapturedConfig> CaptureConfiguration()
     {
-        var networkConfiguration = MapNetworkConfigurationResponse(RequestsAndResponses.NetworkConfigurationResponse);
+        var networkConfiguration = MapNetworkConfigurationResponse(await _transactionStreamStore.GetNetworkConfiguration(CancellationToken.None));
 
         return await Task.FromResult(new CapturedConfig(
             networkConfiguration.NetworkName,

@@ -8,18 +8,16 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class AccountBuilder : BuilderBase<StateUpdates>
 {
-    private readonly List<StateUpdates> _stateUpdatesList;
-    private readonly StateUpdatesStore _stateUpdatesStore;
+    private readonly StateUpdates _stateUpdates;
 
     private string _accountAddress = string.Empty;
     private string _totalAmountAttos = string.Empty;
     private ComponentInfoSubstate? _componentInfoSubstate;
     private string _tokenName = string.Empty;
 
-    public AccountBuilder(List<StateUpdates> stateUpdatesList, StateUpdatesStore stateUpdatesStore)
+    public AccountBuilder(StateUpdates stateUpdates)
     {
-        _stateUpdatesList = stateUpdatesList;
-        _stateUpdatesStore = stateUpdatesStore;
+        _stateUpdates = stateUpdates;
         AddressHelper.GenerateRandomPublicKey();
     }
 
@@ -38,7 +36,7 @@ public class AccountBuilder : BuilderBase<StateUpdates>
         //     .WithTotalSupplyAttos(_totalAmountAttos)
         //     .Build();
 
-        var tokens = _stateUpdatesStore.StateUpdates.GetGlobalEntity(GenesisData.GenesisResourceManagerAddress);
+        var tokens = _stateUpdates.GetGlobalEntity(GenesisData.GenesisResourceManagerAddress);
 
         var vaultAddressHex = AddressHelper.AddressToHex(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.ResourceHrp));
 
@@ -47,8 +45,6 @@ public class AccountBuilder : BuilderBase<StateUpdates>
             .WithFungibleTokensResourceAddress(tokens.EntityAddressHex)
             .WithFungibleResourceAmountAttos(_totalAmountAttos)
             .Build();
-
-        _stateUpdatesList.Add(vault);
 
         var dataStruct = new KeyValueStoreBuilder()
             .WithDataStructField(vaultAddressHex, "Custom", ScryptoType.Vault)
@@ -69,7 +65,7 @@ public class AccountBuilder : BuilderBase<StateUpdates>
             .WithFixedAddress(_accountAddress)
             .Build();
 
-        return account;
+        return account.Add(vault);
     }
 
     public AccountBuilder WithFixedAddress(string accountAddress)

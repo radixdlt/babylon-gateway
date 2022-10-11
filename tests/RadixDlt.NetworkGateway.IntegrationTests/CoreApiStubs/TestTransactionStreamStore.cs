@@ -12,6 +12,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 using TransactionStatus = RadixDlt.CoreApiSdk.Model.TransactionStatus;
@@ -91,7 +92,7 @@ public class TestTransactionStreamStore
         var stateUpdatesList = new List<StateUpdates>();
 
         _testConsole.WriteLine("XRD resource");
-        var tokens = new FungibleResourceBuilder()
+        var tokens = new FungibleResourceBuilder(_stateUpdatesStore.StateUpdates)
             .WithResourceName("XRD")
             .WithFixedAddressHex(GenesisData.GenesisResourceManagerAddressHex)
             .WithTotalSupplyAttos(GenesisData.GenesisAmountAttos)
@@ -101,7 +102,7 @@ public class TestTransactionStreamStore
 
         _testConsole.WriteLine("SysFaucet vault");
         var vault = new VaultBuilder()
-            .WithFungibleTokensResourceAddress(tokens.NewGlobalEntities[0].EntityAddressHex)
+            .WithFungibleTokensResourceAddress(GenesisData.GenesisResourceManagerAddressHex)
             .WithFixedAddressHex(GenesisData.GenesisXrdVaultAddressHex)
             .WithFungibleResourceAmountAttos(GenesisData.GenesisAmountAttos)
             .Build();
@@ -285,7 +286,7 @@ public class TestTransactionStreamStore
         // build TransactionPreviewResponse
         var stateUpdatesList = new List<StateUpdates>();
 
-        var tokenStates = new FungibleResourceBuilder()
+        var tokenStates = new FungibleResourceBuilder(_stateUpdatesStore.StateUpdates)
             .WithResourceName("PreviewToken")
             .Build();
 
@@ -393,14 +394,22 @@ public class TestTransactionStreamStore
         var toStateVersion = Math.Min(MaxStateVersion, fromStateVersion + count);
 
         var transactions = CommittedTransactions.Where(t => t.StateVersion >= fromStateVersion && t.StateVersion <= toStateVersion).Select(t => new CommittedTransaction(t.StateVersion, null, t.Receipt)).ToList();
-        _requestsAndResponses.CommittedTransactionsResponse = new CommittedTransactionsResponse(
+
+        return Task.FromResult(new CommittedTransactionsResponse(
             fromStateVersion: fromStateVersion,
             toStateVersion: toStateVersion,
             maxStateVersion: MaxStateVersion,
             transactions
-        );
+        ));
+    }
 
-        return Task.FromResult(_requestsAndResponses.CommittedTransactionsResponse);
+    public Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    {
+        // TODO: is there an api call to fetch the configuration?
+        return Task.FromResult(new NetworkConfigurationResponse(
+            new NetworkConfigurationResponseVersion(_requestsAndResponses.CoreVersion, _requestsAndResponses.ApiVersion),
+            GenesisData.NetworkDefinition.LogicalName,
+            GenesisData.NetworkDefinition.HrpSuffix));
     }
 
     private void AddPendingTransaction(TestPendingTransaction? pendingTransaction)
@@ -416,7 +425,14 @@ public class TestTransactionStreamStore
 
     private TransactionReceipt IssueTransactionReceipt(TestPendingTransaction pendingTransaction)
     {
+        var tempAllStateUpdates = new StateUpdates(
+            _stateUpdatesStore.StateUpdates.DownVirtualSubstates,
+            _stateUpdatesStore.StateUpdates.UpSubstates,
+            _stateUpdatesStore.StateUpdates.DownSubstates,
+            _stateUpdatesStore.StateUpdates.NewGlobalEntities);
+
         var stateUpdatesList = new List<StateUpdates>();
+
         var newVaultTotalAttos = string.Empty;
 
         BigInteger tokensAmountToTransferAttos = 0;
@@ -424,7 +440,6 @@ public class TestTransactionStreamStore
         if (pendingTransaction.StateUpdates != null)
         {
             stateUpdatesList.Add(pendingTransaction.StateUpdates);
-            _stateUpdatesStore.AddStateUpdates(pendingTransaction.StateUpdates);
         }
 
         // default fee summary
@@ -450,7 +465,8 @@ public class TestTransactionStreamStore
 
                 case InstructionOp.FreeXrd:
                     _testConsole.WriteLine($"Taking 1000 tokens from vault owned by {instruction.Address}");
-                    var freeTokens = _stateUpdatesStore.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, 1000, out newVaultTotalAttos);
+                    var freeTokens = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, 1000, out newVaultTotalAttos);
+
                     stateUpdatesList.Add(freeTokens);
                     break;
 
@@ -470,7 +486,7 @@ public class TestTransactionStreamStore
                             resourceXrdVaultAddressHex = GenesisData.GenesisXrdVaultAddressHex;
                         }
 
-                        var version = _stateUpdatesStore.StateUpdates.GetLastUpSubstateByEntityAddressHex(resourceXrdVaultAddressHex)._Version;
+                        var version = tempAllStateUpdates.GetLastUpSubstateByEntityAddressHex(resourceXrdVaultAddressHex)._Version;
 
                         var vault = new VaultBuilder()
                             .WithFixedAddressHex(resourceXrdVaultAddressHex)
@@ -497,7 +513,7 @@ public class TestTransactionStreamStore
                         _testConsole.WriteLine($"CreateNewAccount: Creating new account {pendingTransaction.AccountAddress}");
 
                         // build account states
-                        var account = new AccountBuilder(stateUpdatesList, _stateUpdatesStore)
+                        var account = new AccountBuilder(tempAllStateUpdates)
                             .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
                             .WithFixedAddress(pendingTransaction.AccountAddress!)
                             .WithTokenName("XRD")
@@ -526,13 +542,12 @@ public class TestTransactionStreamStore
 
                         // faucet vault's up and down substates
                         // TODO: who is paying the fees? faucet or sender?
-                        var faucetVault = _stateUpdatesStore.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, 0, out newVaultTotalAttos);
+                        var faucetVault = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, 0, out newVaultTotalAttos);
 
                         stateUpdatesList.Add(faucetVault);
 
                         // account's vault up and down substates
-
-                        var accountVault = _stateUpdatesStore.TakeTokensFromVault(accountAddress!, feeSummary, tokensToWithdraw, out newVaultTotalAttos);
+                        var accountVault = tempAllStateUpdates.TakeTokensFromVault(accountAddress!, feeSummary, tokensToWithdraw, out newVaultTotalAttos);
 
                         stateUpdatesList.Add(accountVault);
                     }
@@ -548,9 +563,9 @@ public class TestTransactionStreamStore
 
                         _testConsole.WriteLine($"Deposit: Depositing {tokensToDeposit} tokens to account {accountAddress}");
 
-                        var accountVaultDownSubstate = _stateUpdatesStore.StateUpdates.GetLastVaultDownSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
+                        var accountVaultDownSubstate = tempAllStateUpdates.GetLastVaultDownSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
 
-                        var accountVaultUpSubstate = _stateUpdatesStore.StateUpdates.GetLastVaultUpSubstateByEntityAddress(accountAddress);
+                        var accountVaultUpSubstate = tempAllStateUpdates.GetLastVaultUpSubstateByEntityAddress(accountAddress);
 
                         var downVirtualSubstates = new List<SubstateId>();
                         var downSubstates = new List<DownSubstate?>();
@@ -594,6 +609,8 @@ public class TestTransactionStreamStore
 
                     break;
             }
+
+            tempAllStateUpdates = tempAllStateUpdates.Add(stateUpdatesList.Combine());
         }
 
         var transactionReceipt = new TransactionReceiptBuilder()
@@ -603,7 +620,7 @@ public class TestTransactionStreamStore
             .Build();
 
         // add new state updates to the global store
-        _stateUpdatesStore.AddStateUpdates(stateUpdatesList.Combine());
+        _stateUpdatesStore.StateUpdates = _stateUpdatesStore.StateUpdates.Add(stateUpdatesList.Combine());
 
         return transactionReceipt;
     }

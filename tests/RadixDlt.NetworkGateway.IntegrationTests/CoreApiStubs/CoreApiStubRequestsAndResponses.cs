@@ -19,8 +19,6 @@ public class CoreApiStubRequestsAndResponses
 
     public string ApiVersion { get; set; }
 
-    public CommittedTransactionsResponse CommittedTransactionsResponse { get; set; }
-
     public CoreNodeHealthResult CoreNodeHealthResult { get; set; }
 
     public string CoreVersion { get; set; }
@@ -36,19 +34,6 @@ public class CoreApiStubRequestsAndResponses
     public string Hash { get; set; }
 
     public string MempoolTransactionHash { get; set; }
-
-    public MempoolTransactionStatus MempoolTransactionStatus { get; set; }
-
-    public NetworkConfigurationResponse NetworkConfigurationResponse
-    {
-        get
-        {
-            return new NetworkConfigurationResponse(
-                new NetworkConfigurationResponseVersion(CoreVersion, ApiVersion),
-                GenesisData.NetworkDefinition.LogicalName,
-                GenesisData.NetworkDefinition.HrpSuffix);
-        }
-    }
 
     public NetworkStatusResponse NetworkStatusResponse { get; set; }
 
@@ -85,22 +70,6 @@ public class CoreApiStubRequestsAndResponses
         };
 
         TransactionSubmitResponse = new TransactionSubmitResponse();
-
-        // TransactionSummary = new TransactionSummary(
-        //     CommittedTransactionsResponse.Transactions[0].StateVersion,
-        //     0,
-        //     0,
-        //     0,
-        //     false,
-        //     false,
-        //     Hash.ConvertFromHex(),
-        //     Hash.ConvertFromHex(),
-        //     Hash.ConvertFromHex(),
-        //     BitConverter.GetBytes(CommittedTransactionsResponse.Transactions[0].StateVersion),
-        //     new FakeClock().UtcNow,
-        //     new FakeClock().UtcNow,
-        //     new FakeClock().UtcNow
-        // );
 
         CoreNodeHealthResult = new CoreNodeHealthResult(
             new Dictionary<CoreNodeStatus, List<GatewayApi.Configuration.CoreApiNode>>

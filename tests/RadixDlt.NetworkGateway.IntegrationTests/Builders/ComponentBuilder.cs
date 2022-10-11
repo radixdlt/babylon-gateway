@@ -62,7 +62,7 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
         if (_componentInfoSubstate != null)
         {
-            newGlobalEntities.Add(new(
+            newGlobalEntities.GetOrAdd(new(
                 entityType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
                 entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
                 globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
@@ -71,7 +71,7 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
         if (_componentStateSubstate != null)
         {
-            newGlobalEntities.Add(new(
+            newGlobalEntities.GetOrAdd(new(
                 entityType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
                 entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
                 globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
@@ -80,7 +80,7 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
         if (_componentSystemSubstate != null)
         {
-            newGlobalEntities.Add(new(
+            newGlobalEntities.GetOrAdd(new(
                 entityType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
                 entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
                 globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
