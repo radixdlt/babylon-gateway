@@ -461,7 +461,7 @@ public class TestTransactionStreamStore
 
                         _testConsole.WriteLine($"TakeFromWorktop: Moving tokens to bucket '{bucketName}'");
 
-                        // create a new vault up and down sub states
+                        // create a new vault up and down substates
 
                         var resourceXrdVaultAddressHex = string.Empty;
 
