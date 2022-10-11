@@ -1,4 +1,5 @@
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
@@ -8,9 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
-using EcdsaSecp256k1PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.EcdsaSecp256k1PublicKey;
-using PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKey;
-using PublicKeyType = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKeyType;
 using TransactionPreviewRequestFlags = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequestFlags;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
@@ -167,10 +165,10 @@ public partial class GatewayTestsRunner : IDisposable
             .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp), "bucket1")
             .Build();
 
-        var signerPublicKeys = new List<PublicKey>
+        var signerPublicKeys = new List<GatewayApiSdk.Model.PublicKey>
         {
-            new(new EcdsaSecp256k1PublicKey(
-                PublicKeyType.EcdsaSecp256k1, "010000000000000000000000000000001")),
+            new(new GatewayApiSdk.Model.EcdsaSecp256k1PublicKey(
+                GatewayApiSdk.Model.PublicKeyType.EcdsaSecp256k1.ToString(), "010000000000000000000000000000001")),
         };
 
         var flags = new TransactionPreviewRequestFlags(unlimitedLoan: false);

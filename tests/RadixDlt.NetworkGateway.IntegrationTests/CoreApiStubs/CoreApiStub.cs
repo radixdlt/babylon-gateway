@@ -10,11 +10,9 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ICoreApiProvider = RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders.ICoreApiProvider;
-using NetworkDefinition = RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkDefinition;
 using TransactionPreviewRequest = RadixDlt.CoreApiSdk.Model.TransactionPreviewRequest;
 using TransactionPreviewResponse = RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse;
 using TransactionSubmitRequest = RadixDlt.CoreApiSdk.Model.TransactionSubmitRequest;
@@ -97,26 +95,31 @@ public class CoreApiStub :
         var networkConfiguration = MapNetworkConfigurationResponse(RequestsAndResponses.NetworkConfigurationResponse);
 
         return await Task.FromResult(new CapturedConfig(
-            networkConfiguration.NetworkDefinition.NetworkName,
-            networkConfiguration.WellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkAddressHrps.ToAddressHrps(),
-            new TokenIdentifier(networkConfiguration.WellKnownAddresses.XrdAddress)
+            networkConfiguration.NetworkName,
+            networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
+            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
+            new TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
         ));
     }
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
     {
+        var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
+
         return new NetworkConfiguration
         {
-            NetworkDefinition = new NetworkDefinition { NetworkName = networkConfiguration.Network },
-            NetworkAddressHrps = new NetworkAddressHrps
+            NetworkName = networkConfiguration.Network,
+            NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition
             {
-                AccountHrp = "account_" + networkConfiguration.NetworkHrpSuffix,
-                ResourceHrpSuffix = "resource_" + networkConfiguration.NetworkHrpSuffix,
-                ValidatorHrp = "validator_" + networkConfiguration.NetworkHrpSuffix,
-                NodeHrp = "node_" + networkConfiguration.NetworkHrpSuffix,
+                PackageHrp = $"package_{hrpSuffix}",
+                NormalComponentHrp = $"component_{hrpSuffix}",
+                AccountComponentHrp = $"account_{hrpSuffix}",
+                SystemComponentHrp = $"system_{hrpSuffix}",
+                ResourceHrp = $"resource_{hrpSuffix}",
+                ValidatorHrp = $"validator_{hrpSuffix}",
+                NodeHrp = $"node_{hrpSuffix}",
             },
-            WellKnownAddresses = new WellKnownAddresses
+            NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
             {
                 XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
             },
