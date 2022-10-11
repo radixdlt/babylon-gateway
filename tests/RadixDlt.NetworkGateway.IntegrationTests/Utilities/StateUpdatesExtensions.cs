@@ -70,13 +70,18 @@ public static class StateUpdatesExtensions
         return stateUpdates.GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
     }
 
-    public static DownSubstate GetLastVaultDownSubstateByEntityAddress(this StateUpdates stateUpdates, string entityAddress)
+    public static string? GetVaultAddressHexByEntityAddress(this StateUpdates stateUpdates, string entityAddress)
     {
         var componentUpSubstate = stateUpdates.GetLastUpSubstateByEntityAddress(entityAddress);
 
-        var vaultEntityAddressHex = (componentUpSubstate.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+        return (componentUpSubstate.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+    }
 
-        return stateUpdates.GetLastDownSubstateByEntityAddressHex(vaultEntityAddressHex);
+    public static DownSubstate? GetLastVaultDownSubstateByEntityAddress(this StateUpdates stateUpdates, string entityAddress)
+    {
+        var vaultEntityAddressHex = GetVaultAddressHexByEntityAddress(stateUpdates, entityAddress);
+
+        return stateUpdates.DownSubstates.FirstOrDefault(ds => ds.SubstateId.EntityAddressHex == vaultEntityAddressHex);
     }
 
     public static ResourceManagerSubstate GetFungibleResourceUpSubstateByEntityAddress(this StateUpdates stateUpdates, string entityAddress)
@@ -153,7 +158,7 @@ public static class StateUpdatesExtensions
             newVaultDownSubstate = new DownSubstate(
                 new SubstateId(
                     EntityType.Vault,
-                    GetFungibleResoureAddressHexByEntityAddress(stateUpdates, componentAddress),
+                    GetVaultAddressHexByEntityAddress(stateUpdates, componentAddress),
                     SubstateType.Vault,
                     Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
                 ),
