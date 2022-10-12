@@ -65,6 +65,7 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System.Reflection;
@@ -255,16 +256,25 @@ public class TransactionEndpointTests
         var accountAPublicKey = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
         // var createAccountATransactionIntentHash = "f3949c58ea6f9c1e5bb0b917ae190d4a695527e842acda44bc1e18a5fc801b2d";
 
-        // var accountBAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
-        // var accountBPublicKey = "03c00b2b2cfa2320d267f2cf2b43a8ac26d7e986f83d95038e927f3df383a470df";
+        var accountBAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
+        var accountBPublicKey = "03c00b2b2cfa2320d267f2cf2b43a8ac26d7e986f83d95038e927f3df383a470df";
         // var createAccountBTransactionIntentHash = "61ece2bbb206421642b1e4a6df6086ebf7a02e5d326a80cb2b886a0f5b0265c3";
 
         var tokensTransferTransactionIntentHash = "b06099131de839a7b381ef6d9ac3748dd6d7e3536c4a5a5299557585b2ed5f96";
 
+        var manifest = new ManifestBuilder()
+            .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, $"{1}")
+            .WithCallMethod(GenesisData.SysFaucetComponentAddress, "free_xrd")
+            .WithTakeFromWorktop(GenesisData.GenesisResourceManagerAddress, "bucket1")
+            .WithNewAccountWithNonFungibleResource(publicKey, "bucket1")
+            .Build();
+
+        _testConsole.WriteLine($"Manifest: {manifest}");
+
         var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
-            .WithAccount(accountAAddress, accountAPublicKey, "XRD");
-            // .WithAccount(accountBAddress, accountBPublicKey, "XRD")
+            .WithAccount(accountAAddress, accountAPublicKey, "XRD")
+            .WithAccount(accountBAddress, accountBPublicKey, "XRD")
             // .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
 
         using var task = gatewayRunner
