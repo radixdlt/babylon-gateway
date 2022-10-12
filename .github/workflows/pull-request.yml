@@ -43,7 +43,6 @@ jobs:
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --verbosity minimal -l "console;verbosity=detailed" --filter RadixDlt.NetworkGateway.IntegrationTests
 
-
 publish-docker:
     runs-on: ubuntu-22.04
     outputs:
