@@ -35,6 +35,8 @@ public partial class GatewayTestsRunner : IDisposable
 
         WriteTestHeader(testName);
 
+        _testConsole.WriteLine("Initializing GatewayTestsRunner...");
+
         _stateUpdatesStore = new StateUpdatesStore(_testConsole);
 
         var requestsAndResponses = new CoreApiStubRequestsAndResponses();

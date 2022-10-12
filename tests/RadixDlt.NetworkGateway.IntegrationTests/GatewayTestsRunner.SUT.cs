@@ -48,7 +48,7 @@ public partial class GatewayTestsRunner
 
             if (pendingTransaction.Request.MarkAsCommitted)
             {
-                var committedTransaction = _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
+                _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
 
                 var t = WaitAsync(TimeSpan.FromSeconds(5));
                 t.Wait();
