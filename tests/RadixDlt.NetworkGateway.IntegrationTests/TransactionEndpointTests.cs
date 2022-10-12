@@ -262,6 +262,8 @@ public class TransactionEndpointTests
 
         var tokensTransferTransactionIntentHash = "b06099131de839a7b381ef6d9ac3748dd6d7e3536c4a5a5299557585b2ed5f96";
 
+        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
+
         var manifest = new ManifestBuilder()
             .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, $"{1}")
             .WithCallMethod(GenesisData.SysFaucetComponentAddress, "free_xrd")
