@@ -262,22 +262,11 @@ public class TransactionEndpointTests
 
         var tokensTransferTransactionIntentHash = "b06099131de839a7b381ef6d9ac3748dd6d7e3536c4a5a5299557585b2ed5f96";
 
-        _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
-
-        var manifest = new ManifestBuilder()
-            .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, $"{1}")
-            .WithCallMethod(GenesisData.SysFaucetComponentAddress, "free_xrd")
-            .WithTakeFromWorktop(GenesisData.GenesisResourceManagerAddress, "bucket1")
-            .WithNewAccountWithNonFungibleResource(accountAPublicKey, "bucket1")
-            .Build();
-
-        _testConsole.WriteLine($"Manifest: {manifest}");
-
         var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .WithAccount(accountAAddress, accountAPublicKey, "XRD")
-            .WithAccount(accountBAddress, accountBPublicKey, "XRD");
-            // .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
+            .WithAccount(accountBAddress, accountBPublicKey, "XRD")
+            .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
 
         using var task = gatewayRunner
             .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(callback: ValidateResponse);
@@ -291,12 +280,12 @@ public class TransactionEndpointTests
 
             if (intentHash == tokensTransferTransactionIntentHash)
             {
-                // gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
+                gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
 
-                // gatewayRunner.GetAccountBalance(accountBAddress).Should().Be(1200);
+                gatewayRunner.GetAccountBalance(accountBAddress).Should().Be(1200);
             }
         }
 
-        // gatewayRunner.SaveStateUpdatesToFile();
+        gatewayRunner.SaveStateUpdatesToFile();
     }
 }
