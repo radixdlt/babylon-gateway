@@ -1,4 +1,4 @@
-﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
@@ -102,8 +102,8 @@ public class TestTransactionStreamStore
 
         _testConsole.WriteLine("SysFaucet vault");
         var vault = new VaultBuilder()
-            .WithFungibleTokensResourceAddress(GenesisData.GenesisResourceManagerAddressHex)
             .WithFixedAddressHex(GenesisData.GenesisXrdVaultAddressHex)
+            .WithFungibleTokensResourceAddress(GenesisData.GenesisResourceManagerAddress)
             .WithFungibleResourceAmountAttos(GenesisData.GenesisAmountAttos)
             .Build();
 
@@ -358,13 +358,6 @@ public class TestTransactionStreamStore
                 .WithTransactionStatus(TransactionStatus.Succeeded)
                 .WithFeeSummary(GenesisData.GenesisFeeSummary)
                 .Build();
-
-            CommittedTransactions.Add(new TestCommittedTransaction()
-            {
-                StateVersion = MaxStateVersion,
-                NotarizedTransaction = null, // TODO
-                Receipt = transactionReceipt,
-            });
         }
         else
         {
@@ -431,15 +424,16 @@ public class TestTransactionStreamStore
             _stateUpdatesStore.StateUpdates.DownSubstates,
             _stateUpdatesStore.StateUpdates.NewGlobalEntities);
 
-        var stateUpdatesList = new List<StateUpdates>();
+        var transactionStateUpdatesList = new List<StateUpdates>();
 
-        var newVaultTotalAttos = string.Empty;
+        var newFaucetBalanceAttos = string.Empty;
+        var newAccountBalanceAttos = string.Empty;
 
         BigInteger tokensAmountToTransferAttos = 0;
 
         if (pendingTransaction.StateUpdates != null)
         {
-            stateUpdatesList.Add(pendingTransaction.StateUpdates);
+            transactionStateUpdatesList.Add(pendingTransaction.StateUpdates);
         }
 
         // default fee summary
@@ -464,44 +458,22 @@ public class TestTransactionStreamStore
                     break;
 
                 case InstructionOp.FreeXrd:
+                    var defaultAccountBalance = 1000;
                     _testConsole.WriteLine($"Taking 1000 tokens from vault owned by {instruction.Address}");
-                    var freeTokens = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, 1000, out newVaultTotalAttos);
 
-                    stateUpdatesList.Add(freeTokens);
+                    var freeTokens = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, defaultAccountBalance, out newFaucetBalanceAttos);
+
+                    newAccountBalanceAttos = TokenAttosConverter.Tokens2Attos(defaultAccountBalance).ToString();
+
+                    transactionStateUpdatesList.Add(freeTokens);
+
                     break;
 
                 case InstructionOp.TakeFromWorktop:
-                    {
-                        var resourceAddress = instruction.Address;
-                        var bucketName = instruction.Parameters[0].Value;
+                    var resourceAddress = instruction.Address;
+                    var bucketName = instruction.Parameters[0].Value;
 
-                        _testConsole.WriteLine($"TakeFromWorktop: Moving tokens to bucket '{bucketName}'");
-
-                        // create a new vault up and down substates
-
-                        var resourceXrdVaultAddressHex = string.Empty;
-
-                        if (resourceAddress == GenesisData.GenesisResourceManagerAddress)
-                        {
-                            resourceXrdVaultAddressHex = GenesisData.GenesisXrdVaultAddressHex;
-                        }
-
-                        var version = tempAllStateUpdates.GetLastUpSubstateByEntityAddressHex(resourceXrdVaultAddressHex)._Version;
-
-                        var vault = new VaultBuilder()
-                            .WithFixedAddressHex(resourceXrdVaultAddressHex)
-                            .WithFungibleResourceAmountAttos(newVaultTotalAttos)
-                            .WithDownState(new DownSubstate(
-                                new SubstateId(
-                                    EntityType.Vault,
-                                    resourceXrdVaultAddressHex,
-                                    SubstateType.Vault,
-                                    Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
-                                ), substateDataHash: "hash", version)
-                            ).Build();
-
-                        stateUpdatesList.Add(vault);
-                    }
+                    _testConsole.WriteLine($"TakeFromWorktop: Moving tokens to bucket '{bucketName}'");
 
                     break;
 
@@ -517,7 +489,7 @@ public class TestTransactionStreamStore
                             .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
                             .WithFixedAddress(pendingTransaction.AccountAddress!)
                             .WithTokenName("XRD")
-                            .WithTotalAmountAttos(newVaultTotalAttos)
+                            .WithTotalAmountAttos(newAccountBalanceAttos)
                             .WithComponentInfoSubstate(new ComponentInfoSubstate(
                                 entityType: EntityType.Component,
                                 substateType: SubstateType.ComponentInfo,
@@ -525,103 +497,110 @@ public class TestTransactionStreamStore
                                 blueprintName: GenesisData.AccountBlueprintName))
                             .Build();
 
-                        stateUpdatesList.Add(account);
+                        transactionStateUpdatesList.Add(account);
                     }
 
                     break;
 
                 case InstructionOp.WithdrawByAmount:
                     {
-                        var accountAddress = instruction.Address;
+                        // TODO: if (network == "alphanet")
+                        // {
+                            // faucet vault's up and down substates (faucet pays the fees on aplhanet)
+                        WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, GenesisData.SysFaucetComponentAddress, 0, out newFaucetBalanceAttos);
+                            // }
 
                         tokensAmountToTransferAttos = TokenAttosConverter.Tokens2Attos(instruction.Parameters[0].Value);
 
                         var tokensToWithdraw = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
 
-                        _testConsole.WriteLine($"WithdrawByAmount: Withdrawing {tokensToWithdraw} tokens from account {accountAddress}");
-
-                        // faucet vault's up and down substates
-                        // TODO: who is paying the fees? faucet or sender?
-                        var faucetVault = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, 0, out newVaultTotalAttos);
-
-                        stateUpdatesList.Add(faucetVault);
-
-                        // account's vault up and down substates
-                        var accountVault = tempAllStateUpdates.TakeTokensFromVault(accountAddress!, feeSummary, tokensToWithdraw, out newVaultTotalAttos);
-
-                        stateUpdatesList.Add(accountVault);
+                        WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, instruction.Address, tokensToWithdraw, out newAccountBalanceAttos);
                     }
 
                     break;
 
                 case InstructionOp.Deposit:
-                    {
-                        var accountAddress = instruction.Address;
-                        var bucketName1 = instruction.Parameters[0].Value;
+                    // var accountAddress = instruction.Address;
+                    // var bucketName1 = instruction.Parameters[0].Value;
+                    var tokensToDeposit = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
 
-                        var tokensToDeposit = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
-
-                        _testConsole.WriteLine($"Deposit: Depositing {tokensToDeposit} tokens to account {accountAddress}");
-
-                        var accountVaultDownSubstate = tempAllStateUpdates.GetLastVaultDownSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
-
-                        var accountVaultUpSubstate = tempAllStateUpdates.GetLastVaultUpSubstateByEntityAddress(accountAddress);
-
-                        var downVirtualSubstates = new List<SubstateId>();
-                        var downSubstates = new List<DownSubstate?>();
-                        var upSubstates = new List<UpSubstate>();
-
-                        var globalEntityIds = new List<GlobalEntityId>();
-
-                        // add new vault down substate
-                        var newAccountVaultDownSubstate = accountVaultDownSubstate.CloneSubstate();
-                        if (newAccountVaultDownSubstate != null)
-                        {
-                            newAccountVaultDownSubstate._Version = accountVaultUpSubstate._Version;
-                            downSubstates.Add(newAccountVaultDownSubstate);
-                        }
-
-                        // add new vault up state
-                        var newAccountVaultUpSubstate = accountVaultUpSubstate.CloneSubstate();
-                        newAccountVaultUpSubstate._Version += 1;
-
-                        var newAccountVaultSubstate = newAccountVaultUpSubstate.SubstateData.GetVaultSubstate();
-
-                        var vaultResourceAmount = newAccountVaultSubstate.ResourceAmount.GetFungibleResourceAmount();
-                        var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
-
-                        // a receiver doesn't pay fees, right?
-                        // var feesAttos = feeSummary.CostUnitConsumed
-                        //                 * TokenAttosConverter.String2Attos(feeSummary.CostUnitPriceAttos);
-                        //
-                        // var newAttosBalance = vaultResourceAmountAttos - tokenAmountAttos - feesAttos;
-
-                        var newAttosBalance = vaultResourceAmountAttos + tokensAmountToTransferAttos;
-
-                        vaultResourceAmount!.AmountAttos = newAttosBalance.ToString();
-
-                        newVaultTotalAttos = tokensAmountToTransferAttos.ToString();
-
-                        upSubstates.Add(newAccountVaultUpSubstate);
-
-                        stateUpdatesList.Add(new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, globalEntityIds));
-                    }
+                    DepositToAccount(ref transactionStateUpdatesList, tempAllStateUpdates, instruction.Address, tokensToDeposit);
 
                     break;
             }
 
-            tempAllStateUpdates = tempAllStateUpdates.Add(stateUpdatesList.Combine());
+            tempAllStateUpdates = tempAllStateUpdates.Add(transactionStateUpdatesList.Combine());
         }
 
         var transactionReceipt = new TransactionReceiptBuilder()
-            .WithStateUpdates(stateUpdatesList.Combine())
+            .WithStateUpdates(transactionStateUpdatesList.Combine())
             .WithFeeSummary(feeSummary)
             .WithTransactionStatus(TransactionStatus.Succeeded)
             .Build();
 
         // add new state updates to the global store
-        _stateUpdatesStore.StateUpdates = _stateUpdatesStore.StateUpdates.Add(stateUpdatesList.Combine());
+        _stateUpdatesStore.StateUpdates = _stateUpdatesStore.StateUpdates.Add(transactionStateUpdatesList.Combine());
 
         return transactionReceipt;
     }
+
+    private void WithdrawByAmount(
+                    ref List<StateUpdates> transactionStateUpdatesList,
+                    StateUpdates allStateUpdates,
+                    FeeSummary feeSummary,
+                    string accountAddress,
+                    double tokensToWithdraw,
+                    out string newVaultTotalAttos)
+    {
+        _testConsole.WriteLine($"WithdrawByAmount: Withdrawing {tokensToWithdraw} tokens from account {accountAddress}");
+
+        // account's vault up and down substates
+        var accountVault = allStateUpdates.TakeTokensFromVault(accountAddress!, feeSummary, tokensToWithdraw, out newVaultTotalAttos);
+
+        transactionStateUpdatesList.Add(accountVault);
+    }
+
+    private void DepositToAccount(
+                     ref List<StateUpdates> transactionStateUpdatesList,
+                     StateUpdates allStateUpdates,
+                     string accountAddress,
+                     double tokensToDeposit)
+     {
+        _testConsole.WriteLine($"Deposit: Depositing {tokensToDeposit} tokens to account {accountAddress}");
+
+        var accountVaultDownSubstate = allStateUpdates.GetLastVaultDownSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
+
+        var accountVaultUpSubstate = allStateUpdates.GetLastVaultUpSubstateByEntityAddress(accountAddress);
+
+        var downVirtualSubstates = new List<SubstateId>();
+        var downSubstates = new List<DownSubstate?>();
+        var upSubstates = new List<UpSubstate>();
+
+        var globalEntityIds = new List<GlobalEntityId>();
+
+        // add new vault down substate
+        var newAccountVaultDownSubstate = accountVaultDownSubstate.CloneSubstate();
+        if (newAccountVaultDownSubstate != null)
+        {
+            newAccountVaultDownSubstate._Version = accountVaultUpSubstate._Version;
+            downSubstates.Add(newAccountVaultDownSubstate);
+        }
+
+        // add new vault up state
+        var newAccountVaultUpSubstate = accountVaultUpSubstate.CloneSubstate();
+        newAccountVaultUpSubstate._Version += 1;
+
+        var newAccountVaultSubstate = newAccountVaultUpSubstate.SubstateData.GetVaultSubstate();
+
+        var vaultResourceAmount = newAccountVaultSubstate.ResourceAmount.GetFungibleResourceAmount();
+        var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
+
+        var newAttosBalance = vaultResourceAmountAttos + TokenAttosConverter.Tokens2Attos(tokensToDeposit);
+
+        vaultResourceAmount!.AmountAttos = newAttosBalance.ToString();
+
+        upSubstates.Add(newAccountVaultUpSubstate);
+
+        transactionStateUpdatesList.Add(new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, globalEntityIds));
+     }
 }

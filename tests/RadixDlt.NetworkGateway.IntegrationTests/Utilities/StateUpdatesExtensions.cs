@@ -1,4 +1,5 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +107,7 @@ public static class StateUpdatesExtensions
         return resourceManagerSubstate!.FungibleDivisibility;
     }
 
-    public static string GetFungibleResoureAddressHexByEntityAddress(this StateUpdates stateUpdates, string entityAddress)
+    public static string GetFungibleResoureAddressByEntityAddress(this StateUpdates stateUpdates, string entityAddress)
     {
         var vaultUpSubstate = stateUpdates.GetLastVaultUpSubstateByEntityAddress(entityAddress);
 
@@ -132,51 +133,29 @@ public static class StateUpdatesExtensions
         return item;
     }
 
-    public static StateUpdates TakeTokensFromVault(this StateUpdates stateUpdates, string componentAddress, FeeSummary feeSummary, double xrdAmount, out string newTotalAttos)
+    /// <summary>
+    /// Withdraws a given amount of tokens form the vault, creates new vault's down and up  substates, and updates vault balance (ResourceAmount.AmountAttos).
+    /// </summary>
+    /// <param name="stateUpdates">state updates.</param>
+    /// <param name="componentAddress">vault owned by component address.</param>
+    /// <param name="feeSummary">fee summary.</param>
+    /// <param name="xrdAmount">amount of tokens to withdraw.</param>
+    /// <param name="newVaultBalanceAttos">new vault balance in attos.</param>
+    /// <returns>updated state updates.</returns>
+    public static StateUpdates TakeTokensFromVault(this StateUpdates stateUpdates, string componentAddress, FeeSummary feeSummary, double xrdAmount, out string newVaultBalanceAttos)
     {
         // a default value of free XRD tokens
         var tokenAmountAttos = TokenAttosConverter.Tokens2Attos(xrdAmount);
 
-        var vaultDownSubstate = GetLastVaultDownSubstateByEntityAddress(stateUpdates, componentAddress);
+        var resourceAddress = GetFungibleResoureAddressByEntityAddress(stateUpdates, componentAddress);
 
         var vaultUpSubstate = GetLastVaultUpSubstateByEntityAddress(stateUpdates, componentAddress);
 
-        var downVirtualSubstates = new List<SubstateId>();
-        var downSubstates = new List<DownSubstate?>();
-        var upSubstates = new List<UpSubstate>();
-        var globalEntityIds = new List<GlobalEntityId>();
+        var vaultAddressHex = vaultUpSubstate.SubstateId.EntityAddressHex;
 
-        // create a new down state with the 'old' balance
-        // create a new up state with the new balance and increase its state version
+        var vaultSubstate = vaultUpSubstate.SubstateData.GetVaultSubstate();
 
-        // new vault total
-
-        // add new vault down substate
-        var newVaultDownSubstate = vaultDownSubstate.CloneSubstate();
-        if (newVaultDownSubstate == null)
-        {
-            newVaultDownSubstate = new DownSubstate(
-                new SubstateId(
-                    EntityType.Vault,
-                    GetVaultAddressHexByEntityAddress(stateUpdates, componentAddress),
-                    SubstateType.Vault,
-                    Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
-                ),
-                substateDataHash: "hash"
-            );
-        }
-
-        newVaultDownSubstate._Version = vaultUpSubstate._Version;
-
-        downSubstates.Add(newVaultDownSubstate);
-
-        // add new vault up state
-        var newVaultUpSubstate = vaultUpSubstate.CloneSubstate();
-        newVaultUpSubstate._Version += 1;
-
-        var newVaultSubstate = newVaultUpSubstate.SubstateData.GetVaultSubstate();
-
-        var vaultResourceAmount = newVaultSubstate.ResourceAmount.GetFungibleResourceAmount();
+        var vaultResourceAmount = vaultSubstate.ResourceAmount.GetFungibleResourceAmount();
         var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
 
         var feesAttos = feeSummary.CostUnitConsumed
@@ -184,14 +163,21 @@ public static class StateUpdatesExtensions
 
         // _testConsole.WriteLine($"Paid fees {TokenAttosConverter.Attos2Tokens(feesAttos)} xrd");
 
-        var newAttosBalance = vaultResourceAmountAttos - tokenAmountAttos - feesAttos;
+        newVaultBalanceAttos = (vaultResourceAmountAttos - tokenAmountAttos - feesAttos).ToString();
 
-        vaultResourceAmount!.AmountAttos = newAttosBalance.ToString();
+        var vault = new VaultBuilder()
+            .WithFixedAddressHex(vaultAddressHex)
+            .WithFungibleTokensResourceAddress(resourceAddress)
+            .WithFungibleResourceAmountAttos(newVaultBalanceAttos)
+            .WithDownState(new DownSubstate(
+                new SubstateId(
+                    EntityType.Vault,
+                    vaultAddressHex,
+                    SubstateType.Vault,
+                    Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
+                ), substateDataHash: "hash", vaultUpSubstate._Version)
+            ).Build();
 
-        newTotalAttos = tokenAmountAttos.ToString();
-
-        upSubstates.Add(newVaultUpSubstate);
-
-        return new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, globalEntityIds);
+        return vault;
     }
 }

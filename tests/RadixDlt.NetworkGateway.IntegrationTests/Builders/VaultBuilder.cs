@@ -24,6 +24,16 @@ public class VaultBuilder : BuilderBase<StateUpdates>
 
     public override StateUpdates Build()
     {
+        if (string.IsNullOrWhiteSpace(_fungibleTokensResourceAddress))
+        {
+            throw new ArgumentException("Fungible resource address cannot be empty.");
+        }
+
+        if (string.IsNullOrWhiteSpace(_fungibleTokensAmountAttos))
+        {
+            throw new ArgumentException("Fungible resource tokens amount attos cannot be empty.");
+        }
+
         var version = 0L;
 
         var downSubstates = new List<DownSubstate>();
@@ -31,6 +41,7 @@ public class VaultBuilder : BuilderBase<StateUpdates>
         if (_downSubstate != null)
         {
             version = _downSubstate._Version;
+            downSubstates.Add(_downSubstate);
         }
 
         var downVirtualSubstates = new List<SubstateId>();
