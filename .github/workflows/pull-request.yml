@@ -41,9 +41,11 @@ jobs:
         run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
       - name: Integration tests
         # Add --verbosity normal to get more noisy logs if required for debugging
-        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.IntegrationTests
+        run: dotnet test --no-restore --verbosity minimal -l "console;verbosity=detailed" --filter RadixDlt.NetworkGateway.IntegrationTests
+  onTests
 
-  publish-docker:
+
+publish-docker:
     runs-on: ubuntu-22.04
     outputs:
       data-aggregator-tag: ${{ steps.setup_tags.outputs.data-aggregator-tag }}
@@ -123,6 +125,6 @@ jobs:
                    "namespace_postfix": "${{env.NAMESPACE}}",
                    "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
                    "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-                   "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}" 
+                   "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
                }
            }'
