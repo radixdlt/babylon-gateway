@@ -121,7 +121,7 @@ public class TestDataAggregatorFactory
                     // logging
                     config.AddInMemoryCollection(new[]
                     {
-                        new KeyValuePair<string, string>("Logging:LogLevel:Default", "Information"),
+                        new KeyValuePair<string, string>("Logging:LogLevel:Default", "Warning"),
                         new KeyValuePair<string, string>("Logging:LogLevel:Microsoft.AspNetCore", "Warning"),
                         new KeyValuePair<string, string>("Microsoft.Hosting.Lifetime", "Information"),
                         new KeyValuePair<string, string>("Microsoft.EntityFrameworkCore.Database.Command", "Warning"),

@@ -153,6 +153,8 @@ public partial class GatewayTestsRunner
             _dataAggregatorFactory.Server.Dispose();
             _dataAggregatorFactory.Dispose();
             _dataAggregatorFactory = null;
+            var t = WaitAsync(TimeSpan.FromSeconds(5));
+            t.Wait();
         }
 
         if (_gatewayApiFactory != null)
@@ -161,6 +163,8 @@ public partial class GatewayTestsRunner
             _gatewayApiFactory.Server.Dispose();
             _gatewayApiFactory.Dispose();
             _gatewayApiFactory = null;
+            var t = WaitAsync(TimeSpan.FromSeconds(5));
+            t.Wait();
         }
     }
 }
