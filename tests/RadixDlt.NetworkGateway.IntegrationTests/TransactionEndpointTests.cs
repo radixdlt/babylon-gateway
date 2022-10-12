@@ -247,7 +247,7 @@ public class TransactionEndpointTests
     //     status.Should().Be(TransactionStatus.StatusEnum.CONFIRMED);
     // }
 
-    [Fact(Skip = "could a problem?")]
+    [Fact]
     public void TokensTransferFromAccountAtoBShouldSucceed()
     {
         // Arrange
@@ -282,9 +282,9 @@ public class TransactionEndpointTests
                 gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
 
                 gatewayRunner.GetAccountBalance(accountBAddress).Should().Be(1200);
+
+                gatewayRunner.SaveStateUpdatesToFile();
             }
         }
-
-        gatewayRunner.SaveStateUpdatesToFile();
     }
 }
