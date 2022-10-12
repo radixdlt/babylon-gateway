@@ -266,7 +266,7 @@ public class TransactionEndpointTests
             .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, $"{1}")
             .WithCallMethod(GenesisData.SysFaucetComponentAddress, "free_xrd")
             .WithTakeFromWorktop(GenesisData.GenesisResourceManagerAddress, "bucket1")
-            .WithNewAccountWithNonFungibleResource(publicKey, "bucket1")
+            .WithNewAccountWithNonFungibleResource(accountAPublicKey, "bucket1")
             .Build();
 
         _testConsole.WriteLine($"Manifest: {manifest}");
@@ -274,7 +274,7 @@ public class TransactionEndpointTests
         var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .WithAccount(accountAAddress, accountAPublicKey, "XRD")
-            .WithAccount(accountBAddress, accountBPublicKey, "XRD")
+            .WithAccount(accountBAddress, accountBPublicKey, "XRD");
             // .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
 
         using var task = gatewayRunner
