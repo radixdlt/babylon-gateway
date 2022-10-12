@@ -251,8 +251,8 @@ public class TransactionEndpointTests
     public void TokensTransferFromAccountAtoBShouldSucceed()
     {
         // Arrange
-        // var accountAAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
-        // var accountAPublicKey = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+        var accountAAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
+        var accountAPublicKey = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
         // var createAccountATransactionIntentHash = "f3949c58ea6f9c1e5bb0b917ae190d4a695527e842acda44bc1e18a5fc801b2d";
 
         // var accountBAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
@@ -262,8 +262,8 @@ public class TransactionEndpointTests
         var tokensTransferTransactionIntentHash = "b06099131de839a7b381ef6d9ac3748dd6d7e3536c4a5a5299557585b2ed5f96";
 
         var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
-            .MockGenesis();
-            // .WithAccount(accountAAddress, accountAPublicKey, "XRD");
+            .MockGenesis()
+            .WithAccount(accountAAddress, accountAPublicKey, "XRD");
             // .WithAccount(accountBAddress, accountBPublicKey, "XRD")
             // .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
 
