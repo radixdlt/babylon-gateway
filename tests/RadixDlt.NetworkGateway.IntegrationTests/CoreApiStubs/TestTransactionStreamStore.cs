@@ -177,13 +177,14 @@ public class TestTransactionStreamStore
         // TAKE_FROM_WORKTOP ResourceAddress(\"GenesisData.GenesisResourceManagerAddress\") Bucket(\"bucket1\");
         // CALL_FUNCTION PackageAddress(\"GenesisData.AccountPackageAddress\") \"Account\" \"new_with_resource\" Enum(\"Protected\", Enum(\"ProofRule\", Enum(\"Require\", Enum(\"StaticNonFungible\", NonFungibleAddress(\"000000000000000000000000000000000000000000000000000002300721000000${publicKey}\"))))) Bucket(\"bucket1\");
 
-        var manifest = new ManifestBuilder()
-            .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, $"{lockFee}")
-            .WithCallMethod(GenesisData.SysFaucetComponentAddress, "free_xrd")
-            .WithTakeFromWorktop(GenesisData.GenesisResourceManagerAddress, "bucket1")
-            .WithNewAccountWithNonFungibleResource(publicKey, "bucket1")
-            .Build();
+        // var manifest = new ManifestBuilder()
+        //     .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, $"{lockFee}")
+        //     .WithCallMethod(GenesisData.SysFaucetComponentAddress, "free_xrd")
+        //     .WithTakeFromWorktop(GenesisData.GenesisResourceManagerAddress, "bucket1")
+        //     .WithNewAccountWithNonFungibleResource(publicKey, "bucket1")
+        //     .Build();
 
+        var manifest = "account manifest";
         var pendingTransaction = QueueSubmitTransaction(manifest: manifest);
 
         pendingTransaction.AccountAddress = accountAddress;
