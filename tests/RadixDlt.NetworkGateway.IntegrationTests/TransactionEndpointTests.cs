@@ -261,7 +261,7 @@ public class TransactionEndpointTests
 
         var tokensTransferTransactionIntentHash = "b06099131de839a7b381ef6d9ac3748dd6d7e3536c4a5a5299557585b2ed5f96";
 
-        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
+        var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
             .MockGenesis()
             .WithAccount(accountAAddress, accountAPublicKey, "XRD")
             .WithAccount(accountBAddress, accountBPublicKey, "XRD")
