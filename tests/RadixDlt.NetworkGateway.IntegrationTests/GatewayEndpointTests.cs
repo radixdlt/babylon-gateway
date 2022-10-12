@@ -84,7 +84,7 @@ public class GatewayEndpointTests
         _networkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
-    [Fact(Skip = "test")]
+    [Fact]
     public void TestGatewayApiVersions()
     {
         // Arrange

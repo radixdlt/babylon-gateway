@@ -84,7 +84,7 @@ public class TransactionEndpointTests
         GenesisData.NetworkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
-    [Fact(Skip = "test")]
+    [Fact]
     public void TestTransactionRecent()
     {
         // Arrange
@@ -110,7 +110,7 @@ public class TransactionEndpointTests
         }
     }
 
-    [Fact(Skip = "test")]
+    [Fact]
     public void TestTransactionPreviewShouldPass()
     {
         // Arrange A2B Transfer preview
@@ -198,7 +198,7 @@ public class TransactionEndpointTests
     //     status.Should().Be(TransactionStatus.StatusEnum.PENDING);
     // }
 
-    [Fact(Skip = "test")]
+    [Fact]
     public void TestTransactionSubmit()
     {
         // Arrange
