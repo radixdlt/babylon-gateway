@@ -42,7 +42,7 @@ public class AccountBuilder : BuilderBase<StateUpdates>
 
         var vault = new VaultBuilder()
             .WithFixedAddressHex(vaultAddressHex)
-            .WithFungibleTokensResourceAddress(tokens.EntityAddressHex)
+            .WithFungibleTokensResourceAddress(tokens.GlobalAddress)
             .WithFungibleResourceAmountAttos(_totalAmountAttos)
             .Build();
 
