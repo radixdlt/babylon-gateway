@@ -1,6 +1,4 @@
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
@@ -36,7 +34,8 @@ public class ManifestBuilder : BuilderBase<string>
 
     public ManifestBuilder WithWithdrawByAmountMethod(string componentAddress, string withdrawByAmount, string fromResourceAddress)
     {
-        _instructions.Add($"CALL_METHOD ComponentAddress(\"{componentAddress}\") \"withdraw_by_amount\" Decimal(\"{withdrawByAmount}\") ResourceAddress (\"{fromResourceAddress})\"");
+        _instructions.Add(
+            $"CALL_METHOD ComponentAddress(\"{componentAddress}\") \"withdraw_by_amount\" Decimal(\"{withdrawByAmount}\") ResourceAddress (\"{fromResourceAddress})\"");
 
         return this;
     }
@@ -64,9 +63,10 @@ public class ManifestBuilder : BuilderBase<string>
 
     public ManifestBuilder WithNewAccountWithNonFungibleResource(string publicKey, string bucketName)
     {
-        string deriveNonFungibleAddress = "000000000000000000000000000000000000000000000000000002300721000000";
+        var deriveNonFungibleAddress = "000000000000000000000000000000000000000000000000000002300721000000";
 
-        _instructions.Add($"CALL_FUNCTION PackageAddress(\"GenesisData.AccountPackageAddress\") \"Account\" \"new_with_resource\" Enum(\"Protected\", Enum(\"ProofRule\", Enum(\"Require\", Enum(\"StaticNonFungible\", NonFungibleAddress(\"{deriveNonFungibleAddress}{publicKey}\"))))) Bucket(\"{bucketName}\")");
+        _instructions.Add(
+            $"CALL_FUNCTION PackageAddress(\"GenesisData.AccountPackageAddress\") \"Account\" \"new_with_resource\" Enum(\"Protected\", Enum(\"ProofRule\", Enum(\"Require\", Enum(\"StaticNonFungible\", NonFungibleAddress(\"{deriveNonFungibleAddress}{publicKey}\"))))) Bucket(\"{bucketName}\")");
 
         return this;
     }

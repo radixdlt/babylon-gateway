@@ -63,9 +63,12 @@
  */
 
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
@@ -73,15 +76,13 @@ using Xunit.Abstractions;
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 [Collection("Gateway Api integration tests")]
-public class GatewayEndpointTests
+public class GatewayEndpointTests : IClassFixture<TestSetup>
 {
     private readonly ITestOutputHelper _testConsole;
-    private readonly NetworkDefinition _networkDefinition;
 
     public GatewayEndpointTests(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
-        _networkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public class GatewayEndpointTests
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(callback: ValidateResponse);
+            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(ValidateResponse);
         task.Wait();
 
         // Assert (callback method)

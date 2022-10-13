@@ -1,5 +1,4 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using System;
 using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -14,10 +13,10 @@ public static class SubstateExtensions
         }
 
         return new ComponentInfoSubstate(
-            entityType: substate!.EntityType,
-            substateType: substate.SubstateType,
-            packageAddress: substate.PackageAddress,
-            blueprintName: substate.BlueprintName
+            substate!.EntityType,
+            substate.SubstateType,
+            substate.PackageAddress,
+            substate.BlueprintName
         );
     }
 
@@ -29,15 +28,15 @@ public static class SubstateExtensions
         }
 
         return new ComponentStateSubstate(
-            entityType: substate.EntityType,
-            substateType: substate.SubstateType,
-            dataStruct: new DataStruct(
-                structData: new SborData(
-                    dataHex: substate.DataStruct.StructData.DataHex,
-                    dataJson: substate.DataStruct.StructData.DataJson
+            substate.EntityType,
+            substate.SubstateType,
+            new DataStruct(
+                new SborData(
+                    substate.DataStruct.StructData.DataHex,
+                    substate.DataStruct.StructData.DataJson
                 ),
-                ownedEntities: new List<EntityId>(substate.OwnedEntities),
-                referencedEntities: new List<EntityId>(substate.DataStruct.ReferencedEntities)
+                new List<EntityId>(substate.OwnedEntities),
+                new List<EntityId>(substate.DataStruct.ReferencedEntities)
             )
         );
     }
@@ -59,8 +58,8 @@ public static class SubstateExtensions
                     substate.DataStruct.StructData.DataHex,
                     substate.DataStruct.StructData.DataJson
                 ),
-                ownedEntities: new List<EntityId>(substate.DataStruct.OwnedEntities),
-                referencedEntities: new List<EntityId>(substate.DataStruct.ReferencedEntities)
+                new List<EntityId>(substate.DataStruct.OwnedEntities),
+                new List<EntityId>(substate.DataStruct.ReferencedEntities)
             )
         );
     }
@@ -78,13 +77,13 @@ public static class SubstateExtensions
             substate.NfIdHex,
             substate.IsDeleted,
             new NonFungibleData(
-                immutableData: new DataStruct(
-                    structData: new SborData(
-                    substate.NonFungibleData.ImmutableData.StructData.DataHex,
-                    substate.NonFungibleData.ImmutableData.StructData.DataJson)
+                new DataStruct(
+                    new SborData(
+                        substate.NonFungibleData.ImmutableData.StructData.DataHex,
+                        substate.NonFungibleData.ImmutableData.StructData.DataJson)
                 ),
-                mutableData: new DataStruct(
-                    structData: new SborData(
+                new DataStruct(
+                    new SborData(
                         substate.NonFungibleData.MutableData.StructData.DataHex,
                         substate.NonFungibleData.MutableData.StructData.DataJson)
                 )
@@ -117,7 +116,7 @@ public static class SubstateExtensions
             substate.SubstateType,
             substate.ResourceType,
             substate.FungibleDivisibility,
-            metadata: new List<ResourceManagerSubstateAllOfMetadata>(substate.Metadata),
+            new List<ResourceManagerSubstateAllOfMetadata>(substate.Metadata),
             substate.TotalSupplyAttos);
     }
 
@@ -252,7 +251,7 @@ public static class SubstateExtensions
             substate._Version,
             substate.SubstateHex,
             substate.SubstateDataHash,
-            substateData: substateData
+            substateData
         );
     }
 }

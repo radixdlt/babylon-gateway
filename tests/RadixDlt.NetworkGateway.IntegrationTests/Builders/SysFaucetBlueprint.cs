@@ -10,10 +10,7 @@ public interface IBlueprint
 // inspired by: https://github.com/radixdlt/radixdlt-scrypto/blob/f4c41985ad9d1570fff7293fa90b77a896b3be2b/assets/sys-faucet/src/lib.rs
 public class SysFaucetBlueprint : IBlueprint
 {
-    public string Name
-    {
-        get { return "SysFaucet"; }
-    }
+    public string Name => "SysFaucet";
 
     public void Instantiate(object[] args)
     {

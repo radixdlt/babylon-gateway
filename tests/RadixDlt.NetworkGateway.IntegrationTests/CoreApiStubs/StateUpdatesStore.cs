@@ -1,32 +1,26 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Numerics;
-using System.Text;
 using Xunit.Abstractions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 
 public class StateUpdatesStore
 {
+    private readonly List<StateUpdates> _stateUpdatesList = new();
+    private readonly ITestOutputHelper _testConsole;
+
     public StateUpdatesStore(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
     }
 
-    private readonly List<StateUpdates> _stateUpdatesList = new();
-    private readonly ITestOutputHelper _testConsole;
-
     public StateUpdates StateUpdates
     {
-        get
-        {
-            return _stateUpdatesList.Combine();
-        }
+        get => _stateUpdatesList.Combine();
 
         set
         {
@@ -50,9 +44,6 @@ public class StateUpdatesStore
         // calculate fees
         // state updates when complete
 
-        // find token divisibility
-        var divisibility = StateUpdates.GetFungibleResourceDivisibilityEntityAddress(GenesisData.SysFaucetComponentAddress);
-
         var feeSummary = CalculateFeeSummary();
 
         var paidFeeAttos = feeSummary.CostUnitConsumed * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
@@ -65,7 +56,7 @@ public class StateUpdatesStore
 
     public FeeSummary CalculateFeeSummary()
     {
-        Random rnd = new Random();
+        var rnd = new Random();
 
         var tipPercentage = rnd.Next(0, 5); // percents
         var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);
@@ -75,31 +66,18 @@ public class StateUpdatesStore
         var xrdTippedAttos = costUnitConsumed *
             TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100;
 
-        return new FeeSummary(
-            loanFullyRepaid: true,
-            costUnitLimit: GenesisData.GenesisFeeSummary.CostUnitLimit,
-            costUnitConsumed: (long)costUnitConsumed,
-            costUnitPriceAttos: GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
-            tipPercentage: tipPercentage,
-            xrdBurnedAttos: xrdBurnedAttos.ToString(),
-            xrdTippedAttos: xrdTippedAttos.ToString()
+        var feeSummary = new FeeSummary(
+            true,
+            GenesisData.GenesisFeeSummary.CostUnitLimit,
+            (long)costUnitConsumed,
+            GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
+            tipPercentage,
+            xrdBurnedAttos.ToString(),
+            xrdTippedAttos.ToString()
         );
-    }
 
-    public void UpdateAccountBalance(string accountAddress, long amountToTransfer, FeeSummary? feeSummary)
-    {
-        var vaultUpSubstate = StateUpdates.GetLastVaultUpSubstateByEntityAddress(accountAddress);
+        _testConsole.WriteLine($"Calculated fee summary:\n{feeSummary}");
 
-        var vaultResourceAmount = vaultUpSubstate.SubstateData.GetVaultSubstate().ResourceAmount.GetFungibleResourceAmount();
-
-        // find token divisibility
-        var divisibility = StateUpdates.GetFungibleResourceDivisibilityEntityAddress(accountAddress);
-
-        var paidFeeAttos = feeSummary == null ? 0 : feeSummary.CostUnitConsumed * long.Parse(feeSummary.CostUnitPriceAttos);
-
-        var attos = double.Parse(vaultResourceAmount!.AmountAttos);
-        var newTokenBalance = attos + (amountToTransfer * Math.Pow(10, divisibility)) - paidFeeAttos;
-        var newAttos = Convert.ToDecimal(newTokenBalance, CultureInfo.InvariantCulture);
-        vaultResourceAmount!.AmountAttos = newAttos.ToString(CultureInfo.InvariantCulture);
+        return feeSummary;
     }
 }

@@ -6,9 +6,9 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class TransactionReceiptBuilder : BuilderBase<TransactionReceipt>
 {
-    private TransactionStatus _transactionStatus;
     private FeeSummary? _feeSummary;
     private StateUpdates? _stateUpdates;
+    private TransactionStatus _transactionStatus;
 
     public override TransactionReceipt Build()
     {
@@ -23,10 +23,10 @@ public class TransactionReceiptBuilder : BuilderBase<TransactionReceipt>
         }
 
         return new TransactionReceipt(
-            status: _transactionStatus,
-            feeSummary: _feeSummary,
-            stateUpdates: _stateUpdates,
-            output: new List<SborData>()
+            _transactionStatus,
+            _feeSummary,
+            _stateUpdates,
+            new List<SborData>()
         );
     }
 
@@ -54,13 +54,13 @@ public class TransactionReceiptBuilder : BuilderBase<TransactionReceipt>
     private FeeSummary GetDefaultFeeSummary()
     {
         return new FeeSummary(
-            loanFullyRepaid: true,
-            costUnitLimit: 10000000,
-            costUnitConsumed: 0,
-            costUnitPriceAttos: "1000000000000",
-            tipPercentage: 0,
-            xrdBurnedAttos: "0",
-            xrdTippedAttos: "0"
+            true,
+            10000000,
+            0,
+            "1000000000000",
+            0,
+            "0",
+            "0"
         );
     }
 }

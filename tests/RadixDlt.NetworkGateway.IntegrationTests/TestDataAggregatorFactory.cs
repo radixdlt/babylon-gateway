@@ -138,8 +138,7 @@ public class TestDataAggregatorFactory
                         new KeyValuePair<string, string>(
                             "DataAggregator:Mempool:MinDelayBetweenResubmissionsSeconds", "10"),
                         new KeyValuePair<string, string>("DataAggregator:Mempool:StopResubmittingAfterSeconds", "300"),
-                        new KeyValuePair<string, string>("DataAggregator:Mempool:PruneCommittedAfterSeconds", "10"),
-                        new KeyValuePair<string, string>(
+                        new KeyValuePair<string, string>("DataAggregator:Mempool:PruneCommittedAfterSeconds", "10"), new KeyValuePair<string, string>(
                             "DataAggregator:Mempool:PruneMissingTransactionsAfterTimeSinceLastGatewaySubmissionSeconds", "604800"),
                         new KeyValuePair<string, string>(
                             "DataAggregator:Mempool:PruneMissingTransactionsAfterTimeSinceFirstSeenSeconds", "604800"),
@@ -157,8 +156,7 @@ public class TestDataAggregatorFactory
                             "true"),
                         new KeyValuePair<string, string>(
                             "DataAggregator:LedgerConfirmation:SufficientlySyncedStateVersionThreshold", "1000"),
-                        new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:MaxCommitBatchSize", "1000"),
-                        new KeyValuePair<string, string>(
+                        new KeyValuePair<string, string>("DataAggregator:LedgerConfirmation:MaxCommitBatchSize", "1000"), new KeyValuePair<string, string>(
                             "DataAggregator:LedgerConfirmation:MaxTransactionPipelineSizePerNode", "3000"),
                         new KeyValuePair<string, string>(
                             "DataAggregator:LedgerConfirmation:LargeBatchSizeToAddDelay", "500"),
@@ -191,10 +189,7 @@ public class TestDataAggregatorFactory
                     {
                         o.NetworkName = GenesisData.NetworkDefinition.LogicalName;
                         o.DisableCoreApiHttpsCertificateChecks = false;
-                        o.CoreApiNodes = new List<CoreApiNode>
-                        {
-                            _coreApiStub.RequestsAndResponses.DataAggregatorCoreApiNode,
-                        };
+                        o.CoreApiNodes = new List<CoreApiNode> { _coreApiStub.RequestsAndResponses.DataAggregatorCoreApiNode };
                     }
                 );
             });

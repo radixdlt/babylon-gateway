@@ -15,6 +15,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
+using PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKey;
+using TransactionPreviewRequest = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequest;
+using TransactionPreviewRequestFlags = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequestFlags;
+using TransactionPreviewResponse = RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse;
 using TransactionStatus = RadixDlt.CoreApiSdk.Model.TransactionStatus;
 using TransactionSubmitRequest = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionSubmitRequest;
 
@@ -56,7 +60,7 @@ public class TestPendingTransaction
 
     public string? IntentHash { get; set; }
 
-    public string? AccountAddress { get; set; }
+    public string AccountAddress { get; set; } = string.Empty;
 }
 
 [DataContract]
@@ -65,6 +69,13 @@ public class TestTransactionStreamStore
     private readonly CoreApiStubRequestsAndResponses _requestsAndResponses;
     private readonly StateUpdatesStore _stateUpdatesStore;
     private readonly ITestOutputHelper _testConsole;
+
+    public TestTransactionStreamStore(CoreApiStubRequestsAndResponses requestsAndResponses, StateUpdatesStore stateUpdatesStore, ITestOutputHelper testConsole)
+    {
+        _requestsAndResponses = requestsAndResponses;
+        _stateUpdatesStore = stateUpdatesStore;
+        _testConsole = testConsole;
+    }
 
     [DataMember(Name = "from_state_version")]
     public long FromStateVersion { get; set; } = 1L;
@@ -79,13 +90,6 @@ public class TestTransactionStreamStore
     public List<TestCommittedTransaction> CommittedTransactions { get; set; } = new();
 
     public List<TestPendingTransaction?> PendingTransactions { get; set; } = new();
-
-    public TestTransactionStreamStore(CoreApiStubRequestsAndResponses requestsAndResponses, StateUpdatesStore stateUpdatesStore, ITestOutputHelper testConsole)
-    {
-        _requestsAndResponses = requestsAndResponses;
-        _stateUpdatesStore = stateUpdatesStore;
-        _testConsole = testConsole;
-    }
 
     public void QueueGenesisTransaction()
     {
@@ -127,7 +131,7 @@ public class TestTransactionStreamStore
 
         _testConsole.WriteLine("System component info");
         var systemComponentInfo = new ComponentBuilder(ComponentHrp.SystemComponentHrp)
-            .WithSystemStateSubstate(epoch: 0L)
+            .WithSystemStateSubstate(0L)
             .Build();
 
         stateUpdatesList.Add(systemComponentInfo);
@@ -153,7 +157,7 @@ public class TestTransactionStreamStore
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        AddPendingTransaction(new TestPendingTransaction()
+        AddPendingTransaction(new TestPendingTransaction
         {
             StateVersion = MaxStateVersion,
             StateUpdates = stateUpdatesList.Combine(),
@@ -184,7 +188,7 @@ public class TestTransactionStreamStore
             .WithNewAccountWithNonFungibleResource(publicKey, "bucket1")
             .Build();
 
-        var pendingTransaction = QueueSubmitTransaction(manifest: manifest);
+        var pendingTransaction = QueueSubmitTransaction(manifest);
 
         pendingTransaction.AccountAddress = accountAddress;
     }
@@ -193,23 +197,17 @@ public class TestTransactionStreamStore
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        var stateUpdatesList = new List<StateUpdates>();
-
-        // CALL_METHOD ComponentAddress(\"system_tdx_a_1qsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs2ufe42\") \"lock_fee\" Decimal(\"10\");\n
-        // CALL_METHOD ComponentAddress(\"account_tdx_a_1qvq2ft73ku5d7maxhjraupya3n7ms2984z0l7rtlrnqqf0axcu\") \"withdraw_by_amount\" Decimal(\"100\") ResourceAddress(\"resource_sim1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqu57yag\");\n
+        // CALL_METHOD ComponentAddress(\"GenesisData.SysFaucetComponentAddress\") \"lock_fee\" Decimal(\"10\");\n
+        // CALL_METHOD ComponentAddress(\"fromAccount\") \"withdraw_by_amount\" Decimal(\"100\") ResourceAddress(\"resource_sim1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqu57yag\");\n
         // TAKE_FROM_WORKTOP_BY_AMOUNT Decimal(\"100\") ResourceAddress(\"resource_tdx_a_1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqegh4k9\") Bucket(\"bucket1\");\n
-        // CALL_METHOD ComponentAddress(\"account_tdx_a_1qvxvg4rt6w002cqa5akmg7j3xm9r2mkpye25h7d7e3xqeyskss\") \"deposit\" Bucket(\"bucket1\");\n
+        // CALL_METHOD ComponentAddress(\"toAccount\") \"deposit\" Bucket(\"bucket1\");\n
 
         // TODO: resource_sim1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqu57yag - who is this?
         var manifest = new ManifestBuilder()
             .WithLockFeeMethod(GenesisData.SysFaucetComponentAddress, "10")
             .WithCallMethod(fromAccount, "withdraw_by_amount",
-                new[]
-                {
-                    $"Decimal(\"{amountToTransfer}\")",
-                    $"ResourceAddress(\"resource_sim1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqu57yag\")",
-                })
-             .WithTakeFromWorktopByAmountMethod(GenesisData.GenesisResourceManagerAddress, amountToTransfer.ToString(), "bucket1")
+                new[] { $"Decimal(\"{amountToTransfer}\")", "ResourceAddress(\"resource_sim1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzqu57yag\")" })
+            .WithTakeFromWorktopByAmountMethod(GenesisData.GenesisResourceManagerAddress, amountToTransfer.ToString(), "bucket1")
             .WithDepositToAccountMethod(toAccount, "bucket1")
             .Build();
 
@@ -223,25 +221,17 @@ public class TestTransactionStreamStore
         var json = new RecentTransactionsRequest().ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        AddPendingTransaction(new TestPendingTransaction()
-        {
-            StateVersion = MaxStateVersion + 1,
-            Request = ("/transaction/recent", content, MarkAsCommitted: false),
-        });
+        AddPendingTransaction(new TestPendingTransaction { StateVersion = MaxStateVersion + 1, Request = ("/transaction/recent", content, MarkAsCommitted: false) });
     }
 
     public void QueueGatewayVersions()
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        AddPendingTransaction(new TestPendingTransaction()
-        {
-            StateVersion = MaxStateVersion + 1,
-            Request = ("/gateway", JsonContent.Create(new object()), MarkAsCommitted: false),
-        });
+        AddPendingTransaction(new TestPendingTransaction { StateVersion = MaxStateVersion + 1, Request = ("/gateway", JsonContent.Create(new object()), MarkAsCommitted: false) });
     }
 
-    public TestPendingTransaction QueueSubmitTransaction(string manifest, string? transactionIntentHash = default(string))
+    public TestPendingTransaction QueueSubmitTransaction(string manifest, string? transactionIntentHash = default)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
@@ -249,9 +239,12 @@ public class TestTransactionStreamStore
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var pendingTransaction = new TestPendingTransaction()
+        var pendingTransaction = new TestPendingTransaction
         {
-            StateVersion = MaxStateVersion + 1, Manifest = manifest, Request = ("/transaction/submit", content, MarkAsCommitted: true), IntentHash = transactionIntentHash,
+            StateVersion = MaxStateVersion + 1,
+            Manifest = manifest,
+            Request = ("/transaction/submit", content, MarkAsCommitted: true),
+            IntentHash = transactionIntentHash,
         };
 
         AddPendingTransaction(pendingTransaction);
@@ -264,26 +257,24 @@ public class TestTransactionStreamStore
         long costUnitLimit,
         long tipPercentage,
         string nonce,
-        List<GatewayApiSdk.Model.PublicKey> signerPublicKeys,
-        GatewayApiSdk.Model.TransactionPreviewRequestFlags flags)
+        List<PublicKey> signerPublicKeys,
+        TransactionPreviewRequestFlags flags)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.Name);
 
-        // build TransactionPreviewRequest
-        var transactionPreviewRequest = new GatewayApiSdk.Model.TransactionPreviewRequest(
-            manifest: manifest,
-            blobsHex: new List<string>(),
-            costUnitLimit: costUnitLimit,
-            tipPercentage: tipPercentage,
-            nonce: nonce,
-            signerPublicKeys: signerPublicKeys,
-            flags: flags
+        var transactionPreviewRequest = new TransactionPreviewRequest(
+            manifest,
+            new List<string>(),
+            costUnitLimit,
+            tipPercentage,
+            nonce,
+            signerPublicKeys,
+            flags
         );
 
         var json = transactionPreviewRequest.ToJson();
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // build TransactionPreviewResponse
         var stateUpdatesList = new List<StateUpdates>();
 
         var tokenStates = new FungibleResourceBuilder(_stateUpdatesStore.StateUpdates)
@@ -292,32 +283,29 @@ public class TestTransactionStreamStore
 
         stateUpdatesList.Add(tokenStates);
 
-        TransactionReceipt transactionReceipt = new TransactionReceiptBuilder()
+        var transactionReceipt = new TransactionReceiptBuilder()
             .WithStateUpdates(stateUpdatesList.Combine())
             .WithTransactionStatus(TransactionStatus.Succeeded)
             .Build();
 
-        AddPendingTransaction(new TestPendingTransaction()
+        AddPendingTransaction(new TestPendingTransaction
         {
             StateVersion = MaxStateVersion,
             StateUpdates = stateUpdatesList.Combine(),
             Request = ("/transaction/preview", content, MarkAsCommitted: false),
         });
 
-        _requestsAndResponses.TransactionPreviewResponse = new CoreApiSdk.Model.TransactionPreviewResponse(
+        _requestsAndResponses.TransactionPreviewResponse = new TransactionPreviewResponse(
             transactionReceipt,
-            new List<ResourceChange>()
+            new List<ResourceChange>
             {
                 new(
                     "resource address",
                     "component address",
                     new EntityId(EntityType.Component, "entity address"),
-                    amountAttos: "0"),
+                    "0"),
             },
-            logs: new List<TransactionPreviewResponseLogsInner>()
-            {
-                new("level: debug", "message"),
-            });
+            new List<TransactionPreviewResponseLogsInner> { new("level: debug", "message") });
     }
 
     public TestPendingTransaction? GetPendingTransaction()
@@ -334,13 +322,11 @@ public class TestTransactionStreamStore
         return pendingTransaction;
     }
 
-    public TestCommittedTransaction? MarkPendingTransactionAsCommitted(TestPendingTransaction? pendingTransaction)
+    public void MarkPendingTransactionAsCommitted(TestPendingTransaction? pendingTransaction)
     {
-        TransactionReceipt? transactionReceipt = null;
-
         if (pendingTransaction == null)
         {
-            return null;
+            return;
         }
 
         // add transaction state updates to the global store
@@ -348,6 +334,8 @@ public class TestTransactionStreamStore
         {
             _stateUpdatesStore.AddStateUpdates(pendingTransaction.StateUpdates);
         }
+
+        TransactionReceipt? transactionReceipt;
 
         // update global state versions
         if (pendingTransaction.IsGenesis)
@@ -365,7 +353,7 @@ public class TestTransactionStreamStore
             transactionReceipt = IssueTransactionReceipt(pendingTransaction);
         }
 
-        var committedTransaction = new TestCommittedTransaction()
+        var committedTransaction = new TestCommittedTransaction
         {
             StateVersion = MaxStateVersion,
             NotarizedTransaction = null, // TODO
@@ -373,8 +361,6 @@ public class TestTransactionStreamStore
         };
 
         CommittedTransactions.Add(committedTransaction);
-
-        return committedTransaction;
     }
 
     public void MarkPendingTransactionAsCompleted(TestPendingTransaction? pendingTransaction)
@@ -386,19 +372,20 @@ public class TestTransactionStreamStore
     {
         var toStateVersion = Math.Min(MaxStateVersion, fromStateVersion + count);
 
-        var transactions = CommittedTransactions.Where(t => t.StateVersion >= fromStateVersion && t.StateVersion <= toStateVersion).Select(t => new CommittedTransaction(t.StateVersion, null, t.Receipt)).ToList();
+        var transactions = CommittedTransactions.Where(t => t.StateVersion >= fromStateVersion && t.StateVersion <= toStateVersion)
+            .Select(t => new CommittedTransaction(t.StateVersion, null, t.Receipt)).ToList();
 
         return Task.FromResult(new CommittedTransactionsResponse(
-            fromStateVersion: fromStateVersion,
-            toStateVersion: toStateVersion,
-            maxStateVersion: MaxStateVersion,
+            fromStateVersion,
+            toStateVersion,
+            MaxStateVersion,
             transactions
         ));
     }
 
     public Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
-        // TODO: is there an api call to fetch the configuration?
+        // TODO: Do we want to use a network configuration of one the active networks? /v0/status/network-configuration
         return Task.FromResult(new NetworkConfigurationResponse(
             new NetworkConfigurationResponseVersion(_requestsAndResponses.CoreVersion, _requestsAndResponses.ApiVersion),
             GenesisData.NetworkDefinition.LogicalName,
@@ -436,98 +423,19 @@ public class TestTransactionStreamStore
             transactionStateUpdatesList.Add(pendingTransaction.StateUpdates);
         }
 
-        // default fee summary
-        FeeSummary feeSummary = new FeeSummary(
-            GenesisData.GenesisFeeSummary.LoanFullyRepaid,
-            GenesisData.GenesisFeeSummary.CostUnitLimit,
-            GenesisData.GenesisFeeSummary.CostUnitConsumed,
-            GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
-            GenesisData.GenesisFeeSummary.TipPercentage,
-            GenesisData.GenesisFeeSummary.XrdBurnedAttos,
-            GenesisData.GenesisFeeSummary.XrdTippedAttos);
+        var feeSummary = GenesisData.GenesisFeeSummary;
 
         var manifestInstructions = ManifestParser.Parse(pendingTransaction.Manifest);
 
         foreach (var instruction in manifestInstructions)
         {
-            switch (instruction.OpCode)
+            if (instruction.OpCode == InstructionOp.CreateNewAccount)
             {
-                case InstructionOp.LockFee:
-                    _testConsole.WriteLine($"Locking fees on {instruction.Address}");
-                    feeSummary = _stateUpdatesStore.CalculateFeeSummary(); // _stateUpdatesStore.LockFee();
-                    break;
-
-                case InstructionOp.FreeXrd:
-                    var defaultAccountBalance = 1000;
-                    _testConsole.WriteLine($"Taking 1000 tokens from vault owned by {instruction.Address}");
-
-                    var freeTokens = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, defaultAccountBalance, out newFaucetBalanceAttos);
-
-                    newAccountBalanceAttos = TokenAttosConverter.Tokens2Attos(defaultAccountBalance).ToString();
-
-                    transactionStateUpdatesList.Add(freeTokens);
-
-                    break;
-
-                case InstructionOp.TakeFromWorktop:
-                    var resourceAddress = instruction.Address;
-                    var bucketName = instruction.Parameters[0].Value;
-
-                    _testConsole.WriteLine($"TakeFromWorktop: Moving tokens to bucket '{bucketName}'");
-
-                    break;
-
-                case InstructionOp.TakeFromWorktopByAmount:
-                    break;
-
-                case InstructionOp.CreateNewAccount:
-                    {
-                        _testConsole.WriteLine($"CreateNewAccount: Creating new account {pendingTransaction.AccountAddress}");
-
-                        // build account states
-                        var account = new AccountBuilder(tempAllStateUpdates)
-                            .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
-                            .WithFixedAddress(pendingTransaction.AccountAddress!)
-                            .WithTokenName("XRD")
-                            .WithTotalAmountAttos(newAccountBalanceAttos)
-                            .WithComponentInfoSubstate(new ComponentInfoSubstate(
-                                entityType: EntityType.Component,
-                                substateType: SubstateType.ComponentInfo,
-                                packageAddress: GenesisData.AccountPackageAddress,
-                                blueprintName: GenesisData.AccountBlueprintName))
-                            .Build();
-
-                        transactionStateUpdatesList.Add(account);
-                    }
-
-                    break;
-
-                case InstructionOp.WithdrawByAmount:
-                    {
-                        // TODO: if (network == "alphanet")
-                        // {
-                            // faucet vault's up and down substates (faucet pays the fees on aplhanet)
-                        WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, GenesisData.SysFaucetComponentAddress, 0, out newFaucetBalanceAttos);
-                            // }
-
-                        tokensAmountToTransferAttos = TokenAttosConverter.Tokens2Attos(instruction.Parameters[0].Value);
-
-                        var tokensToWithdraw = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
-
-                        WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, instruction.Address, tokensToWithdraw, out newAccountBalanceAttos);
-                    }
-
-                    break;
-
-                case InstructionOp.Deposit:
-                    // var accountAddress = instruction.Address;
-                    // var bucketName1 = instruction.Parameters[0].Value;
-                    var tokensToDeposit = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
-
-                    DepositToAccount(ref transactionStateUpdatesList, tempAllStateUpdates, instruction.Address, tokensToDeposit);
-
-                    break;
+                instruction.Address = pendingTransaction.AccountAddress;
             }
+
+            ProcessInstruction(instruction, ref feeSummary, tempAllStateUpdates, transactionStateUpdatesList, ref newFaucetBalanceAttos, ref newAccountBalanceAttos,
+                ref tokensAmountToTransferAttos);
 
             tempAllStateUpdates = tempAllStateUpdates.Add(transactionStateUpdatesList.Combine());
         }
@@ -544,13 +452,102 @@ public class TestTransactionStreamStore
         return transactionReceipt;
     }
 
+    private void ProcessInstruction(Instruction instruction, ref FeeSummary feeSummary, StateUpdates tempAllStateUpdates, List<StateUpdates> transactionStateUpdatesList,
+        ref string newFaucetBalanceAttos, ref string newAccountBalanceAttos, ref BigInteger tokensAmountToTransferAttos)
+    {
+        switch (instruction.OpCode)
+        {
+            case InstructionOp.LockFee:
+                _testConsole.WriteLine($"Locking fees on {instruction.Address}");
+                feeSummary = _stateUpdatesStore.CalculateFeeSummary(); // _stateUpdatesStore.LockFee();
+                break;
+
+            case InstructionOp.FreeXrd:
+                var defaultAccountBalance = 1000;
+                _testConsole.WriteLine($"Freeing {defaultAccountBalance} tokens from sys faucet");
+
+                var freeTokens = tempAllStateUpdates.TakeTokensFromVault(GenesisData.SysFaucetComponentAddress, feeSummary, defaultAccountBalance, out newFaucetBalanceAttos);
+
+                _testConsole.WriteLine($"New faucet balance: {TokenAttosConverter.Attos2Tokens(newFaucetBalanceAttos):#,###.##}");
+
+                newAccountBalanceAttos = TokenAttosConverter.Tokens2Attos(defaultAccountBalance).ToString();
+
+                transactionStateUpdatesList.Add(freeTokens);
+
+                break;
+
+            case InstructionOp.TakeFromWorktop:
+                var bucketName = instruction.Parameters[0].Value;
+                _testConsole.WriteLine($"TakeFromWorktop: Moving tokens to bucket '{bucketName}'");
+                break;
+
+            case InstructionOp.TakeFromWorktopByAmount:
+                var bucketNameBy = instruction.Parameters[0].Value;
+                _testConsole.WriteLine($"TakeFromWorktopByAmount: Moving tokens to bucket '{bucketNameBy}'");
+                break;
+
+            case InstructionOp.CreateNewAccount:
+                {
+                    _testConsole.WriteLine($"CreateNewAccount: Creating new account {instruction.Address}");
+
+                    // build account states
+                    var account = new AccountBuilder(tempAllStateUpdates)
+                        .WithPublicKey(AddressHelper.GenerateRandomPublicKey())
+                        .WithFixedAddress(instruction.Address)
+                        .WithTokenName("XRD")
+                        .WithTotalAmountAttos(newAccountBalanceAttos)
+                        .WithComponentInfoSubstate(new ComponentInfoSubstate(
+                            EntityType.Component,
+                            SubstateType.ComponentInfo,
+                            GenesisData.AccountPackageAddress,
+                            GenesisData.AccountBlueprintName))
+                        .Build();
+
+                    _testConsole.WriteLine($"New account {instruction.Address} balance is: {TokenAttosConverter.Attos2Tokens(newAccountBalanceAttos):#.##}");
+
+                    transactionStateUpdatesList.Add(account);
+                }
+
+                break;
+
+            case InstructionOp.WithdrawByAmount:
+                {
+                    // TODO: if (network == "alphanet")
+                    // {
+                    // faucet vault's up and down substates (faucet pays the fees on aplhanet)
+                    WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, GenesisData.SysFaucetComponentAddress, 0, out newFaucetBalanceAttos);
+                    // }
+
+                    tokensAmountToTransferAttos = TokenAttosConverter.Tokens2Attos(instruction.Parameters[0].Value);
+
+                    var tokensToWithdraw = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
+
+                    WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, GenesisData.GenesisFeeSummary, instruction.Address, tokensToWithdraw,
+                        out newAccountBalanceAttos);
+
+                    _testConsole.WriteLine($"New account {instruction.Address} balance is: {TokenAttosConverter.Attos2Tokens(newAccountBalanceAttos):#.##}");
+                }
+
+                break;
+
+            case InstructionOp.Deposit:
+                var tokensToDeposit = TokenAttosConverter.Attos2Tokens(tokensAmountToTransferAttos);
+
+                DepositToAccount(ref transactionStateUpdatesList, tempAllStateUpdates, instruction.Address, tokensToDeposit, out newAccountBalanceAttos);
+
+                _testConsole.WriteLine($"New account {instruction.Address} balance is: {TokenAttosConverter.Attos2Tokens(newAccountBalanceAttos):#.##}");
+
+                break;
+        }
+    }
+
     private void WithdrawByAmount(
-                    ref List<StateUpdates> transactionStateUpdatesList,
-                    StateUpdates allStateUpdates,
-                    FeeSummary feeSummary,
-                    string accountAddress,
-                    double tokensToWithdraw,
-                    out string newVaultTotalAttos)
+        ref List<StateUpdates> transactionStateUpdatesList,
+        StateUpdates allStateUpdates,
+        FeeSummary feeSummary,
+        string accountAddress,
+        double tokensToWithdraw,
+        out string newVaultTotalAttos)
     {
         _testConsole.WriteLine($"WithdrawByAmount: Withdrawing {tokensToWithdraw} tokens from account {accountAddress}");
 
@@ -561,11 +558,12 @@ public class TestTransactionStreamStore
     }
 
     private void DepositToAccount(
-                     ref List<StateUpdates> transactionStateUpdatesList,
-                     StateUpdates allStateUpdates,
-                     string accountAddress,
-                     double tokensToDeposit)
-     {
+        ref List<StateUpdates> transactionStateUpdatesList,
+        StateUpdates allStateUpdates,
+        string accountAddress,
+        double tokensToDeposit,
+        out string newAccountBalanceAttos)
+    {
         _testConsole.WriteLine($"Deposit: Depositing {tokensToDeposit} tokens to account {accountAddress}");
 
         var accountVaultDownSubstate = allStateUpdates.GetLastVaultDownSubstateByEntityAddress(GenesisData.SysFaucetComponentAddress);
@@ -595,12 +593,12 @@ public class TestTransactionStreamStore
         var vaultResourceAmount = newAccountVaultSubstate.ResourceAmount.GetFungibleResourceAmount();
         var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
 
-        var newAttosBalance = vaultResourceAmountAttos + TokenAttosConverter.Tokens2Attos(tokensToDeposit);
+        newAccountBalanceAttos = (vaultResourceAmountAttos + TokenAttosConverter.Tokens2Attos(tokensToDeposit)).ToString();
 
-        vaultResourceAmount!.AmountAttos = newAttosBalance.ToString();
+        vaultResourceAmount!.AmountAttos = newAccountBalanceAttos;
 
         upSubstates.Add(newAccountVaultUpSubstate);
 
         transactionStateUpdatesList.Add(new StateUpdates(downVirtualSubstates, upSubstates, downSubstates, globalEntityIds));
-     }
+    }
 }

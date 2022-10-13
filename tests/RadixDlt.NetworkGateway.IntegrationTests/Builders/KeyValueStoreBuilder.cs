@@ -6,9 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using static Newtonsoft.Json.Linq.Extensions;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
@@ -22,13 +19,13 @@ public class DataJsonField
         TypeId = typeId;
     }
 
-    [DataMember(Name ="bytes")]
+    [DataMember(Name = "bytes")]
     public string Bytes { get; set; }
 
-    [DataMember(Name ="type")]
+    [DataMember(Name = "type")]
     public string Type { get; set; }
 
-    [DataMember(Name ="type_id")]
+    [DataMember(Name = "type_id")]
     public ScryptoType TypeId { get; set; }
 }
 
@@ -43,21 +40,14 @@ public class DataJsonFields
     [DataMember(Name = "fields")]
     public List<DataJsonField> Fields { get; set; }
 
-    [DataMember(Name ="type")]
-    public string Type
-    {
-        get { return "Struct"; }
-    }
+    [DataMember(Name = "type")]
+    public string Type => "Struct";
 }
 
 public class KeyValueStoreBuilder : BuilderBase<DataStruct>
 {
     private readonly DataJsonFields _dataJsonFields = new();
     private readonly List<EntityId> _ownedEntities = new();
-
-    public KeyValueStoreBuilder()
-    {
-    }
 
     public override DataStruct Build()
     {
@@ -66,9 +56,9 @@ public class KeyValueStoreBuilder : BuilderBase<DataStruct>
         var dataHex = Convert.ToHexString(Encoding.UTF8.GetBytes(strJson));
 
         var dataStruct = new DataStruct(
-            structData: new SborData(dataHex, JObject.Parse(strJson)),
-            ownedEntities: _ownedEntities,
-            referencedEntities: new List<EntityId>());
+            new SborData(dataHex, JObject.Parse(strJson)),
+            _ownedEntities,
+            new List<EntityId>());
 
         return dataStruct;
     }

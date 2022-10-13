@@ -1,12 +1,9 @@
 #nullable disable
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using System.Collections.Generic;
-using TransactionSubmitResponse = RadixDlt.CoreApiSdk.Model.TransactionSubmitResponse;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 
@@ -55,10 +52,7 @@ public class CoreApiStubRequestsAndResponses
 
         MempoolTransactionHash = "0607030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fff";
 
-        GatewayCoreApiNode = new GatewayApi.Configuration.CoreApiNode
-        {
-            Enabled = true, Name = "node1", RequestWeighting = 1, CoreApiAddress = "3333",
-        };
+        GatewayCoreApiNode = new GatewayApi.Configuration.CoreApiNode { Enabled = true, Name = "node1", RequestWeighting = 1, CoreApiAddress = "3333" };
 
         DataAggregatorCoreApiNode = new CoreApiNode
         {
@@ -74,10 +68,7 @@ public class CoreApiStubRequestsAndResponses
         CoreNodeHealthResult = new CoreNodeHealthResult(
             new Dictionary<CoreNodeStatus, List<GatewayApi.Configuration.CoreApiNode>>
             {
-                {
-                    CoreNodeStatus.HealthyAndSynced,
-                    new List<GatewayApi.Configuration.CoreApiNode> { GatewayCoreApiNode }
-                },
+                { CoreNodeStatus.HealthyAndSynced, new List<GatewayApi.Configuration.CoreApiNode> { GatewayCoreApiNode } },
             });
 
         NetworkStatusResponse = new NetworkStatusResponse(

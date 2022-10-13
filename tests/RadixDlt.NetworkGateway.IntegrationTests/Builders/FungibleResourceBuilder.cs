@@ -1,22 +1,19 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
 public class FungibleResourceBuilder : BuilderBase<StateUpdates>
 {
     private readonly StateUpdates _stateUpdates;
+    private int _fungibleDivisibility = 18;
 
     private string _resourceAddress;
     private string _resourceAddressHex;
     private string _resourceName = "XRD";
     private string _totalSupplyAttos = string.Empty;
-    private int _fungibleDivisibility = 18;
 
     public FungibleResourceBuilder(StateUpdates stateUpdates)
     {
@@ -36,35 +33,35 @@ public class FungibleResourceBuilder : BuilderBase<StateUpdates>
         var newGlobalEntities = new List<GlobalEntityId>();
 
         newGlobalEntities.GetOrAdd(new GlobalEntityId(
-            entityType: EntityType.ResourceManager,
-            entityAddressHex: _resourceAddressHex,
-            globalAddressHex: _resourceAddressHex,
-            globalAddress: _resourceAddress));
+            EntityType.ResourceManager,
+            _resourceAddressHex,
+            _resourceAddressHex,
+            _resourceAddress));
 
-        var upSubstates = new List<UpSubstate>()
+        var upSubstates = new List<UpSubstate>
         {
             new(
-                substateId: new SubstateId(
-                    entityType: EntityType.ResourceManager,
-                    entityAddressHex: _resourceAddressHex,
-                    substateType: SubstateType.ResourceManager,
-                    substateKeyHex: "00"
+                new SubstateId(
+                    EntityType.ResourceManager,
+                    _resourceAddressHex,
+                    SubstateType.ResourceManager,
+                    "00"
                 ),
-                version: 0L,
+                0L,
                 substateData: new Substate(
-                    actualInstance: new ResourceManagerSubstate(
-                        entityType: EntityType.ResourceManager,
-                        substateType: SubstateType.ResourceManager,
-                        resourceType: ResourceType.Fungible,
-                        fungibleDivisibility: _fungibleDivisibility,
-                        metadata: new List<ResourceManagerSubstateAllOfMetadata>()
+                    new ResourceManagerSubstate(
+                        EntityType.ResourceManager,
+                        SubstateType.ResourceManager,
+                        ResourceType.Fungible,
+                        _fungibleDivisibility,
+                        new List<ResourceManagerSubstateAllOfMetadata>
                         {
                             new("name", "Radix"),
                             new("symbol", "XRD"),
                             new("url", "https://tokens.radixdlt.com"),
                             new("description", "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes."),
                         },
-                        totalSupplyAttos: _totalSupplyAttos)
+                        _totalSupplyAttos)
                 ),
                 substateHex: GenesisData.FungibleResourceCodeHex,
                 substateDataHash: "3dc43a58c5cc27bba7d9a96966c8d66a230c781ec04f936bf10130688ed887cf"

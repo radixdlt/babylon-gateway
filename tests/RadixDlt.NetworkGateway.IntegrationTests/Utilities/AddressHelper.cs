@@ -1,6 +1,5 @@
 ﻿using RadixDlt.NetworkGateway.Commons.Addressing;
 using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using System;
 using System.Text;
 
@@ -22,17 +21,17 @@ public static class AddressHelper
 
     public static string GenerateRandomAddress(string hrpSuffix)
     {
-        Random res = new Random();
+        var res = new Random();
 
         // String of alphabets
-        string str = "abcdefghijklmnopqrstuvwxyz";
-        int size = (68 - hrpSuffix.Length) / 2;
+        var str = "abcdefghijklmnopqrstuvwxyz";
+        var size = (68 - hrpSuffix.Length) / 2;
 
-        string addressData = "1";
+        var addressData = "1";
 
-        for (int i = 0; i < size; i++)
+        for (var i = 0; i < size; i++)
         {
-            int x = res.Next(str.Length);
+            var x = res.Next(str.Length);
             addressData = addressData + str[x];
         }
 
@@ -41,7 +40,7 @@ public static class AddressHelper
 
     public static string GenerateRandomPublicKey()
     {
-        byte[] publicKey = new byte[33];
+        var publicKey = new byte[33];
         new Random().NextBytes(publicKey);
 
         return Convert.ToHexString(publicKey).ToLower();

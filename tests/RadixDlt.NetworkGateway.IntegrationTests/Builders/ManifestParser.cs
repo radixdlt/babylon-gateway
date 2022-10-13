@@ -20,7 +20,19 @@ public enum InstructionOp
 
 public record InstructionParameter(string Name, string Value);
 
-public record Instruction(InstructionOp OpCode, string Address, List<InstructionParameter> Parameters);
+public record Person(string FirstName, string LastName, string Id)
+{
+    internal string Id { get; init; } = Id;
+}
+
+public record Instruction(InstructionOp Opcode, string Address, List<InstructionParameter> Parameters)
+{
+    public InstructionOp OpCode { get; } = Opcode;
+
+    public string Address { get; set; } = Address;
+
+    public List<InstructionParameter> Parameters { get; } = Parameters;
+}
 
 public static class ManifestParser
 {
@@ -37,13 +49,14 @@ public static class ManifestParser
 
     public static List<Instruction> Parse(string manifest)
     {
-        string[] manifestCalls = manifest.Trim().Split("\n");
+        var manifestCalls = manifest.Trim().Split("\n");
 
         var instructions = new List<Instruction>();
 
         foreach (var manifestCall in manifestCalls)
         {
-            string[] cmdParts = manifestCall.Trim().Replace("\n", string.Empty).Replace("\r", string.Empty).Replace("(", string.Empty).Replace(")", string.Empty).Replace("\"", string.Empty)
+            var cmdParts = manifestCall.Trim().Replace("\n", string.Empty).Replace("\r", string.Empty).Replace("(", string.Empty).Replace(")", string.Empty)
+                .Replace("\"", string.Empty)
                 .Replace("\\", string.Empty).Replace(";", string.Empty).Split(" ");
 
             var opCode = InstructionOp.NotFound;
@@ -108,14 +121,14 @@ public static class ManifestParser
     }
 
     private static void AddAddressOrParameter(string cmdPart, string pattern, ref string address, List<InstructionParameter> parameters)
-     {
-         if (string.IsNullOrWhiteSpace(address))
-         {
-             address = cmdPart.Replace(pattern, string.Empty);
-         }
-         else
-         {
-             AddParameter(cmdPart, pattern, parameters);
-         }
-     }
+    {
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            address = cmdPart.Replace(pattern, string.Empty);
+        }
+        else
+        {
+            AddParameter(cmdPart, pattern, parameters);
+        }
+    }
 }

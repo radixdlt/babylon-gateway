@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
 using System.IO;
@@ -38,7 +38,7 @@ public partial class GatewayTestsRunner
 
             if (pendingTransaction == null)
             {
-                _testConsole.WriteLine($"No pending transactions found. Exiting...");
+                _testConsole.WriteLine("No pending transactions found. Exiting...");
                 return;
             }
 
@@ -72,10 +72,7 @@ public partial class GatewayTestsRunner
     {
         var statesDump = JsonConvert.SerializeObject(
             _transactionStreamStore,
-            new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-            });
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
         File.WriteAllText(_databaseName + ".log", statesDump);
     }
@@ -119,6 +116,8 @@ public partial class GatewayTestsRunner
         _testConsole.WriteLine($"\n{new string('-', 50)}");
         _testConsole.WriteLine($"{testName} test");
         _testConsole.WriteLine($"{new string('-', 50)}");
+
+        _testConsole.WriteLine(GenesisData.NetworkDefinition.ToString());
     }
 
     private async Task WaitAsync(TimeSpan? timeout)

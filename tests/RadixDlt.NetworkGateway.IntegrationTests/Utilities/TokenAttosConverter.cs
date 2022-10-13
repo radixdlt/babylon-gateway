@@ -1,14 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
+﻿using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using System;
 using System.Numerics;
-using System.Reflection;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 
 public static class TokenAttosConverter
 {
-    public static BigInteger CostUnitConsumed2Attos(long costUnitConsumed, string? costUnitPriceAttos = default(string))
+    public static BigInteger CostUnitConsumed2Attos(long costUnitConsumed, string? costUnitPriceAttos = default)
     {
         if (string.IsNullOrWhiteSpace(costUnitPriceAttos))
         {
@@ -20,7 +18,7 @@ public static class TokenAttosConverter
         return costUnitConsumed * biCostUnitPriceAttos;
     }
 
-    public static BigInteger CostUnitConsumed2Token(long costUnitConsumed, string? costUnitPriceAttos = default(string), int divisibility = 18)
+    public static BigInteger CostUnitConsumed2Token(long costUnitConsumed, string? costUnitPriceAttos = default, int divisibility = 18)
     {
         var costUnitConsumed2Attos = CostUnitConsumed2Attos(costUnitConsumed, costUnitPriceAttos);
 
@@ -37,9 +35,14 @@ public static class TokenAttosConverter
         return Tokens2Attos(double.Parse(strAttos), divisibility);
     }
 
+    public static double Attos2Tokens(string attos, int divisibility = 18)
+    {
+        return double.Parse(attos) / Math.Pow(10, divisibility);
+    }
+
     public static double Attos2Tokens(BigInteger attos, int divisibility = 18)
     {
-        return double.Parse(attos.ToString()) / Math.Pow(10, divisibility);
+        return Attos2Tokens(attos.ToString(), divisibility);
     }
 
     public static BigInteger ParseAttosFromString(string attos)

@@ -1,10 +1,7 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
@@ -27,30 +24,30 @@ public class PackageBuilder : BuilderBase<StateUpdates>
 
         var downVirtualSubstates = new List<SubstateId>();
 
-        var newGlobalEntities = new List<GlobalEntityId>()
-        {
-            new GlobalEntityId(
-                entityType: EntityType.Package,
-                entityAddressHex: _packageAddressHex,
-                globalAddressHex: _packageAddressHex,
-                globalAddress: _packageAddress),
-        };
-
-        var upSubstates = new List<UpSubstate>()
+        var newGlobalEntities = new List<GlobalEntityId>
         {
             new(
-                substateId: new SubstateId(
-                    entityType: EntityType.Package,
-                    entityAddressHex: _packageAddressHex,
-                    substateType: SubstateType.Package,
-                    substateKeyHex: "00"
+                EntityType.Package,
+                _packageAddressHex,
+                _packageAddressHex,
+                _packageAddress),
+        };
+
+        var upSubstates = new List<UpSubstate>
+        {
+            new(
+                new SubstateId(
+                    EntityType.Package,
+                    _packageAddressHex,
+                    SubstateType.Package,
+                    "00"
                 ),
-                version: 0L,
+                0L,
                 substateData: new Substate(
-                    actualInstance: new PackageSubstate(
-                        entityType: EntityType.Package,
-                        substateType: SubstateType.Package,
-                        codeHex: GenesisData.SysFaucetCodeHex)
+                    new PackageSubstate(
+                        EntityType.Package,
+                        SubstateType.Package,
+                        GenesisData.SysFaucetCodeHex)
                 ),
                 substateHex: GenesisData.SysFaucetSubstateHex,
                 substateDataHash: "ccceea5952ca631dcf65146141884a6fbeb0b3b0535fee3d58124a5e9823cb53"

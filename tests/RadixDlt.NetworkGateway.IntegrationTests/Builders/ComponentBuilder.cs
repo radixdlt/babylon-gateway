@@ -1,5 +1,4 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
@@ -16,9 +15,10 @@ public enum ComponentHrp
 
 public class ComponentBuilder : BuilderBase<StateUpdates>
 {
+    private readonly string _componentAddressHrp;
+
     private string _componentAddress;
     private string _componentAddressHex;
-    private string _componentAddressHrp;
 
     private Substate? _componentInfoSubstate;
     private Substate? _componentStateSubstate;
@@ -62,29 +62,29 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
 
         if (_componentInfoSubstate != null)
         {
-            newGlobalEntities.GetOrAdd(new(
-                entityType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
-                entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddress: _componentAddress));
+            newGlobalEntities.GetOrAdd(new GlobalEntityId(
+                ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
+                AddressHelper.AddressToHex(_componentAddress),
+                AddressHelper.AddressToHex(_componentAddress),
+                _componentAddress));
         }
 
         if (_componentStateSubstate != null)
         {
-            newGlobalEntities.GetOrAdd(new(
-                entityType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
-                entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddress: _componentAddress));
+            newGlobalEntities.GetOrAdd(new GlobalEntityId(
+                ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
+                AddressHelper.AddressToHex(_componentAddress),
+                AddressHelper.AddressToHex(_componentAddress),
+                _componentAddress));
         }
 
         if (_componentSystemSubstate != null)
         {
-            newGlobalEntities.GetOrAdd(new(
-                entityType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
-                entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                globalAddress: _componentAddress));
+            newGlobalEntities.GetOrAdd(new GlobalEntityId(
+                ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
+                AddressHelper.AddressToHex(_componentAddress),
+                AddressHelper.AddressToHex(_componentAddress),
+                _componentAddress));
         }
 
         var upSubstates = new List<UpSubstate>();
@@ -93,11 +93,11 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
         {
             upSubstates.Add(
                 new UpSubstate(
-                    substateId: new SubstateId(
-                        entityType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
-                        entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                        substateType: ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).SubstateType,
-                        substateKeyHex: "00"
+                    new SubstateId(
+                        ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).EntityType,
+                        AddressHelper.AddressToHex(_componentAddress),
+                        ((ComponentInfoSubstate)_componentInfoSubstate!.ActualInstance).SubstateType,
+                        "00"
                     ),
                     substateData: _componentInfoSubstate,
                     substateHex: "110d000000436f6d706f6e656e74496e666f010000001003000000801b0000000100000000000000000000000000000000000000000000000000010c09000000537973466175636574301000000000",
@@ -111,11 +111,11 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
         {
             upSubstates.Add(
                 new UpSubstate(
-                    substateId: new SubstateId(
-                        entityType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
-                        entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                        substateType: ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).SubstateType,
-                        substateKeyHex: "00"
+                    new SubstateId(
+                        ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).EntityType,
+                        AddressHelper.AddressToHex(_componentAddress),
+                        ((ComponentStateSubstate)_componentStateSubstate!.ActualInstance).SubstateType,
+                        "00"
                     ),
                     substateData: _componentStateSubstate,
                     substateHex: "110d000000436f6d706f6e656e74496e666f010000001003000000801b0000000100000000000000000000000000000000000000000000000000010c09000000537973466175636574301000000000",
@@ -129,11 +129,11 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
         {
             upSubstates.Add(
                 new UpSubstate(
-                    substateId: new SubstateId(
-                        entityType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
-                        entityAddressHex: AddressHelper.AddressToHex(_componentAddress),
-                        substateType: ((SystemSubstate)_componentSystemSubstate!.ActualInstance).SubstateType,
-                        substateKeyHex: "00"
+                    new SubstateId(
+                        ((SystemSubstate)_componentSystemSubstate!.ActualInstance).EntityType,
+                        AddressHelper.AddressToHex(_componentAddress),
+                        ((SystemSubstate)_componentSystemSubstate!.ActualInstance).SubstateType,
+                        "00"
                     ),
                     substateData: _componentSystemSubstate,
                     substateHex: "110d000000436f6d706f6e656e74496e666f010000001003000000801b0000000100000000000000000000000000000000000000000000000000010c09000000537973466175636574301000000000",
@@ -168,11 +168,11 @@ public class ComponentBuilder : BuilderBase<StateUpdates>
     public ComponentBuilder WithComponentInfoSubstate(string packageAddress, string blueprintName = "")
     {
         _componentInfoSubstate = new Substate(
-            actualInstance: new ComponentInfoSubstate(
-                entityType: EntityType.Component,
-                substateType: SubstateType.ComponentInfo,
-                packageAddress: packageAddress,
-                blueprintName: blueprintName
+            new ComponentInfoSubstate(
+                EntityType.Component,
+                SubstateType.ComponentInfo,
+                packageAddress,
+                blueprintName
             )
         );
 

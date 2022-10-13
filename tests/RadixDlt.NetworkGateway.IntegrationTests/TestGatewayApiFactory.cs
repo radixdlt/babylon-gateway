@@ -169,10 +169,7 @@ public class TestGatewayApiFactory
                     {
                         o.NetworkName = GenesisData.NetworkDefinition.LogicalName;
                         o.IgnoreNonSyncedNodes = false;
-                        o.CoreApiNodes = new List<CoreApiNode>
-                        {
-                            _coreApiStub.RequestsAndResponses.GatewayCoreApiNode,
-                        };
+                        o.CoreApiNodes = new List<CoreApiNode> { _coreApiStub.RequestsAndResponses.GatewayCoreApiNode };
                     }
                 );
 

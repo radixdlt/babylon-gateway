@@ -1,8 +1,6 @@
 ﻿using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Builders;
 
@@ -11,9 +9,9 @@ public class AccountBuilder : BuilderBase<StateUpdates>
     private readonly StateUpdates _stateUpdates;
 
     private string _accountAddress = string.Empty;
-    private string _totalAmountAttos = string.Empty;
     private ComponentInfoSubstate? _componentInfoSubstate;
     private string _tokenName = string.Empty;
+    private string _totalAmountAttos = string.Empty;
 
     public AccountBuilder(StateUpdates stateUpdates)
     {
@@ -54,9 +52,9 @@ public class AccountBuilder : BuilderBase<StateUpdates>
             .Build();
 
         var componentStateSubstateData = new ComponentStateSubstate(
-            entityType: EntityType.Component,
-            substateType: SubstateType.ComponentState,
-            dataStruct: dataStruct
+            EntityType.Component,
+            SubstateType.ComponentState,
+            dataStruct
         );
 
         var account = new ComponentBuilder(ComponentHrp.AccountComponentHrp)

@@ -31,12 +31,48 @@ public class CoreApiStub :
 {
     private readonly TestTransactionStreamStore _transactionStreamStore;
 
-    public CoreApiStubRequestsAndResponses RequestsAndResponses { get; }
-
     public CoreApiStub(CoreApiStubRequestsAndResponses coreApiStubRequestsAndResponses, TestTransactionStreamStore transactionStreamStore)
     {
         _transactionStreamStore = transactionStreamStore;
         RequestsAndResponses = coreApiStubRequestsAndResponses;
+    }
+
+    public CoreApiStubRequestsAndResponses RequestsAndResponses { get; }
+
+    public async Task<CapturedConfig> CaptureConfiguration()
+    {
+        var networkConfiguration = MapNetworkConfigurationResponse(await _transactionStreamStore.GetNetworkConfiguration(CancellationToken.None));
+
+        return await Task.FromResult(new CapturedConfig(
+            networkConfiguration.NetworkName,
+            networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
+            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
+            new TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
+        ));
+    }
+
+    private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
+    {
+        var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
+
+        return new NetworkConfiguration
+        {
+            NetworkName = networkConfiguration.Network,
+            NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition
+            {
+                PackageHrp = $"package_{hrpSuffix}",
+                NormalComponentHrp = $"component_{hrpSuffix}",
+                AccountComponentHrp = $"account_{hrpSuffix}",
+                SystemComponentHrp = $"system_{hrpSuffix}",
+                ResourceHrp = $"resource_{hrpSuffix}",
+                ValidatorHrp = $"validator_{hrpSuffix}",
+                NodeHrp = $"node_{hrpSuffix}",
+            },
+            NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
+            {
+                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
+            },
+        };
     }
 
     #region injected stubs
@@ -89,40 +125,4 @@ public class CoreApiStub :
     }
 
     #endregion
-
-    public async Task<CapturedConfig> CaptureConfiguration()
-    {
-        var networkConfiguration = MapNetworkConfigurationResponse(await _transactionStreamStore.GetNetworkConfiguration(CancellationToken.None));
-
-        return await Task.FromResult(new CapturedConfig(
-            networkConfiguration.NetworkName,
-            networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
-            new TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
-        ));
-    }
-
-    private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
-    {
-        var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
-
-        return new NetworkConfiguration
-        {
-            NetworkName = networkConfiguration.Network,
-            NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition
-            {
-                PackageHrp = $"package_{hrpSuffix}",
-                NormalComponentHrp = $"component_{hrpSuffix}",
-                AccountComponentHrp = $"account_{hrpSuffix}",
-                SystemComponentHrp = $"system_{hrpSuffix}",
-                ResourceHrp = $"resource_{hrpSuffix}",
-                ValidatorHrp = $"validator_{hrpSuffix}",
-                NodeHrp = $"node_{hrpSuffix}",
-            },
-            NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
-            {
-                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
-            },
-        };
-    }
 }

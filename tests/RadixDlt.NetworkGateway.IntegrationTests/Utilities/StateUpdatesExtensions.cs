@@ -66,7 +66,8 @@ public static class StateUpdatesExtensions
     {
         var componentUpSubstate = stateUpdates.GetLastUpSubstateByEntityAddress(entityAddress);
 
-        var vaultEntityAddressHex = (componentUpSubstate.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+        var vaultEntityAddressHex = (componentUpSubstate.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault)
+            .EntityAddressHex;
 
         return stateUpdates.GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
     }
@@ -121,7 +122,7 @@ public static class StateUpdatesExtensions
     public static GlobalEntityId GetOrAdd(this List<GlobalEntityId> source, GlobalEntityId item)
     {
         var globalEntityId = source.Find(ge => ge.GlobalAddress == item.GlobalAddress &&
-                                            ge.GlobalAddressHex == item.GlobalAddressHex);
+                                               ge.GlobalAddressHex == item.GlobalAddressHex);
 
         if (globalEntityId != null)
         {
@@ -134,37 +135,44 @@ public static class StateUpdatesExtensions
     }
 
     /// <summary>
-    /// Withdraws a given amount of tokens form the vault, creates new vault's down and up  substates, and updates vault balance (ResourceAmount.AmountAttos).
+    ///     Withdraws a given amount of tokens form the vault, creates new vault's down and up  substates, and updates vault balance (ResourceAmount.AmountAttos).
     /// </summary>
     /// <param name="stateUpdates">state updates.</param>
     /// <param name="componentAddress">vault owned by component address.</param>
     /// <param name="feeSummary">fee summary.</param>
-    /// <param name="xrdAmount">amount of tokens to withdraw.</param>
+    /// <param name="tokensToWithdraw">amount of tokens to withdraw.</param>
     /// <param name="newVaultBalanceAttos">new vault balance in attos.</param>
     /// <returns>updated state updates.</returns>
-    public static StateUpdates TakeTokensFromVault(this StateUpdates stateUpdates, string componentAddress, FeeSummary feeSummary, double xrdAmount, out string newVaultBalanceAttos)
+    public static StateUpdates TakeTokensFromVault(
+            this StateUpdates stateUpdates,
+            string componentAddress,
+            FeeSummary feeSummary,
+            double tokensToWithdraw,
+            out string newVaultBalanceAttos)
     {
-        // a default value of free XRD tokens
-        var tokenAmountAttos = TokenAttosConverter.Tokens2Attos(xrdAmount);
+        var attosToWithdraw = TokenAttosConverter.Tokens2Attos(tokensToWithdraw);
 
+        // get xrd resource address
         var resourceAddress = GetFungibleResoureAddressByEntityAddress(stateUpdates, componentAddress);
 
+        // get last upsubstate of the vault
         var vaultUpSubstate = GetLastVaultUpSubstateByEntityAddress(stateUpdates, componentAddress);
 
         var vaultAddressHex = vaultUpSubstate.SubstateId.EntityAddressHex;
 
         var vaultSubstate = vaultUpSubstate.SubstateData.GetVaultSubstate();
 
+        // get vault's balance
         var vaultResourceAmount = vaultSubstate.ResourceAmount.GetFungibleResourceAmount();
         var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
 
+        // withdraw 'attosToWithdraw' and fees
         var feesAttos = feeSummary.CostUnitConsumed
                         * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
 
-        // _testConsole.WriteLine($"Paid fees {TokenAttosConverter.Attos2Tokens(feesAttos)} xrd");
+        newVaultBalanceAttos = (vaultResourceAmountAttos - attosToWithdraw - feesAttos).ToString();
 
-        newVaultBalanceAttos = (vaultResourceAmountAttos - tokenAmountAttos - feesAttos).ToString();
-
+        // build vault's new down and up substates
         var vault = new VaultBuilder()
             .WithFixedAddressHex(vaultAddressHex)
             .WithFungibleTokensResourceAddress(resourceAddress)
@@ -175,7 +183,7 @@ public static class StateUpdatesExtensions
                     vaultAddressHex,
                     SubstateType.Vault,
                     Convert.ToHexString(Encoding.UTF8.GetBytes("substateKeyHex")).ToLowerInvariant()
-                ), substateDataHash: "hash", vaultUpSubstate._Version)
+                ), "hash", vaultUpSubstate._Version)
             ).Build();
 
         return vault;

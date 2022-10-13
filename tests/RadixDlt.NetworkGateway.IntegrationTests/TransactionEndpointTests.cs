@@ -63,26 +63,28 @@
  */
 
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using System;
 using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
+using TransactionStatus = RadixDlt.CoreApiSdk.Model.TransactionStatus;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 [Collection("Gateway Api integration tests")]
-public class TransactionEndpointTests
+public class TransactionEndpointTests : IClassFixture<TestSetup>
 {
     private readonly ITestOutputHelper _testConsole;
 
     public TransactionEndpointTests(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
-        GenesisData.NetworkDefinition = NetworkDefinition.Get(NetworkEnum.IntegrationTests);
     }
 
     [Fact]
@@ -95,7 +97,7 @@ public class TransactionEndpointTests
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<RecentTransactionsResponse>(callback: ValidateResponse);
+            .RunAndWaitUntilAllTransactionsIngested<RecentTransactionsResponse>(ValidateResponse);
         task.Wait();
 
         // Assert (callback method)
@@ -121,19 +123,19 @@ public class TransactionEndpointTests
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<TransactionPreviewResponse>(callback: ValidateResponse);
+            .RunAndWaitUntilAllTransactionsIngested<TransactionPreviewResponse>(ValidateResponse);
         task.Wait();
 
         // Assert (callback method)
         void ValidateResponse(TransactionPreviewResponse payload, string intentHash)
         {
             _testConsole.WriteLine($"Validating {payload.GetType().Name} response");
-            var coreApiPayload = JsonConvert.DeserializeObject<RadixDlt.CoreApiSdk.Model.TransactionPreviewResponse>(payload.CoreApiResponse.ToString()!);
+            var coreApiPayload = JsonConvert.DeserializeObject<CoreApiSdk.Model.TransactionPreviewResponse>(payload.CoreApiResponse.ToString()!);
 
             // Assert
             coreApiPayload.ShouldNotBeNull();
             coreApiPayload.Receipt.ShouldNotBeNull();
-            coreApiPayload.Receipt.Status.Should().Be(CoreApiSdk.Model.TransactionStatus.Succeeded);
+            coreApiPayload.Receipt.Status.Should().Be(TransactionStatus.Succeeded);
         }
 
         gatewayRunner.SaveStateUpdatesToFile();
@@ -209,7 +211,7 @@ public class TransactionEndpointTests
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(callback: ValidateResponse);
+            .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(ValidateResponse);
         task.Wait();
 
         // Assert (callback method)
@@ -269,7 +271,7 @@ public class TransactionEndpointTests
             .MockTokensTransfer(accountAAddress, accountBAddress, "XRD", 200, tokensTransferTransactionIntentHash);
 
         using var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(callback: ValidateResponse);
+            .RunAndWaitUntilAllTransactionsIngested<TransactionSubmitResponse>(ValidateResponse);
         task.Wait();
 
         // Assert (callback method)
@@ -280,7 +282,11 @@ public class TransactionEndpointTests
 
             if (intentHash == tokensTransferTransactionIntentHash)
             {
-                gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
+                // TODO: alphanet
+                gatewayRunner.GetAccountBalance(accountAAddress).Should().Be(800);
+
+                // if not alphanet, sender pays fees
+                // gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
 
                 gatewayRunner.GetAccountBalance(accountBAddress).Should().Be(1200);
             }

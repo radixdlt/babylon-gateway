@@ -1,5 +1,4 @@
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
 using RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 using RadixDlt.NetworkGateway.IntegrationTests.Data;
@@ -9,19 +8,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
+using EcdsaSecp256k1PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.EcdsaSecp256k1PublicKey;
+using PublicKey = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKey;
+using PublicKeyType = RadixDlt.NetworkGateway.GatewayApiSdk.Model.PublicKeyType;
 using TransactionPreviewRequestFlags = RadixDlt.NetworkGateway.GatewayApiSdk.Model.TransactionPreviewRequestFlags;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests;
 
 public partial class GatewayTestsRunner : IDisposable
 {
-    private readonly ITestOutputHelper _testConsole;
+    private readonly string _databaseName;
 
     private readonly StateUpdatesStore _stateUpdatesStore;
+    private readonly ITestOutputHelper _testConsole;
 
     private readonly TestTransactionStreamStore _transactionStreamStore;
-
-    private readonly string _databaseName;
 
     private TestDataAggregatorFactory? _dataAggregatorFactory;
     private TestGatewayApiFactory? _gatewayApiFactory;
@@ -144,7 +145,8 @@ public partial class GatewayTestsRunner : IDisposable
         var accountUpSubstate = _stateUpdatesStore.StateUpdates.GetLastUpSubstateByEntityAddress(accountAddress);
 
         // TODO: finds only the 1st vault!!!
-        var vaultEntityAddressHex = (accountUpSubstate?.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault).EntityAddressHex;
+        var vaultEntityAddressHex = (accountUpSubstate?.SubstateData.ActualInstance as ComponentStateSubstate)?.OwnedEntities.First(v => v.EntityType == EntityType.Vault)
+            .EntityAddressHex;
 
         var vaultUpSubstate = _stateUpdatesStore.StateUpdates.GetLastUpSubstateByEntityAddressHex(vaultEntityAddressHex);
 
@@ -167,15 +169,14 @@ public partial class GatewayTestsRunner : IDisposable
             .WithDepositToAccountMethod(AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp), "bucket1")
             .Build();
 
-        var signerPublicKeys = new List<GatewayApiSdk.Model.PublicKey>
+        var signerPublicKeys = new List<PublicKey>
         {
-            new(new GatewayApiSdk.Model.EcdsaSecp256k1PublicKey(
-                GatewayApiSdk.Model.PublicKeyType.EcdsaSecp256k1.ToString(), "010000000000000000000000000000001")),
+            new(new EcdsaSecp256k1PublicKey(PublicKeyType.EcdsaSecp256k1.ToString(), "010000000000000000000000000000001")),
         };
 
-        var flags = new TransactionPreviewRequestFlags(unlimitedLoan: false);
+        var flags = new TransactionPreviewRequestFlags(false);
 
-        _transactionStreamStore.QueuePreviewTransaction(manifest, costUnitLimit: 0L, tipPercentage: 0L, nonce: string.Empty, signerPublicKeys: signerPublicKeys, flags: flags);
+        _transactionStreamStore.QueuePreviewTransaction(manifest, 0L, 0L, string.Empty, signerPublicKeys, flags);
 
         return this;
     }
