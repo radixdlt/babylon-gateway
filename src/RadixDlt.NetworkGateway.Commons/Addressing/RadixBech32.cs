@@ -67,119 +67,17 @@
 // ReSharper disable IdentifierTypo
 /* The above is a fix for ReShaper not liking the work "Bech" */
 
-using RadixDlt.NetworkGateway.Commons.StaticHelpers;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace RadixDlt.NetworkGateway.Commons.Addressing;
 
 public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32.Variant Variant);
 
-public sealed record RadixEngineAddressData(RadixEngineAddressType Type, byte[] AddressBytes);
-
-public enum RadixEngineAddressType : byte
-{
-    SYSTEM = 0,
-    NATIVE_TOKEN = 1,
-    HASHED_KEY = 3,
-    PUB_KEY = 4,
-}
-
 public static class RadixBech32
 {
-    public const int HashedKeyTruncatedBytesLength = 26;
-    public const int CompressedPublicKeyBytesLength = 33;
-    public static readonly Regex ValidResourceSymbolRegex = new("^[a-z0-9]{1,35}$");
     private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32M;
 
-    public static string GenerateValidatorAddress(string validatorHrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
-    {
-        return GeneratePublicKeyNonRadixEngineAddress(validatorHrp, compressedPublicKey, variant);
-    }
-
-    public static string GenerateAccountAddress(string accountHrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
-    {
-        return GeneratePublicKeyRadixEngineAddress(accountHrp, compressedPublicKey, variant);
-    }
-
-    public static string GenerateResourceAddress(byte[] compressedAccountPublicKey, string symbol, string resourceHrpSuffix, Bech32.Variant variant = DefaultVariant)
-    {
-        return GenerateHashedKeyRadixEngineAddress(
-            $"{symbol}{resourceHrpSuffix}",
-            symbol,
-            compressedAccountPublicKey,
-            variant
-        );
-    }
-
-    public static string GeneratePublicKeyNonRadixEngineAddress(string hrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
-    {
-        if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
-        {
-            throw new AddressException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}");
-        }
-
-        return EncodeNonRadixEngineAddress(hrp, compressedPublicKey, variant);
-    }
-
-    public static string GeneratePublicKeyRadixEngineAddress(string hrp, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
-    {
-        if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
-        {
-            throw new AddressException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}");
-        }
-
-        return EncodeRadixEngineAddress(RadixEngineAddressType.PUB_KEY, hrp, compressedPublicKey, variant);
-    }
-
-    public static string GenerateHashedKeyRadixEngineAddress(string hrp, string name, byte[] compressedPublicKey, Bech32.Variant variant = DefaultVariant)
-    {
-        if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
-        {
-            throw new AddressException($"Compressed public key must be of length {CompressedPublicKeyBytesLength}");
-        }
-
-        if (name.Length is < 1 or > 35)
-        {
-            throw new AddressException("Hashed key name must be must be between 1 and 35 characters");
-        }
-
-        // Create Hash Source which is compressedPublicKey||utf8NameBytes
-        var nameBytes = Encoding.UTF8.GetBytes(name);
-        var hashSourceLength = compressedPublicKey.Length + nameBytes.Length;
-        Span<byte> hashSource = stackalloc byte[hashSourceLength];
-        compressedPublicKey.CopyTo(hashSource);
-        nameBytes.CopyTo(hashSource[compressedPublicKey.Length..]);
-
-        // Create Sha256(Sha256(compressedPublicKey||utf8NameBytes)) and then extract the last 26 bytes of the hash
-        Span<byte> generatedHash = stackalloc byte[32];
-        HashingHelper.Sha256Twice(hashSource, generatedHash);
-        Span<byte> shortenedHash = generatedHash[(32 - HashedKeyTruncatedBytesLength)..32];
-
-        return EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, hrp, shortenedHash, variant);
-    }
-
-    public static string GenerateXrdAddress(string resourceHrpSuffix, Bech32.Variant variant = DefaultVariant)
-    {
-        return EncodeRadixEngineAddress(RadixEngineAddressType.NATIVE_TOKEN, $"xrd{resourceHrpSuffix}", Array.Empty<byte>(), variant);
-    }
-
-    public static string EncodeRadixEngineAddress(RadixEngineAddressType type, string hrp, ReadOnlySpan<byte> addressData, Bech32.Variant variant = DefaultVariant)
-    {
-        Span<byte> engineAddressBytes = stackalloc byte[1 + addressData.Length];
-        engineAddressBytes[0] = (byte)type;
-        addressData.CopyTo(engineAddressBytes[1..]);
-        return Bech32EncodeRawAddressData(hrp, engineAddressBytes, variant);
-    }
-
-    public static string EncodeNonRadixEngineAddress(string hrp, ReadOnlySpan<byte> addressBytes, Bech32.Variant variant = DefaultVariant)
-    {
-        return Bech32EncodeRawAddressData(hrp, addressBytes, variant);
-    }
-
-    public static string Bech32EncodeRawAddressData(string hrp, ReadOnlySpan<byte> addressData, Bech32.Variant variant = DefaultVariant)
+    public static string Encode(string hrp, ReadOnlySpan<byte> addressData, Bech32.Variant variant = DefaultVariant)
     {
         return Bech32.EncodeFromRawData(hrp, EncodeAddressDataInBase32(addressData), variant);
     }
@@ -194,59 +92,6 @@ public static class RadixBech32
         }
 
         return new RadixBech32Data(hrp, addressData, variant);
-    }
-
-    public static void ValidatePublicKeyLength(byte[] compressedPublicKey)
-    {
-        if (compressedPublicKey.Length != CompressedPublicKeyBytesLength)
-        {
-            throw new AddressException(
-                $"Compressed public key should have byte length {CompressedPublicKeyBytesLength} but this address has length {compressedPublicKey.Length}"
-            );
-        }
-    }
-
-    public static RadixEngineAddressData ExtractRadixEngineAddressData(byte[] addressData)
-    {
-        var typeByte = addressData[0];
-        if (!Enum.IsDefined(typeof(RadixEngineAddressType), typeByte))
-        {
-            throw new AddressException($"The Bech32 address type {typeByte} is not recognised");
-        }
-
-        var addressBytes = addressData.Length > 1 ? addressData[1..] : Array.Empty<byte>();
-
-        var type = (RadixEngineAddressType)typeByte;
-
-        switch (type)
-        {
-            case RadixEngineAddressType.SYSTEM:
-                AssertDataOfLength(type, addressBytes, 0);
-                break;
-            case RadixEngineAddressType.NATIVE_TOKEN:
-                AssertDataOfLength(type, addressBytes, 0);
-                break;
-            case RadixEngineAddressType.HASHED_KEY:
-                AssertDataOfLength(type, addressBytes, HashedKeyTruncatedBytesLength);
-                break;
-            case RadixEngineAddressType.PUB_KEY:
-                AssertDataOfLength(type, addressBytes, CompressedPublicKeyBytesLength);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        return new RadixEngineAddressData(type, addressBytes);
-    }
-
-    private static void AssertDataOfLength(RadixEngineAddressType type, IReadOnlyCollection<byte> addressBytes, int expectedLength)
-    {
-        if (addressBytes.Count != expectedLength)
-        {
-            throw new AddressException(
-                $"Address of RE type {type} should have byte length {expectedLength} but this address has length {addressBytes}"
-            );
-        }
     }
 
     /// <summary>

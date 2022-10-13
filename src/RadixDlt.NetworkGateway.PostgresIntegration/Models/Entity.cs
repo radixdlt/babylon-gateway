@@ -98,16 +98,16 @@ internal abstract class Entity
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
 
-    public string HrpAddress(HrpDefinition hrp)
+    public string BuildHrpAddress(HrpDefinition hrp)
     {
-        return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, SelectHrp(hrp), Address);
+        return RadixBech32.Encode(SelectHrp(hrp), Address);
     }
 
-    public string? HrpGlobalAddress(HrpDefinition hrp)
+    public string? BuildHrpGlobalAddress(HrpDefinition hrp)
     {
         return GlobalAddress == null
             ? null
-            : RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, SelectHrp(hrp), Address);
+            : RadixBech32.Encode(SelectHrp(hrp), Address);
     }
 
     private string SelectHrp(HrpDefinition hrp)

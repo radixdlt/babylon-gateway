@@ -289,7 +289,7 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         return new LookupResult(MapToGatewayAccountTransaction(ledgerTransaction), new Gateway.TransactionDetails(
             rawHex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
-            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.HrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
+            referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
             messageHex: ledgerTransaction.Message?.ToHex()
         ));
     }

@@ -108,6 +108,8 @@ public static class Bech32
         Bech32M,
     }
 
+    public sealed record Bech32RawData(string Hrp, byte[] RawBase32Data, Variant Variant);
+
     // The Bech32 character set for encoding
     private const string Charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
@@ -171,8 +173,6 @@ public static class Bech32
 
         return result.ToArray();
     }
-
-    public sealed record Bech32RawData(string Hrp, byte[] RawBase32Data, Variant Variant);
 
     public static string EncodeFromRawData(string hrp, ReadOnlySpan<byte> encodedBase32Data, Variant variant)
     {

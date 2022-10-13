@@ -81,7 +81,7 @@ public class RadixBech32Tests
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeAndReencodeIsIdentity(string encodedString)
     {
         var decodedData = RadixBech32.Decode(encodedString);
-        var reEncodedString = RadixBech32.Bech32EncodeRawAddressData(decodedData.Hrp, decodedData.Data, decodedData.Variant);
+        var reEncodedString = RadixBech32.Encode(decodedData.Hrp, decodedData.Data, decodedData.Variant);
 
         reEncodedString.Should().Be(encodedString.ToLowerInvariant());
     }

@@ -142,7 +142,7 @@ INNER JOIN LATERAL (
         foreach (var dbResource in dbResources)
         {
             var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
-            var ra = RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, _networkConfigurationProvider.GetHrpDefinition().Resource, rga);
+            var ra = RadixBech32.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
             if (dbResource is EntityFungibleResourceHistory efrh)
             {
@@ -161,7 +161,7 @@ INNER JOIN LATERAL (
         var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibles.Count, null, "TBD (currently everything is returned)", fungibles);
         var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibles.Count, null, "TBD (currently everything is returned)", nonFungibles);
 
-        return new EntityResourcesResponse(entity.HrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
+        return new EntityResourcesResponse(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
     }
 
     public async Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
@@ -224,6 +224,6 @@ INNER JOIN LATERAL (
             metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
 
-        return new EntityDetailsResponse(entity.HrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
+        return new EntityDetailsResponse(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 }
