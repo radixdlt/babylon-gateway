@@ -86,23 +86,23 @@ public static class DataAggregatorBuilderExtensions
     public static DataAggregatorBuilder AddPrometheusObserverMetrics(this DataAggregatorBuilder builder)
     {
         builder.Services
-            .AddSingleton<MetricsObserver>()
-            .AddSingleton<IGlobalWorkerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INodeWorkerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<ILedgerConfirmationServiceObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<IMempoolPrunerServiceObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<IMempoolResubmissionServiceObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<IAggregatorHealthCheckObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<ISystemStatusServiceObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INodeInitializerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<IMempoolTrackerServiceObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INodeTransactionLogWorkerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INodeMempoolTransactionIdsReaderWorkerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INodeMempoolFullTransactionReaderWorkerObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<IRawTransactionWriterObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INetworkConfigurationReaderObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<INetworkStatusReaderObserver>(provider => provider.GetRequiredService<MetricsObserver>())
-            .AddSingleton<ITransactionLogReaderObserver>(provider => provider.GetRequiredService<MetricsObserver>());
+            .AddSingleton<DataAggregatorMetricsObserver>()
+            .AddSingleton<IGlobalWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INodeWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<ILedgerConfirmationServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<IMempoolPrunerServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<IMempoolResubmissionServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<IAggregatorHealthCheckObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<ISystemStatusServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INodeInitializerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<IMempoolTrackerServiceObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INodeTransactionLogWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INodeMempoolTransactionIdsReaderWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INodeMempoolFullTransactionReaderWorkerObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<IRawTransactionWriterObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INetworkConfigurationReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<INetworkStatusReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
+            .AddSingleton<ITransactionLogReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>());
 
         return builder;
     }

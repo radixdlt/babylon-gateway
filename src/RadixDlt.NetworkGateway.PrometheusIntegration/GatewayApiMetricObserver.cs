@@ -78,7 +78,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
-internal class MetricObserver :
+internal class GatewayApiMetricObserver :
     IExceptionObserver,
     ICoreNodeHealthCheckerObserver,
     ISubmissionServiceObserver,
