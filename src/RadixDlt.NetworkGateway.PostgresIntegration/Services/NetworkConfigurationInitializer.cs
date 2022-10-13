@@ -62,63 +62,52 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RadixDlt.NetworkGateway.GatewayApi;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Commons.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-public static class GatewayApiBuilderExtensions
+internal class NetworkConfigurationInitializer : BackgroundService
 {
-    public static GatewayApiBuilder AddPostgresPersistence(this GatewayApiBuilder builder)
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _logger;
+
+    public NetworkConfigurationInitializer(IServiceProvider serviceProvider, ILogger<NetworkConfigurationInitializer> logger)
     {
-        return builder
-            .AddPostgresPersistenceCore()
-            .AddPostgresPersistenceInitializers()
-            .AddPostgresPersistenceHealthChecks();
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
-    public static GatewayApiBuilder AddPostgresPersistenceCore(this GatewayApiBuilder builder)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        builder.Services
-            .AddScoped<ILedgerStateQuerier, LedgerStateQuerier>()
-            .AddScoped<ITransactionQuerier, TransactionQuerier>()
-            .AddScoped<IEntityStateQuerier, EntityStateQuerier>()
-            .AddScoped<ISubmissionTrackingService, SubmissionTrackingService>()
-            .AddScoped<ICapturedConfigProvider, CapturedConfigProvider>();
+        using var scope = _serviceProvider.CreateScope();
 
-        builder.Services
-            .AddDbContext<ReadOnlyDbContext>((serviceProvider, options) =>
+        var networkConfigurationProvider = scope.ServiceProvider.GetRequiredService<INetworkConfigurationProvider>();
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
             {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadOnlyConnectionStringName));
-            })
-            .AddDbContext<ReadWriteDbContext>((serviceProvider, options) =>
+                await networkConfigurationProvider.Initialize(scope.ServiceProvider.GetRequiredService<ICapturedConfigProvider>(), stoppingToken);
+                break;
+            }
+            catch (Exception exception)
             {
-                // https://www.npgsql.org/efcore/index.html
-                options.UseNpgsql(serviceProvider.GetRequiredService<IConfiguration>().GetConnectionString(PostgresIntegrationConstants.Configuration.ReadWriteConnectionStringName));
-            });
+                if (exception.ShouldBeConsideredAppFatal())
+                {
+                    throw;
+                }
 
-        return builder;
-    }
+                _logger.LogWarning(exception, "Error fetching network configuration - perhaps the data aggregator hasn't committed yet? Will try again in 2 seconds");
 
-    public static GatewayApiBuilder AddPostgresPersistenceInitializers(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHostedService<NetworkConfigurationInitializer>();
-
-        return builder;
-    }
-
-    public static GatewayApiBuilder AddPostgresPersistenceHealthChecks(this GatewayApiBuilder builder)
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>()
-            .AddDbContextCheck<ReadWriteDbContext>();
-
-        return builder;
+                await Task.Delay(2000, stoppingToken);
+            }
+        }
     }
 }

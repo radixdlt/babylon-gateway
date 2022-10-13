@@ -76,7 +76,7 @@ using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class TransactionQuerier : ITransactionQuerier
 {
