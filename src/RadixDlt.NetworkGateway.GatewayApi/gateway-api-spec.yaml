@@ -372,15 +372,12 @@ components:
       type: object
       required:
         - resource_type
-        - is_fungible
         - total_supply_attos
         - total_minted_attos
         - total_burnt_attos
       properties:
         resource_type:
           type: string
-        is_fungible:
-          type: boolean
         total_supply_attos:
           type: string
         total_minted_attos:
@@ -391,13 +388,10 @@ components:
       type: object
       required:
         - resource_type
-        - is_fungible
         - tbd
       properties:
         resource_type:
           type: string
-        is_fungible:
-          type: boolean
         tbd:
           type: string
     RecentTransactionsRequest:

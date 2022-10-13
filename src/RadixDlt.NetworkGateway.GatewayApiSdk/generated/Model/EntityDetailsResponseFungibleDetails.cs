@@ -105,11 +105,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
-        /// <param name="isFungible">isFungible (required).</param>
         /// <param name="totalSupplyAttos">totalSupplyAttos (required).</param>
         /// <param name="totalMintedAttos">totalMintedAttos (required).</param>
         /// <param name="totalBurntAttos">totalBurntAttos (required).</param>
-        public EntityDetailsResponseFungibleDetails(string resourceType = default(string), bool isFungible = default(bool), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
+        public EntityDetailsResponseFungibleDetails(string resourceType = default(string), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
         {
             // to ensure "resourceType" is required (not null)
             if (resourceType == null)
@@ -117,7 +116,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("resourceType is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
             }
             this.ResourceType = resourceType;
-            this.IsFungible = isFungible;
             // to ensure "totalSupplyAttos" is required (not null)
             if (totalSupplyAttos == null)
             {
@@ -143,12 +141,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
         public string ResourceType { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsFungible
-        /// </summary>
-        [DataMember(Name = "is_fungible", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsFungible { get; set; }
 
         /// <summary>
         /// Gets or Sets TotalSupplyAttos
@@ -177,7 +169,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseFungibleDetails {\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
-            sb.Append("  IsFungible: ").Append(IsFungible).Append("\n");
             sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
             sb.Append("  TotalMintedAttos: ").Append(TotalMintedAttos).Append("\n");
             sb.Append("  TotalBurntAttos: ").Append(TotalBurntAttos).Append("\n");
@@ -222,10 +213,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ResourceType.Equals(input.ResourceType))
                 ) && 
                 (
-                    this.IsFungible == input.IsFungible ||
-                    this.IsFungible.Equals(input.IsFungible)
-                ) && 
-                (
                     this.TotalSupplyAttos == input.TotalSupplyAttos ||
                     (this.TotalSupplyAttos != null &&
                     this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
@@ -255,7 +242,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsFungible.GetHashCode();
                 if (this.TotalSupplyAttos != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();

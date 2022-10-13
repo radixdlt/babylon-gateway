@@ -193,14 +193,12 @@ INNER JOIN LATERAL (
             {
                 details = new EntityDetailsResponseDetails(new EntityDetailsResponseNonFungibleDetails(
                     resourceType: ResourceType.NonFungible.ToString(),
-                    isFungible: false,
                     tbd: "unknown"));
             }
             else
             {
                 details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(
                     resourceType: ResourceType.Fungible.ToString(),
-                    isFungible: true,
                     totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
                     totalMintedAttos: supplyHistory.TotalMinted.ToString(),
                     totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
