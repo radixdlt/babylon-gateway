@@ -64,7 +64,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;

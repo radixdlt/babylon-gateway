@@ -65,7 +65,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;

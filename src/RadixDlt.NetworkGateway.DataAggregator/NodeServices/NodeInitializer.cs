@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;

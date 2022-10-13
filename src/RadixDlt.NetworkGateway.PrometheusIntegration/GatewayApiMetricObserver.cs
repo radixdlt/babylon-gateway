@@ -64,8 +64,8 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Prometheus;
-using RadixDlt.NetworkGateway.Commons.Exceptions;
-using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;

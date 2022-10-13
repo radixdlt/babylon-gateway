@@ -64,10 +64,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.Commons.Model;
-using RadixDlt.NetworkGateway.Commons.Utilities;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;

@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Net.Http;

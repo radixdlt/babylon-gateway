@@ -64,9 +64,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.Commons.Model;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;

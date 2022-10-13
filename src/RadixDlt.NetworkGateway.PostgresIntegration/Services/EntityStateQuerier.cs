@@ -63,8 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;

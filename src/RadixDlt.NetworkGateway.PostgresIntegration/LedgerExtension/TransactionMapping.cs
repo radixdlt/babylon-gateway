@@ -63,8 +63,8 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Model;
-using RadixDlt.NetworkGateway.Commons.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;

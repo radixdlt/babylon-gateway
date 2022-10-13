@@ -64,8 +64,8 @@
 
 using Prometheus;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Exceptions;
-using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;

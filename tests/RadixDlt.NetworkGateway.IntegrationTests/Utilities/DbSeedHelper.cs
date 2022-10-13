@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Model;
-using RadixDlt.NetworkGateway.Commons.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System.Collections.Generic;

@@ -63,7 +63,7 @@
  */
 
 using FluentAssertions;
-using RadixDlt.NetworkGateway.Commons.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using System.Linq;
 using System.Numerics;

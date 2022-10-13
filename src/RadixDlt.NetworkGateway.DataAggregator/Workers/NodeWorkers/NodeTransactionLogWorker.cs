@@ -65,10 +65,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.Commons.Utilities;
-using RadixDlt.NetworkGateway.Commons.Workers;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Utilities;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;

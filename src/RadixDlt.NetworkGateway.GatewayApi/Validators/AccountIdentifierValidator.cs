@@ -63,7 +63,7 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;

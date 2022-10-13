@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Model;
-using RadixDlt.NetworkGateway.Commons.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

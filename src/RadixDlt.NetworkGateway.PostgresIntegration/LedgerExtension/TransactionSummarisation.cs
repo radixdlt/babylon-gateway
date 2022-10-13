@@ -63,7 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Linq;

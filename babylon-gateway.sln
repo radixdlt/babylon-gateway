@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.DataAggregator", "src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj", "{6C516526-0AB0-41ED-8DA0-8CBC7751CBF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Commons", "src\RadixDlt.NetworkGateway.Commons\RadixDlt.NetworkGateway.Commons.csproj", "{A193C01E-9DF5-4437-AE45-5018EBF37EFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadixDlt.NetworkGateway.Abstractions", "src\RadixDlt.NetworkGateway.Abstractions\RadixDlt.NetworkGateway.Abstractions.csproj", "{A193C01E-9DF5-4437-AE45-5018EBF37EFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseMigrations", "samples\DatabaseMigrations\DatabaseMigrations.csproj", "{8FA82D83-7886-4B1D-A7F1-5883165EF156}"
 EndProject

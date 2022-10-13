@@ -64,7 +64,7 @@
 
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Commons.Numerics.TokenAmount;
+using TokenAmount = RadixDlt.NetworkGateway.Abstractions.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
