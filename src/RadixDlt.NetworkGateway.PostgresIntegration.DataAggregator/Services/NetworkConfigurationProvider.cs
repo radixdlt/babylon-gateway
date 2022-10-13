@@ -182,7 +182,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             },
             NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
             {
-                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
+                XrdAddress = networkConfiguration.WellKnownAddresses.Xrd,
             },
         };
     }

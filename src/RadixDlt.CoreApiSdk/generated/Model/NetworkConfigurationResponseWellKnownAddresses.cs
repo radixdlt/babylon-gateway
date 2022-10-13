@@ -91,76 +91,87 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NetworkConfigurationResponse
+    /// Key addresses for this network.
     /// </summary>
-    [DataContract(Name = "NetworkConfigurationResponse")]
-    public partial class NetworkConfigurationResponse : IEquatable<NetworkConfigurationResponse>, IValidatableObject
+    [DataContract(Name = "NetworkConfigurationResponse_well_known_addresses")]
+    public partial class NetworkConfigurationResponseWellKnownAddresses : IEquatable<NetworkConfigurationResponseWellKnownAddresses>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkConfigurationResponse" /> class.
+        /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NetworkConfigurationResponse() { }
+        protected NetworkConfigurationResponseWellKnownAddresses() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkConfigurationResponse" /> class.
+        /// Initializes a new instance of the <see cref="NetworkConfigurationResponseWellKnownAddresses" /> class.
         /// </summary>
-        /// <param name="version">version (required).</param>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
-        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), string networkHrpSuffix = default(string), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
+        /// <param name="accountPackage">accountPackage (required).</param>
+        /// <param name="faucet">faucet (required).</param>
+        /// <param name="ecdsaSecp256k1">ecdsaSecp256k1 (required).</param>
+        /// <param name="eddsaEd25519">eddsaEd25519 (required).</param>
+        /// <param name="xrd">xrd (required).</param>
+        public NetworkConfigurationResponseWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
         {
-            // to ensure "version" is required (not null)
-            if (version == null)
+            // to ensure "accountPackage" is required (not null)
+            if (accountPackage == null)
             {
-                throw new ArgumentNullException("version is a required property for NetworkConfigurationResponse and cannot be null");
+                throw new ArgumentNullException("accountPackage is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this._Version = version;
-            // to ensure "network" is required (not null)
-            if (network == null)
+            this.AccountPackage = accountPackage;
+            // to ensure "faucet" is required (not null)
+            if (faucet == null)
             {
-                throw new ArgumentNullException("network is a required property for NetworkConfigurationResponse and cannot be null");
+                throw new ArgumentNullException("faucet is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.Network = network;
-            // to ensure "networkHrpSuffix" is required (not null)
-            if (networkHrpSuffix == null)
+            this.Faucet = faucet;
+            // to ensure "ecdsaSecp256k1" is required (not null)
+            if (ecdsaSecp256k1 == null)
             {
-                throw new ArgumentNullException("networkHrpSuffix is a required property for NetworkConfigurationResponse and cannot be null");
+                throw new ArgumentNullException("ecdsaSecp256k1 is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.NetworkHrpSuffix = networkHrpSuffix;
-            // to ensure "wellKnownAddresses" is required (not null)
-            if (wellKnownAddresses == null)
+            this.EcdsaSecp256k1 = ecdsaSecp256k1;
+            // to ensure "eddsaEd25519" is required (not null)
+            if (eddsaEd25519 == null)
             {
-                throw new ArgumentNullException("wellKnownAddresses is a required property for NetworkConfigurationResponse and cannot be null");
+                throw new ArgumentNullException("eddsaEd25519 is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
             }
-            this.WellKnownAddresses = wellKnownAddresses;
+            this.EddsaEd25519 = eddsaEd25519;
+            // to ensure "xrd" is required (not null)
+            if (xrd == null)
+            {
+                throw new ArgumentNullException("xrd is a required property for NetworkConfigurationResponseWellKnownAddresses and cannot be null");
+            }
+            this.Xrd = xrd;
         }
 
         /// <summary>
-        /// Gets or Sets _Version
+        /// Gets or Sets AccountPackage
         /// </summary>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkConfigurationResponseVersion _Version { get; set; }
+        [DataMember(Name = "account_package", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountPackage { get; set; }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets Faucet
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        [DataMember(Name = "faucet", IsRequired = true, EmitDefaultValue = true)]
+        public string Faucet { get; set; }
 
         /// <summary>
-        /// The network suffix used for Bech32m HRPs used for addressing.
+        /// Gets or Sets EcdsaSecp256k1
         /// </summary>
-        /// <value>The network suffix used for Bech32m HRPs used for addressing.</value>
-        [DataMember(Name = "network_hrp_suffix", IsRequired = true, EmitDefaultValue = true)]
-        public string NetworkHrpSuffix { get; set; }
+        [DataMember(Name = "ecdsa_secp256k1", IsRequired = true, EmitDefaultValue = true)]
+        public string EcdsaSecp256k1 { get; set; }
 
         /// <summary>
-        /// Gets or Sets WellKnownAddresses
+        /// Gets or Sets EddsaEd25519
         /// </summary>
-        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkConfigurationResponseWellKnownAddresses WellKnownAddresses { get; set; }
+        [DataMember(Name = "eddsa_ed25519", IsRequired = true, EmitDefaultValue = true)]
+        public string EddsaEd25519 { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Xrd
+        /// </summary>
+        [DataMember(Name = "xrd", IsRequired = true, EmitDefaultValue = true)]
+        public string Xrd { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -169,11 +180,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NetworkConfigurationResponse {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NetworkHrpSuffix: ").Append(NetworkHrpSuffix).Append("\n");
-            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
+            sb.Append("class NetworkConfigurationResponseWellKnownAddresses {\n");
+            sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
+            sb.Append("  Faucet: ").Append(Faucet).Append("\n");
+            sb.Append("  EcdsaSecp256k1: ").Append(EcdsaSecp256k1).Append("\n");
+            sb.Append("  EddsaEd25519: ").Append(EddsaEd25519).Append("\n");
+            sb.Append("  Xrd: ").Append(Xrd).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,15 +206,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NetworkConfigurationResponse);
+            return this.Equals(input as NetworkConfigurationResponseWellKnownAddresses);
         }
 
         /// <summary>
-        /// Returns true if NetworkConfigurationResponse instances are equal
+        /// Returns true if NetworkConfigurationResponseWellKnownAddresses instances are equal
         /// </summary>
-        /// <param name="input">Instance of NetworkConfigurationResponse to be compared</param>
+        /// <param name="input">Instance of NetworkConfigurationResponseWellKnownAddresses to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NetworkConfigurationResponse input)
+        public bool Equals(NetworkConfigurationResponseWellKnownAddresses input)
         {
             if (input == null)
             {
@@ -210,24 +222,29 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    (this._Version != null &&
-                    this._Version.Equals(input._Version))
+                    this.AccountPackage == input.AccountPackage ||
+                    (this.AccountPackage != null &&
+                    this.AccountPackage.Equals(input.AccountPackage))
                 ) && 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.Faucet == input.Faucet ||
+                    (this.Faucet != null &&
+                    this.Faucet.Equals(input.Faucet))
                 ) && 
                 (
-                    this.NetworkHrpSuffix == input.NetworkHrpSuffix ||
-                    (this.NetworkHrpSuffix != null &&
-                    this.NetworkHrpSuffix.Equals(input.NetworkHrpSuffix))
+                    this.EcdsaSecp256k1 == input.EcdsaSecp256k1 ||
+                    (this.EcdsaSecp256k1 != null &&
+                    this.EcdsaSecp256k1.Equals(input.EcdsaSecp256k1))
                 ) && 
                 (
-                    this.WellKnownAddresses == input.WellKnownAddresses ||
-                    (this.WellKnownAddresses != null &&
-                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
+                    this.EddsaEd25519 == input.EddsaEd25519 ||
+                    (this.EddsaEd25519 != null &&
+                    this.EddsaEd25519.Equals(input.EddsaEd25519))
+                ) && 
+                (
+                    this.Xrd == input.Xrd ||
+                    (this.Xrd != null &&
+                    this.Xrd.Equals(input.Xrd))
                 );
         }
 
@@ -240,21 +257,25 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this._Version != null)
+                if (this.AccountPackage != null)
                 {
-                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccountPackage.GetHashCode();
                 }
-                if (this.Network != null)
+                if (this.Faucet != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
                 }
-                if (this.NetworkHrpSuffix != null)
+                if (this.EcdsaSecp256k1 != null)
                 {
-                    hashCode = (hashCode * 59) + this.NetworkHrpSuffix.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EcdsaSecp256k1.GetHashCode();
                 }
-                if (this.WellKnownAddresses != null)
+                if (this.EddsaEd25519 != null)
                 {
-                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EddsaEd25519.GetHashCode();
+                }
+                if (this.Xrd != null)
+                {
+                    hashCode = (hashCode * 59) + this.Xrd.GetHashCode();
                 }
                 return hashCode;
             }
