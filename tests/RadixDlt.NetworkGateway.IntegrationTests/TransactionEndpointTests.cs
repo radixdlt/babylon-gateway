@@ -251,7 +251,7 @@ public class TransactionEndpointTests : IClassFixture<TestSetup>
     // }
 
     [Fact]
-    public void TokensTransferFromAccountAtoBShouldSucceed()
+    public void TransferOf200TokensFromAccountAtoBShouldSucceed()
     {
         // Arrange
         var accountAAddress = AddressHelper.GenerateRandomAddress(GenesisData.NetworkDefinition.AccountComponentHrp);
@@ -282,11 +282,17 @@ public class TransactionEndpointTests : IClassFixture<TestSetup>
 
             if (intentHash == tokensTransferTransactionIntentHash)
             {
-                // TODO: alphanet
-                gatewayRunner.GetAccountBalance(accountAAddress).Should().Be(800);
-
-                // if not alphanet, sender pays fees
-                // gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
+                if (GenesisData.NetworkDefinition.Id == (int)NetworkEnum.Adapanet)
+                {
+                    gatewayRunner.GetAccountBalance(accountAAddress).Should().Be(800);
+                }
+                else
+                {
+                    {
+                        // if not alphanet, sender pays fees
+                        gatewayRunner.GetAccountBalance(accountAAddress).Should().BeApproximately(795, 5, "paid network fees");
+                    }
+                }
 
                 gatewayRunner.GetAccountBalance(accountBAddress).Should().Be(1200);
             }

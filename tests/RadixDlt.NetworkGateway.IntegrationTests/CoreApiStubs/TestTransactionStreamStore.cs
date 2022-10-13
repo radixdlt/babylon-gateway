@@ -512,11 +512,11 @@ public class TestTransactionStreamStore
 
             case InstructionOp.WithdrawByAmount:
                 {
-                    // TODO: if (network == "alphanet")
-                    // {
-                    // faucet vault's up and down substates (faucet pays the fees on aplhanet)
-                    WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, GenesisData.SysFaucetComponentAddress, 0, out newFaucetBalanceAttos);
-                    // }
+                    if (GenesisData.NetworkDefinition.Id == (int)NetworkEnum.Adapanet)
+                    {
+                        // faucet vault's up and down substates (faucet pays the fees on aplhanet)
+                        WithdrawByAmount(ref transactionStateUpdatesList, tempAllStateUpdates, feeSummary, GenesisData.SysFaucetComponentAddress, 0, out newFaucetBalanceAttos);
+                    }
 
                     tokensAmountToTransferAttos = TokenAttosConverter.Tokens2Attos(instruction.Parameters[0].Value);
 

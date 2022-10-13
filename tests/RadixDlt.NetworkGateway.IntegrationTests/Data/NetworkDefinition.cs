@@ -5,10 +5,10 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Data;
 
 public enum NetworkEnum
 {
-    Localnet = 0,
-    IntegrationTests = 1,
-    Enkinet = 2,
-    Adapanet = 3, // Babylon Alphanet
+    Adapanet = 10, // Babylon Alphanet
+    Enkinet = 33,
+    Localnet = 240,
+    IntegrationTests = 241,
 }
 
 public class NetworkDefinition
@@ -78,6 +78,7 @@ public class NetworkDefinition
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Network Definition:\n");
+        sb.Append("  Id: ").Append(Id).Append("\n");
         sb.Append("  LogicalName: ").Append(LogicalName).Append("\n");
         sb.Append("  HrpSuffix: ").Append(HrpSuffix).Append("\n");
         // sb.Append("  PackageHrp: ").Append(PackageHrp).Append("\n");
