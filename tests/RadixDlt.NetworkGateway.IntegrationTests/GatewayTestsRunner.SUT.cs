@@ -74,7 +74,7 @@ public partial class GatewayTestsRunner
             _transactionStreamStore,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
-        File.WriteAllText(_databaseName + ".log", statesDump);
+        File.WriteAllText(_databaseName + ".json", statesDump);
     }
 
     private async Task<HttpResponseMessage> ActAsync(string? requestUri, HttpContent? content)
