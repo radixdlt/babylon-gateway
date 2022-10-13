@@ -1,4 +1,4 @@
-/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,48 +62,14 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System.Reflection;
-using Xunit;
-using Xunit.Abstractions;
+using System;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-[Collection("Gateway Api integration tests")]
-public class GatewayEndpointTests : IClassFixture<TestSetup>
+public class InvalidCoreApiResponseException : Exception
 {
-    private readonly ITestOutputHelper _testConsole;
-
-    public GatewayEndpointTests(ITestOutputHelper testConsole)
+    public InvalidCoreApiResponseException(string message)
+        : base(message)
     {
-        _testConsole = testConsole;
-    }
-
-    [Fact]
-    public void TestGatewayApiVersions()
-    {
-        // Arrange
-        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
-            .MockGenesis()
-            .MockGatewayVersions();
-
-        // Act
-        var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(ValidateResponse);
-        task.Wait();
-
-        // Assert (callback method)
-        void ValidateResponse(GatewayResponse payload, string intentHash)
-        {
-            payload.GatewayApi.ShouldNotBeNull();
-
-            payload.GatewayApi._Version.ShouldNotBeNull();
-            payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.RequestsAndResponses.GatewayApiVersion);
-
-            payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
-            payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.RequestsAndResponses.GatewayOpenApiSchemaVersion);
-        }
     }
 }

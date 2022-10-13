@@ -63,10 +63,13 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Builders;
+using RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
@@ -230,9 +233,10 @@ public static class StateUpdatesExtensions
         var vaultResourceAmount = vaultSubstate.ResourceAmount.GetFungibleResourceAmount();
         var vaultResourceAmountAttos = TokenAttosConverter.ParseAttosFromString(vaultResourceAmount.AmountAttos);
 
-        // withdraw 'attosToWithdraw' and fees
         var feesAttos = feeSummary.CostUnitConsumed
                         * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
+
+        ThrowExceptionIfNotEnoughTokensToTransfer(vaultResourceAmountAttos, attosToWithdraw, feesAttos);
 
         newVaultBalanceAttos = (vaultResourceAmountAttos - attosToWithdraw - feesAttos).ToString();
 
@@ -251,5 +255,31 @@ public static class StateUpdatesExtensions
             ).Build();
 
         return vault;
+    }
+
+    private static void ThrowExceptionIfNotEnoughTokensToTransfer(BigInteger currentBalanceAttos, BigInteger attosToWithdraw, BigInteger feesAttos)
+    {
+        var totalAttosToWithdraw = attosToWithdraw + feesAttos;
+
+        if (totalAttosToWithdraw < 0)
+        {
+            throw new InvalidCoreApiResponseException($"The requested amount to transfer {ValidationException.AsStringWithUnits(new TokenAmount(totalAttosToWithdraw.ToString(), new TokenIdentifier("xrd")))} is invalid.");
+        }
+        else if (feesAttos > currentBalanceAttos)
+        {
+            throw new NotEnoughNativeTokensForFeeException(
+                new TokenAmount(feesAttos.ToString(), new TokenIdentifier("xrd")),
+                new TokenAmount(currentBalanceAttos.ToString(), new TokenIdentifier("xrd")));
+        }
+        else if (totalAttosToWithdraw == 0)
+        {
+            throw new InvalidCoreApiResponseException($"The requested amount to transfer {ValidationException.AsStringWithUnits(new TokenAmount(totalAttosToWithdraw.ToString(), new TokenIdentifier("xrd")))} is invalid.");
+        }
+        else if (totalAttosToWithdraw > currentBalanceAttos)
+        {
+            throw new NotEnoughTokensForTransferException(
+                new TokenAmount(totalAttosToWithdraw.ToString(), new TokenIdentifier("xrd")),
+                new TokenAmount(currentBalanceAttos.ToString(), new TokenIdentifier("xrd")));
+        }
     }
 }

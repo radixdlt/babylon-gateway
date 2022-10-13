@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,86 +62,50 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Numerics;
+using System.Reflection;
+using Xunit;
 using Xunit.Abstractions;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public class StateUpdatesStore
+[Collection("Gateway Api integration tests")]
+public class GatewayEndpointTests : IClassFixture<TestSetup>
 {
-    private readonly List<StateUpdates> _stateUpdatesList = new();
     private readonly ITestOutputHelper _testConsole;
 
-    public StateUpdatesStore(ITestOutputHelper testConsole)
+    public GatewayEndpointTests(ITestOutputHelper testConsole)
     {
         _testConsole = testConsole;
     }
 
-    public StateUpdates StateUpdates
+    [Fact]
+    public void TestGatewayApiVersions()
     {
-        get => _stateUpdatesList.Combine();
+        // Arrange
+        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .MockGatewayVersions();
 
-        set
+        // Act
+        var task = gatewayRunner
+            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(ValidateResponse);
+        task.Wait();
+
+        // Assert (callback method)
+        void ValidateResponse(GatewayResponse? payload, string? intentHash, Exception? exception)
         {
-            _stateUpdatesList.Clear();
-            _stateUpdatesList.Add(value);
+            payload.ShouldNotBeNull();
+            payload.GatewayApi.ShouldNotBeNull();
+
+            payload.GatewayApi._Version.ShouldNotBeNull();
+            payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.RequestsAndResponses.GatewayApiVersion);
+
+            payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
+            payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.RequestsAndResponses.GatewayOpenApiSchemaVersion);
         }
-    }
-
-    public string ToJson()
-    {
-        return _stateUpdatesList.ToJson();
-    }
-
-    public void AddStateUpdates(StateUpdates stateUpdates)
-    {
-        _stateUpdatesList.Add(stateUpdates);
-    }
-
-    public FeeSummary LockFee()
-    {
-        // calculate fees
-        // state updates when complete
-
-        var feeSummary = CalculateFeeSummary();
-
-        var paidFeeAttos = feeSummary.CostUnitConsumed * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
-        var feeAmount = TokenAttosConverter.Attos2Tokens(paidFeeAttos);
-
-        _testConsole.WriteLine($"Locking fee: {feeAmount} xrd");
-
-        return feeSummary;
-    }
-
-    public FeeSummary CalculateFeeSummary()
-    {
-        var rnd = new Random(1);
-
-        var tipPercentage = rnd.Next(0, 5); // percents
-        var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);
-
-        var xrdBurnedAttos = costUnitConsumed * TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos);
-
-        var xrdTippedAttos = costUnitConsumed *
-            TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100;
-
-        var feeSummary = new FeeSummary(
-            true,
-            GenesisData.GenesisFeeSummary.CostUnitLimit,
-            (long)costUnitConsumed,
-            GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
-            tipPercentage,
-            xrdBurnedAttos.ToString(),
-            xrdTippedAttos.ToString()
-        );
-
-        _testConsole.WriteLine($"Calculated fee summary:\n{feeSummary}");
-
-        return feeSummary;
     }
 }

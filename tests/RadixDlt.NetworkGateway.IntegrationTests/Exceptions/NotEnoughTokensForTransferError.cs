@@ -62,86 +62,104 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using Xunit.Abstractions;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+using System.Text;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public class StateUpdatesStore
+public class NotEnoughTokensForTransferError : GatewayError, IEquatable<NotEnoughTokensForTransferError>, IValidatableObject
 {
-    private readonly List<StateUpdates> _stateUpdatesList = new();
-    private readonly ITestOutputHelper _testConsole;
+    [DataMember(Name = "requested_amount", IsRequired = true, EmitDefaultValue = true)]
+    public TokenAmount? RequestedAmount { get; set; } = new TokenAmount("0", new TokenIdentifier("XRD"));
 
-    public StateUpdatesStore(ITestOutputHelper testConsole)
+    [DataMember(Name = "available_amount", IsRequired = true, EmitDefaultValue = true)]
+    public TokenAmount AvailableAmount { get; set; } = new TokenAmount("0", new TokenIdentifier("XRD"));
+
+    [JsonConstructor]
+    public NotEnoughTokensForTransferError()
     {
-        _testConsole = testConsole;
     }
 
-    public StateUpdates StateUpdates
+    public NotEnoughTokensForTransferError(TokenAmount? requestedAmount = null, TokenAmount? availableAmount = null, string type = "NotEnoughTokensForTransferError")
+      : base(type)
     {
-        get => _stateUpdatesList.Combine();
-
-        set
+        if (requestedAmount == null)
         {
-            _stateUpdatesList.Clear();
-            _stateUpdatesList.Add(value);
+            throw new ArgumentNullException("requestedAmount is a required property for NotEnoughTokensForTransferError and cannot be null");
         }
+
+        RequestedAmount = requestedAmount;
+        if (availableAmount == null)
+        {
+            throw new ArgumentNullException("availableAmount is a required property for NotEnoughTokensForTransferError and cannot be null");
+        }
+
+        AvailableAmount = availableAmount;
     }
 
-    public string ToJson()
+    public override string ToString()
     {
-        return _stateUpdatesList.ToJson();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.Append("class NotEnoughTokensForTransferError {\n");
+        stringBuilder.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+        stringBuilder.Append("  RequestedAmount: ").Append(RequestedAmount).Append("\n");
+        stringBuilder.Append("  AvailableAmount: ").Append(AvailableAmount).Append("\n");
+        stringBuilder.Append("}\n");
+
+        return stringBuilder.ToString();
     }
 
-    public void AddStateUpdates(StateUpdates stateUpdates)
+    public override string ToJson()
     {
-        _stateUpdatesList.Add(stateUpdates);
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
     }
 
-    public FeeSummary LockFee()
+    public override bool Equals(object input)
     {
-        // calculate fees
-        // state updates when complete
-
-        var feeSummary = CalculateFeeSummary();
-
-        var paidFeeAttos = feeSummary.CostUnitConsumed * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
-        var feeAmount = TokenAttosConverter.Attos2Tokens(paidFeeAttos);
-
-        _testConsole.WriteLine($"Locking fee: {feeAmount} xrd");
-
-        return feeSummary;
+        return Equals(input as NotEnoughTokensForTransferError);
     }
 
-    public FeeSummary CalculateFeeSummary()
+    public bool Equals(NotEnoughTokensForTransferError? input)
     {
-        var rnd = new Random(1);
+        if (input == null)
+        {
+            return false;
+        }
 
-        var tipPercentage = rnd.Next(0, 5); // percents
-        var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);
+        return Equals((GatewayError)input) && (RequestedAmount == input.RequestedAmount || (RequestedAmount != null && RequestedAmount.Equals(input.RequestedAmount))) && Equals((GatewayError)input) && (AvailableAmount == input.AvailableAmount || (AvailableAmount != null && AvailableAmount.Equals(input.AvailableAmount)));
+    }
 
-        var xrdBurnedAttos = costUnitConsumed * TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos);
+    public override int GetHashCode()
+    {
+        int num = base.GetHashCode();
+        if (RequestedAmount != null)
+        {
+            num = (num * 59) + RequestedAmount.GetHashCode();
+        }
 
-        var xrdTippedAttos = costUnitConsumed *
-            TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100;
+        if (AvailableAmount != null)
+        {
+            num = (num * 59) + AvailableAmount.GetHashCode();
+        }
 
-        var feeSummary = new FeeSummary(
-            true,
-            GenesisData.GenesisFeeSummary.CostUnitLimit,
-            (long)costUnitConsumed,
-            GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
-            tipPercentage,
-            xrdBurnedAttos.ToString(),
-            xrdTippedAttos.ToString()
-        );
+        return num;
+    }
 
-        _testConsole.WriteLine($"Calculated fee summary:\n{feeSummary}");
+    public new IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        return BaseValidate(validationContext);
+    }
 
-        return feeSummary;
+    protected new IEnumerable<ValidationResult> BaseValidate(ValidationContext validationContext)
+    {
+        foreach (ValidationResult item in base.BaseValidate(validationContext))
+        {
+            yield return item;
+        }
     }
 }

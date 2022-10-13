@@ -386,6 +386,22 @@ public class TestTransactionStreamStore
         return pendingTransaction;
     }
 
+    public void MarkPendingTransactionAsFailed(TestPendingTransaction? pendingTransaction)
+    {
+        if (pendingTransaction == null)
+        {
+            return;
+        }
+
+        // TODO: should we add failed transaction state updates to the global store
+        if (pendingTransaction.StateUpdates != null)
+        {
+            _stateUpdatesStore.AddStateUpdates(pendingTransaction.StateUpdates);
+        }
+
+        PendingTransactions.Remove(pendingTransaction);
+    }
+
     public void MarkPendingTransactionAsCommitted(TestPendingTransaction? pendingTransaction)
     {
         if (pendingTransaction == null)
@@ -613,7 +629,12 @@ public class TestTransactionStreamStore
         double tokensToWithdraw,
         out string newVaultTotalAttos)
     {
-        _testConsole.WriteLine($"WithdrawByAmount: Withdrawing {tokensToWithdraw} tokens from account {accountAddress}");
+        var feesAttos = feeSummary.CostUnitConsumed
+                        * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
+
+        var totalAttosToWithdraw = TokenAttosConverter.Tokens2Attos(tokensToWithdraw) + feesAttos;
+
+        _testConsole.WriteLine($"WithdrawByAmount: withdrawing {TokenAttosConverter.Attos2Tokens(totalAttosToWithdraw)} tokens from account {accountAddress}");
 
         // account's vault up and down substates
         var accountVault = allStateUpdates.TakeTokensFromVault(accountAddress!, feeSummary, tokensToWithdraw, out newVaultTotalAttos);

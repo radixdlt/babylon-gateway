@@ -89,7 +89,7 @@ public partial class GatewayTestsRunner
         return this;
     }
 
-    public async Task RunAndWaitUntilAllTransactionsIngested<T>(Action<T, string>? callback = null)
+    public async Task RunAndWaitUntilAllTransactionsIngested<T>(Action<T?, string?, Exception?> callback)
     {
         _testConsole.WriteLine(MethodBase.GetCurrentMethod()!.NameFromAsync());
 
@@ -112,10 +112,22 @@ public partial class GatewayTestsRunner
 
             if (pendingTransaction.Request.MarkAsCommitted)
             {
-                _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
+                try
+                {
+                    _transactionStreamStore.MarkPendingTransactionAsCommitted(pendingTransaction);
+                }
+                catch (Exception ex)
+                {
+                    callback?.Invoke(default(T), pendingTransaction?.IntentHash, ex);
+                    _transactionStreamStore.MarkPendingTransactionAsFailed(pendingTransaction);
 
-                var t = WaitAsync(TimeSpan.FromSeconds(5));
-                t.Wait();
+                    return;
+                }
+                finally
+                {
+                    var t = WaitAsync(TimeSpan.FromSeconds(5));
+                    t.Wait();
+                }
             }
 
             _transactionStreamStore.MarkPendingTransactionAsCompleted(pendingTransaction);
@@ -124,9 +136,9 @@ public partial class GatewayTestsRunner
 
             if (canParse)
             {
-                if (pendingTransaction.IntentHash != null)
+                if (pendingTransaction?.IntentHash != null)
                 {
-                    callback?.Invoke(await response.ParseToObjectAndAssert<T>(), pendingTransaction.IntentHash);
+                    callback?.Invoke(await response.ParseToObjectAndAssert<T>(), pendingTransaction.IntentHash, null);
                 }
             }
         }
@@ -139,6 +151,26 @@ public partial class GatewayTestsRunner
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
         File.WriteAllText(_databaseName + ".json", statesDump);
+    }
+
+    // Tear down
+    public void TearDown()
+    {
+        if (_dataAggregatorFactory != null)
+        {
+            _testConsole.WriteLine("Tearing down TestDataAggregatorFactory");
+            _dataAggregatorFactory.Server.Dispose();
+            _dataAggregatorFactory.Dispose();
+            _dataAggregatorFactory = null;
+        }
+
+        if (_gatewayApiFactory != null)
+        {
+            _testConsole.WriteLine("Tearing down TestGatewayApiFactory");
+            _gatewayApiFactory.Server.Dispose();
+            _gatewayApiFactory.Dispose();
+            _gatewayApiFactory = null;
+        }
     }
 
     private async Task<HttpResponseMessage> ActAsync(string? requestUri, HttpContent? content)
@@ -205,25 +237,5 @@ public partial class GatewayTestsRunner
 
         var t = WaitAsync(TimeSpan.FromSeconds(10));
         t.Wait();
-    }
-
-    // Tear down
-    private void TearDown()
-    {
-        if (_dataAggregatorFactory != null)
-        {
-            _testConsole.WriteLine("Tearing down TestDataAggregatorFactory");
-            _dataAggregatorFactory.Server.Dispose();
-            _dataAggregatorFactory.Dispose();
-            _dataAggregatorFactory = null;
-        }
-
-        if (_gatewayApiFactory != null)
-        {
-            _testConsole.WriteLine("Tearing down TestGatewayApiFactory");
-            _gatewayApiFactory.Server.Dispose();
-            _gatewayApiFactory.Dispose();
-            _gatewayApiFactory = null;
-        }
     }
 }

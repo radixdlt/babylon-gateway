@@ -62,86 +62,33 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-using Xunit.Abstractions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public class StateUpdatesStore
+public abstract class ValidationException : KnownGatewayErrorException
 {
-    private readonly List<StateUpdates> _stateUpdatesList = new();
-    private readonly ITestOutputHelper _testConsole;
+    private const int ValidationErrorStatusCode = 400;
 
-    public StateUpdatesStore(ITestOutputHelper testConsole)
+    public ValidationException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base(ValidationErrorStatusCode, gatewayError, userFacingMessage, internalMessage)
     {
-        _testConsole = testConsole;
     }
 
-    public StateUpdates StateUpdates
+    public ValidationException(GatewayError gatewayError, string userFacingMessage)
+        : base(ValidationErrorStatusCode, gatewayError, userFacingMessage)
     {
-        get => _stateUpdatesList.Combine();
-
-        set
-        {
-            _stateUpdatesList.Clear();
-            _stateUpdatesList.Add(value);
-        }
     }
 
-    public string ToJson()
+    public static string AsStringWithUnits(TokenAmount apiTokenAmount)
     {
-        return _stateUpdatesList.ToJson();
+        return apiTokenAmount.TokenIdentifier.Rri.StartsWith("xrd_")
+            ? AsXrdString(apiTokenAmount) // xrd is a reserved symbol, so we can avoid sharing the full RRI
+            : $"{Commons.Numerics.TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    public void AddStateUpdates(StateUpdates stateUpdates)
+    public static string AsXrdString(TokenAmount apiTokenAmount)
     {
-        _stateUpdatesList.Add(stateUpdates);
-    }
-
-    public FeeSummary LockFee()
-    {
-        // calculate fees
-        // state updates when complete
-
-        var feeSummary = CalculateFeeSummary();
-
-        var paidFeeAttos = feeSummary.CostUnitConsumed * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
-        var feeAmount = TokenAttosConverter.Attos2Tokens(paidFeeAttos);
-
-        _testConsole.WriteLine($"Locking fee: {feeAmount} xrd");
-
-        return feeSummary;
-    }
-
-    public FeeSummary CalculateFeeSummary()
-    {
-        var rnd = new Random(1);
-
-        var tipPercentage = rnd.Next(0, 5); // percents
-        var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);
-
-        var xrdBurnedAttos = costUnitConsumed * TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos);
-
-        var xrdTippedAttos = costUnitConsumed *
-            TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100;
-
-        var feeSummary = new FeeSummary(
-            true,
-            GenesisData.GenesisFeeSummary.CostUnitLimit,
-            (long)costUnitConsumed,
-            GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
-            tipPercentage,
-            xrdBurnedAttos.ToString(),
-            xrdTippedAttos.ToString()
-        );
-
-        _testConsole.WriteLine($"Calculated fee summary:\n{feeSummary}");
-
-        return feeSummary;
+        return $"{Commons.Numerics.TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} XRD";
     }
 }

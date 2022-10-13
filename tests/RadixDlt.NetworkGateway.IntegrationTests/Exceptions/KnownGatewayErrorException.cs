@@ -62,86 +62,41 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.IntegrationTests.Data;
-using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
-using System.Collections.Generic;
-using System.Numerics;
-using Xunit.Abstractions;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public class StateUpdatesStore
+public abstract class KnownGatewayErrorException : Exception
 {
-    private readonly List<StateUpdates> _stateUpdatesList = new();
-    private readonly ITestOutputHelper _testConsole;
+    public int StatusCode { get; }
 
-    public StateUpdatesStore(ITestOutputHelper testConsole)
+    public GatewayError GatewayError { get; }
+
+    public string? UserFacingMessage { get; }
+
+    public string? InternalMessage { get; }
+
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base($"{userFacingMessage} ({internalMessage})")
     {
-        _testConsole = testConsole;
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
+        UserFacingMessage = userFacingMessage;
+        InternalMessage = internalMessage;
     }
 
-    public StateUpdates StateUpdates
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string? userFacingMessage)
+        : base(userFacingMessage)
     {
-        get => _stateUpdatesList.Combine();
-
-        set
-        {
-            _stateUpdatesList.Clear();
-            _stateUpdatesList.Add(value);
-        }
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
+        UserFacingMessage = userFacingMessage;
     }
 
-    public string ToJson()
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError)
     {
-        return _stateUpdatesList.ToJson();
-    }
-
-    public void AddStateUpdates(StateUpdates stateUpdates)
-    {
-        _stateUpdatesList.Add(stateUpdates);
-    }
-
-    public FeeSummary LockFee()
-    {
-        // calculate fees
-        // state updates when complete
-
-        var feeSummary = CalculateFeeSummary();
-
-        var paidFeeAttos = feeSummary.CostUnitConsumed * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
-        var feeAmount = TokenAttosConverter.Attos2Tokens(paidFeeAttos);
-
-        _testConsole.WriteLine($"Locking fee: {feeAmount} xrd");
-
-        return feeSummary;
-    }
-
-    public FeeSummary CalculateFeeSummary()
-    {
-        var rnd = new Random(1);
-
-        var tipPercentage = rnd.Next(0, 5); // percents
-        var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);
-
-        var xrdBurnedAttos = costUnitConsumed * TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos);
-
-        var xrdTippedAttos = costUnitConsumed *
-            TokenAttosConverter.ParseAttosFromString(GenesisData.GenesisFeeSummary.CostUnitPriceAttos) * tipPercentage / 100;
-
-        var feeSummary = new FeeSummary(
-            true,
-            GenesisData.GenesisFeeSummary.CostUnitLimit,
-            (long)costUnitConsumed,
-            GenesisData.GenesisFeeSummary.CostUnitPriceAttos,
-            tipPercentage,
-            xrdBurnedAttos.ToString(),
-            xrdTippedAttos.ToString()
-        );
-
-        _testConsole.WriteLine($"Calculated fee summary:\n{feeSummary}");
-
-        return feeSummary;
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
     }
 }
