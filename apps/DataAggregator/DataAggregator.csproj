@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+    <PackageReference Include="prometheus-net" />
+    <PackageReference Include="prometheus-net.AspNetCore" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj" />
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PrometheusIntegration\RadixDlt.NetworkGateway.PrometheusIntegration.csproj" />
+  </ItemGroup>
+
+</Project>

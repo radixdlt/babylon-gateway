@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons;
+using RadixDlt.NetworkGateway.Abstractions;
 using System;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;

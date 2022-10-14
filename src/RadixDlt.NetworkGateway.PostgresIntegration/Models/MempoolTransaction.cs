@@ -63,8 +63,8 @@
  */
 
 using Newtonsoft.Json;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Model;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
 using System.Collections.Generic;

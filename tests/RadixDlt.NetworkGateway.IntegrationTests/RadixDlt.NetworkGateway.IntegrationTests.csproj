@@ -22,28 +22,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.GatewayApi\RadixDlt.NetworkGateway.GatewayApi.csproj" />
-    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Commons\RadixDlt.NetworkGateway.Commons.csproj" />
-    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj" />
-    <ProjectReference Include="..\RadixDlt.NetworkGateway.DataAggregatorRunner\RadixDlt.NetworkGateway.DataAggregatorRunner.csproj" />
-    <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiTestServer\RadixDlt.NetworkGateway.GatewayApiTestServer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="appsettings.json">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <None Remove="appsettings.json" />
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.Abstractions\RadixDlt.NetworkGateway.Abstractions.csproj" />
+    <ProjectReference Include="..\RadixDlt.NetworkGateway.TestDependencies\RadixDlt.NetworkGateway.TestDependencies.csproj" />
   </ItemGroup>
 
 </Project>

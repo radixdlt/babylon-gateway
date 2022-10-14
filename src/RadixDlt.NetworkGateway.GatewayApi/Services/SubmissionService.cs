@@ -63,7 +63,7 @@
  */
 
 using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Commons.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
 using System.Collections.Generic;

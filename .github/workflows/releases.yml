@@ -23,7 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Build linux binaries
         run: |
-          cd samples/DataAggregator
+          cd apps/DataAggregator
           echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../DatabaseMigrations
@@ -33,9 +33,9 @@ jobs:
           echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' appsettings.json )" > appsettings.json
           dotnet publish --runtime linux-x64 --configuration Release --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false --output ./output
           cd ../..
-          zip -r data-aggregator.zip samples/DataAggregator/output/
-          zip -r database-migrations.zip samples/DatabaseMigrations/output/
-          zip -r gateway-api.zip samples/GatewayApi/output/
+          zip -r data-aggregator.zip apps/DataAggregator/output/
+          zip -r database-migrations.zip apps/DatabaseMigrations/output/
+          zip -r gateway-api.zip apps/GatewayApi/output/
 
       - name: Upload DataAggreagtor zip
         uses: actions/upload-release-asset@v1
@@ -98,9 +98,9 @@ jobs:
 
       - name: Setup application version
         run: |
-          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' samples/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
-          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' samples/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json          
-          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' samples/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
+          echo "$( jq '.+{DataAggregatorVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DataAggregator/appsettings.json )" > src/DataAggregator/appsettings.json
+          echo "$( jq '.+{DatabaseMigrationsVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/DatabaseMigrations/appsettings.json )" > src/DatabaseMigrations/appsettings.json
+          echo "$( jq '.+{GatewayApiVersion:"${{ steps.get_release.outputs.tag_name }}"}' apps/GatewayApi/appsettings.json )" > src/GatewayAPI/appsettings.json
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -111,7 +111,7 @@ jobs:
       - name: Docker build and push DataAggregator
         uses: docker/build-push-action@v2
         with:
-          file: ./samples/DataAggregator/Dockerfile
+          file: ./apps/DataAggregator/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.data_aggregator_tags }}
           push: true
@@ -121,7 +121,7 @@ jobs:
       - name: Docker build and push Gateway API
         uses: docker/build-push-action@v2
         with:
-          file: ./samples/GatewayApi/Dockerfile
+          file: ./apps/GatewayApi/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
@@ -131,7 +131,7 @@ jobs:
       - name: Docker build and push Database Migrations
         uses: docker/build-push-action@v2
         with:
-          file: ./samples/DatabaseMigrations/Dockerfile
+          file: ./apps/DatabaseMigrations/Dockerfile
           tags: |
             ${{ steps.setup_tags.outputs.database_migrations_tags }}
           push: true

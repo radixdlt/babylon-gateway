@@ -63,9 +63,9 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Extensions;
-using RadixDlt.NetworkGateway.Commons.StaticHelpers;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
