@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Database Migrations with Wipe Database" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
-    <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/samples/DatabaseMigrations/DatabaseMigrations.csproj" />
+    <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/apps/DatabaseMigrations/DatabaseMigrations.csproj" />
     <option name="LAUNCH_PROFILE_TFM" value="net6.0" />
     <option name="LAUNCH_PROFILE_NAME" value="Database Migrations with Wipe Database" />
     <option name="USE_EXTERNAL_CONSOLE" value="0" />

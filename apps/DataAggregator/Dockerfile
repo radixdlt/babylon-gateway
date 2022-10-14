@@ -1,5 +1,5 @@
 ﻿# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
-# docker build -f samples/DataAggregator/Dockerfile .
+# docker build -f apps/DataAggregator/Dockerfile .
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
@@ -10,11 +10,11 @@ EXPOSE 1235
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore "samples/DataAggregator/DataAggregator.csproj"
-RUN dotnet build "samples/DataAggregator/DataAggregator.csproj" -c Release -o /app/build
+RUN dotnet restore "apps/DataAggregator/DataAggregator.csproj"
+RUN dotnet build "apps/DataAggregator/DataAggregator.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "samples/DataAggregator/DataAggregator.csproj" -c Release -o /app/publish
+RUN dotnet publish "apps/DataAggregator/DataAggregator.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app

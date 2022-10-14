@@ -10,4 +10,4 @@ The Network Gateway services can be configured in line with the [configuration i
 
 ## Configuration options
 
-Check out the .json files in [/samples/DataAggregator](../samples/DataAggregator) and [/samples/GatewayApi](../samples/GatewayApi) respectively. 
+Check out the .json files in [/apps/DataAggregator](../apps/DataAggregator) and [/apps/GatewayApi](../apps/GatewayApi) respectively. 

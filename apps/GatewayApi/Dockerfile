@@ -1,5 +1,5 @@
 ﻿# This dockerfile should be build with the context at the root of the repo, eg, from the repo root:
-# docker build -f samples/GatewayAPI/Dockerfile .
+# docker build -f apps/GatewayAPI/Dockerfile .
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
@@ -10,11 +10,11 @@ EXPOSE 1235
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore "samples/GatewayApi/GatewayApi.csproj"
-RUN dotnet build "samples/GatewayApi/GatewayApi.csproj" -c Release -o /app/build
+RUN dotnet restore "apps/GatewayApi/GatewayApi.csproj"
+RUN dotnet build "apps/GatewayApi/GatewayApi.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "samples/GatewayApi/GatewayApi.csproj" -c Release -o /app/publish
+RUN dotnet publish "apps/GatewayApi/GatewayApi.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
