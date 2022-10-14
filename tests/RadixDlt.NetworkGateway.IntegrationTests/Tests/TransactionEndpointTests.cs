@@ -309,7 +309,7 @@ public class TransactionEndpointTests : IClassFixture<TestSetup>
     }
 
     [Theory]
-    [InlineData(00)]
+    [InlineData(0)]
     [InlineData(1100)]
     [InlineData(-1000)]
     public void TransferOfInvalidAmountOfTokensFromAccountAtoBShouldFail(int tokensToTransfer)
