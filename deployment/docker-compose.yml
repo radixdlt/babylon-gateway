@@ -184,7 +184,7 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./samples/DatabaseMigrations/Dockerfile"
+      dockerfile: "./apps/DatabaseMigrations/Dockerfile"
     depends_on:
       postgres_db:
         condition: service_healthy
@@ -195,7 +195,7 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./samples/DataAggregator/Dockerfile"
+      dockerfile: "./apps/DataAggregator/Dockerfile"
     depends_on:
       database_migrations_built:
         condition: service_completed_successfully
@@ -206,7 +206,7 @@ services:
     profiles: ["network-gateway-built"]
     build: # build: takes higher priority over image:, so this allows us to capture all the config, but replace the image with a direct build
       context: "../"
-      dockerfile: "./samples/GatewayAPI/Dockerfile"
+      dockerfile: "./apps/GatewayAPI/Dockerfile"
     depends_on:
       database_migrations_built:
         condition: service_completed_successfully

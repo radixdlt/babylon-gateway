@@ -63,8 +63,8 @@
  */
 
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Commons;
-using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -98,16 +98,11 @@ internal abstract class Entity
     [Column("global_ancestor_id")]
     public long? GlobalAncestorId { get; set; }
 
-    public string HrpAddress(HrpDefinition hrp)
-    {
-        return RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, SelectHrp(hrp), Address);
-    }
-
-    public string? HrpGlobalAddress(HrpDefinition hrp)
+    public string? BuildHrpGlobalAddress(HrpDefinition hrp)
     {
         return GlobalAddress == null
             ? null
-            : RadixBech32.EncodeRadixEngineAddress(RadixEngineAddressType.HASHED_KEY, SelectHrp(hrp), Address);
+            : RadixBech32.Encode(SelectHrp(hrp), GlobalAddress);
     }
 
     private string SelectHrp(HrpDefinition hrp)

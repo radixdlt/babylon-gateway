@@ -107,7 +107,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="version">version (required).</param>
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
-        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), string networkHrpSuffix = default(string))
+        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
+        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), string networkHrpSuffix = default(string), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
         {
             // to ensure "version" is required (not null)
             if (version == null)
@@ -127,6 +128,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("networkHrpSuffix is a required property for NetworkConfigurationResponse and cannot be null");
             }
             this.NetworkHrpSuffix = networkHrpSuffix;
+            // to ensure "wellKnownAddresses" is required (not null)
+            if (wellKnownAddresses == null)
+            {
+                throw new ArgumentNullException("wellKnownAddresses is a required property for NetworkConfigurationResponse and cannot be null");
+            }
+            this.WellKnownAddresses = wellKnownAddresses;
         }
 
         /// <summary>
@@ -150,6 +157,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public string NetworkHrpSuffix { get; set; }
 
         /// <summary>
+        /// Gets or Sets WellKnownAddresses
+        /// </summary>
+        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
+        public NetworkConfigurationResponseWellKnownAddresses WellKnownAddresses { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -160,6 +173,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  NetworkHrpSuffix: ").Append(NetworkHrpSuffix).Append("\n");
+            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -209,6 +223,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NetworkHrpSuffix == input.NetworkHrpSuffix ||
                     (this.NetworkHrpSuffix != null &&
                     this.NetworkHrpSuffix.Equals(input.NetworkHrpSuffix))
+                ) && 
+                (
+                    this.WellKnownAddresses == input.WellKnownAddresses ||
+                    (this.WellKnownAddresses != null &&
+                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
                 );
         }
 
@@ -232,6 +251,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.NetworkHrpSuffix != null)
                 {
                     hashCode = (hashCode * 59) + this.NetworkHrpSuffix.GetHashCode();
+                }
+                if (this.WellKnownAddresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
                 }
                 return hashCode;
             }

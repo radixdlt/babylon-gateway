@@ -75,7 +75,7 @@ jobs:
       - name: Docker build and push DataAggregator
         uses: docker/build-push-action@v2
         with:
-          file: ./samples/DataAggregator/Dockerfile
+          file: ./apps/DataAggregator/Dockerfile
           TAGS: |
             ${{ steps.setup_tags.outputs.data_aggregator_tags }}
           push: true
@@ -84,7 +84,7 @@ jobs:
       - name: Docker build and push Gateway API
         uses: docker/build-push-action@v2
         with:
-          file: ./samples/GatewayApi/Dockerfile
+          file: ./apps/GatewayApi/Dockerfile
           TAGS: |
             ${{ steps.setup_tags.outputs.gateway_api_tags }}
           push: true
@@ -94,7 +94,7 @@ jobs:
       - name: Docker build and push Database Migrations
         uses: docker/build-push-action@v2
         with:
-          file: ./samples/DatabaseMigrations/Dockerfile
+          file: ./apps/DatabaseMigrations/Dockerfile
           TAGS: |
             ${{ steps.setup_tags.outputs.database_migrations_tags }}
           push: true
@@ -119,7 +119,7 @@ jobs:
                   "namespace_postfix": "${{env.NAMESPACE}}",
                   "data_aggregator_image_tag": "${{ needs.publish-docker.outputs.data-aggregator-tag }}",
                   "gateway_api_image_tag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-                  "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}" 
+                  "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
                 }
             }'
 

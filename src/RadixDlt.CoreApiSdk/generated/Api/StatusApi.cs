@@ -131,6 +131,25 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="networkStatusRequest"></param>
         /// <returns>ApiResponse of NetworkStatusResponse</returns>
         ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest);
+        /// <summary>
+        /// Get Network Configuration
+        /// </summary>
+        /// <remarks>
+        /// Returns the network configuration.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>NetworkConfigurationResponse</returns>
+        NetworkConfigurationResponse V0StatusNetworkConfigurationPost();
+
+        /// <summary>
+        /// Get Network Configuration
+        /// </summary>
+        /// <remarks>
+        /// Returns the network configuration.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>ApiResponse of NetworkConfigurationResponse</returns>
+        ApiResponse<NetworkConfigurationResponse> V0StatusNetworkConfigurationPostWithHttpInfo();
         #endregion Synchronous Operations
     }
 
@@ -184,6 +203,27 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (NetworkStatusResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Get Network Configuration
+        /// </summary>
+        /// <remarks>
+        /// Returns the network configuration.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of NetworkConfigurationResponse</returns>
+        System.Threading.Tasks.Task<NetworkConfigurationResponse> V0StatusNetworkConfigurationPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Get Network Configuration
+        /// </summary>
+        /// <remarks>
+        /// Returns the network configuration.
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (NetworkConfigurationResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<NetworkConfigurationResponse>> V0StatusNetworkConfigurationPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -609,6 +649,107 @@ namespace RadixDlt.CoreApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("StatusNetworkStatusPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Network Configuration Returns the network configuration.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>NetworkConfigurationResponse</returns>
+        public NetworkConfigurationResponse V0StatusNetworkConfigurationPost()
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse> localVarResponse = V0StatusNetworkConfigurationPostWithHttpInfo();
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Network Configuration Returns the network configuration.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>ApiResponse of NetworkConfigurationResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse> V0StatusNetworkConfigurationPostWithHttpInfo()
+        {
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<NetworkConfigurationResponse>("/v0/status/network-configuration", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StatusNetworkConfigurationPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Get Network Configuration Returns the network configuration.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of NetworkConfigurationResponse</returns>
+        public async System.Threading.Tasks.Task<NetworkConfigurationResponse> V0StatusNetworkConfigurationPostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse> localVarResponse = await V0StatusNetworkConfigurationPostWithHttpInfoAsync(cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Get Network Configuration Returns the network configuration.
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (NetworkConfigurationResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkConfigurationResponse>> V0StatusNetworkConfigurationPostWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<NetworkConfigurationResponse>("/v0/status/network-configuration", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("V0StatusNetworkConfigurationPost", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

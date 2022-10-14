@@ -64,7 +64,7 @@
 
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
-using RadixDlt.NetworkGateway.Commons.Configuration;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;

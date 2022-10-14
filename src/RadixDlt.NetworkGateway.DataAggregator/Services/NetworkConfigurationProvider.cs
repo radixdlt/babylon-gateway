@@ -63,7 +63,7 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.CoreCommunications;
+using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Threading;
 using System.Threading.Tasks;
 

@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Commons.Model;
+using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 

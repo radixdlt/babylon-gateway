@@ -12,9 +12,9 @@ Whilst any IDE supporting dotnet core can be used for development, we would reco
 
 In development, configuration comes from a few places, with items lower down the list taking priority for a given field. `[X]` is `DataAggregator` or `GatewayApi`.
 
-* `samples/[X]/appsettings.json`
-* `samples/[X]/appsettings.Development.json`
-* `samples/[X]/appsettings.PersonalOverrides.json` (under .gitignore)
+* `apps/[X]/appsettings.json`
+* `apps/[X]/appsettings.Development.json`
+* `apps/[X]/appsettings.PersonalOverrides.json` (under .gitignore)
 * Environment variables
 
 By default, the configuration is set up to point to a full node's Core API running locally at http://localhost:3333, but you may wish to use non-local Core API, to have a synced-up system to read from, and to avoid hammering your computer too much! (see sections below).
@@ -70,19 +70,19 @@ docker-compose up
 
 ```bash
 # Run the DataAggregator
-dotnet run --project samples/DataAggregator --launch-profile "Data Aggregator"
+dotnet run --project apps/DataAggregator --launch-profile "Data Aggregator"
 ```
 
 ```bash
 # Run the Gateway API
-dotnet run --project samples/GatewayAPI --launch-profile "Gateway Api"
+dotnet run --project apps/GatewayApi --launch-profile "Gateway Api"
 ```
 
 And, if you need to wipe the database, you should stop all of the above processes, and then either delete the `.postgresdata` folder, or run:
 
 ```bash
 # Wipe the database
-dotnet run --project samples/DatabaseMigrations --launch-profile "Wipe Database"
+dotnet run --project apps/DatabaseMigrations --launch-profile "Wipe Database"
 ```
 
 ## Looking at the database

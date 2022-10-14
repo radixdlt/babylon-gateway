@@ -9,10 +9,10 @@ cd "$ROOT_DIR"
 # This script should only be used whilst we're in development and completely wiping the database each boot-up
 
 # Check it builds
-dotnet build samples/DatabaseMigrations
+dotnet build apps/DatabaseMigrations
 
 # Remove existing migrations
 find "src/RadixDlt.NetworkGateway.PostgresIntegration/Migrations" -name \*.cs -exec rm {} \;
-dotnet ef migrations add InitialCreate --project src/RadixDlt.NetworkGateway.PostgresIntegration --startup-project samples/DatabaseMigrations --context MigrationsDbContext
+dotnet ef migrations add InitialCreate --project src/RadixDlt.NetworkGateway.PostgresIntegration --startup-project apps/DatabaseMigrations --context MigrationsDbContext
 
 ./generation/ensure-license-headers.sh
