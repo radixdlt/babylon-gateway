@@ -80,7 +80,7 @@ public interface INetworkConfigurationReader
 
 internal class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private readonly StatusApi _statusApi;
+    private readonly IStatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
 

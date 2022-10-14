@@ -72,7 +72,7 @@ public interface ICoreApiProvider
 {
     TransactionApi TransactionsApi { get; }
 
-    StatusApi StatusApi { get; }
+    IStatusApi StatusApi { get; }
 
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // ConstructionApi ConstructionApi { get; }
@@ -86,7 +86,7 @@ internal class CoreApiProvider : ICoreApiProvider
 {
     public TransactionApi TransactionsApi { get; }
 
-    public StatusApi StatusApi { get; }
+    public IStatusApi StatusApi { get; }
 
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // public ConstructionApi ConstructionApi { get; }

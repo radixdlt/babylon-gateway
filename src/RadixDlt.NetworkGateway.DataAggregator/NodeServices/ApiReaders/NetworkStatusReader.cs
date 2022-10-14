@@ -87,7 +87,7 @@ public interface INetworkStatusReaderObserver
 internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly StatusApi _statusApi;
+    private readonly IStatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 

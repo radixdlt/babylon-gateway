@@ -143,7 +143,13 @@ public class CoreApiStub :
 
     public CoreApiNode CoreApiNode => RequestsAndResponses.GatewayCoreApiNode;
 
-    public StatusApi StatusApi => new StatusApiStub(RequestsAndResponses.NetworkStatusResponse);
+    public IStatusApi StatusApi
+    {
+        get
+        {
+            return new StatusApiStub(RequestsAndResponses.NetworkStatusResponse);
+        }
+    }
 
     public TransactionApi TransactionApi { get; }
 

@@ -73,7 +73,7 @@ public interface ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 
-    public StatusApi StatusApi { get; }
+    public IStatusApi StatusApi { get; }
 
     public TransactionApi TransactionApi { get; }
 
@@ -85,7 +85,7 @@ internal class CoreApiProvider : ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 
-    public StatusApi StatusApi { get; }
+    public IStatusApi StatusApi { get; }
 
     public TransactionApi TransactionApi { get; }
 

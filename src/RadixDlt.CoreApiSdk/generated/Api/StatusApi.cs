@@ -601,7 +601,7 @@ namespace RadixDlt.CoreApiSdk.Api
         /// <param name="networkStatusRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of NetworkStatusResponse</returns>
-        public virtual async System.Threading.Tasks.Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(NetworkStatusRequest networkStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             RadixDlt.CoreApiSdk.Client.ApiResponse<NetworkStatusResponse> localVarResponse = await StatusNetworkStatusPostWithHttpInfoAsync(networkStatusRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;

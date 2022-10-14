@@ -63,24 +63,119 @@
  */
 
 using RadixDlt.CoreApiSdk.Api;
+using RadixDlt.CoreApiSdk.Client;
 using RadixDlt.CoreApiSdk.Model;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.IntegrationTests.CoreApiStubs;
 
-public class StatusApiStub : StatusApi
+public class StatusApiStub : IDisposable, IStatusApi
 {
     private readonly NetworkStatusResponse _networkStatusResponse;
+
+    private StatusApi _statusApi = new();
 
     public StatusApiStub(NetworkStatusResponse networkStatusResponse)
     {
         _networkStatusResponse = networkStatusResponse;
     }
 
-    public override async Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(
+    public async Task<NetworkConfigurationResponse> StatusNetworkConfigurationPostAsync(CancellationToken cancellationToken = default(CancellationToken))
+    {
+        return await _statusApi.StatusNetworkConfigurationPostAsync(cancellationToken);
+    }
+
+    public async Task<ApiResponse<NetworkConfigurationResponse>> StatusNetworkConfigurationPostWithHttpInfoAsync(CancellationToken cancellationToken = default(CancellationToken))
+    {
+        return await _statusApi.StatusNetworkConfigurationPostWithHttpInfoAsync(cancellationToken);
+    }
+
+    public async Task<NetworkStatusResponse> StatusNetworkStatusPostAsync(
         NetworkStatusRequest networkStatusRequest, CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(_networkStatusResponse);
+    }
+
+    public async Task<ApiResponse<NetworkStatusResponse>> StatusNetworkStatusPostWithHttpInfoAsync(NetworkStatusRequest networkStatusRequest, CancellationToken cancellationToken = default(CancellationToken))
+    {
+        return await _statusApi.StatusNetworkStatusPostWithHttpInfoAsync(networkStatusRequest, cancellationToken);
+    }
+
+    public async Task<NetworkConfigurationResponse> V0StatusNetworkConfigurationPostAsync(CancellationToken cancellationToken = default(CancellationToken))
+    {
+        return await _statusApi.V0StatusNetworkConfigurationPostAsync(cancellationToken);
+    }
+
+    public async Task<ApiResponse<NetworkConfigurationResponse>> V0StatusNetworkConfigurationPostWithHttpInfoAsync(CancellationToken cancellationToken = default(CancellationToken))
+    {
+        return await _statusApi.V0StatusNetworkConfigurationPostWithHttpInfoAsync(cancellationToken);
+    }
+
+    public IReadableConfiguration Configuration
+    {
+        get
+        {
+            return _statusApi.Configuration;
+        }
+
+        set
+        {
+            _statusApi.Configuration = value;
+        }
+    }
+
+    public string GetBasePath()
+    {
+        return _statusApi.GetBasePath();
+    }
+
+    public ExceptionFactory ExceptionFactory
+    {
+        get
+        {
+            return _statusApi.ExceptionFactory;
+        }
+
+        set
+        {
+            _statusApi.ExceptionFactory = value;
+        }
+    }
+
+    public void Dispose()
+    {
+        _statusApi.Dispose();
+    }
+
+    public NetworkConfigurationResponse StatusNetworkConfigurationPost()
+    {
+        return _statusApi.StatusNetworkConfigurationPost();
+    }
+
+    public ApiResponse<NetworkConfigurationResponse> StatusNetworkConfigurationPostWithHttpInfo()
+    {
+        return _statusApi.StatusNetworkConfigurationPostWithHttpInfo();
+    }
+
+    public NetworkStatusResponse StatusNetworkStatusPost(NetworkStatusRequest networkStatusRequest)
+    {
+        return _statusApi.StatusNetworkStatusPost(networkStatusRequest);
+    }
+
+    public ApiResponse<NetworkStatusResponse> StatusNetworkStatusPostWithHttpInfo(NetworkStatusRequest networkStatusRequest)
+    {
+        return _statusApi.StatusNetworkStatusPostWithHttpInfo(networkStatusRequest);
+    }
+
+    public NetworkConfigurationResponse V0StatusNetworkConfigurationPost()
+    {
+        return _statusApi.V0StatusNetworkConfigurationPost();
+    }
+
+    public ApiResponse<NetworkConfigurationResponse> V0StatusNetworkConfigurationPostWithHttpInfo()
+    {
+        return _statusApi.V0StatusNetworkConfigurationPostWithHttpInfo();
     }
 }
