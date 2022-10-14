@@ -66,6 +66,7 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.Abstractions.Addressing;
@@ -78,6 +79,8 @@ public class RadixBech32Tests
     [InlineData("xrd_rr1qy5wfsfh")] // Radix Token definition Address (XRD)
     [InlineData("usdc_rb1qvqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gwwwd")] // Radix Test Token definition Address
     [InlineData("rn1qwa45jjf40vuf9xlq85xym86yegnm95h3g8d4lul5hskrws9gm6ykyx7hsf")] // Radix Node Address
+    [InlineData("resource_rdx1999a9220radxrd")] // Possible XRD address
+    [InlineData("resource_rdx19yw75y2lqqqqmyacct")] // Possible account owner badge address
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeAndReencodeIsIdentity(string encodedString)
     {
         var decodedData = RadixBech32.Decode(encodedString);
