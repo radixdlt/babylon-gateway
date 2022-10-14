@@ -386,6 +386,22 @@ public class TestTransactionStreamStore
         return pendingTransaction;
     }
 
+    public void MarkPendingTransactionAsFailed(TestPendingTransaction? pendingTransaction)
+    {
+        if (pendingTransaction == null)
+        {
+            return;
+        }
+
+        // TODO: should we add failed transaction state updates to the global store
+        if (pendingTransaction.StateUpdates != null)
+        {
+            _stateUpdatesStore.AddStateUpdates(pendingTransaction.StateUpdates);
+        }
+
+        PendingTransactions.Remove(pendingTransaction);
+    }
+
     public void MarkPendingTransactionAsCommitted(TestPendingTransaction? pendingTransaction)
     {
         if (pendingTransaction == null)
@@ -451,9 +467,17 @@ public class TestTransactionStreamStore
     {
         // TODO: Do we want to use a network configuration of one the active networks? /v0/status/network-configuration
         return Task.FromResult(new NetworkConfigurationResponse(
-            new NetworkConfigurationResponseVersion(_requestsAndResponses.CoreVersion, _requestsAndResponses.ApiVersion),
+            new NetworkConfigurationResponseVersion(
+                _requestsAndResponses.CoreVersion,
+                _requestsAndResponses.ApiVersion),
             GenesisData.NetworkDefinition.LogicalName,
-            GenesisData.NetworkDefinition.HrpSuffix));
+            GenesisData.NetworkDefinition.HrpSuffix,
+            new NetworkConfigurationResponseWellKnownAddresses(
+                accountPackage: GenesisData.AccountPackageAddress,
+                faucet: GenesisData.SysFaucetComponentAddress,
+                ecdsaSecp256k1: "resource_tdx_a_1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpqgxxjt0",
+                eddsaEd25519: "resource_tdx_a_1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpsa8w27u",
+                xrd: GenesisData.GenesisResourceManagerAddress)));
     }
 
     private void AddPendingTransaction(TestPendingTransaction? pendingTransaction)
@@ -613,7 +637,12 @@ public class TestTransactionStreamStore
         double tokensToWithdraw,
         out string newVaultTotalAttos)
     {
-        _testConsole.WriteLine($"WithdrawByAmount: Withdrawing {tokensToWithdraw} tokens from account {accountAddress}");
+        var feesAttos = feeSummary.CostUnitConsumed
+                        * TokenAttosConverter.ParseAttosFromString(feeSummary.CostUnitPriceAttos);
+
+        var totalAttosToWithdraw = TokenAttosConverter.Tokens2Attos(tokensToWithdraw) + feesAttos;
+
+        _testConsole.WriteLine($"WithdrawByAmount: withdrawing {TokenAttosConverter.Attos2Tokens(totalAttosToWithdraw)} tokens from account {accountAddress}");
 
         // account's vault up and down substates
         var accountVault = allStateUpdates.TakeTokensFromVault(accountAddress!, feeSummary, tokensToWithdraw, out newVaultTotalAttos);

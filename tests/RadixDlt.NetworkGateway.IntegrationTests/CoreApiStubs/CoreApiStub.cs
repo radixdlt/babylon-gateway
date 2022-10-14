@@ -66,7 +66,7 @@
 
 using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Commons.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
@@ -134,7 +134,7 @@ public class CoreApiStub :
             },
             NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
             {
-                XrdAddress = RadixBech32.GenerateXrdAddress("resource_" + networkConfiguration.NetworkHrpSuffix),
+                XrdAddress = networkConfiguration.WellKnownAddresses.Xrd,
             },
         };
     }

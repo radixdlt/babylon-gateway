@@ -70,6 +70,8 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 
 public static class TokenAttosConverter
 {
+    private const int DecimalPrecision = 18;
+
     public static BigInteger CostUnitConsumed2Attos(long costUnitConsumed, string? costUnitPriceAttos = default)
     {
         if (string.IsNullOrWhiteSpace(costUnitPriceAttos))
@@ -77,34 +79,34 @@ public static class TokenAttosConverter
             costUnitPriceAttos = GenesisData.GenesisFeeSummary.CostUnitPriceAttos;
         }
 
-        BigInteger.TryParse(costUnitPriceAttos, out var biCostUnitPriceAttos);
+        var biCostUnitPriceAttos = BigInteger.Parse(costUnitPriceAttos);
 
         return costUnitConsumed * biCostUnitPriceAttos;
     }
 
-    public static BigInteger CostUnitConsumed2Token(long costUnitConsumed, string? costUnitPriceAttos = default, int divisibility = 18)
+    public static BigInteger CostUnitConsumed2Token(long costUnitConsumed, string? costUnitPriceAttos = default, int divisibility = DecimalPrecision)
     {
         var costUnitConsumed2Attos = CostUnitConsumed2Attos(costUnitConsumed, costUnitPriceAttos);
 
         return costUnitConsumed2Attos / BigInteger.Pow(10, divisibility);
     }
 
-    public static BigInteger Tokens2Attos(double tokens, int divisibility = 18)
+    public static BigInteger Tokens2Attos(double tokens, int divisibility = DecimalPrecision)
     {
         return BigInteger.Parse(tokens.ToString()) * BigInteger.Pow(10, divisibility);
     }
 
-    public static BigInteger Tokens2Attos(string strAttos, int divisibility = 18)
+    public static BigInteger Tokens2Attos(string strAttos, int divisibility = DecimalPrecision)
     {
         return Tokens2Attos(double.Parse(strAttos), divisibility);
     }
 
-    public static double Attos2Tokens(string attos, int divisibility = 18)
+    public static double Attos2Tokens(string attos, int divisibility = DecimalPrecision)
     {
         return double.Parse(attos) / Math.Pow(10, divisibility);
     }
 
-    public static double Attos2Tokens(BigInteger attos, int divisibility = 18)
+    public static double Attos2Tokens(BigInteger attos, int divisibility = DecimalPrecision)
     {
         return Attos2Tokens(attos.ToString(), divisibility);
     }

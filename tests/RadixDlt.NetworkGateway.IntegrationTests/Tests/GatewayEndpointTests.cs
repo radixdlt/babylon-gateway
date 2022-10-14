@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
+/* Copyright 2021 Radix Publishing Ltd incorporated in Jersey (Channel Islands).
  *
  * Licensed under the Radix License, Version 1.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at:
@@ -62,51 +62,50 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.IntegrationTests.Utilities;
 using System;
-using System.Text;
+using System.Reflection;
+using Xunit;
+using Xunit.Abstractions;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.IntegrationTests;
 
-public static class AddressHelper
+[Collection("Gateway Api integration tests")]
+public class GatewayEndpointTests : IClassFixture<TestSetup>
 {
-    public static string AddressToHex(string address)
+    private readonly ITestOutputHelper _testConsole;
+
+    public GatewayEndpointTests(ITestOutputHelper testConsole)
     {
-        return RadixBech32.Decode(address).Data.ToHex();
+        _testConsole = testConsole;
     }
 
-    public static string AddressFromHex(string addressHex, string hrp)
+    [Fact]
+    public void TestGatewayApiVersions()
     {
-        return RadixBech32.Encode(
-            hrp,
-            Convert.FromHexString(addressHex));
-    }
+        // Arrange
+        using var gatewayRunner = new GatewayTestsRunner(MethodBase.GetCurrentMethod()!.Name, _testConsole)
+            .MockGenesis()
+            .MockGatewayVersions();
 
-    public static string GenerateRandomAddress(string hrpSuffix)
-    {
-        var res = new Random();
+        // Act
+        var task = gatewayRunner
+            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(ValidateResponse);
+        task.Wait();
 
-        // String of alphabets
-        var str = "abcdefghijklmnopqrstuvwxyz";
-        var size = (68 - hrpSuffix.Length) / 2;
-
-        var addressData = "1";
-
-        for (var i = 0; i < size; i++)
+        // Assert (callback method)
+        void ValidateResponse(GatewayResponse? payload, string? intentHash, Exception? exception)
         {
-            var x = res.Next(str.Length);
-            addressData = addressData + str[x];
+            payload.ShouldNotBeNull();
+            payload.GatewayApi.ShouldNotBeNull();
+
+            payload.GatewayApi._Version.ShouldNotBeNull();
+            payload.GatewayApi._Version.Should().Be(gatewayRunner.CoreApiStub.RequestsAndResponses.GatewayApiVersion);
+
+            payload.GatewayApi.OpenApiSchemaVersion.ShouldNotBeNull();
+            payload.GatewayApi.OpenApiSchemaVersion.Should().Be(gatewayRunner.CoreApiStub.RequestsAndResponses.GatewayOpenApiSchemaVersion);
         }
-
-        return RadixBech32.Encode(hrpSuffix, Encoding.Default.GetBytes(addressData));
-    }
-
-    public static string GenerateRandomPublicKey()
-    {
-        var publicKey = new byte[33];
-        new Random().NextBytes(publicKey);
-
-        return Convert.ToHexString(publicKey).ToLower();
     }
 }

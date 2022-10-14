@@ -62,51 +62,33 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using System;
-using System.Text;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public static class AddressHelper
+public abstract class ValidationException : KnownGatewayErrorException
 {
-    public static string AddressToHex(string address)
+    private const int ValidationErrorStatusCode = 400;
+
+    public ValidationException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base(ValidationErrorStatusCode, gatewayError, userFacingMessage, internalMessage)
     {
-        return RadixBech32.Decode(address).Data.ToHex();
     }
 
-    public static string AddressFromHex(string addressHex, string hrp)
+    public ValidationException(GatewayError gatewayError, string userFacingMessage)
+        : base(ValidationErrorStatusCode, gatewayError, userFacingMessage)
     {
-        return RadixBech32.Encode(
-            hrp,
-            Convert.FromHexString(addressHex));
     }
 
-    public static string GenerateRandomAddress(string hrpSuffix)
+    public static string AsStringWithUnits(TokenAmount apiTokenAmount)
     {
-        var res = new Random();
-
-        // String of alphabets
-        var str = "abcdefghijklmnopqrstuvwxyz";
-        var size = (68 - hrpSuffix.Length) / 2;
-
-        var addressData = "1";
-
-        for (var i = 0; i < size; i++)
-        {
-            var x = res.Next(str.Length);
-            addressData = addressData + str[x];
-        }
-
-        return RadixBech32.Encode(hrpSuffix, Encoding.Default.GetBytes(addressData));
+        return apiTokenAmount.TokenIdentifier.Rri.StartsWith("xrd_")
+            ? AsXrdString(apiTokenAmount) // xrd is a reserved symbol, so we can avoid sharing the full RRI
+            : $"{Abstractions.Numerics.TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    public static string GenerateRandomPublicKey()
+    public static string AsXrdString(TokenAmount apiTokenAmount)
     {
-        var publicKey = new byte[33];
-        new Random().NextBytes(publicKey);
-
-        return Convert.ToHexString(publicKey).ToLower();
+        return $"{Abstractions.Numerics.TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} XRD";
     }
 }

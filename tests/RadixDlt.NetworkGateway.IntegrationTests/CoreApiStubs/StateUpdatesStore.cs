@@ -120,7 +120,7 @@ public class StateUpdatesStore
 
     public FeeSummary CalculateFeeSummary()
     {
-        var rnd = new Random();
+        var rnd = new Random(1);
 
         var tipPercentage = rnd.Next(0, 5); // percents
         var costUnitConsumed = (BigInteger)(rnd.NextDouble() * 1000000);

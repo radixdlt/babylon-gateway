@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.DataAggregator\RadixDlt.NetworkGateway.DataAggregator.csproj" />
-    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator\RadixDlt.NetworkGateway.PostgresIntegration.DataAggregator.csproj" />
+    <ProjectReference Include="..\..\src\RadixDlt.NetworkGateway.PostgresIntegration\RadixDlt.NetworkGateway.PostgresIntegration.csproj" />
   </ItemGroup>
 
 </Project>

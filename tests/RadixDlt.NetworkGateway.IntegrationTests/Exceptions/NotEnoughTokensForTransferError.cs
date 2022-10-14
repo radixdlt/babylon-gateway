@@ -62,51 +62,104 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using Newtonsoft.Json;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using System.Text;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public static class AddressHelper
+public class NotEnoughTokensForTransferError : GatewayError, IEquatable<NotEnoughTokensForTransferError>, IValidatableObject
 {
-    public static string AddressToHex(string address)
+    [DataMember(Name = "requested_amount", IsRequired = true, EmitDefaultValue = true)]
+    public TokenAmount? RequestedAmount { get; set; } = new TokenAmount("0", new TokenIdentifier("XRD"));
+
+    [DataMember(Name = "available_amount", IsRequired = true, EmitDefaultValue = true)]
+    public TokenAmount AvailableAmount { get; set; } = new TokenAmount("0", new TokenIdentifier("XRD"));
+
+    [JsonConstructor]
+    public NotEnoughTokensForTransferError()
     {
-        return RadixBech32.Decode(address).Data.ToHex();
     }
 
-    public static string AddressFromHex(string addressHex, string hrp)
+    public NotEnoughTokensForTransferError(TokenAmount? requestedAmount = null, TokenAmount? availableAmount = null, string type = "NotEnoughTokensForTransferError")
+      : base(type)
     {
-        return RadixBech32.Encode(
-            hrp,
-            Convert.FromHexString(addressHex));
-    }
-
-    public static string GenerateRandomAddress(string hrpSuffix)
-    {
-        var res = new Random();
-
-        // String of alphabets
-        var str = "abcdefghijklmnopqrstuvwxyz";
-        var size = (68 - hrpSuffix.Length) / 2;
-
-        var addressData = "1";
-
-        for (var i = 0; i < size; i++)
+        if (requestedAmount == null)
         {
-            var x = res.Next(str.Length);
-            addressData = addressData + str[x];
+            throw new ArgumentNullException("requestedAmount is a required property for NotEnoughTokensForTransferError and cannot be null");
         }
 
-        return RadixBech32.Encode(hrpSuffix, Encoding.Default.GetBytes(addressData));
+        RequestedAmount = requestedAmount;
+        if (availableAmount == null)
+        {
+            throw new ArgumentNullException("availableAmount is a required property for NotEnoughTokensForTransferError and cannot be null");
+        }
+
+        AvailableAmount = availableAmount;
     }
 
-    public static string GenerateRandomPublicKey()
+    public override string ToString()
     {
-        var publicKey = new byte[33];
-        new Random().NextBytes(publicKey);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.Append("class NotEnoughTokensForTransferError {\n");
+        stringBuilder.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+        stringBuilder.Append("  RequestedAmount: ").Append(RequestedAmount).Append("\n");
+        stringBuilder.Append("  AvailableAmount: ").Append(AvailableAmount).Append("\n");
+        stringBuilder.Append("}\n");
 
-        return Convert.ToHexString(publicKey).ToLower();
+        return stringBuilder.ToString();
+    }
+
+    public override string ToJson()
+    {
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
+    }
+
+    public override bool Equals(object input)
+    {
+        return Equals(input as NotEnoughTokensForTransferError);
+    }
+
+    public bool Equals(NotEnoughTokensForTransferError? input)
+    {
+        if (input == null)
+        {
+            return false;
+        }
+
+        return Equals((GatewayError)input) && (RequestedAmount == input.RequestedAmount || (RequestedAmount != null && RequestedAmount.Equals(input.RequestedAmount))) && Equals((GatewayError)input) && (AvailableAmount == input.AvailableAmount || (AvailableAmount != null && AvailableAmount.Equals(input.AvailableAmount)));
+    }
+
+    public override int GetHashCode()
+    {
+        int num = base.GetHashCode();
+        if (RequestedAmount != null)
+        {
+            num = (num * 59) + RequestedAmount.GetHashCode();
+        }
+
+        if (AvailableAmount != null)
+        {
+            num = (num * 59) + AvailableAmount.GetHashCode();
+        }
+
+        return num;
+    }
+
+    public new IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        return BaseValidate(validationContext);
+    }
+
+    protected new IEnumerable<ValidationResult> BaseValidate(ValidationContext validationContext)
+    {
+        foreach (ValidationResult item in base.BaseValidate(validationContext))
+        {
+            yield return item;
+        }
     }
 }

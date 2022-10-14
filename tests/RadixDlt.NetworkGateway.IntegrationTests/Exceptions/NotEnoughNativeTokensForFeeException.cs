@@ -62,51 +62,19 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using System;
-using System.Text;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public static class AddressHelper
+public class NotEnoughNativeTokensForFeeException : ValidationException
 {
-    public static string AddressToHex(string address)
+    public NotEnoughNativeTokensForFeeException(TokenAmount requiredAmount, TokenAmount availableAmount)
+        : base(new NotEnoughNativeTokensForFeesError(requiredAmount, availableAmount), GetErrorMessage(requiredAmount, availableAmount))
     {
-        return RadixBech32.Decode(address).Data.ToHex();
     }
 
-    public static string AddressFromHex(string addressHex, string hrp)
+    public static string GetErrorMessage(TokenAmount requiredAmount, TokenAmount availableAmount)
     {
-        return RadixBech32.Encode(
-            hrp,
-            Convert.FromHexString(addressHex));
-    }
-
-    public static string GenerateRandomAddress(string hrpSuffix)
-    {
-        var res = new Random();
-
-        // String of alphabets
-        var str = "abcdefghijklmnopqrstuvwxyz";
-        var size = (68 - hrpSuffix.Length) / 2;
-
-        var addressData = "1";
-
-        for (var i = 0; i < size; i++)
-        {
-            var x = res.Next(str.Length);
-            addressData = addressData + str[x];
-        }
-
-        return RadixBech32.Encode(hrpSuffix, Encoding.Default.GetBytes(addressData));
-    }
-
-    public static string GenerateRandomPublicKey()
-    {
-        var publicKey = new byte[33];
-        new Random().NextBytes(publicKey);
-
-        return Convert.ToHexString(publicKey).ToLower();
+        return $"After any other transfers, the account needs {AsStringWithUnits(requiredAmount)} for fees, but only has {AsStringWithUnits(availableAmount)} available";
     }
 }

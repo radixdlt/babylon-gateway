@@ -62,51 +62,41 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
-using System.Text;
 
-namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities;
+namespace RadixDlt.NetworkGateway.IntegrationTests.Exceptions;
 
-public static class AddressHelper
+public abstract class KnownGatewayErrorException : Exception
 {
-    public static string AddressToHex(string address)
+    public int StatusCode { get; }
+
+    public GatewayError GatewayError { get; }
+
+    public string? UserFacingMessage { get; }
+
+    public string? InternalMessage { get; }
+
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
+        : base($"{userFacingMessage} ({internalMessage})")
     {
-        return RadixBech32.Decode(address).Data.ToHex();
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
+        UserFacingMessage = userFacingMessage;
+        InternalMessage = internalMessage;
     }
 
-    public static string AddressFromHex(string addressHex, string hrp)
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string? userFacingMessage)
+        : base(userFacingMessage)
     {
-        return RadixBech32.Encode(
-            hrp,
-            Convert.FromHexString(addressHex));
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
+        UserFacingMessage = userFacingMessage;
     }
 
-    public static string GenerateRandomAddress(string hrpSuffix)
+    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError)
     {
-        var res = new Random();
-
-        // String of alphabets
-        var str = "abcdefghijklmnopqrstuvwxyz";
-        var size = (68 - hrpSuffix.Length) / 2;
-
-        var addressData = "1";
-
-        for (var i = 0; i < size; i++)
-        {
-            var x = res.Next(str.Length);
-            addressData = addressData + str[x];
-        }
-
-        return RadixBech32.Encode(hrpSuffix, Encoding.Default.GetBytes(addressData));
-    }
-
-    public static string GenerateRandomPublicKey()
-    {
-        var publicKey = new byte[33];
-        new Random().NextBytes(publicKey);
-
-        return Convert.ToHexString(publicKey).ToLower();
+        StatusCode = statusCode;
+        GatewayError = gatewayError;
     }
 }
