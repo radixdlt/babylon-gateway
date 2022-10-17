@@ -91,87 +91,50 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// V0TransactionPayloadStatus
+    /// TransactionManifest
     /// </summary>
-    [DataContract(Name = "V0TransactionPayloadStatus")]
-    public partial class V0TransactionPayloadStatus : IEquatable<V0TransactionPayloadStatus>, IValidatableObject
+    [DataContract(Name = "TransactionManifest")]
+    public partial class TransactionManifest : IEquatable<TransactionManifest>, IValidatableObject
     {
         /// <summary>
-        /// The status of the transaction payload, as per this node
-        /// </summary>
-        /// <value>The status of the transaction payload, as per this node</value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum StatusEnum
-        {
-            /// <summary>
-            /// Enum CommittedSuccess for value: CommittedSuccess
-            /// </summary>
-            [EnumMember(Value = "CommittedSuccess")]
-            CommittedSuccess = 1,
-
-            /// <summary>
-            /// Enum CommittedFailure for value: CommittedFailure
-            /// </summary>
-            [EnumMember(Value = "CommittedFailure")]
-            CommittedFailure = 2,
-
-            /// <summary>
-            /// Enum InMempool for value: InMempool
-            /// </summary>
-            [EnumMember(Value = "InMempool")]
-            InMempool = 3,
-
-            /// <summary>
-            /// Enum Rejected for value: Rejected
-            /// </summary>
-            [EnumMember(Value = "Rejected")]
-            Rejected = 4
-
-        }
-
-
-        /// <summary>
-        /// The status of the transaction payload, as per this node
-        /// </summary>
-        /// <value>The status of the transaction payload, as per this node</value>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public StatusEnum Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
+        /// Initializes a new instance of the <see cref="TransactionManifest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected V0TransactionPayloadStatus() { }
+        protected TransactionManifest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
+        /// Initializes a new instance of the <see cref="TransactionManifest" /> class.
         /// </summary>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction)) (required).</param>
-        /// <param name="status">The status of the transaction payload, as per this node (required).</param>
-        /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
-        public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum), string errorMessage = default(string))
+        /// <param name="instructions">The decompiled transaction manifest instructions (required).</param>
+        /// <param name="blobsHex">A map of the hex-encoded blob hash, to hex-encoded blob content (required).</param>
+        public TransactionManifest(string instructions = default(string), Dictionary<string, string> blobsHex = default(Dictionary<string, string>))
         {
-            // to ensure "payloadHash" is required (not null)
-            if (payloadHash == null)
+            // to ensure "instructions" is required (not null)
+            if (instructions == null)
             {
-                throw new ArgumentNullException("payloadHash is a required property for V0TransactionPayloadStatus and cannot be null");
+                throw new ArgumentNullException("instructions is a required property for TransactionManifest and cannot be null");
             }
-            this.PayloadHash = payloadHash;
-            this.Status = status;
-            this.ErrorMessage = errorMessage;
+            this.Instructions = instructions;
+            // to ensure "blobsHex" is required (not null)
+            if (blobsHex == null)
+            {
+                throw new ArgumentNullException("blobsHex is a required property for TransactionManifest and cannot be null");
+            }
+            this.BlobsHex = blobsHex;
         }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))
+        /// The decompiled transaction manifest instructions
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))</value>
-        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHash { get; set; }
+        /// <value>The decompiled transaction manifest instructions</value>
+        [DataMember(Name = "instructions", IsRequired = true, EmitDefaultValue = true)]
+        public string Instructions { get; set; }
 
         /// <summary>
-        /// An explanation for the error, if failed or rejected
+        /// A map of the hex-encoded blob hash, to hex-encoded blob content
         /// </summary>
-        /// <value>An explanation for the error, if failed or rejected</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        /// <value>A map of the hex-encoded blob hash, to hex-encoded blob content</value>
+        [DataMember(Name = "blobs_hex", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> BlobsHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,10 +143,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class V0TransactionPayloadStatus {\n");
-            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class TransactionManifest {\n");
+            sb.Append("  Instructions: ").Append(Instructions).Append("\n");
+            sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -204,15 +166,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as V0TransactionPayloadStatus);
+            return this.Equals(input as TransactionManifest);
         }
 
         /// <summary>
-        /// Returns true if V0TransactionPayloadStatus instances are equal
+        /// Returns true if TransactionManifest instances are equal
         /// </summary>
-        /// <param name="input">Instance of V0TransactionPayloadStatus to be compared</param>
+        /// <param name="input">Instance of TransactionManifest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(V0TransactionPayloadStatus input)
+        public bool Equals(TransactionManifest input)
         {
             if (input == null)
             {
@@ -220,18 +182,15 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PayloadHash == input.PayloadHash ||
-                    (this.PayloadHash != null &&
-                    this.PayloadHash.Equals(input.PayloadHash))
+                    this.Instructions == input.Instructions ||
+                    (this.Instructions != null &&
+                    this.Instructions.Equals(input.Instructions))
                 ) && 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.BlobsHex == input.BlobsHex ||
+                    this.BlobsHex != null &&
+                    input.BlobsHex != null &&
+                    this.BlobsHex.SequenceEqual(input.BlobsHex)
                 );
         }
 
@@ -244,14 +203,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PayloadHash != null)
+                if (this.Instructions != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Instructions.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.ErrorMessage != null)
+                if (this.BlobsHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.BlobsHex.GetHashCode();
                 }
                 return hashCode;
             }
@@ -264,18 +222,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // PayloadHash (string) maxLength
-            if (this.PayloadHash != null && this.PayloadHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be less than 64.", new [] { "PayloadHash" });
-            }
-
-            // PayloadHash (string) minLength
-            if (this.PayloadHash != null && this.PayloadHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be greater than 64.", new [] { "PayloadHash" });
-            }
-
             yield break;
         }
     }

@@ -91,73 +91,43 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// V0TransactionPayloadStatus
+    /// MempoolTransactionHashes
     /// </summary>
-    [DataContract(Name = "V0TransactionPayloadStatus")]
-    public partial class V0TransactionPayloadStatus : IEquatable<V0TransactionPayloadStatus>, IValidatableObject
+    [DataContract(Name = "MempoolTransactionHashes")]
+    public partial class MempoolTransactionHashes : IEquatable<MempoolTransactionHashes>, IValidatableObject
     {
         /// <summary>
-        /// The status of the transaction payload, as per this node
-        /// </summary>
-        /// <value>The status of the transaction payload, as per this node</value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum StatusEnum
-        {
-            /// <summary>
-            /// Enum CommittedSuccess for value: CommittedSuccess
-            /// </summary>
-            [EnumMember(Value = "CommittedSuccess")]
-            CommittedSuccess = 1,
-
-            /// <summary>
-            /// Enum CommittedFailure for value: CommittedFailure
-            /// </summary>
-            [EnumMember(Value = "CommittedFailure")]
-            CommittedFailure = 2,
-
-            /// <summary>
-            /// Enum InMempool for value: InMempool
-            /// </summary>
-            [EnumMember(Value = "InMempool")]
-            InMempool = 3,
-
-            /// <summary>
-            /// Enum Rejected for value: Rejected
-            /// </summary>
-            [EnumMember(Value = "Rejected")]
-            Rejected = 4
-
-        }
-
-
-        /// <summary>
-        /// The status of the transaction payload, as per this node
-        /// </summary>
-        /// <value>The status of the transaction payload, as per this node</value>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public StatusEnum Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
+        /// Initializes a new instance of the <see cref="MempoolTransactionHashes" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected V0TransactionPayloadStatus() { }
+        protected MempoolTransactionHashes() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
+        /// Initializes a new instance of the <see cref="MempoolTransactionHashes" /> class.
         /// </summary>
+        /// <param name="intentHash">The hex-encoded transaction intent hash. This is also known as the Transaction Identifier hash for user transactions. This hash is SHA256(SHA256(compiled_intent)) (required).</param>
         /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction)) (required).</param>
-        /// <param name="status">The status of the transaction payload, as per this node (required).</param>
-        /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
-        public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum), string errorMessage = default(string))
+        public MempoolTransactionHashes(string intentHash = default(string), string payloadHash = default(string))
         {
+            // to ensure "intentHash" is required (not null)
+            if (intentHash == null)
+            {
+                throw new ArgumentNullException("intentHash is a required property for MempoolTransactionHashes and cannot be null");
+            }
+            this.IntentHash = intentHash;
             // to ensure "payloadHash" is required (not null)
             if (payloadHash == null)
             {
-                throw new ArgumentNullException("payloadHash is a required property for V0TransactionPayloadStatus and cannot be null");
+                throw new ArgumentNullException("payloadHash is a required property for MempoolTransactionHashes and cannot be null");
             }
             this.PayloadHash = payloadHash;
-            this.Status = status;
-            this.ErrorMessage = errorMessage;
         }
+
+        /// <summary>
+        /// The hex-encoded transaction intent hash. This is also known as the Transaction Identifier hash for user transactions. This hash is SHA256(SHA256(compiled_intent))
+        /// </summary>
+        /// <value>The hex-encoded transaction intent hash. This is also known as the Transaction Identifier hash for user transactions. This hash is SHA256(SHA256(compiled_intent))</value>
+        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
         /// The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))
@@ -167,23 +137,15 @@ namespace RadixDlt.CoreApiSdk.Model
         public string PayloadHash { get; set; }
 
         /// <summary>
-        /// An explanation for the error, if failed or rejected
-        /// </summary>
-        /// <value>An explanation for the error, if failed or rejected</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class V0TransactionPayloadStatus {\n");
+            sb.Append("class MempoolTransactionHashes {\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
             sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -204,15 +166,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as V0TransactionPayloadStatus);
+            return this.Equals(input as MempoolTransactionHashes);
         }
 
         /// <summary>
-        /// Returns true if V0TransactionPayloadStatus instances are equal
+        /// Returns true if MempoolTransactionHashes instances are equal
         /// </summary>
-        /// <param name="input">Instance of V0TransactionPayloadStatus to be compared</param>
+        /// <param name="input">Instance of MempoolTransactionHashes to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(V0TransactionPayloadStatus input)
+        public bool Equals(MempoolTransactionHashes input)
         {
             if (input == null)
             {
@@ -220,18 +182,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
+                ) && 
+                (
                     this.PayloadHash == input.PayloadHash ||
                     (this.PayloadHash != null &&
                     this.PayloadHash.Equals(input.PayloadHash))
-                ) && 
-                (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
-                ) && 
-                (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
                 );
         }
 
@@ -244,14 +202,13 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.IntentHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                }
                 if (this.PayloadHash != null)
                 {
                     hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
-                }
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.ErrorMessage != null)
-                {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
                 }
                 return hashCode;
             }
@@ -264,6 +221,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // IntentHash (string) maxLength
+            if (this.IntentHash != null && this.IntentHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be less than 64.", new [] { "IntentHash" });
+            }
+
+            // IntentHash (string) minLength
+            if (this.IntentHash != null && this.IntentHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 64.", new [] { "IntentHash" });
+            }
+
             // PayloadHash (string) maxLength
             if (this.PayloadHash != null && this.PayloadHash.Length > 64)
             {

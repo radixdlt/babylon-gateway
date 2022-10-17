@@ -91,87 +91,53 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// V0TransactionPayloadStatus
+    /// ParsedNotarizedTransaction
     /// </summary>
-    [DataContract(Name = "V0TransactionPayloadStatus")]
-    public partial class V0TransactionPayloadStatus : IEquatable<V0TransactionPayloadStatus>, IValidatableObject
+    [DataContract(Name = "ParsedNotarizedTransaction")]
+    public partial class ParsedNotarizedTransaction : IEquatable<ParsedNotarizedTransaction>, IValidatableObject
     {
         /// <summary>
-        /// The status of the transaction payload, as per this node
-        /// </summary>
-        /// <value>The status of the transaction payload, as per this node</value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum StatusEnum
-        {
-            /// <summary>
-            /// Enum CommittedSuccess for value: CommittedSuccess
-            /// </summary>
-            [EnumMember(Value = "CommittedSuccess")]
-            CommittedSuccess = 1,
-
-            /// <summary>
-            /// Enum CommittedFailure for value: CommittedFailure
-            /// </summary>
-            [EnumMember(Value = "CommittedFailure")]
-            CommittedFailure = 2,
-
-            /// <summary>
-            /// Enum InMempool for value: InMempool
-            /// </summary>
-            [EnumMember(Value = "InMempool")]
-            InMempool = 3,
-
-            /// <summary>
-            /// Enum Rejected for value: Rejected
-            /// </summary>
-            [EnumMember(Value = "Rejected")]
-            Rejected = 4
-
-        }
-
-
-        /// <summary>
-        /// The status of the transaction payload, as per this node
-        /// </summary>
-        /// <value>The status of the transaction payload, as per this node</value>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public StatusEnum Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
+        /// Initializes a new instance of the <see cref="ParsedNotarizedTransaction" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected V0TransactionPayloadStatus() { }
+        protected ParsedNotarizedTransaction() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
+        /// Initializes a new instance of the <see cref="ParsedNotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction)) (required).</param>
-        /// <param name="status">The status of the transaction payload, as per this node (required).</param>
-        /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
-        public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum), string errorMessage = default(string))
+        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
+        /// <param name="isStaticallyValid">Gives if the transaction is statically valid. Note that, even if statically valid, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid).  (required).</param>
+        /// <param name="validityError">If the transaction is not statically valid, this gives a reason. .</param>
+        public ParsedNotarizedTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), bool isStaticallyValid = default(bool), string validityError = default(string))
         {
-            // to ensure "payloadHash" is required (not null)
-            if (payloadHash == null)
+            // to ensure "notarizedTransaction" is required (not null)
+            if (notarizedTransaction == null)
             {
-                throw new ArgumentNullException("payloadHash is a required property for V0TransactionPayloadStatus and cannot be null");
+                throw new ArgumentNullException("notarizedTransaction is a required property for ParsedNotarizedTransaction and cannot be null");
             }
-            this.PayloadHash = payloadHash;
-            this.Status = status;
-            this.ErrorMessage = errorMessage;
+            this.NotarizedTransaction = notarizedTransaction;
+            this.IsStaticallyValid = isStaticallyValid;
+            this.ValidityError = validityError;
         }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))
+        /// Gets or Sets NotarizedTransaction
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))</value>
-        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHash { get; set; }
+        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
+        public NotarizedTransaction NotarizedTransaction { get; set; }
 
         /// <summary>
-        /// An explanation for the error, if failed or rejected
+        /// Gives if the transaction is statically valid. Note that, even if statically valid, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid). 
         /// </summary>
-        /// <value>An explanation for the error, if failed or rejected</value>
-        [DataMember(Name = "error_message", EmitDefaultValue = true)]
-        public string ErrorMessage { get; set; }
+        /// <value>Gives if the transaction is statically valid. Note that, even if statically valid, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid). </value>
+        [DataMember(Name = "is_statically_valid", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsStaticallyValid { get; set; }
+
+        /// <summary>
+        /// If the transaction is not statically valid, this gives a reason. 
+        /// </summary>
+        /// <value>If the transaction is not statically valid, this gives a reason. </value>
+        [DataMember(Name = "validity_error", EmitDefaultValue = true)]
+        public string ValidityError { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -180,10 +146,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class V0TransactionPayloadStatus {\n");
-            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
+            sb.Append("class ParsedNotarizedTransaction {\n");
+            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("  IsStaticallyValid: ").Append(IsStaticallyValid).Append("\n");
+            sb.Append("  ValidityError: ").Append(ValidityError).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -204,15 +170,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as V0TransactionPayloadStatus);
+            return this.Equals(input as ParsedNotarizedTransaction);
         }
 
         /// <summary>
-        /// Returns true if V0TransactionPayloadStatus instances are equal
+        /// Returns true if ParsedNotarizedTransaction instances are equal
         /// </summary>
-        /// <param name="input">Instance of V0TransactionPayloadStatus to be compared</param>
+        /// <param name="input">Instance of ParsedNotarizedTransaction to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(V0TransactionPayloadStatus input)
+        public bool Equals(ParsedNotarizedTransaction input)
         {
             if (input == null)
             {
@@ -220,18 +186,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.PayloadHash == input.PayloadHash ||
-                    (this.PayloadHash != null &&
-                    this.PayloadHash.Equals(input.PayloadHash))
+                    this.NotarizedTransaction == input.NotarizedTransaction ||
+                    (this.NotarizedTransaction != null &&
+                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
                 ) && 
                 (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
+                    this.IsStaticallyValid == input.IsStaticallyValid ||
+                    this.IsStaticallyValid.Equals(input.IsStaticallyValid)
                 ) && 
                 (
-                    this.ErrorMessage == input.ErrorMessage ||
-                    (this.ErrorMessage != null &&
-                    this.ErrorMessage.Equals(input.ErrorMessage))
+                    this.ValidityError == input.ValidityError ||
+                    (this.ValidityError != null &&
+                    this.ValidityError.Equals(input.ValidityError))
                 );
         }
 
@@ -244,14 +210,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PayloadHash != null)
+                if (this.NotarizedTransaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.ErrorMessage != null)
+                hashCode = (hashCode * 59) + this.IsStaticallyValid.GetHashCode();
+                if (this.ValidityError != null)
                 {
-                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidityError.GetHashCode();
                 }
                 return hashCode;
             }
@@ -264,18 +230,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // PayloadHash (string) maxLength
-            if (this.PayloadHash != null && this.PayloadHash.Length > 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be less than 64.", new [] { "PayloadHash" });
-            }
-
-            // PayloadHash (string) minLength
-            if (this.PayloadHash != null && this.PayloadHash.Length < 64)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be greater than 64.", new [] { "PayloadHash" });
-            }
-
             yield break;
         }
     }
