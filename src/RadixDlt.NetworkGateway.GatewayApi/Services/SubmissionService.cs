@@ -63,7 +63,9 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
+using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
 using System.Collections.Generic;
@@ -82,21 +84,42 @@ public interface ISubmissionService
 internal class SubmissionService : ISubmissionService
 {
     private readonly ICoreApiHandler _coreApiHandler;
+    private readonly ISubmissionTrackingService _submissionTrackingService;
+    private readonly IClock _clock;
     private readonly IEnumerable<ISubmissionServiceObserver> _observers;
     private readonly ILogger _logger;
 
     public SubmissionService(
         ICoreApiHandler coreApiHandler,
+        ISubmissionTrackingService submissionTrackingService,
+        IClock clock,
         IEnumerable<ISubmissionServiceObserver> observers,
         ILogger<SubmissionService> logger)
     {
         _coreApiHandler = coreApiHandler;
+        _submissionTrackingService = submissionTrackingService;
+        _clock = clock;
         _observers = observers;
         _logger = logger;
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
+        // TODO still waiting for CoreApi endpoint, this is why we'll use following values as a placeholders
+        var rawBytes = request.NotarizedTransaction.ConvertFromHex();
+        var payloadHash = HashingHelper.Sha256Twice(request.NotarizedTransaction.ConvertFromHex());
+        var intentHash = HashingHelper.Sha256Twice(payloadHash);
+        var submittedTimestamp = _clock.UtcNow;
+
+        var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(
+            submittedTimestamp,
+            payloadHash,
+            intentHash,
+            rawBytes,
+            _coreApiHandler.GetCoreNodeConnectedTo().Name,
+            token
+        );
+
         try
         {
             await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));

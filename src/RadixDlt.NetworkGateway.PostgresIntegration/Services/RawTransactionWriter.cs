@@ -116,7 +116,7 @@ internal class RawTransactionWriter : IRawTransactionWriter
 
         var transactionIdList = transactionsById.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 
-        var toUpdate = await context.MempoolTransactions
+        var toUpdate = await context.PendingTransactions
             .Where(mt => mt.Status != MempoolTransactionStatus.Committed && transactionIdList.Contains(mt.PayloadHash))
             .ToListAsync(token);
 

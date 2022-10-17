@@ -62,69 +62,28 @@
  * permissions under this License.
  */
 
-using Newtonsoft.Json;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 /// <summary>
-///  This stores all the data needed to construct a Gateway.TransactionInfo (alongside the other data in the DB).
-/// </summary>
-[DataContract(Name = "TransactionContents")]
-public record GatewayTransactionContents
-{
-    [DataMember(Name = "fee", EmitDefaultValue = false)]
-    public string FeePaidSubunits { get; set; }
-
-    [DataMember(Name = "message", EmitDefaultValue = false)]
-    public string? MessageHex { get; set; }
-
-    [DataMember(Name = "confirmed_time", EmitDefaultValue = false)]
-    public DateTimeOffset? ConfirmedTime { get; set; }
-
-    [DataMember(Name = "state_version", EmitDefaultValue = false)]
-    public long? LedgerStateVersion { get; set; }
-
-    public static GatewayTransactionContents Default()
-    {
-        return new GatewayTransactionContents { FeePaidSubunits = string.Empty };
-    }
-}
-
-/// <summary>
 /// A record of transactions submitted recently by this and other nodes.
 /// </summary>
-[Table("mempool_transactions")]
-internal class MempoolTransaction
+[Table("pending_transactions")]
+internal class PendingTransaction
 {
-    private MempoolTransaction(byte[] payloadHash, byte[] payload, GatewayTransactionContents transactionContents)
-    {
-        PayloadHash = payloadHash;
-        IntentHash = new byte[32]; // TODO - Fix me!
-        Payload = payload;
-        SetTransactionContents(transactionContents);
-    }
-
-    // For EF Core
-    private MempoolTransaction()
-    {
-    }
-
     [Key]
-    [Column(name: "payload_hash")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public long Id { get; set; }
+
+    [Column("payload_hash")]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] PayloadHash { get; private set; }
 
-    [Column(name: "intent_hash")]
+    [Column("intent_hash")]
     // OnModelCreating: Add intent_hash as alternate key.
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] IntentHash { get; private set; }
@@ -132,13 +91,9 @@ internal class MempoolTransaction
     /// <summary>
     /// The payload of the transaction.
     /// </summary>
-    [Column("payload")]
+    [Column("notarized_transaction")]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
-    public byte[] Payload { get; private set; }
-
-    // https://www.npgsql.org/efcore/mapping/json.html?tabs=data-annotations%2Cpoco
-    [Column("transaction_contents", TypeName="jsonb")]
-    public string TransactionContents { get; private set; }
+    public byte[] NotarizedTransaction { get; private set; }
 
     [Column("status")]
     [ConcurrencyCheck]
@@ -205,47 +160,48 @@ internal class MempoolTransaction
     [Column("failure_timestamp")]
     public DateTimeOffset? FailureTimestamp { get; private set; }
 
-    public static MempoolTransaction NewFirstSeenInMempool(
+    public static PendingTransaction NewFirstSeenInMempool(
         byte[] payloadHash,
-        byte[] payload,
-        GatewayTransactionContents transactionContents,
+        byte[] intentHash,
+        byte[] notarizedTransaction,
         DateTimeOffset firstSeenAt
     )
     {
-        var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
+        var mempoolTransaction = new PendingTransaction
+        {
+            PayloadHash = payloadHash,
+            IntentHash = intentHash,
+            NotarizedTransaction = notarizedTransaction,
+        };
+
         mempoolTransaction.MarkAsSeenInAMempool(firstSeenAt);
+
         return mempoolTransaction;
     }
 
-    public static MempoolTransaction NewAsSubmittedForFirstTimeByGateway(
+    public static PendingTransaction NewAsSubmittedForFirstTimeByGateway(
         byte[] payloadHash,
-        byte[] payload,
+        byte[] intentHash,
+        byte[] notarizedTransaction,
         string submittedToNodeName,
-        GatewayTransactionContents transactionContents,
         DateTimeOffset submittedTimestamp
     )
     {
-        var mempoolTransaction = new MempoolTransaction(payloadHash, payload, transactionContents);
+        var pendingTransaction = new PendingTransaction
+        {
+            PayloadHash = payloadHash,
+            IntentHash = intentHash,
+            NotarizedTransaction = notarizedTransaction,
+            FirstSubmittedToGatewayTimestamp = submittedTimestamp,
+        };
 
-        mempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+        pendingTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
 
         // We assume it's been successfully submitted until we see an error and then mark it as an error then
         // This ensures the correct resubmission behaviour
-        mempoolTransaction.MarkAsAssumedSuccessfullySubmittedToNode(submittedToNodeName, submittedTimestamp);
+        pendingTransaction.MarkAsAssumedSuccessfullySubmittedToNode(submittedToNodeName, submittedTimestamp);
 
-        return mempoolTransaction;
-    }
-
-    public GatewayTransactionContents GetTransactionContents()
-    {
-        try
-        {
-            return JsonConvert.DeserializeObject<GatewayTransactionContents>(TransactionContents) ?? GatewayTransactionContents.Default();
-        }
-        catch (Exception)
-        {
-            return GatewayTransactionContents.Default();
-        }
+        return pendingTransaction;
     }
 
     public void MarkAsMissing(DateTimeOffset timestamp)
@@ -259,12 +215,6 @@ internal class MempoolTransaction
         var commitToDbTimestamp = clock.UtcNow;
         Status = MempoolTransactionStatus.Committed;
         CommitTimestamp = commitToDbTimestamp;
-
-        var transactionContents = GetTransactionContents();
-        transactionContents.LedgerStateVersion = ledgerStateVersion;
-        transactionContents.ConfirmedTime = ledgerCommitTimestamp;
-
-        SetTransactionContents(transactionContents);
     }
 
     public void MarkAsSeenInAMempool(DateTimeOffset timestamp)
@@ -311,10 +261,5 @@ internal class MempoolTransaction
         LastSubmittedToNodeTimestamp = submittedAt;
         LastSubmittedToNodeName = nodeSubmittedTo;
         SubmissionToNodesCount += 1;
-    }
-
-    private void SetTransactionContents(GatewayTransactionContents transactionContents)
-    {
-        TransactionContents = JsonConvert.SerializeObject(transactionContents);
     }
 }

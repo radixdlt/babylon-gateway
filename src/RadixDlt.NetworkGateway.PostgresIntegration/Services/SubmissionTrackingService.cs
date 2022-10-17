@@ -95,16 +95,14 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
     public async Task<MempoolTrackGuidance> TrackInitialSubmission(
         DateTimeOffset submittedTimestamp,
-        byte[] signedTransaction,
-        byte[] transactionIdentifierHash,
+        byte[] payloadHash,
+        byte[] intentHash,
+        byte[] notarizedTransaction,
         string submittedToNodeName,
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // CoreModel.ConstructionParseResponse parseResponse,
-        object? parseResponse,
         CancellationToken token = default
     )
     {
-        var existingMempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash, token);
+        var existingMempoolTransaction = await GetPendingTransaction(payloadHash, token);
 
         if (existingMempoolTransaction != null)
         {
@@ -120,15 +118,15 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
             return new MempoolTrackGuidance(ShouldSubmitToNode: false);
         }
 
-        var mempoolTransaction = MempoolTransaction.NewAsSubmittedForFirstTimeByGateway(
-            transactionIdentifierHash,
-            signedTransaction,
+        var mempoolTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
+            payloadHash,
+            intentHash,
+            notarizedTransaction,
             submittedToNodeName,
-            GatewayTransactionContents.Default(), // TODO - Need to fix for Babylon
             submittedTimestamp
         );
 
-        _dbContext.MempoolTransactions.Add(mempoolTransaction);
+        _dbContext.PendingTransactions.Add(mempoolTransaction);
 
         // We now try saving to the DB - but catch duplicates - if we get a duplicate reported, the gateway which saved
         // it successfully should then submit it to the node -- and the one that reports a duplicate should return a
@@ -154,7 +152,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         CancellationToken token = default
     )
     {
-        var mempoolTransaction = await GetMempoolTransaction(transactionIdentifierHash, token);
+        var mempoolTransaction = await GetPendingTransaction(transactionIdentifierHash, token);
 
         if (mempoolTransaction == null)
         {
@@ -167,10 +165,10 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         await _dbContext.SaveChangesAsync(token);
     }
 
-    private async Task<MempoolTransaction?> GetMempoolTransaction(byte[] transactionIdentifierHash, CancellationToken token = default)
+    private async Task<PendingTransaction?> GetPendingTransaction(byte[] payloadHash, CancellationToken token = default)
     {
-        return await _dbContext.MempoolTransactions
-            .Where(t => t.PayloadHash == transactionIdentifierHash)
+        return await _dbContext.PendingTransactions
+            .Where(t => t.PayloadHash == payloadHash)
             .SingleOrDefaultAsync(token);
     }
 }

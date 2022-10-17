@@ -108,7 +108,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var mempoolCountByStatus = await dbContext.MempoolTransactions
+        var mempoolCountByStatus = await dbContext.PendingTransactions
             .GroupBy(t => t.Status)
             .Select(g => new MempoolStatusCount(MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(g.Key) ?? "UNKNOWN", g.Count()))
             .ToListAsync(token);
@@ -128,7 +128,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
             pruneIfCommittedBefore
         );
 
-        var transactionsToPrune = await dbContext.MempoolTransactions
+        var transactionsToPrune = await dbContext.PendingTransactions
             .Where(mt =>
                 (
                     /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */
@@ -163,7 +163,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
 
             await _observers.ForEachAsync(x => x.PreMempoolTransactionPruned(transactionsToPrune.Count));
 
-            dbContext.MempoolTransactions.RemoveRange(transactionsToPrune);
+            dbContext.PendingTransactions.RemoveRange(transactionsToPrune);
             await dbContext.SaveChangesAsync(token);
         }
     }

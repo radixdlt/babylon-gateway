@@ -432,11 +432,29 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transactions");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.MempoolTransaction", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
                 {
-                    b.Property<byte[]>("PayloadHash")
-                        .HasColumnType("bytea")
-                        .HasColumnName("payload_hash");
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("NetworkName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("network_name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("network_configuration");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset?>("CommitTimestamp")
                         .HasColumnType("timestamp with time zone")
@@ -483,10 +501,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_node_timestamp");
 
-                    b.Property<byte[]>("Payload")
+                    b.Property<byte[]>("NotarizedTransaction")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("payload");
+                        .HasColumnName("notarized_transaction");
+
+                    b.Property<byte[]>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload_hash");
 
                     b.Property<string>("Status")
                         .IsConcurrencyToken()
@@ -502,34 +525,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("submitted_by_this_gateway");
 
-                    b.Property<string>("TransactionContents")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("transaction_contents");
-
-                    b.HasKey("PayloadHash");
-
-                    b.HasAlternateKey("IntentHash");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("mempool_transactions");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("NetworkName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("network_name");
-
                     b.HasKey("Id");
 
-                    b.ToTable("network_configuration");
+                    b.ToTable("pending_transactions");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", b =>

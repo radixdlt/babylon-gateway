@@ -74,12 +74,10 @@ public interface ISubmissionTrackingService
 {
     Task<MempoolTrackGuidance> TrackInitialSubmission(
         DateTimeOffset submittedTimestamp,
-        byte[] signedTransaction,
-        byte[] transactionIdentifierHash,
+        byte[] payloadHash,
+        byte[] intentHash,
+        byte[] notarizedTransaction,
         string submittedToNodeName,
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // CoreModel.ConstructionParseResponse parseResponse,
-        object? parseResponse,
         CancellationToken token = default
     );
 

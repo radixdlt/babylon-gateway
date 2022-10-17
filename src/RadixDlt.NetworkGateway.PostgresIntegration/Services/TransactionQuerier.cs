@@ -155,7 +155,7 @@ internal class TransactionQuerier : ITransactionQuerier
     public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
-        var query = _rwDbContext.MempoolTransactions.AsQueryable();
+        var query = _rwDbContext.PendingTransactions.AsQueryable();
 
         switch (lookup.Origin)
         {
@@ -183,13 +183,12 @@ internal class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
-        var transactionContents = mempoolTransaction.GetTransactionContents();
-        var stateVersion = transactionContents.LedgerStateVersion ?? 0;
+        var stateVersion = -1; // TODO fix me
 
         var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
-            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Succeeded, transactionContents.ConfirmedTime),
+            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Succeeded), // TODO , transactionContents.ConfirmedTime),
             MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
             MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
             MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
@@ -202,7 +201,7 @@ internal class TransactionQuerier : ITransactionQuerier
             payloadHashHex: Array.Empty<byte>().ToHex(),
             intentHashHex: Array.Empty<byte>().ToHex(),
             transactionAccumulatorHex: Array.Empty<byte>().ToHex(),
-            feePaid: TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+            feePaid: new Gateway.TokenAmount("0", new Gateway.TokenIdentifier("some rri")) // TODO TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
         );
     }
 

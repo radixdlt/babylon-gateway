@@ -87,7 +87,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
+    public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
     public DbSet<Entity> Entities => Set<Entity>();
 
@@ -110,7 +110,7 @@ internal abstract class CommonDbContext : DbContext
     {
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
-        HookupMempoolTransactions(modelBuilder);
+        HookupPendingTransactions(modelBuilder);
 
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("type")
@@ -167,13 +167,14 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
+        // TODO we most likely want to drop most of those indices as they must slow down ingestion rate by quite some margin
+
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.PayloadHash);
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.IntentHash);
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.SignedIntentHash);
-
         modelBuilder.Entity<LedgerTransaction>()
             .HasAlternateKey(lt => lt.TransactionAccumulator);
 
@@ -209,14 +210,8 @@ internal abstract class CommonDbContext : DbContext
             .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_epoch_starts");
     }
 
-    private static void HookupMempoolTransactions(ModelBuilder modelBuilder)
+    private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<MempoolTransaction>()
-            .HasAlternateKey(lt => lt.IntentHash);
-
-        modelBuilder.Entity<MempoolTransaction>()
-            .HasIndex(lt => lt.Status);
-
         // TODO - We should improve these indices to match the queries we actually need to make here
     }
 }
