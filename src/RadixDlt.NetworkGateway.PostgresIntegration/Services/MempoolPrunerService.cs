@@ -110,7 +110,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
 
         var mempoolCountByStatus = await dbContext.PendingTransactions
             .GroupBy(t => t.Status)
-            .Select(g => new MempoolStatusCount(MempoolTransactionStatusValueConverter.Conversion.GetValueOrDefault(g.Key) ?? "UNKNOWN", g.Count()))
+            .Select(g => new MempoolStatusCount(PendingTransactionStatusValueConverter.Conversion.GetValueOrDefault(g.Key) ?? "UNKNOWN", g.Count()))
             .ToListAsync(token);
 
         await _observers.ForEachAsync(x => x.PreMempoolPrune(mempoolCountByStatus));
@@ -132,7 +132,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
             .Where(mt =>
                 (
                     /* For committed transactions, remove from the mempool if we're synced up (as a committed transaction will be on ledger) */
-                    mt.Status == MempoolTransactionStatus.Committed
+                    mt.Status == PendingTransactionStatus.Committed
                     && aggregatorIsSyncedUpEnoughToRemoveCommittedTransactions
                     && mt.CommitTimestamp!.Value < pruneIfCommittedBefore
                 )
@@ -158,7 +158,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
             _logger.LogInformation(
                 "Pruning {PrunedCount} transactions from the mempool, of which {PrunedCommittedCount} were committed",
                 transactionsToPrune.Count,
-                transactionsToPrune.Count(t => t.Status == MempoolTransactionStatus.Committed)
+                transactionsToPrune.Count(t => t.Status == PendingTransactionStatus.Committed)
             );
 
             await _observers.ForEachAsync(x => x.PreMempoolTransactionPruned(transactionsToPrune.Count));

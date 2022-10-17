@@ -62,18 +62,26 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
-public enum MempoolTransactionStatus
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
+
+internal class PendingTransactionStatusValueConverter : EnumTypeValueConverterBase<PendingTransactionStatus>
 {
-    SubmittedOrKnownInNodeMempool, // We believe the transaction is in at least one node mempool, or will hopefully (just) be entering one, or has entered one
-    Missing,       // A transaction which was previously SubmittedOrKnownInNodeMempool, but at last check, was past its
-    // post-submission grace period, and no longer seen in any mempool.
-    // After transitioning to Missing, we wait for a further delay before attempting resubmission, to allow the
-    // Gateway DB time to sync and mark it committed
-    ResolvedButUnknownTillSyncedUp, // A transaction has been marked as substate not found by a node at resubmission, but we've yet to see it on ledger
-    // because the aggregator service is not sufficiently synced up - so we don't know if it's been committed
-    // and detected itself, or clashed with another transaction.
-    Failed,        // A transaction which we have tried to (re)submit, but it returns a permanent error from the node (eg substate clash)
-    Committed,     // A transaction which we know got committed to the ledger
+    public static readonly ImmutableDictionary<PendingTransactionStatus, string> Conversion =
+        new Dictionary<PendingTransactionStatus, string>()
+        {
+            { PendingTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
+            { PendingTransactionStatus.Missing, "MISSING" },
+            { PendingTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
+            { PendingTransactionStatus.Failed, "FAILED" },
+            { PendingTransactionStatus.Committed, "COMMITTED" },
+        }.ToImmutableDictionary();
+
+    public PendingTransactionStatusValueConverter()
+        : base(Conversion, Invert(Conversion))
+    {
+    }
 }

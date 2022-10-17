@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApi.Controllers;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
@@ -72,12 +71,12 @@ public class OpenApiSchemaValidatorTests
     [Fact(Skip ="Fails since the GatewayRequest parameter in missing")]
     public void GatewayControllerShouldMatchOpenApiSchema()
     {
-        OpenApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
+        // TODO OpenApiSpecValidator.ValidateController(typeof(GatewayController), "/gateway");
     }
 
     [Fact(Skip ="CancellationToken parameter is not documented yet")]
     public void TransactionControllerShouldMatchOpenApiSchema()
     {
-        OpenApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
+        // TODO OpenApiSpecValidator.ValidateController(typeof(TransactionController), "/transaction/");
     }
 }

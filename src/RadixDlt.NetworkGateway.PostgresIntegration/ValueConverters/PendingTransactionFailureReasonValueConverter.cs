@@ -67,16 +67,16 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-internal class MempoolTransactionFailureReasonValueConverter : EnumTypeValueConverterBase<MempoolTransactionFailureReason>
+internal class PendingTransactionFailureReasonValueConverter : EnumTypeValueConverterBase<PendingTransactionFailureReason>
 {
-    private static readonly Dictionary<MempoolTransactionFailureReason, string> _conversion = new()
+    private static readonly Dictionary<PendingTransactionFailureReason, string> _conversion = new()
     {
-        { MempoolTransactionFailureReason.DoubleSpend, "DOUBLE_SPEND" },
-        { MempoolTransactionFailureReason.Timeout, "TIMEOUT" },
-        { MempoolTransactionFailureReason.Unknown, "UNKNOWN" },
+        { PendingTransactionFailureReason.DoubleSpend, "DOUBLE_SPEND" },
+        { PendingTransactionFailureReason.Timeout, "TIMEOUT" },
+        { PendingTransactionFailureReason.Unknown, "UNKNOWN" },
     };
 
-    public MempoolTransactionFailureReasonValueConverter()
+    public PendingTransactionFailureReasonValueConverter()
         : base(_conversion, Invert(_conversion))
     {
     }

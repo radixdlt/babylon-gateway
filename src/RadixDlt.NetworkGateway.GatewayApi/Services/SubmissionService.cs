@@ -105,19 +105,12 @@ internal class SubmissionService : ISubmissionService
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
-        var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
-
-        // TODO still waiting for CoreApi endpoint, this is why we'll use following values as a placeholders
-        var rawBytes = request.NotarizedTransaction.ConvertFromHex();
-        var payloadHash = HashingHelper.Sha256Twice(request.NotarizedTransaction.ConvertFromHex());
-        var intentHash = HashingHelper.Sha256Twice(payloadHash);
+        var parsedTransaction = await HandlePreSubmissionParseTransaction(request, token);
         var submittedTimestamp = _clock.UtcNow;
 
-        var mempoolTrackGuidance = await _submissionTrackingService.TrackInitialSubmission(
+        var trackingGuidance = await _submissionTrackingService.TrackInitialSubmission(
             submittedTimestamp,
-            payloadHash,
-            intentHash,
-            rawBytes,
+            parsedTransaction,
             _coreApiHandler.GetCoreNodeConnectedTo().Name,
             token
         );
@@ -140,14 +133,11 @@ internal class SubmissionService : ISubmissionService
         }
     }
 
-    private async Task<CoreModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
+    private async Task<CoreModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {
         try
         {
-            var response = await _coreApiHandler.ParseTransaction(new CoreModel.TransactionParseRequest(
-                network: _coreApiHandler.GetNetworkIdentifier(),
-                payloadHex: request.NotarizedTransaction
-            ));
+            var response = await _coreApiHandler.ParseTransaction(new CoreModel.TransactionParseRequest(_coreApiHandler.GetNetworkIdentifier(), request.NotarizedTransaction), token);
 
             if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
             {

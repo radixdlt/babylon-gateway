@@ -62,26 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions.Model;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+namespace RadixDlt.NetworkGateway.Abstractions.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
-
-internal class MempoolTransactionStatusValueConverter : EnumTypeValueConverterBase<MempoolTransactionStatus>
+public enum PendingTransactionFailureReason
 {
-    public static readonly ImmutableDictionary<MempoolTransactionStatus, string> Conversion =
-        new Dictionary<MempoolTransactionStatus, string>()
-        {
-            { MempoolTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
-            { MempoolTransactionStatus.Missing, "MISSING" },
-            { MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
-            { MempoolTransactionStatus.Failed, "FAILED" },
-            { MempoolTransactionStatus.Committed, "COMMITTED" },
-        }.ToImmutableDictionary();
-
-    public MempoolTransactionStatusValueConverter()
-        : base(Conversion, Invert(Conversion))
-    {
-    }
+    DoubleSpend,
+    Timeout,
+    Unknown,
+    // Invalid shouldn't be possible, because they shouldn't make it to this table in the first place - mark as Unknown
 }

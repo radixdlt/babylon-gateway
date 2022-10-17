@@ -145,11 +145,11 @@ internal abstract class CommonDbContext : DbContext
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
 
-        configurationBuilder.Properties<MempoolTransactionStatus>()
-            .HaveConversion<MempoolTransactionStatusValueConverter>();
+        configurationBuilder.Properties<PendingTransactionStatus>()
+            .HaveConversion<PendingTransactionStatusValueConverter>();
 
-        configurationBuilder.Properties<MempoolTransactionFailureReason>()
-            .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
+        configurationBuilder.Properties<PendingTransactionFailureReason>()
+            .HaveConversion<PendingTransactionFailureReasonValueConverter>();
 
         configurationBuilder.Properties<LedgerTransactionStatus>()
             .HaveConversion<LedgerTransactionStatusValueConverter>();

@@ -74,6 +74,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -93,40 +94,39 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         _clock = clock;
     }
 
-    public async Task<MempoolTrackGuidance> TrackInitialSubmission(
+    public async Task<TackingGuidance> TrackInitialSubmission(
         DateTimeOffset submittedTimestamp,
-        byte[] payloadHash,
-        byte[] intentHash,
-        byte[] notarizedTransaction,
+        CoreModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     )
     {
-        var existingMempoolTransaction = await GetPendingTransaction(payloadHash, token);
+        var existingPendingTransaction = await GetPendingTransaction(notarizedTransaction.Hash.ConvertFromHex(), token);
 
-        if (existingMempoolTransaction != null)
+        if (existingPendingTransaction != null)
         {
-            if (existingMempoolTransaction.Status == MempoolTransactionStatus.Failed)
+            if (existingPendingTransaction.Status == PendingTransactionStatus.Failed)
             {
-                return new MempoolTrackGuidance(ShouldSubmitToNode: false, TransactionAlreadyFailedReason: existingMempoolTransaction.FailureReason);
+                return new TackingGuidance(ShouldSubmitToNode: false, TransactionAlreadyFailedReason: existingPendingTransaction.FailureReason);
             }
 
-            existingMempoolTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
+            existingPendingTransaction.MarkAsSubmittedToGateway(submittedTimestamp);
             await _dbContext.SaveChangesAsync(token);
 
             // It's already been submitted to a node - this will be handled by the resubmission service if appropriate
-            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
+            return new TackingGuidance(ShouldSubmitToNode: false);
         }
 
-        var mempoolTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
-            payloadHash,
-            intentHash,
-            notarizedTransaction,
+        var pendingTransaction = PendingTransaction.NewAsSubmittedForFirstTimeByGateway(
+            notarizedTransaction.Hash.ConvertFromHex(),
+            notarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex(),
+            notarizedTransaction.SignedIntent.Hash.ConvertFromHex(),
+            notarizedTransaction.PayloadHex.ConvertFromHex(),
             submittedToNodeName,
             submittedTimestamp
         );
 
-        _dbContext.PendingTransactions.Add(mempoolTransaction);
+        _dbContext.PendingTransactions.Add(pendingTransaction);
 
         // We now try saving to the DB - but catch duplicates - if we get a duplicate reported, the gateway which saved
         // it successfully should then submit it to the node -- and the one that reports a duplicate should return a
@@ -135,19 +135,19 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
         try
         {
             await _dbContext.SaveChangesAsync(token);
-            await _observers.ForEachAsync(x => x.PostMempoolTransactionAdded());
+            await _observers.ForEachAsync(x => x.PostPendingTransactionAdded());
 
-            return new MempoolTrackGuidance(ShouldSubmitToNode: true);
+            return new TackingGuidance(ShouldSubmitToNode: true);
         }
         catch (DbUpdateException ex) when ((ex.InnerException is PostgresException pg) && pg.SqlState.StartsWith("23"))
         {
-            return new MempoolTrackGuidance(ShouldSubmitToNode: false);
+            return new TackingGuidance(ShouldSubmitToNode: false);
         }
     }
 
     public async Task MarkAsFailed(
         byte[] transactionIdentifierHash,
-        MempoolTransactionFailureReason failureReason,
+        PendingTransactionFailureReason failureReason,
         string failureExplanation,
         CancellationToken token = default
     )
@@ -161,7 +161,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
 
         mempoolTransaction.MarkAsFailed(failureReason, failureExplanation, _clock.UtcNow);
 
-        await _observers.ForEachAsync(x => x.PostMempoolTransactionMarkedAsFailed());
+        await _observers.ForEachAsync(x => x.PostPendingTransactionMarkedAsFailed());
         await _dbContext.SaveChangesAsync(token);
     }
 

@@ -72,21 +72,19 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionTrackingService
 {
-    Task<MempoolTrackGuidance> TrackInitialSubmission(
+    Task<TackingGuidance> TrackInitialSubmission(
         DateTimeOffset submittedTimestamp,
-        byte[] payloadHash,
-        byte[] intentHash,
-        byte[] notarizedTransaction,
+        CoreModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default
     );
 
     Task MarkAsFailed(
         byte[] transactionIdentifierHash,
-        MempoolTransactionFailureReason failureReason,
+        PendingTransactionFailureReason failureReason,
         string failureExplanation,
         CancellationToken token = default
     );
 }
 
-public sealed record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
+public sealed record TackingGuidance(bool ShouldSubmitToNode, PendingTransactionFailureReason? TransactionAlreadyFailedReason = null);

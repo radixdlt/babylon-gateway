@@ -498,7 +498,7 @@ components:
       properties:
         duplicate:
           type: boolean
-          description: Is true if the transaction is a duplicate of an existing transaction in the mempool.
+          description: Is true if the transaction is a duplicate of an existing pending transaction.
     GatewayRequest:
       type: object
       example: {}

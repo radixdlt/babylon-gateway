@@ -253,14 +253,14 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, MempoolTrackGuidance mempoolTrackGuidance)
+    ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_failed").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, MempoolTrackGuidance mempoolTrackGuidance)
+    ValueTask ISubmissionServiceObserver.SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_submitted").Inc();
 
@@ -345,14 +345,14 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionTrackingServiceObserver.PostMempoolTransactionAdded()
+    ValueTask ISubmissionTrackingServiceObserver.PostPendingTransactionAdded()
     {
         _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionTrackingServiceObserver.PostMempoolTransactionMarkedAsFailed()
+    ValueTask ISubmissionTrackingServiceObserver.PostPendingTransactionMarkedAsFailed()
     {
         _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount.Inc();
 

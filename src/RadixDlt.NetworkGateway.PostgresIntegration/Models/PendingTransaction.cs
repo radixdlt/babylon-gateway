@@ -88,16 +88,20 @@ internal class PendingTransaction
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
     public byte[] IntentHash { get; private set; }
 
+    [Column("signed_intent_hash")]
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
+    public byte[] SignedIntentHash { get; private set; }
+
     /// <summary>
     /// The payload of the transaction.
     /// </summary>
-    [Column("notarized_transaction")]
+    [Column("notarized_transaction_blob")]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local - Needed for EF Core
-    public byte[] NotarizedTransaction { get; private set; }
+    public byte[] NotarizedTransactionBlob { get; private set; }
 
     [Column("status")]
     [ConcurrencyCheck]
-    public MempoolTransactionStatus Status { get; private set; }
+    public PendingTransactionStatus Status { get; private set; }
 
     /// <summary>
     /// True if the transaction was submitted by this gateway. In which case, the gateway is responsible for
@@ -152,7 +156,7 @@ internal class PendingTransaction
     public DateTimeOffset? CommitTimestamp { get; private set; }
 
     [Column("failure_reason")]
-    public MempoolTransactionFailureReason? FailureReason { get; private set; }
+    public PendingTransactionFailureReason? FailureReason { get; private set; }
 
     [Column("failure_explanation")]
     public string? FailureExplanation { get; private set; }
@@ -171,7 +175,7 @@ internal class PendingTransaction
         {
             PayloadHash = payloadHash,
             IntentHash = intentHash,
-            NotarizedTransaction = notarizedTransaction,
+            NotarizedTransactionBlob = notarizedTransaction,
         };
 
         mempoolTransaction.MarkAsSeenInAMempool(firstSeenAt);
@@ -182,7 +186,8 @@ internal class PendingTransaction
     public static PendingTransaction NewAsSubmittedForFirstTimeByGateway(
         byte[] payloadHash,
         byte[] intentHash,
-        byte[] notarizedTransaction,
+        byte[] signedIntentHash,
+        byte[] notarizedTransactionBlob,
         string submittedToNodeName,
         DateTimeOffset submittedTimestamp
     )
@@ -191,7 +196,8 @@ internal class PendingTransaction
         {
             PayloadHash = payloadHash,
             IntentHash = intentHash,
-            NotarizedTransaction = notarizedTransaction,
+            SignedIntentHash = signedIntentHash,
+            NotarizedTransactionBlob = notarizedTransactionBlob,
             FirstSubmittedToGatewayTimestamp = submittedTimestamp,
         };
 
@@ -206,26 +212,26 @@ internal class PendingTransaction
 
     public void MarkAsMissing(DateTimeOffset timestamp)
     {
-        Status = MempoolTransactionStatus.Missing;
+        Status = PendingTransactionStatus.Missing;
         LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
     public void MarkAsCommitted(long ledgerStateVersion, DateTimeOffset ledgerCommitTimestamp, IClock clock)
     {
         var commitToDbTimestamp = clock.UtcNow;
-        Status = MempoolTransactionStatus.Committed;
+        Status = PendingTransactionStatus.Committed;
         CommitTimestamp = commitToDbTimestamp;
     }
 
     public void MarkAsSeenInAMempool(DateTimeOffset timestamp)
     {
-        Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
+        Status = PendingTransactionStatus.SubmittedOrKnownInNodeMempool;
         FirstSeenInMempoolTimestamp ??= timestamp;
     }
 
-    public void MarkAsFailed(MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset timestamp)
+    public void MarkAsFailed(PendingTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset timestamp)
     {
-        Status = MempoolTransactionStatus.Failed;
+        Status = PendingTransactionStatus.Failed;
         FailureReason = failureReason;
         FailureExplanation = failureExplanation;
         FailureTimestamp = timestamp;
@@ -240,11 +246,11 @@ internal class PendingTransaction
 
     public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
-        Status = MempoolTransactionStatus.SubmittedOrKnownInNodeMempool;
+        Status = PendingTransactionStatus.SubmittedOrKnownInNodeMempool;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, MempoolTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset submittedAt, DateTimeOffset timestamp)
+    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, PendingTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset submittedAt, DateTimeOffset timestamp)
     {
         MarkAsFailed(failureReason, failureExplanation, timestamp);
         RecordSubmission(nodeSubmittedTo, submittedAt);
@@ -252,7 +258,7 @@ internal class PendingTransaction
 
     public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
     {
-        Status = MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp;
+        Status = PendingTransactionStatus.ResolvedButUnknownTillSyncedUp;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 

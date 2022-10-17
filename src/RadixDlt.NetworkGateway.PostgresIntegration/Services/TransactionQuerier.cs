@@ -152,7 +152,7 @@ internal class TransactionQuerier : ITransactionQuerier
             : new LookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
-    public async Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default)
+    public async Task<Gateway.TransactionInfo?> LookupPendingTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
         var query = _rwDbContext.PendingTransactions.AsQueryable();
@@ -188,11 +188,11 @@ internal class TransactionQuerier : ITransactionQuerier
         var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
-            MempoolTransactionStatus.Committed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Succeeded), // TODO , transactionContents.ConfirmedTime),
-            MempoolTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
-            MempoolTransactionStatus.Missing => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
-            MempoolTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
-            MempoolTransactionStatus.Failed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Failed),
+            PendingTransactionStatus.Committed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Succeeded), // TODO , transactionContents.ConfirmedTime),
+            PendingTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
+            PendingTransactionStatus.Missing => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
+            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
+            PendingTransactionStatus.Failed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Failed),
             _ => throw new ArgumentOutOfRangeException(),
         };
 

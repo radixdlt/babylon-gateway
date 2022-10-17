@@ -85,9 +85,9 @@ public interface ISubmissionServiceObserver
 
     ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, MempoolTrackGuidance mempoolTrackGuidance);
+    ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
 
-    ValueTask SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, MempoolTrackGuidance mempoolTrackGuidance);
+    ValueTask SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
 
     ValueTask SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
 

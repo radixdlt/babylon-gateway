@@ -241,7 +241,7 @@ internal class MempoolTrackerService : IMempoolTrackerService
 
         var reappearedTransactions = await dbContext.PendingTransactions
             .Where(mt => mempoolTransactionIds.Contains(mt.PayloadHash))
-            .Where(mt => mt.Status == MempoolTransactionStatus.Missing)
+            .Where(mt => mt.Status == PendingTransactionStatus.Missing)
             .ToListAsync(token);
 
         if (reappearedTransactions.Count == 0)
@@ -360,7 +360,7 @@ internal class MempoolTrackerService : IMempoolTrackerService
         var submissionGracePeriodCutOff = currentTimestamp - mempoolOptions.PostSubmissionGracePeriodBeforeCanBeMarkedMissing;
 
         var previouslyTrackedTransactionsNowMissingFromNodeMempools = await dbContext.PendingTransactions
-            .Where(mt => mt.Status == MempoolTransactionStatus.SubmittedOrKnownInNodeMempool)
+            .Where(mt => mt.Status == PendingTransactionStatus.SubmittedOrKnownInNodeMempool)
             .Where(mt =>
                 !mt.SubmittedByThisGateway
                 ||

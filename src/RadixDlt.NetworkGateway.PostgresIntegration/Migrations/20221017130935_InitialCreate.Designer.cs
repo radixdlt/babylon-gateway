@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221017085250_InitialCreate")]
+    [Migration("20221017130935_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -503,15 +503,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_node_timestamp");
 
-                    b.Property<byte[]>("NotarizedTransaction")
+                    b.Property<byte[]>("NotarizedTransactionBlob")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("notarized_transaction");
+                        .HasColumnName("notarized_transaction_blob");
 
                     b.Property<byte[]>("PayloadHash")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("payload_hash");
+
+                    b.Property<byte[]>("SignedIntentHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("signed_intent_hash");
 
                     b.Property<string>("Status")
                         .IsConcurrencyToken()

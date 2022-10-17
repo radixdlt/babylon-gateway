@@ -63,30 +63,30 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace GatewayApi;
+namespace GatewayApi.Controllers;
 
 [ApiController]
-[Route("")]
-public class RootController : ControllerBase
+[Route("gateway")]
+[TypeFilter(typeof(ExceptionFilter))]
+[TypeFilter(typeof(InvalidModelStateFilter))]
+public sealed class GatewayController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-    public RootController(ILedgerStateQuerier ledgerStateQuerier)
+    public GatewayController(ILedgerStateQuerier ledgerStateQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
     }
 
-    [HttpGet("")]
-    public async Task<IActionResult> GetRootResponse()
+    [HttpPost("")]
+    public async Task<GatewayResponse> Status(CancellationToken token)
     {
-        return Ok(new
-        {
-            docs = "https://docs.radixdlt.com",
-            repo = "https://github.com/radixdlt/babylon-gateway",
-            gateway = await _ledgerStateQuerier.GetGatewayState(),
-        });
+        return await _ledgerStateQuerier.GetGatewayState(token);
     }
 }

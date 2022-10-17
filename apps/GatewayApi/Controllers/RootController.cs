@@ -62,38 +62,31 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+namespace GatewayApi.Controllers;
 
-public class ExceptionFilter : IActionFilter, IOrderedFilter
+[ApiController]
+[Route("")]
+public class RootController : ControllerBase
 {
-    private readonly IExceptionHandler _exceptionHandler;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-    public ExceptionFilter(IExceptionHandler exceptionHandler)
+    public RootController(ILedgerStateQuerier ledgerStateQuerier)
     {
-        _exceptionHandler = exceptionHandler;
+        _ledgerStateQuerier = ledgerStateQuerier;
     }
 
-    public int Order => int.MaxValue - 10;
-
-    public void OnActionExecuting(ActionExecutingContext context)
+    [HttpGet("")]
+    public async Task<IActionResult> GetRootResponse()
     {
-    }
-
-    public void OnActionExecuted(ActionExecutedContext context)
-    {
-        if (context.Exception == null)
+        return Ok(new
         {
-            return;
-        }
-
-        // See https://github.com/dotnet/aspnetcore/blob/ae1a6cbe225b99c0bf38b7e31bf60cb653b73a52/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs#L92
-        var traceId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
-
-        context.Result = _exceptionHandler.CreateAndLogApiResultFromException(context, context.Exception!, traceId);
-        context.ExceptionHandled = true;
+            docs = "https://docs.radixdlt.com",
+            repo = "https://github.com/radixdlt/babylon-gateway",
+            gateway = await _ledgerStateQuerier.GetGatewayState(),
+        });
     }
 }

@@ -62,12 +62,56 @@
  * permissions under this License.
  */
 
-namespace RadixDlt.NetworkGateway.Abstractions.Model;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading;
+using System.Threading.Tasks;
 
-public enum MempoolTransactionFailureReason
+namespace GatewayApi.Controllers;
+
+// TODO don't like route/type "state" name
+
+[ApiController]
+[Route("state")]
+[TypeFilter(typeof(ExceptionFilter))]
+[TypeFilter(typeof(InvalidModelStateFilter))]
+public class StateController : ControllerBase
 {
-    DoubleSpend,
-    Timeout,
-    Unknown,
-    // Invalid shouldn't be possible, because they shouldn't make it to this table in the first place - mark as Unknown
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
+
+    public StateController(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
+    }
+
+    [HttpPost("resources")]
+    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
+    {
+        var address = RadixBech32.Decode(request.Address);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var response = await _entityStateQuerier.EntityResourcesSnapshot(address.Data, ledgerState, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("details")]
+    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
+    {
+        var address = RadixBech32.Decode(request.Address);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var response = await _entityStateQuerier.EntityDetailsSnapshot(address.Data, ledgerState, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
 }
