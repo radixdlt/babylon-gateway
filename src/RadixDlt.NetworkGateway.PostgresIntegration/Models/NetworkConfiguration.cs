@@ -89,7 +89,7 @@ internal class NetworkConfiguration : SingleEntryBase
 }
 
 [Owned]
-internal class NetworkConfigurationHrpDefinition
+internal record NetworkConfigurationHrpDefinition
 {
     [Column("package_hrp")]
     public string PackageHrp { get; set; }
@@ -119,7 +119,7 @@ internal class NetworkConfigurationHrpDefinition
 }
 
 [Owned]
-internal class NetworkConfigurationWellKnownAddresses
+internal record NetworkConfigurationWellKnownAddresses
 {
     [Column("xrd_address")]
     public string XrdAddress { get; set; }
