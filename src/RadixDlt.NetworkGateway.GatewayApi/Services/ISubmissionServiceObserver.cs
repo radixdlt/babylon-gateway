@@ -81,13 +81,13 @@ public interface ISubmissionServiceObserver
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // ValueTask ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
 
-    ValueTask ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException);
 
-    ValueTask ParseTransactionFailedUnknown(ValidatedHex signedTransaction, Exception exception);
+    ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask SubmissionAlreadyFailed(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance);
+    ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, MempoolTrackGuidance mempoolTrackGuidance);
 
-    ValueTask SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance);
+    ValueTask SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, MempoolTrackGuidance mempoolTrackGuidance);
 
     ValueTask SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
 

@@ -105,6 +105,8 @@ internal class SubmissionService : ISubmissionService
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
+        var parsedTransaction = await HandlePreSubmissionParseTransaction(request);
+
         // TODO still waiting for CoreApi endpoint, this is why we'll use following values as a placeholders
         var rawBytes = request.NotarizedTransaction.ConvertFromHex();
         var payloadHash = HashingHelper.Sha256Twice(request.NotarizedTransaction.ConvertFromHex());
@@ -133,6 +135,47 @@ internal class SubmissionService : ISubmissionService
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.HandleSubmitRequestFailed(request, ex));
+
+            throw;
+        }
+    }
+
+    private async Task<CoreModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request)
+    {
+        try
+        {
+            var response = await _coreApiHandler.ParseTransaction(new CoreModel.TransactionParseRequest(
+                network: _coreApiHandler.GetNetworkIdentifier(),
+                payloadHex: request.NotarizedTransaction
+            ));
+
+            if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
+            {
+                throw new Exception("bla bla bla, only notarized transactions are supported!"); // TODO improve
+            }
+
+            if (!parsed.IsStaticallyValid)
+            {
+                throw new Exception("bla bla bla, statically not valid: " + parsed.ValidityError); // TODO improve
+            }
+
+            return parsed.NotarizedTransaction;
+        }
+
+        // TODO adjust for Babylon
+        // catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
+        // {
+        //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
+        //     throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
+        // }
+        // catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        // {
+        //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
+        //     throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
+        // }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedUnknown(request, ex));
 
             throw;
         }

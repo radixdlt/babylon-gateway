@@ -80,9 +80,10 @@ public interface ICoreApiHandler
 
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default);
-    //
-    // Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default);
-    //
+
+    Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default);
+
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default);
     //
     // Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default);
@@ -125,12 +126,13 @@ internal class CoreApiHandler : ICoreApiHandler
     // {
     //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request, token));
     // }
-    //
-    // public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default)
-    // {
-    //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request, token));
-    // }
-    //
+
+    public async Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default)
+    {
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionParsePostAsync(request, token));
+    }
+
+    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
     // public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default)
     // {
     //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request, token));
