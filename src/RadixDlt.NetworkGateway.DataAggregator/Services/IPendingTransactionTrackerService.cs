@@ -70,7 +70,7 @@ using CoreApi = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public sealed record FullTransactionData(byte[] Id, DateTimeOffset SeenAt, byte[] Payload, object UnusedTransaction);
+public sealed record FullTransactionData(byte[] PayloadHash, DateTimeOffset SeenAt, byte[] Payload, object UnusedTransaction);
 
 public sealed record NodeMempoolHashes
 {
@@ -95,7 +95,7 @@ public interface IPendingTransactionTrackerService
     /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
     /// contents actually need fetching.
     /// </summary>
-    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> transactionIdentifiers, CancellationToken cancellationToken);
+    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> payloadHashes, CancellationToken cancellationToken);
 
     bool SubmitTransactionContents(FullTransactionData fullTransactionData);
 

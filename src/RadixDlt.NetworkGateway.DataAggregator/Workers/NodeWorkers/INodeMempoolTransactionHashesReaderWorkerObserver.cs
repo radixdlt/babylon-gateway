@@ -66,7 +66,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
-public interface INodeMempoolTransactionIdsReaderWorkerObserver
+public interface INodeMempoolTransactionHashesReaderWorkerObserver
 {
     ValueTask MempoolSize(string nodeName, int transactionIdentifiersCount);
 

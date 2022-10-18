@@ -90,7 +90,7 @@ internal class DataAggregatorMetricsObserver :
     INodeInitializerObserver,
     IMempoolTrackerServiceObserver,
     INodeTransactionLogWorkerObserver,
-    INodeMempoolTransactionIdsReaderWorkerObserver,
+    INodeMempoolTransactionHashesReaderWorkerObserver,
     INodeMempoolFullTransactionReaderWorkerObserver,
     IRawTransactionWriterObserver,
     INetworkConfigurationReaderObserver,
@@ -712,14 +712,14 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask INodeMempoolTransactionIdsReaderWorkerObserver.MempoolSize(string nodeName, int transactionIdentifiersCount)
+    ValueTask INodeMempoolTransactionHashesReaderWorkerObserver.MempoolSize(string nodeName, int transactionIdentifiersCount)
     {
         _mempoolSizeUnScoped.WithLabels(nodeName).Set(transactionIdentifiersCount);
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask INodeMempoolTransactionIdsReaderWorkerObserver.MempoolItemsChange(string nodeName, int transactionIdsAddedCount, int transactionIdsRemovedCount)
+    ValueTask INodeMempoolTransactionHashesReaderWorkerObserver.MempoolItemsChange(string nodeName, int transactionIdsAddedCount, int transactionIdsRemovedCount)
     {
         _mempoolItemsAddedUnScoped.WithLabels(nodeName).Inc(transactionIdsAddedCount);
         _mempoolItemsRemovedUnScoped.WithLabels(nodeName).Inc(transactionIdsRemovedCount);

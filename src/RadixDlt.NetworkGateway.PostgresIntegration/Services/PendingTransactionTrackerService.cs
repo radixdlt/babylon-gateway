@@ -73,7 +73,6 @@ using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -127,30 +126,31 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
     /// contents actually need fetching.
     /// </summary>
-    public async Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> transactionIdentifiers, CancellationToken cancellationToken)
+    public async Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> payloadHashes, CancellationToken cancellationToken)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        var idsInMempoolNotRecentlyFetched = transactionIdentifiers
-            .Where(id => !_recentFullTransactionsFetched.Contains(id))
+        var payloadHashesInMempoolNotRecentlyFetched = payloadHashes
+            .Where(hash => !_recentFullTransactionsFetched.Contains(hash))
             .ToList(); // Npgsql optimises ToList calls but not ToHashSet
 
-        if (idsInMempoolNotRecentlyFetched.Count == 0)
+        if (payloadHashesInMempoolNotRecentlyFetched.Count == 0)
         {
             return new HashSet<byte[]>(ByteArrayEqualityComparer.Default);
         }
 
+        // TODO are we sure we want to operate on PayloadHash alone?
         var unfetchedTransactionsAlreadyInDatabase = await dbContext.PendingTransactions
-            .Where(lt => idsInMempoolNotRecentlyFetched.Contains(lt.PayloadHash))
+            .Where(lt => payloadHashesInMempoolNotRecentlyFetched.Contains(lt.PayloadHash))
             .Select(lt => lt.PayloadHash)
             .ToListAsync(cancellationToken);
 
-        var transactionIdsToFetch = idsInMempoolNotRecentlyFetched
+        var payloadHashesToFetch = payloadHashesInMempoolNotRecentlyFetched
             .ToHashSet(ByteArrayEqualityComparer.Default);
 
-        transactionIdsToFetch.ExceptWith(unfetchedTransactionsAlreadyInDatabase);
+        payloadHashesToFetch.ExceptWith(unfetchedTransactionsAlreadyInDatabase);
 
-        return transactionIdsToFetch;
+        return payloadHashesToFetch;
     }
 
     /// <summary>
@@ -171,7 +171,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     /// <returns>If the transaction was first seen (true) or (false).</returns>
     public bool SubmitTransactionContents(FullTransactionData fullTransactionData)
     {
-        return _recentFullTransactionsFetched.SetIfNotExists(fullTransactionData.Id, fullTransactionData);
+        return _recentFullTransactionsFetched.SetIfNotExists(fullTransactionData.PayloadHash, fullTransactionData);
     }
 
     public async Task HandleChanges(CancellationToken token)
@@ -290,7 +290,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .ToList();
 
         var transactionIdsWhichMightNeedAdding = transactionsWhichMightNeedAdding
-            .Select(t => t.Id)
+            .Select(t => t.PayloadHash)
             .ToList(); // Npgsql optimizes List<> Contains
 
         // Now check that these are actually new and need adding, by checking the transaction ids against the database.
@@ -309,9 +309,9 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
 
         var transactionsToAdd = transactionsWhichMightNeedAdding
             .Where(mt =>
-                !transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb.Contains(mt.Id)
+                !transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb.Contains(mt.PayloadHash)
                 &&
-                !transactionIdsInANodeMempoolWhichAreAlreadyCommitted.Contains(mt.Id)
+                !transactionIdsInANodeMempoolWhichAreAlreadyCommitted.Contains(mt.PayloadHash)
             )
             .ToList();
 
