@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221018140729_InitialCreate")]
+    [Migration("20221018142210_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,7 +133,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Address"), "hash");
 
-                    b.HasIndex("GlobalAddress");
+                    b.HasIndex("GlobalAddress")
+                        .HasFilter("global_address IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("GlobalAddress"), "hash");
 
                     b.ToTable("entities");
 
@@ -207,7 +210,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("EntityId", "FromStateVersion");
 
-                    b.HasIndex("IsMostRecent", "EntityId");
+                    b.HasIndex("IsMostRecent", "EntityId")
+                        .HasFilter("is_most_recent IS TRUE");
 
                     b.ToTable("entity_resource_aggregate_history");
                 });
@@ -405,26 +409,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("StateVersion");
 
-                    b.HasAlternateKey("IntentHash");
-
-                    b.HasAlternateKey("PayloadHash");
-
-                    b.HasAlternateKey("SignedIntentHash");
-
-                    b.HasAlternateKey("TransactionAccumulator");
-
                     b.HasIndex("Epoch")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_epoch_starts")
                         .HasFilter("is_start_of_epoch = true");
 
+                    b.HasIndex("IntentHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
+
+                    b.HasIndex("PayloadHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
+
                     b.HasIndex("RoundTimestamp")
                         .HasDatabaseName("IX_ledger_transaction_round_timestamp");
+
+                    b.HasIndex("SignedIntentHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
 
                     b.HasIndex("StateVersion")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_user_transactions")
                         .HasFilter("is_user_transaction = true");
+
+                    b.HasIndex("TransactionAccumulator");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("TransactionAccumulator"), "hash");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()

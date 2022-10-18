@@ -253,10 +253,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
-                    table.UniqueConstraint("AK_ledger_transactions_intent_hash", x => x.intent_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_payload_hash", x => x.payload_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_signed_intent_hash", x => x.signed_intent_hash);
-                    table.UniqueConstraint("AK_ledger_transactions_transaction_accumulator", x => x.transaction_accumulator);
                     table.ForeignKey(
                         name: "FK_ledger_transactions_raw_transactions_state_version",
                         column: x => x.state_version,
@@ -293,7 +289,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_entities_global_address",
                 table: "entities",
-                column: "global_address");
+                column: "global_address",
+                filter: "global_address IS NOT NULL")
+                .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_aggregate_history_entity_id_from_state_vers~",
@@ -303,7 +301,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_aggregate_history_is_most_recent_entity_id",
                 table: "entity_resource_aggregate_history",
-                columns: new[] { "is_most_recent", "entity_id" });
+                columns: new[] { "is_most_recent", "entity_id" },
+                filter: "is_most_recent IS TRUE");
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_history_global_entity_id_from_state_version",
@@ -350,6 +349,30 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "state_version",
                 unique: true,
                 filter: "is_user_transaction = true");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_intent_hash",
+                table: "ledger_transactions",
+                column: "intent_hash")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_payload_hash",
+                table: "ledger_transactions",
+                column: "payload_hash")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_signed_intent_hash",
+                table: "ledger_transactions",
+                column: "signed_intent_hash")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_transaction_accumulator",
+                table: "ledger_transactions",
+                column: "transaction_accumulator")
+                .Annotation("Npgsql:IndexMethod", "hash");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

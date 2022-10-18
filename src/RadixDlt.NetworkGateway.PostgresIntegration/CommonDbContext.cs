@@ -124,7 +124,13 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<VaultEntity>("vault");
 
         modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.Address).HasMethod("hash");
+            .HasIndex(e => e.Address)
+            .HasMethod("hash");
+
+        modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.GlobalAddress)
+            .HasMethod("hash")
+            .HasFilter("global_address IS NOT NULL");
 
         modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("type")
@@ -132,7 +138,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, e.EntityId }); // TODO filter out IsMostRecent=false?
+            .HasIndex(e => new { e.IsMostRecent, e.EntityId })
+            .HasFilter("is_most_recent IS TRUE");
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -170,13 +177,17 @@ internal abstract class CommonDbContext : DbContext
         // TODO we most likely want to drop most of those indices as they must slow down ingestion rate by quite some margin
 
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.PayloadHash);
+            .HasIndex(lt => lt.PayloadHash)
+            .HasMethod("hash");
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.IntentHash);
+            .HasIndex(lt => lt.IntentHash)
+            .HasMethod("hash");
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.SignedIntentHash);
+            .HasIndex(lt => lt.SignedIntentHash)
+            .HasMethod("hash");
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.TransactionAccumulator);
+            .HasIndex(lt => lt.TransactionAccumulator)
+            .HasMethod("hash");
 
         // Because StateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
         // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")
