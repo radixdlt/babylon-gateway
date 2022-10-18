@@ -104,16 +104,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitResponse" /> class.
         /// </summary>
-        /// <param name="duplicate">Is true if the transaction is a duplicate of an existing transaction in the mempool. (required).</param>
+        /// <param name="duplicate">Is true if the transaction is a duplicate of an existing pending transaction. (required).</param>
         public TransactionSubmitResponse(bool duplicate = default(bool))
         {
             this.Duplicate = duplicate;
         }
 
         /// <summary>
-        /// Is true if the transaction is a duplicate of an existing transaction in the mempool.
+        /// Is true if the transaction is a duplicate of an existing pending transaction.
         /// </summary>
-        /// <value>Is true if the transaction is a duplicate of an existing transaction in the mempool.</value>
+        /// <value>Is true if the transaction is a duplicate of an existing pending transaction.</value>
         [DataMember(Name = "duplicate", IsRequired = true, EmitDefaultValue = true)]
         public bool Duplicate { get; set; }
 

@@ -62,48 +62,42 @@
  * permissions under this License.
  */
 
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApi = RadixDlt.CoreApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-public sealed record FullTransactionData(byte[] Id, DateTimeOffset SeenAt, byte[] Payload, object UnusedTransaction);
-
-public sealed record NodeMempoolHashes
+/// <summary>
+/// Responsible for keeping the db mempool pruned.
+/// </summary>
+public sealed class PendingTransactionPrunerWorker : GlobalWorker
 {
-    public HashSet<byte[]> TransactionHashes { get; }
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10));
 
-    public DateTimeOffset AtTime { get; }
+    private readonly IPendingTransactionPrunerService _pendingTransactionPrunerService;
 
-    public NodeMempoolHashes(HashSet<byte[]> transactionHashes, DateTimeOffset atTime)
+    public PendingTransactionPrunerWorker(
+        ILogger<PendingTransactionPrunerWorker> logger,
+        IPendingTransactionPrunerService pendingTransactionPrunerService,
+        IEnumerable<IGlobalWorkerObserver> observers,
+        IClock clock
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
     {
-        TransactionHashes = transactionHashes;
-        AtTime = atTime;
+        _pendingTransactionPrunerService = pendingTransactionPrunerService;
     }
-}
 
-public interface IMempoolTrackerService
-{
-    void RegisterNodeMempoolHashes(string nodeName, NodeMempoolHashes nodeMempoolHashes);
-
-    Task HandleMempoolChanges(CancellationToken token);
-
-    /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
-    /// contents actually need fetching.
-    /// </summary>
-    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> transactionIdentifiers, CancellationToken cancellationToken);
-
-    bool SubmitTransactionContents(FullTransactionData fullTransactionData);
-
-    /// <summary>
-    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
-    /// identifier still needs fetching. This is to try to not make a call if we've already got the transaction contents
-    /// from another node in the mean-time.
-    /// </summary>
-    /// <returns>If the transaction was first seen (true) or (false).</returns>
-    bool TransactionContentsStillNeedFetching(byte[] transactionIdentifier);
+    protected override async Task DoWork(CancellationToken cancellationToken)
+    {
+        await _pendingTransactionPrunerService.PrunePendingTransactions(cancellationToken);
+    }
 }

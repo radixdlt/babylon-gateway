@@ -92,42 +92,29 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionNotFoundError
+    /// InvalidTransactionError
     /// </summary>
-    [DataContract(Name = "TransactionNotFoundError")]
+    [DataContract(Name = "InvalidTransactionError")]
     [JsonConverter(typeof(JsonSubtypes), "Type")]
     [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
     [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
     [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
     [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
     [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class TransactionNotFoundError : GatewayError, IEquatable<TransactionNotFoundError>, IValidatableObject
+    public partial class InvalidTransactionError : GatewayError, IEquatable<InvalidTransactionError>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionNotFoundError" /> class.
+        /// Initializes a new instance of the <see cref="InvalidTransactionError" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionNotFoundError() { }
+        protected InvalidTransactionError() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionNotFoundError" /> class.
+        /// Initializes a new instance of the <see cref="InvalidTransactionError" /> class.
         /// </summary>
-        /// <param name="transactionNotFound">transactionNotFound (required).</param>
-        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;TransactionNotFoundError&quot;).</param>
-        public TransactionNotFoundError(TransactionLookupIdentifier transactionNotFound = default(TransactionLookupIdentifier), string type = "TransactionNotFoundError") : base(type)
+        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;InvalidTransactionError&quot;).</param>
+        public InvalidTransactionError(string type = "InvalidTransactionError") : base(type)
         {
-            // to ensure "transactionNotFound" is required (not null)
-            if (transactionNotFound == null)
-            {
-                throw new ArgumentNullException("transactionNotFound is a required property for TransactionNotFoundError and cannot be null");
-            }
-            this.TransactionNotFound = transactionNotFound;
         }
-
-        /// <summary>
-        /// Gets or Sets TransactionNotFound
-        /// </summary>
-        [DataMember(Name = "transaction_not_found", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionLookupIdentifier TransactionNotFound { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +123,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionNotFoundError {\n");
+            sb.Append("class InvalidTransactionError {\n");
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  TransactionNotFound: ").Append(TransactionNotFound).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,26 +145,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionNotFoundError);
+            return this.Equals(input as InvalidTransactionError);
         }
 
         /// <summary>
-        /// Returns true if TransactionNotFoundError instances are equal
+        /// Returns true if InvalidTransactionError instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionNotFoundError to be compared</param>
+        /// <param name="input">Instance of InvalidTransactionError to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionNotFoundError input)
+        public bool Equals(InvalidTransactionError input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
-                (
-                    this.TransactionNotFound == input.TransactionNotFound ||
-                    (this.TransactionNotFound != null &&
-                    this.TransactionNotFound.Equals(input.TransactionNotFound))
-                );
+            return base.Equals(input);
         }
 
         /// <summary>
@@ -190,10 +171,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = base.GetHashCode();
-                if (this.TransactionNotFound != null)
-                {
-                    hashCode = (hashCode * 59) + this.TransactionNotFound.GetHashCode();
-                }
                 return hashCode;
             }
         }

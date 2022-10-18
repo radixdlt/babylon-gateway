@@ -65,8 +65,8 @@
 using Microsoft.Extensions.Logging;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -115,6 +115,24 @@ internal class SubmissionService : ISubmissionService
             token
         );
 
+        if (trackingGuidance.TransactionAlreadyFailedReason.HasValue)
+        {
+            await _observers.ForEachAsync(x => x.SubmissionAlreadyFailed(request, trackingGuidance));
+
+            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
+                trackingGuidance.TransactionAlreadyFailedReason.Value
+            );
+        }
+
+        if (!trackingGuidance.ShouldSubmitToNode)
+        {
+            await _observers.ForEachAsync(x => x.SubmissionAlreadySubmitted(request, trackingGuidance));
+
+            return new GatewayModel.TransactionSubmitResponse(
+                duplicate: true // TODO what should we do here? maybe we should throw some well-known exception?
+            );
+        }
+
         try
         {
             await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
@@ -141,12 +159,16 @@ internal class SubmissionService : ISubmissionService
 
             if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
             {
-                throw new Exception("bla bla bla, only notarized transactions are supported!"); // TODO improve
+                await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, response));
+
+                throw InvalidTransactionException.FromUnsupportedPayloadType();
             }
 
             if (!parsed.IsStaticallyValid)
             {
-                throw new Exception("bla bla bla, statically not valid: " + parsed.ValidityError); // TODO improve
+                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, response));
+
+                throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidityError);
             }
 
             return parsed.NotarizedTransaction;
@@ -247,8 +269,6 @@ internal class SubmissionService : ISubmissionService
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(request, ex));
 
             _logger.LogWarning(ex, "Request timeout submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
-
-            throw;
         }
         catch (Exception ex)
         {
@@ -259,8 +279,12 @@ internal class SubmissionService : ISubmissionService
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedUnknown(request, ex));
 
             _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
-
-            throw;
         }
+
+        // TODO ok, so we're not throwing, should we actually return this value?
+
+        return new GatewayModel.TransactionSubmitResponse(
+            duplicate: false
+        );
     }
 }

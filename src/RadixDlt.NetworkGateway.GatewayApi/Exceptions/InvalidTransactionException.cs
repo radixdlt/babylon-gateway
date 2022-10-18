@@ -62,42 +62,49 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Workers;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using RadixDlt.NetworkGateway.Abstractions.Model;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
-/// <summary>
-/// Responsible for keeping the db mempool pruned.
-/// </summary>
-public sealed class MempoolPrunerWorker : GlobalWorker
+public class InvalidTransactionException : ValidationException
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromSeconds(30),
-            TimeSpan.FromSeconds(10));
+    public WrappedCoreApiException? WrappedCoreApiException { get; }
 
-    private readonly IMempoolPrunerService _mempoolPrunerService;
-
-    public MempoolPrunerWorker(
-        ILogger<MempoolPrunerWorker> logger,
-        IMempoolPrunerService mempoolPrunerService,
-        IEnumerable<IGlobalWorkerObserver> observers,
-        IClock clock
-    )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
+    private InvalidTransactionException(string userFacingMessage, string internalMessage)
+        : base(new InvalidTransactionError(userFacingMessage), userFacingMessage, internalMessage)
     {
-        _mempoolPrunerService = mempoolPrunerService;
     }
 
-    protected override async Task DoWork(CancellationToken cancellationToken)
+    private InvalidTransactionException(string userFacingMessage, WrappedCoreApiException? wrappedCoreApiException = null)
+        : base(new InvalidTransactionError(userFacingMessage), userFacingMessage)
     {
-        await _mempoolPrunerService.PruneMempool(cancellationToken);
+        WrappedCoreApiException = wrappedCoreApiException;
+    }
+
+    public static InvalidTransactionException FromInvalidTransactionDueToCoreApiException(WrappedCoreApiException wrappedCoreApiException)
+    {
+        return new InvalidTransactionException("Transaction is invalid", wrappedCoreApiException);
+    }
+
+    public static InvalidTransactionException FromPreviouslyFailedTransactionError(PendingTransactionFailureReason previousFailureReason)
+    {
+        var userFacingMessage = previousFailureReason == PendingTransactionFailureReason.DoubleSpend
+            ? "The transaction submission has already failed as it clashes with a previous transaction"
+            : "The transaction submission has already failed";
+
+        return new InvalidTransactionException(userFacingMessage);
+    }
+
+    public static Exception FromUnsupportedPayloadType()
+    {
+        return new InvalidTransactionException("Expected notarized transaction");
+    }
+
+    public static Exception FromStaticallyInvalid(string validityError)
+    {
+        return new InvalidTransactionException("Statically invalid transaction: " + validityError);
     }
 }

@@ -62,16 +62,48 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using CoreApi = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface IMempoolPrunerServiceObserver
-{
-    ValueTask PreMempoolPrune(List<MempoolStatusCount> mempoolCountByStatus);
+public sealed record FullTransactionData(byte[] Id, DateTimeOffset SeenAt, byte[] Payload, object UnusedTransaction);
 
-    ValueTask PreMempoolTransactionPruned(int count);
+public sealed record NodeMempoolHashes
+{
+    public HashSet<byte[]> TransactionHashes { get; }
+
+    public DateTimeOffset AtTime { get; }
+
+    public NodeMempoolHashes(HashSet<byte[]> transactionHashes, DateTimeOffset atTime)
+    {
+        TransactionHashes = transactionHashes;
+        AtTime = atTime;
+    }
 }
 
-public sealed record MempoolStatusCount(string Status, int Count);
+public interface IPendingTransactionTrackerService
+{
+    void RegisterNodeMempoolHashes(string nodeName, NodeMempoolHashes nodeMempoolHashes);
+
+    Task HandleChanges(CancellationToken token);
+
+    /// <summary>
+    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to work out which transaction
+    /// contents actually need fetching.
+    /// </summary>
+    Task<HashSet<byte[]>> WhichTransactionsNeedContentFetching(IEnumerable<byte[]> transactionIdentifiers, CancellationToken cancellationToken);
+
+    bool SubmitTransactionContents(FullTransactionData fullTransactionData);
+
+    /// <summary>
+    /// This is called from the NodeMempoolFullTransactionReaderWorker (where enabled) to check if the transaction
+    /// identifier still needs fetching. This is to try to not make a call if we've already got the transaction contents
+    /// from another node in the mean-time.
+    /// </summary>
+    /// <returns>If the transaction was first seen (true) or (false).</returns>
+    bool TransactionContentsStillNeedFetching(byte[] transactionIdentifier);
+}

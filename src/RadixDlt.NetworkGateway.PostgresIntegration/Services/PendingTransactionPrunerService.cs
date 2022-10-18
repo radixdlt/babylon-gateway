@@ -79,21 +79,21 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal class MempoolPrunerService : IMempoolPrunerService
+internal class PendingTransactionPrunerService : IPendingTransactionPrunerService
 {
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
     private readonly ISystemStatusService _systemStatusService;
-    private readonly ILogger<MempoolPrunerService> _logger;
-    private readonly IEnumerable<IMempoolPrunerServiceObserver> _observers;
+    private readonly ILogger<PendingTransactionPrunerService> _logger;
+    private readonly IEnumerable<IPendingTransactionPrunerServiceObserver> _observers;
     private readonly IClock _clock;
 
-    public MempoolPrunerService(
+    public PendingTransactionPrunerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
         ISystemStatusService systemStatusService,
-        ILogger<MempoolPrunerService> logger,
-        IEnumerable<IMempoolPrunerServiceObserver> observers,
+        ILogger<PendingTransactionPrunerService> logger,
+        IEnumerable<IPendingTransactionPrunerServiceObserver> observers,
         IClock clock)
     {
         _dbContextFactory = dbContextFactory;
@@ -104,16 +104,20 @@ internal class MempoolPrunerService : IMempoolPrunerService
         _clock = clock;
     }
 
-    public async Task PruneMempool(CancellationToken token = default)
+    public async Task PrunePendingTransactions(CancellationToken token = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var mempoolCountByStatus = await dbContext.PendingTransactions
+        var rawCountByStatus = await dbContext.PendingTransactions
             .GroupBy(t => t.Status)
-            .Select(g => new MempoolStatusCount(PendingTransactionStatusValueConverter.Conversion.GetValueOrDefault(g.Key) ?? "UNKNOWN", g.Count()))
+            .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync(token);
 
-        await _observers.ForEachAsync(x => x.PreMempoolPrune(mempoolCountByStatus));
+        var countByStatus = rawCountByStatus
+            .Select(g => new PendingTransactionStatusCount(PendingTransactionStatusValueConverter.Conversion[g.Status], g.Count))
+            .ToList();
+
+        await _observers.ForEachAsync(x => x.PrePendingTransactionPrune(countByStatus));
 
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;
 
@@ -156,7 +160,7 @@ internal class MempoolPrunerService : IMempoolPrunerService
         if (transactionsToPrune.Count > 0)
         {
             _logger.LogInformation(
-                "Pruning {PrunedCount} transactions from the mempool, of which {PrunedCommittedCount} were committed",
+                "Pruning {PrunedCount} transactions from the pending list, of which {PrunedCommittedCount} were committed",
                 transactionsToPrune.Count,
                 transactionsToPrune.Count(t => t.Status == PendingTransactionStatus.Committed)
             );

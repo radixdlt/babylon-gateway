@@ -62,12 +62,36 @@
  * permissions under this License.
  */
 
-using System.Threading;
+using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using System;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface IMempoolPrunerService
+public interface IPendingTransactionResubmissionServiceObserver
 {
-    Task PruneMempool(CancellationToken token = default);
+    ValueTask TransactionsSelected(int totalTransactionsNeedingResubmission);
+
+    void TransactionMarkedAsAssumedSuccessfullySubmittedToNode();
+
+    void TransactionMarkedAsFailed();
+
+    ValueTask TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode();
+
+    ValueTask TransactionMarkedAsFailedAfterSubmittedToNode();
+
+    ValueTask PreResubmit(byte[] notarizedTransaction);
+
+    ValueTask PostResubmit(byte[] notarizedTransaction);
+
+    ValueTask PostResubmitDuplicate(byte[] notarizedTransaction);
+
+    ValueTask PostResubmitSucceeded(byte[] notarizedTransaction);
+
+    ValueTask ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException);
+
+    ValueTask ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException);
+
+    ValueTask ResubmitFailedUnknown(byte[] notarizedTransaction, Exception exception);
 }

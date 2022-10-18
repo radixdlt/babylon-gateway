@@ -62,36 +62,63 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Abstractions.Exceptions;
+using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Utilities;
+using RadixDlt.NetworkGateway.Abstractions.Workers;
+using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
+using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Services;
+namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
 
-public interface IMempoolResubmissionServiceObserver
+/// <summary>
+/// Responsible for keeping the db mempool in sync with the node mempools that have been submitted by the NodeMempoolTracker.
+/// </summary>
+public sealed class PendingTransactionTrackerWorker : GlobalWorker
 {
-    ValueTask TransactionsSelected(int totalTransactionsNeedingResubmission);
+    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
+        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
+            TimeSpan.FromMilliseconds(500),
+            TimeSpan.FromMilliseconds(500));
 
-    void TransactionMarkedAsAssumedSuccessfullySubmittedToNode();
+    private static readonly LogLimiter _noMempoolDataLogLimiter = new(TimeSpan.FromSeconds(30), LogLevel.Warning, LogLevel.Debug);
 
-    void TransactionMarkedAsFailed();
+    private readonly ILogger<PendingTransactionTrackerWorker> _logger;
+    private readonly IPendingTransactionTrackerService _pendingTransactionTrackerService;
 
-    ValueTask TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode();
+    public PendingTransactionTrackerWorker(
+        ILogger<PendingTransactionTrackerWorker> logger,
+        IPendingTransactionTrackerService pendingTransactionTrackerService,
+        IEnumerable<IGlobalWorkerObserver> observers,
+        IClock clock
+    )
+        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
+    {
+        _logger = logger;
+        _pendingTransactionTrackerService = pendingTransactionTrackerService;
+    }
 
-    ValueTask TransactionMarkedAsFailedAfterSubmittedToNode();
+    protected override async Task OnStart(CancellationToken cancellationToken, bool isCurrentlyEnabled)
+    {
+        // Wait on start-up for nodes to load to allow some time for the nodes to populate their mempools
+        await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+        await base.OnStart(cancellationToken, isCurrentlyEnabled);
+    }
 
-    ValueTask PreResubmit(string signedTransaction);
-
-    ValueTask PostResubmit(string signedTransaction);
-
-    ValueTask PostResubmitDuplicate(string signedTransaction);
-
-    ValueTask PostResubmitSucceeded(string signedTransaction);
-
-    ValueTask ResubmitFailedPermanently(string signedTransaction, WrappedCoreApiException wrappedCoreApiException);
-
-    ValueTask ResubmitFailedTimeout(string signedTransaction, OperationCanceledException operationCanceledException);
-
-    ValueTask ResubmitFailedUnknown(string signedTransaction, Exception exception);
+    protected override async Task DoWork(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _pendingTransactionTrackerService.HandleChanges(cancellationToken);
+        }
+        catch (NoMempoolDataException ex)
+        {
+            // We swallow this exception, which is known/expected if the service is slow to startup.
+            _logger.Log(_noMempoolDataLogLimiter.GetLogLevel(), "{ExceptionMessage}", ex.Message);
+        }
+    }
 }

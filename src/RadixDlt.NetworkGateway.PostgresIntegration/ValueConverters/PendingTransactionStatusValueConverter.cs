@@ -71,9 +71,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 internal class PendingTransactionStatusValueConverter : EnumTypeValueConverterBase<PendingTransactionStatus>
 {
     public static readonly ImmutableDictionary<PendingTransactionStatus, string> Conversion =
-        new Dictionary<PendingTransactionStatus, string>()
+        new Dictionary<PendingTransactionStatus, string>
         {
-            { PendingTransactionStatus.SubmittedOrKnownInNodeMempool, "IN_NODE_MEMPOOL" },
+            { PendingTransactionStatus.SubmittedOrKnownInNodeMempool, "SUBMITTED_OR_KNOWN_IN_NODE_MEMPOOL" },
             { PendingTransactionStatus.Missing, "MISSING" },
             { PendingTransactionStatus.ResolvedButUnknownTillSyncedUp, "RESOLVED_BUT_UNKNOWN_TILL_SYNCED_UP" },
             { PendingTransactionStatus.Failed, "FAILED" },

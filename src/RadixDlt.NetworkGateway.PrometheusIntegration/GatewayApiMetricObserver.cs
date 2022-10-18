@@ -253,6 +253,20 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
+    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("parsed_statically_invalid").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
     ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_failed").Inc();

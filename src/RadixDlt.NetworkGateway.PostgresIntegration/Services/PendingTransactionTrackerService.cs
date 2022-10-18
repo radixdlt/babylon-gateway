@@ -83,22 +83,22 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
-internal class MempoolTrackerService : IMempoolTrackerService
+internal class PendingTransactionTrackerService : IPendingTransactionTrackerService
 {
     private static readonly LogLimiter _combineMempoolsInfoLogLimiter = new(TimeSpan.FromSeconds(10), LogLevel.Information, LogLevel.Debug);
 
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly IOptionsMonitor<MempoolOptions> _mempoolOptionsMonitor;
-    private readonly ILogger<MempoolTrackerService> _logger;
+    private readonly ILogger<PendingTransactionTrackerService> _logger;
     private readonly ConcurrentDictionary<string, NodeMempoolHashes> _latestMempoolContentsByNode = new();
     private readonly ConcurrentLruCache<byte[], FullTransactionData> _recentFullTransactionsFetched;
     private readonly IEnumerable<IMempoolTrackerServiceObserver> _observers;
     private readonly IClock _clock;
 
-    public MempoolTrackerService(
+    public PendingTransactionTrackerService(
         IDbContextFactory<ReadWriteDbContext> dbContextFactory,
         IOptionsMonitor<MempoolOptions> mempoolOptionsMonitor,
-        ILogger<MempoolTrackerService> logger,
+        ILogger<PendingTransactionTrackerService> logger,
         IEnumerable<IMempoolTrackerServiceObserver> observers,
         IClock clock)
     {
@@ -174,7 +174,7 @@ internal class MempoolTrackerService : IMempoolTrackerService
         return _recentFullTransactionsFetched.SetIfNotExists(fullTransactionData.Id, fullTransactionData);
     }
 
-    public async Task HandleMempoolChanges(CancellationToken token)
+    public async Task HandleChanges(CancellationToken token)
     {
         var currentTimestamp = _clock.UtcNow;
         var mempoolConfiguration = _mempoolOptionsMonitor.CurrentValue;

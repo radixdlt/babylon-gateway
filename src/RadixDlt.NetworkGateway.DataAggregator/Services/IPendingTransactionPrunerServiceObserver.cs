@@ -62,29 +62,16 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
-using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-internal class MempoolResubmissionService : IMempoolResubmissionService
+public interface IPendingTransactionPrunerServiceObserver
 {
-    public Task RunBatchOfResubmissions(CancellationToken token = default)
-    {
-        throw new NotImplementedException();
-    }
+    ValueTask PrePendingTransactionPrune(List<PendingTransactionStatusCount> mempoolCountByStatus);
+
+    ValueTask PreMempoolTransactionPruned(int count);
 }
+
+public sealed record PendingTransactionStatusCount(string Status, int Count);

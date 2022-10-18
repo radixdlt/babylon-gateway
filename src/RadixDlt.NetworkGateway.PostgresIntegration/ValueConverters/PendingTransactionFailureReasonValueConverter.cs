@@ -64,20 +64,22 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
 internal class PendingTransactionFailureReasonValueConverter : EnumTypeValueConverterBase<PendingTransactionFailureReason>
 {
-    private static readonly Dictionary<PendingTransactionFailureReason, string> _conversion = new()
-    {
-        { PendingTransactionFailureReason.DoubleSpend, "DOUBLE_SPEND" },
-        { PendingTransactionFailureReason.Timeout, "TIMEOUT" },
-        { PendingTransactionFailureReason.Unknown, "UNKNOWN" },
-    };
+    public static readonly ImmutableDictionary<PendingTransactionFailureReason, string> Conversion
+        = new Dictionary<PendingTransactionFailureReason, string>
+        {
+            { PendingTransactionFailureReason.DoubleSpend, "DOUBLE_SPEND" },
+            { PendingTransactionFailureReason.Timeout, "TIMEOUT" },
+            { PendingTransactionFailureReason.Unknown, "UNKNOWN" },
+        }.ToImmutableDictionary();
 
     public PendingTransactionFailureReasonValueConverter()
-        : base(_conversion, Invert(_conversion))
+        : base(Conversion, Invert(Conversion))
     {
     }
 }

@@ -808,6 +808,7 @@ components:
         mapping:
           NotSyncedUpError: "#/components/schemas/NotSyncedUpError"
           InvalidRequestError: "#/components/schemas/InvalidRequestError"
+          InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
           TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
           InternalServerError: "#/components/schemas/InternalServerError"
     NotSyncedUpError:
@@ -868,6 +869,9 @@ components:
             cause:
               description: Gives a human readable message - likely just a trace ID for reporting the error.
               type: string
+    InvalidTransactionError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
     TransactionNotFoundError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"

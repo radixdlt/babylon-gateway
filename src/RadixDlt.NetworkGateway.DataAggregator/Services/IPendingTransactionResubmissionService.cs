@@ -62,42 +62,12 @@
  * permissions under this License.
  */
 
-using Microsoft.Extensions.Logging;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Workers;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.DataAggregator.Workers.GlobalWorkers;
+namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-/// <summary>
-/// Responsible for keeping the db mempool pruned.
-/// </summary>
-public sealed class MempoolResubmissionWorker : GlobalWorker
+public interface IPendingTransactionResubmissionService
 {
-    private static readonly IDelayBetweenLoopsStrategy _delayBetweenLoopsStrategy =
-        IDelayBetweenLoopsStrategy.ConstantDelayStrategy(
-            TimeSpan.FromMilliseconds(500),
-            TimeSpan.FromMilliseconds(500));
-
-    private readonly IMempoolResubmissionService _mempoolResubmissionService;
-
-    public MempoolResubmissionWorker(
-        ILogger<MempoolResubmissionWorker> logger,
-        IMempoolResubmissionService mempoolResubmissionService,
-        IEnumerable<IGlobalWorkerObserver> observers,
-        IClock clock
-    )
-        : base(logger, _delayBetweenLoopsStrategy, TimeSpan.FromSeconds(60), observers, clock)
-    {
-        _mempoolResubmissionService = mempoolResubmissionService;
-    }
-
-    protected override async Task DoWork(CancellationToken cancellationToken)
-    {
-        await _mempoolResubmissionService.RunBatchOfResubmissions(cancellationToken);
-    }
+    Task RunBatchOfResubmissions(CancellationToken token = default);
 }
