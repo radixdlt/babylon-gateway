@@ -63,8 +63,10 @@
  */
 
 using Microsoft.Extensions.Logging;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -82,21 +84,55 @@ public interface ISubmissionService
 internal class SubmissionService : ISubmissionService
 {
     private readonly ICoreApiHandler _coreApiHandler;
+    private readonly ISubmissionTrackingService _submissionTrackingService;
+    private readonly IClock _clock;
     private readonly IEnumerable<ISubmissionServiceObserver> _observers;
     private readonly ILogger _logger;
 
     public SubmissionService(
         ICoreApiHandler coreApiHandler,
+        ISubmissionTrackingService submissionTrackingService,
+        IClock clock,
         IEnumerable<ISubmissionServiceObserver> observers,
         ILogger<SubmissionService> logger)
     {
         _coreApiHandler = coreApiHandler;
+        _submissionTrackingService = submissionTrackingService;
+        _clock = clock;
         _observers = observers;
         _logger = logger;
     }
 
     public async Task<GatewayModel.TransactionSubmitResponse> HandleSubmitRequest(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
+        var parsedTransaction = await HandlePreSubmissionParseTransaction(request, token);
+        var submittedTimestamp = _clock.UtcNow;
+
+        var trackingGuidance = await _submissionTrackingService.TrackInitialSubmission(
+            submittedTimestamp,
+            parsedTransaction,
+            _coreApiHandler.GetCoreNodeConnectedTo().Name,
+            token
+        );
+
+        if (trackingGuidance.TransactionAlreadyFailedReason.HasValue)
+        {
+            await _observers.ForEachAsync(x => x.SubmissionAlreadyFailed(request, trackingGuidance));
+
+            throw InvalidTransactionException.FromPreviouslyFailedTransactionError(
+                trackingGuidance.TransactionAlreadyFailedReason.Value
+            );
+        }
+
+        if (!trackingGuidance.ShouldSubmitToNode)
+        {
+            await _observers.ForEachAsync(x => x.SubmissionAlreadySubmitted(request, trackingGuidance));
+
+            return new GatewayModel.TransactionSubmitResponse(
+                duplicate: true // TODO what should we do here? maybe we should throw some well-known exception?
+            );
+        }
+
         try
         {
             await _observers.ForEachAsync(x => x.PreHandleSubmitRequest(request));
@@ -110,6 +146,48 @@ internal class SubmissionService : ISubmissionService
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.HandleSubmitRequestFailed(request, ex));
+
+            throw;
+        }
+    }
+
+    private async Task<CoreModel.NotarizedTransaction> HandlePreSubmissionParseTransaction(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
+    {
+        try
+        {
+            var response = await _coreApiHandler.ParseTransaction(new CoreModel.TransactionParseRequest(_coreApiHandler.GetNetworkIdentifier(), request.NotarizedTransaction), token);
+
+            if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
+            {
+                await _observers.ForEachAsync(x => x.ParsedTransactionUnsupportedPayloadType(request, response));
+
+                throw InvalidTransactionException.FromUnsupportedPayloadType();
+            }
+
+            if (!parsed.IsStaticallyValid)
+            {
+                await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, response));
+
+                throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidityError);
+            }
+
+            return parsed.NotarizedTransaction;
+        }
+
+        // TODO adjust for Babylon
+        // catch (WrappedCoreApiException<Core.SubstateDependencyNotFoundError> ex)
+        // {
+        //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
+        //     throw InvalidTransactionException.FromSubstateDependencyNotFoundError(signedTransaction.AsString, ex.Error);
+        // }
+        // catch (WrappedCoreApiException ex) when (ex.Properties.MarksInvalidTransaction)
+        // {
+        //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
+        //     throw InvalidTransactionException.FromInvalidTransactionDueToCoreApiException(signedTransaction.AsString, ex);
+        // }
+        catch (Exception ex)
+        {
+            await _observers.ForEachAsync(x => x.ParseTransactionFailedUnknown(request, ex));
 
             throw;
         }
@@ -191,8 +269,6 @@ internal class SubmissionService : ISubmissionService
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(request, ex));
 
             _logger.LogWarning(ex, "Request timeout submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
-
-            throw;
         }
         catch (Exception ex)
         {
@@ -203,8 +279,12 @@ internal class SubmissionService : ISubmissionService
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedUnknown(request, ex));
 
             _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
-
-            throw;
         }
+
+        // TODO ok, so we're not throwing, should we actually return this value?
+
+        return new GatewayModel.TransactionSubmitResponse(
+            duplicate: false
+        );
     }
 }

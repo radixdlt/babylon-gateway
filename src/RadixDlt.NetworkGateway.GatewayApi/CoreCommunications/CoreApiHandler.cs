@@ -78,14 +78,7 @@ public interface ICoreApiHandler
 
     CoreApiNode GetCoreNodeConnectedTo();
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default);
-    //
-    // Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default);
-    //
-    // Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default);
-    //
-    // Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default);
+    Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default);
 
     Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default);
 
@@ -120,26 +113,10 @@ internal class CoreApiHandler : ICoreApiHandler
         return _coreApiProvider.CoreApiNode;
     }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // public async Task<ConstructionBuildResponse> BuildTransaction(ConstructionBuildRequest request, CancellationToken token = default)
-    // {
-    //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionBuildPostAsync(request, token));
-    // }
-    //
-    // public async Task<ConstructionParseResponse> ParseTransaction(ConstructionParseRequest request, CancellationToken token = default)
-    // {
-    //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionParsePostAsync(request, token));
-    // }
-    //
-    // public async Task<ConstructionFinalizeResponse> FinalizeTransaction(ConstructionFinalizeRequest request, CancellationToken token = default)
-    // {
-    //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionFinalizePostAsync(request, token));
-    // }
-    //
-    // public async Task<ConstructionHashResponse> GetTransactionHash(ConstructionHashRequest request, CancellationToken token = default)
-    // {
-    //     return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.ConstructionApi.ConstructionHashPostAsync(request, token));
-    // }
+    public async Task<CoreModel.TransactionParseResponse> ParseTransaction(CoreModel.TransactionParseRequest request, CancellationToken token = default)
+    {
+        return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionParsePostAsync(request, token));
+    }
 
     public async Task<CoreModel.TransactionPreviewResponse> PreviewTransaction(CoreModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
@@ -151,9 +128,7 @@ internal class CoreApiHandler : ICoreApiHandler
         return await CoreApiErrorWrapper.ExtractCoreApiErrors(() => _coreApiProvider.TransactionApi.TransactionSubmitPostAsync(request, token));
     }
 
-    private static ICoreApiProvider ChooseCoreApiProvider(
-        ICoreNodesSelectorService coreNodesSelectorService,
-        HttpClient httpClient)
+    private static ICoreApiProvider ChooseCoreApiProvider(ICoreNodesSelectorService coreNodesSelectorService, HttpClient httpClient)
     {
         return new CoreApiProvider(coreNodesSelectorService.GetRandomTopTierCoreNode(), httpClient);
     }

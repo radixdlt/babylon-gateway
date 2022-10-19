@@ -107,17 +107,14 @@ internal class RawTransactionWriter : IRawTransactionWriter
 
     public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
     {
-        var transactionsById = transactionData
+        var transactionsByPayloadHash = transactionData
             .Where(td => !td.TransactionSummary.IsStartOfRound)
-            .ToDictionary(
-                rt => rt.TransactionSummary.PayloadHash,
-                ByteArrayEqualityComparer.Default
-            );
+            .ToDictionary(rt => rt.TransactionSummary.PayloadHash, ByteArrayEqualityComparer.Default);
 
-        var transactionIdList = transactionsById.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
+        var transactionPayloadHashList = transactionsByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 
-        var toUpdate = await context.MempoolTransactions
-            .Where(mt => mt.Status != MempoolTransactionStatus.Committed && transactionIdList.Contains(mt.PayloadHash))
+        var toUpdate = await context.PendingTransactions
+            .Where(mt => mt.Status != PendingTransactionStatus.Committed && transactionPayloadHashList.Contains(mt.PayloadHash))
             .ToListAsync(token);
 
         if (toUpdate.Count == 0)
@@ -125,30 +122,27 @@ internal class RawTransactionWriter : IRawTransactionWriter
             return 0;
         }
 
-        foreach (var mempoolTransaction in toUpdate)
+        foreach (var pendingTransaction in toUpdate)
         {
-            if (mempoolTransaction.Status == MempoolTransactionStatus.Failed)
+            if (pendingTransaction.Status == PendingTransactionStatus.Failed)
             {
                 await _observers.ForEachAsync(x => x.TransactionsMarkedCommittedWhichWasFailed());
 
                 _logger.LogError(
-                    "Transaction with id {TransactionId} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
-                    mempoolTransaction.PayloadHash.ToHex(),
-                    mempoolTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
-                    mempoolTransaction.FailureReason?.ToString(),
-                    mempoolTransaction.FailureExplanation
+                    "Transaction with payload hash {PayloadHash} which was first/last submitted to Gateway at {FirstGatewaySubmissionTime}/{LastGatewaySubmissionTime} and last marked missing from mempool at {LastMissingFromMempoolTimestamp} was mark failed at {FailureTime} due to {FailureReason} ({FailureExplanation}) but has now been marked committed",
+                    pendingTransaction.PayloadHash.ToHex(),
+                    pendingTransaction.FirstSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LastSubmittedToGatewayTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.LastDroppedOutOfMempoolTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.FailureTimestamp?.AsUtcIsoDateToSecondsForLogs(),
+                    pendingTransaction.FailureReason?.ToString(),
+                    pendingTransaction.FailureExplanation
                 );
             }
 
-            var transactionSummary = transactionsById[mempoolTransaction.PayloadHash].TransactionSummary;
-            mempoolTransaction.MarkAsCommitted(
-                transactionSummary.StateVersion,
-                transactionSummary.NormalizedRoundTimestamp,
-                _clock
-            );
+            var transactionSummary = transactionsByPayloadHash[pendingTransaction.PayloadHash].TransactionSummary;
+
+            pendingTransaction.MarkAsCommitted(transactionSummary.StateVersion, transactionSummary.NormalizedRoundTimestamp, _clock);
         }
 
         // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider

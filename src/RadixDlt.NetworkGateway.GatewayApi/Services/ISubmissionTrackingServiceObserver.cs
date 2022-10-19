@@ -68,7 +68,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionTrackingServiceObserver
 {
-    ValueTask PostMempoolTransactionAdded();
+    ValueTask PostPendingTransactionAdded();
 
-    ValueTask PostMempoolTransactionMarkedAsFailed();
+    ValueTask PostPendingTransactionMarkedAsFailed();
 }

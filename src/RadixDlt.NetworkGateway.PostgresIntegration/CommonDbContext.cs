@@ -87,7 +87,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
 
-    public DbSet<MempoolTransaction> MempoolTransactions => Set<MempoolTransaction>();
+    public DbSet<PendingTransaction> PendingTransactions => Set<PendingTransaction>();
 
     public DbSet<Entity> Entities => Set<Entity>();
 
@@ -110,7 +110,7 @@ internal abstract class CommonDbContext : DbContext
     {
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
-        HookupMempoolTransactions(modelBuilder);
+        HookupPendingTransactions(modelBuilder);
 
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("type")
@@ -124,7 +124,13 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<VaultEntity>("vault");
 
         modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.Address).HasMethod("hash");
+            .HasIndex(e => e.Address)
+            .HasMethod("hash");
+
+        modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.GlobalAddress)
+            .HasMethod("hash")
+            .HasFilter("global_address IS NOT NULL");
 
         modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("type")
@@ -132,7 +138,8 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, e.EntityId }); // TODO filter out IsMostRecent=false?
+            .HasIndex(e => new { e.IsMostRecent, e.EntityId })
+            .HasFilter("is_most_recent IS TRUE");
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -145,11 +152,11 @@ internal abstract class CommonDbContext : DbContext
         configurationBuilder.Properties<RadixAddress>()
             .HaveConversion<RadixAddressToByteArrayConverter>();
 
-        configurationBuilder.Properties<MempoolTransactionStatus>()
-            .HaveConversion<MempoolTransactionStatusValueConverter>();
+        configurationBuilder.Properties<PendingTransactionStatus>()
+            .HaveConversion<PendingTransactionStatusValueConverter>();
 
-        configurationBuilder.Properties<MempoolTransactionFailureReason>()
-            .HaveConversion<MempoolTransactionFailureReasonValueConverter>();
+        configurationBuilder.Properties<PendingTransactionFailureReason>()
+            .HaveConversion<PendingTransactionFailureReasonValueConverter>();
 
         configurationBuilder.Properties<LedgerTransactionStatus>()
             .HaveConversion<LedgerTransactionStatusValueConverter>();
@@ -167,15 +174,20 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.PayloadHash);
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.IntentHash);
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.SignedIntentHash);
+        // TODO we most likely want to drop most of those indices as they must slow down ingestion rate by quite some margin
 
         modelBuilder.Entity<LedgerTransaction>()
-            .HasAlternateKey(lt => lt.TransactionAccumulator);
+            .HasIndex(lt => lt.PayloadHash)
+            .HasMethod("hash");
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.IntentHash)
+            .HasMethod("hash");
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.SignedIntentHash)
+            .HasMethod("hash");
+        modelBuilder.Entity<LedgerTransaction>()
+            .HasIndex(lt => lt.TransactionAccumulator)
+            .HasMethod("hash");
 
         // Because StateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
         // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")
@@ -209,14 +221,8 @@ internal abstract class CommonDbContext : DbContext
             .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_epoch_starts");
     }
 
-    private static void HookupMempoolTransactions(ModelBuilder modelBuilder)
+    private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<MempoolTransaction>()
-            .HasAlternateKey(lt => lt.IntentHash);
-
-        modelBuilder.Entity<MempoolTransaction>()
-            .HasIndex(lt => lt.Status);
-
         // TODO - We should improve these indices to match the queries we actually need to make here
     }
 }

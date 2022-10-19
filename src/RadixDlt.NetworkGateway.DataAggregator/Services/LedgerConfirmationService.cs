@@ -516,6 +516,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             {
                 var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction, _clock);
 
+                // TODO do we even need that?
+                var contents = transaction.NotarizedTransaction?.PayloadHex?.ConvertFromHex() ?? Array.Empty<byte>();
+
                 // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
                 // var contents = transaction.Metadata.Hex.ConvertFromHex();
                 //
@@ -523,7 +526,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                 // TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
                 //
                 // transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
-                transactionData.Add(new CommittedTransactionData(transaction, summary, new byte[] { 1, 2, 4, 8 })); // TODO use real contents
+                transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
                 currentParentSummary = summary;
             }
 

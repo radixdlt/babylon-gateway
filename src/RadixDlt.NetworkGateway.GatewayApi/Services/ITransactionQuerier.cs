@@ -80,7 +80,7 @@ public interface ITransactionQuerier
 
     Task<LookupResult?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, bool withMetadata, CancellationToken token = default);
 
-    Task<Gateway.TransactionInfo?> LookupMempoolTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
+    Task<Gateway.TransactionInfo?> LookupPendingTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
 
 [DataContract]

@@ -74,12 +74,7 @@ public interface ICoreApiProvider
 
     StatusApi StatusApi { get; }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ConstructionApi ConstructionApi { get; }
-    //
-    // MempoolApi MempoolApi { get; }
-    //
-    // NetworkApi NetworkApi { get; }
+    MempoolApi MempoolApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
@@ -88,12 +83,7 @@ internal class CoreApiProvider : ICoreApiProvider
 
     public StatusApi StatusApi { get; }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // public ConstructionApi ConstructionApi { get; }
-    //
-    // public MempoolApi MempoolApi { get; }
-    //
-    // public NetworkApi NetworkApi { get; }
+    public MempoolApi MempoolApi { get; }
 
     public CoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
@@ -104,9 +94,6 @@ internal class CoreApiProvider : ICoreApiProvider
 
         TransactionsApi = new TransactionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
         StatusApi = new StatusApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // ConstructionApi = new ConstructionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        // MempoolApi = new MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        // NetworkApi = new NetworkApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        MempoolApi = new MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
     }
 }

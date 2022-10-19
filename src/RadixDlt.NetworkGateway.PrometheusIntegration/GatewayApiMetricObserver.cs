@@ -239,28 +239,42 @@ internal class GatewayApiMetricObserver :
     //     return ValueTask.CompletedTask;
     // }
 
-    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.ParseTransactionFailedUnknown(ValidatedHex signedTransaction, Exception exception)
+    ValueTask ISubmissionServiceObserver.ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_unknown_error").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance)
+    ValueTask ISubmissionServiceObserver.ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("parsed_unsupported_payload_type").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask ISubmissionServiceObserver.ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response)
+    {
+        _transactionSubmitResolutionByResultCount.WithLabels("parsed_statically_invalid").Inc();
+
+        return ValueTask.CompletedTask;
+    }
+
+    ValueTask ISubmissionServiceObserver.SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_failed").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionServiceObserver.SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance)
+    ValueTask ISubmissionServiceObserver.SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("already_submitted").Inc();
 
@@ -345,14 +359,14 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionTrackingServiceObserver.PostMempoolTransactionAdded()
+    ValueTask ISubmissionTrackingServiceObserver.PostPendingTransactionAdded()
     {
         _dbMempoolTransactionsAddedDueToSubmissionCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ISubmissionTrackingServiceObserver.PostMempoolTransactionMarkedAsFailed()
+    ValueTask ISubmissionTrackingServiceObserver.PostPendingTransactionMarkedAsFailed()
     {
         _dbMempoolTransactionsMarkedAsFailedDuringInitialSubmissionCount.Inc();
 
