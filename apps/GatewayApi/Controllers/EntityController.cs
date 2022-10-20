@@ -72,18 +72,16 @@ using System.Threading.Tasks;
 
 namespace GatewayApi.Controllers;
 
-// TODO don't like route/type "state" name
-
 [ApiController]
-[Route("state")]
+[Route("entity")]
 [ServiceFilter(typeof(ExceptionFilter))]
 [ServiceFilter(typeof(InvalidModelStateFilter))]
-public class StateController : ControllerBase
+public class EntityController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;
 
-    public StateController(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    public EntityController(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _entityStateQuerier = entityStateQuerier;

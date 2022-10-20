@@ -91,52 +91,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Allows a client to request a response referencing an earlier (&#x60;at_*&#x60; properties) or later (&#x60;from_*&#x60; properties) ledger state.
+    /// TransactionDetailsResponseAllOf
     /// </summary>
-    [DataContract(Name = "PartialLedgerStateIdentifier")]
-    public partial class PartialLedgerStateIdentifier : IEquatable<PartialLedgerStateIdentifier>, IValidatableObject
+    [DataContract(Name = "TransactionDetailsResponse_allOf")]
+    public partial class TransactionDetailsResponseAllOf : IEquatable<TransactionDetailsResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PartialLedgerStateIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponseAllOf" /> class.
         /// </summary>
-        /// <param name="stateVersion">If the version is provided, the latest ledger state &lt;&#x3D; the given version is returned..</param>
-        /// <param name="timestamp">If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned..</param>
-        /// <param name="epoch">If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned..</param>
-        /// <param name="round">round.</param>
-        public PartialLedgerStateIdentifier(long? stateVersion = default(long?), DateTimeOffset? timestamp = default(DateTimeOffset?), long? epoch = default(long?), long? round = default(long?))
+        [JsonConstructorAttribute]
+        protected TransactionDetailsResponseAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponseAllOf" /> class.
+        /// </summary>
+        /// <param name="transaction">transaction (required).</param>
+        /// <param name="details">details (required).</param>
+        public TransactionDetailsResponseAllOf(TransactionInfo transaction = default(TransactionInfo), TransactionDetails details = default(TransactionDetails))
         {
-            this.StateVersion = stateVersion;
-            this.Timestamp = timestamp;
-            this.Epoch = epoch;
-            this.Round = round;
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction is a required property for TransactionDetailsResponseAllOf and cannot be null");
+            }
+            this.Transaction = transaction;
+            // to ensure "details" is required (not null)
+            if (details == null)
+            {
+                throw new ArgumentNullException("details is a required property for TransactionDetailsResponseAllOf and cannot be null");
+            }
+            this.Details = details;
         }
 
         /// <summary>
-        /// If the version is provided, the latest ledger state &lt;&#x3D; the given version is returned.
+        /// Gets or Sets Transaction
         /// </summary>
-        /// <value>If the version is provided, the latest ledger state &lt;&#x3D; the given version is returned.</value>
-        [DataMember(Name = "state_version", EmitDefaultValue = true)]
-        public long? StateVersion { get; set; }
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionInfo Transaction { get; set; }
 
         /// <summary>
-        /// If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned.
+        /// Gets or Sets Details
         /// </summary>
-        /// <value>If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned.</value>
-        [DataMember(Name = "timestamp", EmitDefaultValue = true)]
-        public DateTimeOffset? Timestamp { get; set; }
-
-        /// <summary>
-        /// If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned.
-        /// </summary>
-        /// <value>If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned.</value>
-        [DataMember(Name = "epoch", EmitDefaultValue = true)]
-        public long? Epoch { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Round
-        /// </summary>
-        [DataMember(Name = "round", EmitDefaultValue = true)]
-        public long? Round { get; set; }
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,11 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class PartialLedgerStateIdentifier {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  Timestamp: ").Append(Timestamp).Append("\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
-            sb.Append("  Round: ").Append(Round).Append("\n");
+            sb.Append("class TransactionDetailsResponseAllOf {\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -170,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as PartialLedgerStateIdentifier);
+            return this.Equals(input as TransactionDetailsResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if PartialLedgerStateIdentifier instances are equal
+        /// Returns true if TransactionDetailsResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of PartialLedgerStateIdentifier to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(PartialLedgerStateIdentifier input)
+        public bool Equals(TransactionDetailsResponseAllOf input)
         {
             if (input == null)
             {
@@ -186,24 +180,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    (this.StateVersion != null &&
-                    this.StateVersion.Equals(input.StateVersion))
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
                 ) && 
                 (
-                    this.Timestamp == input.Timestamp ||
-                    (this.Timestamp != null &&
-                    this.Timestamp.Equals(input.Timestamp))
-                ) && 
-                (
-                    this.Epoch == input.Epoch ||
-                    (this.Epoch != null &&
-                    this.Epoch.Equals(input.Epoch))
-                ) && 
-                (
-                    this.Round == input.Round ||
-                    (this.Round != null &&
-                    this.Round.Equals(input.Round))
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -216,21 +200,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.StateVersion != null)
+                if (this.Transaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
                 }
-                if (this.Timestamp != null)
+                if (this.Details != null)
                 {
-                    hashCode = (hashCode * 59) + this.Timestamp.GetHashCode();
-                }
-                if (this.Epoch != null)
-                {
-                    hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
-                }
-                if (this.Round != null)
-                {
-                    hashCode = (hashCode * 59) + this.Round.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

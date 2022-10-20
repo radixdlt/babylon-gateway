@@ -18,8 +18,8 @@ tags:
   - name: Transaction
     x-displayName: Transaction Endpoints
     description: To build, finalize and submit transactions, and to query transaction status and contents.
-  - name: State
-    x-displayName: TBD State Endpoints
+  - name: Entity
+    x-displayName: Entity State Endpoints
     description: TBD
 paths:
   "/gateway":
@@ -192,7 +192,7 @@ paths:
       description: |
         TBD
       tags:
-        - State
+        - Entity
       requestBody:
         required: true
         content:
@@ -219,7 +219,7 @@ paths:
       description: |
         TBD
       tags:
-        - State
+        - Entity
       requestBody:
         required: true
         content:
@@ -286,6 +286,30 @@ components:
           description: The consensus round in the epoch that this state version was committed in.
           type: integer
           format: int64
+    PartialLedgerStateIdentifier:
+      description: Allows a client to request a response referencing an earlier (`at_*` properties) or later (`from_*` properties) ledger state.
+      type: object
+      nullable: true
+      properties:
+        state_version:
+          description: If the version is provided, the latest ledger state <= the given version is returned.
+          nullable: true
+          type: integer
+          format: int64
+        timestamp:
+          description: If a timestamp is provided, the latest ledger state <= the given timestamp is returned.
+          nullable: true
+          type: string
+          format: date-time
+        epoch:
+          description: If an epoch is provided, the ledger state at the given epoch <= the given round (else round 0) is returned.
+          nullable: true
+          type: integer
+          format: int64
+        round:
+          nullable: true
+          type: integer
+          format: int64
 
     LedgerStateMixin:
       type: object
@@ -311,10 +335,6 @@ components:
           description: TBD (maybe we should use HATEOAS-like permalinks?)
           type: string
           nullable: true
-
-    #
-    # ??
-    #
 
     #
     # "Status" Request & Response Types
@@ -393,7 +413,7 @@ components:
                   items:
                     $ref: "#/components/schemas/TransactionInfo"
     #
-    # "State" Request & Response Types
+    # "Entity" Request & Response Types
     #
 
     EntityResourcesRequest:
@@ -609,30 +629,7 @@ components:
         duplicate:
           type: boolean
           description: Is true if the transaction is a duplicate of an existing pending transaction.
-    PartialLedgerStateIdentifier:
-      description: Optional. Allows a client to request a response referencing an earlier (`at_*` properties) or later (`from_*` properties) ledger state.
-      type: object
-      nullable: true
-      properties:
-        state_version:
-          description: If the version is provided, the latest ledger state <= the given version is returned.
-          nullable: true
-          type: integer
-          format: int64
-        timestamp:
-          description: If a timestamp is provided, the latest ledger state <= the given timestamp is returned.
-          nullable: true
-          type: string
-          format: date-time
-        epoch:
-          description: If an epoch is provided, the ledger state at the given epoch <= the given round (else round 0) is returned.
-          nullable: true
-          type: integer
-          format: int64
-        round:
-          nullable: true
-          type: integer
-          format: int64
+
     TransactionStatusRequest:
       type: object
       required:
@@ -647,15 +644,14 @@ components:
           origin: intent
           value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
     TransactionStatusResponse:
-      type: object
-      required:
-        - ledger_state
-        - transaction
-      properties:
-        ledger_state:
-          $ref: "#/components/schemas/LedgerState"
-        transaction:
-          $ref: "#/components/schemas/TransactionInfo"
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - transaction
+          properties:
+            transaction:
+              $ref: "#/components/schemas/TransactionInfo"
     TransactionDetailsRequest:
       type: object
       required:
@@ -670,18 +666,17 @@ components:
           origin: intent
           value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
     TransactionDetailsResponse:
-      type: object
-      required:
-        - ledger_state
-        - transaction
-        - details
-      properties:
-        ledger_state:
-          $ref: "#/components/schemas/LedgerState"
-        transaction:
-          $ref: "#/components/schemas/TransactionInfo"
-        details:
-          "$ref": "#/components/schemas/TransactionDetails"
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - transaction
+            - details
+          properties:
+            transaction:
+              $ref: "#/components/schemas/TransactionInfo"
+            details:
+              "$ref": "#/components/schemas/TransactionDetails"
     TokenProperties:
       type: object
       required:

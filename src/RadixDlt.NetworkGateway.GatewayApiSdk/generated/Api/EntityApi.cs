@@ -88,7 +88,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStateApiSync : IApiAccessor
+    public interface IEntityApiSync : IApiAccessor
     {
         #region Synchronous Operations
         /// <summary>
@@ -139,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStateApiAsync : IApiAccessor
+    public interface IEntityApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
         /// <summary>
@@ -194,7 +194,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public interface IStateApi : IStateApiSync, IStateApiAsync
+    public interface IEntityApi : IEntityApiSync, IEntityApiAsync
     {
 
     }
@@ -202,29 +202,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
-    public partial class StateApi : IDisposable, IStateApi
+    public partial class EntityApi : IDisposable, IEntityApi
     {
         private RadixDlt.NetworkGateway.GatewayApiSdk.Client.ExceptionFactory _exceptionFactory = (name, response) => null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class.
+        /// Initializes a new instance of the <see cref="EntityApi"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <returns></returns>
-        public StateApi() : this((string)null)
+        public EntityApi() : this((string)null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class.
+        /// Initializes a new instance of the <see cref="EntityApi"/> class.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <returns></returns>
-        public StateApi(string basePath)
+        public EntityApi(string basePath)
         {
             this.Configuration = RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration.MergeConfigurations(
                 RadixDlt.NetworkGateway.GatewayApiSdk.Client.GlobalConfiguration.Instance,
@@ -237,14 +237,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="EntityApi"/> class using Configuration object.
         /// **IMPORTANT** This will also create an instance of HttpClient, which is less than ideal.
         /// It's better to reuse the <see href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net">HttpClient and HttpClientHandler</see>.
         /// </summary>
         /// <param name="configuration">An instance of Configuration.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public StateApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration)
+        public EntityApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
 
@@ -259,7 +259,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class.
+        /// Initializes a new instance of the <see cref="EntityApi"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="handler">An optional instance of HttpClientHandler that is used by HttpClient.</param>
@@ -269,12 +269,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StateApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
+        public EntityApi(HttpClient client, HttpClientHandler handler = null) : this(client, (string)null, handler)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class.
+        /// Initializes a new instance of the <see cref="EntityApi"/> class.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="basePath">The target service's base path in URL format.</param>
@@ -286,7 +286,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StateApi(HttpClient client, string basePath, HttpClientHandler handler = null)
+        public EntityApi(HttpClient client, string basePath, HttpClientHandler handler = null)
         {
             if (client == null) throw new ArgumentNullException("client");
 
@@ -301,7 +301,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class using Configuration object.
+        /// Initializes a new instance of the <see cref="EntityApi"/> class using Configuration object.
         /// </summary>
         /// <param name="client">An instance of HttpClient.</param>
         /// <param name="configuration">An instance of Configuration.</param>
@@ -312,7 +312,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Some configuration settings will not be applied without passing an HttpClientHandler.
         /// The features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings.
         /// </remarks>
-        public StateApi(HttpClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
+        public EntityApi(HttpClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.Configuration configuration, HttpClientHandler handler = null)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
             if (client == null) throw new ArgumentNullException("client");
@@ -328,14 +328,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StateApi"/> class
+        /// Initializes a new instance of the <see cref="EntityApi"/> class
         /// using a Configuration object and client instance.
         /// </summary>
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public StateApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.ISynchronousClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IReadableConfiguration configuration)
+        public EntityApi(RadixDlt.NetworkGateway.GatewayApiSdk.Client.ISynchronousClient client, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IAsynchronousClient asyncClient, RadixDlt.NetworkGateway.GatewayApiSdk.Client.IReadableConfiguration configuration)
         {
             if (client == null) throw new ArgumentNullException("client");
             if (asyncClient == null) throw new ArgumentNullException("asyncClient");
@@ -423,7 +423,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         {
             // verify the required parameter 'entityDetailsRequest' is set
             if (entityDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->EntityDetails");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling EntityApi->EntityDetails");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -481,7 +481,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         {
             // verify the required parameter 'entityDetailsRequest' is set
             if (entityDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->EntityDetails");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling EntityApi->EntityDetails");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -540,7 +540,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         {
             // verify the required parameter 'entityResourcesRequest' is set
             if (entityResourcesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->EntityResources");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling EntityApi->EntityResources");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -598,7 +598,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         {
             // verify the required parameter 'entityResourcesRequest' is set
             if (entityResourcesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->EntityResources");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling EntityApi->EntityResources");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
