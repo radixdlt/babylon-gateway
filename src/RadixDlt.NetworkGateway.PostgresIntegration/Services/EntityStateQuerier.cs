@@ -226,4 +226,50 @@ INNER JOIN LATERAL (
 
         return new EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
+
+    public async Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default)
+    {
+        var addressesList = addresses.ToList();
+
+        var entities = await _dbContext.Entities
+            .Where(e => e.GlobalAddress != null && addressesList.Contains(e.GlobalAddress))
+            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .ToListAsync(token);
+
+        var entityIds = entities.Select(e => e.Id).ToList();
+
+        var metadataHistory = await _dbContext.EntityMetadataHistory
+            .FromSqlInterpolated($@"
+WITH ids (id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT emh.*
+FROM ids
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_history
+    WHERE
+       from_state_version <= 123 AND entity_id = ids.id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON true;
+")
+            .ToDictionaryAsync(e => e.EntityId, token);
+
+        var items = new List<EntityOverviewResponseEntityItem>();
+
+        foreach (var entity in entities)
+        {
+            var metadata = new Dictionary<string, string>();
+
+            if (metadataHistory.ContainsKey(entity.Id))
+            {
+                metadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
+            }
+
+            items.Add(new EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata));
+        }
+
+        return new EntityOverviewResponse(ledgerState, items);
+    }
 }

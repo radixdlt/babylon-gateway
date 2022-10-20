@@ -239,6 +239,33 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+  /entity/overview:
+    post:
+      operationId: EntityOverview
+      summary: Entity Overview
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/EntityOverviewRequest"
+      responses:
+        '200':
+          description: Entity Details
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EntityOverviewResponse"
+        '500':
+          description: Gateway Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
 
@@ -554,6 +581,43 @@ components:
           $ref: "#/components/schemas/ResourceTypeMapping"
         tbd:
           type: string
+
+    EntityOverviewRequest:
+      type: object
+      required:
+        - addresses
+      properties:
+        addresses:
+          type: array
+          items:
+            type: string
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+    EntityOverviewResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - entities
+          properties:
+            entities:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityOverviewResponseEntityItem"
+    EntityOverviewResponseEntityItem:
+       type: object
+       required:
+         - address
+         - metadata
+       properties:
+         address:
+           description: The Bech32m-encoded human readable version of the resource's global address
+           type: string
+         metadata:
+           description: TBD
+           type: object
+           additionalProperties:
+             type: string
 
     #
     # TODO Not categorized yet

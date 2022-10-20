@@ -65,6 +65,7 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,4 +77,6 @@ public interface IEntityStateQuerier
     Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
 
     Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+
+    Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default);
 }

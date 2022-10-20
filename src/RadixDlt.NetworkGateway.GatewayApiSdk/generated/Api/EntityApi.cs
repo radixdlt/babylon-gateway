@@ -113,6 +113,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntityDetailsResponse</returns>
         ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest);
         /// <summary>
+        /// Entity Overview
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <returns>EntityOverviewResponse</returns>
+        EntityOverviewResponse EntityOverview(EntityOverviewRequest entityOverviewRequest);
+
+        /// <summary>
+        /// Entity Overview
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <returns>ApiResponse of EntityOverviewResponse</returns>
+        ApiResponse<EntityOverviewResponse> EntityOverviewWithHttpInfo(EntityOverviewRequest entityOverviewRequest);
+        /// <summary>
         /// Entity Resources
         /// </summary>
         /// <remarks>
@@ -165,6 +186,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Entity Overview
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityOverviewResponse</returns>
+        System.Threading.Tasks.Task<EntityOverviewResponse> EntityOverviewAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Entity Overview
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityOverviewResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntityOverviewResponse>> EntityOverviewWithHttpInfoAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Entity Resources
         /// </summary>
@@ -512,6 +556,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("EntityDetails", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Entity Overview TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <returns>EntityOverviewResponse</returns>
+        public EntityOverviewResponse EntityOverview(EntityOverviewRequest entityOverviewRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse> localVarResponse = EntityOverviewWithHttpInfo(entityOverviewRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Entity Overview TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <returns>ApiResponse of EntityOverviewResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse> EntityOverviewWithHttpInfo(EntityOverviewRequest entityOverviewRequest)
+        {
+            // verify the required parameter 'entityOverviewRequest' is set
+            if (entityOverviewRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityOverviewRequest' when calling EntityApi->EntityOverview");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityOverviewRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<EntityOverviewResponse>("/entity/overview", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityOverview", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Entity Overview TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityOverviewResponse</returns>
+        public async System.Threading.Tasks.Task<EntityOverviewResponse> EntityOverviewAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse> localVarResponse = await EntityOverviewWithHttpInfoAsync(entityOverviewRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Entity Overview TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityOverviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityOverviewResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityOverviewResponse>> EntityOverviewWithHttpInfoAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'entityOverviewRequest' is set
+            if (entityOverviewRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityOverviewRequest' when calling EntityApi->EntityOverview");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityOverviewRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityOverviewResponse>("/entity/overview", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityOverview", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

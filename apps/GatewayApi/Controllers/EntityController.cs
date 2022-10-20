@@ -63,10 +63,12 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -111,5 +113,16 @@ public class EntityController : ControllerBase
         return response != null
             ? Ok(response)
             : NotFound();
+    }
+
+    [HttpPost("overview")]
+    public async Task<IActionResult> Overview(EntityOverviewRequest request, CancellationToken token = default)
+    {
+        var addresses = request.Addresses.Select(address => (RadixAddress)RadixBech32.Decode(address).Data).ToArray();
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var response = await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
+
+        return Ok(response);
     }
 }
