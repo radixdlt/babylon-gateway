@@ -114,7 +114,7 @@ public sealed class TransactionController : ControllerBase
         return new RecentTransactionsResponse(
             atLedgerState,
             nextCursor: results.NextPageCursor?.ToCursorString(),
-            results.Transactions
+            items: results.Transactions
         );
     }
 

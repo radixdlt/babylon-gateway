@@ -136,6 +136,9 @@ public static class ServiceCollectionExtensions
 
     private static void AddRequestServices(IServiceCollection services)
     {
+        services.AddScoped<ExceptionFilter>();
+        services.AddScoped<InvalidModelStateFilter>();
+
         services.TryAddScoped<IPreviewService, PreviewService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();
     }

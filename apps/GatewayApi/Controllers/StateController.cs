@@ -76,8 +76,8 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("state")]
-[TypeFilter(typeof(ExceptionFilter))]
-[TypeFilter(typeof(InvalidModelStateFilter))]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
 public class StateController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;

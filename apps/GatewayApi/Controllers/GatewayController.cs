@@ -73,8 +73,8 @@ namespace GatewayApi.Controllers;
 
 [ApiController]
 [Route("gateway")]
-[TypeFilter(typeof(ExceptionFilter))]
-[TypeFilter(typeof(InvalidModelStateFilter))]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class GatewayController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
@@ -85,7 +85,7 @@ public sealed class GatewayController : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<GatewayResponse> Status(CancellationToken token)
+    public async Task<GatewayInfoResponse> Status(CancellationToken token)
     {
         return await _ledgerStateQuerier.GetGatewayState(token);
     }
