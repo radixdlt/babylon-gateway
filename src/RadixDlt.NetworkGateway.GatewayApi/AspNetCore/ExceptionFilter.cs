@@ -68,7 +68,7 @@ using System.Diagnostics;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 
-internal class ExceptionFilter : IActionFilter, IOrderedFilter
+public class ExceptionFilter : IActionFilter, IOrderedFilter
 {
     private readonly IExceptionHandler _exceptionHandler;
 

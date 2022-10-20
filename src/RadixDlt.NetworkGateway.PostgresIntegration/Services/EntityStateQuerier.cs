@@ -136,8 +136,8 @@ INNER JOIN LATERAL (
             .Where(e => referencedEntityIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
-        var fungibles = new List<EntityStateResponseFungibleResource>();
-        var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
+        var fungibles = new List<EntityResourcesResponseFungibleResourcesItem>();
+        var nonFungibles = new List<EntityResourcesResponseNonFungibleResourcesItem>();
 
         foreach (var dbResource in dbResources)
         {
@@ -146,11 +146,11 @@ INNER JOIN LATERAL (
 
             if (dbResource is EntityFungibleResourceHistory efrh)
             {
-                fungibles.Add(new EntityStateResponseFungibleResource(ra, efrh.Balance.ToSubUnitString()));
+                fungibles.Add(new EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
             }
             else if (dbResource is EntityNonFungibleResourceHistory enfrh)
             {
-                nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, enfrh.IdsCount));
+                nonFungibles.Add(new EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
             }
             else
             {
@@ -161,7 +161,7 @@ INNER JOIN LATERAL (
         var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibles.Count, null, "TBD (currently everything is returned)", fungibles);
         var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibles.Count, null, "TBD (currently everything is returned)", nonFungibles);
 
-        return new EntityResourcesResponse(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
+        return new EntityResourcesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
     }
 
     public async Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
@@ -192,13 +192,13 @@ INNER JOIN LATERAL (
             if (supplyHistory == null)
             {
                 details = new EntityDetailsResponseDetails(new EntityDetailsResponseNonFungibleDetails(
-                    resourceType: ResourceType.NonFungible.ToString(),
+                    resourceType: ResourceTypeMapping.NonFungible,
                     tbd: "unknown"));
             }
             else
             {
                 details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(
-                    resourceType: ResourceType.Fungible.ToString(),
+                    resourceType: ResourceTypeMapping.Fungible,
                     totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
                     totalMintedAttos: supplyHistory.TotalMinted.ToString(),
                     totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
@@ -224,6 +224,52 @@ INNER JOIN LATERAL (
             metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
 
-        return new EntityDetailsResponse(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
+        return new EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
+    }
+
+    public async Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default)
+    {
+        var addressesList = addresses.ToList();
+
+        var entities = await _dbContext.Entities
+            .Where(e => e.GlobalAddress != null && addressesList.Contains(e.GlobalAddress))
+            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .ToListAsync(token);
+
+        var entityIds = entities.Select(e => e.Id).ToList();
+
+        var metadataHistory = await _dbContext.EntityMetadataHistory
+            .FromSqlInterpolated($@"
+WITH ids (id) AS (
+    SELECT UNNEST({entityIds})
+)
+SELECT emh.*
+FROM ids
+INNER JOIN LATERAL (
+    SELECT *
+    FROM entity_metadata_history
+    WHERE
+       from_state_version <= 123 AND entity_id = ids.id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON true;
+")
+            .ToDictionaryAsync(e => e.EntityId, token);
+
+        var items = new List<EntityOverviewResponseEntityItem>();
+
+        foreach (var entity in entities)
+        {
+            var metadata = new Dictionary<string, string>();
+
+            if (metadataHistory.ContainsKey(entity.Id))
+            {
+                metadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
+            }
+
+            items.Add(new EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata));
+        }
+
+        return new EntityOverviewResponse(ledgerState, items);
     }
 }

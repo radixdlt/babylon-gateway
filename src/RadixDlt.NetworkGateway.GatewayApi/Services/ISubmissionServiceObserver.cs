@@ -78,23 +78,21 @@ public interface ISubmissionServiceObserver
 
     ValueTask HandleSubmitRequestFailed(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
+    ValueTask ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException);
 
-    ValueTask ParseTransactionFailedInvalidTransaction(ValidatedHex signedTransaction, WrappedCoreApiException wrappedCoreApiException);
+    ValueTask ParseTransactionFailedUnknown(GatewayModel.TransactionSubmitRequest request, Exception exception);
 
-    ValueTask ParseTransactionFailedUnknown(ValidatedHex signedTransaction, Exception exception);
+    ValueTask ParsedTransactionUnsupportedPayloadType(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response);
 
-    ValueTask SubmissionAlreadyFailed(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance);
+    ValueTask ParsedTransactionStaticallyInvalid(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionParseResponse response);
 
-    ValueTask SubmissionAlreadySubmitted(ValidatedHex signedTransaction, MempoolTrackGuidance mempoolTrackGuidance);
+    ValueTask SubmissionAlreadyFailed(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
+
+    ValueTask SubmissionAlreadySubmitted(GatewayModel.TransactionSubmitRequest request, TackingGuidance tackingGuidance);
 
     ValueTask SubmissionDuplicate(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
 
     ValueTask SubmissionSucceeded(GatewayModel.TransactionSubmitRequest request, CoreModel.TransactionSubmitResponse response);
-
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask HandleSubmissionFailedSubstateNotFound(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException);
 
     ValueTask HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception);
 

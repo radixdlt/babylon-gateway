@@ -93,9 +93,9 @@ public sealed class DataAggregatorBuilder
     {
         Services.AddHostedService<NodeConfigurationMonitorWorker>();
         Services.AddHostedService<LedgerConfirmationWorker>();
-        // Services.AddHostedService<MempoolTrackerWorker>();
-        // Services.AddHostedService<MempoolResubmissionWorker>();
-        // Services.AddHostedService<MempoolPrunerWorker>();
+        Services.AddHostedService<PendingTransactionTrackerWorker>();
+        Services.AddHostedService<PendingTransactionResubmissionWorker>();
+        Services.AddHostedService<PendingTransactionPrunerWorker>();
 
         return this;
     }

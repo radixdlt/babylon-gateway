@@ -83,14 +83,14 @@ internal class DataAggregatorMetricsObserver :
     IGlobalWorkerObserver,
     INodeWorkerObserver,
     ILedgerConfirmationServiceObserver,
-    IMempoolPrunerServiceObserver,
-    IMempoolResubmissionServiceObserver,
+    IPendingTransactionPrunerServiceObserver,
+    IPendingTransactionResubmissionServiceObserver,
     IAggregatorHealthCheckObserver,
     ISystemStatusServiceObserver,
     INodeInitializerObserver,
     IMempoolTrackerServiceObserver,
     INodeTransactionLogWorkerObserver,
-    INodeMempoolTransactionIdsReaderWorkerObserver,
+    INodeMempoolTransactionHashesReaderWorkerObserver,
     INodeMempoolFullTransactionReaderWorkerObserver,
     IRawTransactionWriterObserver,
     INetworkConfigurationReaderObserver,
@@ -541,7 +541,7 @@ internal class DataAggregatorMetricsObserver :
         _quorumExtensionConsistentStatus.SetStatus(MetricStatus.No);
     }
 
-    public ValueTask PreMempoolPrune(List<MempoolStatusCount> mempoolCountByStatus)
+    public ValueTask PrePendingTransactionPrune(List<PendingTransactionStatusCount> mempoolCountByStatus)
     {
         var existingStatusLabelsNeedingUpdating = _mempoolDbSizeByStatus.GetAllLabelValues().SelectMany(x => x).ToHashSet();
 
@@ -560,66 +560,66 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolPrunerServiceObserver.PreMempoolTransactionPruned(int count)
+    ValueTask IPendingTransactionPrunerServiceObserver.PreMempoolTransactionPruned(int count)
     {
         _mempoolTransactionsPrunedCount.Inc(count);
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.TransactionsSelected(int totalTransactionsNeedingResubmission)
+    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionsSelected(int totalTransactionsNeedingResubmission)
     {
         _resubmissionQueueSize.Set(totalTransactionsNeedingResubmission);
 
         return ValueTask.CompletedTask;
     }
 
-    void IMempoolResubmissionServiceObserver.TransactionMarkedAsAssumedSuccessfullySubmittedToNode()
+    void IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsAssumedSuccessfullySubmittedToNode()
     {
         _dbMempoolTransactionsMarkedAsAssumedInNodeMempoolAfterResubmissionCount.Inc();
     }
 
-    void IMempoolResubmissionServiceObserver.TransactionMarkedAsFailed()
+    void IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsFailed()
     {
         _dbTransactionsMarkedAsFailedForTimeoutCount.Inc();
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode()
+    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsResolvedButUnknownAfterSubmittedToNode()
     {
         _dbMempoolTransactionsMarkedAsResolvedButUnknownStatusCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.TransactionMarkedAsFailedAfterSubmittedToNode()
+    ValueTask IPendingTransactionResubmissionServiceObserver.TransactionMarkedAsFailedAfterSubmittedToNode()
     {
         _dbMempoolTransactionsMarkedAsFailedDuringResubmissionCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.PreResubmit(string signedTransaction)
+    ValueTask IPendingTransactionResubmissionServiceObserver.PreResubmit(byte[] notarizedTransaction)
     {
         _transactionResubmissionAttemptCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.PostResubmit(string signedTransaction)
+    ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmit(byte[] notarizedTransaction)
     {
         _transactionResubmissionSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.PostResubmitDuplicate(string signedTransaction)
+    ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmitDuplicate(byte[] notarizedTransaction)
     {
         _transactionResubmissionResolutionByResultCount.WithLabels("node_marks_as_duplicate").Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.PostResubmitSucceeded(string signedTransaction)
+    ValueTask IPendingTransactionResubmissionServiceObserver.PostResubmitSucceeded(byte[] notarizedTransaction)
     {
         _transactionResubmissionResolutionByResultCount.WithLabels("success").Inc();
 
@@ -627,7 +627,7 @@ internal class DataAggregatorMetricsObserver :
     }
 
     // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedSubstateNotFound(string signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
+    // ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedSubstateNotFound(byte[] notarizedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
     // {
     //     _transactionResubmissionErrorCount.Inc();
     //     _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
@@ -635,7 +635,7 @@ internal class DataAggregatorMetricsObserver :
     //     return ValueTask.CompletedTask;
     // }
 
-    ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedPermanently(string signedTransaction, WrappedCoreApiException wrappedCoreApiException)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("unknown_permanent_error").Inc();
@@ -643,7 +643,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedTimeout(string signedTransaction, OperationCanceledException operationCanceledException)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedTimeout(byte[] notarizedTransaction, OperationCanceledException operationCanceledException)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("request_timeout").Inc();
@@ -651,7 +651,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedUnknown(string signedTransaction, Exception exception)
+    ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedUnknown(byte[] notarizedTransaction, Exception exception)
     {
         _transactionResubmissionErrorCount.Inc();
         _transactionResubmissionResolutionByResultCount.WithLabels("unknown_error").Inc();
@@ -712,14 +712,14 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask INodeMempoolTransactionIdsReaderWorkerObserver.MempoolSize(string nodeName, int transactionIdentifiersCount)
+    ValueTask INodeMempoolTransactionHashesReaderWorkerObserver.MempoolSize(string nodeName, int transactionIdentifiersCount)
     {
         _mempoolSizeUnScoped.WithLabels(nodeName).Set(transactionIdentifiersCount);
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask INodeMempoolTransactionIdsReaderWorkerObserver.MempoolItemsChange(string nodeName, int transactionIdsAddedCount, int transactionIdsRemovedCount)
+    ValueTask INodeMempoolTransactionHashesReaderWorkerObserver.MempoolItemsChange(string nodeName, int transactionIdsAddedCount, int transactionIdsRemovedCount)
     {
         _mempoolItemsAddedUnScoped.WithLabels(nodeName).Inc(transactionIdsAddedCount);
         _mempoolItemsRemovedUnScoped.WithLabels(nodeName).Inc(transactionIdsRemovedCount);

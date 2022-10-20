@@ -108,14 +108,10 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _clock = clock;
     }
 
-    public async Task<GatewayResponse> GetGatewayState(CancellationToken token)
+    public async Task<GatewayInfoResponse> GetGatewayState(CancellationToken token)
     {
         var ledgerStatus = await GetLedgerStatus(token);
-        return new GatewayResponse(
-            new GatewayApiVersions(
-                _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
-                _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
-            ),
+        return new GatewayInfoResponse(
             new LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
                 ledgerStatus.TopOfLedgerTransaction.StateVersion,
@@ -123,7 +119,11 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new TargetLedgerState(ledgerStatus.TargetStateVersion)
+            new GatewayInfoResponseGatewayApiVersions(
+                _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
+                _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
+            ),
+            new GatewayInfoResponseTargetLedgerState(ledgerStatus.TargetStateVersion)
         );
     }
 

@@ -98,6 +98,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [JsonConverter(typeof(JsonSubtypes), "Type")]
     [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
     [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
+    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
     [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
     [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
     public partial class InvalidRequestError : GatewayError, IEquatable<InvalidRequestError>, IValidatableObject

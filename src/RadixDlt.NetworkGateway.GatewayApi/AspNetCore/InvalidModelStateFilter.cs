@@ -68,7 +68,7 @@ using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 
-internal class InvalidModelStateFilter : IActionFilter, IOrderedFilter
+public class InvalidModelStateFilter : IActionFilter, IOrderedFilter
 {
     public int Order => -3000;
 

@@ -82,7 +82,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.9")
+                .HasAnnotation("ProductVersion", "6.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -131,7 +131,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Address"), "hash");
 
-                    b.HasIndex("GlobalAddress");
+                    b.HasIndex("GlobalAddress")
+                        .HasFilter("global_address IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("GlobalAddress"), "hash");
 
                     b.ToTable("entities");
 
@@ -205,7 +208,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasIndex("EntityId", "FromStateVersion");
 
-                    b.HasIndex("IsMostRecent", "EntityId");
+                    b.HasIndex("IsMostRecent", "EntityId")
+                        .HasFilter("is_most_recent IS TRUE");
 
                     b.ToTable("entity_resource_aggregate_history");
                 });
@@ -403,26 +407,34 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("StateVersion");
 
-                    b.HasAlternateKey("IntentHash");
-
-                    b.HasAlternateKey("PayloadHash");
-
-                    b.HasAlternateKey("SignedIntentHash");
-
-                    b.HasAlternateKey("TransactionAccumulator");
-
                     b.HasIndex("Epoch")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_epoch_starts")
                         .HasFilter("is_start_of_epoch = true");
 
+                    b.HasIndex("IntentHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
+
+                    b.HasIndex("PayloadHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
+
                     b.HasIndex("RoundTimestamp")
                         .HasDatabaseName("IX_ledger_transaction_round_timestamp");
+
+                    b.HasIndex("SignedIntentHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
 
                     b.HasIndex("StateVersion")
                         .IsUnique()
                         .HasDatabaseName("IX_ledger_transaction_user_transactions")
                         .HasFilter("is_user_transaction = true");
+
+                    b.HasIndex("TransactionAccumulator");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("TransactionAccumulator"), "hash");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
@@ -432,11 +444,29 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("ledger_transactions");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.MempoolTransaction", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
                 {
-                    b.Property<byte[]>("PayloadHash")
-                        .HasColumnType("bytea")
-                        .HasColumnName("payload_hash");
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("NetworkName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("network_name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("network_configuration");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset?>("CommitTimestamp")
                         .HasColumnType("timestamp with time zone")
@@ -483,10 +513,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_node_timestamp");
 
-                    b.Property<byte[]>("Payload")
+                    b.Property<byte[]>("NotarizedTransactionBlob")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("payload");
+                        .HasColumnName("notarized_transaction_blob");
+
+                    b.Property<byte[]>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<byte[]>("SignedIntentHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("signed_intent_hash");
 
                     b.Property<string>("Status")
                         .IsConcurrencyToken()
@@ -502,34 +542,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("submitted_by_this_gateway");
 
-                    b.Property<string>("TransactionContents")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("transaction_contents");
-
-                    b.HasKey("PayloadHash");
-
-                    b.HasAlternateKey("IntentHash");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("mempool_transactions");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("NetworkName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("network_name");
-
                     b.HasKey("Id");
 
-                    b.ToTable("network_configuration");
+                    b.ToTable("pending_transactions");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", b =>

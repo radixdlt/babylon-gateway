@@ -96,7 +96,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// EntityDetailsResponseDetails
     /// </summary>
     [JsonConverter(typeof(EntityDetailsResponseDetailsJsonConverter))]
-    [DataContract(Name = "EntityDetailsResponse_details")]
+    [DataContract(Name = "EntityDetailsResponseDetails")]
     public partial class EntityDetailsResponseDetails : AbstractOpenAPISchema, IEquatable<EntityDetailsResponseDetails>, IValidatableObject
     {
         /// <summary>

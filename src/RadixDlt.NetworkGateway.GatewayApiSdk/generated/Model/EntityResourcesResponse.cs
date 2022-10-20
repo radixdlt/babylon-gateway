@@ -104,11 +104,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesResponse" /> class.
         /// </summary>
+        /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="fungibleResources">fungibleResources (required).</param>
         /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
-        public EntityResourcesResponse(string address = default(string), EntityResourcesResponseFungibleResources fungibleResources = default(EntityResourcesResponseFungibleResources), EntityResourcesResponseNonFungibleResources nonFungibleResources = default(EntityResourcesResponseNonFungibleResources))
+        public EntityResourcesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityResourcesResponseFungibleResources fungibleResources = default(EntityResourcesResponseFungibleResources), EntityResourcesResponseNonFungibleResources nonFungibleResources = default(EntityResourcesResponseNonFungibleResources))
         {
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
+            {
+                throw new ArgumentNullException("ledgerState is a required property for EntityResourcesResponse and cannot be null");
+            }
+            this.LedgerState = ledgerState;
             // to ensure "address" is required (not null)
             if (address == null)
             {
@@ -128,6 +135,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.NonFungibleResources = nonFungibleResources;
         }
+
+        /// <summary>
+        /// Gets or Sets LedgerState
+        /// </summary>
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the entity&#39;s global address
@@ -156,6 +169,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityResourcesResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  FungibleResources: ").Append(FungibleResources).Append("\n");
             sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
@@ -195,6 +209,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
+                ) && 
+                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
@@ -220,6 +239,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.LedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();

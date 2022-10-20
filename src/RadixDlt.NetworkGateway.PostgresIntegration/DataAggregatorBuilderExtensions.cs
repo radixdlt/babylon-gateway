@@ -86,9 +86,9 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IRawTransactionWriter, RawTransactionWriter>()
             .AddSingleton<ILedgerExtenderService, LedgerExtenderService>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
-            .AddSingleton<IMempoolTrackerService, MempoolTrackerService>()
-            .AddSingleton<IMempoolResubmissionService, MempoolResubmissionService>()
-            .AddSingleton<IMempoolPrunerService, MempoolPrunerService>();
+            .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()
+            .AddSingleton<IPendingTransactionResubmissionService, PendingTransactionResubmissionService>()
+            .AddSingleton<IPendingTransactionPrunerService, PendingTransactionPrunerService>();
 
         // Useful links:
         // https://www.npgsql.org/efcore/index.html

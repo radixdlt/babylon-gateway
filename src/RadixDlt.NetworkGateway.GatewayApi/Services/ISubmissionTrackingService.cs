@@ -72,23 +72,19 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ISubmissionTrackingService
 {
-    Task<MempoolTrackGuidance> TrackInitialSubmission(
+    Task<TackingGuidance> TrackInitialSubmission(
         DateTimeOffset submittedTimestamp,
-        byte[] signedTransaction,
-        byte[] transactionIdentifierHash,
+        CoreModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // CoreModel.ConstructionParseResponse parseResponse,
-        object? parseResponse,
         CancellationToken token = default
     );
 
     Task MarkAsFailed(
         byte[] transactionIdentifierHash,
-        MempoolTransactionFailureReason failureReason,
+        PendingTransactionFailureReason failureReason,
         string failureExplanation,
         CancellationToken token = default
     );
 }
 
-public sealed record MempoolTrackGuidance(bool ShouldSubmitToNode, MempoolTransactionFailureReason? TransactionAlreadyFailedReason = null);
+public sealed record TackingGuidance(bool ShouldSubmitToNode, PendingTransactionFailureReason? TransactionAlreadyFailedReason = null);
