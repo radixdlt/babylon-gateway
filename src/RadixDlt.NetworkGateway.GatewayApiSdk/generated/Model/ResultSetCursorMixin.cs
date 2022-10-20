@@ -91,56 +91,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayResponse
+    /// ResultSetCursorMixin
     /// </summary>
-    [DataContract(Name = "GatewayResponse")]
-    public partial class GatewayResponse : IEquatable<GatewayResponse>, IValidatableObject
+    [DataContract(Name = "ResultSetCursorMixin")]
+    public partial class ResultSetCursorMixin : IEquatable<ResultSetCursorMixin>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayResponse" /> class.
+        /// Initializes a new instance of the <see cref="ResultSetCursorMixin" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayResponse() { }
+        protected ResultSetCursorMixin() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayResponse" /> class.
+        /// Initializes a new instance of the <see cref="ResultSetCursorMixin" /> class.
         /// </summary>
-        /// <param name="gatewayApi">gatewayApi (required).</param>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="targetLedgerState">targetLedgerState.</param>
-        public GatewayResponse(GatewayApiVersions gatewayApi = default(GatewayApiVersions), LedgerState ledgerState = default(LedgerState), TargetLedgerState targetLedgerState = default(TargetLedgerState))
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        public ResultSetCursorMixin(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string))
         {
-            // to ensure "gatewayApi" is required (not null)
-            if (gatewayApi == null)
-            {
-                throw new ArgumentNullException("gatewayApi is a required property for GatewayResponse and cannot be null");
-            }
-            this.GatewayApi = gatewayApi;
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for GatewayResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
-            this.TargetLedgerState = targetLedgerState;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets GatewayApi
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        [DataMember(Name = "gateway_api", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayApiVersions GatewayApi { get; set; }
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public int TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets TargetLedgerState
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "target_ledger_state", EmitDefaultValue = true)]
-        public TargetLedgerState TargetLedgerState { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +142,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayResponse {\n");
-            sb.Append("  GatewayApi: ").Append(GatewayApi).Append("\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  TargetLedgerState: ").Append(TargetLedgerState).Append("\n");
+            sb.Append("class ResultSetCursorMixin {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayResponse);
+            return this.Equals(input as ResultSetCursorMixin);
         }
 
         /// <summary>
-        /// Returns true if GatewayResponse instances are equal
+        /// Returns true if ResultSetCursorMixin instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayResponse to be compared</param>
+        /// <param name="input">Instance of ResultSetCursorMixin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayResponse input)
+        public bool Equals(ResultSetCursorMixin input)
         {
             if (input == null)
             {
@@ -189,19 +182,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.GatewayApi == input.GatewayApi ||
-                    (this.GatewayApi != null &&
-                    this.GatewayApi.Equals(input.GatewayApi))
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 ) && 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
                 ) && 
                 (
-                    this.TargetLedgerState == input.TargetLedgerState ||
-                    (this.TargetLedgerState != null &&
-                    this.TargetLedgerState.Equals(input.TargetLedgerState))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 );
         }
 
@@ -214,17 +206,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.GatewayApi != null)
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.GatewayApi.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.LedgerState != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
-                }
-                if (this.TargetLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.TargetLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
                 return hashCode;
             }

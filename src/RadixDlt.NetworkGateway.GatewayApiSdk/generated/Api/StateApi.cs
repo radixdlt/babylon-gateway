@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
         /// <returns>EntityDetailsResponse</returns>
-        EntityDetailsResponse GetEntityDetails(EntityDetailsRequest entityDetailsRequest);
+        EntityDetailsResponse EntityDetails(EntityDetailsRequest entityDetailsRequest);
 
         /// <summary>
         /// Entity Details
@@ -111,7 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
         /// <returns>ApiResponse of EntityDetailsResponse</returns>
-        ApiResponse<EntityDetailsResponse> GetEntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest);
+        ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest);
         /// <summary>
         /// Entity Resources
         /// </summary>
@@ -121,7 +121,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
         /// <returns>EntityResourcesResponse</returns>
-        EntityResourcesResponse GetEntityResources(EntityResourcesRequest entityResourcesRequest);
+        EntityResourcesResponse EntityResources(EntityResourcesRequest entityResourcesRequest);
 
         /// <summary>
         /// Entity Resources
@@ -132,7 +132,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
         /// <returns>ApiResponse of EntityResourcesResponse</returns>
-        ApiResponse<EntityResourcesResponse> GetEntityResourcesWithHttpInfo(EntityResourcesRequest entityResourcesRequest);
+        ApiResponse<EntityResourcesResponse> EntityResourcesWithHttpInfo(EntityResourcesRequest entityResourcesRequest);
         #endregion Synchronous Operations
     }
 
@@ -152,7 +152,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of EntityDetailsResponse</returns>
-        System.Threading.Tasks.Task<EntityDetailsResponse> GetEntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<EntityDetailsResponse> EntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Entity Details
@@ -164,7 +164,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityDetailsResponse>> GetEntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Entity Resources
         /// </summary>
@@ -175,7 +175,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityResourcesRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of EntityResourcesResponse</returns>
-        System.Threading.Tasks.Task<EntityResourcesResponse> GetEntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<EntityResourcesResponse> EntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Entity Resources
@@ -187,7 +187,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityResourcesRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntityResourcesResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<EntityResourcesResponse>> GetEntityResourcesWithHttpInfoAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<EntityResourcesResponse>> EntityResourcesWithHttpInfoAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -407,9 +407,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
         /// <returns>EntityDetailsResponse</returns>
-        public EntityDetailsResponse GetEntityDetails(EntityDetailsRequest entityDetailsRequest)
+        public EntityDetailsResponse EntityDetails(EntityDetailsRequest entityDetailsRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> localVarResponse = GetEntityDetailsWithHttpInfo(entityDetailsRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> localVarResponse = EntityDetailsWithHttpInfo(entityDetailsRequest);
             return localVarResponse.Data;
         }
 
@@ -419,11 +419,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
         /// <returns>ApiResponse of EntityDetailsResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> GetEntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest)
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest)
         {
             // verify the required parameter 'entityDetailsRequest' is set
             if (entityDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->GetEntityDetails");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->EntityDetails");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -450,7 +450,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("GetEntityDetails", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityDetails", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -464,9 +464,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of EntityDetailsResponse</returns>
-        public async System.Threading.Tasks.Task<EntityDetailsResponse> GetEntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<EntityDetailsResponse> EntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> localVarResponse = await GetEntityDetailsWithHttpInfoAsync(entityDetailsRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse> localVarResponse = await EntityDetailsWithHttpInfoAsync(entityDetailsRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -477,11 +477,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityDetailsRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse>> GetEntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'entityDetailsRequest' is set
             if (entityDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->GetEntityDetails");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityDetailsRequest' when calling StateApi->EntityDetails");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -511,7 +511,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("GetEntityDetails", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityDetails", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -524,9 +524,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
         /// <returns>EntityResourcesResponse</returns>
-        public EntityResourcesResponse GetEntityResources(EntityResourcesRequest entityResourcesRequest)
+        public EntityResourcesResponse EntityResources(EntityResourcesRequest entityResourcesRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> localVarResponse = GetEntityResourcesWithHttpInfo(entityResourcesRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> localVarResponse = EntityResourcesWithHttpInfo(entityResourcesRequest);
             return localVarResponse.Data;
         }
 
@@ -536,11 +536,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
         /// <returns>ApiResponse of EntityResourcesResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> GetEntityResourcesWithHttpInfo(EntityResourcesRequest entityResourcesRequest)
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> EntityResourcesWithHttpInfo(EntityResourcesRequest entityResourcesRequest)
         {
             // verify the required parameter 'entityResourcesRequest' is set
             if (entityResourcesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->GetEntityResources");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->EntityResources");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -567,7 +567,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("GetEntityResources", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityResources", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -581,9 +581,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityResourcesRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of EntityResourcesResponse</returns>
-        public async System.Threading.Tasks.Task<EntityResourcesResponse> GetEntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<EntityResourcesResponse> EntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> localVarResponse = await GetEntityResourcesWithHttpInfoAsync(entityResourcesRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse> localVarResponse = await EntityResourcesWithHttpInfoAsync(entityResourcesRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -594,11 +594,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="entityResourcesRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntityResourcesResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse>> GetEntityResourcesWithHttpInfoAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityResourcesResponse>> EntityResourcesWithHttpInfoAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'entityResourcesRequest' is set
             if (entityResourcesRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->GetEntityResources");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityResourcesRequest' when calling StateApi->EntityResources");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -628,7 +628,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("GetEntityResources", localVarResponse);
+                Exception _exception = this.ExceptionFactory("EntityResources", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

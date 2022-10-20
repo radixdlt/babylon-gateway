@@ -104,11 +104,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponse" /> class.
         /// </summary>
+        /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
         /// <param name="metadata">TBD (required).</param>
         /// <param name="details">details (required).</param>
-        public EntityDetailsResponse(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
+        public EntityDetailsResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
         {
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
+            {
+                throw new ArgumentNullException("ledgerState is a required property for EntityDetailsResponse and cannot be null");
+            }
+            this.LedgerState = ledgerState;
             // to ensure "address" is required (not null)
             if (address == null)
             {
@@ -128,6 +135,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Details = details;
         }
+
+        /// <summary>
+        /// Gets or Sets LedgerState
+        /// </summary>
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
         /// The Bech32m-encoded human readable version of the resource&#39;s global address
@@ -157,6 +170,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
@@ -196,6 +210,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
+                ) && 
+                (
                     this.Address == input.Address ||
                     (this.Address != null &&
                     this.Address.Equals(input.Address))
@@ -222,6 +241,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.LedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
                 if (this.Address != null)
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();

@@ -80,7 +80,7 @@ public class GatewayEndpointTests
 
         using var response = await client.PostAsync("/gateway", JsonContent.Create(new object()));
 
-        var payload = await response.ParseToObjectAndAssert<GatewayResponse>();
+        var payload = await response.ParseToObjectAndAssert<GatewayInfoResponse>();
 
         payload.GatewayApi.ShouldNotBeNull();
 

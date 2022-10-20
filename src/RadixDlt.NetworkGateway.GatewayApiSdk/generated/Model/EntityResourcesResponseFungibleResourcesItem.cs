@@ -91,31 +91,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TargetLedgerState
+    /// EntityResourcesResponseFungibleResourcesItem
     /// </summary>
-    [DataContract(Name = "TargetLedgerState")]
-    public partial class TargetLedgerState : IEquatable<TargetLedgerState>, IValidatableObject
+    [DataContract(Name = "EntityResourcesResponseFungibleResourcesItem")]
+    public partial class EntityResourcesResponseFungibleResourcesItem : IEquatable<EntityResourcesResponseFungibleResourcesItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TargetLedgerState" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TargetLedgerState() { }
+        protected EntityResourcesResponseFungibleResourcesItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TargetLedgerState" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesItem" /> class.
         /// </summary>
-        /// <param name="version">The latest-seen state version of the tip of the network&#39;s ledger. If this is singificantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information.  (required).</param>
-        public TargetLedgerState(long version = default(long))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
+        public EntityResourcesResponseFungibleResourcesItem(string address = default(string), string amountAttos = default(string))
         {
-            this._Version = version;
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
+            }
+            this.Address = address;
+            // to ensure "amountAttos" is required (not null)
+            if (amountAttos == null)
+            {
+                throw new ArgumentNullException("amountAttos is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
+            }
+            this.AmountAttos = amountAttos;
         }
 
         /// <summary>
-        /// The latest-seen state version of the tip of the network&#39;s ledger. If this is singificantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. 
+        /// The Bech32m-encoded human readable version of the resource&#39;s global address
         /// </summary>
-        /// <value>The latest-seen state version of the tip of the network&#39;s ledger. If this is singificantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. </value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// </summary>
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
+        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string AmountAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,8 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TargetLedgerState {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class EntityResourcesResponseFungibleResourcesItem {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TargetLedgerState);
+            return this.Equals(input as EntityResourcesResponseFungibleResourcesItem);
         }
 
         /// <summary>
-        /// Returns true if TargetLedgerState instances are equal
+        /// Returns true if EntityResourcesResponseFungibleResourcesItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of TargetLedgerState to be compared</param>
+        /// <param name="input">Instance of EntityResourcesResponseFungibleResourcesItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TargetLedgerState input)
+        public bool Equals(EntityResourcesResponseFungibleResourcesItem input)
         {
             if (input == null)
             {
@@ -162,8 +182,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.AmountAttos == input.AmountAttos ||
+                    (this.AmountAttos != null &&
+                    this.AmountAttos.Equals(input.AmountAttos))
                 );
         }
 
@@ -176,7 +202,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.AmountAttos != null)
+                {
+                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                }
                 return hashCode;
             }
         }

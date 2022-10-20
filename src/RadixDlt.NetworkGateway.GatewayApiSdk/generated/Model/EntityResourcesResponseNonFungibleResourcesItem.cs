@@ -91,62 +91,44 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResultSetCursor
+    /// EntityResourcesResponseNonFungibleResourcesItem
     /// </summary>
-    [DataContract(Name = "ResultSetCursor")]
-    public partial class ResultSetCursor : IEquatable<ResultSetCursor>, IValidatableObject
+    [DataContract(Name = "EntityResourcesResponseNonFungibleResourcesItem")]
+    public partial class EntityResourcesResponseNonFungibleResourcesItem : IEquatable<EntityResourcesResponseNonFungibleResourcesItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResultSetCursor" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResultSetCursor() { }
+        protected EntityResourcesResponseNonFungibleResourcesItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResultSetCursor" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesItem" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="results">results (required).</param>
-        public ResultSetCursor(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<Object> results = default(List<Object>))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="amount">amount (required).</param>
+        public EntityResourcesResponseNonFungibleResourcesItem(string address = default(string), decimal amount = default(decimal))
         {
-            this.TotalCount = totalCount;
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("results is a required property for ResultSetCursor and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityResourcesResponseNonFungibleResourcesItem and cannot be null");
             }
-            this.Results = results;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
+            this.Address = address;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
+        /// The Bech32m-encoded human readable version of the resource&#39;s global address
         /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public int TotalCount { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// Gets or Sets Amount
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Results
-        /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<Object> Results { get; set; }
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public decimal Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,11 +137,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResultSetCursor {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class EntityResourcesResponseNonFungibleResourcesItem {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,15 +160,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResultSetCursor);
+            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesItem);
         }
 
         /// <summary>
-        /// Returns true if ResultSetCursor instances are equal
+        /// Returns true if EntityResourcesResponseNonFungibleResourcesItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResultSetCursor to be compared</param>
+        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResultSetCursor input)
+        public bool Equals(EntityResourcesResponseNonFungibleResourcesItem input)
         {
             if (input == null)
             {
@@ -196,24 +176,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Amount == input.Amount ||
+                    this.Amount.Equals(input.Amount)
                 );
         }
 
@@ -226,19 +195,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                if (this.PreviousCursor != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Results != null)
-                {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 return hashCode;
             }
         }

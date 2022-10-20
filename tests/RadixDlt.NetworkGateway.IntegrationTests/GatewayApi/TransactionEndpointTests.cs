@@ -86,7 +86,7 @@ public class TransactionEndpointTests
         payload.LedgerState.ShouldNotBeNull();
         payload.LedgerState.Network.Should().Be(DbSeedHelper.NetworkName);
         payload.LedgerState._Version.Should().Be(1);
-        payload.Transactions.Count.Should().BeGreaterThan(0);
+        payload.Items.Count.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class TransactionEndpointTests
 
         // Arrange
         var recentTransactions = await GetRecentTransactions(client);
-        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, recentTransactions.Transactions[0].IntentHashHex); // TODO not sure if valid origin
+        var transactionIdentifier = new TransactionLookupIdentifier(TransactionLookupOrigin.Intent, recentTransactions.Items[0].IntentHashHex); // TODO not sure if valid origin
 
         // Act
         string json = new TransactionStatusRequest(transactionIdentifier).ToJson();
@@ -140,7 +140,7 @@ public class TransactionEndpointTests
 
         var payload = await response.ParseToObjectAndAssert<RecentTransactionsResponse>();
 
-        payload.Transactions.ShouldNotBeNull();
+        payload.Items.ShouldNotBeNull();
 
         return payload;
     }

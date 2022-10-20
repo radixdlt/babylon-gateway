@@ -136,8 +136,8 @@ INNER JOIN LATERAL (
             .Where(e => referencedEntityIds.Contains(e.Id))
             .ToDictionaryAsync(e => e.Id, token);
 
-        var fungibles = new List<EntityStateResponseFungibleResource>();
-        var nonFungibles = new List<EntityStateResponseNonFungibleResource>();
+        var fungibles = new List<EntityResourcesResponseFungibleResourcesItem>();
+        var nonFungibles = new List<EntityResourcesResponseNonFungibleResourcesItem>();
 
         foreach (var dbResource in dbResources)
         {
@@ -146,11 +146,11 @@ INNER JOIN LATERAL (
 
             if (dbResource is EntityFungibleResourceHistory efrh)
             {
-                fungibles.Add(new EntityStateResponseFungibleResource(ra, efrh.Balance.ToSubUnitString()));
+                fungibles.Add(new EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
             }
             else if (dbResource is EntityNonFungibleResourceHistory enfrh)
             {
-                nonFungibles.Add(new EntityStateResponseNonFungibleResource(ra, enfrh.IdsCount));
+                nonFungibles.Add(new EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
             }
             else
             {
@@ -161,7 +161,7 @@ INNER JOIN LATERAL (
         var fungiblesPagination = new EntityResourcesResponseFungibleResources(fungibles.Count, null, "TBD (currently everything is returned)", fungibles);
         var nonFungiblesPagination = new EntityResourcesResponseNonFungibleResources(nonFungibles.Count, null, "TBD (currently everything is returned)", nonFungibles);
 
-        return new EntityResourcesResponse(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
+        return new EntityResourcesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
     }
 
     public async Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default)
@@ -192,13 +192,13 @@ INNER JOIN LATERAL (
             if (supplyHistory == null)
             {
                 details = new EntityDetailsResponseDetails(new EntityDetailsResponseNonFungibleDetails(
-                    resourceType: ResourceType.NonFungible.ToString(),
+                    resourceType: ResourceTypeMapping.NonFungible,
                     tbd: "unknown"));
             }
             else
             {
                 details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(
-                    resourceType: ResourceType.Fungible.ToString(),
+                    resourceType: ResourceTypeMapping.Fungible,
                     totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
                     totalMintedAttos: supplyHistory.TotalMinted.ToString(),
                     totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
@@ -224,6 +224,6 @@ INNER JOIN LATERAL (
             metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
 
-        return new EntityDetailsResponse(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
+        return new EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 }

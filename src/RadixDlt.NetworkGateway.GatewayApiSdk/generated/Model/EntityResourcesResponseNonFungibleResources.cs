@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// <summary>
     /// EntityResourcesResponseNonFungibleResources
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponse_non_fungible_resources")]
+    [DataContract(Name = "EntityResourcesResponseNonFungibleResources")]
     public partial class EntityResourcesResponseNonFungibleResources : IEquatable<EntityResourcesResponseNonFungibleResources>, IValidatableObject
     {
         /// <summary>
@@ -108,7 +108,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="results">results (required).</param>
-        public EntityResourcesResponseNonFungibleResources(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityStateResponseNonFungibleResource> results = default(List<EntityStateResponseNonFungibleResource>))
+        public EntityResourcesResponseNonFungibleResources(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityResourcesResponseNonFungibleResourcesItem> results = default(List<EntityResourcesResponseNonFungibleResourcesItem>))
         {
             this.TotalCount = totalCount;
             // to ensure "results" is required (not null)
@@ -146,7 +146,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Results
         /// </summary>
         [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityStateResponseNonFungibleResource> Results { get; set; }
+        public List<EntityResourcesResponseNonFungibleResourcesItem> Results { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

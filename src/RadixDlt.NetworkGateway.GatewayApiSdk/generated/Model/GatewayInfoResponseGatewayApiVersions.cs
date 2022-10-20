@@ -91,33 +91,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayApiVersions
+    /// GatewayInfoResponseGatewayApiVersions
     /// </summary>
-    [DataContract(Name = "GatewayApiVersions")]
-    public partial class GatewayApiVersions : IEquatable<GatewayApiVersions>, IValidatableObject
+    [DataContract(Name = "GatewayInfoResponseGatewayApiVersions")]
+    public partial class GatewayInfoResponseGatewayApiVersions : IEquatable<GatewayInfoResponseGatewayApiVersions>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayApiVersions" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseGatewayApiVersions" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayApiVersions() { }
+        protected GatewayInfoResponseGatewayApiVersions() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayApiVersions" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseGatewayApiVersions" /> class.
         /// </summary>
         /// <param name="version">The release that is currently deployed to the Gateway API. (required).</param>
         /// <param name="openApiSchemaVersion">The open api schema version that was used to generate the API models. (required).</param>
-        public GatewayApiVersions(string version = default(string), string openApiSchemaVersion = default(string))
+        public GatewayInfoResponseGatewayApiVersions(string version = default(string), string openApiSchemaVersion = default(string))
         {
             // to ensure "version" is required (not null)
             if (version == null)
             {
-                throw new ArgumentNullException("version is a required property for GatewayApiVersions and cannot be null");
+                throw new ArgumentNullException("version is a required property for GatewayInfoResponseGatewayApiVersions and cannot be null");
             }
             this._Version = version;
             // to ensure "openApiSchemaVersion" is required (not null)
             if (openApiSchemaVersion == null)
             {
-                throw new ArgumentNullException("openApiSchemaVersion is a required property for GatewayApiVersions and cannot be null");
+                throw new ArgumentNullException("openApiSchemaVersion is a required property for GatewayInfoResponseGatewayApiVersions and cannot be null");
             }
             this.OpenApiSchemaVersion = openApiSchemaVersion;
         }
@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayApiVersions {\n");
+            sb.Append("class GatewayInfoResponseGatewayApiVersions {\n");
             sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("  OpenApiSchemaVersion: ").Append(OpenApiSchemaVersion).Append("\n");
             sb.Append("}\n");
@@ -166,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayApiVersions);
+            return this.Equals(input as GatewayInfoResponseGatewayApiVersions);
         }
 
         /// <summary>
-        /// Returns true if GatewayApiVersions instances are equal
+        /// Returns true if GatewayInfoResponseGatewayApiVersions instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayApiVersions to be compared</param>
+        /// <param name="input">Instance of GatewayInfoResponseGatewayApiVersions to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayApiVersions input)
+        public bool Equals(GatewayInfoResponseGatewayApiVersions input)
         {
             if (input == null)
             {

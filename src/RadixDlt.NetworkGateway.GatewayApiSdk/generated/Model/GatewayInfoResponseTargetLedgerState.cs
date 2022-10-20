@@ -91,23 +91,105 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines ResourceType
+    /// GatewayInfoResponseTargetLedgerState
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ResourceType
+    [DataContract(Name = "GatewayInfoResponseTargetLedgerState")]
+    public partial class GatewayInfoResponseTargetLedgerState : IEquatable<GatewayInfoResponseTargetLedgerState>, IValidatableObject
     {
         /// <summary>
-        /// Enum Fungible for value: fungible
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseTargetLedgerState" /> class.
         /// </summary>
-        [EnumMember(Value = "fungible")]
-        Fungible = 1,
+        [JsonConstructorAttribute]
+        protected GatewayInfoResponseTargetLedgerState() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseTargetLedgerState" /> class.
+        /// </summary>
+        /// <param name="version">The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information.  (required).</param>
+        public GatewayInfoResponseTargetLedgerState(long version = default(long))
+        {
+            this._Version = version;
+        }
 
         /// <summary>
-        /// Enum NonFungible for value: non_fungible
+        /// The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. 
         /// </summary>
-        [EnumMember(Value = "non_fungible")]
-        NonFungible = 2
+        /// <value>The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. </value>
+        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
+        public long _Version { get; set; }
 
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class GatewayInfoResponseTargetLedgerState {\n");
+            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as GatewayInfoResponseTargetLedgerState);
+        }
+
+        /// <summary>
+        /// Returns true if GatewayInfoResponseTargetLedgerState instances are equal
+        /// </summary>
+        /// <param name="input">Instance of GatewayInfoResponseTargetLedgerState to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(GatewayInfoResponseTargetLedgerState input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this._Version == input._Version ||
+                    this._Version.Equals(input._Version)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// To validate all properties of the instance
+        /// </summary>
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }

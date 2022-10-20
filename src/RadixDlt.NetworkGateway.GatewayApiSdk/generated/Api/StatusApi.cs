@@ -99,8 +99,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
-        /// <returns>GatewayResponse</returns>
-        GatewayResponse GetGatewayInfo(Object body);
+        /// <returns>GatewayInfoResponse</returns>
+        GatewayInfoResponse GatewayInfo(Object body);
 
         /// <summary>
         /// Get Gateway Info
@@ -110,8 +110,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
-        /// <returns>ApiResponse of GatewayResponse</returns>
-        ApiResponse<GatewayResponse> GetGatewayInfoWithHttpInfo(Object body);
+        /// <returns>ApiResponse of GatewayInfoResponse</returns>
+        ApiResponse<GatewayInfoResponse> GatewayInfoWithHttpInfo(Object body);
         #endregion Synchronous Operations
     }
 
@@ -130,8 +130,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of GatewayResponse</returns>
-        System.Threading.Tasks.Task<GatewayResponse> GetGatewayInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of GatewayInfoResponse</returns>
+        System.Threading.Tasks.Task<GatewayInfoResponse> GatewayInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Get Gateway Info
@@ -142,8 +142,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (GatewayResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<GatewayResponse>> GetGatewayInfoWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (GatewayInfoResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<GatewayInfoResponse>> GatewayInfoWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -362,10 +362,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
-        /// <returns>GatewayResponse</returns>
-        public GatewayResponse GetGatewayInfo(Object body)
+        /// <returns>GatewayInfoResponse</returns>
+        public GatewayInfoResponse GatewayInfo(Object body)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayResponse> localVarResponse = GetGatewayInfoWithHttpInfo(body);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayInfoResponse> localVarResponse = GatewayInfoWithHttpInfo(body);
             return localVarResponse.Data;
         }
 
@@ -374,12 +374,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
-        /// <returns>ApiResponse of GatewayResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayResponse> GetGatewayInfoWithHttpInfo(Object body)
+        /// <returns>ApiResponse of GatewayInfoResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayInfoResponse> GatewayInfoWithHttpInfo(Object body)
         {
             // verify the required parameter 'body' is set
             if (body == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling StatusApi->GetGatewayInfo");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling StatusApi->GatewayInfo");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -402,11 +402,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<GatewayResponse>("/gateway", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<GatewayInfoResponse>("/gateway", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("GetGatewayInfo", localVarResponse);
+                Exception _exception = this.ExceptionFactory("GatewayInfo", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -419,10 +419,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of GatewayResponse</returns>
-        public async System.Threading.Tasks.Task<GatewayResponse> GetGatewayInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of GatewayInfoResponse</returns>
+        public async System.Threading.Tasks.Task<GatewayInfoResponse> GatewayInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayResponse> localVarResponse = await GetGatewayInfoWithHttpInfoAsync(body, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayInfoResponse> localVarResponse = await GatewayInfoWithHttpInfoAsync(body, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -432,12 +432,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (GatewayResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayResponse>> GetGatewayInfoWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (GatewayInfoResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<GatewayInfoResponse>> GatewayInfoWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'body' is set
             if (body == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling StatusApi->GetGatewayInfo");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling StatusApi->GatewayInfo");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -463,11 +463,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<GatewayResponse>("/gateway", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<GatewayInfoResponse>("/gateway", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("GetGatewayInfo", localVarResponse);
+                Exception _exception = this.ExceptionFactory("GatewayInfo", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

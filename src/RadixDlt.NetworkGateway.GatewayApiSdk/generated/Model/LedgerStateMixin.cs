@@ -91,50 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponseFungibleResource
+    /// LedgerStateMixin
     /// </summary>
-    [DataContract(Name = "EntityStateResponseFungibleResource")]
-    public partial class EntityStateResponseFungibleResource : IEquatable<EntityStateResponseFungibleResource>, IValidatableObject
+    [DataContract(Name = "LedgerStateMixin")]
+    public partial class LedgerStateMixin : IEquatable<LedgerStateMixin>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="LedgerStateMixin" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponseFungibleResource() { }
+        protected LedgerStateMixin() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="LedgerStateMixin" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public EntityStateResponseFungibleResource(string address = default(string), string amountAttos = default(string))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        public LedgerStateMixin(LedgerState ledgerState = default(LedgerState))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityStateResponseFungibleResource and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for LedgerStateMixin and cannot be null");
             }
-            this.Address = address;
-            // to ensure "amountAttos" is required (not null)
-            if (amountAttos == null)
-            {
-                throw new ArgumentNullException("amountAttos is a required property for EntityStateResponseFungibleResource and cannot be null");
-            }
-            this.AmountAttos = amountAttos;
+            this.LedgerState = ledgerState;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource&#39;s global address
+        /// Gets or Sets LedgerState
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
-        /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountAttos { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponseFungibleResource {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
+            sb.Append("class LedgerStateMixin {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponseFungibleResource);
+            return this.Equals(input as LedgerStateMixin);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponseFungibleResource instances are equal
+        /// Returns true if LedgerStateMixin instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponseFungibleResource to be compared</param>
+        /// <param name="input">Instance of LedgerStateMixin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponseFungibleResource input)
+        public bool Equals(LedgerStateMixin input)
         {
             if (input == null)
             {
@@ -182,14 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.AmountAttos == input.AmountAttos ||
-                    (this.AmountAttos != null &&
-                    this.AmountAttos.Equals(input.AmountAttos))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 );
         }
 
@@ -202,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                if (this.AmountAttos != null)
-                {
-                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
                 return hashCode;
             }

@@ -93,7 +93,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// <summary>
     /// EntityResourcesResponseFungibleResourcesAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponse_fungible_resources_allOf")]
+    [DataContract(Name = "EntityResourcesResponseFungibleResources_allOf")]
     public partial class EntityResourcesResponseFungibleResourcesAllOf : IEquatable<EntityResourcesResponseFungibleResourcesAllOf>, IValidatableObject
     {
         /// <summary>
@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesAllOf" /> class.
         /// </summary>
         /// <param name="results">results (required).</param>
-        public EntityResourcesResponseFungibleResourcesAllOf(List<EntityStateResponseFungibleResource> results = default(List<EntityStateResponseFungibleResource>))
+        public EntityResourcesResponseFungibleResourcesAllOf(List<EntityResourcesResponseFungibleResourcesItem> results = default(List<EntityResourcesResponseFungibleResourcesItem>))
         {
             // to ensure "results" is required (not null)
             if (results == null)
@@ -119,7 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Results
         /// </summary>
         [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityStateResponseFungibleResource> Results { get; set; }
+        public List<EntityResourcesResponseFungibleResourcesItem> Results { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
