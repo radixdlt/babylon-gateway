@@ -91,31 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TargetLedgerState
+    /// LedgerStateMixin
     /// </summary>
-    [DataContract(Name = "TargetLedgerState")]
-    public partial class TargetLedgerState : IEquatable<TargetLedgerState>, IValidatableObject
+    [DataContract(Name = "LedgerStateMixin")]
+    public partial class LedgerStateMixin : IEquatable<LedgerStateMixin>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TargetLedgerState" /> class.
+        /// Initializes a new instance of the <see cref="LedgerStateMixin" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TargetLedgerState() { }
+        protected LedgerStateMixin() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TargetLedgerState" /> class.
+        /// Initializes a new instance of the <see cref="LedgerStateMixin" /> class.
         /// </summary>
-        /// <param name="version">The latest-seen state version of the tip of the network&#39;s ledger. If this is singificantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information.  (required).</param>
-        public TargetLedgerState(long version = default(long))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        public LedgerStateMixin(LedgerState ledgerState = default(LedgerState))
         {
-            this._Version = version;
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
+            {
+                throw new ArgumentNullException("ledgerState is a required property for LedgerStateMixin and cannot be null");
+            }
+            this.LedgerState = ledgerState;
         }
 
         /// <summary>
-        /// The latest-seen state version of the tip of the network&#39;s ledger. If this is singificantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. 
+        /// Gets or Sets LedgerState
         /// </summary>
-        /// <value>The latest-seen state version of the tip of the network&#39;s ledger. If this is singificantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. </value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TargetLedgerState {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class LedgerStateMixin {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TargetLedgerState);
+            return this.Equals(input as LedgerStateMixin);
         }
 
         /// <summary>
-        /// Returns true if TargetLedgerState instances are equal
+        /// Returns true if LedgerStateMixin instances are equal
         /// </summary>
-        /// <param name="input">Instance of TargetLedgerState to be compared</param>
+        /// <param name="input">Instance of LedgerStateMixin to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TargetLedgerState input)
+        public bool Equals(LedgerStateMixin input)
         {
             if (input == null)
             {
@@ -162,8 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 );
         }
 
@@ -176,7 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                if (this.LedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                }
                 return hashCode;
             }
         }

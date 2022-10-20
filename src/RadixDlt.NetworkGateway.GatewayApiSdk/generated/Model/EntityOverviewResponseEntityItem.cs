@@ -91,35 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponseFungibleResource
+    /// EntityOverviewResponseEntityItem
     /// </summary>
-    [DataContract(Name = "EntityStateResponseFungibleResource")]
-    public partial class EntityStateResponseFungibleResource : IEquatable<EntityStateResponseFungibleResource>, IValidatableObject
+    [DataContract(Name = "EntityOverviewResponseEntityItem")]
+    public partial class EntityOverviewResponseEntityItem : IEquatable<EntityOverviewResponseEntityItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewResponseEntityItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponseFungibleResource() { }
+        protected EntityOverviewResponseEntityItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewResponseEntityItem" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public EntityStateResponseFungibleResource(string address = default(string), string amountAttos = default(string))
+        /// <param name="metadata">TBD (required).</param>
+        public EntityOverviewResponseEntityItem(string address = default(string), Dictionary<string, string> metadata = default(Dictionary<string, string>))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityStateResponseFungibleResource and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityOverviewResponseEntityItem and cannot be null");
             }
             this.Address = address;
-            // to ensure "amountAttos" is required (not null)
-            if (amountAttos == null)
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
             {
-                throw new ArgumentNullException("amountAttos is a required property for EntityStateResponseFungibleResource and cannot be null");
+                throw new ArgumentNullException("metadata is a required property for EntityOverviewResponseEntityItem and cannot be null");
             }
-            this.AmountAttos = amountAttos;
+            this.Metadata = metadata;
         }
 
         /// <summary>
@@ -130,11 +130,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// TBD
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountAttos { get; set; }
+        /// <value>TBD</value>
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, string> Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,9 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponseFungibleResource {\n");
+            sb.Append("class EntityOverviewResponseEntityItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponseFungibleResource);
+            return this.Equals(input as EntityOverviewResponseEntityItem);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponseFungibleResource instances are equal
+        /// Returns true if EntityOverviewResponseEntityItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponseFungibleResource to be compared</param>
+        /// <param name="input">Instance of EntityOverviewResponseEntityItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponseFungibleResource input)
+        public bool Equals(EntityOverviewResponseEntityItem input)
         {
             if (input == null)
             {
@@ -187,9 +187,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.AmountAttos == input.AmountAttos ||
-                    (this.AmountAttos != null &&
-                    this.AmountAttos.Equals(input.AmountAttos))
+                    this.Metadata == input.Metadata ||
+                    this.Metadata != null &&
+                    input.Metadata != null &&
+                    this.Metadata.SequenceEqual(input.Metadata)
                 );
         }
 
@@ -206,9 +207,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.AmountAttos != null)
+                if (this.Metadata != null)
                 {
-                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

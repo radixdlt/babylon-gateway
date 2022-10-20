@@ -91,35 +91,31 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesAllOf
+    /// GatewayInfoResponseTargetLedgerState
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResources_allOf")]
-    public partial class EntityResourcesResponseNonFungibleResourcesAllOf : IEquatable<EntityResourcesResponseNonFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "GatewayInfoResponseTargetLedgerState")]
+    public partial class GatewayInfoResponseTargetLedgerState : IEquatable<GatewayInfoResponseTargetLedgerState>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseTargetLedgerState" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesAllOf() { }
+        protected GatewayInfoResponseTargetLedgerState() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseTargetLedgerState" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesAllOf(List<EntityResourcesResponseNonFungibleResourcesItem> results = default(List<EntityResourcesResponseNonFungibleResourcesItem>))
+        /// <param name="version">The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information.  (required).</param>
+        public GatewayInfoResponseTargetLedgerState(long version = default(long))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
-            {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseNonFungibleResourcesAllOf and cannot be null");
-            }
-            this.Results = results;
+            this._Version = version;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. 
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseNonFungibleResourcesItem> Results { get; set; }
+        /// <value>The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. </value>
+        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
+        public long _Version { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +124,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class GatewayInfoResponseTargetLedgerState {\n");
+            sb.Append("  _Version: ").Append(_Version).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +146,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesAllOf);
+            return this.Equals(input as GatewayInfoResponseTargetLedgerState);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesAllOf instances are equal
+        /// Returns true if GatewayInfoResponseTargetLedgerState instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of GatewayInfoResponseTargetLedgerState to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesAllOf input)
+        public bool Equals(GatewayInfoResponseTargetLedgerState input)
         {
             if (input == null)
             {
@@ -166,10 +162,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this._Version == input._Version ||
+                    this._Version.Equals(input._Version)
                 );
         }
 
@@ -182,10 +176,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
-                {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 return hashCode;
             }
         }

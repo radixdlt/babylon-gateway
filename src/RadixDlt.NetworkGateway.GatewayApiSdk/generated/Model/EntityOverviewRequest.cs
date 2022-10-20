@@ -91,35 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesAllOf
+    /// EntityOverviewRequest
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResources_allOf")]
-    public partial class EntityResourcesResponseNonFungibleResourcesAllOf : IEquatable<EntityResourcesResponseNonFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "EntityOverviewRequest")]
+    public partial class EntityOverviewRequest : IEquatable<EntityOverviewRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesAllOf() { }
+        protected EntityOverviewRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewRequest" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesAllOf(List<EntityResourcesResponseNonFungibleResourcesItem> results = default(List<EntityResourcesResponseNonFungibleResourcesItem>))
+        /// <param name="addresses">addresses (required).</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        public EntityOverviewRequest(List<string> addresses = default(List<string>), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "addresses" is required (not null)
+            if (addresses == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseNonFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("addresses is a required property for EntityOverviewRequest and cannot be null");
             }
-            this.Results = results;
+            this.Addresses = addresses;
+            this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// Gets or Sets Addresses
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseNonFungibleResourcesItem> Results { get; set; }
+        [DataMember(Name = "addresses", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Addresses { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AtStateIdentifier
+        /// </summary>
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class EntityOverviewRequest {\n");
+            sb.Append("  Addresses: ").Append(Addresses).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesAllOf);
+            return this.Equals(input as EntityOverviewRequest);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesAllOf instances are equal
+        /// Returns true if EntityOverviewRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of EntityOverviewRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesAllOf input)
+        public bool Equals(EntityOverviewRequest input)
         {
             if (input == null)
             {
@@ -166,10 +175,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Addresses == input.Addresses ||
+                    this.Addresses != null &&
+                    input.Addresses != null &&
+                    this.Addresses.SequenceEqual(input.Addresses)
+                ) && 
+                (
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -182,9 +196,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.Addresses != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Addresses.GetHashCode();
+                }
+                if (this.AtStateIdentifier != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

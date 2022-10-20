@@ -91,35 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesAllOf
+    /// EntityOverviewResponseAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResources_allOf")]
-    public partial class EntityResourcesResponseNonFungibleResourcesAllOf : IEquatable<EntityResourcesResponseNonFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "EntityOverviewResponse_allOf")]
+    public partial class EntityOverviewResponseAllOf : IEquatable<EntityOverviewResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesAllOf() { }
+        protected EntityOverviewResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityOverviewResponseAllOf" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesAllOf(List<EntityResourcesResponseNonFungibleResourcesItem> results = default(List<EntityResourcesResponseNonFungibleResourcesItem>))
+        /// <param name="entities">entities (required).</param>
+        public EntityOverviewResponseAllOf(List<EntityOverviewResponseEntityItem> entities = default(List<EntityOverviewResponseEntityItem>))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "entities" is required (not null)
+            if (entities == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseNonFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("entities is a required property for EntityOverviewResponseAllOf and cannot be null");
             }
-            this.Results = results;
+            this.Entities = entities;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// Gets or Sets Entities
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseNonFungibleResourcesItem> Results { get; set; }
+        [DataMember(Name = "entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityOverviewResponseEntityItem> Entities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class EntityOverviewResponseAllOf {\n");
+            sb.Append("  Entities: ").Append(Entities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesAllOf);
+            return this.Equals(input as EntityOverviewResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesAllOf instances are equal
+        /// Returns true if EntityOverviewResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of EntityOverviewResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesAllOf input)
+        public bool Equals(EntityOverviewResponseAllOf input)
         {
             if (input == null)
             {
@@ -166,10 +166,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Entities == input.Entities ||
+                    this.Entities != null &&
+                    input.Entities != null &&
+                    this.Entities.SequenceEqual(input.Entities)
                 );
         }
 
@@ -182,9 +182,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.Entities != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entities.GetHashCode();
                 }
                 return hashCode;
             }

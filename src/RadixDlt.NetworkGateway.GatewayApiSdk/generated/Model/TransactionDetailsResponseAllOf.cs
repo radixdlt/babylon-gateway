@@ -91,35 +91,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesAllOf
+    /// TransactionDetailsResponseAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResources_allOf")]
-    public partial class EntityResourcesResponseNonFungibleResourcesAllOf : IEquatable<EntityResourcesResponseNonFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionDetailsResponse_allOf")]
+    public partial class TransactionDetailsResponseAllOf : IEquatable<TransactionDetailsResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesAllOf() { }
+        protected TransactionDetailsResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionDetailsResponseAllOf" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesAllOf(List<EntityResourcesResponseNonFungibleResourcesItem> results = default(List<EntityResourcesResponseNonFungibleResourcesItem>))
+        /// <param name="transaction">transaction (required).</param>
+        /// <param name="details">details (required).</param>
+        public TransactionDetailsResponseAllOf(TransactionInfo transaction = default(TransactionInfo), TransactionDetails details = default(TransactionDetails))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseNonFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("transaction is a required property for TransactionDetailsResponseAllOf and cannot be null");
             }
-            this.Results = results;
+            this.Transaction = transaction;
+            // to ensure "details" is required (not null)
+            if (details == null)
+            {
+                throw new ArgumentNullException("details is a required property for TransactionDetailsResponseAllOf and cannot be null");
+            }
+            this.Details = details;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// Gets or Sets Transaction
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseNonFungibleResourcesItem> Results { get; set; }
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionInfo Transaction { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Details
+        /// </summary>
+        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class TransactionDetailsResponseAllOf {\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
+            sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesAllOf);
+            return this.Equals(input as TransactionDetailsResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesAllOf instances are equal
+        /// Returns true if TransactionDetailsResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionDetailsResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesAllOf input)
+        public bool Equals(TransactionDetailsResponseAllOf input)
         {
             if (input == null)
             {
@@ -166,10 +180,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
+                ) && 
+                (
+                    this.Details == input.Details ||
+                    (this.Details != null &&
+                    this.Details.Equals(input.Details))
                 );
         }
 
@@ -182,9 +200,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.Transaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                }
+                if (this.Details != null)
+                {
+                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
                 }
                 return hashCode;
             }

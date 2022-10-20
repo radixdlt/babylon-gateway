@@ -91,62 +91,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// ResultSetCursor
+    /// GatewayInfoResponseGatewayApiVersions
     /// </summary>
-    [DataContract(Name = "ResultSetCursor")]
-    public partial class ResultSetCursor : IEquatable<ResultSetCursor>, IValidatableObject
+    [DataContract(Name = "GatewayInfoResponseGatewayApiVersions")]
+    public partial class GatewayInfoResponseGatewayApiVersions : IEquatable<GatewayInfoResponseGatewayApiVersions>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResultSetCursor" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseGatewayApiVersions" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected ResultSetCursor() { }
+        protected GatewayInfoResponseGatewayApiVersions() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResultSetCursor" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseGatewayApiVersions" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="results">results (required).</param>
-        public ResultSetCursor(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<Object> results = default(List<Object>))
+        /// <param name="version">The release that is currently deployed to the Gateway API. (required).</param>
+        /// <param name="openApiSchemaVersion">The open api schema version that was used to generate the API models. (required).</param>
+        public GatewayInfoResponseGatewayApiVersions(string version = default(string), string openApiSchemaVersion = default(string))
         {
-            this.TotalCount = totalCount;
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "version" is required (not null)
+            if (version == null)
             {
-                throw new ArgumentNullException("results is a required property for ResultSetCursor and cannot be null");
+                throw new ArgumentNullException("version is a required property for GatewayInfoResponseGatewayApiVersions and cannot be null");
             }
-            this.Results = results;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
+            this._Version = version;
+            // to ensure "openApiSchemaVersion" is required (not null)
+            if (openApiSchemaVersion == null)
+            {
+                throw new ArgumentNullException("openApiSchemaVersion is a required property for GatewayInfoResponseGatewayApiVersions and cannot be null");
+            }
+            this.OpenApiSchemaVersion = openApiSchemaVersion;
         }
 
         /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
+        /// The release that is currently deployed to the Gateway API.
         /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public int TotalCount { get; set; }
+        /// <value>The release that is currently deployed to the Gateway API.</value>
+        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
+        public string _Version { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// The open api schema version that was used to generate the API models.
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Results
-        /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<Object> Results { get; set; }
+        /// <value>The open api schema version that was used to generate the API models.</value>
+        [DataMember(Name = "open_api_schema_version", IsRequired = true, EmitDefaultValue = true)]
+        public string OpenApiSchemaVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,11 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class ResultSetCursor {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class GatewayInfoResponseGatewayApiVersions {\n");
+            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("  OpenApiSchemaVersion: ").Append(OpenApiSchemaVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as ResultSetCursor);
+            return this.Equals(input as GatewayInfoResponseGatewayApiVersions);
         }
 
         /// <summary>
-        /// Returns true if ResultSetCursor instances are equal
+        /// Returns true if GatewayInfoResponseGatewayApiVersions instances are equal
         /// </summary>
-        /// <param name="input">Instance of ResultSetCursor to be compared</param>
+        /// <param name="input">Instance of GatewayInfoResponseGatewayApiVersions to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(ResultSetCursor input)
+        public bool Equals(GatewayInfoResponseGatewayApiVersions input)
         {
             if (input == null)
             {
@@ -196,24 +182,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
+                    this._Version == input._Version ||
+                    (this._Version != null &&
+                    this._Version.Equals(input._Version))
                 ) && 
                 (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.OpenApiSchemaVersion == input.OpenApiSchemaVersion ||
+                    (this.OpenApiSchemaVersion != null &&
+                    this.OpenApiSchemaVersion.Equals(input.OpenApiSchemaVersion))
                 );
         }
 
@@ -226,18 +202,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                if (this.PreviousCursor != null)
+                if (this._Version != null)
                 {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
                 }
-                if (this.NextCursor != null)
+                if (this.OpenApiSchemaVersion != null)
                 {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Results != null)
-                {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.OpenApiSchemaVersion.GetHashCode();
                 }
                 return hashCode;
             }

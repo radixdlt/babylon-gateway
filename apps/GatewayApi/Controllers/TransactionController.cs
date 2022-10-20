@@ -72,10 +72,12 @@ using System.Threading.Tasks;
 
 namespace GatewayApi.Controllers;
 
+// TODO add "end-to-end" service accepting entire "request"s to ensure controllers are as skinny as possible
+
 [ApiController]
 [Route("transaction")]
-[TypeFilter(typeof(ExceptionFilter))]
-[TypeFilter(typeof(InvalidModelStateFilter))]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class TransactionController : ControllerBase
 {
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
@@ -112,7 +114,7 @@ public sealed class TransactionController : ControllerBase
         return new RecentTransactionsResponse(
             atLedgerState,
             nextCursor: results.NextPageCursor?.ToCursorString(),
-            results.Transactions
+            items: results.Transactions
         );
     }
 

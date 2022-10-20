@@ -91,56 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayResponse
+    /// TransactionStatusResponseAllOf
     /// </summary>
-    [DataContract(Name = "GatewayResponse")]
-    public partial class GatewayResponse : IEquatable<GatewayResponse>, IValidatableObject
+    [DataContract(Name = "TransactionStatusResponse_allOf")]
+    public partial class TransactionStatusResponseAllOf : IEquatable<TransactionStatusResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayResponse() { }
+        protected TransactionStatusResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
-        /// <param name="gatewayApi">gatewayApi (required).</param>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="targetLedgerState">targetLedgerState.</param>
-        public GatewayResponse(GatewayApiVersions gatewayApi = default(GatewayApiVersions), LedgerState ledgerState = default(LedgerState), TargetLedgerState targetLedgerState = default(TargetLedgerState))
+        /// <param name="transaction">transaction (required).</param>
+        public TransactionStatusResponseAllOf(TransactionInfo transaction = default(TransactionInfo))
         {
-            // to ensure "gatewayApi" is required (not null)
-            if (gatewayApi == null)
+            // to ensure "transaction" is required (not null)
+            if (transaction == null)
             {
-                throw new ArgumentNullException("gatewayApi is a required property for GatewayResponse and cannot be null");
+                throw new ArgumentNullException("transaction is a required property for TransactionStatusResponseAllOf and cannot be null");
             }
-            this.GatewayApi = gatewayApi;
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for GatewayResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
-            this.TargetLedgerState = targetLedgerState;
+            this.Transaction = transaction;
         }
 
         /// <summary>
-        /// Gets or Sets GatewayApi
+        /// Gets or Sets Transaction
         /// </summary>
-        [DataMember(Name = "gateway_api", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayApiVersions GatewayApi { get; set; }
-
-        /// <summary>
-        /// Gets or Sets LedgerState
-        /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
-
-        /// <summary>
-        /// Gets or Sets TargetLedgerState
-        /// </summary>
-        [DataMember(Name = "target_ledger_state", EmitDefaultValue = true)]
-        public TargetLedgerState TargetLedgerState { get; set; }
+        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionInfo Transaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,10 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayResponse {\n");
-            sb.Append("  GatewayApi: ").Append(GatewayApi).Append("\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  TargetLedgerState: ").Append(TargetLedgerState).Append("\n");
+            sb.Append("class TransactionStatusResponseAllOf {\n");
+            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -173,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayResponse);
+            return this.Equals(input as TransactionStatusResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if GatewayResponse instances are equal
+        /// Returns true if TransactionStatusResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayResponse to be compared</param>
+        /// <param name="input">Instance of TransactionStatusResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayResponse input)
+        public bool Equals(TransactionStatusResponseAllOf input)
         {
             if (input == null)
             {
@@ -189,19 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.GatewayApi == input.GatewayApi ||
-                    (this.GatewayApi != null &&
-                    this.GatewayApi.Equals(input.GatewayApi))
-                ) && 
-                (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
-                ) && 
-                (
-                    this.TargetLedgerState == input.TargetLedgerState ||
-                    (this.TargetLedgerState != null &&
-                    this.TargetLedgerState.Equals(input.TargetLedgerState))
+                    this.Transaction == input.Transaction ||
+                    (this.Transaction != null &&
+                    this.Transaction.Equals(input.Transaction))
                 );
         }
 
@@ -214,17 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.GatewayApi != null)
+                if (this.Transaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.GatewayApi.GetHashCode();
-                }
-                if (this.LedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
-                }
-                if (this.TargetLedgerState != null)
-                {
-                    hashCode = (hashCode * 59) + this.TargetLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
                 }
                 return hashCode;
             }

@@ -91,35 +91,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesAllOf
+    /// GatewayInfoResponseAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResources_allOf")]
-    public partial class EntityResourcesResponseNonFungibleResourcesAllOf : IEquatable<EntityResourcesResponseNonFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "GatewayInfoResponse_allOf")]
+    public partial class GatewayInfoResponseAllOf : IEquatable<GatewayInfoResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesAllOf() { }
+        protected GatewayInfoResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseAllOf" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesAllOf(List<EntityResourcesResponseNonFungibleResourcesItem> results = default(List<EntityResourcesResponseNonFungibleResourcesItem>))
+        /// <param name="gatewayApi">gatewayApi (required).</param>
+        /// <param name="targetLedgerState">targetLedgerState (required).</param>
+        public GatewayInfoResponseAllOf(GatewayInfoResponseGatewayApiVersions gatewayApi = default(GatewayInfoResponseGatewayApiVersions), GatewayInfoResponseTargetLedgerState targetLedgerState = default(GatewayInfoResponseTargetLedgerState))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "gatewayApi" is required (not null)
+            if (gatewayApi == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseNonFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("gatewayApi is a required property for GatewayInfoResponseAllOf and cannot be null");
             }
-            this.Results = results;
+            this.GatewayApi = gatewayApi;
+            // to ensure "targetLedgerState" is required (not null)
+            if (targetLedgerState == null)
+            {
+                throw new ArgumentNullException("targetLedgerState is a required property for GatewayInfoResponseAllOf and cannot be null");
+            }
+            this.TargetLedgerState = targetLedgerState;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// Gets or Sets GatewayApi
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseNonFungibleResourcesItem> Results { get; set; }
+        [DataMember(Name = "gateway_api", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInfoResponseGatewayApiVersions GatewayApi { get; set; }
+
+        /// <summary>
+        /// Gets or Sets TargetLedgerState
+        /// </summary>
+        [DataMember(Name = "target_ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInfoResponseTargetLedgerState TargetLedgerState { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("class GatewayInfoResponseAllOf {\n");
+            sb.Append("  GatewayApi: ").Append(GatewayApi).Append("\n");
+            sb.Append("  TargetLedgerState: ").Append(TargetLedgerState).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesAllOf);
+            return this.Equals(input as GatewayInfoResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesAllOf instances are equal
+        /// Returns true if GatewayInfoResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of GatewayInfoResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesAllOf input)
+        public bool Equals(GatewayInfoResponseAllOf input)
         {
             if (input == null)
             {
@@ -166,10 +180,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.GatewayApi == input.GatewayApi ||
+                    (this.GatewayApi != null &&
+                    this.GatewayApi.Equals(input.GatewayApi))
+                ) && 
+                (
+                    this.TargetLedgerState == input.TargetLedgerState ||
+                    (this.TargetLedgerState != null &&
+                    this.TargetLedgerState.Equals(input.TargetLedgerState))
                 );
         }
 
@@ -182,9 +200,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.GatewayApi != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GatewayApi.GetHashCode();
+                }
+                if (this.TargetLedgerState != null)
+                {
+                    hashCode = (hashCode * 59) + this.TargetLedgerState.GetHashCode();
                 }
                 return hashCode;
             }

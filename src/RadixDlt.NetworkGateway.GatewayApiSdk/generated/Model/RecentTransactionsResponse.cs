@@ -105,9 +105,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="RecentTransactionsResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="nextCursor">The cursor to be provided for the next page of results. If missing, this is the last page of results..</param>
-        /// <param name="transactions">The page of user transactions. (required).</param>
-        public RecentTransactionsResponse(LedgerState ledgerState = default(LedgerState), string nextCursor = default(string), List<TransactionInfo> transactions = default(List<TransactionInfo>))
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="items">The page of user transactions. (required).</param>
+        public RecentTransactionsResponse(LedgerState ledgerState = default(LedgerState), int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -115,12 +117,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("ledgerState is a required property for RecentTransactionsResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
-            // to ensure "transactions" is required (not null)
-            if (transactions == null)
+            this.TotalCount = totalCount;
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("transactions is a required property for RecentTransactionsResponse and cannot be null");
+                throw new ArgumentNullException("items is a required property for RecentTransactionsResponse and cannot be null");
             }
-            this.Transactions = transactions;
+            this.Items = items;
+            this.PreviousCursor = previousCursor;
             this.NextCursor = nextCursor;
         }
 
@@ -131,9 +135,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// The cursor to be provided for the next page of results. If missing, this is the last page of results.
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        /// <value>The cursor to be provided for the next page of results. If missing, this is the last page of results.</value>
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public int TotalCount { get; set; }
+
+        /// <summary>
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// </summary>
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
+
+        /// <summary>
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// </summary>
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
         [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
         public string NextCursor { get; set; }
 
@@ -141,8 +159,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The page of user transactions.
         /// </summary>
         /// <value>The page of user transactions.</value>
-        [DataMember(Name = "transactions", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionInfo> Transactions { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionInfo> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,8 +171,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class RecentTransactionsResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,15 +216,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
+                ) && 
+                (
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
+                ) && 
+                (
                     this.NextCursor == input.NextCursor ||
                     (this.NextCursor != null &&
                     this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.Transactions == input.Transactions ||
-                    this.Transactions != null &&
-                    input.Transactions != null &&
-                    this.Transactions.SequenceEqual(input.Transactions)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -221,13 +250,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.PreviousCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                }
                 if (this.NextCursor != null)
                 {
                     hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Transactions != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

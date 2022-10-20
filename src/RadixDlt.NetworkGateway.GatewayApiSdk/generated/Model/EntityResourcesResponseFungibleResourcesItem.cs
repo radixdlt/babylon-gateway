@@ -91,30 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityStateResponseNonFungibleResource
+    /// EntityResourcesResponseFungibleResourcesItem
     /// </summary>
-    [DataContract(Name = "EntityStateResponseNonFungibleResource")]
-    public partial class EntityStateResponseNonFungibleResource : IEquatable<EntityStateResponseNonFungibleResource>, IValidatableObject
+    [DataContract(Name = "EntityResourcesResponseFungibleResourcesItem")]
+    public partial class EntityResourcesResponseFungibleResourcesItem : IEquatable<EntityResourcesResponseFungibleResourcesItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseNonFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityStateResponseNonFungibleResource() { }
+        protected EntityResourcesResponseFungibleResourcesItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityStateResponseNonFungibleResource" /> class.
+        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesItem" /> class.
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="amount">amount (required).</param>
-        public EntityStateResponseNonFungibleResource(string address = default(string), decimal amount = default(decimal))
+        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
+        public EntityResourcesResponseFungibleResourcesItem(string address = default(string), string amountAttos = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityStateResponseNonFungibleResource and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
             }
             this.Address = address;
-            this.Amount = amount;
+            // to ensure "amountAttos" is required (not null)
+            if (amountAttos == null)
+            {
+                throw new ArgumentNullException("amountAttos is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
+            }
+            this.AmountAttos = amountAttos;
         }
 
         /// <summary>
@@ -125,10 +130,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets Amount
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
         /// </summary>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public decimal Amount { get; set; }
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
+        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
+        public string AmountAttos { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityStateResponseNonFungibleResource {\n");
+            sb.Append("class EntityResourcesResponseFungibleResourcesItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityStateResponseNonFungibleResource);
+            return this.Equals(input as EntityResourcesResponseFungibleResourcesItem);
         }
 
         /// <summary>
-        /// Returns true if EntityStateResponseNonFungibleResource instances are equal
+        /// Returns true if EntityResourcesResponseFungibleResourcesItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityStateResponseNonFungibleResource to be compared</param>
+        /// <param name="input">Instance of EntityResourcesResponseFungibleResourcesItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityStateResponseNonFungibleResource input)
+        public bool Equals(EntityResourcesResponseFungibleResourcesItem input)
         {
             if (input == null)
             {
@@ -181,8 +187,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Amount == input.Amount ||
-                    this.Amount.Equals(input.Amount)
+                    this.AmountAttos == input.AmountAttos ||
+                    (this.AmountAttos != null &&
+                    this.AmountAttos.Equals(input.AmountAttos))
                 );
         }
 
@@ -199,7 +206,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                if (this.AmountAttos != null)
+                {
+                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                }
                 return hashCode;
             }
         }
