@@ -74,7 +74,7 @@ public interface ICoreApiProvider
 
     IStatusApi StatusApi { get; }
 
-    MempoolApi MempoolApi { get; }
+    IMempoolApi MempoolApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
@@ -83,7 +83,7 @@ internal class CoreApiProvider : ICoreApiProvider
 
     public IStatusApi StatusApi { get; }
 
-    public MempoolApi MempoolApi { get; }
+    public IMempoolApi MempoolApi { get; }
 
     public CoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {

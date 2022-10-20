@@ -92,11 +92,11 @@ public class GatewayEndpointTests : IClassFixture<TestSetup>
 
         // Act
         var task = gatewayRunner
-            .RunAndWaitUntilAllTransactionsIngested<GatewayResponse>(ValidateResponse);
+            .RunAndWaitUntilAllTransactionsIngested<GatewayInfoResponse>(ValidateResponse);
         task.Wait();
 
         // Assert (callback method)
-        void ValidateResponse(GatewayResponse? payload, string? intentHash, Exception? exception)
+        void ValidateResponse(GatewayInfoResponse? payload, string? intentHash, Exception? exception)
         {
             payload.ShouldNotBeNull();
             payload.GatewayApi.ShouldNotBeNull();

@@ -151,6 +151,14 @@ public class CoreApiStub :
         }
     }
 
+    public IMempoolApi MempoolApi
+    {
+        get
+        {
+            return new MempoolApiStub(RequestsAndResponses.MempoolListResponse);
+        }
+    }
+
     public TransactionApi TransactionApi { get; }
 
     public TransactionApi TransactionsApi { get; }
@@ -163,6 +171,11 @@ public class CoreApiStub :
     public CoreApiNode GetCoreNodeConnectedTo()
     {
         return RequestsAndResponses.GatewayCoreApiNode;
+    }
+
+    public Task<TransactionParseResponse> ParseTransaction(TransactionParseRequest request, CancellationToken token = default)
+    {
+        throw new System.NotImplementedException();
     }
 
     public Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)

@@ -96,6 +96,8 @@ public class CoreApiStubRequestsAndResponses
 
     public string MempoolTransactionHash { get; set; }
 
+    public MempoolListResponse MempoolListResponse { get; set; }
+
     public NetworkStatusResponse NetworkStatusResponse { get; set; }
 
     public TransactionPreviewResponse TransactionPreviewResponse { get; set; }
@@ -139,5 +141,8 @@ public class CoreApiStubRequestsAndResponses
             new CommittedStateIdentifier(1L),
             new CommittedStateIdentifier(1L),
             new CommittedStateIdentifier(1L));
+
+        MempoolListResponse = new MempoolListResponse(
+            new List<MempoolTransactionHashes>() { new MempoolTransactionHashes(MempoolTransactionHash, Hash) });
     }
 }
