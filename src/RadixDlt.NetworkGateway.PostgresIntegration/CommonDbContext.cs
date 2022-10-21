@@ -132,14 +132,30 @@ internal abstract class CommonDbContext : DbContext
             .HasMethod("hash")
             .HasFilter("global_address IS NOT NULL");
 
+        // TODO investigate what's more performant FromStateVersion+EntityId or EntityId+FromStateVersion
+        modelBuilder.Entity<EntityMetadataHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityResourceAggregateHistory>()
+            .HasIndex(e => new { e.IsMostRecent, EntityId = e.EntityId })
+            .HasFilter("is_most_recent IS TRUE");
+
+        modelBuilder.Entity<EntityResourceAggregateHistory>()
+            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+
         modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("type")
             .HasValue<EntityFungibleResourceHistory>("fungible")
             .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
 
-        modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, e.EntityId })
-            .HasFilter("is_most_recent IS TRUE");
+        modelBuilder.Entity<EntityResourceHistory>()
+            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityResourceHistory>()
+            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<FungibleResourceSupplyHistory>()
+            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

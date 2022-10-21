@@ -170,6 +170,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EntityId", "FromStateVersion");
+
                     b.ToTable("entity_metadata_history");
                 });
 

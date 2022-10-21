@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -70,7 +69,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("fungible_resource_supply_history")]
-[Index(nameof(ResourceEntityId), nameof(FromStateVersion))] // TODO does it make any difference if we define index with from_state_version DESC?
 internal class FungibleResourceSupplyHistory
 {
     [Key]

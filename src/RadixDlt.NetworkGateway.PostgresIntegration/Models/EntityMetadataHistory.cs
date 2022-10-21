@@ -68,7 +68,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_metadata_history")]
-public class EntityMetadataHistory
+internal class EntityMetadataHistory
 {
     [Key]
     [Column("id")]

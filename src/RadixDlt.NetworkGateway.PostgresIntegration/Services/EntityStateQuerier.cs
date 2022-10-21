@@ -229,6 +229,8 @@ INNER JOIN LATERAL (
 
     public async Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default)
     {
+        // TODO we could use just one query (select with lateral join) but it seems it is impossible to do it easily with EF Core (no foreign key)
+
         var addressesList = addresses.ToList();
 
         var entities = await _dbContext.Entities
@@ -249,7 +251,7 @@ INNER JOIN LATERAL (
     SELECT *
     FROM entity_metadata_history
     WHERE
-       from_state_version <= 123 AND entity_id = ids.id
+       from_state_version <= {ledgerState._Version} AND entity_id = ids.id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;
