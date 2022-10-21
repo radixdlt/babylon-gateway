@@ -111,9 +111,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
-        /// <param name="totalSupplyAttos">totalSupplyAttos (required).</param>
-        /// <param name="totalMintedAttos">totalMintedAttos (required).</param>
-        /// <param name="totalBurntAttos">totalBurntAttos (required).</param>
+        /// <param name="totalSupplyAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
+        /// <param name="totalMintedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
+        /// <param name="totalBurntAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
         public EntityDetailsResponseFungibleDetails(ResourceTypeMapping resourceType = default(ResourceTypeMapping), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
         {
             this.ResourceType = resourceType;
@@ -138,20 +138,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets TotalSupplyAttos
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
         /// </summary>
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
         [DataMember(Name = "total_supply_attos", IsRequired = true, EmitDefaultValue = true)]
         public string TotalSupplyAttos { get; set; }
 
         /// <summary>
-        /// Gets or Sets TotalMintedAttos
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
         /// </summary>
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
         [DataMember(Name = "total_minted_attos", IsRequired = true, EmitDefaultValue = true)]
         public string TotalMintedAttos { get; set; }
 
         /// <summary>
-        /// Gets or Sets TotalBurntAttos
+        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
         /// </summary>
+        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
         [DataMember(Name = "total_burnt_attos", IsRequired = true, EmitDefaultValue = true)]
         public string TotalBurntAttos { get; set; }
 

@@ -104,22 +104,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesAllOf" /> class.
         /// </summary>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseFungibleResourcesAllOf(List<EntityResourcesResponseFungibleResourcesItem> results = default(List<EntityResourcesResponseFungibleResourcesItem>))
+        /// <param name="items">items (required).</param>
+        public EntityResourcesResponseFungibleResourcesAllOf(List<EntityResourcesResponseFungibleResourcesItem> items = default(List<EntityResourcesResponseFungibleResourcesItem>))
         {
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntityResourcesResponseFungibleResourcesAllOf and cannot be null");
             }
-            this.Results = results;
+            this.Items = items;
         }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseFungibleResourcesItem> Results { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityResourcesResponseFungibleResourcesItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,7 +129,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityResourcesResponseFungibleResourcesAllOf {\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -166,10 +166,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -182,9 +182,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Results != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

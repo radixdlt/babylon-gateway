@@ -107,16 +107,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="results">results (required).</param>
-        public EntityResourcesResponseFungibleResources(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityResourcesResponseFungibleResourcesItem> results = default(List<EntityResourcesResponseFungibleResourcesItem>))
+        /// <param name="items">items (required).</param>
+        public EntityResourcesResponseFungibleResources(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityResourcesResponseFungibleResourcesItem> items = default(List<EntityResourcesResponseFungibleResourcesItem>))
         {
             this.TotalCount = totalCount;
-            // to ensure "results" is required (not null)
-            if (results == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("results is a required property for EntityResourcesResponseFungibleResources and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntityResourcesResponseFungibleResources and cannot be null");
             }
-            this.Results = results;
+            this.Items = items;
             this.PreviousCursor = previousCursor;
             this.NextCursor = nextCursor;
         }
@@ -143,10 +143,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string NextCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets Results
+        /// Gets or Sets Items
         /// </summary>
-        [DataMember(Name = "results", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseFungibleResourcesItem> Results { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityResourcesResponseFungibleResourcesItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -159,7 +159,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Results: ").Append(Results).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -210,10 +210,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.Results == input.Results ||
-                    this.Results != null &&
-                    input.Results != null &&
-                    this.Results.SequenceEqual(input.Results)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -235,9 +235,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Results != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Results.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

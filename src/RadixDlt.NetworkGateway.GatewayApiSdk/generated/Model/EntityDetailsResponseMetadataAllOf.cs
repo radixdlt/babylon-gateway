@@ -91,44 +91,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesItem
+    /// EntityDetailsResponseMetadataAllOf
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResourcesItem")]
-    public partial class EntityResourcesResponseNonFungibleResourcesItem : IEquatable<EntityResourcesResponseNonFungibleResourcesItem>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseMetadata_allOf")]
+    public partial class EntityDetailsResponseMetadataAllOf : IEquatable<EntityDetailsResponseMetadataAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesItem" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseMetadataAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesItem() { }
+        protected EntityDetailsResponseMetadataAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesItem" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseMetadataAllOf" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        /// <param name="amount">amount (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesItem(string address = default(string), decimal amount = default(decimal))
+        /// <param name="items">TBD (required).</param>
+        public EntityDetailsResponseMetadataAllOf(List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityResourcesResponseNonFungibleResourcesItem and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntityDetailsResponseMetadataAllOf and cannot be null");
             }
-            this.Address = address;
-            this.Amount = amount;
+            this.Items = items;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// TBD
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Amount
-        /// </summary>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public decimal Amount { get; set; }
+        /// <value>TBD</value>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityMetadataItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +129,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesItem {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("class EntityDetailsResponseMetadataAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +151,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesItem);
+            return this.Equals(input as EntityDetailsResponseMetadataAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesItem instances are equal
+        /// Returns true if EntityDetailsResponseMetadataAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesItem to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseMetadataAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesItem input)
+        public bool Equals(EntityDetailsResponseMetadataAllOf input)
         {
             if (input == null)
             {
@@ -176,13 +167,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.Amount == input.Amount ||
-                    this.Amount.Equals(input.Amount)
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -195,11 +183,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 return hashCode;
             }
         }

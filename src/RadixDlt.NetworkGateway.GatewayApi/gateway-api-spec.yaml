@@ -42,12 +42,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/GatewayInfoResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/recent":
     post:
       operationId: RecentTransactions
@@ -70,12 +64,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/RecentTransactionsResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/preview":
     post:
       operationId: PreviewTransaction
@@ -97,12 +85,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/TransactionPreviewResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/submit":
     post:
       operationId: SubmitTransaction
@@ -125,12 +107,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/TransactionSubmitResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/status":
     post:
       operationId: TransactionStatus
@@ -152,12 +128,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/TransactionStatusResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   "/transaction/details":
     post:
       operationId: TransactionDetails
@@ -179,12 +149,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/TransactionDetailsResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   /entity/resources:
     post:
       operationId: EntityResources
@@ -206,12 +170,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/EntityResourcesResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   /entity/details:
     post:
       operationId: EntityDetails
@@ -233,12 +191,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/EntityDetailsResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
   /entity/overview:
     post:
       operationId: EntityOverview
@@ -260,14 +212,22 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/EntityOverviewResponse"
-        '500':
-          description: Gateway Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorResponse"
 components:
   schemas:
+
+    #
+    # Aliases
+    #
+
+    EntityAddress:
+      type: string
+      description: The Bech32m-encoded human readable version of the entity's global address
+
+    TokenAmountAttos: # TODO shouldn't we drop value of 18 in favor of token-specific divisibility number?
+      type: string
+      description: |
+        A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
+        the total supply of this resource.
 
     #
     # Mapping Enums
@@ -338,6 +298,17 @@ components:
           type: integer
           format: int64
 
+    EntityMetadataItem:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
     LedgerStateMixin:
       type: object
       required:
@@ -376,7 +347,6 @@ components:
         - type: object
           required:
             - gateway_api
-            - ledger_state
             - target_ledger_state
           properties:
             gateway_api:
@@ -439,6 +409,7 @@ components:
                   type: array
                   items:
                     $ref: "#/components/schemas/TransactionInfo"
+
     #
     # "Entity" Request & Response Types
     #
@@ -449,8 +420,7 @@ components:
         - address
       properties:
         address:
-          description: The Bech32m-encoded human readable version of the entity's global address
-          type: string
+          $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
     EntityResourcesResponse:
@@ -463,8 +433,7 @@ components:
             - non_fungible_resources
           properties:
             address:
-              description: The Bech32m-encoded human readable version of the entity's global address
-              type: string
+              $ref: "#/components/schemas/EntityAddress"
             fungible_resources:
               $ref: "#/components/schemas/EntityResourcesResponseFungibleResources"
             non_fungible_resources:
@@ -474,9 +443,9 @@ components:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
-            - results
+            - items
           properties:
-            results:
+            items:
               type: array
               items:
                 $ref: "#/components/schemas/EntityResourcesResponseFungibleResourcesItem"
@@ -487,21 +456,17 @@ components:
         - amount_attos
       properties:
         address:
-          description: The Bech32m-encoded human readable version of the resource's global address
-          type: string
+          $ref: "#/components/schemas/EntityAddress"
         amount_attos:
-          type: string
-          description: |
-            A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
-            the total supply of this resource.
+          $ref: "#/components/schemas/TokenAmountAttos"
     EntityResourcesResponseNonFungibleResources:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object
           required:
-            - results
+            - items
           properties:
-            results:
+            items:
               type: array
               items:
                 $ref: "#/components/schemas/EntityResourcesResponseNonFungibleResourcesItem"
@@ -512,8 +477,7 @@ components:
         - amount
       properties:
         address:
-          description: The Bech32m-encoded human readable version of the resource's global address
-          type: string
+          $ref: "#/components/schemas/EntityAddress"
         amount:
           type: number
 
@@ -523,8 +487,7 @@ components:
         - address
       properties:
         address:
-          description: The Bech32m-encoded human readable version of the entity's global address
-          type: string
+          $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
     EntityDetailsResponse:
@@ -537,15 +500,23 @@ components:
             - details
           properties:
             address:
-              description: The Bech32m-encoded human readable version of the resource's global address
-              type: string
+              $ref: "#/components/schemas/EntityAddress"
             metadata:
-              description: TBD
-              type: object
-              additionalProperties:
-                type: string
+              $ref: "#/components/schemas/EntityDetailsResponseMetadata"
             details:
               $ref: "#/components/schemas/EntityDetailsResponseDetails"
+    EntityDetailsResponseMetadata:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: TBD
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityMetadataItem"
     EntityDetailsResponseDetails:
       oneOf:
         - $ref: "#/components/schemas/EntityDetailsResponseFungibleDetails"
@@ -553,6 +524,7 @@ components:
       discriminator:
         propertyName: resource_type
         mapping:
+          # Must match ResourceTypeMapping
           fungible: "#/components/schemas/EntityDetailsResponseFungibleDetails"
           non_fungible: "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
     EntityDetailsResponseFungibleDetails:
@@ -566,11 +538,11 @@ components:
         resource_type:
           $ref: "#/components/schemas/ResourceTypeMapping"
         total_supply_attos:
-          type: string
+          $ref: "#/components/schemas/TokenAmountAttos"
         total_minted_attos:
-          type: string
+          $ref: "#/components/schemas/TokenAmountAttos"
         total_burnt_attos:
-          type: string
+          $ref: "#/components/schemas/TokenAmountAttos"
     EntityDetailsResponseNonFungibleDetails:
       type: object
       required:
@@ -590,7 +562,7 @@ components:
         addresses:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
     EntityOverviewResponse:
@@ -611,16 +583,24 @@ components:
          - metadata
        properties:
          address:
-           description: The Bech32m-encoded human readable version of the resource's global address
-           type: string
+           $ref: "#/components/schemas/EntityAddress"
          metadata:
-           description: TBD
-           type: object
-           additionalProperties:
-             type: string
+           $ref: "#/components/schemas/EntityOverviewResponseEntityItemMetadata"
+    EntityOverviewResponseEntityItemMetadata:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: TBD
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityMetadataItem"
 
     #
-    # TODO Not categorized yet
+    # TODO Not categorized/cleaned yet
     #
 
     TransactionPreviewRequest:

@@ -213,7 +213,7 @@ INNER JOIN LATERAL (
             return null;
         }
 
-        var metadata = new Dictionary<string, string>();
+        var rawMetadata = new Dictionary<string, string>();
         var metadataHistory = await _dbContext.EntityMetadataHistory
             .Where(e => e.EntityId == entity.Id && e.FromStateVersion <= ledgerState._Version)
             .OrderByDescending(e => e.FromStateVersion)
@@ -221,8 +221,10 @@ INNER JOIN LATERAL (
 
         if (metadataHistory != null)
         {
-            metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
+            rawMetadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
+
+        var metadata = new EntityDetailsResponseMetadata(rawMetadata.Count, null, "TBD (currently everything is returned)", rawMetadata.Select(rm => new EntityMetadataItem(rm.Key, rm.Value)).ToList());
 
         return new EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
@@ -262,12 +264,14 @@ INNER JOIN LATERAL (
 
         foreach (var entity in entities)
         {
-            var metadata = new Dictionary<string, string>();
+            var rawMetadata = new Dictionary<string, string>();
 
             if (metadataHistory.ContainsKey(entity.Id))
             {
-                metadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
+                rawMetadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
             }
+
+            var metadata = new EntityOverviewResponseEntityItemMetadata(rawMetadata.Count, null, "TBD (currently everything is returned)", rawMetadata.Select(rm => new EntityMetadataItem(rm.Key, rm.Value)).ToList());
 
             items.Add(new EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata));
         }
