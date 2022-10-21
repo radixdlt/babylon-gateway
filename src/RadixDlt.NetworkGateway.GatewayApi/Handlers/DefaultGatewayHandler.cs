@@ -62,21 +62,24 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-public interface ITransactionHandler
+internal class DefaultGatewayHandler : IGatewayHandler
 {
-    Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token = default);
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
 
-    Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token = default);
+    public DefaultGatewayHandler(ILedgerStateQuerier ledgerStateQuerier)
+    {
+        _ledgerStateQuerier = ledgerStateQuerier;
+    }
 
-    Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token = default);
-
-    Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token = default);
-
-    Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token = default);
+    public async Task<GatewayInfoResponse> Status(CancellationToken token)
+    {
+        return await _ledgerStateQuerier.GetGatewayState(token);
+    }
 }

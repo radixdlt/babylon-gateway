@@ -137,12 +137,13 @@ public static class ServiceCollectionExtensions
 
     private static void AddRequestServices(IServiceCollection services)
     {
-        services.AddScoped<ExceptionFilter>();
-        services.AddScoped<InvalidModelStateFilter>();
+        services
+            .AddScoped<ExceptionFilter>()
+            .AddScoped<InvalidModelStateFilter>();
 
-        services.AddScoped<IEntityHandler, DefaultEntityHandler>();
-        services.AddScoped<ITransactionHandler, DefaultTransactionHandler>();
-
+        services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
+        services.TryAddScoped<IGatewayHandler, DefaultGatewayHandler>();
+        services.TryAddScoped<ITransactionHandler, DefaultTransactionHandler>();
         services.TryAddScoped<IPreviewService, PreviewService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();
     }
