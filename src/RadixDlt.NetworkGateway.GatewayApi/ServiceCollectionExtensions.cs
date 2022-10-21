@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Net;
 using System.Net.Http;
@@ -138,6 +139,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ExceptionFilter>();
         services.AddScoped<InvalidModelStateFilter>();
+
+        services.AddScoped<IEntityHandler, DefaultEntityHandler>();
+        services.AddScoped<ITransactionHandler, DefaultTransactionHandler>();
 
         services.TryAddScoped<IPreviewService, PreviewService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();

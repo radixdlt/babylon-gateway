@@ -64,15 +64,12 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace GatewayApi.Controllers;
-
-// TODO add "end-to-end" service accepting entire "request"s to ensure controllers are as skinny as possible
 
 [ApiController]
 [Route("transaction")]
@@ -80,96 +77,41 @@ namespace GatewayApi.Controllers;
 [ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class TransactionController : ControllerBase
 {
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly ITransactionQuerier _transactionQuerier;
-    private readonly IPreviewService _previewService;
-    private readonly ISubmissionService _submissionService;
+    private readonly ITransactionHandler _transactionHandler;
 
-    public TransactionController(
-        ILedgerStateQuerier ledgerStateQuerier,
-        ITransactionQuerier transactionQuerier,
-        IPreviewService previewService,
-        ISubmissionService submissionService)
+    public TransactionController(ITransactionHandler transactionHandler)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
-        _transactionQuerier = transactionQuerier;
-        _previewService = previewService;
-        _submissionService = submissionService;
+        _transactionHandler = transactionHandler;
     }
 
     [HttpPost("recent")]
     public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token)
     {
-        var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-        var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, token);
-
-        var transactionsPageRequest = new RecentTransactionPageRequest(
-            Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
-            PageSize: request.Limit ?? 10
-        );
-
-        var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
-
-        // NB - We don't return a total here as we don't have an index on user transactions
-        return new RecentTransactionsResponse(
-            atLedgerState,
-            nextCursor: results.NextPageCursor?.ToCursorString(),
-            items: results.Transactions
-        );
+        return await _transactionHandler.Recent(request, token);
     }
 
     [HttpPost("status")]
     public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, false, token);
-
-        if (committedTransaction != null)
-        {
-            return new TransactionStatusResponse(ledgerState, committedTransaction.Info);
-        }
-
-        var pendingTransaction = await _transactionQuerier.LookupPendingTransaction(request.TransactionIdentifier, token);
-
-        if (pendingTransaction != null)
-        {
-            return new TransactionStatusResponse(ledgerState, pendingTransaction);
-        }
-
-        throw new TransactionNotFoundException(request.TransactionIdentifier);
+        return await _transactionHandler.Status(request, token);
     }
 
     [HttpPost("details")]
     public async Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token)
     {
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-        var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
-
-        if (committedTransaction != null)
-        {
-            return new TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
-        }
-
-        var pendingTransaction = await _transactionQuerier.LookupPendingTransaction(request.TransactionIdentifier, token);
-
-        if (pendingTransaction != null)
-        {
-            return new TransactionDetailsResponse(ledgerState, pendingTransaction);
-        }
-
-        throw new TransactionNotFoundException(request.TransactionIdentifier);
+        return await _transactionHandler.Details(request, token);
     }
 
     // TODO decide how do we want to model /this endpoint in our OAS
     [HttpPost("preview")]
     public async Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token)
     {
-        return await _previewService.HandlePreviewRequest(request, token);
+        return await _transactionHandler.Preview(request, token);
     }
 
     [HttpPost("submit")]
     public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token)
     {
-        return await _submissionService.HandleSubmitRequest(request, token);
+        return await _transactionHandler.Submit(request, token);
     }
 }

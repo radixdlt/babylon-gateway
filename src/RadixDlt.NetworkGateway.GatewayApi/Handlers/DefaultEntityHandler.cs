@@ -62,53 +62,48 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[ApiController]
-[Route("entity")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class EntityController : ControllerBase
+internal class DefaultEntityHandler : IEntityHandler
 {
-    private readonly IEntityHandler _entityHandler;
+    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
 
-    public EntityController(IEntityHandler entityHandler)
+    public DefaultEntityHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
     {
-        _entityHandler = entityHandler;
+        _ledgerStateQuerier = ledgerStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
     }
 
-    [HttpPost("resources")]
-    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
+    public async Task<EntityResourcesResponse?> Resources(EntityResourcesRequest request, CancellationToken token = default)
     {
-        var response = await _entityHandler.Resources(request, token);
+        var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return response != null
-            ? Ok(response)
-            : NotFound();
+        return await _entityStateQuerier.EntityResourcesSnapshot(address, ledgerState, token);
     }
 
-    [HttpPost("details")]
-    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
+    public async Task<EntityDetailsResponse?> Details(EntityDetailsRequest request, CancellationToken token = default)
     {
-        var response = await _entityHandler.Details(request, token);
+        var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return response != null
-            ? Ok(response)
-            : NotFound();
+        return await _entityStateQuerier.EntityDetailsSnapshot(address, ledgerState, token);
     }
 
-    [HttpPost("overview")]
-    public async Task<IActionResult> Overview(EntityOverviewRequest request, CancellationToken token = default)
+    public async Task<EntityOverviewResponse> Overview(EntityOverviewRequest request, CancellationToken token = default)
     {
-        var response = await _entityHandler.Overview(request, token);
+        var addresses = request.Addresses.Select(address => (RadixAddress)RadixBech32.Decode(address).Data).ToArray();
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return Ok(response);
+        return await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
     }
 }
