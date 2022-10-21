@@ -10,8 +10,8 @@ jobs:
       - name: Get PR HSN
         run: |
           pull_number=${{ github.event.number }}
-          echo "NAMESPACE=ng-pr-$pull_number" >> $GITHUB_ENV
-          echo "EVENT_TYPE=pr_hsn" >> $GITHUB_ENV
+          echo "NAMESPACE=ng-babylon-pr-$pull_number" >> $GITHUB_ENV
+          echo "EVENT_TYPE=babylon_pr_hsn" >> $GITHUB_ENV
 
       - name: Trigger pr deletion event ${{ github.ref }}
         run: |
