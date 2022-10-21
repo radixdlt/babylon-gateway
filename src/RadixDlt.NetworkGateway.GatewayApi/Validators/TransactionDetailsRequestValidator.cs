@@ -62,67 +62,22 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using FluentValidation;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[ApiController]
-[Route("entity")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class EntityController : ControllerBase
+internal class TransactionDetailsRequestValidator : AbstractValidator<TransactionDetailsRequest>
 {
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly IEntityStateQuerier _entityStateQuerier;
-
-    public EntityController(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
+    public TransactionDetailsRequestValidator(
+        TransactionLookupIdentifierValidator transactionLookupIdentifierValidator,
+        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
-        _entityStateQuerier = entityStateQuerier;
-    }
+        RuleFor(x => x.TransactionIdentifier)
+            .NotNull()
+            .SetValidator(transactionLookupIdentifierValidator);
 
-    [HttpPost("resources")]
-    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
-    {
-        var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-
-        var response = await _entityStateQuerier.EntityResourcesSnapshot(address, ledgerState, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("details")]
-    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
-    {
-        var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-
-        var response = await _entityStateQuerier.EntityDetailsSnapshot(address, ledgerState, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("overview")]
-    public async Task<IActionResult> Overview(EntityOverviewRequest request, CancellationToken token = default)
-    {
-        var addresses = request.Addresses.Select(address => (RadixAddress)RadixBech32.Decode(address).Data).ToArray();
-        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
-
-        var response = await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
-
-        return Ok(response);
+        RuleFor(x => x.AtStateIdentifier)
+            .SetValidator(partialLedgerStateIdentifierValidator);
     }
 }

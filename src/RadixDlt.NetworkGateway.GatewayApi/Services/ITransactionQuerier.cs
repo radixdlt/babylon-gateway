@@ -78,7 +78,7 @@ public interface ITransactionQuerier
         Gateway.LedgerState? fromLedgerState,
         CancellationToken token = default);
 
-    Task<LookupResult?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, bool withMetadata, CancellationToken token = default);
+    Task<LookupResult?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
     Task<Gateway.TransactionInfo?> LookupPendingTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }

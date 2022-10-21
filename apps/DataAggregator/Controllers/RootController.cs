@@ -65,7 +65,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
-namespace DataAggregator;
+namespace DataAggregator.Controllers;
 
 [ApiController]
 [Route("")]
