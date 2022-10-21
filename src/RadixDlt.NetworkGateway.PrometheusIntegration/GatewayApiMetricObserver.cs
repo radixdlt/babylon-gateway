@@ -231,14 +231,6 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask ISubmissionServiceObserver.ParseTransactionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
-    // {
-    //     _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_substate_missing_or_already_used").Inc();
-    //
-    //     return ValueTask.CompletedTask;
-    // }
-
     ValueTask ISubmissionServiceObserver.ParseTransactionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException wrappedCoreApiException)
     {
         _transactionSubmitResolutionByResultCount.WithLabels("parse_failed_invalid_transaction").Inc();
@@ -294,14 +286,6 @@ internal class GatewayApiMetricObserver :
 
         return ValueTask.CompletedTask;
     }
-
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask ISubmissionServiceObserver.HandleSubmissionFailedSubstateNotFound(ValidatedHex signedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
-    // {
-    //     _transactionSubmitResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
-    //
-    //     return ValueTask.CompletedTask;
-    // }
 
     ValueTask ISubmissionServiceObserver.HandleSubmissionFailedInvalidTransaction(GatewayModel.TransactionSubmitRequest request, WrappedCoreApiException exception)
     {

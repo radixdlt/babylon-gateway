@@ -626,15 +626,6 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-    // ValueTask IMempoolResubmissionServiceObserver.ResubmitFailedSubstateNotFound(byte[] notarizedTransaction, WrappedCoreApiException<SubstateDependencyNotFoundError> wrappedCoreApiException)
-    // {
-    //     _transactionResubmissionErrorCount.Inc();
-    //     _transactionResubmissionResolutionByResultCount.WithLabels("substate_missing_or_already_used").Inc();
-    //
-    //     return ValueTask.CompletedTask;
-    // }
-
     ValueTask IPendingTransactionResubmissionServiceObserver.ResubmitFailedPermanently(byte[] notarizedTransaction, WrappedCoreApiException wrappedCoreApiException)
     {
         _transactionResubmissionErrorCount.Inc();

@@ -144,17 +144,16 @@ INNER JOIN LATERAL (
             var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
             var ra = RadixBech32.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
-            if (dbResource is EntityFungibleResourceHistory efrh)
+            switch (dbResource)
             {
-                fungibles.Add(new EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
-            }
-            else if (dbResource is EntityNonFungibleResourceHistory enfrh)
-            {
-                nonFungibles.Add(new EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
-            }
-            else
-            {
-                throw new Exception("bla bla bla"); // TODO fix me
+                case EntityFungibleResourceHistory efrh:
+                    fungibles.Add(new EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
+                    break;
+                case EntityNonFungibleResourceHistory enfrh:
+                    nonFungibles.Add(new EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbResource));
             }
         }
 
