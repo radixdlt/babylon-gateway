@@ -84,7 +84,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     address = table.Column<byte[]>(type: "bytea", nullable: false),
                     global_address = table.Column<byte[]>(type: "bytea", nullable: true),
-                    parent_id = table.Column<long>(type: "bigint", nullable: true),
+                    ancestor_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
+                    parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     type = table.Column<string>(type: "text", nullable: false)

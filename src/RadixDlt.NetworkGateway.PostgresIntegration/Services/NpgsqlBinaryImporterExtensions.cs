@@ -84,4 +84,11 @@ internal static class NpgsqlBinaryImporterExtensions
             ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
             : writer.WriteNullAsync(cancellationToken);
     }
+
+    public static Task WriteNullableAsync(this NpgsqlBinaryImporter writer, long[]? value, NpgsqlDbType npgsqlDbType, CancellationToken cancellationToken = default)
+    {
+        return value != null
+            ? writer.WriteAsync(value, npgsqlDbType, cancellationToken)
+            : writer.WriteNullAsync(cancellationToken);
+    }
 }

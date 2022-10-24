@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221021111256_InitialCreate")]
+    [Migration("20221024115050_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,6 +103,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("address");
 
+                    b.Property<long[]>("AncestorIds")
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("ancestor_ids");
+
                     b.Property<long>("FromStateVersion")
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
@@ -119,9 +123,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("owner_ancestor_id");
 
-                    b.Property<long?>("ParentId")
+                    b.Property<long?>("ParentAncestorId")
                         .HasColumnType("bigint")
-                        .HasColumnName("parent_id");
+                        .HasColumnName("parent_ancestor_id");
 
                     b.Property<string>("type")
                         .IsRequired()
