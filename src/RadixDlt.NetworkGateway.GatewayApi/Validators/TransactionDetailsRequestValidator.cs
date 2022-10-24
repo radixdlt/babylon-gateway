@@ -62,53 +62,22 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using FluentValidation;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace GatewayApi.Controllers;
+namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-[ApiController]
-[Route("entity")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class EntityController : ControllerBase
+internal class TransactionDetailsRequestValidator : AbstractValidator<TransactionDetailsRequest>
 {
-    private readonly IEntityHandler _entityHandler;
-
-    public EntityController(IEntityHandler entityHandler)
+    public TransactionDetailsRequestValidator(
+        TransactionLookupIdentifierValidator transactionLookupIdentifierValidator,
+        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        _entityHandler = entityHandler;
-    }
+        RuleFor(x => x.TransactionIdentifier)
+            .NotNull()
+            .SetValidator(transactionLookupIdentifierValidator);
 
-    [HttpPost("resources")]
-    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Resources(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("details")]
-    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Details(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("overview")]
-    public async Task<IActionResult> Overview(EntityOverviewRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Overview(request, token);
-
-        return Ok(response);
+        RuleFor(x => x.AtStateIdentifier)
+            .SetValidator(partialLedgerStateIdentifierValidator);
     }
 }

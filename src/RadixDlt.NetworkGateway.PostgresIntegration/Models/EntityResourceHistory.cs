@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -70,8 +69,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_resource_history")]
-[Index(nameof(OwnerEntityId), nameof(FromStateVersion))]
-[Index(nameof(GlobalEntityId), nameof(FromStateVersion))]
 internal abstract class EntityResourceHistory
 {
     [Key]

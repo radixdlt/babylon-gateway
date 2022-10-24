@@ -62,32 +62,21 @@
  * permissions under this License.
  */
 
-using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace DataAggregator;
+namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-[ApiController]
-[Route("")]
-public class RootController : ControllerBase
+public interface ITransactionHandler
 {
-    private readonly ISystemStatusService _systemStatusService;
+    Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token = default);
 
-    public RootController(ISystemStatusService systemStatusService)
-    {
-        _systemStatusService = systemStatusService;
-    }
+    Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token = default);
 
-    [HttpGet("")]
-    public JsonResult GetRootResponse()
-    {
-        var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
+    Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token = default);
 
-        return new JsonResult(new
-        {
-            docs = "https://docs.radixdlt.com",
-            repo = "https://github.com/radixdlt/babylon-gateway",
-            ledger_commit_health = healthReport,
-        }) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
-    }
+    Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token = default);
+
+    Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token = default);
 }

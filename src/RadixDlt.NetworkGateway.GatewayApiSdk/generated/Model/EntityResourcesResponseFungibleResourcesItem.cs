@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesItem" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
         public EntityResourcesResponseFungibleResourcesItem(string address = default(string), string amountAttos = default(string))
         {
@@ -123,9 +123,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the resource&#39;s global address
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the resource&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

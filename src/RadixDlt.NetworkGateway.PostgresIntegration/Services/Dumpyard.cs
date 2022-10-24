@@ -106,8 +106,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
 
-    // TODO not sure if this logic is valid?
-    public bool IsOwner => Type is EntityType.Component or EntityType.ResourceManager;
+    public bool CanBeOwner => Type is EntityType.Component or EntityType.ResourceManager;
 
     [MemberNotNullWhen(true, nameof(Parent))]
     public bool HasParent => _parent != null;
@@ -125,9 +124,10 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         _databaseEntity = entity;
     }
 
-    public void ResolveParentalIds(long parentId, long ownerId, long globalId)
+    public void ResolveParentalIds(long[] ids, long parentId, long ownerId, long globalId)
     {
-        GetDatabaseEntity().ParentId = parentId;
+        GetDatabaseEntity().AncestorIds = ids;
+        GetDatabaseEntity().ParentAncestorId = parentId;
         GetDatabaseEntity().OwnerAncestorId = ownerId;
         GetDatabaseEntity().GlobalAncestorId = globalId;
     }

@@ -63,52 +63,31 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
-using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System.Threading;
-using System.Threading.Tasks;
+using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
-namespace GatewayApi.Controllers;
+namespace DataAggregator.Controllers;
 
 [ApiController]
-[Route("entity")]
-[ServiceFilter(typeof(ExceptionFilter))]
-[ServiceFilter(typeof(InvalidModelStateFilter))]
-public class EntityController : ControllerBase
+[Route("")]
+public class RootController : ControllerBase
 {
-    private readonly IEntityHandler _entityHandler;
+    private readonly ISystemStatusService _systemStatusService;
 
-    public EntityController(IEntityHandler entityHandler)
+    public RootController(ISystemStatusService systemStatusService)
     {
-        _entityHandler = entityHandler;
+        _systemStatusService = systemStatusService;
     }
 
-    [HttpPost("resources")]
-    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
+    [HttpGet("")]
+    public JsonResult GetRootResponse()
     {
-        var response = await _entityHandler.Resources(request, token);
+        var healthReport = _systemStatusService.GenerateTransactionCommitmentHealthReport();
 
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("details")]
-    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Details(request, token);
-
-        return response != null
-            ? Ok(response)
-            : NotFound();
-    }
-
-    [HttpPost("overview")]
-    public async Task<IActionResult> Overview(EntityOverviewRequest request, CancellationToken token = default)
-    {
-        var response = await _entityHandler.Overview(request, token);
-
-        return Ok(response);
+        return new JsonResult(new
+        {
+            docs = "https://docs.radixdlt.com",
+            repo = "https://github.com/radixdlt/babylon-gateway",
+            ledger_commit_health = healthReport,
+        }) { StatusCode = healthReport.IsHealthy ? 200 : 500 };
     }
 }

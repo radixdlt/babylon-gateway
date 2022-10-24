@@ -62,15 +62,13 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
 [Table("entity_resource_aggregate_history")]
-[Index(nameof(EntityId), nameof(FromStateVersion))]
-public class EntityResourceAggregateHistory
+internal class EntityResourceAggregateHistory
 {
     [Key]
     [Column("id")]

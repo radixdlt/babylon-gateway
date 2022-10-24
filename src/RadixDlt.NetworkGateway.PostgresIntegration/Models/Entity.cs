@@ -86,8 +86,11 @@ internal abstract class Entity
     [Column("global_address")]
     public RadixAddress? GlobalAddress { get; set; }
 
-    [Column("parent_id")]
-    public long? ParentId { get; set; }
+    [Column("ancestor_ids")]
+    public long[]? AncestorIds { get; set; }
+
+    [Column("parent_ancestor_id")]
+    public long? ParentAncestorId { get; set; }
 
     [Column("owner_ancestor_id")]
     public long? OwnerAncestorId { get; set; }

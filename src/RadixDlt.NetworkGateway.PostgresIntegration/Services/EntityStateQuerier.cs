@@ -144,17 +144,16 @@ INNER JOIN LATERAL (
             var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
             var ra = RadixBech32.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
-            if (dbResource is EntityFungibleResourceHistory efrh)
+            switch (dbResource)
             {
-                fungibles.Add(new EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
-            }
-            else if (dbResource is EntityNonFungibleResourceHistory enfrh)
-            {
-                nonFungibles.Add(new EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
-            }
-            else
-            {
-                throw new Exception("bla bla bla"); // TODO fix me
+                case EntityFungibleResourceHistory efrh:
+                    fungibles.Add(new EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
+                    break;
+                case EntityNonFungibleResourceHistory enfrh:
+                    nonFungibles.Add(new EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbResource));
             }
         }
 
@@ -213,7 +212,7 @@ INNER JOIN LATERAL (
             return null;
         }
 
-        var metadata = new Dictionary<string, string>();
+        var rawMetadata = new Dictionary<string, string>();
         var metadataHistory = await _dbContext.EntityMetadataHistory
             .Where(e => e.EntityId == entity.Id && e.FromStateVersion <= ledgerState._Version)
             .OrderByDescending(e => e.FromStateVersion)
@@ -221,14 +220,18 @@ INNER JOIN LATERAL (
 
         if (metadataHistory != null)
         {
-            metadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
+            rawMetadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
         }
+
+        var metadata = new EntityDetailsResponseMetadata(rawMetadata.Count, null, "TBD (currently everything is returned)", rawMetadata.Select(rm => new EntityMetadataItem(rm.Key, rm.Value)).ToList());
 
         return new EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 
     public async Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default)
     {
+        // TODO we could use just one query (select with lateral join) but it seems it is impossible to do it easily with EF Core (no foreign key)
+
         var addressesList = addresses.ToList();
 
         var entities = await _dbContext.Entities
@@ -249,7 +252,7 @@ INNER JOIN LATERAL (
     SELECT *
     FROM entity_metadata_history
     WHERE
-       from_state_version <= 123 AND entity_id = ids.id
+       from_state_version <= {ledgerState._Version} AND entity_id = ids.id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;
@@ -260,12 +263,14 @@ INNER JOIN LATERAL (
 
         foreach (var entity in entities)
         {
-            var metadata = new Dictionary<string, string>();
+            var rawMetadata = new Dictionary<string, string>();
 
             if (metadataHistory.ContainsKey(entity.Id))
             {
-                metadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
+                rawMetadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
             }
+
+            var metadata = new EntityOverviewResponseEntityItemMetadata(rawMetadata.Count, null, "TBD (currently everything is returned)", rawMetadata.Select(rm => new EntityMetadataItem(rm.Key, rm.Value)).ToList());
 
             items.Add(new EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata));
         }

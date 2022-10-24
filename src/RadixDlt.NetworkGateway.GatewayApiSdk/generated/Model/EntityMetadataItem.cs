@@ -91,44 +91,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseNonFungibleResourcesItem
+    /// EntityMetadataItem
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseNonFungibleResourcesItem")]
-    public partial class EntityResourcesResponseNonFungibleResourcesItem : IEquatable<EntityResourcesResponseNonFungibleResourcesItem>, IValidatableObject
+    [DataContract(Name = "EntityMetadataItem")]
+    public partial class EntityMetadataItem : IEquatable<EntityMetadataItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesItem" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseNonFungibleResourcesItem() { }
+        protected EntityMetadataItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseNonFungibleResourcesItem" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataItem" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        /// <param name="amount">amount (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesItem(string address = default(string), decimal amount = default(decimal))
+        /// <param name="key">key (required).</param>
+        /// <param name="value">value (required).</param>
+        public EntityMetadataItem(string key = default(string), string value = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "key" is required (not null)
+            if (key == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityResourcesResponseNonFungibleResourcesItem and cannot be null");
+                throw new ArgumentNullException("key is a required property for EntityMetadataItem and cannot be null");
             }
-            this.Address = address;
-            this.Amount = amount;
+            this.Key = key;
+            // to ensure "value" is required (not null)
+            if (value == null)
+            {
+                throw new ArgumentNullException("value is a required property for EntityMetadataItem and cannot be null");
+            }
+            this.Value = value;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// Gets or Sets Key
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "key", IsRequired = true, EmitDefaultValue = true)]
+        public string Key { get; set; }
 
         /// <summary>
-        /// Gets or Sets Amount
+        /// Gets or Sets Value
         /// </summary>
-        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public decimal Amount { get; set; }
+        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        public string Value { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +141,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseNonFungibleResourcesItem {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Amount: ").Append(Amount).Append("\n");
+            sb.Append("class EntityMetadataItem {\n");
+            sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +164,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseNonFungibleResourcesItem);
+            return this.Equals(input as EntityMetadataItem);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseNonFungibleResourcesItem instances are equal
+        /// Returns true if EntityMetadataItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseNonFungibleResourcesItem to be compared</param>
+        /// <param name="input">Instance of EntityMetadataItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseNonFungibleResourcesItem input)
+        public bool Equals(EntityMetadataItem input)
         {
             if (input == null)
             {
@@ -176,13 +180,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Key == input.Key ||
+                    (this.Key != null &&
+                    this.Key.Equals(input.Key))
                 ) && 
                 (
-                    this.Amount == input.Amount ||
-                    this.Amount.Equals(input.Amount)
+                    this.Value == input.Value ||
+                    (this.Value != null &&
+                    this.Value.Equals(input.Value))
                 );
         }
 
@@ -195,11 +200,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Key != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Key.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                if (this.Value != null)
+                {
+                    hashCode = (hashCode * 59) + this.Value.GetHashCode();
+                }
                 return hashCode;
             }
         }

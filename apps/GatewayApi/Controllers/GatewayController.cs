@@ -64,7 +64,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,16 +77,16 @@ namespace GatewayApi.Controllers;
 [ServiceFilter(typeof(InvalidModelStateFilter))]
 public sealed class GatewayController : ControllerBase
 {
-    private readonly ILedgerStateQuerier _ledgerStateQuerier;
+    private readonly IGatewayHandler _gatewayHandler;
 
-    public GatewayController(ILedgerStateQuerier ledgerStateQuerier)
+    public GatewayController(IGatewayHandler gatewayHandler)
     {
-        _ledgerStateQuerier = ledgerStateQuerier;
+        _gatewayHandler = gatewayHandler;
     }
 
     [HttpPost("")]
     public async Task<GatewayInfoResponse> Status(CancellationToken token)
     {
-        return await _ledgerStateQuerier.GetGatewayState(token);
+        return await _gatewayHandler.Status(token);
     }
 }

@@ -115,7 +115,7 @@ internal class TransactionQuerier : ITransactionQuerier
     public async Task<LookupResult?> LookupCommittedTransaction(
         Gateway.TransactionLookupIdentifier lookup,
         Gateway.LedgerState ledgerState,
-        bool withMetadata,
+        bool withDetails,
         CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
@@ -147,8 +147,8 @@ internal class TransactionQuerier : ITransactionQuerier
             return null;
         }
 
-        return withMetadata
-            ? await GetTransactionWithMetadata(stateVersion, token)
+        return withDetails
+            ? await GetTransactionWithDetails(stateVersion, token)
             : new LookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
@@ -253,7 +253,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return transactions.Select(MapToGatewayAccountTransaction).ToList();
     }
 
-    private async Task<LookupResult> GetTransactionWithMetadata(long stateVersion, CancellationToken token)
+    private async Task<LookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
     {
         var transaction = await _dbContext.LedgerTransactions
             .Where(lt => lt.StateVersion == stateVersion)
@@ -270,7 +270,7 @@ internal class TransactionQuerier : ITransactionQuerier
                 .ToListAsync(token);
         }
 
-        return MapToGatewayAccountTransactionWithMetadata(transaction, referencedEntities);
+        return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities);
     }
 
     private Gateway.TransactionInfo MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
@@ -284,7 +284,7 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private LookupResult MapToGatewayAccountTransactionWithMetadata(LedgerTransaction ledgerTransaction, List<Entity> referencedEntities)
+    private LookupResult MapToGatewayAccountTransactionWithDetails(LedgerTransaction ledgerTransaction, List<Entity> referencedEntities)
     {
         return new LookupResult(MapToGatewayAccountTransaction(ledgerTransaction), new Gateway.TransactionDetails(
             rawHex: ledgerTransaction.RawTransaction!.Payload.ToHex(),

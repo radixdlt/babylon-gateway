@@ -84,7 +84,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     from_state_version = table.Column<long>(type: "bigint", nullable: false),
                     address = table.Column<byte[]>(type: "bytea", nullable: false),
                     global_address = table.Column<byte[]>(type: "bytea", nullable: true),
-                    parent_id = table.Column<long>(type: "bigint", nullable: true),
+                    ancestor_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
+                    parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     type = table.Column<string>(type: "text", nullable: false)
@@ -292,6 +293,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "global_address",
                 filter: "global_address IS NOT NULL")
                 .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_metadata_history_entity_id_from_state_version",
+                table: "entity_metadata_history",
+                columns: new[] { "entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_entity_resource_aggregate_history_entity_id_from_state_vers~",

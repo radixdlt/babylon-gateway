@@ -376,7 +376,12 @@ SELECT
             }
 
             var entityAddresses = referencedEntities.Keys.Select(x => x.ConvertFromHex()).ToList();
-            var entityAddressesParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
+            var childEntityAddresses = childToParentEntities.Values.Select(x => x.ConvertFromHex()).ToList();
+            var finalEntityAddresses = new List<byte[]>();
+            finalEntityAddresses.AddRange(entityAddresses);
+            finalEntityAddresses.AddRange(childEntityAddresses);
+            finalEntityAddresses = finalEntityAddresses.Distinct(ByteArrayEqualityComparer.Default).ToList();
+            var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = finalEntityAddresses };
 
             var sw = Stopwatch.StartNew();
             var knownDbEntities = await dbContext.Entities
@@ -384,7 +389,7 @@ SELECT
 SELECT *
 FROM entities
 WHERE id IN(
-    SELECT DISTINCT UNNEST(ARRAY[id, parent_id, owner_ancestor_id, global_ancestor_id]) AS id
+    SELECT DISTINCT UNNEST(id || ancestor_ids) AS id
     FROM entities
     WHERE address = ANY({entityAddressesParameter})
 )")
@@ -426,25 +431,42 @@ WHERE id IN(
 
             foreach (var (childAddress, parentAddress) in childToParentEntities)
             {
-                var globalAncestor = referencedEntities[parentAddress];
-                var ownerAncestor = referencedEntities[parentAddress];
+                var currentParent = referencedEntities[parentAddress];
+                long? parentId = null;
+                long? ownerId = null;
+                long? globalId = null;
 
-                while (globalAncestor.HasParent)
+                var allAncestors = new List<long>();
+
+                while (currentParent != null)
                 {
-                    globalAncestor = globalAncestor.Parent;
+                    allAncestors.Add(currentParent.DatabaseId);
+                    parentId ??= currentParent.DatabaseId;
+
+                    if (!ownerId.HasValue && currentParent.CanBeOwner)
+                    {
+                        ownerId = currentParent.DatabaseId;
+                    }
+
+                    if (!globalId.HasValue && !currentParent.HasParent)
+                    {
+                        globalId = currentParent.DatabaseId;
+                    }
+
+                    currentParent = currentParent.HasParent ? currentParent.Parent : null;
                 }
 
-                while (!ownerAncestor.IsOwner)
+                if (parentId == null || ownerId == null || globalId == null)
                 {
-                    ownerAncestor = ownerAncestor.Parent;
+                    throw new Exception("bla bla bla x22");
                 }
 
-                referencedEntities[childAddress].ResolveParentalIds(referencedEntities[parentAddress].DatabaseId, ownerAncestor.DatabaseId, globalAncestor.DatabaseId);
+                referencedEntities[childAddress].ResolveParentalIds(allAncestors.ToArray(), parentId.Value, ownerId.Value, globalId.Value);
             }
 
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, parent_id, owner_ancestor_id, global_ancestor_id, type) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, type) FROM STDIN (FORMAT BINARY)", token))
             {
                 // TODO ouh, we must somehow reuse information already held by EF
                 var typeMapping = new Dictionary<Type, string>
@@ -466,7 +488,8 @@ WHERE id IN(
                     await writer.WriteAsync(dbEntity.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(dbEntity.Address.AsByteArray(), NpgsqlDbType.Bytea, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAddress.AsByteArray(), NpgsqlDbType.Bytea, token);
-                    await writer.WriteNullableAsync(dbEntity.ParentId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity.AncestorIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity.ParentAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.OwnerAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(typeMapping[dbEntity.GetType()], NpgsqlDbType.Text, token);
