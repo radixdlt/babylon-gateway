@@ -106,7 +106,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
 
-    public bool CanBeOwner => Type is EntityType.Component or EntityType.ResourceManager;
+    public bool CanBeOwner => Type is EntityType.Component or EntityType.ResourceManager or EntityType.KeyValueStore;
 
     [MemberNotNullWhen(true, nameof(Parent))]
     public bool HasParent => _parent != null;
