@@ -376,12 +376,7 @@ SELECT
             }
 
             var entityAddresses = referencedEntities.Keys.Select(x => x.ConvertFromHex()).ToList();
-            var childEntityAddresses = childToParentEntities.Values.Select(x => x.ConvertFromHex()).ToList();
-            var finalEntityAddresses = new List<byte[]>();
-            finalEntityAddresses.AddRange(entityAddresses);
-            finalEntityAddresses.AddRange(childEntityAddresses);
-            finalEntityAddresses = finalEntityAddresses.Distinct(ByteArrayEqualityComparer.Default).ToList();
-            var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = finalEntityAddresses };
+            var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
 
             var sw = Stopwatch.StartNew();
             var knownDbEntities = await dbContext.Entities
