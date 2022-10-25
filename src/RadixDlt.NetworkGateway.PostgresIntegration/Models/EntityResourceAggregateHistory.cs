@@ -86,8 +86,6 @@ internal class EntityResourceAggregateHistory
     [Column("fungible_resource_ids")]
     public long[] FungibleResourceIds { get; set; }
 
-    // TODO add fungible balances so that we can use this table alone?
-
     [Column("non_fungible_resource_ids")]
     public long[] NonFungibleResourceIds { get; set; }
 }

@@ -239,6 +239,8 @@ internal abstract class CommonDbContext : DbContext
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
     {
-        // TODO - We should improve these indices to match the queries we actually need to make here
+        modelBuilder.Entity<PendingTransaction>()
+            .HasIndex(pt => pt.PayloadHash)
+            .HasMethod("hash");
     }
 }
