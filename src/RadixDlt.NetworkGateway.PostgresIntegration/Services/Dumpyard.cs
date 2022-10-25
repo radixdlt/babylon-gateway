@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -168,8 +169,6 @@ internal record AggregateChange
 
     public List<long> NonFungibleIds { get; } = new();
 
-    public List<long> RemovedNonFungibleIds { get; } = new();
-
     public bool Persistable { get; }
 
     public AggregateChange(long stateVersion)
@@ -178,7 +177,7 @@ internal record AggregateChange
         Persistable = true;
     }
 
-    public AggregateChange(long stateVersion, ICollection<long> fungibleIds, ICollection<long> nonFungibleIds)
+    public AggregateChange(long stateVersion, long[] fungibleIds, long[] nonFungibleIds)
     {
         StateVersion = stateVersion;
         FungibleIds = new List<long>(fungibleIds);
@@ -201,38 +200,52 @@ internal record AggregateChange
         }
     }
 
-    public void RemoveNonFungible(long id)
+    public void Apply(AggregateChange? previous)
     {
-        if (!RemovedNonFungibleIds.Contains(id))
+        if (previous == null)
         {
-            RemovedNonFungibleIds.Add(id);
+            return;
         }
+
+        var finalFungibleIds = new List<long>(previous.FungibleIds);
+        var finalNonFungibleIds = new List<long>(previous.NonFungibleIds);
+
+        foreach (var id in FungibleIds.Where(id => !finalFungibleIds.Contains(id)))
+        {
+            finalFungibleIds.Add(id);
+        }
+
+        foreach (var id in NonFungibleIds.Where(id => !finalNonFungibleIds.Contains(id)))
+        {
+            finalNonFungibleIds.Add(id);
+        }
+
+        // TODO add support for NonFungibleIds removal (separate collections + foreach + finalNonFungibleIds.Remove(id)
+
+        FungibleIds.Clear();
+        FungibleIds.AddRange(finalFungibleIds);
+        NonFungibleIds.Clear();
+        NonFungibleIds.AddRange(finalNonFungibleIds);
     }
 
-    public void Merge(AggregateChange other)
+    public bool ShouldBePersisted(AggregateChange? previous)
     {
-        foreach (var id in other.FungibleIds)
+        if (!Persistable)
         {
-            AppendFungible(id);
+            return false;
         }
 
-        foreach (var id in other.NonFungibleIds)
+        if (previous == null)
         {
-            AppendNonFungible(id);
+            return true;
         }
 
-        foreach (var id in other.RemovedNonFungibleIds)
+        if (FungibleIds.SequenceEqual(previous.FungibleIds) && NonFungibleIds.SequenceEqual(previous.NonFungibleIds))
         {
-            RemoveNonFungible(id);
+            return false;
         }
-    }
 
-    public void Resolve()
-    {
-        foreach (var id in RemovedNonFungibleIds)
-        {
-            NonFungibleIds.Remove(id);
-        }
+        return true;
     }
 }
 

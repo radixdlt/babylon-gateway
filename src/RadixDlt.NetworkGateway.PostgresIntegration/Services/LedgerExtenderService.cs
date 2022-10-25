@@ -722,20 +722,10 @@ WHERE id IN(
                     var current = aggregateChange[orderedStateVersions[i]];
                     var previous = i > 0 ? aggregateChange[orderedStateVersions[i - 1]] : null;
 
-                    if (!current.Persistable)
-                    {
-                        continue;
-                    }
+                    current.Apply(previous);
 
-                    if (previous != null)
+                    if (current.ShouldBePersisted(previous))
                     {
-                        current.Merge(previous);
-                    }
-
-                    if (previous == null || current.FungibleIds.SequenceEqual(previous.FungibleIds) == false)
-                    {
-                        current.Resolve();
-
                         var dbAggregate = new EntityResourceAggregateHistory
                         {
                             EntityId = entityId,
