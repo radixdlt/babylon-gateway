@@ -91,38 +91,58 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// TransactionPreviewRequestFlags
+    /// GlobalEntityReference
     /// </summary>
-    [DataContract(Name = "TransactionPreviewRequest_flags")]
-    public partial class TransactionPreviewRequestFlags : IEquatable<TransactionPreviewRequestFlags>, IValidatableObject
+    [DataContract(Name = "GlobalEntityReference")]
+    public partial class GlobalEntityReference : IEquatable<GlobalEntityReference>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalEntityReference" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionPreviewRequestFlags() { }
+        protected GlobalEntityReference() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
+        /// Initializes a new instance of the <see cref="GlobalEntityReference" /> class.
         /// </summary>
-        /// <param name="unlimitedLoan">unlimitedLoan (required).</param>
-        /// <param name="assumeAllSignatureProofs">assumeAllSignatureProofs (required).</param>
-        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool), bool assumeAllSignatureProofs = default(bool))
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="globalAddressHex">The hex-encoded bytes of the entity&#39;s global address (required).</param>
+        /// <param name="globalAddress">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        public GlobalEntityReference(EntityType entityType = default(EntityType), string globalAddressHex = default(string), string globalAddress = default(string))
         {
-            this.UnlimitedLoan = unlimitedLoan;
-            this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
+            this.EntityType = entityType;
+            // to ensure "globalAddressHex" is required (not null)
+            if (globalAddressHex == null)
+            {
+                throw new ArgumentNullException("globalAddressHex is a required property for GlobalEntityReference and cannot be null");
+            }
+            this.GlobalAddressHex = globalAddressHex;
+            // to ensure "globalAddress" is required (not null)
+            if (globalAddress == null)
+            {
+                throw new ArgumentNullException("globalAddress is a required property for GlobalEntityReference and cannot be null");
+            }
+            this.GlobalAddress = globalAddress;
         }
 
         /// <summary>
-        /// Gets or Sets UnlimitedLoan
+        /// The hex-encoded bytes of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "unlimited_loan", IsRequired = true, EmitDefaultValue = true)]
-        public bool UnlimitedLoan { get; set; }
+        /// <value>The hex-encoded bytes of the entity&#39;s global address</value>
+        [DataMember(Name = "global_address_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddressHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets AssumeAllSignatureProofs
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "assume_all_signature_proofs", IsRequired = true, EmitDefaultValue = true)]
-        public bool AssumeAllSignatureProofs { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "global_address", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -131,9 +151,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionPreviewRequestFlags {\n");
-            sb.Append("  UnlimitedLoan: ").Append(UnlimitedLoan).Append("\n");
-            sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
+            sb.Append("class GlobalEntityReference {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  GlobalAddressHex: ").Append(GlobalAddressHex).Append("\n");
+            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -154,15 +175,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionPreviewRequestFlags);
+            return this.Equals(input as GlobalEntityReference);
         }
 
         /// <summary>
-        /// Returns true if TransactionPreviewRequestFlags instances are equal
+        /// Returns true if GlobalEntityReference instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionPreviewRequestFlags to be compared</param>
+        /// <param name="input">Instance of GlobalEntityReference to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionPreviewRequestFlags input)
+        public bool Equals(GlobalEntityReference input)
         {
             if (input == null)
             {
@@ -170,12 +191,18 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.UnlimitedLoan == input.UnlimitedLoan ||
-                    this.UnlimitedLoan.Equals(input.UnlimitedLoan)
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.AssumeAllSignatureProofs == input.AssumeAllSignatureProofs ||
-                    this.AssumeAllSignatureProofs.Equals(input.AssumeAllSignatureProofs)
+                    this.GlobalAddressHex == input.GlobalAddressHex ||
+                    (this.GlobalAddressHex != null &&
+                    this.GlobalAddressHex.Equals(input.GlobalAddressHex))
+                ) && 
+                (
+                    this.GlobalAddress == input.GlobalAddress ||
+                    (this.GlobalAddress != null &&
+                    this.GlobalAddress.Equals(input.GlobalAddress))
                 );
         }
 
@@ -188,8 +215,15 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.UnlimitedLoan.GetHashCode();
-                hashCode = (hashCode * 59) + this.AssumeAllSignatureProofs.GetHashCode();
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                if (this.GlobalAddressHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalAddressHex.GetHashCode();
+                }
+                if (this.GlobalAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

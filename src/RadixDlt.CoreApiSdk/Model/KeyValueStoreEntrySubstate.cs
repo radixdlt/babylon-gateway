@@ -68,5 +68,5 @@ namespace RadixDlt.CoreApiSdk.Model;
 
 public partial class KeyValueStoreEntrySubstate : IOwner
 {
-    public IEnumerable<EntityId> OwnedEntities => DataStruct.OwnedEntities;
+    public IEnumerable<EntityReference> OwnedEntities => DataStruct.OwnedEntities;
 }

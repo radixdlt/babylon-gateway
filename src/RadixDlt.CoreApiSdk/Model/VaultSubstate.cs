@@ -66,27 +66,20 @@ using System.Collections.Generic;
 
 namespace RadixDlt.CoreApiSdk.Model;
 
-public partial class VaultSubstate : IResourcePointer
+public partial class VaultSubstate : IGlobalResourcePointer
 {
-    public IEnumerable<TypedResourceAddress> PointedResources
+    public IEnumerable<GlobalResourcePointer> Pointers
     {
         get
         {
             if (ResourceAmount.ActualInstance is FungibleResourceAmount fra)
             {
-                yield return new TypedResourceAddress(fra.ResourceType, fra.ResourceAddress);
+                yield return new GlobalResourcePointer(fra.ResourceType, fra.ResourceAddress);
             }
 
             if (ResourceAmount.ActualInstance is NonFungibleResourceAmount nfra)
             {
-                // TODO shouldn't we differentiate between "nf" and "nf value"?
-
-                yield return new TypedResourceAddress(nfra.ResourceType, nfra.ResourceAddress);
-
-                foreach (var id in nfra.NfIdsHex)
-                {
-                    yield return new TypedResourceAddress(ResourceType.NonFungible, id);
-                }
+                yield return new GlobalResourcePointer(nfra.ResourceType, nfra.ResourceAddress);
             }
         }
     }

@@ -105,10 +105,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ResourceChange" /> class.
         /// </summary>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="componentAddress">The Bech32m-encoded human readable version of the component address (required).</param>
-        /// <param name="vaultEntityId">vaultEntityId (required).</param>
+        /// <param name="componentEntity">componentEntity (required).</param>
+        /// <param name="vaultEntity">vaultEntity (required).</param>
         /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault  (required).</param>
-        public ResourceChange(string resourceAddress = default(string), string componentAddress = default(string), EntityId vaultEntityId = default(EntityId), string amountAttos = default(string))
+        public ResourceChange(string resourceAddress = default(string), EntityReference componentEntity = default(EntityReference), EntityReference vaultEntity = default(EntityReference), string amountAttos = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
@@ -116,18 +116,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for ResourceChange and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            // to ensure "componentAddress" is required (not null)
-            if (componentAddress == null)
+            // to ensure "componentEntity" is required (not null)
+            if (componentEntity == null)
             {
-                throw new ArgumentNullException("componentAddress is a required property for ResourceChange and cannot be null");
+                throw new ArgumentNullException("componentEntity is a required property for ResourceChange and cannot be null");
             }
-            this.ComponentAddress = componentAddress;
-            // to ensure "vaultEntityId" is required (not null)
-            if (vaultEntityId == null)
+            this.ComponentEntity = componentEntity;
+            // to ensure "vaultEntity" is required (not null)
+            if (vaultEntity == null)
             {
-                throw new ArgumentNullException("vaultEntityId is a required property for ResourceChange and cannot be null");
+                throw new ArgumentNullException("vaultEntity is a required property for ResourceChange and cannot be null");
             }
-            this.VaultEntityId = vaultEntityId;
+            this.VaultEntity = vaultEntity;
             // to ensure "amountAttos" is required (not null)
             if (amountAttos == null)
             {
@@ -144,17 +144,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the component address
+        /// Gets or Sets ComponentEntity
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the component address</value>
-        [DataMember(Name = "component_address", IsRequired = true, EmitDefaultValue = true)]
-        public string ComponentAddress { get; set; }
+        [DataMember(Name = "component_entity", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference ComponentEntity { get; set; }
 
         /// <summary>
-        /// Gets or Sets VaultEntityId
+        /// Gets or Sets VaultEntity
         /// </summary>
-        [DataMember(Name = "vault_entity_id", IsRequired = true, EmitDefaultValue = true)]
-        public EntityId VaultEntityId { get; set; }
+        [DataMember(Name = "vault_entity", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference VaultEntity { get; set; }
 
         /// <summary>
         /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault 
@@ -172,8 +171,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ResourceChange {\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  ComponentAddress: ").Append(ComponentAddress).Append("\n");
-            sb.Append("  VaultEntityId: ").Append(VaultEntityId).Append("\n");
+            sb.Append("  ComponentEntity: ").Append(ComponentEntity).Append("\n");
+            sb.Append("  VaultEntity: ").Append(VaultEntity).Append("\n");
             sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -216,14 +215,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.ComponentAddress == input.ComponentAddress ||
-                    (this.ComponentAddress != null &&
-                    this.ComponentAddress.Equals(input.ComponentAddress))
+                    this.ComponentEntity == input.ComponentEntity ||
+                    (this.ComponentEntity != null &&
+                    this.ComponentEntity.Equals(input.ComponentEntity))
                 ) && 
                 (
-                    this.VaultEntityId == input.VaultEntityId ||
-                    (this.VaultEntityId != null &&
-                    this.VaultEntityId.Equals(input.VaultEntityId))
+                    this.VaultEntity == input.VaultEntity ||
+                    (this.VaultEntity != null &&
+                    this.VaultEntity.Equals(input.VaultEntity))
                 ) && 
                 (
                     this.AmountAttos == input.AmountAttos ||
@@ -245,13 +244,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.ComponentAddress != null)
+                if (this.ComponentEntity != null)
                 {
-                    hashCode = (hashCode * 59) + this.ComponentAddress.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ComponentEntity.GetHashCode();
                 }
-                if (this.VaultEntityId != null)
+                if (this.VaultEntity != null)
                 {
-                    hashCode = (hashCode * 59) + this.VaultEntityId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.VaultEntity.GetHashCode();
                 }
                 if (this.AmountAttos != null)
                 {

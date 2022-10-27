@@ -141,7 +141,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     type = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     ids_count = table.Column<long>(type: "bigint", nullable: true),
-                    ids = table.Column<long[]>(type: "bigint[]", nullable: true)
+                    ids = table.Column<byte[][]>(type: "bytea[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -378,6 +378,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "IX_ledger_transactions_transaction_accumulator",
                 table: "ledger_transactions",
                 column: "transaction_accumulator")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pending_transactions_payload_hash",
+                table: "pending_transactions",
+                column: "payload_hash")
                 .Annotation("Npgsql:IndexMethod", "hash");
         }
 

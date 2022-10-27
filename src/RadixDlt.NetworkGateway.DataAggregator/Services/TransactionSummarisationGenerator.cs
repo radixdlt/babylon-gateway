@@ -78,28 +78,25 @@ public static class TransactionSummarisationGenerator
         long? newRoundInEpoch = null;
         DateTimeOffset? newRoundTimestamp = null;
 
-        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-        // foreach (var operationGroup in transaction.OperationGroups)
-        // {
-        //     foreach (var operation in operationGroup.Operations)
-        //     {
-        //         if (operation.IsCreateOf<EpochData>(out var epochData))
-        //         {
-        //             newEpoch = epochData.Epoch;
-        //         }
-        //
-        //         if (operation.IsCreateOf<RoundData>(out var newRoundData))
-        //         {
-        //             newRoundInEpoch = newRoundData.Round;
-        //
-        //             // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
-        //             if (newRoundData.Timestamp != 0)
-        //             {
-        //                 newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
-        //             }
-        //         }
-        //     }
-        // }
+        foreach (var upSubstate in transaction.Receipt.StateUpdates.UpSubstates)
+        {
+            if (upSubstate.SubstateData.ActualInstance is SystemSubstate systemSubstate)
+            {
+                newEpoch = systemSubstate.Epoch;
+            }
+
+            // TODO implement roundInEpoch the same way once CoreApi expose round/roundInEpoch
+            // if (operation.IsCreateOf<RoundData>(out var newRoundData))
+            // {
+            //     newRoundInEpoch = newRoundData.Round;
+            //
+            //     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
+            //     if (newRoundData.Timestamp != 0)
+            //     {
+            //         newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+            //     }
+            // }
+        }
 
         /* NB:
            The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally

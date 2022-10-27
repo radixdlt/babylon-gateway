@@ -195,6 +195,18 @@ namespace RadixDlt.CoreApiSdk.Model
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Substate" /> class
+        /// with the <see cref="GlobalSubstate" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of GlobalSubstate.</param>
+        public Substate(GlobalSubstate actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
 
         private Object _actualInstance;
 
@@ -214,6 +226,10 @@ namespace RadixDlt.CoreApiSdk.Model
                     this._actualInstance = value;
                 }
                 else if (value.GetType() == typeof(ComponentStateSubstate))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(GlobalSubstate))
                 {
                     this._actualInstance = value;
                 }
@@ -243,7 +259,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: ComponentInfoSubstate, ComponentStateSubstate, KeyValueStoreEntrySubstate, NonFungibleSubstate, PackageSubstate, ResourceManagerSubstate, SystemSubstate, VaultSubstate");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: ComponentInfoSubstate, ComponentStateSubstate, GlobalSubstate, KeyValueStoreEntrySubstate, NonFungibleSubstate, PackageSubstate, ResourceManagerSubstate, SystemSubstate, VaultSubstate");
                 }
             }
         }
@@ -329,6 +345,16 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
+        /// Get the actual instance of `GlobalSubstate`. If the actual instance is not `GlobalSubstate`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of GlobalSubstate</returns>
+        public GlobalSubstate GetGlobalSubstate()
+        {
+            return (GlobalSubstate)this.ActualInstance;
+        }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -382,6 +408,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     case "ComponentStateSubstate":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
+                    case "Global":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "GlobalSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
                     case "KeyValueStoreEntry":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<KeyValueStoreEntrySubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
@@ -419,7 +451,7 @@ namespace RadixDlt.CoreApiSdk.Model
                         newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: ComponentInfo ComponentInfoSubstate ComponentState ComponentStateSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate NonFungible NonFungibleSubstate Package PackageSubstate ResourceManager ResourceManagerSubstate System SystemSubstate Vault VaultSubstate", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: ComponentInfo ComponentInfoSubstate ComponentState ComponentStateSubstate Global GlobalSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate NonFungible NonFungibleSubstate Package PackageSubstate ResourceManager ResourceManagerSubstate System SystemSubstate Vault VaultSubstate", discriminatorValue));
                         break;
                 }
             }
@@ -469,6 +501,26 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 // deserialization failed, try the next one
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentStateSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(GlobalSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("GlobalSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into GlobalSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try

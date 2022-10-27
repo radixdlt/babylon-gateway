@@ -130,7 +130,19 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum KeyValueStore for value: KeyValueStore
         /// </summary>
         [EnumMember(Value = "KeyValueStore")]
-        KeyValueStore = 6
+        KeyValueStore = 6,
+
+        /// <summary>
+        /// Enum Global for value: Global
+        /// </summary>
+        [EnumMember(Value = "Global")]
+        Global = 7,
+
+        /// <summary>
+        /// Enum NonFungibleStore for value: NonFungibleStore
+        /// </summary>
+        [EnumMember(Value = "NonFungibleStore")]
+        NonFungibleStore = 8
 
     }
 

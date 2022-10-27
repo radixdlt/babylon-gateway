@@ -62,11 +62,14 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace RadixDlt.NetworkGateway.Abstractions;
 
+[DebuggerDisplay("{ToHex()}")]
 public sealed record RadixAddress
 {
     public sealed class EqualityComparer : IEqualityComparer<RadixAddress?>
@@ -106,4 +109,9 @@ public sealed record RadixAddress
     public static implicit operator byte[](RadixAddress ra) => ra._address;
 
     public static implicit operator RadixAddress(byte[] bytes) => new RadixAddress(bytes);
+
+    public string ToHex()
+    {
+        return _address.ToHex();
+    }
 }

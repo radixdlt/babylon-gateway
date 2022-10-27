@@ -91,65 +91,128 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines SubstateType
+    /// EntityReference
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SubstateType
+    [DataContract(Name = "EntityReference")]
+    public partial class EntityReference : IEquatable<EntityReference>, IValidatableObject
     {
-        /// <summary>
-        /// Enum System for value: System
-        /// </summary>
-        [EnumMember(Value = "System")]
-        System = 1,
 
         /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
+        /// Gets or Sets EntityType
         /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 2,
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityReference" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected EntityReference() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityReference" /> class.
+        /// </summary>
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="entityIdHex">The hex-encoded bytes of the entity id (required).</param>
+        public EntityReference(EntityType entityType = default(EntityType), string entityIdHex = default(string))
+        {
+            this.EntityType = entityType;
+            // to ensure "entityIdHex" is required (not null)
+            if (entityIdHex == null)
+            {
+                throw new ArgumentNullException("entityIdHex is a required property for EntityReference and cannot be null");
+            }
+            this.EntityIdHex = entityIdHex;
+        }
 
         /// <summary>
-        /// Enum ComponentInfo for value: ComponentInfo
+        /// The hex-encoded bytes of the entity id
         /// </summary>
-        [EnumMember(Value = "ComponentInfo")]
-        ComponentInfo = 3,
+        /// <value>The hex-encoded bytes of the entity id</value>
+        [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityIdHex { get; set; }
 
         /// <summary>
-        /// Enum ComponentState for value: ComponentState
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentState")]
-        ComponentState = 4,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class EntityReference {\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum Package for value: Package
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "Package")]
-        Package = 5,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum Vault for value: Vault
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "Vault")]
-        Vault = 6,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as EntityReference);
+        }
 
         /// <summary>
-        /// Enum NonFungible for value: NonFungible
+        /// Returns true if EntityReference instances are equal
         /// </summary>
-        [EnumMember(Value = "NonFungible")]
-        NonFungible = 7,
+        /// <param name="input">Instance of EntityReference to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(EntityReference input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
+                ) && 
+                (
+                    this.EntityIdHex == input.EntityIdHex ||
+                    (this.EntityIdHex != null &&
+                    this.EntityIdHex.Equals(input.EntityIdHex))
+                );
+        }
 
         /// <summary>
-        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
+        /// Gets the hash code
         /// </summary>
-        [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 8,
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                if (this.EntityIdHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
         /// <summary>
-        /// Enum Global for value: Global
+        /// To validate all properties of the instance
         /// </summary>
-        [EnumMember(Value = "Global")]
-        Global = 9
-
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }

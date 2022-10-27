@@ -105,9 +105,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="V0StateComponentDescendentId" /> class.
         /// </summary>
         /// <param name="parent">parent (required).</param>
-        /// <param name="entityId">entityId (required).</param>
+        /// <param name="entity">entity (required).</param>
         /// <param name="depth">Depth under component (required).</param>
-        public V0StateComponentDescendentId(SubstateId parent = default(SubstateId), EntityId entityId = default(EntityId), int depth = default(int))
+        public V0StateComponentDescendentId(SubstateId parent = default(SubstateId), EntityReference entity = default(EntityReference), int depth = default(int))
         {
             // to ensure "parent" is required (not null)
             if (parent == null)
@@ -115,12 +115,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("parent is a required property for V0StateComponentDescendentId and cannot be null");
             }
             this.Parent = parent;
-            // to ensure "entityId" is required (not null)
-            if (entityId == null)
+            // to ensure "entity" is required (not null)
+            if (entity == null)
             {
-                throw new ArgumentNullException("entityId is a required property for V0StateComponentDescendentId and cannot be null");
+                throw new ArgumentNullException("entity is a required property for V0StateComponentDescendentId and cannot be null");
             }
-            this.EntityId = entityId;
+            this.Entity = entity;
             this.Depth = depth;
         }
 
@@ -131,10 +131,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateId Parent { get; set; }
 
         /// <summary>
-        /// Gets or Sets EntityId
+        /// Gets or Sets Entity
         /// </summary>
-        [DataMember(Name = "entity_id", IsRequired = true, EmitDefaultValue = true)]
-        public EntityId EntityId { get; set; }
+        [DataMember(Name = "entity", IsRequired = true, EmitDefaultValue = true)]
+        public EntityReference Entity { get; set; }
 
         /// <summary>
         /// Depth under component
@@ -152,7 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class V0StateComponentDescendentId {\n");
             sb.Append("  Parent: ").Append(Parent).Append("\n");
-            sb.Append("  EntityId: ").Append(EntityId).Append("\n");
+            sb.Append("  Entity: ").Append(Entity).Append("\n");
             sb.Append("  Depth: ").Append(Depth).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -195,9 +195,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Parent.Equals(input.Parent))
                 ) && 
                 (
-                    this.EntityId == input.EntityId ||
-                    (this.EntityId != null &&
-                    this.EntityId.Equals(input.EntityId))
+                    this.Entity == input.Entity ||
+                    (this.Entity != null &&
+                    this.Entity.Equals(input.Entity))
                 ) && 
                 (
                     this.Depth == input.Depth ||
@@ -218,9 +218,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Parent.GetHashCode();
                 }
-                if (this.EntityId != null)
+                if (this.Entity != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityId.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Entity.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Depth.GetHashCode();
                 return hashCode;

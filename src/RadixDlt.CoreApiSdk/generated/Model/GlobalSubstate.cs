@@ -91,10 +91,10 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EntityId
+    /// GlobalSubstate
     /// </summary>
-    [DataContract(Name = "EntityId")]
-    public partial class EntityId : IEquatable<EntityId>, IValidatableObject
+    [DataContract(Name = "GlobalSubstate")]
+    public partial class GlobalSubstate : IEquatable<GlobalSubstate>, IValidatableObject
     {
 
         /// <summary>
@@ -102,33 +102,40 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
         public EntityType EntityType { get; set; }
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityId" /> class.
+        /// Gets or Sets SubstateType
+        /// </summary>
+        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
+        public SubstateType SubstateType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalSubstate" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityId() { }
+        protected GlobalSubstate() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityId" /> class.
+        /// Initializes a new instance of the <see cref="GlobalSubstate" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityAddressHex">The hex-encoded bytes of the entity address (required).</param>
-        public EntityId(EntityType entityType = default(EntityType), string entityAddressHex = default(string))
+        /// <param name="substateType">substateType (required).</param>
+        /// <param name="targetEntity">targetEntity (required).</param>
+        public GlobalSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), GlobalEntityAssignment targetEntity = default(GlobalEntityAssignment))
         {
             this.EntityType = entityType;
-            // to ensure "entityAddressHex" is required (not null)
-            if (entityAddressHex == null)
+            this.SubstateType = substateType;
+            // to ensure "targetEntity" is required (not null)
+            if (targetEntity == null)
             {
-                throw new ArgumentNullException("entityAddressHex is a required property for EntityId and cannot be null");
+                throw new ArgumentNullException("targetEntity is a required property for GlobalSubstate and cannot be null");
             }
-            this.EntityAddressHex = entityAddressHex;
+            this.TargetEntity = targetEntity;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity address
+        /// Gets or Sets TargetEntity
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity address</value>
-        [DataMember(Name = "entity_address_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddressHex { get; set; }
+        [DataMember(Name = "target_entity", IsRequired = true, EmitDefaultValue = true)]
+        public GlobalEntityAssignment TargetEntity { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +144,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityId {\n");
+            sb.Append("class GlobalSubstate {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityAddressHex: ").Append(EntityAddressHex).Append("\n");
+            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
+            sb.Append("  TargetEntity: ").Append(TargetEntity).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +168,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityId);
+            return this.Equals(input as GlobalSubstate);
         }
 
         /// <summary>
-        /// Returns true if EntityId instances are equal
+        /// Returns true if GlobalSubstate instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityId to be compared</param>
+        /// <param name="input">Instance of GlobalSubstate to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityId input)
+        public bool Equals(GlobalSubstate input)
         {
             if (input == null)
             {
@@ -180,9 +188,13 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityAddressHex == input.EntityAddressHex ||
-                    (this.EntityAddressHex != null &&
-                    this.EntityAddressHex.Equals(input.EntityAddressHex))
+                    this.SubstateType == input.SubstateType ||
+                    this.SubstateType.Equals(input.SubstateType)
+                ) && 
+                (
+                    this.TargetEntity == input.TargetEntity ||
+                    (this.TargetEntity != null &&
+                    this.TargetEntity.Equals(input.TargetEntity))
                 );
         }
 
@@ -196,9 +208,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityAddressHex != null)
+                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
+                if (this.TargetEntity != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddressHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TargetEntity.GetHashCode();
                 }
                 return hashCode;
             }
