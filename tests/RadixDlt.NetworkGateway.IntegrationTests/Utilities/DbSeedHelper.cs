@@ -66,6 +66,7 @@ using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -126,6 +127,7 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                     RoundInEpoch = 0,
                     IsStartOfEpoch = true,
                     IsStartOfRound = true,
+                    ReferencedEntities = Array.Empty<long>(),
                     RoundTimestamp = Clock.UtcNow,
                     CreatedTimestamp = Clock.UtcNow,
                     NormalizedRoundTimestamp = Clock.UtcNow,
@@ -158,8 +160,20 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.Utilities
                 {
                     Id = 1,
                     NetworkName = NetworkName,
-                    NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition() { AccountComponentHrp = "ddx", ResourceHrp = "_dr", ValidatorHrp = "dv", NodeHrp = "dn" },
-                    NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses() { XrdAddress = "xrd_dr1qyrs8qwl" },
+                    NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition
+                    {
+                        PackageHrp = "dp",
+                        NormalComponentHrp = "dcx",
+                        AccountComponentHrp = "dax",
+                        SystemComponentHrp = "dsx",
+                        ResourceHrp = "dr",
+                        ValidatorHrp = "dv",
+                        NodeHrp = "dn",
+                    },
+                    NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
+                    {
+                        XrdAddress = "xrd_dr1qyrs8qwl",
+                    },
                 },
             }.ToArray();
         }
