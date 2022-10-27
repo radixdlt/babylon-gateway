@@ -91,10 +91,10 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// GlobalSubstate
+    /// GlobalEntityReference
     /// </summary>
-    [DataContract(Name = "GlobalSubstate")]
-    public partial class GlobalSubstate : IEquatable<GlobalSubstate>, IValidatableObject
+    [DataContract(Name = "GlobalEntityReference")]
+    public partial class GlobalEntityReference : IEquatable<GlobalEntityReference>, IValidatableObject
     {
 
         /// <summary>
@@ -102,40 +102,47 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
         public EntityType EntityType { get; set; }
-
         /// <summary>
-        /// Gets or Sets SubstateType
-        /// </summary>
-        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateType SubstateType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="GlobalEntityReference" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GlobalSubstate() { }
+        protected GlobalEntityReference() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalSubstate" /> class.
+        /// Initializes a new instance of the <see cref="GlobalEntityReference" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="substateType">substateType (required).</param>
-        /// <param name="targetEntity">targetEntity (required).</param>
-        public GlobalSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), GlobalEntityAssignment targetEntity = default(GlobalEntityAssignment))
+        /// <param name="globalAddressHex">The hex-encoded bytes of the entity&#39;s global address (required).</param>
+        /// <param name="globalAddress">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        public GlobalEntityReference(EntityType entityType = default(EntityType), string globalAddressHex = default(string), string globalAddress = default(string))
         {
             this.EntityType = entityType;
-            this.SubstateType = substateType;
-            // to ensure "targetEntity" is required (not null)
-            if (targetEntity == null)
+            // to ensure "globalAddressHex" is required (not null)
+            if (globalAddressHex == null)
             {
-                throw new ArgumentNullException("targetEntity is a required property for GlobalSubstate and cannot be null");
+                throw new ArgumentNullException("globalAddressHex is a required property for GlobalEntityReference and cannot be null");
             }
-            this.TargetEntity = targetEntity;
+            this.GlobalAddressHex = globalAddressHex;
+            // to ensure "globalAddress" is required (not null)
+            if (globalAddress == null)
+            {
+                throw new ArgumentNullException("globalAddress is a required property for GlobalEntityReference and cannot be null");
+            }
+            this.GlobalAddress = globalAddress;
         }
 
         /// <summary>
-        /// Gets or Sets TargetEntity
+        /// The hex-encoded bytes of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "target_entity", IsRequired = true, EmitDefaultValue = true)]
-        public GlobalEntityAssignment TargetEntity { get; set; }
+        /// <value>The hex-encoded bytes of the entity&#39;s global address</value>
+        [DataMember(Name = "global_address_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddressHex { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "global_address", IsRequired = true, EmitDefaultValue = true)]
+        public string GlobalAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,10 +151,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GlobalSubstate {\n");
+            sb.Append("class GlobalEntityReference {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  TargetEntity: ").Append(TargetEntity).Append("\n");
+            sb.Append("  GlobalAddressHex: ").Append(GlobalAddressHex).Append("\n");
+            sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -168,15 +175,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GlobalSubstate);
+            return this.Equals(input as GlobalEntityReference);
         }
 
         /// <summary>
-        /// Returns true if GlobalSubstate instances are equal
+        /// Returns true if GlobalEntityReference instances are equal
         /// </summary>
-        /// <param name="input">Instance of GlobalSubstate to be compared</param>
+        /// <param name="input">Instance of GlobalEntityReference to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GlobalSubstate input)
+        public bool Equals(GlobalEntityReference input)
         {
             if (input == null)
             {
@@ -188,13 +195,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.SubstateType == input.SubstateType ||
-                    this.SubstateType.Equals(input.SubstateType)
+                    this.GlobalAddressHex == input.GlobalAddressHex ||
+                    (this.GlobalAddressHex != null &&
+                    this.GlobalAddressHex.Equals(input.GlobalAddressHex))
                 ) && 
                 (
-                    this.TargetEntity == input.TargetEntity ||
-                    (this.TargetEntity != null &&
-                    this.TargetEntity.Equals(input.TargetEntity))
+                    this.GlobalAddress == input.GlobalAddress ||
+                    (this.GlobalAddress != null &&
+                    this.GlobalAddress.Equals(input.GlobalAddress))
                 );
         }
 
@@ -208,10 +216,13 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                if (this.TargetEntity != null)
+                if (this.GlobalAddressHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TargetEntity.GetHashCode();
+                    hashCode = (hashCode * 59) + this.GlobalAddressHex.GetHashCode();
+                }
+                if (this.GlobalAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.GlobalAddress.GetHashCode();
                 }
                 return hashCode;
             }

@@ -108,7 +108,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="upSubstates">upSubstates (required).</param>
         /// <param name="downSubstates">downSubstates (required).</param>
         /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<SubstateId> downVirtualSubstates = default(List<SubstateId>), List<UpSubstate> upSubstates = default(List<UpSubstate>), List<DownSubstate> downSubstates = default(List<DownSubstate>), List<GlobalEntityId> newGlobalEntities = default(List<GlobalEntityId>))
+        public StateUpdates(List<SubstateId> downVirtualSubstates = default(List<SubstateId>), List<UpSubstate> upSubstates = default(List<UpSubstate>), List<DownSubstate> downSubstates = default(List<DownSubstate>), List<GlobalEntityAssignment> newGlobalEntities = default(List<GlobalEntityAssignment>))
         {
             // to ensure "downVirtualSubstates" is required (not null)
             if (downVirtualSubstates == null)
@@ -158,7 +158,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets NewGlobalEntities
         /// </summary>
         [DataMember(Name = "new_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<GlobalEntityId> NewGlobalEntities { get; set; }
+        public List<GlobalEntityAssignment> NewGlobalEntities { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

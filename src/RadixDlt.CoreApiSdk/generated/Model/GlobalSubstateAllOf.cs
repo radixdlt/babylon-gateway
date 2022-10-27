@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="GlobalSubstateAllOf" /> class.
         /// </summary>
         /// <param name="targetEntity">targetEntity (required).</param>
-        public GlobalSubstateAllOf(GlobalEntityId targetEntity = default(GlobalEntityId))
+        public GlobalSubstateAllOf(GlobalEntityAssignment targetEntity = default(GlobalEntityAssignment))
         {
             // to ensure "targetEntity" is required (not null)
             if (targetEntity == null)
@@ -119,7 +119,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Gets or Sets TargetEntity
         /// </summary>
         [DataMember(Name = "target_entity", IsRequired = true, EmitDefaultValue = true)]
-        public GlobalEntityId TargetEntity { get; set; }
+        public GlobalEntityAssignment TargetEntity { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

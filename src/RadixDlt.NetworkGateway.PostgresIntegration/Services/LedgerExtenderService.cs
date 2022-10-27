@@ -316,7 +316,7 @@ SELECT
                     if (data is GlobalSubstate global)
                     {
                         var target = global.TargetEntity;
-                        var te = referencedEntities.GetOrAdd(target.EntityAddressHex, _ => new ReferencedEntity(target.EntityAddressHex, target.EntityType, stateVersion));
+                        var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
                         te.Globalize(target.GlobalAddressHex, target.GlobalAddress);
 
@@ -326,16 +326,16 @@ SELECT
                         continue;
                     }
 
-                    var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
+                    var re = referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
                     var us = new UppedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
                     if (data is IOwner owner)
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
-                            referencedEntities.GetOrAdd(oe.EntityAddressHex, _ => new ReferencedEntity(oe.EntityAddressHex, oe.EntityType, stateVersion)).IsChildOf(re);
+                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsChildOf(re);
 
-                            childToParentEntities.Add(oe.EntityAddressHex, sid.EntityAddressHex);
+                            childToParentEntities.Add(oe.EntityIdHex, sid.EntityIdHex);
                         }
                     }
 
@@ -357,14 +357,14 @@ SELECT
                 {
                     var sid = downSubstate.SubstateId;
 
-                    referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
+                    referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
                 }
 
                 foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
                 {
                     // TODO not sure how to handle those; not sure what they even are
 
-                    referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddressHex, _ => new ReferencedEntity(downVirtualSubstate.EntityAddressHex, downVirtualSubstate.EntityType, stateVersion));
+                    referencedEntities.GetOrAdd(downVirtualSubstate.EntityIdHex, _ => new ReferencedEntity(downVirtualSubstate.EntityIdHex, downVirtualSubstate.EntityType, stateVersion));
                 }
             }
         }

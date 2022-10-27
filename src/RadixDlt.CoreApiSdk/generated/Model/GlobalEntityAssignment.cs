@@ -91,70 +91,70 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// GlobalEntityId
+    /// GlobalEntityAssignment
     /// </summary>
-    [DataContract(Name = "GlobalEntityId")]
-    public partial class GlobalEntityId : IEquatable<GlobalEntityId>, IValidatableObject
+    [DataContract(Name = "GlobalEntityAssignment")]
+    public partial class GlobalEntityAssignment : IEquatable<GlobalEntityAssignment>, IValidatableObject
     {
 
         /// <summary>
-        /// Gets or Sets EntityType
+        /// Gets or Sets TargetEntityType
         /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
+        [DataMember(Name = "target_entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType TargetEntityType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalEntityId" /> class.
+        /// Initializes a new instance of the <see cref="GlobalEntityAssignment" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GlobalEntityId() { }
+        protected GlobalEntityAssignment() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalEntityId" /> class.
+        /// Initializes a new instance of the <see cref="GlobalEntityAssignment" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityAddressHex">The hex-encoded bytes of the entity address (required).</param>
-        /// <param name="globalAddressHex">The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future. (required).</param>
-        /// <param name="globalAddress">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        public GlobalEntityId(EntityType entityType = default(EntityType), string entityAddressHex = default(string), string globalAddressHex = default(string), string globalAddress = default(string))
+        /// <param name="targetEntityType">targetEntityType (required).</param>
+        /// <param name="targetEntityIdHex">The hex-encoded bytes of the target entity id (required).</param>
+        /// <param name="globalAddressHex">The hex-encoded bytes of the assigned global address. (required).</param>
+        /// <param name="globalAddress">The Bech32m-encoded human readable version of the assigned global address (required).</param>
+        public GlobalEntityAssignment(EntityType targetEntityType = default(EntityType), string targetEntityIdHex = default(string), string globalAddressHex = default(string), string globalAddress = default(string))
         {
-            this.EntityType = entityType;
-            // to ensure "entityAddressHex" is required (not null)
-            if (entityAddressHex == null)
+            this.TargetEntityType = targetEntityType;
+            // to ensure "targetEntityIdHex" is required (not null)
+            if (targetEntityIdHex == null)
             {
-                throw new ArgumentNullException("entityAddressHex is a required property for GlobalEntityId and cannot be null");
+                throw new ArgumentNullException("targetEntityIdHex is a required property for GlobalEntityAssignment and cannot be null");
             }
-            this.EntityAddressHex = entityAddressHex;
+            this.TargetEntityIdHex = targetEntityIdHex;
             // to ensure "globalAddressHex" is required (not null)
             if (globalAddressHex == null)
             {
-                throw new ArgumentNullException("globalAddressHex is a required property for GlobalEntityId and cannot be null");
+                throw new ArgumentNullException("globalAddressHex is a required property for GlobalEntityAssignment and cannot be null");
             }
             this.GlobalAddressHex = globalAddressHex;
             // to ensure "globalAddress" is required (not null)
             if (globalAddress == null)
             {
-                throw new ArgumentNullException("globalAddress is a required property for GlobalEntityId and cannot be null");
+                throw new ArgumentNullException("globalAddress is a required property for GlobalEntityAssignment and cannot be null");
             }
             this.GlobalAddress = globalAddress;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity address
+        /// The hex-encoded bytes of the target entity id
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity address</value>
-        [DataMember(Name = "entity_address_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddressHex { get; set; }
+        /// <value>The hex-encoded bytes of the target entity id</value>
+        [DataMember(Name = "target_entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string TargetEntityIdHex { get; set; }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future.
+        /// The hex-encoded bytes of the assigned global address.
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity&#39;s global address. This is currently the same as entity_address, but may change in future.</value>
+        /// <value>The hex-encoded bytes of the assigned global address.</value>
         [DataMember(Name = "global_address_hex", IsRequired = true, EmitDefaultValue = true)]
         public string GlobalAddressHex { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the assigned global address
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the assigned global address</value>
         [DataMember(Name = "global_address", IsRequired = true, EmitDefaultValue = true)]
         public string GlobalAddress { get; set; }
 
@@ -165,9 +165,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GlobalEntityId {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityAddressHex: ").Append(EntityAddressHex).Append("\n");
+            sb.Append("class GlobalEntityAssignment {\n");
+            sb.Append("  TargetEntityType: ").Append(TargetEntityType).Append("\n");
+            sb.Append("  TargetEntityIdHex: ").Append(TargetEntityIdHex).Append("\n");
             sb.Append("  GlobalAddressHex: ").Append(GlobalAddressHex).Append("\n");
             sb.Append("  GlobalAddress: ").Append(GlobalAddress).Append("\n");
             sb.Append("}\n");
@@ -190,15 +190,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GlobalEntityId);
+            return this.Equals(input as GlobalEntityAssignment);
         }
 
         /// <summary>
-        /// Returns true if GlobalEntityId instances are equal
+        /// Returns true if GlobalEntityAssignment instances are equal
         /// </summary>
-        /// <param name="input">Instance of GlobalEntityId to be compared</param>
+        /// <param name="input">Instance of GlobalEntityAssignment to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GlobalEntityId input)
+        public bool Equals(GlobalEntityAssignment input)
         {
             if (input == null)
             {
@@ -206,13 +206,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
+                    this.TargetEntityType == input.TargetEntityType ||
+                    this.TargetEntityType.Equals(input.TargetEntityType)
                 ) && 
                 (
-                    this.EntityAddressHex == input.EntityAddressHex ||
-                    (this.EntityAddressHex != null &&
-                    this.EntityAddressHex.Equals(input.EntityAddressHex))
+                    this.TargetEntityIdHex == input.TargetEntityIdHex ||
+                    (this.TargetEntityIdHex != null &&
+                    this.TargetEntityIdHex.Equals(input.TargetEntityIdHex))
                 ) && 
                 (
                     this.GlobalAddressHex == input.GlobalAddressHex ||
@@ -235,10 +235,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityAddressHex != null)
+                hashCode = (hashCode * 59) + this.TargetEntityType.GetHashCode();
+                if (this.TargetEntityIdHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddressHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TargetEntityIdHex.GetHashCode();
                 }
                 if (this.GlobalAddressHex != null)
                 {

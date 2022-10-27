@@ -91,10 +91,10 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// EntityId
+    /// EntityReference
     /// </summary>
-    [DataContract(Name = "EntityId")]
-    public partial class EntityId : IEquatable<EntityId>, IValidatableObject
+    [DataContract(Name = "EntityReference")]
+    public partial class EntityReference : IEquatable<EntityReference>, IValidatableObject
     {
 
         /// <summary>
@@ -103,32 +103,32 @@ namespace RadixDlt.CoreApiSdk.Model
         [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
         public EntityType EntityType { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityId" /> class.
+        /// Initializes a new instance of the <see cref="EntityReference" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityId() { }
+        protected EntityReference() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityId" /> class.
+        /// Initializes a new instance of the <see cref="EntityReference" /> class.
         /// </summary>
         /// <param name="entityType">entityType (required).</param>
-        /// <param name="entityAddressHex">The hex-encoded bytes of the entity address (required).</param>
-        public EntityId(EntityType entityType = default(EntityType), string entityAddressHex = default(string))
+        /// <param name="entityIdHex">The hex-encoded bytes of the entity id (required).</param>
+        public EntityReference(EntityType entityType = default(EntityType), string entityIdHex = default(string))
         {
             this.EntityType = entityType;
-            // to ensure "entityAddressHex" is required (not null)
-            if (entityAddressHex == null)
+            // to ensure "entityIdHex" is required (not null)
+            if (entityIdHex == null)
             {
-                throw new ArgumentNullException("entityAddressHex is a required property for EntityId and cannot be null");
+                throw new ArgumentNullException("entityIdHex is a required property for EntityReference and cannot be null");
             }
-            this.EntityAddressHex = entityAddressHex;
+            this.EntityIdHex = entityIdHex;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of the entity address
+        /// The hex-encoded bytes of the entity id
         /// </summary>
-        /// <value>The hex-encoded bytes of the entity address</value>
-        [DataMember(Name = "entity_address_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string EntityAddressHex { get; set; }
+        /// <value>The hex-encoded bytes of the entity id</value>
+        [DataMember(Name = "entity_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string EntityIdHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -137,9 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityId {\n");
+            sb.Append("class EntityReference {\n");
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  EntityAddressHex: ").Append(EntityAddressHex).Append("\n");
+            sb.Append("  EntityIdHex: ").Append(EntityIdHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -160,15 +160,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityId);
+            return this.Equals(input as EntityReference);
         }
 
         /// <summary>
-        /// Returns true if EntityId instances are equal
+        /// Returns true if EntityReference instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityId to be compared</param>
+        /// <param name="input">Instance of EntityReference to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityId input)
+        public bool Equals(EntityReference input)
         {
             if (input == null)
             {
@@ -180,9 +180,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.EntityAddressHex == input.EntityAddressHex ||
-                    (this.EntityAddressHex != null &&
-                    this.EntityAddressHex.Equals(input.EntityAddressHex))
+                    this.EntityIdHex == input.EntityIdHex ||
+                    (this.EntityIdHex != null &&
+                    this.EntityIdHex.Equals(input.EntityIdHex))
                 );
         }
 
@@ -196,9 +196,9 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                if (this.EntityAddressHex != null)
+                if (this.EntityIdHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.EntityAddressHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EntityIdHex.GetHashCode();
                 }
                 return hashCode;
             }

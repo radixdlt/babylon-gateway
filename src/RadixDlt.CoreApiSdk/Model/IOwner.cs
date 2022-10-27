@@ -71,7 +71,7 @@ namespace RadixDlt.CoreApiSdk.Model;
 // b) has owned_entities
 public interface IOwner
 {
-    public IEnumerable<EntityId> OwnedEntities { get; }
+    public IEnumerable<EntityReference> OwnedEntities { get; }
 }
 
 public interface IGlobalResourcePointer
