@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221024115050_InitialCreate")]
+    [Migration("20221026123332_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -552,6 +552,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PayloadHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
+
                     b.ToTable("pending_transactions");
                 });
 
@@ -603,9 +607,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
 
-                    b.Property<long[]>("Ids")
+                    b.Property<byte[][]>("Ids")
                         .IsRequired()
-                        .HasColumnType("bigint[]")
+                        .HasColumnType("bytea[]")
                         .HasColumnName("ids");
 
                     b.Property<long>("IdsCount")
@@ -615,6 +619,33 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entity_resource_history");
 
                     b.HasDiscriminator().HasValue("non_fungible");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("global");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("key_value_store");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleStoreEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("non_fungible_store");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NormalComponentEntity", b =>
@@ -660,15 +691,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("system");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValueStoreEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
-
-                    b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue("value_store");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>

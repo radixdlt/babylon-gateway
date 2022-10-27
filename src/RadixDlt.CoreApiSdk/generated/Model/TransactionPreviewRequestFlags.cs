@@ -105,9 +105,11 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionPreviewRequestFlags" /> class.
         /// </summary>
         /// <param name="unlimitedLoan">unlimitedLoan (required).</param>
-        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool))
+        /// <param name="assumeAllSignatureProofs">assumeAllSignatureProofs (required).</param>
+        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool), bool assumeAllSignatureProofs = default(bool))
         {
             this.UnlimitedLoan = unlimitedLoan;
+            this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
         }
 
         /// <summary>
@@ -115,6 +117,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         [DataMember(Name = "unlimited_loan", IsRequired = true, EmitDefaultValue = true)]
         public bool UnlimitedLoan { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AssumeAllSignatureProofs
+        /// </summary>
+        [DataMember(Name = "assume_all_signature_proofs", IsRequired = true, EmitDefaultValue = true)]
+        public bool AssumeAllSignatureProofs { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,6 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionPreviewRequestFlags {\n");
             sb.Append("  UnlimitedLoan: ").Append(UnlimitedLoan).Append("\n");
+            sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,6 +172,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.UnlimitedLoan == input.UnlimitedLoan ||
                     this.UnlimitedLoan.Equals(input.UnlimitedLoan)
+                ) && 
+                (
+                    this.AssumeAllSignatureProofs == input.AssumeAllSignatureProofs ||
+                    this.AssumeAllSignatureProofs.Equals(input.AssumeAllSignatureProofs)
                 );
         }
 
@@ -176,6 +189,7 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.UnlimitedLoan.GetHashCode();
+                hashCode = (hashCode * 59) + this.AssumeAllSignatureProofs.GetHashCode();
                 return hashCode;
             }
         }

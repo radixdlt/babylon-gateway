@@ -272,6 +272,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
         var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
         var referencedEntities = new ReferencedEntityDictionary();
+        var knownGlobalAddressesToLoad = new HashSet<string>();
         var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
         var fungibleResourceChanges = new List<FungibleResourceChange>();
@@ -310,10 +311,25 @@ SELECT
                 foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
                     var sid = upSubstate.SubstateId;
+                    var data = upSubstate.SubstateData.ActualInstance;
+
+                    if (data is GlobalSubstate global)
+                    {
+                        var target = global.TargetEntity;
+                        var te = referencedEntities.GetOrAdd(target.EntityAddressHex, _ => new ReferencedEntity(target.EntityAddressHex, target.EntityType, stateVersion));
+
+                        te.Globalize(target.GlobalAddressHex, target.GlobalAddress);
+
+                        // we do not want to store GlobalEntities as they bring no value from NG perspective
+                        // GlobalAddress is essentially a property of other entities
+
+                        continue;
+                    }
+
                     var re = referencedEntities.GetOrAdd(sid.EntityAddressHex, _ => new ReferencedEntity(sid.EntityAddressHex, sid.EntityType, stateVersion));
                     var us = new UppedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
-                    if (us.Data.ActualInstance is IOwner owner)
+                    if (data is IOwner owner)
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
@@ -323,14 +339,14 @@ SELECT
                         }
                     }
 
-                    if (us.Data.ActualInstance is IResourcePointer resourcePointer)
+                    if (data is IGlobalResourcePointer globalResourcePointer)
                     {
-                        foreach (var typedResource in resourcePointer.PointedResources)
+                        foreach (var pointer in globalResourcePointer.Pointers)
                         {
                             // TODO ugh...
-                            var resourceAddress = RadixBech32.Decode(typedResource.Address).Data.ToHex();
+                            var globalAddress = RadixBech32.Decode(pointer.GlobalAddress).Data.ToHex();
 
-                            referencedEntities.GetOrAdd(resourceAddress, _ => new ReferencedEntity(resourceAddress, EntityType.ResourceManager, stateVersion));
+                            knownGlobalAddressesToLoad.Add(globalAddress);
                         }
                     }
 
@@ -349,11 +365,6 @@ SELECT
                     // TODO not sure how to handle those; not sure what they even are
 
                     referencedEntities.GetOrAdd(downVirtualSubstate.EntityAddressHex, _ => new ReferencedEntity(downVirtualSubstate.EntityAddressHex, downVirtualSubstate.EntityType, stateVersion));
-                }
-
-                foreach (var newGlobalEntity in stateUpdates.NewGlobalEntities)
-                {
-                    referencedEntities[newGlobalEntity.EntityAddressHex].Globalize(newGlobalEntity.GlobalAddressHex, newGlobalEntity.GlobalAddress);
                 }
             }
         }
@@ -375,8 +386,10 @@ SELECT
                 return new NormalComponentEntity();
             }
 
-            var entityAddresses = referencedEntities.Keys.Select(x => x.ConvertFromHex()).ToList();
+            var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
+            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => x.ConvertFromHex()).ToList();
             var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
+            var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
 
             var sw = Stopwatch.StartNew();
             var knownDbEntities = await dbContext.Entities
@@ -386,16 +399,21 @@ FROM entities
 WHERE id IN(
     SELECT DISTINCT UNNEST(id || ancestor_ids) AS id
     FROM entities
-    WHERE address = ANY({entityAddressesParameter})
+    WHERE address = ANY({entityAddressesParameter}) OR global_address = ANY({globalEntityAddressesParameter})
 )")
                 .AsNoTracking()
                 .ToDictionaryAsync(e => ((byte[])e.Address).ToHex(), token);
 
             dbReadDuration += sw.Elapsed;
 
+            foreach (var knownDbEntity in knownDbEntities.Values.OfType<ResourceManagerEntity>())
+            {
+                referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, EntityType.ResourceManager, knownDbEntity.FromStateVersion));
+            }
+
             var dbEntities = new List<Entity>();
 
-            foreach (var e in referencedEntities.Values)
+            foreach (var e in referencedEntities.All)
             {
                 if (knownDbEntities.ContainsKey(e.Address))
                 {
@@ -411,14 +429,16 @@ WHERE id IN(
                     EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
                     EntityType.Package => new PackageEntity(),
                     EntityType.Vault => new VaultEntity(),
-                    EntityType.KeyValueStore => new ValueStoreEntity(),
+                    EntityType.KeyValueStore => new KeyValueStoreEntity(),
+                    EntityType.Global => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, "Global entities should be filtered out"),
+                    EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, null),
                 };
 
                 dbEntity.Id = sequences.NextEntity;
                 dbEntity.FromStateVersion = e.StateVersion;
                 dbEntity.Address = e.Address.ConvertFromHex();
-                dbEntity.GlobalAddress = e.GlobalAddress;
+                dbEntity.GlobalAddress = e.GlobalAddress == null ? null : (RadixAddress)e.GlobalAddress.ConvertFromHex();
 
                 e.Resolve(dbEntity);
                 dbEntities.Add(dbEntity);
@@ -426,7 +446,7 @@ WHERE id IN(
 
             foreach (var (childAddress, parentAddress) in childToParentEntities)
             {
-                var currentParent = referencedEntities[parentAddress];
+                var currentParent = referencedEntities.Get(parentAddress);
                 long? parentId = null;
                 long? ownerId = null;
                 long? globalId = null;
@@ -456,7 +476,7 @@ WHERE id IN(
                     throw new Exception("bla bla bla x22");
                 }
 
-                referencedEntities[childAddress].ResolveParentalIds(allAncestors.ToArray(), parentId.Value, ownerId.Value, globalId.Value);
+                referencedEntities.Get(childAddress).ResolveParentalIds(allAncestors.ToArray(), parentId.Value, ownerId.Value, globalId.Value);
             }
 
             sw = Stopwatch.StartNew();
@@ -472,8 +492,9 @@ WHERE id IN(
                     [typeof(AccountComponentEntity)] = "account_component",
                     [typeof(SystemComponentEntity)] = "system_component",
                     [typeof(PackageEntity)] = "package",
-                    [typeof(ValueStoreEntity)] = "value_store",
+                    [typeof(KeyValueStoreEntity)] = "key_value_store",
                     [typeof(VaultEntity)] = "vault",
+                    [typeof(NonFungibleStoreEntity)] = "non_fungible_store",
                 };
 
                 foreach (var dbEntity in dbEntities)
@@ -559,7 +580,7 @@ WHERE id IN(
                     var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
 
                     var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
-                    var resourceEntity = referencedEntities[resourceAddress];
+                    var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
                     fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, amount, us.StateVersion));
 
@@ -569,7 +590,7 @@ WHERE id IN(
                 if (resourceAmount is NonFungibleResourceAmount nfra)
                 {
                     var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
-                    var resourceEntity = referencedEntities[resourceAddress];
+                    var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
                     nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIdsHex, us.StateVersion));
 
@@ -612,8 +633,11 @@ WHERE id IN(
                     case SubstateType.KeyValueStoreEntry:
                         HandleKeyValueStoreEntrySubstate(us);
                         break;
+                    case SubstateType.Global:
+                        // we do not want to handle them on purpose
+                        break;
                     default:
-                        throw new Exception("bleh"); // TODO fix me
+                        throw new ArgumentOutOfRangeException(nameof(us.Type), us.Type, null);
                 }
             }
         }
@@ -655,7 +679,7 @@ WHERE id IN(
                         GlobalEntityId = e.SubstateEntity.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.ResourceEntity.DatabaseId,
                         IdsCount = e.Ids.Count,
-                        Ids = e.Ids.Select(id => referencedEntities[id].DatabaseId).ToArray(),
+                        Ids = e.Ids.Select(id => id.ConvertFromHex()).ToArray(),
                     };
                 })
                 .ToList();
@@ -815,7 +839,7 @@ WHERE id IN(
                     await writer.WriteAsync(type, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(nonFungible.IdsCount, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(nonFungible.Ids, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(nonFungible.Ids, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
                 }
 
                 await writer.CompleteAsync(token);

@@ -74,9 +74,9 @@ public interface IOwner
     public IEnumerable<EntityId> OwnedEntities { get; }
 }
 
-public interface IResourcePointer
+public interface IGlobalResourcePointer
 {
-    public IEnumerable<TypedResourceAddress> PointedResources { get; }
+    public IEnumerable<GlobalResourcePointer> Pointers { get; }
 }
 
-public record TypedResourceAddress(ResourceType Type, string Address);
+public record GlobalResourcePointer(ResourceType Type, string GlobalAddress);

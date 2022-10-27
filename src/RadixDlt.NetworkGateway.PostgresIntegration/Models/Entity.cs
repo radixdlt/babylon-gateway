@@ -147,10 +147,14 @@ internal class PackageEntity : Entity
 {
 }
 
-internal class ValueStoreEntity : Entity
+internal class KeyValueStoreEntity : Entity
 {
 }
 
 internal class VaultEntity : Entity
+{
+}
+
+internal class NonFungibleStoreEntity : Entity
 {
 }

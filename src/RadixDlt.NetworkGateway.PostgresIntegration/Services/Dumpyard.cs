@@ -97,7 +97,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     private Entity? _databaseEntity;
     private ReferencedEntity? _parent;
 
-    public RadixAddress? GlobalAddress { get; private set; }
+    public string? GlobalAddress { get; private set; }
 
     public string? GlobalHrpAddress { get; private set; }
 
@@ -107,7 +107,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
 
-    public bool CanBeOwner => Type is EntityType.Component or EntityType.ResourceManager or EntityType.KeyValueStore;
+    public bool CanBeOwner => Type is EntityType.Component or EntityType.ResourceManager or EntityType.KeyValueStore or EntityType.Global;
 
     [MemberNotNullWhen(true, nameof(Parent))]
     public bool HasParent => _parent != null;
@@ -116,13 +116,18 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public void Globalize(string addressHex, string hrpAddress)
     {
-        GlobalAddress = addressHex.ConvertFromHex();
+        GlobalAddress = addressHex;
         GlobalHrpAddress = hrpAddress;
     }
 
     public void Resolve(Entity entity)
     {
         _databaseEntity = entity;
+
+        if (entity.GlobalAddress != null)
+        {
+            GlobalAddress = entity.GlobalAddress.ToHex();
+        }
     }
 
     public void ResolveParentalIds(long[] ids, long parentId, long ownerId, long globalId)
@@ -249,28 +254,44 @@ internal record AggregateChange
     }
 }
 
-internal class ReferencedEntityDictionary : Dictionary<string, ReferencedEntity>
+internal class ReferencedEntityDictionary
 {
+    private readonly Dictionary<string, ReferencedEntity> _storage = new();
     private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
+    private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
 
-    public ReferencedEntity GetOrAdd(string key, Func<string, ReferencedEntity> factory)
+    public ICollection<string> Addresses => _storage.Keys;
+
+    public ICollection<ReferencedEntity> All => _storage.Values;
+
+    public ReferencedEntity GetOrAdd(string addressHex, Func<string, ReferencedEntity> factory)
     {
-        if (ContainsKey(key))
+        if (_storage.ContainsKey(addressHex))
         {
-            return this[key];
+            return _storage[addressHex];
         }
 
-        var value = factory(key);
+        var value = factory(addressHex);
 
         if (!_inversed.ContainsKey(value.StateVersion))
         {
             _inversed[value.StateVersion] = new List<ReferencedEntity>();
         }
 
-        this[key] = value;
+        _storage[addressHex] = value;
         _inversed[value.StateVersion].Add(value);
 
         return value;
+    }
+
+    public ReferencedEntity Get(string addressHex)
+    {
+        return _storage[addressHex];
+    }
+
+    public ReferencedEntity GetByGlobal(string globalAddress)
+    {
+        return _globalsCache.GetOrAdd(globalAddress, _ => _storage.Values.First(re => re.GlobalAddress == globalAddress));
     }
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)

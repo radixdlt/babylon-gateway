@@ -100,5 +100,5 @@ internal class EntityNonFungibleResourceHistory : EntityResourceHistory
     public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
 
     [Column("ids")]
-    public long[] Ids { get; set; }
+    public byte[][] Ids { get; set; }
 }

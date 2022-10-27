@@ -91,65 +91,113 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// Defines SubstateType
+    /// GlobalSubstateAllOf
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SubstateType
+    [DataContract(Name = "GlobalSubstate_allOf")]
+    public partial class GlobalSubstateAllOf : IEquatable<GlobalSubstateAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Enum System for value: System
+        /// Initializes a new instance of the <see cref="GlobalSubstateAllOf" /> class.
         /// </summary>
-        [EnumMember(Value = "System")]
-        System = 1,
+        [JsonConstructorAttribute]
+        protected GlobalSubstateAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalSubstateAllOf" /> class.
+        /// </summary>
+        /// <param name="targetEntity">targetEntity (required).</param>
+        public GlobalSubstateAllOf(GlobalEntityId targetEntity = default(GlobalEntityId))
+        {
+            // to ensure "targetEntity" is required (not null)
+            if (targetEntity == null)
+            {
+                throw new ArgumentNullException("targetEntity is a required property for GlobalSubstateAllOf and cannot be null");
+            }
+            this.TargetEntity = targetEntity;
+        }
 
         /// <summary>
-        /// Enum ResourceManager for value: ResourceManager
+        /// Gets or Sets TargetEntity
         /// </summary>
-        [EnumMember(Value = "ResourceManager")]
-        ResourceManager = 2,
+        [DataMember(Name = "target_entity", IsRequired = true, EmitDefaultValue = true)]
+        public GlobalEntityId TargetEntity { get; set; }
 
         /// <summary>
-        /// Enum ComponentInfo for value: ComponentInfo
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentInfo")]
-        ComponentInfo = 3,
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class GlobalSubstateAllOf {\n");
+            sb.Append("  TargetEntity: ").Append(TargetEntity).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
         /// <summary>
-        /// Enum ComponentState for value: ComponentState
+        /// Returns the JSON string presentation of the object
         /// </summary>
-        [EnumMember(Value = "ComponentState")]
-        ComponentState = 4,
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
 
         /// <summary>
-        /// Enum Package for value: Package
+        /// Returns true if objects are equal
         /// </summary>
-        [EnumMember(Value = "Package")]
-        Package = 5,
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as GlobalSubstateAllOf);
+        }
 
         /// <summary>
-        /// Enum Vault for value: Vault
+        /// Returns true if GlobalSubstateAllOf instances are equal
         /// </summary>
-        [EnumMember(Value = "Vault")]
-        Vault = 6,
+        /// <param name="input">Instance of GlobalSubstateAllOf to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(GlobalSubstateAllOf input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.TargetEntity == input.TargetEntity ||
+                    (this.TargetEntity != null &&
+                    this.TargetEntity.Equals(input.TargetEntity))
+                );
+        }
 
         /// <summary>
-        /// Enum NonFungible for value: NonFungible
+        /// Gets the hash code
         /// </summary>
-        [EnumMember(Value = "NonFungible")]
-        NonFungible = 7,
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                if (this.TargetEntity != null)
+                {
+                    hashCode = (hashCode * 59) + this.TargetEntity.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
 
         /// <summary>
-        /// Enum KeyValueStoreEntry for value: KeyValueStoreEntry
+        /// To validate all properties of the instance
         /// </summary>
-        [EnumMember(Value = "KeyValueStoreEntry")]
-        KeyValueStoreEntry = 8,
-
-        /// <summary>
-        /// Enum Global for value: Global
-        /// </summary>
-        [EnumMember(Value = "Global")]
-        Global = 9
-
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }

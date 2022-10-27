@@ -120,8 +120,9 @@ internal abstract class CommonDbContext : DbContext
             .HasValue<AccountComponentEntity>("account_component")
             .HasValue<SystemComponentEntity>("system_component")
             .HasValue<PackageEntity>("package")
-            .HasValue<ValueStoreEntity>("value_store")
-            .HasValue<VaultEntity>("vault");
+            .HasValue<KeyValueStoreEntity>("key_value_store")
+            .HasValue<VaultEntity>("vault")
+            .HasValue<NonFungibleStoreEntity>("non_fungible_store");
 
         modelBuilder.Entity<Entity>()
             .HasIndex(e => e.Address)
