@@ -9,8 +9,7 @@ lerna-debug.log*
 
 .yarn
 node_modules
-# Purposefully choose _not_ to gitignore dist, so that examples/node-16 works well
-# dist
+dist
 dist-ssr
 *.local
 
