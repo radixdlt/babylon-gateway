@@ -17,14 +17,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     ],\
     "dependencyTreeRoots": [\
       {\
-        "name": "@radixdlt/alphanet-gateway-api-sdk",\
+        "name": "@radixdlt/babylon-gateway-api-sdk",\
         "reference": "workspace:."\
       }\
     ],\
     "enableTopLevelFallback": true,\
     "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
     "fallbackExclusionList": [\
-      ["@radixdlt/alphanet-gateway-api-sdk", ["workspace:."]]\
+      ["@radixdlt/babylon-gateway-api-sdk", ["workspace:."]]\
     ],\
     "fallbackPool": [\
     ],\
@@ -3222,11 +3222,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["@radixdlt/alphanet-gateway-api-sdk", [\
+      ["@radixdlt/babylon-gateway-api-sdk", [\
         ["workspace:.", {\
           "packageLocation": "./",\
           "packageDependencies": [\
-            ["@radixdlt/alphanet-gateway-api-sdk", "workspace:."],\
+            ["@radixdlt/babylon-gateway-api-sdk", "workspace:."],\
             ["@babel/preset-env", "virtual:676de49ad71cfb2acc84b49e0fa1135df5eea9f41da167761f0ea814b3e1e45d10a4166536b19c88d6cd1d82fbcf18d70be900f580e5733fd6f61f61abef04ef#npm:7.19.1"],\
             ["@babel/preset-typescript", "virtual:676de49ad71cfb2acc84b49e0fa1135df5eea9f41da167761f0ea814b3e1e45d10a4166536b19c88d6cd1d82fbcf18d70be900f580e5733fd6f61f61abef04ef#npm:7.18.6"],\
             ["@hirez_io/observer-spy", "virtual:676de49ad71cfb2acc84b49e0fa1135df5eea9f41da167761f0ea814b3e1e45d10a4166536b19c88d6cd1d82fbcf18d70be900f580e5733fd6f61f61abef04ef#npm:2.2.0"],\

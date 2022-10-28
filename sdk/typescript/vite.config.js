@@ -6,7 +6,7 @@ module.exports = defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'lib/index.ts'),
-      name: 'alphanet-gateway-api-sdk',
+      name: 'babylon-gateway-api-sdk',
     },
   },
 })

@@ -10,7 +10,7 @@ If in an environment where this is not available, a polyfill must be used.
 
 ```typescript
 import "./node-fetch-polyfill" // Polyfill for fetch required if running in node-js
-import { TransactionApi } from "@radixdlt/alphanet-gateway-api-sdk";
+import { TransactionApi } from "@radixdlt/babylon-gateway-api-sdk";
 
 const transactionApi = new TransactionApi();
 

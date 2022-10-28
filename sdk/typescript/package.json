@@ -1,17 +1,17 @@
 {
-  "name": "@radixdlt/alphanet-gateway-api-sdk",
+  "name": "@radixdlt/babylon-gateway-api-sdk",
   "version": "0.1.5",
   "license": "Apache-2.0",
   "homepage": "https://github.com/radixdlt/babylon-gateway/tree/main/sdk/typescript/",
   "files": [
     "dist"
   ],
-  "main": "./dist/alphanet-gateway-api-sdk.umd.js",
-  "module": "./dist/alphanet-gateway-api-sdk.mjs",
+  "main": "./dist/babylon-gateway-api-sdk.umd.js",
+  "module": "./dist/babylon-gateway-api-sdk.mjs",
   "exports": {
     ".": {
-      "import": "./dist/alphanet-gateway-api-sdk.mjs",
-      "require": "./dist/alphanet-gateway-api-sdk.umd.js"
+      "import": "./dist/babylon-gateway-api-sdk.mjs",
+      "require": "./dist/babylon-gateway-api-sdk.umd.js"
     }
   },
   "types": "./dist/index.d.ts",
