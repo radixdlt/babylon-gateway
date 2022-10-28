@@ -15,9 +15,9 @@ import { TransactionApi } from "@radixdlt/babylon-gateway-api-sdk";
 const transactionApi = new TransactionApi();
 
 async function getTransactionStatus(transactionIntentHashHex: string) {
-    let response = await transactionApi.transactionStatusPost({
-        transactionIdentifier: {
-            origin: intent
+    let response = await transactionApi.transactionStatus({
+        transaction_identifier: {
+            origin: TransactionLookupOrigin.Intent,
             value_hex: transactionIntentHashHex
         }
     });
