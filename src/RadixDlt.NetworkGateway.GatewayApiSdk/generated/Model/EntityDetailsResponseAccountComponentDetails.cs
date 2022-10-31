@@ -91,23 +91,104 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines ResourceTypeMapping
+    /// EntityDetailsResponseAccountComponentDetails
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ResourceTypeMapping
+    [DataContract(Name = "EntityDetailsResponseAccountComponentDetails")]
+    public partial class EntityDetailsResponseAccountComponentDetails : IEquatable<EntityDetailsResponseAccountComponentDetails>, IValidatableObject
     {
-        /// <summary>
-        /// Enum Fungible for value: fungible
-        /// </summary>
-        [EnumMember(Value = "fungible")]
-        Fungible = 1,
 
         /// <summary>
-        /// Enum NonFungible for value: non_fungible
+        /// Gets or Sets Discriminator
         /// </summary>
-        [EnumMember(Value = "non_fungible")]
-        NonFungible = 2
+        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
+        public EntityDetailsResponseDetailsType Discriminator { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseAccountComponentDetails" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected EntityDetailsResponseAccountComponentDetails() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseAccountComponentDetails" /> class.
+        /// </summary>
+        /// <param name="discriminator">discriminator (required).</param>
+        public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType))
+        {
+            this.Discriminator = discriminator;
+        }
 
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class EntityDetailsResponseAccountComponentDetails {\n");
+            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as EntityDetailsResponseAccountComponentDetails);
+        }
+
+        /// <summary>
+        /// Returns true if EntityDetailsResponseAccountComponentDetails instances are equal
+        /// </summary>
+        /// <param name="input">Instance of EntityDetailsResponseAccountComponentDetails to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(EntityDetailsResponseAccountComponentDetails input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Discriminator == input.Discriminator ||
+                    this.Discriminator.Equals(input.Discriminator)
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// To validate all properties of the instance
+        /// </summary>
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }

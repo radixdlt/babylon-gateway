@@ -6,6 +6,7 @@
       <Path>deployment</Path>
       <Path>docs</Path>
       <Path>generation</Path>
+      <Path>sdk</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />

@@ -350,6 +350,18 @@ SELECT
                         }
                     }
 
+                    if (data is ResourceManagerSubstate resourceManager)
+                    {
+                        Type typeHint = resourceManager.ResourceType switch
+                        {
+                            ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
+                            ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
+                            _ => throw new ArgumentOutOfRangeException(),
+                        };
+
+                        re.WithTypeHint(typeHint);
+                    }
+
                     uppedSubstates.Add(us);
                 }
 
@@ -425,7 +437,7 @@ WHERE id IN(
                 Entity dbEntity = e.Type switch
                 {
                     EntityType.System => new SystemEntity(),
-                    EntityType.ResourceManager => new ResourceManagerEntity(),
+                    EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
                     EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
                     EntityType.Package => new PackageEntity(),
                     EntityType.Vault => new VaultEntity(),
@@ -481,13 +493,14 @@ WHERE id IN(
 
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, type) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator) FROM STDIN (FORMAT BINARY)", token))
             {
                 // TODO ouh, we must somehow reuse information already held by EF
                 var typeMapping = new Dictionary<Type, string>
                 {
                     [typeof(SystemEntity)] = "system",
-                    [typeof(ResourceManagerEntity)] = "resource_manager",
+                    [typeof(FungibleResourceManagerEntity)] = "fungible_resource_manager",
+                    [typeof(NonFungibleResourceManagerEntity)] = "non_fungible_resource_manager",
                     [typeof(NormalComponentEntity)] = "normal_component",
                     [typeof(AccountComponentEntity)] = "account_component",
                     [typeof(SystemComponentEntity)] = "system_component",
@@ -549,15 +562,21 @@ WHERE id IN(
             dbWriteDuration += sw.Elapsed;
         }
 
+        // TODO can't we actually merge this with step "scan for any referenced entities"?
         // step: scan all substates to figure out changes
         {
             void HandleResourceManagerSubstate(UppedSubstate us)
             {
                 var data = us.Data.GetResourceManagerSubstate();
-                var totalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos);
 
                 metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
-                fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(us.ReferencedEntity, totalSupply, TokenAmount.Zero, TokenAmount.Zero, us.StateVersion)); // TODO support mint & burnt
+
+                var totalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos);
+
+                if (data.ResourceType == ResourceType.Fungible)
+                {
+                    fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(us.ReferencedEntity, totalSupply, TokenAmount.Zero, TokenAmount.Zero, us.StateVersion)); // TODO support mint & burnt
+                }
             }
 
             void HandleComponentStateSubstate(UppedSubstate us)
@@ -600,6 +619,11 @@ WHERE id IN(
                 throw new Exception("bla bla bla bla x9"); // TODO fix me
             }
 
+            void HandleNonFungibleSubstate(UppedSubstate us)
+            {
+                var data = us.Data.GetNonFungibleSubstate();
+            }
+
             void HandleKeyValueStoreEntrySubstate(UppedSubstate us)
             {
                 // TODO handle referenced_entities properly (not sure if we can ensure references types have been seen)
@@ -628,7 +652,7 @@ WHERE id IN(
                         HandleVaultSubstate(us);
                         break;
                     case SubstateType.NonFungible:
-                        // TODO handle somehow
+                        HandleNonFungibleSubstate(us);
                         break;
                     case SubstateType.KeyValueStoreEntry:
                         HandleKeyValueStoreEntrySubstate(us);
@@ -808,7 +832,7 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, type, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token))
             {
                 var type = "fungible";
 

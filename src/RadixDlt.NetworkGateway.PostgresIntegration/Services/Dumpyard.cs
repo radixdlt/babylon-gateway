@@ -63,8 +63,6 @@
  */
 
 using RadixDlt.CoreApiSdk.Model;
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -100,6 +98,8 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     public string? GlobalAddress { get; private set; }
 
     public string? GlobalHrpAddress { get; private set; }
+
+    public Type? TypeHint { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
@@ -141,6 +141,36 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
     public void IsChildOf(ReferencedEntity parent)
     {
         _parent = parent;
+    }
+
+    public void WithTypeHint(Type type)
+    {
+        if (TypeHint != null && TypeHint != type)
+        {
+            throw new ArgumentException("Already annotated with different type hint", nameof(type));
+        }
+
+        TypeHint = type;
+    }
+
+    public TEntity CreateUsingTypeHint<TEntity>()
+    {
+        if (TypeHint == null)
+        {
+            throw new InvalidOperationException("No TypeHint specified");
+        }
+
+        if (!TypeHint.IsAssignableTo(typeof(TEntity)))
+        {
+            throw new InvalidOperationException("Conflicting hint type");
+        }
+
+        if (Activator.CreateInstance(TypeHint) is not TEntity instance)
+        {
+            throw new Exception("Unable to create instance");
+        }
+
+        return instance;
     }
 
     private Entity GetDatabaseEntity()

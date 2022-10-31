@@ -91,48 +91,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseFungibleDetails
+    /// EntityDetailsResponseFungibleResourceDetails
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseFungibleDetails")]
-    public partial class EntityDetailsResponseFungibleDetails : IEquatable<EntityDetailsResponseFungibleDetails>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseFungibleResourceDetails")]
+    public partial class EntityDetailsResponseFungibleResourceDetails : IEquatable<EntityDetailsResponseFungibleResourceDetails>, IValidatableObject
     {
 
         /// <summary>
-        /// Gets or Sets ResourceType
+        /// Gets or Sets Discriminator
         /// </summary>
-        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceTypeMapping ResourceType { get; set; }
+        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
+        public EntityDetailsResponseDetailsType Discriminator { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseFungibleDetails() { }
+        protected EntityDetailsResponseFungibleResourceDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
         /// </summary>
-        /// <param name="resourceType">resourceType (required).</param>
+        /// <param name="discriminator">discriminator (required).</param>
         /// <param name="totalSupplyAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
         /// <param name="totalMintedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
         /// <param name="totalBurntAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public EntityDetailsResponseFungibleDetails(ResourceTypeMapping resourceType = default(ResourceTypeMapping), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
         {
-            this.ResourceType = resourceType;
+            this.Discriminator = discriminator;
             // to ensure "totalSupplyAttos" is required (not null)
             if (totalSupplyAttos == null)
             {
-                throw new ArgumentNullException("totalSupplyAttos is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+                throw new ArgumentNullException("totalSupplyAttos is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
             this.TotalSupplyAttos = totalSupplyAttos;
             // to ensure "totalMintedAttos" is required (not null)
             if (totalMintedAttos == null)
             {
-                throw new ArgumentNullException("totalMintedAttos is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+                throw new ArgumentNullException("totalMintedAttos is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
             this.TotalMintedAttos = totalMintedAttos;
             // to ensure "totalBurntAttos" is required (not null)
             if (totalBurntAttos == null)
             {
-                throw new ArgumentNullException("totalBurntAttos is a required property for EntityDetailsResponseFungibleDetails and cannot be null");
+                throw new ArgumentNullException("totalBurntAttos is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
             this.TotalBurntAttos = totalBurntAttos;
         }
@@ -165,8 +165,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseFungibleDetails {\n");
-            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
+            sb.Append("class EntityDetailsResponseFungibleResourceDetails {\n");
+            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
             sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
             sb.Append("  TotalMintedAttos: ").Append(TotalMintedAttos).Append("\n");
             sb.Append("  TotalBurntAttos: ").Append(TotalBurntAttos).Append("\n");
@@ -190,15 +190,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseFungibleDetails);
+            return this.Equals(input as EntityDetailsResponseFungibleResourceDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseFungibleDetails instances are equal
+        /// Returns true if EntityDetailsResponseFungibleResourceDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseFungibleDetails to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseFungibleResourceDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseFungibleDetails input)
+        public bool Equals(EntityDetailsResponseFungibleResourceDetails input)
         {
             if (input == null)
             {
@@ -206,8 +206,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.ResourceType == input.ResourceType ||
-                    this.ResourceType.Equals(input.ResourceType)
+                    this.Discriminator == input.Discriminator ||
+                    this.Discriminator.Equals(input.Discriminator)
                 ) && 
                 (
                     this.TotalSupplyAttos == input.TotalSupplyAttos ||
@@ -235,7 +235,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
+                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
                 if (this.TotalSupplyAttos != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();
