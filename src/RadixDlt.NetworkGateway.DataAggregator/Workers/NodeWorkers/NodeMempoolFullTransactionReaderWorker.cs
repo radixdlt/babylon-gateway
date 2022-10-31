@@ -255,8 +255,7 @@ internal class NodeMempoolFullTransactionReaderWorker : NodeWorker
             return new FullTransactionData(
                 payloadHash,
                 _clock.UtcNow,
-                response.NotarizedTransaction.PayloadHex.ConvertFromHex(),
-                response.NotarizedTransaction
+                response.NotarizedTransaction.PayloadHex.ConvertFromHex()
             );
         }
 

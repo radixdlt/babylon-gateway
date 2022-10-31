@@ -2,6 +2,10 @@ name: Publish TypeScript Gateway SDK
 
 on:
   workflow_dispatch:
+    inputs:
+      package_version_number:
+        description: "Package version number"
+        required: true
   release:
     types: [published]
 
@@ -39,7 +43,7 @@ jobs:
         with:
           file: ./sdk/typescript/package.json
           field: version
-          value: ${{ steps.setup_tags.outputs.version-tag }}
+          value: ${{ github.event.inputs.package_version_number || steps.setup_tags.outputs.version-tag }}
 
       - run: |
           npm config set access public

@@ -216,11 +216,10 @@ internal class PendingTransaction
         LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
-    public void MarkAsCommitted(long ledgerStateVersion, DateTimeOffset ledgerCommitTimestamp, IClock clock)
+    public void MarkAsCommitted(DateTimeOffset timestamp)
     {
-        var commitToDbTimestamp = clock.UtcNow;
         Status = PendingTransactionStatus.Committed;
-        CommitTimestamp = commitToDbTimestamp;
+        CommitTimestamp = timestamp;
     }
 
     public void MarkAsSeenInAMempool(DateTimeOffset timestamp)
