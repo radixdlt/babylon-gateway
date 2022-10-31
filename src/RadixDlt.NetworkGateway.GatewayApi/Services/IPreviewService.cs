@@ -129,7 +129,7 @@ internal class PreviewService : IPreviewService
                     GatewayModel.EddsaEd25519PublicKey eddsa => new CoreModel.PublicKey(new CoreModel.EddsaEd25519PublicKey(CoreModel.PublicKeyType.EddsaEd25519, eddsa.KeyHex)),
                     _ => throw new Exception("fix me"),
                 }).ToList(),
-                new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan)
+                new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan, request.Flags.AssumeAllSignatureProofs)
             ),
             token
         );
