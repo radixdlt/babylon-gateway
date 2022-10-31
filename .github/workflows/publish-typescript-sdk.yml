@@ -1,0 +1,47 @@
+name: Publish TypeScript Gateway SDK
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-gateway-sdk-npmjs:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./sdk/typescript
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: cat $NPM_CONFIG_USERCONFIG
+      - name: Build alphanet-gateway-sdk
+        run: |
+          yarn
+          yarn build
+
+      - name: Setup tags for npm
+        id: setup_tags
+        uses: ./.github/actions/set-variables
+        with:
+          github_event_name: ${{ github.event_name }}
+          github_action_name: ${{ github.event.action}}
+
+      - name: Update package.json version
+        uses: jossef/action-set-json-field@v2
+        with:
+          file: ./sdk/typescript/package.json
+          field: version
+          value: ${{ steps.setup_tags.outputs.version-tag }}
+
+      - run: |
+          npm config set access public
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
