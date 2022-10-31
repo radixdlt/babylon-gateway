@@ -153,7 +153,6 @@ namespace RadixDlt.NetworkGateway.IntegrationTests.GatewayApi
                 {
                     o.GatewayApiVersion = "3.0.0";
                     o.GatewayOpenApiSchemaVersion = "2.0.0";
-                    o.MaxPageSize = 30;
                 });
             });
         }
