@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221026123332_InitialCreate")]
+    [Migration("20221028091719_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("parent_ancestor_id");
 
-                    b.Property<string>("type")
+                    b.Property<string>("discriminator")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -144,7 +144,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("entities");
 
-                    b.HasDiscriminator<string>("type").HasValue("Entity");
+                    b.HasDiscriminator<string>("discriminator").HasValue("Entity");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityMetadataHistory", b =>
@@ -247,7 +247,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("resource_entity_id");
 
-                    b.Property<string>("type")
+                    b.Property<string>("discriminator")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -259,7 +259,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.ToTable("entity_resource_history");
 
-                    b.HasDiscriminator<string>("type").HasValue("EntityResourceHistory");
+                    b.HasDiscriminator<string>("discriminator").HasValue("EntityResourceHistory");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FungibleResourceSupplyHistory", b =>
@@ -621,13 +621,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("non_fungible");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.GlobalEntity", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.FungibleResourceManagerEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
                     b.ToTable("entities");
 
-                    b.HasDiscriminator().HasValue("global");
+                    b.HasDiscriminator().HasValue("fungible_resource_manager");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.KeyValueStoreEntity", b =>
@@ -637,6 +637,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("key_value_store");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleResourceManagerEntity", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.ToTable("entities");
+
+                    b.HasDiscriminator().HasValue("non_fungible_resource_manager");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleStoreEntity", b =>
@@ -664,15 +673,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("package");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerEntity", b =>
-                {
-                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
-
-                    b.ToTable("entities");
-
-                    b.HasDiscriminator().HasValue("resource_manager");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemComponentEntity", b =>

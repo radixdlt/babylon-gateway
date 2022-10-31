@@ -234,16 +234,6 @@ components:
       pattern: "^-?[0-9]+$"
 
     #
-    # Mapping Enums
-    #
-
-    ResourceTypeMapping:
-      type: string
-      enum:
-        - fungible
-        - non_fungible
-
-    #
     # Generic Types
     #
 
@@ -642,42 +632,79 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/EntityMetadataItem"
+    EntityDetailsResponseDetailsType:
+      type: string
+      enum:
+        - fungible_resource
+        - non_fungible_resource
+        - account_component
     EntityDetailsResponseDetails:
       oneOf:
-        - $ref: "#/components/schemas/EntityDetailsResponseFungibleDetails"
-        - $ref: "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
+        - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
+        - $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
+        - $ref: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
       discriminator:
-        propertyName: resource_type
+        propertyName: discriminator
         mapping:
-          # Must match ResourceTypeMapping
-          fungible: "#/components/schemas/EntityDetailsResponseFungibleDetails"
-          non_fungible: "#/components/schemas/EntityDetailsResponseNonFungibleDetails"
-    EntityDetailsResponseFungibleDetails:
+          # Must match EntityDetailsResponseDetailsType
+          fungible_resource: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
+          non_fungible_resource: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
+          account_component: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
+    EntityDetailsResponseFungibleResourceDetails:
       type: object
       required:
-        - resource_type
+        - discriminator
         - total_supply_attos
         - total_minted_attos
         - total_burnt_attos
       properties:
-        resource_type:
-          $ref: "#/components/schemas/ResourceTypeMapping"
+        discriminator:
+          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
         total_supply_attos:
           $ref: "#/components/schemas/TokenAmountAttos"
         total_minted_attos:
           $ref: "#/components/schemas/TokenAmountAttos"
         total_burnt_attos:
           $ref: "#/components/schemas/TokenAmountAttos"
-    EntityDetailsResponseNonFungibleDetails:
+    EntityDetailsResponseNonFungibleResourceDetails:
       type: object
       required:
-        - resource_type
-        - tbd
+        - discriminator
+        - ids
       properties:
-        resource_type:
-          $ref: "#/components/schemas/ResourceTypeMapping"
-        tbd:
+        discriminator:
+          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        ids:
+          $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetailsIds"
+    EntityDetailsResponseNonFungibleResourceDetailsIds:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetailsIdsItem"
+    EntityDetailsResponseNonFungibleResourceDetailsIdsItem:
+      type: object
+      required:
+        - id
+      properties:
+        id_hex:
           type: string
+        immutable_data_hex:
+          type: string
+        mutable_data_hex:
+          type: string
+    EntityDetailsResponseAccountComponentDetails:
+      type: object
+      required:
+        - discriminator
+      properties:
+        discriminator:
+          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
 
     EntityOverviewRequest:
       type: object

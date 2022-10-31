@@ -101,10 +101,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseDetails" /> class
-        /// with the <see cref="EntityDetailsResponseFungibleDetails" /> class
+        /// with the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of EntityDetailsResponseFungibleDetails.</param>
-        public EntityDetailsResponseDetails(EntityDetailsResponseFungibleDetails actualInstance)
+        /// <param name="actualInstance">An instance of EntityDetailsResponseFungibleResourceDetails.</param>
+        public EntityDetailsResponseDetails(EntityDetailsResponseFungibleResourceDetails actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -113,10 +113,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseDetails" /> class
-        /// with the <see cref="EntityDetailsResponseNonFungibleDetails" /> class
+        /// with the <see cref="EntityDetailsResponseNonFungibleResourceDetails" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of EntityDetailsResponseNonFungibleDetails.</param>
-        public EntityDetailsResponseDetails(EntityDetailsResponseNonFungibleDetails actualInstance)
+        /// <param name="actualInstance">An instance of EntityDetailsResponseNonFungibleResourceDetails.</param>
+        public EntityDetailsResponseDetails(EntityDetailsResponseNonFungibleResourceDetails actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseDetails" /> class
+        /// with the <see cref="EntityDetailsResponseAccountComponentDetails" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of EntityDetailsResponseAccountComponentDetails.</param>
+        public EntityDetailsResponseDetails(EntityDetailsResponseAccountComponentDetails actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -137,39 +149,53 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             set
             {
-                if (value.GetType() == typeof(EntityDetailsResponseFungibleDetails))
+                if (value.GetType() == typeof(EntityDetailsResponseAccountComponentDetails))
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(EntityDetailsResponseNonFungibleDetails))
+                else if (value.GetType() == typeof(EntityDetailsResponseFungibleResourceDetails))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(EntityDetailsResponseNonFungibleResourceDetails))
                 {
                     this._actualInstance = value;
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: EntityDetailsResponseFungibleDetails, EntityDetailsResponseNonFungibleDetails");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: EntityDetailsResponseAccountComponentDetails, EntityDetailsResponseFungibleResourceDetails, EntityDetailsResponseNonFungibleResourceDetails");
                 }
             }
         }
 
         /// <summary>
-        /// Get the actual instance of `EntityDetailsResponseFungibleDetails`. If the actual instance is not `EntityDetailsResponseFungibleDetails`,
+        /// Get the actual instance of `EntityDetailsResponseFungibleResourceDetails`. If the actual instance is not `EntityDetailsResponseFungibleResourceDetails`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of EntityDetailsResponseFungibleDetails</returns>
-        public EntityDetailsResponseFungibleDetails GetEntityDetailsResponseFungibleDetails()
+        /// <returns>An instance of EntityDetailsResponseFungibleResourceDetails</returns>
+        public EntityDetailsResponseFungibleResourceDetails GetEntityDetailsResponseFungibleResourceDetails()
         {
-            return (EntityDetailsResponseFungibleDetails)this.ActualInstance;
+            return (EntityDetailsResponseFungibleResourceDetails)this.ActualInstance;
         }
 
         /// <summary>
-        /// Get the actual instance of `EntityDetailsResponseNonFungibleDetails`. If the actual instance is not `EntityDetailsResponseNonFungibleDetails`,
+        /// Get the actual instance of `EntityDetailsResponseNonFungibleResourceDetails`. If the actual instance is not `EntityDetailsResponseNonFungibleResourceDetails`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of EntityDetailsResponseNonFungibleDetails</returns>
-        public EntityDetailsResponseNonFungibleDetails GetEntityDetailsResponseNonFungibleDetails()
+        /// <returns>An instance of EntityDetailsResponseNonFungibleResourceDetails</returns>
+        public EntityDetailsResponseNonFungibleResourceDetails GetEntityDetailsResponseNonFungibleResourceDetails()
         {
-            return (EntityDetailsResponseNonFungibleDetails)this.ActualInstance;
+            return (EntityDetailsResponseNonFungibleResourceDetails)this.ActualInstance;
+        }
+
+        /// <summary>
+        /// Get the actual instance of `EntityDetailsResponseAccountComponentDetails`. If the actual instance is not `EntityDetailsResponseAccountComponentDetails`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of EntityDetailsResponseAccountComponentDetails</returns>
+        public EntityDetailsResponseAccountComponentDetails GetEntityDetailsResponseAccountComponentDetails()
+        {
+            return (EntityDetailsResponseAccountComponentDetails)this.ActualInstance;
         }
 
         /// <summary>
@@ -210,24 +236,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
             try
             {
-                var discriminatorObj = JObject.Parse(jsonString)["resource_type"];
+                var discriminatorObj = JObject.Parse(jsonString)["discriminator"];
                 string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
                 switch (discriminatorValue)
                 {
-                    case "EntityDetailsResponseFungibleDetails":
-                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    case "EntityDetailsResponseAccountComponentDetails":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
-                    case "EntityDetailsResponseNonFungibleDetails":
-                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    case "EntityDetailsResponseFungibleResourceDetails":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
-                    case "fungible":
-                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    case "EntityDetailsResponseNonFungibleResourceDetails":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
-                    case "non_fungible":
-                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    case "account_component":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                        return newEntityDetailsResponseDetails;
+                    case "fungible_resource":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                        return newEntityDetailsResponseDetails;
+                    case "non_fungible_resource":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for EntityDetailsResponseDetails. Possible values: EntityDetailsResponseFungibleDetails EntityDetailsResponseNonFungibleDetails fungible non_fungible", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for EntityDetailsResponseDetails. Possible values: EntityDetailsResponseAccountComponentDetails EntityDetailsResponseFungibleResourceDetails EntityDetailsResponseNonFungibleResourceDetails account_component fungible_resource non_fungible_resource", discriminatorValue));
                         break;
                 }
             }
@@ -242,41 +274,61 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(EntityDetailsResponseFungibleDetails).GetProperty("AdditionalProperties") == null)
+                if (typeof(EntityDetailsResponseAccountComponentDetails).GetProperty("AdditionalProperties") == null)
                 {
-                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
                 }
                 else
                 {
-                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("EntityDetailsResponseFungibleDetails");
+                matchedTypes.Add("EntityDetailsResponseAccountComponentDetails");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseFungibleDetails: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseAccountComponentDetails: {1}", jsonString, exception.ToString()));
             }
 
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(EntityDetailsResponseNonFungibleDetails).GetProperty("AdditionalProperties") == null)
+                if (typeof(EntityDetailsResponseFungibleResourceDetails).GetProperty("AdditionalProperties") == null)
                 {
-                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
                 }
                 else
                 {
-                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("EntityDetailsResponseNonFungibleDetails");
+                matchedTypes.Add("EntityDetailsResponseFungibleResourceDetails");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseNonFungibleDetails: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseFungibleResourceDetails: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(EntityDetailsResponseNonFungibleResourceDetails).GetProperty("AdditionalProperties") == null)
+                {
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
+                }
+                else
+                {
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseNonFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("EntityDetailsResponseNonFungibleResourceDetails");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseNonFungibleResourceDetails: {1}", jsonString, exception.ToString()));
             }
 
             if (match == 0)

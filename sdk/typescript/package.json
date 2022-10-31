@@ -1,6 +1,6 @@
 {
   "name": "@radixdlt/babylon-gateway-api-sdk",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/radixdlt/babylon-gateway/tree/main/sdk/typescript/",
   "files": [

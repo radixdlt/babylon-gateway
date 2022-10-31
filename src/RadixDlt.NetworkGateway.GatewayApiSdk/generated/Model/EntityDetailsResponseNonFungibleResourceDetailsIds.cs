@@ -91,43 +91,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseNonFungibleDetails
+    /// EntityDetailsResponseNonFungibleResourceDetailsIds
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseNonFungibleDetails")]
-    public partial class EntityDetailsResponseNonFungibleDetails : IEquatable<EntityDetailsResponseNonFungibleDetails>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseNonFungibleResourceDetailsIds")]
+    public partial class EntityDetailsResponseNonFungibleResourceDetailsIds : IEquatable<EntityDetailsResponseNonFungibleResourceDetailsIds>, IValidatableObject
     {
-
         /// <summary>
-        /// Gets or Sets ResourceType
-        /// </summary>
-        [DataMember(Name = "resource_type", IsRequired = true, EmitDefaultValue = true)]
-        public ResourceTypeMapping ResourceType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleResourceDetailsIds" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseNonFungibleDetails() { }
+        protected EntityDetailsResponseNonFungibleResourceDetailsIds() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleResourceDetailsIds" /> class.
         /// </summary>
-        /// <param name="resourceType">resourceType (required).</param>
-        /// <param name="tbd">tbd (required).</param>
-        public EntityDetailsResponseNonFungibleDetails(ResourceTypeMapping resourceType = default(ResourceTypeMapping), string tbd = default(string))
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="items">items (required).</param>
+        public EntityDetailsResponseNonFungibleResourceDetailsIds(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityDetailsResponseNonFungibleResourceDetailsIdsItem> items = default(List<EntityDetailsResponseNonFungibleResourceDetailsIdsItem>))
         {
-            this.ResourceType = resourceType;
-            // to ensure "tbd" is required (not null)
-            if (tbd == null)
+            this.TotalCount = totalCount;
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("tbd is a required property for EntityDetailsResponseNonFungibleDetails and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntityDetailsResponseNonFungibleResourceDetailsIds and cannot be null");
             }
-            this.Tbd = tbd;
+            this.Items = items;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets Tbd
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        [DataMember(Name = "tbd", IsRequired = true, EmitDefaultValue = true)]
-        public string Tbd { get; set; }
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public int TotalCount { get; set; }
+
+        /// <summary>
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// </summary>
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
+
+        /// <summary>
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// </summary>
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityDetailsResponseNonFungibleResourceDetailsIdsItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +155,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseNonFungibleDetails {\n");
-            sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
-            sb.Append("  Tbd: ").Append(Tbd).Append("\n");
+            sb.Append("class EntityDetailsResponseNonFungibleResourceDetailsIds {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseNonFungibleDetails);
+            return this.Equals(input as EntityDetailsResponseNonFungibleResourceDetailsIds);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseNonFungibleDetails instances are equal
+        /// Returns true if EntityDetailsResponseNonFungibleResourceDetailsIds instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseNonFungibleDetails to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseNonFungibleResourceDetailsIds to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseNonFungibleDetails input)
+        public bool Equals(EntityDetailsResponseNonFungibleResourceDetailsIds input)
         {
             if (input == null)
             {
@@ -175,13 +196,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.ResourceType == input.ResourceType ||
-                    this.ResourceType.Equals(input.ResourceType)
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 ) && 
                 (
-                    this.Tbd == input.Tbd ||
-                    (this.Tbd != null &&
-                    this.Tbd.Equals(input.Tbd))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -194,10 +226,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.ResourceType.GetHashCode();
-                if (this.Tbd != null)
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.Tbd.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

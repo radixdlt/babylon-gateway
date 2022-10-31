@@ -178,38 +178,54 @@ INNER JOIN LATERAL (
 
         EntityDetailsResponseDetails details;
 
-        if (entity is ResourceManagerEntity rme)
+        switch (entity)
         {
-            // TODO how to detect between fungible and non-fun? Kind property or something?
-            // TODO current solution based on supplyHistory == null is just a dirty hack!
-
-            var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
-                .Where(e => e.FromStateVersion <= ledgerState._Version && e.ResourceEntityId == rme.Id)
-                .OrderByDescending(e => e.FromStateVersion)
-                .FirstOrDefaultAsync(token);
-
-            if (supplyHistory == null)
+            case FungibleResourceManagerEntity frme:
             {
-                details = new EntityDetailsResponseDetails(new EntityDetailsResponseNonFungibleDetails(
-                    resourceType: ResourceTypeMapping.NonFungible,
-                    tbd: "unknown"));
+                var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
+                    .Where(e => e.FromStateVersion <= ledgerState._Version && e.ResourceEntityId == frme.Id)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstOrDefaultAsync(token);
+
+                // TODO handle null better
+
+                if (supplyHistory == null)
+                {
+                    details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleResourceDetails(
+                        discriminator: EntityDetailsResponseDetailsType.FungibleResource,
+                        totalSupplyAttos: "-1",
+                        totalMintedAttos: "-1",
+                        totalBurntAttos: "-1"));
+                }
+                else
+                {
+                    details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleResourceDetails(
+                        discriminator: EntityDetailsResponseDetailsType.FungibleResource,
+                        totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
+                        totalMintedAttos: supplyHistory.TotalMinted.ToString(),
+                        totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
+                }
+
+                break;
             }
-            else
-            {
-                details = new EntityDetailsResponseDetails(new EntityDetailsResponseFungibleDetails(
-                    resourceType: ResourceTypeMapping.Fungible,
-                    totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
-                    totalMintedAttos: supplyHistory.TotalMinted.ToString(),
-                    totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
-            }
-        }
-        else if (entity is AccountComponentEntity)
-        {
-            return null; // TODO handle somehow
-        }
-        else
-        {
-            return null;
+
+            case NonFungibleResourceManagerEntity nfrme:
+                // TODO add support for detailed ids
+
+                details = new EntityDetailsResponseDetails(new EntityDetailsResponseNonFungibleResourceDetails(
+                    discriminator: EntityDetailsResponseDetailsType.NonFungibleResource,
+                    ids: new EntityDetailsResponseNonFungibleResourceDetailsIds(
+                        totalCount: -1,
+                        previousCursor: null,
+                        nextCursor: "TBD (not implemented yet; currently everything is returned)",
+                        items: new List<EntityDetailsResponseNonFungibleResourceDetailsIdsItem>())));
+                break;
+            case AccountComponentEntity:
+                details = new EntityDetailsResponseDetails(new EntityDetailsResponseAccountComponentDetails(
+                    discriminator: EntityDetailsResponseDetailsType.AccountComponent));
+                break;
+            default:
+                return null;
         }
 
         var rawMetadata = new Dictionary<string, string>();

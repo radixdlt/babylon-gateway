@@ -1,6 +1,7 @@
 name: Publish TypeScript Gateway SDK
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 

@@ -88,7 +88,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
                     global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    type = table.Column<string>(type: "text", nullable: false)
+                    discriminator = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -138,7 +138,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     global_entity_id = table.Column<long>(type: "bigint", nullable: false),
                     resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false),
+                    discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
                     ids_count = table.Column<long>(type: "bigint", nullable: true),
                     ids = table.Column<byte[][]>(type: "bytea[]", nullable: true)

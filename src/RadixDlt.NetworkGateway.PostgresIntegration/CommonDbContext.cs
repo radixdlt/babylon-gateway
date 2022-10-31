@@ -113,9 +113,10 @@ internal abstract class CommonDbContext : DbContext
         HookupPendingTransactions(modelBuilder);
 
         modelBuilder.Entity<Entity>()
-            .HasDiscriminator<string>("type")
+            .HasDiscriminator<string>("discriminator")
             .HasValue<SystemEntity>("system")
-            .HasValue<ResourceManagerEntity>("resource_manager")
+            .HasValue<FungibleResourceManagerEntity>("fungible_resource_manager")
+            .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
             .HasValue<NormalComponentEntity>("normal_component")
             .HasValue<AccountComponentEntity>("account_component")
             .HasValue<SystemComponentEntity>("system_component")
@@ -145,7 +146,7 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceHistory>()
-            .HasDiscriminator<string>("type")
+            .HasDiscriminator<string>("discriminator")
             .HasValue<EntityFungibleResourceHistory>("fungible")
             .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
 
