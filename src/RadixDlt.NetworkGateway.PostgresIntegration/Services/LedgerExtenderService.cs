@@ -795,26 +795,14 @@ WHERE id IN(
 
             sw = Stopwatch.StartNew();
 
-            if (existingAggregates.Any())
-            {
-                // update only those aggregates that will be modified in next step
-                var ids = existingAggregates.Values.Select(e => e.Id).Intersect(lastAggregateByEntity.Keys).ToList();
-                var idsParameter = new NpgsqlParameter("@ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = ids };
+            var entityIds = aggregates.Select(a => a.EntityId).Distinct().ToList();
+            var entityIdsParameter = new NpgsqlParameter("@entity_ids", NpgsqlDbType.Array | NpgsqlDbType.Bigint) { Value = entityIds };
 
-                if (ids.Any())
-                {
-                    var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
-                        $"UPDATE entity_resource_aggregate_history SET is_most_recent = false WHERE id = ANY({idsParameter})",
-                        token);
+            var affected = await dbContext.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE entity_resource_aggregate_history SET is_most_recent = false WHERE is_most_recent = true AND entity_id = ANY({entityIdsParameter})",
+                token);
 
-                    if (ids.Count != affected)
-                    {
-                        throw new Exception("bla bla bla x6"); // TODO fix me
-                    }
-
-                    rowsUpdated += affected;
-                }
-            }
+            rowsUpdated += affected;
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_ids, non_fungible_resource_ids) FROM STDIN (FORMAT BINARY)", token))
             {
