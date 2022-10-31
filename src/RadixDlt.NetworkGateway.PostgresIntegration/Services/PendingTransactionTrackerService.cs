@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
+using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -294,7 +295,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .ToList(); // Npgsql optimizes List<> Contains
 
         // Now check that these are actually new and need adding, by checking the transaction ids against the database.
-        // We check both the MempoolTransactions table, and the LedgerTransactions table.
+        // We check both the PendingTransactions table, and the LedgerTransactions table.
         // If a node mempool gets really far behind, it could include committed transactions we've already pruned
         // from our MempoolTransactions table due to being committed - so let's ensure these don't get re-added.
         var transactionIdsInANodeMempoolWhichAreAlreadyAMempoolTransactionInTheDb = await dbContext.PendingTransactions
@@ -320,7 +321,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             return;
         }
 
-        // TODO uncomment and tune for Babylon
+        // TODO fetch transaction details using CoreApi's /mempool/transaction endpoint and add to DB
         // var newDbMempoolTransactions = transactionsToAdd
         //     .Select((transactionData, index) => PendingTransaction.NewFirstSeenInMempool(
         //         transactionData.Id,

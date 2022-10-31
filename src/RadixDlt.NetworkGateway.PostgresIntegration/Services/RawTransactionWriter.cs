@@ -140,9 +140,7 @@ internal class RawTransactionWriter : IRawTransactionWriter
                 );
             }
 
-            var transactionSummary = transactionsByPayloadHash[pendingTransaction.PayloadHash].TransactionSummary;
-
-            pendingTransaction.MarkAsCommitted(transactionSummary.StateVersion, transactionSummary.NormalizedRoundTimestamp, _clock);
+            pendingTransaction.MarkAsCommitted(_clock.UtcNow);
         }
 
         // If this errors (due to changes to the MempoolTransaction.Status ConcurrencyToken), we may have to consider
