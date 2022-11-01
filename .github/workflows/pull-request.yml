@@ -39,9 +39,6 @@ jobs:
       - name: Unit tests
         # Add --verbosity normal to get more noisy logs if required for debugging
         run: dotnet test --no-restore --filter RadixDlt.NetworkGateway.UnitTests
-      - name: Integration tests
-        # Add --verbosity normal to get more noisy logs if required for debugging
-        run: dotnet test --no-restore --verbosity normal --filter RadixDlt.NetworkGateway.IntegrationTests
 
   publish-docker:
     runs-on: ubuntu-22.04
