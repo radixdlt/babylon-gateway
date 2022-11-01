@@ -134,8 +134,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
             preparationReport.MempoolTransactionUpdateMs,
             (long)processTransactionReport.ContentHandlingDuration.TotalMilliseconds,
             (long)processTransactionReport.DbReadDuration.TotalMilliseconds,
-            -1, // TODO unused
-            -1, // TODO unused
             ledgerExtensionReport.DbPersistenceMs,
             dbEntriesWritten
         );
@@ -260,7 +258,6 @@ internal class LedgerExtenderService : ILedgerExtenderService
     {
         // TODO further improvements:
         // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
-        // - we must somehow benefit from EF-stored configuration (type mapping etc.)
 
         // TODO replace with proper Activity at some point
         var rowsInserted = 0;
@@ -273,12 +270,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
         var referencedEntities = new ReferencedEntityDictionary();
         var knownGlobalAddressesToLoad = new HashSet<string>();
-        var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
-        var fungibleResourceChanges = new List<FungibleResourceChange>();
-        var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
-        var metadataChanges = new List<MetadataChange>();
-        var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
 
         SequencesHolder sequences;
@@ -311,11 +303,11 @@ SELECT
                 foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
                     var sid = upSubstate.SubstateId;
-                    var data = upSubstate.SubstateData.ActualInstance;
+                    var sd = upSubstate.SubstateData.ActualInstance;
 
-                    if (data is GlobalSubstate global)
+                    if (sd is GlobalSubstate globalData)
                     {
-                        var target = global.TargetEntity;
+                        var target = globalData.TargetEntity;
                         var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
                         te.Globalize(target.GlobalAddressHex, target.GlobalAddress);
@@ -327,9 +319,8 @@ SELECT
                     }
 
                     var re = referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
-                    var us = new UppedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
-                    if (data is IOwner owner)
+                    if (sd is IOwner owner)
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
@@ -339,7 +330,7 @@ SELECT
                         }
                     }
 
-                    if (data is IGlobalResourcePointer globalResourcePointer)
+                    if (sd is IGlobalResourcePointer globalResourcePointer)
                     {
                         foreach (var pointer in globalResourcePointer.Pointers)
                         {
@@ -350,7 +341,7 @@ SELECT
                         }
                     }
 
-                    if (data is ResourceManagerSubstate resourceManager)
+                    if (sd is ResourceManagerSubstate resourceManager)
                     {
                         Type typeHint = resourceManager.ResourceType switch
                         {
@@ -361,8 +352,6 @@ SELECT
 
                         re.WithTypeHint(typeHint);
                     }
-
-                    uppedSubstates.Add(us);
                 }
 
                 foreach (var downSubstate in stateUpdates.DownSubstates)
@@ -418,9 +407,21 @@ WHERE id IN(
 
             dbReadDuration += sw.Elapsed;
 
-            foreach (var knownDbEntity in knownDbEntities.Values.OfType<ResourceManagerEntity>())
+            foreach (var knownDbEntity in knownDbEntities.Values.Where(e => e.GlobalAddress != null))
             {
-                referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, EntityType.ResourceManager, knownDbEntity.FromStateVersion));
+                var entityType = knownDbEntity switch
+                {
+                    SystemEntity => EntityType.System,
+                    ResourceManagerEntity => EntityType.ResourceManager,
+                    ComponentEntity => EntityType.Component,
+                    PackageEntity => EntityType.Package,
+                    KeyValueStoreEntity => EntityType.KeyValueStore,
+                    VaultEntity => EntityType.Vault,
+                    NonFungibleStoreEntity => EntityType.NonFungibleStore,
+                    _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
+                };
+
+                referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, entityType, knownDbEntity.FromStateVersion));
             }
 
             var dbEntities = new List<Entity>();
@@ -495,23 +496,13 @@ WHERE id IN(
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator) FROM STDIN (FORMAT BINARY)", token))
             {
-                // TODO ouh, we must somehow reuse information already held by EF
-                var typeMapping = new Dictionary<Type, string>
-                {
-                    [typeof(SystemEntity)] = "system",
-                    [typeof(FungibleResourceManagerEntity)] = "fungible_resource_manager",
-                    [typeof(NonFungibleResourceManagerEntity)] = "non_fungible_resource_manager",
-                    [typeof(NormalComponentEntity)] = "normal_component",
-                    [typeof(AccountComponentEntity)] = "account_component",
-                    [typeof(SystemComponentEntity)] = "system_component",
-                    [typeof(PackageEntity)] = "package",
-                    [typeof(KeyValueStoreEntity)] = "key_value_store",
-                    [typeof(VaultEntity)] = "vault",
-                    [typeof(NonFungibleStoreEntity)] = "non_fungible_store",
-                };
-
                 foreach (var dbEntity in dbEntities)
                 {
+                    if (dbContext.Model.FindEntityType(dbEntity.GetType())?.GetDiscriminatorValue() is not string discriminator)
+                    {
+                        throw new Exception("Unable to determine discriminator of entity " + dbEntity.Address.ToHex());
+                    }
+
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(dbEntity.Id, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(dbEntity.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -521,7 +512,7 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity.ParentAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.OwnerAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(typeMapping[dbEntity.GetType()], NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -562,106 +553,73 @@ WHERE id IN(
             dbWriteDuration += sw.Elapsed;
         }
 
-        // TODO can't we actually merge this with step "scan for any referenced entities"?
+        var fungibleResourceChanges = new List<FungibleResourceChange>();
+        var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
+        var metadataChanges = new List<MetadataChange>();
+        var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
+
         // step: scan all substates to figure out changes
         {
-            void HandleResourceManagerSubstate(UppedSubstate us)
+            foreach (var transactionData in transactionsData)
             {
-                var data = us.Data.GetResourceManagerSubstate();
+                var stateVersion = transactionData.CommittedTransaction.StateVersion;
+                var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
 
-                metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
-
-                var totalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos);
-
-                if (data.ResourceType == ResourceType.Fungible)
+                foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
-                    fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(us.ReferencedEntity, totalSupply, TokenAmount.Zero, TokenAmount.Zero, us.StateVersion)); // TODO support mint & burnt
-                }
-            }
+                    var sid = upSubstate.SubstateId;
+                    var sd = upSubstate.SubstateData.ActualInstance;
 
-            void HandleComponentStateSubstate(UppedSubstate us)
-            {
-                var data = us.Data.GetComponentStateSubstate();
-            }
+                    if (sd is GlobalSubstate)
+                    {
+                        continue;
+                    }
 
-            void HandleVaultSubstate(UppedSubstate us)
-            {
-                var data = us.Data.GetVaultSubstate();
+                    var re = referencedEntities.Get(sid.EntityIdHex);
 
-                // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
+                    if (sd is ResourceManagerSubstate resourceManager)
+                    {
+                        metadataChanges.Add(new MetadataChange(re, resourceManager.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
 
-                // TODO ugh...
-                var resourceAmount = data.ResourceAmount.ActualInstance;
-                var substateEntity = us.ReferencedEntity;
+                        var totalSupply = TokenAmount.FromSubUnitsString(resourceManager.TotalSupplyAttos);
 
-                if (resourceAmount is FungibleResourceAmount fra)
-                {
-                    var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
+                        if (resourceManager.ResourceType == ResourceType.Fungible)
+                        {
+                            fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(re, totalSupply, TokenAmount.Zero, TokenAmount.Zero, stateVersion)); // TODO support mint & burnt
+                        }
+                    }
 
-                    var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
-                    var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                    if (sd is VaultSubstate vault)
+                    {
+                        var resourceAmount = vault.ResourceAmount.ActualInstance;
 
-                    fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, amount, us.StateVersion));
+                        switch (resourceAmount)
+                        {
+                            case FungibleResourceAmount fra:
+                            {
+                                var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
+                                var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
+                                var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                    return;
-                }
+                                fungibleResourceChanges.Add(new FungibleResourceChange(re, resourceEntity, amount, stateVersion));
 
-                if (resourceAmount is NonFungibleResourceAmount nfra)
-                {
-                    var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
-                    var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                                break;
+                            }
 
-                    nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIdsHex, us.StateVersion));
+                            case NonFungibleResourceAmount nfra:
+                            {
+                                var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
+                                var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                    return;
-                }
+                                nonFungibleResourceChanges.Add(new NonFungibleResourceChange(re, resourceEntity, nfra.NfIdsHex, stateVersion));
 
-                throw new Exception("bla bla bla bla x9"); // TODO fix me
-            }
+                                break;
+                            }
 
-            void HandleNonFungibleSubstate(UppedSubstate us)
-            {
-                var data = us.Data.GetNonFungibleSubstate();
-            }
-
-            void HandleKeyValueStoreEntrySubstate(UppedSubstate us)
-            {
-                // TODO handle referenced_entities properly (not sure if we can ensure references types have been seen)
-            }
-
-            foreach (var us in uppedSubstates)
-            {
-                switch (us.Type)
-                {
-                    case SubstateType.System:
-                        // TODO handle somehow
-                        break;
-                    case SubstateType.ResourceManager:
-                        HandleResourceManagerSubstate(us);
-                        break;
-                    case SubstateType.ComponentInfo:
-                        // TODO handle somehow
-                        break;
-                    case SubstateType.ComponentState:
-                        HandleComponentStateSubstate(us);
-                        break;
-                    case SubstateType.Package:
-                        // TODO handle somehow
-                        break;
-                    case SubstateType.Vault:
-                        HandleVaultSubstate(us);
-                        break;
-                    case SubstateType.NonFungible:
-                        HandleNonFungibleSubstate(us);
-                        break;
-                    case SubstateType.KeyValueStoreEntry:
-                        HandleKeyValueStoreEntrySubstate(us);
-                        break;
-                    case SubstateType.Global:
-                        // we do not want to handle them on purpose
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(us.Type), us.Type, null);
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(resourceAmount), resourceAmount.GetType().Name);
+                        }
+                    }
                 }
             }
         }
@@ -822,7 +780,15 @@ WHERE id IN(
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token))
             {
-                var type = "fungible";
+                if (dbContext.Model.FindEntityType(typeof(EntityFungibleResourceHistory))?.GetDiscriminatorValue() is not string fungibleDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of EntityFungibleResourceHistory");
+                }
+
+                if (dbContext.Model.FindEntityType(typeof(EntityNonFungibleResourceHistory))?.GetDiscriminatorValue() is not string nonFungibleDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of EntityNonFungibleResourceHistory");
+                }
 
                 foreach (var fungible in fungibles)
                 {
@@ -832,13 +798,11 @@ WHERE id IN(
                     await writer.WriteAsync(fungible.OwnerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.GlobalEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(type, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(fungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(fungible.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                 }
-
-                type = "non_fungible";
 
                 foreach (var nonFungible in nonFungibles)
                 {
@@ -848,7 +812,7 @@ WHERE id IN(
                     await writer.WriteAsync(nonFungible.OwnerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.GlobalEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(type, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(nonFungible.IdsCount, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.Ids, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);

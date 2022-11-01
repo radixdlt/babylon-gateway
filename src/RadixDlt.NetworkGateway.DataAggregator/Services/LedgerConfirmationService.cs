@@ -397,28 +397,26 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         UpdateRecordsOfTopOfLedger(commitReport.FinalTransaction);
 
         var currentTimestamp = _clock.UtcNow;
+        var committedTransactionSummary = commitReport.FinalTransaction;
 
         _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
 
         _logger.LogInformation(
-            "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten},TxnContentDbActions={TransactionContentDbActionsCount}]",
+            "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten}]",
             ledgerExtension.TransactionData.Count,
             totalCommitMs,
-            commitReport.DbEntriesWritten,
-            commitReport.TransactionContentDbActionsCount
+            commitReport.DbEntriesWritten
         );
 
         _logger.LogInformation(
-            "[TimeSplitsInMs: RawTxns={RawTxnPersistenceMs},Mempool={MempoolTransactionUpdateMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},LocalActionPlanning={LocalDbContextActionsMs},DbPersistence={DbPersistanceMs}]",
+            "[TimeSplitsInMs: RawTxns={RawTxnPersistenceMs},Mempool={MempoolTransactionUpdateMs},TxnContentHandling={TxnContentHandlingMs},DbDependencyLoading={DbDependenciesLoadingMs},DbPersistence={DbPersistanceMs}]",
             commitReport.RawTxnPersistenceMs,
             commitReport.MempoolTransactionUpdateMs,
             commitReport.TransactionContentHandlingMs,
             commitReport.DbDependenciesLoadingMs,
-            commitReport.LocalDbContextActionsMs,
             commitReport.DbPersistanceMs
         );
 
-        var committedTransactionSummary = commitReport.FinalTransaction;
         _logger.LogInformation(
             "[NewDbLedgerTip: StateVersion={LedgerStateVersion},Epoch={LedgerEpoch},IndexInEpoch={LedgerIndexInEpoch},RoundTimestamp={RoundTimestamp}]",
             committedTransactionSummary.StateVersion,

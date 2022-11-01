@@ -91,8 +91,6 @@ public sealed record CommitTransactionsReport(
     long MempoolTransactionUpdateMs,
     long TransactionContentHandlingMs,
     long DbDependenciesLoadingMs,
-    int TransactionContentDbActionsCount,
-    long LocalDbContextActionsMs,
     long DbPersistanceMs,
     int DbEntriesWritten
 );
