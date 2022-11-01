@@ -27,7 +27,6 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
     <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
     <PackageVersion Include="prometheus-net" Version="6.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="6.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
