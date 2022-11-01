@@ -1,0 +1,100 @@
+name: Sync OpenAPI specs with Postman
+
+on:
+  push:
+    branches:
+    - main
+  workflow_dispatch:
+    inputs:
+      network_name:
+        description: "Testnet to publish collection for"
+        required: true
+        default: gilganet
+        options:
+          - gilganet
+          - enkinet
+          - hammunet
+          - adapanet
+
+jobs:
+  cancel_running_workflows:
+    name: Cancel running workflows
+    runs-on: ubuntu-22.04
+    steps:
+      - name: cancel running workflows
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{github.token}}
+  sync_collections:
+    name: Sync Postman collection w/ latest specs
+    environment: Postman
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%b %d, %H:%M')"
+      - name: Checkout gateway repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set git tags
+        id: gittag
+        run: echo "::set-output name=gittag::$(git describe --tags --dirty)"
+
+      # ========== Mapping the network name to postman-related variables ==========
+      - name: Map network name to its variables
+        uses: kanga333/variable-mapper@v0.3.0
+        with:
+          key: "${{ github.event.inputs.network_name || 'gilganet' }}"
+          map: |
+            {
+              "gilganet": {
+                "gateway_api_collection_name": "Gateway API (${{steps.gittag.outputs.gittag}}) ${{steps.date.outputs.date}} UTC",
+                "gateway_api_collection_id": "14449947-f0543557-0b9e-43ef-ae62-dd640fbf5a35"
+              },
+              "enkinet": {
+                "gateway_api_collection_name": "Enkinet Gateway API (${{steps.gittag.outputs.gittag}})",
+                "gateway_api_collection_id": "14449947-61a63b06-4f92-465c-a0f3-89d4e756e664"
+              },
+              "hammunet": {
+                "gateway_api_collection_name": "Gateway API (${{steps.gittag.outputs.gittag}})",
+                "gateway_api_collection_id": ""
+              },
+              "adapanet": {
+                "gateway_api_collection_name": "Adapanet [ALPHANET] Gateway API (${{steps.gittag.outputs.gittag}})",
+                "gateway_api_collection_id": ""
+              },
+              ".*": {
+                "gateway_api_collection_name": "Gateway API (${{steps.gittag.outputs.gittag}}) ${{steps.date.outputs.date}} UTC",
+                "gateway_api_collection_id": "14449947-f0543557-0b9e-43ef-ae62-dd640fbf5a35"
+              }
+            }
+      - name: Echo environment
+        run: echo ${{ env.environment }}
+
+      # ========== Credentials ==========
+      - name: Setup Postman credentials
+        uses: DamianReeves/write-file-action@v1.1
+        with:
+          path: .env
+          contents: POSTMAN_API_KEY=${{secrets.POSTMAN_API_TOKEN}}
+          write-mode: append
+
+      # ========== Actually updating the postman collection ==========
+      - name: Update Postman's Gateway API collection from the spec
+        run: |
+          npx @apideck/portman@1.18.1 -l src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml \
+            --postmanUid ${{env.gateway_api_collection_id}} --syncPostman true --envFile .env
+      - name: Download the collection
+        run: |
+          curl -X GET -H "X-API-KEY:${{secrets.POSTMAN_API_TOKEN}}" https://api.getpostman.com/collections/${{env.gateway_api_collection_id}} > tmp.collection.json
+      - name: Update the collection name w/ timestamp and git tag
+        run: |
+          sed -i 's/"name":".*","description":"See/"name":"${{env.gateway_api_collection_name}}","description":"See/' tmp.collection.json
+      - name: Change the baseUrl variable name
+        run: |
+          sed -i 's/{{baseUrl}}/{{gatewayBaseUrl}}/g' tmp.collection.json
+      - name: Update the collection
+        run: |
+          curl -X PUT -H "X-API-KEY:${{secrets.POSTMAN_API_TOKEN}}" -H "Content-Type: application/json" \
+            https://api.getpostman.com/collections/${{env.gateway_api_collection_id}} --data "@tmp.collection.json"
