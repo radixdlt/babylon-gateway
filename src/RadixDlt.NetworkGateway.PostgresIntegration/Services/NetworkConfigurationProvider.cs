@@ -64,13 +64,13 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -95,7 +95,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         _logger = logger;
     }
 
-    public async Task SetNetworkConfigurationOrAssertMatching(NetworkConfigurationResponse networkConfigurationResponse, CancellationToken token)
+    public async Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse networkConfigurationResponse, CancellationToken token)
     {
         var inputNetworkConfiguration = MapNetworkConfigurationResponse(networkConfigurationResponse);
         var existingNetworkConfiguration = await GetCurrentLedgerNetworkConfigurationFromDb(token);
@@ -163,7 +163,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress;
     }
 
-    private static NetworkConfiguration MapNetworkConfigurationResponse(NetworkConfigurationResponse networkConfiguration)
+    private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
     {
         var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
 

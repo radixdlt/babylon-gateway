@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Client;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using System;
 using System.Threading.Tasks;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 
 namespace RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 
@@ -82,7 +82,7 @@ public static class CoreApiErrorWrapper
         {
             return await requestAction();
         }
-        catch (ApiException apiException)
+        catch (CoreClient.ApiException apiException)
         {
             var wrappedException = ExtractWrappedCoreApiException(apiException);
 
@@ -95,7 +95,7 @@ public static class CoreApiErrorWrapper
         }
     }
 
-    public static WrappedCoreApiException? ExtractWrappedCoreApiException(ApiException apiException)
+    public static WrappedCoreApiException? ExtractWrappedCoreApiException(CoreClient.ApiException apiException)
     {
         return null;
 

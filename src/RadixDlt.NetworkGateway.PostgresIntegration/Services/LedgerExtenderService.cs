@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -83,6 +82,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -305,7 +305,7 @@ SELECT
                     var sid = upSubstate.SubstateId;
                     var sd = upSubstate.SubstateData.ActualInstance;
 
-                    if (sd is GlobalSubstate globalData)
+                    if (sd is CoreModel.GlobalSubstate globalData)
                     {
                         var target = globalData.TargetEntity;
                         var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
@@ -320,7 +320,7 @@ SELECT
 
                     var re = referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
 
-                    if (sd is IOwner owner)
+                    if (sd is CoreModel.IOwner owner)
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
@@ -330,7 +330,7 @@ SELECT
                         }
                     }
 
-                    if (sd is IGlobalResourcePointer globalResourcePointer)
+                    if (sd is CoreModel.IGlobalResourcePointer globalResourcePointer)
                     {
                         foreach (var pointer in globalResourcePointer.Pointers)
                         {
@@ -341,12 +341,12 @@ SELECT
                         }
                     }
 
-                    if (sd is ResourceManagerSubstate resourceManager)
+                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
                     {
                         Type typeHint = resourceManager.ResourceType switch
                         {
-                            ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
-                            ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
+                            CoreModel.ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
+                            CoreModel.ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
                             _ => throw new ArgumentOutOfRangeException(),
                         };
 
@@ -411,13 +411,13 @@ WHERE id IN(
             {
                 var entityType = knownDbEntity switch
                 {
-                    SystemEntity => EntityType.System,
-                    ResourceManagerEntity => EntityType.ResourceManager,
-                    ComponentEntity => EntityType.Component,
-                    PackageEntity => EntityType.Package,
-                    KeyValueStoreEntity => EntityType.KeyValueStore,
-                    VaultEntity => EntityType.Vault,
-                    NonFungibleStoreEntity => EntityType.NonFungibleStore,
+                    SystemEntity => CoreModel.EntityType.System,
+                    ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
+                    ComponentEntity => CoreModel.EntityType.Component,
+                    PackageEntity => CoreModel.EntityType.Package,
+                    KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
+                    VaultEntity => CoreModel.EntityType.Vault,
+                    NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
                     _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
                 };
 
@@ -437,14 +437,14 @@ WHERE id IN(
 
                 Entity dbEntity = e.Type switch
                 {
-                    EntityType.System => new SystemEntity(),
-                    EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
-                    EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
-                    EntityType.Package => new PackageEntity(),
-                    EntityType.Vault => new VaultEntity(),
-                    EntityType.KeyValueStore => new KeyValueStoreEntity(),
-                    EntityType.Global => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, "Global entities should be filtered out"),
-                    EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
+                    CoreModel.EntityType.System => new SystemEntity(),
+                    CoreModel.EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
+                    CoreModel.EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
+                    CoreModel.EntityType.Package => new PackageEntity(),
+                    CoreModel.EntityType.Vault => new VaultEntity(),
+                    CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
+                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, "Global entities should be filtered out"),
+                    CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, null),
                 };
 
@@ -570,32 +570,32 @@ WHERE id IN(
                     var sid = upSubstate.SubstateId;
                     var sd = upSubstate.SubstateData.ActualInstance;
 
-                    if (sd is GlobalSubstate)
+                    if (sd is CoreModel.GlobalSubstate)
                     {
                         continue;
                     }
 
                     var re = referencedEntities.Get(sid.EntityIdHex);
 
-                    if (sd is ResourceManagerSubstate resourceManager)
+                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
                     {
                         metadataChanges.Add(new MetadataChange(re, resourceManager.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
 
                         var totalSupply = TokenAmount.FromSubUnitsString(resourceManager.TotalSupplyAttos);
 
-                        if (resourceManager.ResourceType == ResourceType.Fungible)
+                        if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
                         {
                             fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(re, totalSupply, TokenAmount.Zero, TokenAmount.Zero, stateVersion)); // TODO support mint & burnt
                         }
                     }
 
-                    if (sd is VaultSubstate vault)
+                    if (sd is CoreModel.VaultSubstate vault)
                     {
                         var resourceAmount = vault.ResourceAmount.ActualInstance;
 
                         switch (resourceAmount)
                         {
-                            case FungibleResourceAmount fra:
+                            case CoreModel.FungibleResourceAmount fra:
                             {
                                 var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
                                 var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
@@ -606,7 +606,7 @@ WHERE id IN(
                                 break;
                             }
 
-                            case NonFungibleResourceAmount nfra:
+                            case CoreModel.NonFungibleResourceAmount nfra:
                             {
                                 var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);

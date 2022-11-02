@@ -70,13 +70,13 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -108,27 +108,27 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _clock = clock;
     }
 
-    public async Task<GatewayInfoResponse> GetGatewayState(CancellationToken token)
+    public async Task<GatewayModel.GatewayInfoResponse> GetGatewayState(CancellationToken token)
     {
         var ledgerStatus = await GetLedgerStatus(token);
-        return new GatewayInfoResponse(
-            new LedgerState(
+        return new GatewayModel.GatewayInfoResponse(
+            new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
                 ledgerStatus.TopOfLedgerTransaction.StateVersion,
                 ledgerStatus.TopOfLedgerTransaction.RoundTimestamp.AsUtcIsoDateWithMillisString(),
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new GatewayInfoResponseGatewayApiVersions(
+            new GatewayModel.GatewayInfoResponseGatewayApiVersions(
                 _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
                 _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
             ),
-            new GatewayInfoResponseTargetLedgerState(ledgerStatus.TargetStateVersion)
+            new GatewayModel.GatewayInfoResponseTargetLedgerState(ledgerStatus.TargetStateVersion)
         );
     }
 
     // So that we don't forget to check the network name, add the assertion in here.
-    public async Task<LedgerState> GetValidLedgerStateForReadRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
+    public async Task<GatewayModel.LedgerState> GetValidLedgerStateForReadRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
     {
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier, token);
         var ledgerState = ledgerStateReport.LedgerState;
@@ -165,7 +165,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    public async Task<LedgerState?> GetValidLedgerStateForReadForwardRequest(PartialLedgerStateIdentifier? fromLedgerStateIdentifier, CancellationToken token = default)
+    public async Task<GatewayModel.LedgerState?> GetValidLedgerStateForReadForwardRequest(GatewayModel.PartialLedgerStateIdentifier? fromLedgerStateIdentifier, CancellationToken token = default)
     {
         LedgerStateReport? ledgerStateReport = null;
 
@@ -185,7 +185,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStateReport?.LedgerState;
     }
 
-    public async Task<LedgerState> GetValidLedgerStateForConstructionRequest(PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
+    public async Task<GatewayModel.LedgerState> GetValidLedgerStateForConstructionRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default)
     {
         var ledgerStateReport = await GetLedgerState(atLedgerStateIdentifier, token);
         var ledgerState = ledgerStateReport.LedgerState;
@@ -243,9 +243,9 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus;
     }
 
-    private record LedgerStateReport(LedgerState LedgerState, DateTimeOffset RoundTimestamp);
+    private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTimeOffset RoundTimestamp);
 
-    private async Task<LedgerStateReport> GetLedgerState(PartialLedgerStateIdentifier? at = null, CancellationToken token = default)
+    private async Task<LedgerStateReport> GetLedgerState(GatewayModel.PartialLedgerStateIdentifier? at = null, CancellationToken token = default)
     {
         LedgerStateReport result;
 
@@ -366,7 +366,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             .SingleOrDefaultAsync(token);
 
         return lt == null ? null : new LedgerStateReport(
-            new LedgerState(
+            new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
                 lt.StateVersion,
                 lt.RoundTimestamp.AsUtcIsoDateWithMillisString(),

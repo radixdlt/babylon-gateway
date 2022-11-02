@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
@@ -70,12 +70,12 @@ public abstract class NotFoundException : KnownGatewayErrorException
 {
     private const int NotFoundStatusCode = 404;
 
-    public NotFoundException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
+    public NotFoundException(GatewayModel.GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base(NotFoundStatusCode, gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    public NotFoundException(GatewayError gatewayError, string userFacingMessage)
+    public NotFoundException(GatewayModel.GatewayError gatewayError, string userFacingMessage)
         : base(NotFoundStatusCode, gatewayError, userFacingMessage)
     {
     }

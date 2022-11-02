@@ -62,17 +62,17 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using System;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public static class TransactionSummarisationGenerator
 {
-    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CommittedTransaction transaction, IClock clock)
+    public static TransactionSummary GenerateSummary(TransactionSummary lastTransaction, CoreModel.CommittedTransaction transaction, IClock clock)
     {
         long? newEpoch = null;
         long? newRoundInEpoch = null;
@@ -80,7 +80,7 @@ public static class TransactionSummarisationGenerator
 
         foreach (var upSubstate in transaction.Receipt.StateUpdates.UpSubstates)
         {
-            if (upSubstate.SubstateData.ActualInstance is SystemSubstate systemSubstate)
+            if (upSubstate.SubstateData.ActualInstance is CoreModel.SystemSubstate systemSubstate)
             {
                 newEpoch = systemSubstate.Epoch;
             }

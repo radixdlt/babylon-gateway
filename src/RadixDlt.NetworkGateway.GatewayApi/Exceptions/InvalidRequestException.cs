@@ -62,27 +62,27 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Collections.Generic;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
 public sealed class InvalidRequestException : ValidationException
 {
-    private InvalidRequestException(InvalidRequestError gatewayError, string userFacingMessage, string internalMessage)
+    private InvalidRequestException(GatewayModel.InvalidRequestError gatewayError, string userFacingMessage, string internalMessage)
         : base(gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    private InvalidRequestException(InvalidRequestError gatewayError, string userFacingMessage)
+    private InvalidRequestException(GatewayModel.InvalidRequestError gatewayError, string userFacingMessage)
         : base(gatewayError, userFacingMessage)
     {
     }
 
-    public static InvalidRequestException FromValidationErrors(List<ValidationErrorsAtPath> validationErrors)
+    public static InvalidRequestException FromValidationErrors(List<GatewayModel.ValidationErrorsAtPath> validationErrors)
     {
         return new InvalidRequestException(
-            new InvalidRequestError(
+            new GatewayModel.InvalidRequestError(
                 validationErrors
             ),
             "One or more validation errors occurred"
@@ -92,8 +92,8 @@ public sealed class InvalidRequestException : ValidationException
     public static InvalidRequestException FromOtherError(string error)
     {
         return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
+            new GatewayModel.InvalidRequestError(
+                new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
             ),
             "One or more validation errors occurred"
         );
@@ -102,8 +102,8 @@ public sealed class InvalidRequestException : ValidationException
     public static InvalidRequestException FromOtherError(string error, string internalMessage)
     {
         return new InvalidRequestException(
-            new InvalidRequestError(
-                new List<ValidationErrorsAtPath> { new("?", new List<string> { error }) }
+            new GatewayModel.InvalidRequestError(
+                new List<GatewayModel.ValidationErrorsAtPath> { new("?", new List<string> { error }) }
             ),
             "One or more validation errors occurred",
             internalMessage

@@ -63,8 +63,8 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
@@ -76,7 +76,7 @@ public enum NotSyncedUpRequestType
 
 public sealed class NotSyncedUpException : KnownGatewayErrorException
 {
-    private NotSyncedUpException(NotSyncedUpError gatewayError, string userFacingMessage)
+    private NotSyncedUpException(GatewayModel.NotSyncedUpError gatewayError, string userFacingMessage)
         : base(500, gatewayError, userFacingMessage)
     {
     }
@@ -84,7 +84,7 @@ public sealed class NotSyncedUpException : KnownGatewayErrorException
     public static NotSyncedUpException FromRequest(NotSyncedUpRequestType requestType, TimeSpan currentSyncDelay, long maxAllowedSyncDelaySeconds)
     {
         return new NotSyncedUpException(
-            new NotSyncedUpError(
+            new GatewayModel.NotSyncedUpError(
                 RequestTypeAsString(requestType),
                 currentSyncDelaySeconds: (long)Math.Floor(currentSyncDelay.TotalSeconds),
                 maxAllowedSyncDelaySeconds: maxAllowedSyncDelaySeconds

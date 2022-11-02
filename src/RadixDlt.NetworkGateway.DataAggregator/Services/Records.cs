@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using System;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -84,7 +84,7 @@ public sealed record TransactionSummary(
 );
 
 public sealed record CommittedTransactionData(
-    CommittedTransaction CommittedTransaction,
+    CoreModel.CommittedTransaction CommittedTransaction,
     TransactionSummary TransactionSummary,
     byte[] TransactionContents
 );

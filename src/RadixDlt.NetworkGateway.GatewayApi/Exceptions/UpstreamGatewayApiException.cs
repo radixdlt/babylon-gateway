@@ -62,18 +62,18 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
 public sealed class UpstreamGatewayApiException : KnownGatewayErrorException
 {
-    private UpstreamGatewayApiException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
+    private UpstreamGatewayApiException(int statusCode, GatewayModel.GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base(statusCode, gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    public static UpstreamGatewayApiException OfUpstreamGatewayApiError(ErrorResponse errorResponse)
+    public static UpstreamGatewayApiException OfUpstreamGatewayApiError(GatewayModel.ErrorResponse errorResponse)
     {
         return new UpstreamGatewayApiException(
             errorResponse.Code,

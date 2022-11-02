@@ -73,7 +73,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CoreApiModel = RadixDlt.CoreApiSdk.Model;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -237,7 +237,7 @@ internal class CoreNodeHealthChecker : ICoreNodeHealthChecker
                 );
 
             var networkStatusResponse = await coreApiProvider.StatusApi.StatusNetworkStatusPostAsync(
-                new CoreApiModel.NetworkStatusRequest(networkName),
+                new CoreModel.NetworkStatusRequest(networkName),
                 sharedCancellationTokenSource.Token);
 
             return (coreApiNode, networkStatusResponse.CurrentStateIdentifier.StateVersion, null);

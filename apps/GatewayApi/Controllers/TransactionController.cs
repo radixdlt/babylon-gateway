@@ -65,9 +65,9 @@
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace GatewayApi.Controllers;
 
@@ -85,32 +85,32 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("recent")]
-    public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token)
+    public async Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token)
     {
         return await _transactionHandler.Recent(request, token);
     }
 
     [HttpPost("status")]
-    public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token)
+    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
     {
         return await _transactionHandler.Status(request, token);
     }
 
     [HttpPost("details")]
-    public async Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token)
+    public async Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token)
     {
         return await _transactionHandler.Details(request, token);
     }
 
     // TODO decide how do we want to model /this endpoint in our OAS
     [HttpPost("preview")]
-    public async Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token)
+    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
     {
         return await _transactionHandler.Preview(request, token);
     }
 
     [HttpPost("submit")]
-    public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token)
+    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token)
     {
         return await _transactionHandler.Submit(request, token);
     }

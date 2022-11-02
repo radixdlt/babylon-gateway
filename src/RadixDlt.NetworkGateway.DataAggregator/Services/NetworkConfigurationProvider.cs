@@ -62,16 +62,16 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 {
-    Task SetNetworkConfigurationOrAssertMatching(NetworkConfigurationResponse inputNetworkConfiguration, CancellationToken token);
+    Task SetNetworkConfigurationOrAssertMatching(CoreModel.NetworkConfigurationResponse inputNetworkConfiguration, CancellationToken token);
 
     Task<string?> EnsureNetworkConfigurationLoadedFromDatabaseIfExistsAndReturnNetworkName(CancellationToken token = default);
 

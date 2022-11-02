@@ -62,21 +62,21 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface ITransactionHandler
 {
-    Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token = default);
+    Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token = default);
 
-    Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default);
 
-    Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token = default);
 
-    Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
 
-    Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }

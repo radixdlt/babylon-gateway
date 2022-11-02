@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -73,6 +72,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
@@ -118,7 +118,7 @@ public sealed class NodeNetworkConfigurationInitializer : NodeInitializer
         );
     }
 
-    private async Task<NetworkConfigurationResponse> ReadNetworkConfigurationFromNode(CancellationToken token)
+    private async Task<CoreModel.NetworkConfigurationResponse> ReadNetworkConfigurationFromNode(CancellationToken token)
     {
         try
         {

@@ -64,9 +64,9 @@
 
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
@@ -89,72 +89,72 @@ internal class DefaultTransactionHandler : ITransactionHandler
         _submissionService = submissionService;
     }
 
-    public async Task<RecentTransactionsResponse> Recent(RecentTransactionsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
         var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, token);
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
-            Cursor: LedgerTransactionsCursor.FromCursorString(request.Cursor),
+            Cursor: GatewayModel.LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.Limit ?? 10
         );
 
         var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
 
         // NB - We don't return a total here as we don't have an index on user transactions
-        return new RecentTransactionsResponse(
+        return new GatewayModel.RecentTransactionsResponse(
             atLedgerState,
             nextCursor: results.NextPageCursor?.ToCursorString(),
             items: results.Transactions
         );
     }
 
-    public async Task<TransactionStatusResponse> Status(TransactionStatusRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, false, token);
 
         if (committedTransaction != null)
         {
-            return new TransactionStatusResponse(ledgerState, committedTransaction.Info);
+            return new GatewayModel.TransactionStatusResponse(ledgerState, committedTransaction.Info);
         }
 
         var pendingTransaction = await _transactionQuerier.LookupPendingTransaction(request.TransactionIdentifier, token);
 
         if (pendingTransaction != null)
         {
-            return new TransactionStatusResponse(ledgerState, pendingTransaction);
+            return new GatewayModel.TransactionStatusResponse(ledgerState, pendingTransaction);
         }
 
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
-    public async Task<TransactionDetailsResponse> Details(TransactionDetailsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
 
         if (committedTransaction != null)
         {
-            return new TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
+            return new GatewayModel.TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
         }
 
         var pendingTransaction = await _transactionQuerier.LookupPendingTransaction(request.TransactionIdentifier, token);
 
         if (pendingTransaction != null)
         {
-            return new TransactionDetailsResponse(ledgerState, pendingTransaction);
+            return new GatewayModel.TransactionDetailsResponse(ledgerState, pendingTransaction);
         }
 
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
-    public async Task<TransactionPreviewResponse> Preview(TransactionPreviewRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
     {
         return await _previewService.HandlePreviewRequest(request, token);
     }
 
-    public async Task<TransactionSubmitResponse> Submit(TransactionSubmitRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default)
     {
         return await _submissionService.HandleSubmitRequest(request, token);
     }

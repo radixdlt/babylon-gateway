@@ -62,7 +62,7 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
@@ -70,12 +70,12 @@ public abstract class ValidationException : KnownGatewayErrorException
 {
     private const int ValidationErrorStatusCode = 400;
 
-    public ValidationException(GatewayError gatewayError, string userFacingMessage, string internalMessage)
+    public ValidationException(GatewayModel.GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base(ValidationErrorStatusCode, gatewayError, userFacingMessage, internalMessage)
     {
     }
 
-    public ValidationException(GatewayError gatewayError, string userFacingMessage)
+    public ValidationException(GatewayModel.GatewayError gatewayError, string userFacingMessage)
         : base(ValidationErrorStatusCode, gatewayError, userFacingMessage)
     {
     }

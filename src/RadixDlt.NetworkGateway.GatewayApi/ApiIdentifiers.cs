@@ -62,33 +62,33 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Abstractions.Numerics.TokenAmount;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi;
 
 public static class ApiIdentifiers
 {
-    public static Gateway.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, Gateway.TokenIdentifier tokenIdentifier)
+    public static GatewayModel.TokenAmount AsGatewayTokenAmount(this TokenAmount tokenAmount, GatewayModel.TokenIdentifier tokenIdentifier)
     {
-        return new Gateway.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
+        return new GatewayModel.TokenAmount(tokenAmount.ToSubUnitString(), tokenIdentifier);
     }
 
-    public static string AsXrdString(this Gateway.TokenAmount apiTokenAmount)
+    public static string AsXrdString(this GatewayModel.TokenAmount apiTokenAmount)
     {
         return $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} XRD";
     }
 
-    public static string AsStringWithUnits(this Gateway.TokenAmount apiTokenAmount)
+    public static string AsStringWithUnits(this GatewayModel.TokenAmount apiTokenAmount)
     {
         return apiTokenAmount.TokenIdentifier.Rri.StartsWith("xrd_")
             ? AsXrdString(apiTokenAmount) // xrd is a reserved symbol, so we can avoid sharing the full RRI
             : $"{TokenAmount.FromSubUnitsString(apiTokenAmount.Value)} {apiTokenAmount.TokenIdentifier.Rri}";
     }
 
-    public static Gateway.TokenIdentifier AsGatewayTokenIdentifier(this string rri)
+    public static GatewayModel.TokenIdentifier AsGatewayTokenIdentifier(this string rri)
     {
-        return new Gateway.TokenIdentifier(rri);
+        return new GatewayModel.TokenIdentifier(rri);
     }
 }

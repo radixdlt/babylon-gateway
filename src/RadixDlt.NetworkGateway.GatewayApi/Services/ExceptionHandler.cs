@@ -73,7 +73,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -101,7 +101,7 @@ internal class ExceptionHandler : IExceptionHandler
 
         _observers.ForEach(x => x.OnException(actionContext, exception, gatewayErrorException));
 
-        return new JsonResult(new Gateway.ErrorResponse(
+        return new JsonResult(new GatewayModel.ErrorResponse(
             code: gatewayErrorException.StatusCode,
             message: gatewayErrorException.UserFacingMessage,
             details: gatewayErrorException.GatewayError,

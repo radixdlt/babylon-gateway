@@ -64,11 +64,11 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -78,10 +78,10 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
 
     string GetNetworkName();
 
-    TokenIdentifier GetXrdTokenIdentifier();
+    GatewayModel.TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition, TokenIdentifier XrdTokenIdentifier);
+public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition, GatewayModel.TokenIdentifier XrdTokenIdentifier);
 
 public interface ICapturedConfigProvider
 {
@@ -123,7 +123,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().XrdAddress;
     }
 
-    public TokenIdentifier GetXrdTokenIdentifier()
+    public GatewayModel.TokenIdentifier GetXrdTokenIdentifier()
     {
         return GetCapturedConfig().XrdTokenIdentifier;
     }

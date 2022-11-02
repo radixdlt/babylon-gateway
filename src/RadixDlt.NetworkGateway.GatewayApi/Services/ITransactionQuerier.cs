@@ -63,10 +63,9 @@
  */
 
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -74,17 +73,17 @@ public interface ITransactionQuerier
 {
     Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
         RecentTransactionPageRequest request,
-        Gateway.LedgerState atLedgerState,
-        Gateway.LedgerState? fromLedgerState,
+        GatewayModel.LedgerState atLedgerState,
+        GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token = default);
 
-    Task<LookupResult?> LookupCommittedTransaction(Gateway.TransactionLookupIdentifier lookup, Gateway.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
+    Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionLookupIdentifier lookup, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
-    Task<Gateway.TransactionInfo?> LookupPendingTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
+    Task<GatewayModel.TransactionInfo?> LookupPendingTransaction(GatewayModel.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
 
-public sealed record LookupResult(Gateway.TransactionInfo? Info, Gateway.TransactionDetails? Details);
+public sealed record LookupResult(GatewayModel.TransactionInfo? Info, GatewayModel.TransactionDetails? Details);
 
-public sealed record TransactionPageWithoutTotal(Gateway.LedgerTransactionsCursor? NextPageCursor, List<Gateway.TransactionInfo> Transactions);
+public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.TransactionInfo> Transactions);
 
-public sealed record RecentTransactionPageRequest(Gateway.LedgerTransactionsCursor? Cursor, int PageSize);
+public sealed record RecentTransactionPageRequest(GatewayModel.LedgerTransactionsCursor? Cursor, int PageSize);

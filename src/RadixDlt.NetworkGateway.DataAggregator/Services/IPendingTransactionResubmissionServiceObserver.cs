@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using System;
 using System.Threading.Tasks;

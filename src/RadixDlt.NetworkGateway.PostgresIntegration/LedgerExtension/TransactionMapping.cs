@@ -62,12 +62,12 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
@@ -104,13 +104,13 @@ internal static class TransactionMapping
         };
     }
 
-    private static LedgerTransactionStatus ToLedgerStatus(TransactionStatus status)
+    private static LedgerTransactionStatus ToLedgerStatus(CoreModel.TransactionStatus status)
     {
         return status switch
         {
-            TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
-            TransactionStatus.Failed => LedgerTransactionStatus.Failed,
-            TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
+            CoreModel.TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
+            CoreModel.TransactionStatus.Failed => LedgerTransactionStatus.Failed,
+            CoreModel.TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }

@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
@@ -77,6 +76,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
@@ -88,7 +88,7 @@ public interface ILedgerConfirmationService
     // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
     void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion);
 
-    void SubmitTransactionsFromNode(string nodeName, List<CommittedTransaction> transactions);
+    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions);
 
     TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
 }
@@ -115,7 +115,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /* Variables */
     private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CommittedTransaction>> _transactionsByNode = new();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CoreModel.CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;
 
     private IList<CoreApiNode> TransactionNodes { get; set; } = new List<CoreApiNode>();
@@ -217,7 +217,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// </summary>
     public void SubmitTransactionsFromNode(
         string nodeName,
-        List<CommittedTransaction> transactions
+        List<CoreModel.CommittedTransaction> transactions
     )
     {
         if (!_latestLedgerTipByNode.ContainsKey(nodeName))
@@ -264,9 +264,9 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         Config = _ledgerConfirmationOptionsMonitor.CurrentValue;
     }
 
-    private List<CommittedTransaction> ConstructQuorumLedgerExtension()
+    private List<CoreModel.CommittedTransaction> ConstructQuorumLedgerExtension()
     {
-        var extension = new List<CommittedTransaction>();
+        var extension = new List<CoreModel.CommittedTransaction>();
 
         var startStateVersion = _knownTopOfCommittedLedger!.StateVersion + 1;
         var trustRequirements = ComputeTrustWeightingRequirements();
@@ -464,7 +464,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         List<string> InconsistentNodeNames
     );
 
-    private record TransactionClaim(CommittedTransaction Transaction, List<string> NodeNames, decimal Trust);
+    private record TransactionClaim(CoreModel.CommittedTransaction Transaction, List<string> NodeNames, decimal Trust);
 
     private MostTrustedTransactionReport FindMostTrustedTransaction(long stateVersion)
     {
@@ -503,7 +503,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         return new MostTrustedTransactionReport(topTransaction, totalTrust, inconsistentNodeNames);
     }
 
-    private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CommittedTransaction> transactions)
+    private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions)
     {
         var transactionData = new List<CommittedTransactionData>();
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
@@ -623,8 +623,8 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         return null;
     }
 
-    private ConcurrentDictionary<long, CommittedTransaction> GetTransactionsForNode(string nodeName)
+    private ConcurrentDictionary<long, CoreModel.CommittedTransaction> GetTransactionsForNode(string nodeName)
     {
-        return _transactionsByNode.GetOrAdd(nodeName, new ConcurrentDictionary<long, CommittedTransaction>());
+        return _transactionsByNode.GetOrAdd(nodeName, new ConcurrentDictionary<long, CoreModel.CommittedTransaction>());
     }
 }
