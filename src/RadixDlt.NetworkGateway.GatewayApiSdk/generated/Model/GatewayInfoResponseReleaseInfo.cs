@@ -91,31 +91,50 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayInfoResponseTargetLedgerState
+    /// GatewayInfoResponseReleaseInfo
     /// </summary>
-    [DataContract(Name = "GatewayInfoResponseTargetLedgerState")]
-    public partial class GatewayInfoResponseTargetLedgerState : IEquatable<GatewayInfoResponseTargetLedgerState>, IValidatableObject
+    [DataContract(Name = "GatewayInfoResponseReleaseInfo")]
+    public partial class GatewayInfoResponseReleaseInfo : IEquatable<GatewayInfoResponseReleaseInfo>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponseTargetLedgerState" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseReleaseInfo" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayInfoResponseTargetLedgerState() { }
+        protected GatewayInfoResponseReleaseInfo() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponseTargetLedgerState" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseReleaseInfo" /> class.
         /// </summary>
-        /// <param name="version">The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information.  (required).</param>
-        public GatewayInfoResponseTargetLedgerState(long version = default(long))
+        /// <param name="releaseVersion">The release that is currently deployed to the Gateway API. (required).</param>
+        /// <param name="openApiSchemaVersion">The Open API Schema version that was used to generate the API models. (required).</param>
+        public GatewayInfoResponseReleaseInfo(string releaseVersion = default(string), string openApiSchemaVersion = default(string))
         {
-            this._Version = version;
+            // to ensure "releaseVersion" is required (not null)
+            if (releaseVersion == null)
+            {
+                throw new ArgumentNullException("releaseVersion is a required property for GatewayInfoResponseReleaseInfo and cannot be null");
+            }
+            this.ReleaseVersion = releaseVersion;
+            // to ensure "openApiSchemaVersion" is required (not null)
+            if (openApiSchemaVersion == null)
+            {
+                throw new ArgumentNullException("openApiSchemaVersion is a required property for GatewayInfoResponseReleaseInfo and cannot be null");
+            }
+            this.OpenApiSchemaVersion = openApiSchemaVersion;
         }
 
         /// <summary>
-        /// The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. 
+        /// The release that is currently deployed to the Gateway API.
         /// </summary>
-        /// <value>The latest-seen state version of the tip of the network&#39;s ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information. </value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        /// <value>The release that is currently deployed to the Gateway API.</value>
+        [DataMember(Name = "release_version", IsRequired = true, EmitDefaultValue = true)]
+        public string ReleaseVersion { get; set; }
+
+        /// <summary>
+        /// The Open API Schema version that was used to generate the API models.
+        /// </summary>
+        /// <value>The Open API Schema version that was used to generate the API models.</value>
+        [DataMember(Name = "open_api_schema_version", IsRequired = true, EmitDefaultValue = true)]
+        public string OpenApiSchemaVersion { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,8 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayInfoResponseTargetLedgerState {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("class GatewayInfoResponseReleaseInfo {\n");
+            sb.Append("  ReleaseVersion: ").Append(ReleaseVersion).Append("\n");
+            sb.Append("  OpenApiSchemaVersion: ").Append(OpenApiSchemaVersion).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,15 +166,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayInfoResponseTargetLedgerState);
+            return this.Equals(input as GatewayInfoResponseReleaseInfo);
         }
 
         /// <summary>
-        /// Returns true if GatewayInfoResponseTargetLedgerState instances are equal
+        /// Returns true if GatewayInfoResponseReleaseInfo instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayInfoResponseTargetLedgerState to be compared</param>
+        /// <param name="input">Instance of GatewayInfoResponseReleaseInfo to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayInfoResponseTargetLedgerState input)
+        public bool Equals(GatewayInfoResponseReleaseInfo input)
         {
             if (input == null)
             {
@@ -162,8 +182,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.ReleaseVersion == input.ReleaseVersion ||
+                    (this.ReleaseVersion != null &&
+                    this.ReleaseVersion.Equals(input.ReleaseVersion))
+                ) && 
+                (
+                    this.OpenApiSchemaVersion == input.OpenApiSchemaVersion ||
+                    (this.OpenApiSchemaVersion != null &&
+                    this.OpenApiSchemaVersion.Equals(input.OpenApiSchemaVersion))
                 );
         }
 
@@ -176,7 +202,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                if (this.ReleaseVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.ReleaseVersion.GetHashCode();
+                }
+                if (this.OpenApiSchemaVersion != null)
+                {
+                    hashCode = (hashCode * 59) + this.OpenApiSchemaVersion.GetHashCode();
+                }
                 return hashCode;
             }
         }

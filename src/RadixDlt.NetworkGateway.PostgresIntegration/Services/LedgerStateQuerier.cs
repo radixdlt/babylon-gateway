@@ -119,11 +119,11 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 ledgerStatus.TopOfLedgerTransaction.Epoch,
                 ledgerStatus.TopOfLedgerTransaction.RoundInEpoch
             ),
-            new GatewayModel.GatewayInfoResponseGatewayApiVersions(
+            new GatewayModel.GatewayInfoResponseKnownTarget(ledgerStatus.TargetStateVersion),
+            new GatewayModel.GatewayInfoResponseReleaseInfo(
                 _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
                 _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
-            ),
-            new GatewayModel.GatewayInfoResponseTargetLedgerState(ledgerStatus.TargetStateVersion)
+            )
         );
     }
 

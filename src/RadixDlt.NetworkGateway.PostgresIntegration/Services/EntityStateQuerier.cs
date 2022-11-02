@@ -96,7 +96,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         // const string referenceColumn = "global_entity_id"; // TODO or "owner_entity_id"
 
         var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
         if (entity is not ComponentEntity ce)
@@ -113,7 +113,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
 WITH aggregate_history_resources AS (
     SELECT fungible_resource_ids, non_fungible_resource_ids
     FROM entity_resource_aggregate_history
-    WHERE from_state_version <= {ledgerState._Version} AND entity_id = {ce.Id}
+    WHERE from_state_version <= {ledgerState.StateVersion} AND entity_id = {ce.Id}
     ORDER BY from_state_version DESC
     LIMIT 1
 ),
@@ -126,7 +126,7 @@ FROM aggregate_history ah
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_resource_history
-    WHERE from_state_version <= {ledgerState._Version} AND global_entity_id = {ce.Id} AND resource_entity_id = ah.resource_id
+    WHERE from_state_version <= {ledgerState.StateVersion} AND global_entity_id = {ce.Id} AND resource_entity_id = ah.resource_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) erh ON true;
@@ -171,7 +171,7 @@ INNER JOIN LATERAL (
         // TODO just some quick and naive implementation
 
         var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
 
         if (entity == null)
@@ -186,7 +186,7 @@ INNER JOIN LATERAL (
             case FungibleResourceManagerEntity frme:
             {
                 var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
-                    .Where(e => e.FromStateVersion <= ledgerState._Version && e.ResourceEntityId == frme.Id)
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceEntityId == frme.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstOrDefaultAsync(token);
 
@@ -242,7 +242,7 @@ INNER JOIN LATERAL (
 
         var entities = await _dbContext.Entities
             .Where(e => e.GlobalAddress != null && addressesList.Contains(e.GlobalAddress))
-            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .ToListAsync(token);
 
         var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, DefaultMetadataLimit, ledgerState, token);
@@ -257,7 +257,7 @@ INNER JOIN LATERAL (
     public async Task<GatewayModel.EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .FirstOrDefaultAsync(e => e.GlobalAddress == request.Address, token);
 
         if (entity == null)
@@ -300,7 +300,7 @@ INNER JOIN LATERAL (
             parameters: new
             {
                 entityIds = entityIds,
-                stateVersion = ledgerState._Version,
+                stateVersion = ledgerState.StateVersion,
                 offset = offset + 1,
                 limit = offset + limit,
             },

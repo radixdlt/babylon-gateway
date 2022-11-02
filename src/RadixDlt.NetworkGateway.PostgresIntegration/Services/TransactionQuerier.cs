@@ -120,7 +120,7 @@ internal class TransactionQuerier : ITransactionQuerier
         var hash = lookup.ValueHex.ConvertFromHex();
         var query = _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
-            .Where(ult => ult.StateVersion <= ledgerState._Version);
+            .Where(ult => ult.StateVersion <= ledgerState.StateVersion);
 
         switch (lookup.Origin)
         {
@@ -214,8 +214,8 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         if (fromLedgerState != null)
         {
-            var bottomStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? fromLedgerState._Version;
-            var topStateVersionBoundary = atLedgerState._Version;
+            var bottomStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? fromLedgerState.StateVersion;
+            var topStateVersionBoundary = atLedgerState.StateVersion;
 
             return await _dbContext.LedgerTransactions
                 .Where(lt =>
@@ -230,7 +230,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
         else
         {
-            var topStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? atLedgerState._Version;
+            var topStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? atLedgerState.StateVersion;
 
             return await _dbContext.LedgerTransactions
                 .OfType<UserLedgerTransaction>()

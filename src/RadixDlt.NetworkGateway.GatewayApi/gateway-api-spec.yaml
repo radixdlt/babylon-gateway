@@ -265,7 +265,7 @@ components:
       type: object
       required:
         - network
-        - version
+        - state_version
         - timestamp
         - epoch
         - round
@@ -273,7 +273,7 @@ components:
         network:
           description: The name of the network against which the request is made.
           type: string
-        version:
+        state_version:
           description: The state version of the ledger. Each transaction increments the state version by 1.
           type: integer
           format: int64
@@ -429,35 +429,35 @@ components:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
-            - gateway_api
-            - target_ledger_state
+            - known_target
+            - release_info
           properties:
-            gateway_api:
-              $ref: "#/components/schemas/GatewayInfoResponseGatewayApiVersions"
-            target_ledger_state:
-              $ref: "#/components/schemas/GatewayInfoResponseTargetLedgerState"
-    GatewayInfoResponseGatewayApiVersions:
+            known_target:
+              $ref: "#/components/schemas/GatewayInfoResponseKnownTarget"
+            release_info:
+              $ref: "#/components/schemas/GatewayInfoResponseReleaseInfo"
+    GatewayInfoResponseKnownTarget:
       type: object
       required:
-        - version
-        - open_api_schema_version
+        - state_version
       properties:
-        version:
-          description: The release that is currently deployed to the Gateway API.
-          type: string
-        open_api_schema_version:
-          description: The open api schema version that was used to generate the API models.
-          type: string
-    GatewayInfoResponseTargetLedgerState:
-      type: object
-      required:
-        - version
-      properties:
-        version:
+        state_version:
           description: |
             The latest-seen state version of the tip of the network's ledger. If this is significantly ahead of the current LedgerState version, the Network Gateway is possibly behind and may be reporting outdated information.
           type: integer
           format: int64
+    GatewayInfoResponseReleaseInfo:
+      type: object
+      required:
+        - release_version
+        - open_api_schema_version
+      properties:
+        release_version:
+          description: The release that is currently deployed to the Gateway API.
+          type: string
+        open_api_schema_version:
+          description: The Open API Schema version that was used to generate the API models.
+          type: string
 
     #
     # "Transaction" Request & Response Types

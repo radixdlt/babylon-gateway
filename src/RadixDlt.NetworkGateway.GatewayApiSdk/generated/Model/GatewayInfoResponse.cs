@@ -105,9 +105,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="GatewayInfoResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="gatewayApi">gatewayApi (required).</param>
-        /// <param name="targetLedgerState">targetLedgerState (required).</param>
-        public GatewayInfoResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseGatewayApiVersions gatewayApi = default(GatewayInfoResponseGatewayApiVersions), GatewayInfoResponseTargetLedgerState targetLedgerState = default(GatewayInfoResponseTargetLedgerState))
+        /// <param name="knownTarget">knownTarget (required).</param>
+        /// <param name="releaseInfo">releaseInfo (required).</param>
+        public GatewayInfoResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -115,18 +115,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("ledgerState is a required property for GatewayInfoResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
-            // to ensure "gatewayApi" is required (not null)
-            if (gatewayApi == null)
+            // to ensure "knownTarget" is required (not null)
+            if (knownTarget == null)
             {
-                throw new ArgumentNullException("gatewayApi is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("knownTarget is a required property for GatewayInfoResponse and cannot be null");
             }
-            this.GatewayApi = gatewayApi;
-            // to ensure "targetLedgerState" is required (not null)
-            if (targetLedgerState == null)
+            this.KnownTarget = knownTarget;
+            // to ensure "releaseInfo" is required (not null)
+            if (releaseInfo == null)
             {
-                throw new ArgumentNullException("targetLedgerState is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("releaseInfo is a required property for GatewayInfoResponse and cannot be null");
             }
-            this.TargetLedgerState = targetLedgerState;
+            this.ReleaseInfo = releaseInfo;
         }
 
         /// <summary>
@@ -136,16 +136,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets GatewayApi
+        /// Gets or Sets KnownTarget
         /// </summary>
-        [DataMember(Name = "gateway_api", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseGatewayApiVersions GatewayApi { get; set; }
+        [DataMember(Name = "known_target", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInfoResponseKnownTarget KnownTarget { get; set; }
 
         /// <summary>
-        /// Gets or Sets TargetLedgerState
+        /// Gets or Sets ReleaseInfo
         /// </summary>
-        [DataMember(Name = "target_ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseTargetLedgerState TargetLedgerState { get; set; }
+        [DataMember(Name = "release_info", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInfoResponseReleaseInfo ReleaseInfo { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -156,8 +156,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class GatewayInfoResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  GatewayApi: ").Append(GatewayApi).Append("\n");
-            sb.Append("  TargetLedgerState: ").Append(TargetLedgerState).Append("\n");
+            sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
+            sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -199,14 +199,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.GatewayApi == input.GatewayApi ||
-                    (this.GatewayApi != null &&
-                    this.GatewayApi.Equals(input.GatewayApi))
+                    this.KnownTarget == input.KnownTarget ||
+                    (this.KnownTarget != null &&
+                    this.KnownTarget.Equals(input.KnownTarget))
                 ) && 
                 (
-                    this.TargetLedgerState == input.TargetLedgerState ||
-                    (this.TargetLedgerState != null &&
-                    this.TargetLedgerState.Equals(input.TargetLedgerState))
+                    this.ReleaseInfo == input.ReleaseInfo ||
+                    (this.ReleaseInfo != null &&
+                    this.ReleaseInfo.Equals(input.ReleaseInfo))
                 );
         }
 
@@ -223,13 +223,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.GatewayApi != null)
+                if (this.KnownTarget != null)
                 {
-                    hashCode = (hashCode * 59) + this.GatewayApi.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KnownTarget.GetHashCode();
                 }
-                if (this.TargetLedgerState != null)
+                if (this.ReleaseInfo != null)
                 {
-                    hashCode = (hashCode * 59) + this.TargetLedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ReleaseInfo.GetHashCode();
                 }
                 return hashCode;
             }
