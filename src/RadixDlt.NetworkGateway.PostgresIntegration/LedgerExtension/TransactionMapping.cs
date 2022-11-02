@@ -62,8 +62,11 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -73,20 +76,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal static class TransactionMapping
 {
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
+    public static LedgerTransaction CreateLedgerTransaction(CoreModel.CommittedTransaction transaction, TransactionSummary summary)
     {
-        var (transaction, summary, _) = transactionData;
+        // TODO support UserTx and ValidatorTx
+
         var feePaid = TokenAmount.FromSubUnitsString(transaction.Receipt.FeeSummary.XrdBurnedAttos);
         var tipPaid = TokenAmount.FromSubUnitsString(transaction.Receipt.FeeSummary.XrdTippedAttos);
 
         return new LedgerTransaction
         {
-            StateVersion = summary.StateVersion,
+            StateVersion = transaction.StateVersion,
             Status = ToLedgerStatus(transaction.Receipt.Status),
-            PayloadHash = summary.PayloadHash,
-            IntentHash = summary.IntentHash,
-            SignedIntentHash = summary.SignedIntentHash,
-            TransactionAccumulator = summary.TransactionAccumulator,
+            PayloadHash = transaction.NotarizedTransaction?.Hash.ConvertFromHex() ?? HashingHelper.Sha256Twice(BitConverter.GetBytes(transaction.StateVersion)),
+            IntentHash = transaction.NotarizedTransaction?.SignedIntent.Intent.Hash.ConvertFromHex() ?? HashingHelper.Sha256Twice(BitConverter.GetBytes(transaction.StateVersion)),
+            SignedIntentHash = transaction.NotarizedTransaction?.SignedIntent.Hash.ConvertFromHex() ?? HashingHelper.Sha256Twice(BitConverter.GetBytes(transaction.StateVersion)),
+            TransactionAccumulator = HashingHelper.Sha256Twice(BitConverter.GetBytes(transaction.StateVersion)),
             IsUserTransaction = feePaid != TokenAmount.Zero,
             // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
             // message: transaction.Metadata.Message?.ConvertFromHex(),

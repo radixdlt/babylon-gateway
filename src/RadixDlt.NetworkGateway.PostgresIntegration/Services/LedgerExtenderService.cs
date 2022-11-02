@@ -108,14 +108,14 @@ internal class LedgerExtenderService : ILedgerExtenderService
         _clock = clock;
     }
 
-    public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
+    public async Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, _clock, token);
+        return await GetTopOfLedger(dbContext, token);
     }
 
-    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token)
+    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default)
     {
         var preparationReport = await PrepareForLedgerExtension(ledgerExtension, token);
         var ledgerExtensionReport = await ExtendLedger(ledgerExtension, latestSyncTarget.TargetStateVersion, token);
@@ -128,7 +128,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
             + ledgerExtensionReport.EntriesWritten;
 
         return new CommitTransactionsReport(
-            ledgerExtension.TransactionData.Count,
+            ledgerExtension.CommittedTransactions.Count,
             ledgerExtensionReport.FinalTransactionSummary,
             preparationReport.RawTxnPersistenceMs,
             preparationReport.MempoolTransactionUpdateMs,
@@ -154,12 +154,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
     {
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, _clock, token);
+        var topOfLedgerSummary = await GetTopOfLedger(preparationDbContext, token);
 
-        if (ledgerExtension.ParentSummary.StateVersion != topOfLedgerSummary.StateVersion)
+        if (ledgerExtension.LatestTransactionSummary.StateVersion != topOfLedgerSummary.StateVersion)
         {
             throw new Exception(
-                $"Tried to commit transactions with parent state version {ledgerExtension.ParentSummary.StateVersion} " +
+                $"Tried to commit transactions with parent state version {ledgerExtension.LatestTransactionSummary.StateVersion} " +
                 $"on top of a ledger with state version {topOfLedgerSummary.StateVersion}"
             );
         }
@@ -169,18 +169,17 @@ internal class LedgerExtenderService : ILedgerExtenderService
             await EnsureDbLedgerIsInitialized(token);
         }
 
-        var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
-            td.TransactionSummary.StateVersion,
-            td.TransactionSummary.PayloadHash,
-            td.TransactionContents
-        )).ToList();
+        var rawTransactions = ledgerExtension.CommittedTransactions
+            .Where(ct => ct.NotarizedTransaction != null)
+            .Select(ct => new RawTransaction(ct.StateVersion, ct.NotarizedTransaction.Hash.ConvertFromHex(), ct.NotarizedTransaction.PayloadHex.ConvertFromHex()))
+            .ToList();
 
         var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
             () => _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(preparationDbContext, rawTransactions, token)
         );
 
         var (mempoolTransactionsTouched, mempoolTransactionUpdateMs) = await CodeStopwatch.TimeInMs(
-            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, ledgerExtension.TransactionData, token)
+            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, ledgerExtension.CommittedTransactions, token)
         );
 
         var preparationEntriesTouched = await preparationDbContext.SaveChangesAsync(token);
@@ -222,10 +221,9 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         try
         {
-            var processTransactionsReport = await ProcessTransactions(dbContext, ledgerExtension.TransactionData, token);
-            var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;
+            var (finalTransaction, report) = await ProcessTransactions(dbContext, ledgerExtension, token);
 
-            await CreateOrUpdateLedgerStatus(dbContext, finalTransactionSummary, latestSyncTarget, token);
+            await CreateOrUpdateLedgerStatus(dbContext, finalTransaction, latestSyncTarget, token);
 
             var (remainingRowsTouched, remainingDbDuration) = await CodeStopwatch.TimeInMs(
                 () => dbContext.SaveChangesAsync(token)
@@ -234,10 +232,10 @@ internal class LedgerExtenderService : ILedgerExtenderService
             await tx.CommitAsync(token);
 
             return new LedgerExtensionReport(
-                processTransactionsReport,
-                finalTransactionSummary,
-                processTransactionsReport.RowsTouched + remainingRowsTouched,
-                ((long)processTransactionsReport.DbWriteDuration.TotalMilliseconds) + remainingDbDuration);
+                report,
+                finalTransaction,
+                report.RowsTouched + remainingRowsTouched,
+                ((long)report.DbWriteDuration.TotalMilliseconds) + remainingDbDuration);
         }
         catch (Exception)
         {
@@ -247,6 +245,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
     }
 
+    private record ProcessTransactionsResult(TransactionSummary FinalTransaction, ProcessTransactionsReport Report);
+
     private record ProcessTransactionsReport(
         int RowsTouched,
         TimeSpan DbReadDuration,
@@ -254,7 +254,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         TimeSpan ContentHandlingDuration
     );
 
-    private async Task<ProcessTransactionsReport> ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
+    private async Task<ProcessTransactionsResult> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
         // TODO further improvements:
         // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
@@ -267,10 +267,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var outerStopwatch = Stopwatch.StartNew();
 
         // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
-        var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
+        var ledgerTransactions = new List<LedgerTransaction>(ledgerExtension.CommittedTransactions.Count);
         var referencedEntities = new ReferencedEntityDictionary();
         var knownGlobalAddressesToLoad = new HashSet<string>();
         var childToParentEntities = new Dictionary<string, string>();
+
+        var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
 
         SequencesHolder sequences;
@@ -293,12 +295,14 @@ SELECT
 
         // step: scan for any referenced entities
         {
-            foreach (var transactionData in transactionsData)
+            foreach (var ct in ledgerExtension.CommittedTransactions)
             {
-                ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transactionData));
+                var stateVersion = ct.StateVersion;
+                var stateUpdates = ct.Receipt.StateUpdates;
 
-                var stateVersion = transactionData.CommittedTransaction.StateVersion;
-                var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
+                long? newEpoch = null;
+                long? newRoundInEpoch = null;
+                DateTimeOffset? newRoundTimestamp = null;
 
                 foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
@@ -352,6 +356,23 @@ SELECT
 
                         re.WithTypeHint(typeHint);
                     }
+
+                    if (sd is CoreModel.SystemSubstate systemSubstate)
+                    {
+                        newEpoch = systemSubstate.Epoch;
+                    }
+
+                    // TODO implement roundInEpoch the same way once CoreApi expose round/roundInEpoch
+                    // if (operation.IsCreateOf<RoundData>(out var newRoundData))
+                    // {
+                    //     newRoundInEpoch = newRoundData.Round;
+                    //
+                    //     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
+                    //     if (newRoundData.Timestamp != 0)
+                    //     {
+                    //         newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+                    //     }
+                    // }
                 }
 
                 foreach (var downSubstate in stateUpdates.DownSubstates)
@@ -367,6 +388,35 @@ SELECT
 
                     referencedEntities.GetOrAdd(downVirtualSubstate.EntityIdHex, _ => new ReferencedEntity(downVirtualSubstate.EntityIdHex, downVirtualSubstate.EntityType, stateVersion));
                 }
+
+                /* NB:
+                   The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
+                   as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
+                */
+
+                var isStartOfEpoch = newEpoch != null;
+                var isStartOfRound = newRoundInEpoch != null;
+                var roundTimestamp = newRoundTimestamp ?? lastTransactionSummary.RoundTimestamp;
+                var createdTimestamp = _clock.UtcNow;
+                var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
+                    roundTimestamp < lastTransactionSummary.NormalizedRoundTimestamp ? lastTransactionSummary.NormalizedRoundTimestamp
+                    : roundTimestamp > createdTimestamp ? createdTimestamp
+                    : roundTimestamp;
+
+                var summary = new TransactionSummary(
+                    StateVersion: stateVersion,
+                    RoundTimestamp: roundTimestamp,
+                    NormalizedRoundTimestamp: normalizedRoundTimestamp,
+                    CreatedTimestamp: createdTimestamp,
+                    Epoch: newEpoch ?? lastTransactionSummary.Epoch,
+                    IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
+                    RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
+                    IsStartOfEpoch: isStartOfEpoch,
+                    IsStartOfRound: isStartOfRound);
+
+                ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(ct, summary)); // TODO inline this for now on
+
+                lastTransactionSummary = summary;
             }
         }
 
@@ -560,10 +610,10 @@ WHERE id IN(
 
         // step: scan all substates to figure out changes
         {
-            foreach (var transactionData in transactionsData)
+            foreach (var ct in ledgerExtension.CommittedTransactions)
             {
-                var stateVersion = transactionData.CommittedTransaction.StateVersion;
-                var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
+                var stateVersion = ct.StateVersion;
+                var stateUpdates = ct.Receipt.StateUpdates;
 
                 foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
@@ -882,12 +932,12 @@ SELECT
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
 
-        return new ProcessTransactionsReport(rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration);
+        return new ProcessTransactionsResult(lastTransactionSummary, new ProcessTransactionsReport(rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration));
     }
 
     private async Task CreateOrUpdateLedgerStatus(
         ReadWriteDbContext dbContext,
-        TransactionSummary finalTransactionSummary,
+        TransactionSummary finalTransaction,
         long latestSyncTarget,
         CancellationToken token
     )
@@ -901,7 +951,45 @@ SELECT
         }
 
         ledgerStatus.LastUpdated = _clock.UtcNow;
-        ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
+        ledgerStatus.TopOfLedgerStateVersion = finalTransaction.StateVersion;
         ledgerStatus.TargetStateVersion = latestSyncTarget;
+    }
+
+    private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
+    {
+        var lastTransaction = await dbContext.LedgerTransactions
+            .AsNoTracking()
+            .OrderByDescending(lt => lt.StateVersion)
+            .FirstOrDefaultAsync(token);
+
+        var lastOverview = lastTransaction == null ? null : new TransactionSummary(
+            StateVersion: lastTransaction.StateVersion,
+            RoundTimestamp: lastTransaction.RoundTimestamp,
+            NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
+            CreatedTimestamp: lastTransaction.CreatedTimestamp,
+            Epoch: lastTransaction.Epoch,
+            IndexInEpoch: lastTransaction.IndexInEpoch,
+            RoundInEpoch: lastTransaction.RoundInEpoch,
+            IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
+            IsStartOfRound: lastTransaction.IsStartOfRound
+        );
+
+        return lastOverview ?? PreGenesisTransactionSummary();
+    }
+
+    private TransactionSummary PreGenesisTransactionSummary()
+    {
+        // Nearly all of theses turn out to be unused!
+        return new TransactionSummary(
+            StateVersion: 0,
+            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            CreatedTimestamp: _clock.UtcNow,
+            Epoch: 0,
+            IndexInEpoch: 0,
+            RoundInEpoch: 0,
+            IsStartOfEpoch: false,
+            IsStartOfRound: false
+        );
     }
 }

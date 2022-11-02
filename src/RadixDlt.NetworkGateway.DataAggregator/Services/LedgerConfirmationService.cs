@@ -80,21 +80,6 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface ILedgerConfirmationService
-{
-    // This method is to be called from the global LedgerExtensionWorker
-    Task HandleLedgerExtensionIfQuorum(CancellationToken token);
-
-    // Below are to be called from the node transaction log workers - to communicate with the LedgerConfirmationService
-    void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion);
-
-    void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions);
-
-    TransactionsRequested? GetWhichTransactionsAreRequestedFromNode(string nodeName);
-}
-
-public sealed record TransactionsRequested(long StateVersionInclusiveLowerBound, long StateVersionInclusiveUpperBound);
-
 /// <summary>
 /// This service is responsible for controlling the NodeTransactionLogWorkers, and deciding on / committing when
 /// a quorum is reached.
@@ -113,7 +98,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private readonly IClock _clock;
 
     /* Variables */
-    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000);
+    private readonly ConcurrentLruCache<long, byte[]> _quorumAccumulatorCacheByStateVersion = new(2000); // TODO not sure how this suits Babylon
     private readonly ConcurrentDictionary<string, long> _latestLedgerTipByNode = new();
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<long, CoreModel.CommittedTransaction>> _transactionsByNode = new();
     private TransactionSummary? _knownTopOfCommittedLedger;
@@ -193,6 +178,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             return;
         }
 
+        // TODO not sure how this suits Babylon
         var cachedAccumulator = _quorumAccumulatorCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
 
         if (cachedAccumulator == null)
@@ -215,10 +201,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitTransactionsFromNode(
-        string nodeName,
-        List<CoreModel.CommittedTransaction> transactions
-    )
+    public void SubmitTransactionsFromNode(string nodeName, List<CoreModel.CommittedTransaction> transactions)
     {
         if (!_latestLedgerTipByNode.ContainsKey(nodeName))
         {
@@ -226,6 +209,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         }
 
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
+
         foreach (var transaction in transactions)
         {
             transactionStoreForNode[transaction.StateVersion] = transaction;
@@ -352,7 +336,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private async Task LoadTopOfDbLedger(CancellationToken token)
     {
         var (topOfLedger, readTopOfLedgerMs) = await CodeStopwatch.TimeInMs(
-            () => _ledgerExtenderService.GetTopOfLedger(token)
+            () => _ledgerExtenderService.GetLatestTransactionSummary(token)
         );
         UpdateRecordsOfTopOfLedger(topOfLedger);
         _logger.LogDebug(
@@ -362,8 +346,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         );
     }
 
-    private void HandleLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs,
-        CommitTransactionsReport commitReport)
+    private void HandleLedgerExtensionSuccess(ConsistentLedgerExtension ledgerExtension, long totalCommitMs, CommitTransactionsReport commitReport)
     {
         AddAccumulatorsToCache(ledgerExtension);
         ReportOnLedgerExtensionSuccess(ledgerExtension, totalCommitMs, commitReport);
@@ -399,11 +382,11 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var currentTimestamp = _clock.UtcNow;
         var committedTransactionSummary = commitReport.FinalTransaction;
 
-        _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.ParentSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
+        _observers.ForEach(x => x.ReportOnLedgerExtensionSuccess(currentTimestamp, currentTimestamp - ledgerExtension.LatestTransactionSummary.RoundTimestamp, totalCommitMs, commitReport.TransactionsCommittedCount));
 
         _logger.LogInformation(
             "Committed {TransactionCount} transactions to the DB in {TotalCommitTransactionsMs}ms [EntitiesTouched={DbEntriesWritten}]",
-            ledgerExtension.TransactionData.Count,
+            ledgerExtension.CommittedTransactions.Count,
             totalCommitMs,
             commitReport.DbEntriesWritten
         );
@@ -428,13 +411,14 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
     private void AddAccumulatorsToCache(ConsistentLedgerExtension ledgerExtension)
     {
-        foreach (var transactionData in ledgerExtension.TransactionData)
-        {
-            _quorumAccumulatorCacheByStateVersion.Set(
-                transactionData.TransactionSummary.StateVersion,
-                transactionData.TransactionSummary.TransactionAccumulator
-            );
-        }
+        // TODO not sure how this suits Babylon
+        // foreach (var transactionData in ledgerExtension.TransactionData)
+        // {
+        //     _quorumAccumulatorCacheByStateVersion.Set(
+        //         transactionData.TransactionSummary.StateVersion,
+        //         transactionData.TransactionSummary.TransactionAccumulator
+        //     );
+        // }
     }
 
     private void UpdateRecordsOfTopOfLedger(TransactionSummary topOfLedger)
@@ -505,28 +489,19 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
     private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions)
     {
-        var transactionData = new List<CommittedTransactionData>();
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
-        var currentParentSummary = transactionBatchParentSummary;
+
+        // TODO leftover from Olympia
+        // var currentParentSummary = transactionBatchParentSummary;
+
         try
         {
-            foreach (var transaction in transactions)
-            {
-                var summary = TransactionSummarisationGenerator.GenerateSummary(currentParentSummary, transaction, _clock);
-
-                // TODO do we even need that?
-                var contents = transaction.NotarizedTransaction?.PayloadHex?.ConvertFromHex() ?? Array.Empty<byte>();
-
-                // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-                // var contents = transaction.Metadata.Hex.ConvertFromHex();
-                //
-                // TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
-                // TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
-                //
-                // transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
-                transactionData.Add(new CommittedTransactionData(transaction, summary, contents));
-                currentParentSummary = summary;
-            }
+            // TODO adjust & restore
+            // foreach (var transaction in transactions)
+            // {
+            //     TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
+            //     TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
+            // }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());
         }
@@ -541,7 +516,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             throw;
         }
 
-        return new ConsistentLedgerExtension(transactionBatchParentSummary, transactionData);
+        return new ConsistentLedgerExtension(transactionBatchParentSummary, transactions);
     }
 
     private long GetTargetStateVersion()

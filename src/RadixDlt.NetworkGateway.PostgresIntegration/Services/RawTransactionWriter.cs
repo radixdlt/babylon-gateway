@@ -74,6 +74,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -81,7 +82,7 @@ internal interface IRawTransactionWriter
 {
     Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token);
 
-    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token);
+    Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CoreModel.CommittedTransaction> transactionData, CancellationToken token);
 }
 
 internal class RawTransactionWriter : IRawTransactionWriter
@@ -105,11 +106,11 @@ internal class RawTransactionWriter : IRawTransactionWriter
             .RunAsync(token);
     }
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CommittedTransactionData> transactionData, CancellationToken token)
+    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CoreModel.CommittedTransaction> transactionData, CancellationToken token)
     {
         var transactionsByPayloadHash = transactionData
-            .Where(td => !td.TransactionSummary.IsStartOfRound)
-            .ToDictionary(rt => rt.TransactionSummary.PayloadHash, ByteArrayEqualityComparer.Default);
+            .Where(ct => ct.NotarizedTransaction != null)
+            .ToDictionary(ct => ct.NotarizedTransaction.Hash.ConvertFromHex(), ByteArrayEqualityComparer.Default);
 
         var transactionPayloadHashList = transactionsByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 

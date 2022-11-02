@@ -62,26 +62,40 @@
  * permissions under this License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 public interface ILedgerExtenderService
 {
-    Task<CommitTransactionsReport> CommitTransactions(
-        ConsistentLedgerExtension ledgerExtension,
-        SyncTargetCarrier latestSyncTarget,
-        CancellationToken token
-    );
+    Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default);
 
-    Task<TransactionSummary> GetTopOfLedger(CancellationToken token);
+    Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default);
 }
 
+public sealed record TransactionSummary(
+    long StateVersion,
+    DateTimeOffset RoundTimestamp,
+    DateTimeOffset NormalizedRoundTimestamp,
+    DateTimeOffset CreatedTimestamp,
+    long Epoch,
+    long IndexInEpoch,
+    long RoundInEpoch,
+    bool IsStartOfEpoch,
+    bool IsStartOfRound
+);
+
+public sealed record SyncTargetCarrier(
+    long TargetStateVersion
+);
+
 public sealed record ConsistentLedgerExtension(
-    TransactionSummary ParentSummary,
-    List<CommittedTransactionData> TransactionData
+    TransactionSummary LatestTransactionSummary,
+    List<CoreModel.CommittedTransaction> CommittedTransactions
 );
 
 public sealed record CommitTransactionsReport(
