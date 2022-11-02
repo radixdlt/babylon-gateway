@@ -113,6 +113,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntityDetailsResponse</returns>
         ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest);
         /// <summary>
+        /// Entity Metadata
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <returns>EntityMetadataResponse</returns>
+        EntityMetadataResponse EntityMetadata(EntityMetadataRequest entityMetadataRequest);
+
+        /// <summary>
+        /// Entity Metadata
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <returns>ApiResponse of EntityMetadataResponse</returns>
+        ApiResponse<EntityMetadataResponse> EntityMetadataWithHttpInfo(EntityMetadataRequest entityMetadataRequest);
+        /// <summary>
         /// Entity Overview
         /// </summary>
         /// <remarks>
@@ -186,6 +207,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Entity Metadata
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityMetadataResponse</returns>
+        System.Threading.Tasks.Task<EntityMetadataResponse> EntityMetadataAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Entity Metadata
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityMetadataResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntityMetadataResponse>> EntityMetadataWithHttpInfoAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Entity Overview
         /// </summary>
@@ -556,6 +600,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("EntityDetails", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Entity Metadata TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <returns>EntityMetadataResponse</returns>
+        public EntityMetadataResponse EntityMetadata(EntityMetadataRequest entityMetadataRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse> localVarResponse = EntityMetadataWithHttpInfo(entityMetadataRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Entity Metadata TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <returns>ApiResponse of EntityMetadataResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse> EntityMetadataWithHttpInfo(EntityMetadataRequest entityMetadataRequest)
+        {
+            // verify the required parameter 'entityMetadataRequest' is set
+            if (entityMetadataRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityMetadataRequest' when calling EntityApi->EntityMetadata");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityMetadataRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<EntityMetadataResponse>("/entity/metadata", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityMetadata", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Entity Metadata TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityMetadataResponse</returns>
+        public async System.Threading.Tasks.Task<EntityMetadataResponse> EntityMetadataAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse> localVarResponse = await EntityMetadataWithHttpInfoAsync(entityMetadataRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Entity Metadata TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityMetadataRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityMetadataResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityMetadataResponse>> EntityMetadataWithHttpInfoAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'entityMetadataRequest' is set
+            if (entityMetadataRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityMetadataRequest' when calling EntityApi->EntityMetadata");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityMetadataRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityMetadataResponse>("/entity/metadata", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityMetadata", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

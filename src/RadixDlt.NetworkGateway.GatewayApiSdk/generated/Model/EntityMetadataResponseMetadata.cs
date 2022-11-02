@@ -91,51 +91,63 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// RecentTransactionsRequest
+    /// EntityMetadataResponseMetadata
     /// </summary>
-    [DataContract(Name = "RecentTransactionsRequest")]
-    public partial class RecentTransactionsRequest : IEquatable<RecentTransactionsRequest>, IValidatableObject
+    [DataContract(Name = "EntityMetadataResponseMetadata")]
+    public partial class EntityMetadataResponseMetadata : IEquatable<EntityMetadataResponseMetadata>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RecentTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataResponseMetadata" /> class.
         /// </summary>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
+        [JsonConstructorAttribute]
+        protected EntityMetadataResponseMetadata() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMetadataResponseMetadata" /> class.
+        /// </summary>
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="items">TBD (required).</param>
+        public EntityMetadataResponseMetadata(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
         {
-            this.AtStateIdentifier = atStateIdentifier;
-            this.FromStateIdentifier = fromStateIdentifier;
-            this.Cursor = cursor;
-            this.Limit = limit;
+            this.TotalCount = totalCount;
+            // to ensure "items" is required (not null)
+            if (items == null)
+            {
+                throw new ArgumentNullException("items is a required property for EntityMetadataResponseMetadata and cannot be null");
+            }
+            this.Items = items;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets AtStateIdentifier
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
+        public int TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets FromStateIdentifier
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "from_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier FromStateIdentifier { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
 
         /// <summary>
-        /// The page size requested.
+        /// TBD
         /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
+        /// <value>TBD</value>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<EntityMetadataItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,11 +156,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RecentTransactionsRequest {\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
-            sb.Append("  FromStateIdentifier: ").Append(FromStateIdentifier).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("class EntityMetadataResponseMetadata {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +181,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RecentTransactionsRequest);
+            return this.Equals(input as EntityMetadataResponseMetadata);
         }
 
         /// <summary>
-        /// Returns true if RecentTransactionsRequest instances are equal
+        /// Returns true if EntityMetadataResponseMetadata instances are equal
         /// </summary>
-        /// <param name="input">Instance of RecentTransactionsRequest to be compared</param>
+        /// <param name="input">Instance of EntityMetadataResponseMetadata to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RecentTransactionsRequest input)
+        public bool Equals(EntityMetadataResponseMetadata input)
         {
             if (input == null)
             {
@@ -185,24 +197,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.TotalCount == input.TotalCount ||
+                    this.TotalCount.Equals(input.TotalCount)
                 ) && 
                 (
-                    this.FromStateIdentifier == input.FromStateIdentifier ||
-                    (this.FromStateIdentifier != null &&
-                    this.FromStateIdentifier.Equals(input.FromStateIdentifier))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
                 ) && 
                 (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
                 ) && 
                 (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -215,21 +227,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtStateIdentifier != null)
+                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.FromStateIdentifier != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.FromStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
                 }
-                if (this.Cursor != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.Limit != null)
-                {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

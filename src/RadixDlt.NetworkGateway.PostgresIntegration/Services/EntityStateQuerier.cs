@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
@@ -107,23 +108,23 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
         var dbResources = await _dbContext.EntityResourceHistory
             .FromSqlInterpolated($@"
-WITH aggregate_history AS (
+WITH aggregate_history_resources AS (
     SELECT fungible_resource_ids, non_fungible_resource_ids
     FROM entity_resource_aggregate_history
     WHERE from_state_version <= {ledgerState._Version} AND entity_id = {ce.Id}
     ORDER BY from_state_version DESC
     LIMIT 1
 ),
-unnested_aggregate_history AS (
+aggregate_history AS (
     SELECT UNNEST(fungible_resource_ids || non_fungible_resource_ids) AS resource_id
-    FROM aggregate_history
+    FROM aggregate_history_resources
 )
 SELECT erh.*
-FROM unnested_aggregate_history uah
+FROM aggregate_history ah
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_resource_history
-    WHERE from_state_version <= {ledgerState._Version} AND global_entity_id = {ce.Id} AND resource_entity_id = uah.resource_id
+    WHERE from_state_version <= {ledgerState._Version} AND global_entity_id = {ce.Id} AND resource_entity_id = ah.resource_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) erh ON true;
@@ -259,7 +260,7 @@ INNER JOIN LATERAL (
 
         var metadataHistory = await _dbContext.EntityMetadataHistory
             .FromSqlInterpolated($@"
-WITH ids (id) AS (
+WITH entities (id) AS (
     SELECT UNNEST({entityIds})
 )
 SELECT emh.*
@@ -268,7 +269,7 @@ INNER JOIN LATERAL (
     SELECT *
     FROM entity_metadata_history
     WHERE
-       from_state_version <= {ledgerState._Version} AND entity_id = ids.id
+       from_state_version <= {ledgerState._Version} AND entity_id = entities.id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) emh ON true;
@@ -293,4 +294,54 @@ INNER JOIN LATERAL (
 
         return new EntityOverviewResponse(ledgerState, items);
     }
+
+    public async Task<EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entity = await _dbContext.Entities
+            .Where(e => e.FromStateVersion <= ledgerState._Version)
+            .FirstOrDefaultAsync(e => e.GlobalAddress == request.Address, token);
+
+        if (entity == null)
+        {
+            return null;
+        }
+
+        var metadata = EntityMetadataResponseMetadata.Empty;
+
+        var dbMetadata = await _dbContext.Database.GetDbConnection().QuerySingleOrDefaultAsync<EntityMetadataHistorySlice>(
+            @"
+SELECT keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, array_length(keys, 1) AS TotalCount
+FROM entity_metadata_history
+WHERE entity_id = @entityId AND from_state_version <= @stateVersion
+ORDER BY from_state_version DESC
+LIMIT 1",
+            new
+            {
+                entityId = entity.Id,
+                stateVersion = ledgerState._Version,
+                offset = request.Offset + 1,
+                limit = request.Offset + request.Limit,
+            });
+
+        if (dbMetadata != null)
+        {
+            var items = dbMetadata.Keys.Zip(dbMetadata.Values)
+                .Select(rm => new EntityMetadataItem(rm.First, rm.Second))
+                .ToList();
+
+            var previousCursor = request.Offset > 0
+                ? new EntityMetadataRequestCursor(request.Offset - request.Limit).ToCursorString()
+                : null;
+
+            var nextCursor = request.Offset + request.Limit < dbMetadata.TotalCount
+                ? new EntityMetadataRequestCursor(request.Offset + request.Limit).ToCursorString()
+                : null;
+
+            metadata = new EntityMetadataResponseMetadata(dbMetadata.TotalCount, previousCursor, nextCursor, items);
+        }
+
+        return new EntityMetadataResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata);
+    }
+
+    private record EntityMetadataHistorySlice(string[] Keys, string[] Values, int TotalCount);
 }

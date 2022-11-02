@@ -111,4 +111,14 @@ public class EntityController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("metadata")]
+    public async Task<IActionResult> Metadata(EntityMetadataRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Metadata(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
 }

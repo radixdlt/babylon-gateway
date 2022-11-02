@@ -95,7 +95,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, token);
 
         var transactionsPageRequest = new RecentTransactionPageRequest(
-            Cursor: CommittedTransactionPaginationCursor.FromCursorString(request.Cursor),
+            Cursor: LedgerTransactionsCursor.FromCursorString(request.Cursor),
             PageSize: request.Limit ?? 10
         );
 

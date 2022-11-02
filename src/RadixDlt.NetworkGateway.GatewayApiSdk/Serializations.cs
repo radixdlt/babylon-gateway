@@ -62,24 +62,34 @@
  * permissions under this License.
  */
 
-using FluentAssertions;
-using RadixDlt.NetworkGateway.GatewayApi;
-using Xunit;
+using Newtonsoft.Json;
+using System;
+using System.Text;
 
-namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk;
 
-public class SerializationsTests
+internal static class Serializations
 {
-    private record InputType(string SomeString, int SomeInt);
-
-    private readonly InputType _input = new InputType("abc", 123);
-
-    [Fact]
-    public void SerializationDeserializationPayload()
+    public static string AsBase64Json<T>(T input)
     {
-        var base64json = Serializations.AsBase64Json(_input);
-        var output = Serializations.FromBase64JsonOrDefault<InputType>(base64json);
+        var json = JsonConvert.SerializeObject(input);
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+    }
 
-        output.Should().BeEquivalentTo(_input);
+    public static T FromBase64JsonOrDefault<T>(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return default;
+        }
+
+        try
+        {
+            return JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(Convert.FromBase64String(input)));
+        }
+        catch (Exception)
+        {
+            return default;
+        }
     }
 }

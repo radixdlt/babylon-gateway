@@ -62,25 +62,17 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
+using Dapper;
+using System.Data;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.ValueConverters;
 
-public interface IEntityStateQuerier
+public sealed class GenericArrayHandler<T> : SqlMapper.TypeHandler<T[]>
 {
-    Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    public override void SetValue(IDbDataParameter parameter, T[] value)
+    {
+        parameter.Value = value;
+    }
 
-    Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
-
-    Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default);
-
-    Task<EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, LedgerState ledgerState, CancellationToken token = default);
+    public override T[] Parse(object value) => (T[])value;
 }
-
-public sealed record EntityMetadataPageRequest(RadixAddress Address, int Offset, int Limit);

@@ -91,37 +91,48 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// RecentTransactionsRequest
+    /// EntityMetadataRequest
     /// </summary>
-    [DataContract(Name = "RecentTransactionsRequest")]
-    public partial class RecentTransactionsRequest : IEquatable<RecentTransactionsRequest>, IValidatableObject
+    [DataContract(Name = "EntityMetadataRequest")]
+    public partial class EntityMetadataRequest : IEquatable<EntityMetadataRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RecentTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataRequest" /> class.
         /// </summary>
+        [JsonConstructorAttribute]
+        protected EntityMetadataRequest() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMetadataRequest" /> class.
+        /// </summary>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
         /// <param name="limit">The page size requested..</param>
-        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
+        public EntityMetadataRequest(string address = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
         {
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EntityMetadataRequest and cannot be null");
+            }
+            this.Address = address;
             this.AtStateIdentifier = atStateIdentifier;
-            this.FromStateIdentifier = fromStateIdentifier;
             this.Cursor = cursor;
             this.Limit = limit;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Gets or Sets AtStateIdentifier
         /// </summary>
         [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
         public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
-
-        /// <summary>
-        /// Gets or Sets FromStateIdentifier
-        /// </summary>
-        [DataMember(Name = "from_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier FromStateIdentifier { get; set; }
 
         /// <summary>
         /// This cursor allows forward pagination, by providing the cursor from the previous request.
@@ -144,9 +155,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RecentTransactionsRequest {\n");
+            sb.Append("class EntityMetadataRequest {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
-            sb.Append("  FromStateIdentifier: ").Append(FromStateIdentifier).Append("\n");
             sb.Append("  Cursor: ").Append(Cursor).Append("\n");
             sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
@@ -169,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RecentTransactionsRequest);
+            return this.Equals(input as EntityMetadataRequest);
         }
 
         /// <summary>
-        /// Returns true if RecentTransactionsRequest instances are equal
+        /// Returns true if EntityMetadataRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of RecentTransactionsRequest to be compared</param>
+        /// <param name="input">Instance of EntityMetadataRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RecentTransactionsRequest input)
+        public bool Equals(EntityMetadataRequest input)
         {
             if (input == null)
             {
@@ -185,14 +196,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
                     this.AtStateIdentifier == input.AtStateIdentifier ||
                     (this.AtStateIdentifier != null &&
                     this.AtStateIdentifier.Equals(input.AtStateIdentifier))
-                ) && 
-                (
-                    this.FromStateIdentifier == input.FromStateIdentifier ||
-                    (this.FromStateIdentifier != null &&
-                    this.FromStateIdentifier.Equals(input.FromStateIdentifier))
                 ) && 
                 (
                     this.Cursor == input.Cursor ||
@@ -215,13 +226,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                if (this.Address != null)
+                {
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
                 if (this.AtStateIdentifier != null)
                 {
                     hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
-                }
-                if (this.FromStateIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.FromStateIdentifier.GetHashCode();
                 }
                 if (this.Cursor != null)
                 {

@@ -212,6 +212,28 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/EntityOverviewResponse"
+  /entity/metadata:
+    post:
+      operationId: EntityMetadata
+      summary: Entity Metadata
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/EntityMetadataRequest"
+      responses:
+        '200':
+          description: Entity Metadata
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EntityMetadataResponse"
+
 components:
   schemas:
 
@@ -441,7 +463,7 @@ components:
           type: string
           nullable: true
         limit:
-          description: The page size requested. The maximum value is 30 at present.
+          description: The page size requested.
           type: integer
           nullable: true
     RecentTransactionsResponse:
@@ -739,6 +761,49 @@ components:
          metadata:
            $ref: "#/components/schemas/EntityOverviewResponseEntityItemMetadata"
     EntityOverviewResponseEntityItemMetadata:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: TBD
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityMetadataItem"
+
+    EntityMetadataRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+    EntityMetadataResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - address
+            - metadata
+            - details
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            metadata:
+              $ref: "#/components/schemas/EntityMetadataResponseMetadata"
+    EntityMetadataResponseMetadata:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
         - type: object

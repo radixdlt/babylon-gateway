@@ -62,25 +62,24 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
+using FluentAssertions;
+using RadixDlt.NetworkGateway.GatewayApiSdk;
+using Xunit;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApiSdk;
 
-public interface IEntityStateQuerier
+public class SerializationsTests
 {
-    Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    private record InputType(string SomeString, int SomeInt);
 
-    Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    private readonly InputType _input = new InputType("abc", 123);
 
-    Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default);
+    [Fact]
+    public void SerializationDeserializationPayload()
+    {
+        var base64json = Serializations.AsBase64Json(_input);
+        var output = Serializations.FromBase64JsonOrDefault<InputType>(base64json);
 
-    Task<EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, LedgerState ledgerState, CancellationToken token = default);
+        output.Should().BeEquivalentTo(_input);
+    }
 }
-
-public sealed record EntityMetadataPageRequest(RadixAddress Address, int Offset, int Limit);

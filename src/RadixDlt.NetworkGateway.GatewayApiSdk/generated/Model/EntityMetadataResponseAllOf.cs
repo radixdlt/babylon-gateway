@@ -91,51 +91,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// RecentTransactionsRequest
+    /// EntityMetadataResponseAllOf
     /// </summary>
-    [DataContract(Name = "RecentTransactionsRequest")]
-    public partial class RecentTransactionsRequest : IEquatable<RecentTransactionsRequest>, IValidatableObject
+    [DataContract(Name = "EntityMetadataResponse_allOf")]
+    public partial class EntityMetadataResponseAllOf : IEquatable<EntityMetadataResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RecentTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataResponseAllOf" /> class.
         /// </summary>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
-        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested..</param>
-        public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
+        [JsonConstructorAttribute]
+        protected EntityMetadataResponseAllOf() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMetadataResponseAllOf" /> class.
+        /// </summary>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="metadata">metadata (required).</param>
+        public EntityMetadataResponseAllOf(string address = default(string), EntityMetadataResponseMetadata metadata = default(EntityMetadataResponseMetadata))
         {
-            this.AtStateIdentifier = atStateIdentifier;
-            this.FromStateIdentifier = fromStateIdentifier;
-            this.Cursor = cursor;
-            this.Limit = limit;
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EntityMetadataResponseAllOf and cannot be null");
+            }
+            this.Address = address;
+            // to ensure "metadata" is required (not null)
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata is a required property for EntityMetadataResponseAllOf and cannot be null");
+            }
+            this.Metadata = metadata;
         }
 
         /// <summary>
-        /// Gets or Sets AtStateIdentifier
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets FromStateIdentifier
+        /// Gets or Sets Metadata
         /// </summary>
-        [DataMember(Name = "from_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier FromStateIdentifier { get; set; }
-
-        /// <summary>
-        /// This cursor allows forward pagination, by providing the cursor from the previous request.
-        /// </summary>
-        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
-        [DataMember(Name = "cursor", EmitDefaultValue = true)]
-        public string Cursor { get; set; }
-
-        /// <summary>
-        /// The page size requested.
-        /// </summary>
-        /// <value>The page size requested.</value>
-        [DataMember(Name = "limit", EmitDefaultValue = true)]
-        public int? Limit { get; set; }
+        [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
+        public EntityMetadataResponseMetadata Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,11 +142,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class RecentTransactionsRequest {\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
-            sb.Append("  FromStateIdentifier: ").Append(FromStateIdentifier).Append("\n");
-            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("class EntityMetadataResponseAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,15 +165,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as RecentTransactionsRequest);
+            return this.Equals(input as EntityMetadataResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if RecentTransactionsRequest instances are equal
+        /// Returns true if EntityMetadataResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of RecentTransactionsRequest to be compared</param>
+        /// <param name="input">Instance of EntityMetadataResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(RecentTransactionsRequest input)
+        public bool Equals(EntityMetadataResponseAllOf input)
         {
             if (input == null)
             {
@@ -185,24 +181,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.FromStateIdentifier == input.FromStateIdentifier ||
-                    (this.FromStateIdentifier != null &&
-                    this.FromStateIdentifier.Equals(input.FromStateIdentifier))
-                ) && 
-                (
-                    this.Cursor == input.Cursor ||
-                    (this.Cursor != null &&
-                    this.Cursor.Equals(input.Cursor))
-                ) && 
-                (
-                    this.Limit == input.Limit ||
-                    (this.Limit != null &&
-                    this.Limit.Equals(input.Limit))
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
                 );
         }
 
@@ -215,21 +201,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AtStateIdentifier != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.FromStateIdentifier != null)
+                if (this.Metadata != null)
                 {
-                    hashCode = (hashCode * 59) + this.FromStateIdentifier.GetHashCode();
-                }
-                if (this.Cursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
-                }
-                if (this.Limit != null)
-                {
-                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

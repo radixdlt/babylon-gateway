@@ -106,4 +106,18 @@ internal class DefaultEntityHandler : IEntityHandler
 
         return await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
     }
+
+    public async Task<EntityMetadataResponse?> Metadata(EntityMetadataRequest request, CancellationToken token = default)
+    {
+        var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var pageRequest = new EntityMetadataPageRequest(
+            Address: address,
+            Offset: EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.Limit ?? 10
+        );
+
+        return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
+    }
 }

@@ -62,25 +62,23 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IEntityStateQuerier
+[DataContract]
+public sealed record LedgerTransactionsCursor(long? StateVersionBoundary)
 {
-    Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
 
-    Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    public static LedgerTransactionsCursor FromCursorString(string cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<LedgerTransactionsCursor>(cursorString);
+    }
 
-    Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default);
-
-    Task<EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, LedgerState ledgerState, CancellationToken token = default);
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
 }
-
-public sealed record EntityMetadataPageRequest(RadixAddress Address, int Offset, int Limit);

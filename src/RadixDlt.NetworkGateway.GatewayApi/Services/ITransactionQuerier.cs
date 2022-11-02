@@ -83,34 +83,8 @@ public interface ITransactionQuerier
     Task<Gateway.TransactionInfo?> LookupPendingTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
 
-[DataContract]
-public sealed record CommittedTransactionPaginationCursor(long? StateVersionBoundary)
-{
-    [DataMember(Name = "v", EmitDefaultValue = false)]
-    public long? StateVersionBoundary { get; set; } = StateVersionBoundary;
+public sealed record LookupResult(Gateway.TransactionInfo? Info, Gateway.TransactionDetails? Details);
 
-    public static CommittedTransactionPaginationCursor? FromCursorString(string? cursorString)
-    {
-        return Serializations.FromBase64JsonOrDefault<CommittedTransactionPaginationCursor>(cursorString);
-    }
+public sealed record TransactionPageWithoutTotal(Gateway.LedgerTransactionsCursor? NextPageCursor, List<Gateway.TransactionInfo> Transactions);
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
-    }
-}
-
-public sealed record LookupResult(
-    Gateway.TransactionInfo? Info,
-    Gateway.TransactionDetails? Details
-);
-
-public sealed record TransactionPageWithoutTotal(
-    CommittedTransactionPaginationCursor? NextPageCursor,
-    List<Gateway.TransactionInfo> Transactions
-);
-
-public sealed record RecentTransactionPageRequest(
-    CommittedTransactionPaginationCursor? Cursor,
-    int PageSize
-);
+public sealed record RecentTransactionPageRequest(Gateway.LedgerTransactionsCursor? Cursor, int PageSize);

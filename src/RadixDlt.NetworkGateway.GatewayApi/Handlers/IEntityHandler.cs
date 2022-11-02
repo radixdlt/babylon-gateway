@@ -75,4 +75,6 @@ public interface IEntityHandler
     Task<EntityDetailsResponse?> Details(EntityDetailsRequest request, CancellationToken token = default);
 
     Task<EntityOverviewResponse> Overview(EntityOverviewRequest request, CancellationToken token = default);
+
+    Task<EntityMetadataResponse?> Metadata(EntityMetadataRequest request, CancellationToken token = default);
 }

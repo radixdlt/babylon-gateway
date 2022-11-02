@@ -74,7 +74,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using TokenAmount = RadixDlt.NetworkGateway.Abstractions.Numerics.TokenAmount;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -99,7 +98,7 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, atLedgerState, fromLedgerState, token);
         var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
-            ? new CommittedTransactionPaginationCursor(transactionStateVersionsAndOneMore.Last())
+            ? new Gateway.LedgerTransactionsCursor(transactionStateVersionsAndOneMore.Last())
             : null;
 
         var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
