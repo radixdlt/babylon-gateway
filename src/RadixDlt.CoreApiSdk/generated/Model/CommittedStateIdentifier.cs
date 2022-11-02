@@ -104,16 +104,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedStateIdentifier" /> class.
         /// </summary>
-        /// <param name="stateVersion">An integer between 0 and 10^13, representing the state version. The state version increments with each transaction, starting at 0 pre-genesis. (required).</param>
+        /// <param name="stateVersion">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis. (required).</param>
         public CommittedStateIdentifier(long stateVersion = default(long))
         {
             this.StateVersion = stateVersion;
         }
 
         /// <summary>
-        /// An integer between 0 and 10^13, representing the state version. The state version increments with each transaction, starting at 0 pre-genesis.
+        /// An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis.
         /// </summary>
-        /// <value>An integer between 0 and 10^13, representing the state version. The state version increments with each transaction, starting at 0 pre-genesis.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis.</value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
 

@@ -107,7 +107,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
         /// <param name="componentEntity">componentEntity (required).</param>
         /// <param name="vaultEntity">vaultEntity (required).</param>
-        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault  (required).</param>
+        /// <param name="amountAttos">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the XRD amount put or taken from the vault  (required).</param>
         public ResourceChange(string resourceAddress = default(string), EntityReference componentEntity = default(EntityReference), EntityReference vaultEntity = default(EntityReference), string amountAttos = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
@@ -156,9 +156,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public EntityReference VaultEntity { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault 
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the XRD amount put or taken from the vault 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD amount put or taken from the vault </value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the XRD amount put or taken from the vault </value>
         [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
         public string AmountAttos { get; set; }
 

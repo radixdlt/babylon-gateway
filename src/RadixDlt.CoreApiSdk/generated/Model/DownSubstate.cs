@@ -106,7 +106,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
         /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
-        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
+        /// <param name="version">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated (required).</param>
         public DownSubstate(SubstateId substateId = default(SubstateId), string substateDataHash = default(string), long version = default(long))
         {
             // to ensure "substateId" is required (not null)
@@ -138,9 +138,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string SubstateDataHash { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 10^13, counting the number of times the substate was updated
+        /// An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated
         /// </summary>
-        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated</value>
         [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
         public long _Version { get; set; }
 

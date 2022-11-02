@@ -104,22 +104,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedSignedTransactionIntent" /> class.
         /// </summary>
-        /// <param name="signedIntent">signedIntent (required).</param>
-        public ParsedSignedTransactionIntent(SignedTransactionIntent signedIntent = default(SignedTransactionIntent))
+        /// <param name="signedIntent">signedIntent.</param>
+        /// <param name="identifiers">identifiers (required).</param>
+        public ParsedSignedTransactionIntent(SignedTransactionIntent signedIntent = default(SignedTransactionIntent), ParsedSignedTransactionIntentAllOfIdentifiers identifiers = default(ParsedSignedTransactionIntentAllOfIdentifiers))
         {
-            // to ensure "signedIntent" is required (not null)
-            if (signedIntent == null)
+            // to ensure "identifiers" is required (not null)
+            if (identifiers == null)
             {
-                throw new ArgumentNullException("signedIntent is a required property for ParsedSignedTransactionIntent and cannot be null");
+                throw new ArgumentNullException("identifiers is a required property for ParsedSignedTransactionIntent and cannot be null");
             }
+            this.Identifiers = identifiers;
             this.SignedIntent = signedIntent;
         }
 
         /// <summary>
         /// Gets or Sets SignedIntent
         /// </summary>
-        [DataMember(Name = "signed_intent", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "signed_intent", EmitDefaultValue = true)]
         public SignedTransactionIntent SignedIntent { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Identifiers
+        /// </summary>
+        [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
+        public ParsedSignedTransactionIntentAllOfIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,6 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedSignedTransactionIntent {\n");
             sb.Append("  SignedIntent: ").Append(SignedIntent).Append("\n");
+            sb.Append("  Identifiers: ").Append(Identifiers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +178,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SignedIntent == input.SignedIntent ||
                     (this.SignedIntent != null &&
                     this.SignedIntent.Equals(input.SignedIntent))
+                ) && 
+                (
+                    this.Identifiers == input.Identifiers ||
+                    (this.Identifiers != null &&
+                    this.Identifiers.Equals(input.Identifiers))
                 );
         }
 
@@ -184,6 +198,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.SignedIntent != null)
                 {
                     hashCode = (hashCode * 59) + this.SignedIntent.GetHashCode();
+                }
+                if (this.Identifiers != null)
+                {
+                    hashCode = (hashCode * 59) + this.Identifiers.GetHashCode();
                 }
                 return hashCode;
             }

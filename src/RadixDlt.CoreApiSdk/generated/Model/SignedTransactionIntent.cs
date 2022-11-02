@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SignedTransactionIntent" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded double-SHA256 hash of the signed transaction intent. Also known as the signatures hash. (required).</param>
+        /// <param name="hash">The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60; (required).</param>
         /// <param name="intent">intent (required).</param>
         /// <param name="intentSignatures">intentSignatures (required).</param>
         public SignedTransactionIntent(string hash = default(string), TransactionIntent intent = default(TransactionIntent), List<SignatureWithPublicKey> intentSignatures = default(List<SignatureWithPublicKey>))
@@ -130,9 +130,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the signed transaction intent. Also known as the signatures hash.
+        /// The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60;
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the signed transaction intent. Also known as the signatures hash.</value>
+        /// <value>The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60;</value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 
@@ -244,6 +244,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Hash (string) maxLength
+            if (this.Hash != null && this.Hash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be less than 64.", new [] { "Hash" });
+            }
+
+            // Hash (string) minLength
+            if (this.Hash != null && this.Hash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be greater than 64.", new [] { "Hash" });
+            }
+
             yield break;
         }
     }

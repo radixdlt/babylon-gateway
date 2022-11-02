@@ -105,6 +105,6 @@ public class InvalidTransactionException : ValidationException
 
     public static Exception FromStaticallyInvalid(string validityError)
     {
-        return new InvalidTransactionException("Statically invalid transaction: " + validityError);
+        return new InvalidTransactionException("Invalid transaction: " + validityError);
     }
 }

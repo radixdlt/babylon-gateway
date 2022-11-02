@@ -155,7 +155,14 @@ internal class SubmissionService : ISubmissionService
     {
         try
         {
-            var response = await _coreApiHandler.ParseTransaction(new CoreModel.TransactionParseRequest(_coreApiHandler.GetNetworkIdentifier(), request.NotarizedTransaction), token);
+            var response = await _coreApiHandler.ParseTransaction(
+                new CoreModel.TransactionParseRequest(
+                    network: _coreApiHandler.GetNetworkIdentifier(),
+                    payloadHex: request.NotarizedTransaction,
+                    parseMode: CoreModel.TransactionParseRequest.ParseModeEnum.Notarized,
+                    validationMode: CoreModel.TransactionParseRequest.ValidationModeEnum.Static,
+                    responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Basic),
+                token);
 
             if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
             {
@@ -164,11 +171,11 @@ internal class SubmissionService : ISubmissionService
                 throw InvalidTransactionException.FromUnsupportedPayloadType();
             }
 
-            if (!parsed.IsStaticallyValid)
+            if (parsed.ValidationError != null)
             {
                 await _observers.ForEachAsync(x => x.ParsedTransactionStaticallyInvalid(request, response));
 
-                throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidityError);
+                throw InvalidTransactionException.FromStaticallyInvalid(parsed.ValidationError.Reason);
             }
 
             return parsed.NotarizedTransaction;

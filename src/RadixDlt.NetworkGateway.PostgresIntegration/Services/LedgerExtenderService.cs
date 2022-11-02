@@ -170,8 +170,18 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
 
         var rawTransactions = ledgerExtension.CommittedTransactions
-            .Where(ct => ct.NotarizedTransaction != null)
-            .Select(ct => new RawTransaction(ct.StateVersion, ct.NotarizedTransaction.Hash.ConvertFromHex(), ct.NotarizedTransaction.PayloadHex.ConvertFromHex()))
+            .Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction)
+            .Select(ct =>
+            {
+                var nt = ct.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
+
+                return new RawTransaction
+                {
+                    StateVersion = ct.StateVersion,
+                    PayloadHash = nt.Hash.ConvertFromHex(),
+                    Payload = nt.PayloadHex.ConvertFromHex(),
+                };
+            })
             .ToList();
 
         var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
@@ -568,23 +578,27 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, payload_hash, intent_hash, signed_intent_hash, transaction_accumulator, is_user_transaction, message, fee_paid, tip_paid, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, transaction_accumulator, message, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash, fee_paid, tip_paid) FROM STDIN (FORMAT BINARY)", token))
             {
                 var statusConverter = new LedgerTransactionStatusValueConverter().ConvertToProvider;
+
+                if (dbContext.Model.FindEntityType(typeof(UserLedgerTransaction))?.GetDiscriminatorValue() is not string userDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of UserLedgerTransaction");
+                }
+
+                if (dbContext.Model.FindEntityType(typeof(ValidatorLedgerTransaction))?.GetDiscriminatorValue() is not string validatorDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of ValidatorLedgerTransaction");
+                }
 
                 foreach (var lt in ledgerTransactions)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(statusConverter(lt.Status), NpgsqlDbType.Text, token);
-                    await writer.WriteAsync(lt.PayloadHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.IntentHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
                     await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
@@ -594,6 +608,28 @@ WHERE id IN(
                     await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.CreatedTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.NormalizedRoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
+
+                    switch (lt)
+                    {
+                        case UserLedgerTransaction ult:
+                            await writer.WriteAsync(userDiscriminator, NpgsqlDbType.Text, token);
+                            await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
+                            await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
+                            await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
+                            await writer.WriteAsync(ult.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                            await writer.WriteAsync(ult.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                            break;
+                        case ValidatorLedgerTransaction:
+                            await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
+                    }
                 }
 
                 await writer.CompleteAsync(token);

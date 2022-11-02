@@ -73,7 +73,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Gateway = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -92,13 +92,13 @@ internal class TransactionQuerier : ITransactionQuerier
 
     public async Task<TransactionPageWithoutTotal> GetRecentUserTransactions(
         RecentTransactionPageRequest request,
-        Gateway.LedgerState atLedgerState,
-        Gateway.LedgerState? fromLedgerState,
+        GatewayModel.LedgerState atLedgerState,
+        GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token = default)
     {
         var transactionStateVersionsAndOneMore = await GetRecentUserTransactionStateVersions(request, atLedgerState, fromLedgerState, token);
         var nextCursor = transactionStateVersionsAndOneMore.Count == request.PageSize + 1
-            ? new Gateway.LedgerTransactionsCursor(transactionStateVersionsAndOneMore.Last())
+            ? new GatewayModel.LedgerTransactionsCursor(transactionStateVersionsAndOneMore.Last())
             : null;
 
         var transactions = await GetTransactions(transactionStateVersionsAndOneMore.Take(request.PageSize).ToList(), token);
@@ -112,34 +112,36 @@ internal class TransactionQuerier : ITransactionQuerier
     }
 
     public async Task<LookupResult?> LookupCommittedTransaction(
-        Gateway.TransactionLookupIdentifier lookup,
-        Gateway.LedgerState ledgerState,
+        GatewayModel.TransactionLookupIdentifier lookup,
+        GatewayModel.LedgerState ledgerState,
         bool withDetails,
         CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
-        var query = _dbContext.LedgerTransactions.Where(lt => lt.StateVersion <= ledgerState._Version);
+        var query = _dbContext.LedgerTransactions
+            .OfType<UserLedgerTransaction>()
+            .Where(ult => ult.StateVersion <= ledgerState._Version);
 
         switch (lookup.Origin)
         {
-            case Gateway.TransactionLookupOrigin.Intent:
-                query = query.Where(lt => lt.IntentHash == hash);
+            case GatewayModel.TransactionLookupOrigin.Intent:
+                query = query.Where(ult => ult.IntentHash == hash);
                 break;
-            case Gateway.TransactionLookupOrigin.SignedIntent:
-                query = query.Where(lt => lt.SignedIntentHash == hash); // TODO fix me
+            case GatewayModel.TransactionLookupOrigin.SignedIntent:
+                query = query.Where(ult => ult.SignedIntentHash == hash);
                 break;
-            case Gateway.TransactionLookupOrigin.Notarized:
+            case GatewayModel.TransactionLookupOrigin.Notarized:
                 throw new NotImplementedException("fix me"); // TODO fix me
-            case Gateway.TransactionLookupOrigin.Payload:
-                query = query.Where(lt => lt.PayloadHash == hash);
+            case GatewayModel.TransactionLookupOrigin.Payload:
+                query = query.Where(ult => ult.PayloadHash == hash);
                 break;
             default:
-                throw new ArgumentOutOfRangeException("fix me"); // TODO fix me
+                throw new ArgumentOutOfRangeException(nameof(lookup.Origin), lookup.Origin, null);
         }
 
         var stateVersion = await query
-            .Select(lt => lt.StateVersion)
-            .SingleOrDefaultAsync(token);
+            .Select(ult => ult.StateVersion)
+            .FirstOrDefaultAsync(token);
 
         if (stateVersion == 0)
         {
@@ -151,21 +153,21 @@ internal class TransactionQuerier : ITransactionQuerier
             : new LookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
-    public async Task<Gateway.TransactionInfo?> LookupPendingTransaction(Gateway.TransactionLookupIdentifier lookup, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionInfo?> LookupPendingTransaction(GatewayModel.TransactionLookupIdentifier lookup, CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
         var query = _rwDbContext.PendingTransactions.AsQueryable();
 
         switch (lookup.Origin)
         {
-            case Gateway.TransactionLookupOrigin.Intent:
+            case GatewayModel.TransactionLookupOrigin.Intent:
                 query = query.Where(mt => mt.IntentHash == hash);
                 break;
-            case Gateway.TransactionLookupOrigin.SignedIntent:
+            case GatewayModel.TransactionLookupOrigin.SignedIntent:
                 throw new NotImplementedException("fix me"); // TODO fix me
-            case Gateway.TransactionLookupOrigin.Notarized:
+            case GatewayModel.TransactionLookupOrigin.Notarized:
                 throw new NotImplementedException("fix me"); // TODO fix me
-            case Gateway.TransactionLookupOrigin.Payload:
+            case GatewayModel.TransactionLookupOrigin.Payload:
                 query = query.Where(lt => lt.PayloadHash == hash);
                 break;
             default:
@@ -187,27 +189,27 @@ internal class TransactionQuerier : ITransactionQuerier
         var status = mempoolTransaction.Status switch
         {
             // If it is committed here, but not on ledger - it's likely because the read replica hasn't caught up yet
-            PendingTransactionStatus.Committed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Succeeded), // TODO , transactionContents.ConfirmedTime),
-            PendingTransactionStatus.SubmittedOrKnownInNodeMempool => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
-            PendingTransactionStatus.Missing => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
-            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Pending),
-            PendingTransactionStatus.Failed => new Gateway.TransactionStatus(stateVersion, Gateway.TransactionStatus.StatusEnum.Failed),
+            PendingTransactionStatus.Committed => new GatewayModel.TransactionStatus(stateVersion, GatewayModel.TransactionStatus.StatusEnum.Succeeded), // TODO , transactionContents.ConfirmedTime),
+            PendingTransactionStatus.SubmittedOrKnownInNodeMempool => new GatewayModel.TransactionStatus(stateVersion, GatewayModel.TransactionStatus.StatusEnum.Pending),
+            PendingTransactionStatus.Missing => new GatewayModel.TransactionStatus(stateVersion, GatewayModel.TransactionStatus.StatusEnum.Pending),
+            PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => new GatewayModel.TransactionStatus(stateVersion, GatewayModel.TransactionStatus.StatusEnum.Pending),
+            PendingTransactionStatus.Failed => new GatewayModel.TransactionStatus(stateVersion, GatewayModel.TransactionStatus.StatusEnum.Failed),
             _ => throw new ArgumentOutOfRangeException(),
         };
 
-        return new Gateway.TransactionInfo(
+        return new GatewayModel.TransactionInfo(
             transactionStatus: status,
             payloadHashHex: Array.Empty<byte>().ToHex(),
             intentHashHex: Array.Empty<byte>().ToHex(),
             transactionAccumulatorHex: Array.Empty<byte>().ToHex(),
-            feePaid: new Gateway.TokenAmount("0", new Gateway.TokenIdentifier("some rri")) // TODO TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+            feePaid: new GatewayModel.TokenAmount("0", new GatewayModel.TokenIdentifier("some rri")) // TODO TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
         );
     }
 
     private async Task<List<long>> GetRecentUserTransactionStateVersions(
         RecentTransactionPageRequest request,
-        Gateway.LedgerState atLedgerState,
-        Gateway.LedgerState? fromLedgerState,
+        GatewayModel.LedgerState atLedgerState,
+        GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token)
     {
         if (fromLedgerState != null)
@@ -231,22 +233,21 @@ internal class TransactionQuerier : ITransactionQuerier
             var topStateVersionBoundary = request.Cursor?.StateVersionBoundary ?? atLedgerState._Version;
 
             return await _dbContext.LedgerTransactions
-                .Where(lt =>
-                    lt.StateVersion <= topStateVersionBoundary
-                    && lt.IsUserTransaction
-                )
-                .OrderByDescending(at => at.StateVersion)
+                .OfType<UserLedgerTransaction>()
+                .Where(ult => ult.StateVersion <= topStateVersionBoundary)
+                .OrderByDescending(ult => ult.StateVersion)
                 .Take(request.PageSize + 1)
-                .Select(at => at.StateVersion)
+                .Select(ult => ult.StateVersion)
                 .ToListAsync(token);
         }
     }
 
-    private async Task<List<Gateway.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
+    private async Task<List<GatewayModel.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
     {
         var transactions = await _dbContext.LedgerTransactions
-            .Where(lt => transactionStateVersions.Contains(lt.StateVersion))
-            .OrderByDescending(lt => lt.StateVersion)
+            .OfType<UserLedgerTransaction>()
+            .Where(ult => transactionStateVersions.Contains(ult.StateVersion))
+            .OrderByDescending(ult => ult.StateVersion)
             .ToListAsync(token);
 
         return transactions.Select(MapToGatewayAccountTransaction).ToList();
@@ -254,11 +255,16 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private async Task<LookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
     {
+        // TODO how to execute that with join?
+
         var transaction = await _dbContext.LedgerTransactions
-            .Where(lt => lt.StateVersion == stateVersion)
-            .Include(lt => lt.RawTransaction)
+            .OfType<UserLedgerTransaction>()
+            .Where(ult => ult.StateVersion == stateVersion)
             .OrderByDescending(lt => lt.StateVersion)
             .FirstAsync(token);
+
+        var rawTransaction = await _dbContext.RawTransactions
+            .FirstAsync(rt => rt.StateVersion == transaction.StateVersion, token);
 
         List<Entity> referencedEntities = new List<Entity>();
 
@@ -269,36 +275,36 @@ internal class TransactionQuerier : ITransactionQuerier
                 .ToListAsync(token);
         }
 
-        return MapToGatewayAccountTransactionWithDetails(transaction, referencedEntities);
+        return MapToGatewayAccountTransactionWithDetails(transaction, rawTransaction, referencedEntities);
     }
 
-    private Gateway.TransactionInfo MapToGatewayAccountTransaction(LedgerTransaction ledgerTransaction)
+    private GatewayModel.TransactionInfo MapToGatewayAccountTransaction(UserLedgerTransaction ult)
     {
-        return new Gateway.TransactionInfo(
-            transactionStatus: new Gateway.TransactionStatus(ledgerTransaction.StateVersion, ToGatewayStatus(ledgerTransaction.Status), ledgerTransaction.RoundTimestamp),
-            payloadHashHex: ledgerTransaction.PayloadHash.ToHex(),
-            intentHashHex: ledgerTransaction.IntentHash.ToHex(),
-            transactionAccumulatorHex: ledgerTransaction.TransactionAccumulator.ToHex(),
-            feePaid: ledgerTransaction.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+        return new GatewayModel.TransactionInfo(
+            transactionStatus: new GatewayModel.TransactionStatus(ult.StateVersion, ToGatewayStatus(ult.Status), ult.RoundTimestamp),
+            payloadHashHex: ult.PayloadHash.ToHex(),
+            intentHashHex: ult.IntentHash.ToHex(),
+            transactionAccumulatorHex: ult.TransactionAccumulator.ToHex(),
+            feePaid: ult.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
         );
     }
 
-    private LookupResult MapToGatewayAccountTransactionWithDetails(LedgerTransaction ledgerTransaction, List<Entity> referencedEntities)
+    private LookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawTransaction rawTransaction, List<Entity> referencedEntities)
     {
-        return new LookupResult(MapToGatewayAccountTransaction(ledgerTransaction), new Gateway.TransactionDetails(
-            rawHex: ledgerTransaction.RawTransaction!.Payload.ToHex(),
+        return new LookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionDetails(
+            rawHex: rawTransaction.Payload.ToHex(),
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
-            messageHex: ledgerTransaction.Message?.ToHex()
+            messageHex: ult.Message?.ToHex()
         ));
     }
 
-    private Gateway.TransactionStatus.StatusEnum ToGatewayStatus(LedgerTransactionStatus status)
+    private GatewayModel.TransactionStatus.StatusEnum ToGatewayStatus(LedgerTransactionStatus status)
     {
         return status switch
         {
-            LedgerTransactionStatus.Succeeded => Gateway.TransactionStatus.StatusEnum.Succeeded,
-            LedgerTransactionStatus.Failed => Gateway.TransactionStatus.StatusEnum.Failed,
-            LedgerTransactionStatus.Rejected => Gateway.TransactionStatus.StatusEnum.Rejected,
+            LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.StatusEnum.Succeeded,
+            LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.StatusEnum.Failed,
+            LedgerTransactionStatus.Rejected => GatewayModel.TransactionStatus.StatusEnum.Rejected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }

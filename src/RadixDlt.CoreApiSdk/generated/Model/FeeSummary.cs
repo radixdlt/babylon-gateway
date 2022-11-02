@@ -105,12 +105,12 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="FeeSummary" /> class.
         /// </summary>
         /// <param name="loanFullyRepaid">Specifies whether the transaction execution loan has been fully repaid. (required).</param>
-        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, representing the maximum amount of cost units available for the transaction execution. (required).</param>
-        /// <param name="costUnitConsumed">An integer between 0 and 2^32 - 1, representing the amount of cost units consumed by the transaction execution. (required).</param>
-        /// <param name="costUnitPriceAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD price of a single cost unit.  (required).</param>
-        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
-        /// <param name="xrdBurnedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD burned in the transaction.  (required).</param>
-        /// <param name="xrdTippedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD tipped to validators in the transaction.  (required).</param>
+        /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the maximum amount of cost units available for the transaction execution. (required).</param>
+        /// <param name="costUnitConsumed">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the amount of cost units consumed by the transaction execution. (required).</param>
+        /// <param name="costUnitPriceAttos">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the XRD price of a single cost unit.  (required).</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
+        /// <param name="xrdBurnedAttos">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total amount of XRD burned in the transaction.  (required).</param>
+        /// <param name="xrdTippedAttos">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total amount of XRD tipped to validators in the transaction.  (required).</param>
         public FeeSummary(bool loanFullyRepaid = default(bool), long costUnitLimit = default(long), long costUnitConsumed = default(long), string costUnitPriceAttos = default(string), long tipPercentage = default(long), string xrdBurnedAttos = default(string), string xrdTippedAttos = default(string))
         {
             this.LoanFullyRepaid = loanFullyRepaid;
@@ -145,44 +145,44 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool LoanFullyRepaid { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, representing the maximum amount of cost units available for the transaction execution.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the maximum amount of cost units available for the transaction execution.
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, representing the maximum amount of cost units available for the transaction execution.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the maximum amount of cost units available for the transaction execution.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
         public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, representing the amount of cost units consumed by the transaction execution.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the amount of cost units consumed by the transaction execution.
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, representing the amount of cost units consumed by the transaction execution.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, representing the amount of cost units consumed by the transaction execution.</value>
         [DataMember(Name = "cost_unit_consumed", IsRequired = true, EmitDefaultValue = true)]
         public long CostUnitConsumed { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD price of a single cost unit. 
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the XRD price of a single cost unit. 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the XRD price of a single cost unit. </value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the XRD price of a single cost unit. </value>
         [DataMember(Name = "cost_unit_price_attos", IsRequired = true, EmitDefaultValue = true)]
         public string CostUnitPriceAttos { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
         public long TipPercentage { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD burned in the transaction. 
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total amount of XRD burned in the transaction. 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD burned in the transaction. </value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total amount of XRD burned in the transaction. </value>
         [DataMember(Name = "xrd_burned_attos", IsRequired = true, EmitDefaultValue = true)]
         public string XrdBurnedAttos { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD tipped to validators in the transaction. 
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total amount of XRD tipped to validators in the transaction. 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total amount of XRD tipped to validators in the transaction. </value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total amount of XRD tipped to validators in the transaction. </value>
         [DataMember(Name = "xrd_tipped_attos", IsRequired = true, EmitDefaultValue = true)]
         public string XrdTippedAttos { get; set; }
 

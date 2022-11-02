@@ -99,26 +99,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedTransactionManifest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ParsedTransactionManifest() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParsedTransactionManifest" /> class.
-        /// </summary>
-        /// <param name="manifest">manifest (required).</param>
+        /// <param name="manifest">manifest.</param>
         public ParsedTransactionManifest(TransactionManifest manifest = default(TransactionManifest))
         {
-            // to ensure "manifest" is required (not null)
-            if (manifest == null)
-            {
-                throw new ArgumentNullException("manifest is a required property for ParsedTransactionManifest and cannot be null");
-            }
             this.Manifest = manifest;
         }
 
         /// <summary>
         /// Gets or Sets Manifest
         /// </summary>
-        [DataMember(Name = "manifest", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "manifest", EmitDefaultValue = true)]
         public TransactionManifest Manifest { get; set; }
 
         /// <summary>

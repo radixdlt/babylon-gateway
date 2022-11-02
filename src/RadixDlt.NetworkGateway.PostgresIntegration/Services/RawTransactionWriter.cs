@@ -106,11 +106,11 @@ internal class RawTransactionWriter : IRawTransactionWriter
             .RunAsync(token);
     }
 
-    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CoreModel.CommittedTransaction> transactionData, CancellationToken token)
+    public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
     {
-        var transactionsByPayloadHash = transactionData
-            .Where(ct => ct.NotarizedTransaction != null)
-            .ToDictionary(ct => ct.NotarizedTransaction.Hash.ConvertFromHex(), ByteArrayEqualityComparer.Default);
+        var transactionsByPayloadHash = committedTransactions
+            .Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction)
+            .ToDictionary(ct => ct.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction.Hash.ConvertFromHex(), ByteArrayEqualityComparer.Default);
 
         var transactionPayloadHashList = transactionsByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 

@@ -166,6 +166,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ledger_transactions",
+                columns: table => new
+                {
+                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
+                    transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
+                    message = table.Column<byte[]>(type: "bytea", nullable: true),
+                    epoch = table.Column<long>(type: "bigint", nullable: false),
+                    index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
+                    round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
+                    is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
+                    is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
+                    referenced_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
+                    round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    normalized_round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    discriminator = table.Column<string>(type: "text", nullable: false),
+                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
+                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "network_configuration",
                 columns: table => new
                 {
@@ -219,47 +248,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: table => new
                 {
                     state_version = table.Column<long>(type: "bigint", nullable: false),
-                    transaction_payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
                     payload = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_raw_transactions", x => x.state_version);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ledger_transactions",
-                columns: table => new
-                {
-                    state_version = table.Column<long>(type: "bigint", nullable: false),
-                    status = table.Column<string>(type: "text", nullable: false),
-                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
-                    is_user_transaction = table.Column<bool>(type: "boolean", nullable: false),
-                    message = table.Column<byte[]>(type: "bytea", nullable: true),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    epoch = table.Column<long>(type: "bigint", nullable: false),
-                    index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
-                    round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
-                    is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
-                    is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
-                    referenced_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
-                    round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    normalized_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
-                    table.ForeignKey(
-                        name: "FK_ledger_transactions_raw_transactions_state_version",
-                        column: x => x.state_version,
-                        principalTable: "raw_transactions",
-                        principalColumn: "state_version",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -275,7 +269,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     table.PrimaryKey("PK_ledger_status", x => x.id);
                     table.ForeignKey(
-                        name: "FK_ledger_status_top_transactions_state_version",
+                        name: "FK_ledger_status_ledger_transactions_top_of_ledger_state_versi~",
                         column: x => x.top_of_ledger_state_version,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version");
@@ -331,53 +325,43 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 column: "top_of_ledger_state_version");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_epoch_starts",
+                name: "IX_ledger_transactions_epoch",
                 table: "ledger_transactions",
                 column: "epoch",
                 unique: true,
                 filter: "is_start_of_epoch = true");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_round_starts",
+                name: "IX_ledger_transactions_epoch_round_in_epoch",
                 table: "ledger_transactions",
                 columns: new[] { "epoch", "round_in_epoch" },
                 unique: true,
                 filter: "is_start_of_round = true");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_round_timestamp",
-                table: "ledger_transactions",
-                column: "round_timestamp");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transaction_user_transactions",
-                table: "ledger_transactions",
-                column: "state_version",
-                unique: true,
-                filter: "is_user_transaction = true");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_intent_hash",
                 table: "ledger_transactions",
-                column: "intent_hash")
+                column: "intent_hash",
+                filter: "intent_hash IS NOT NULL")
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_payload_hash",
                 table: "ledger_transactions",
-                column: "payload_hash")
+                column: "payload_hash",
+                filter: "payload_hash IS NOT NULL")
                 .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ledger_transactions_round_timestamp",
+                table: "ledger_transactions",
+                column: "round_timestamp");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ledger_transactions_signed_intent_hash",
                 table: "ledger_transactions",
-                column: "signed_intent_hash")
-                .Annotation("Npgsql:IndexMethod", "hash");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ledger_transactions_transaction_accumulator",
-                table: "ledger_transactions",
-                column: "transaction_accumulator")
+                column: "signed_intent_hash",
+                filter: "signed_intent_hash IS NOT NULL")
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
@@ -414,10 +398,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "pending_transactions");
 
             migrationBuilder.DropTable(
-                name: "ledger_transactions");
+                name: "raw_transactions");
 
             migrationBuilder.DropTable(
-                name: "raw_transactions");
+                name: "ledger_transactions");
         }
     }
 }

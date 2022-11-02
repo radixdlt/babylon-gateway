@@ -91,54 +91,45 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// A request to retrieve a sublist of committed transactions from the ledger. 
+    /// If the transaction is known to not be valid, this gives a reason. Different levels of validation are performed, dependent on the validation mode. Note that, even if validation mode is Static or Full, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid). 
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsRequest")]
-    public partial class CommittedTransactionsRequest : IEquatable<CommittedTransactionsRequest>, IValidatableObject
+    [DataContract(Name = "ParsedNotarizedTransaction_allOf_validation_error")]
+    public partial class ParsedNotarizedTransactionAllOfValidationError : IEquatable<ParsedNotarizedTransactionAllOfValidationError>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ParsedNotarizedTransactionAllOfValidationError" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsRequest() { }
+        protected ParsedNotarizedTransactionAllOfValidationError() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ParsedNotarizedTransactionAllOfValidationError" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned (required).</param>
-        /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
-        public CommittedTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int))
+        /// <param name="reason">The error message.  (required).</param>
+        /// <param name="isPermanent">Whether the error is known to be permanent, or not. This relates to whether the transaction would be rejected permanently or temporarily if submitted.  (required).</param>
+        public ParsedNotarizedTransactionAllOfValidationError(string reason = default(string), bool isPermanent = default(bool))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "reason" is required (not null)
+            if (reason == null)
             {
-                throw new ArgumentNullException("network is a required property for CommittedTransactionsRequest and cannot be null");
+                throw new ArgumentNullException("reason is a required property for ParsedNotarizedTransactionAllOfValidationError and cannot be null");
             }
-            this.Network = network;
-            this.FromStateVersion = fromStateVersion;
-            this.Limit = limit;
+            this.Reason = reason;
+            this.IsPermanent = isPermanent;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// The error message. 
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        /// <value>The error message. </value>
+        [DataMember(Name = "reason", IsRequired = true, EmitDefaultValue = true)]
+        public string Reason { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned
+        /// Whether the error is known to be permanent, or not. This relates to whether the transaction would be rejected permanently or temporarily if submitted. 
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned</value>
-        [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long FromStateVersion { get; set; }
-
-        /// <summary>
-        /// The maximum number of transactions that will be returned.
-        /// </summary>
-        /// <value>The maximum number of transactions that will be returned.</value>
-        [DataMember(Name = "limit", IsRequired = true, EmitDefaultValue = true)]
-        public int Limit { get; set; }
+        /// <value>Whether the error is known to be permanent, or not. This relates to whether the transaction would be rejected permanently or temporarily if submitted. </value>
+        [DataMember(Name = "is_permanent", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsPermanent { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -147,10 +138,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("class ParsedNotarizedTransactionAllOfValidationError {\n");
+            sb.Append("  Reason: ").Append(Reason).Append("\n");
+            sb.Append("  IsPermanent: ").Append(IsPermanent).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,15 +161,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsRequest);
+            return this.Equals(input as ParsedNotarizedTransactionAllOfValidationError);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsRequest instances are equal
+        /// Returns true if ParsedNotarizedTransactionAllOfValidationError instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsRequest to be compared</param>
+        /// <param name="input">Instance of ParsedNotarizedTransactionAllOfValidationError to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsRequest input)
+        public bool Equals(ParsedNotarizedTransactionAllOfValidationError input)
         {
             if (input == null)
             {
@@ -187,17 +177,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.Reason == input.Reason ||
+                    (this.Reason != null &&
+                    this.Reason.Equals(input.Reason))
                 ) && 
                 (
-                    this.FromStateVersion == input.FromStateVersion ||
-                    this.FromStateVersion.Equals(input.FromStateVersion)
-                ) && 
-                (
-                    this.Limit == input.Limit ||
-                    this.Limit.Equals(input.Limit)
+                    this.IsPermanent == input.IsPermanent ||
+                    this.IsPermanent.Equals(input.IsPermanent)
                 );
         }
 
@@ -210,12 +196,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.Reason != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Reason.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
-                hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                hashCode = (hashCode * 59) + this.IsPermanent.GetHashCode();
                 return hashCode;
             }
         }
@@ -227,18 +212,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // FromStateVersion (long) maximum
-            if (this.FromStateVersion > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
-            }
-
-            // FromStateVersion (long) minimum
-            if (this.FromStateVersion < (long)1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
-            }
-
             yield break;
         }
     }

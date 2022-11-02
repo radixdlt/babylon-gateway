@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="UpSubstate" /> class.
         /// </summary>
         /// <param name="substateId">substateId (required).</param>
-        /// <param name="version">An integer between 0 and 10^13, counting the number of times the substate was updated (required).</param>
+        /// <param name="version">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated (required).</param>
         /// <param name="substateHex">The hex-encoded, SBOR-encoded substate data bytes (required).</param>
         /// <param name="substateDataHash">The hex-encoded single-SHA256 hash of the substate data bytes (required).</param>
         /// <param name="substateData">substateData (required).</param>
@@ -145,9 +145,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public SubstateId SubstateId { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 10^13, counting the number of times the substate was updated
+        /// An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated
         /// </summary>
-        /// <value>An integer between 0 and 10^13, counting the number of times the substate was updated</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, counting the number of times the substate was updated</value>
         [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
         public long _Version { get; set; }
 

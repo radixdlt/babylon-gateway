@@ -91,54 +91,50 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// A request to retrieve a sublist of committed transactions from the ledger. 
+    /// ParsedSignedTransactionIntentAllOfIdentifiers
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsRequest")]
-    public partial class CommittedTransactionsRequest : IEquatable<CommittedTransactionsRequest>, IValidatableObject
+    [DataContract(Name = "ParsedSignedTransactionIntent_allOf_identifiers")]
+    public partial class ParsedSignedTransactionIntentAllOfIdentifiers : IEquatable<ParsedSignedTransactionIntentAllOfIdentifiers>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ParsedSignedTransactionIntentAllOfIdentifiers" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsRequest() { }
+        protected ParsedSignedTransactionIntentAllOfIdentifiers() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ParsedSignedTransactionIntentAllOfIdentifiers" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned (required).</param>
-        /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
-        public CommittedTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int))
+        /// <param name="intentHash">The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60; (required).</param>
+        /// <param name="signaturesHash">The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60; (required).</param>
+        public ParsedSignedTransactionIntentAllOfIdentifiers(string intentHash = default(string), string signaturesHash = default(string))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "intentHash" is required (not null)
+            if (intentHash == null)
             {
-                throw new ArgumentNullException("network is a required property for CommittedTransactionsRequest and cannot be null");
+                throw new ArgumentNullException("intentHash is a required property for ParsedSignedTransactionIntentAllOfIdentifiers and cannot be null");
             }
-            this.Network = network;
-            this.FromStateVersion = fromStateVersion;
-            this.Limit = limit;
+            this.IntentHash = intentHash;
+            // to ensure "signaturesHash" is required (not null)
+            if (signaturesHash == null)
+            {
+                throw new ArgumentNullException("signaturesHash is a required property for ParsedSignedTransactionIntentAllOfIdentifiers and cannot be null");
+            }
+            this.SignaturesHash = signaturesHash;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60;
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        /// <value>The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60;</value>
+        [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHash { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned
+        /// The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60;
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned</value>
-        [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long FromStateVersion { get; set; }
-
-        /// <summary>
-        /// The maximum number of transactions that will be returned.
-        /// </summary>
-        /// <value>The maximum number of transactions that will be returned.</value>
-        [DataMember(Name = "limit", IsRequired = true, EmitDefaultValue = true)]
-        public int Limit { get; set; }
+        /// <value>The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60;</value>
+        [DataMember(Name = "signatures_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SignaturesHash { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -147,10 +143,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("class ParsedSignedTransactionIntentAllOfIdentifiers {\n");
+            sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  SignaturesHash: ").Append(SignaturesHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,15 +166,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsRequest);
+            return this.Equals(input as ParsedSignedTransactionIntentAllOfIdentifiers);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsRequest instances are equal
+        /// Returns true if ParsedSignedTransactionIntentAllOfIdentifiers instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsRequest to be compared</param>
+        /// <param name="input">Instance of ParsedSignedTransactionIntentAllOfIdentifiers to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsRequest input)
+        public bool Equals(ParsedSignedTransactionIntentAllOfIdentifiers input)
         {
             if (input == null)
             {
@@ -187,17 +182,14 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.IntentHash == input.IntentHash ||
+                    (this.IntentHash != null &&
+                    this.IntentHash.Equals(input.IntentHash))
                 ) && 
                 (
-                    this.FromStateVersion == input.FromStateVersion ||
-                    this.FromStateVersion.Equals(input.FromStateVersion)
-                ) && 
-                (
-                    this.Limit == input.Limit ||
-                    this.Limit.Equals(input.Limit)
+                    this.SignaturesHash == input.SignaturesHash ||
+                    (this.SignaturesHash != null &&
+                    this.SignaturesHash.Equals(input.SignaturesHash))
                 );
         }
 
@@ -210,12 +202,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.IntentHash != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
-                hashCode = (hashCode * 59) + this.Limit.GetHashCode();
+                if (this.SignaturesHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.SignaturesHash.GetHashCode();
+                }
                 return hashCode;
             }
         }
@@ -227,16 +221,28 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // FromStateVersion (long) maximum
-            if (this.FromStateVersion > (long)100000000000000)
+            // IntentHash (string) maxLength
+            if (this.IntentHash != null && this.IntentHash.Length > 64)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be less than 64.", new [] { "IntentHash" });
             }
 
-            // FromStateVersion (long) minimum
-            if (this.FromStateVersion < (long)1)
+            // IntentHash (string) minLength
+            if (this.IntentHash != null && this.IntentHash.Length < 64)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 64.", new [] { "IntentHash" });
+            }
+
+            // SignaturesHash (string) maxLength
+            if (this.SignaturesHash != null && this.SignaturesHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be less than 64.", new [] { "SignaturesHash" });
+            }
+
+            // SignaturesHash (string) minLength
+            if (this.SignaturesHash != null && this.SignaturesHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be greater than 64.", new [] { "SignaturesHash" });
             }
 
             yield break;

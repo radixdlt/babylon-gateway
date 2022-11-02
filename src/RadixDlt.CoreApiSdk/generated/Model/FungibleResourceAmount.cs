@@ -112,7 +112,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
+        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
         public FungibleResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), string amountAttos = default(string))
         {
             this.ResourceType = resourceType;
@@ -138,9 +138,9 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
+        /// The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
         /// </summary>
-        /// <value>The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
+        /// <value>The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
         [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
         public string AmountAttos { get; set; }
 

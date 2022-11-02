@@ -106,13 +106,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="version">version (required).</param>
         /// <param name="networkId">networkId (required).</param>
-        /// <param name="startEpochInclusive">An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted (required).</param>
-        /// <param name="endEpochExclusive">An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
-        /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents (required).</param>
+        /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction can be submitted (required).</param>
+        /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be rejected (required).</param>
+        /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents (required).</param>
         /// <param name="notaryPublicKey">notaryPublicKey (required).</param>
         /// <param name="notaryAsSignatory">Specifies whether the notary&#39;s signature should be included in transaction signers list (required).</param>
-        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution. (required).</param>
-        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
+        /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution. (required).</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
         public TransactionHeader(int version = default(int), int networkId = default(int), long startEpochInclusive = default(long), long endEpochExclusive = default(long), string nonce = default(string), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long))
         {
             this._Version = version;
@@ -149,23 +149,23 @@ namespace RadixDlt.CoreApiSdk.Model
         public int NetworkId { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction can be submitted
         /// </summary>
-        /// <value>An integer between 0 and 10^10, marking the epoch from which the transaction can be submitted</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction can be submitted</value>
         [DataMember(Name = "start_epoch_inclusive", IsRequired = true, EmitDefaultValue = true)]
         public long StartEpochInclusive { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be rejected
         /// </summary>
-        /// <value>An integer between 0 and 10^10, marking the epoch from which the transaction will no longer be valid, and be rejected</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch from which the transaction will no longer be valid, and be rejected</value>
         [DataMember(Name = "end_epoch_exclusive", IsRequired = true, EmitDefaultValue = true)]
         public long EndEpochExclusive { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^64 - 1, chosen to be unique to allow replay of transaction intents</value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, chosen to be unique to allow replay of transaction intents</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
         public string Nonce { get; set; }
 
@@ -183,16 +183,16 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool NotaryAsSignatory { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution.
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution.</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
         public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, giving the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
         public long TipPercentage { get; set; }
 

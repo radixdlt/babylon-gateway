@@ -91,54 +91,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// A request to retrieve a sublist of committed transactions from the ledger. 
+    /// ValidatorLedgerTransactionAllOf
     /// </summary>
-    [DataContract(Name = "CommittedTransactionsRequest")]
-    public partial class CommittedTransactionsRequest : IEquatable<CommittedTransactionsRequest>, IValidatableObject
+    [DataContract(Name = "ValidatorLedgerTransaction_allOf")]
+    public partial class ValidatorLedgerTransactionAllOf : IEquatable<ValidatorLedgerTransactionAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorLedgerTransactionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected CommittedTransactionsRequest() { }
+        protected ValidatorLedgerTransactionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedTransactionsRequest" /> class.
+        /// Initializes a new instance of the <see cref="ValidatorLedgerTransactionAllOf" /> class.
         /// </summary>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned (required).</param>
-        /// <param name="limit">The maximum number of transactions that will be returned. (required).</param>
-        public CommittedTransactionsRequest(string network = default(string), long fromStateVersion = default(long), int limit = default(int))
+        /// <param name="validatorTransaction">validatorTransaction (required).</param>
+        public ValidatorLedgerTransactionAllOf(ValidatorTransaction validatorTransaction = default(ValidatorTransaction))
         {
-            // to ensure "network" is required (not null)
-            if (network == null)
+            // to ensure "validatorTransaction" is required (not null)
+            if (validatorTransaction == null)
             {
-                throw new ArgumentNullException("network is a required property for CommittedTransactionsRequest and cannot be null");
+                throw new ArgumentNullException("validatorTransaction is a required property for ValidatorLedgerTransactionAllOf and cannot be null");
             }
-            this.Network = network;
-            this.FromStateVersion = fromStateVersion;
-            this.Limit = limit;
+            this.ValidatorTransaction = validatorTransaction;
         }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets ValidatorTransaction
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
-
-        /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned
-        /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version to be returned</value>
-        [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long FromStateVersion { get; set; }
-
-        /// <summary>
-        /// The maximum number of transactions that will be returned.
-        /// </summary>
-        /// <value>The maximum number of transactions that will be returned.</value>
-        [DataMember(Name = "limit", IsRequired = true, EmitDefaultValue = true)]
-        public int Limit { get; set; }
+        [DataMember(Name = "validator_transaction", IsRequired = true, EmitDefaultValue = true)]
+        public ValidatorTransaction ValidatorTransaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -147,10 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class CommittedTransactionsRequest {\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
-            sb.Append("  Limit: ").Append(Limit).Append("\n");
+            sb.Append("class ValidatorLedgerTransactionAllOf {\n");
+            sb.Append("  ValidatorTransaction: ").Append(ValidatorTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -171,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CommittedTransactionsRequest);
+            return this.Equals(input as ValidatorLedgerTransactionAllOf);
         }
 
         /// <summary>
-        /// Returns true if CommittedTransactionsRequest instances are equal
+        /// Returns true if ValidatorLedgerTransactionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of CommittedTransactionsRequest to be compared</param>
+        /// <param name="input">Instance of ValidatorLedgerTransactionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CommittedTransactionsRequest input)
+        public bool Equals(ValidatorLedgerTransactionAllOf input)
         {
             if (input == null)
             {
@@ -187,17 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
-                ) && 
-                (
-                    this.FromStateVersion == input.FromStateVersion ||
-                    this.FromStateVersion.Equals(input.FromStateVersion)
-                ) && 
-                (
-                    this.Limit == input.Limit ||
-                    this.Limit.Equals(input.Limit)
+                    this.ValidatorTransaction == input.ValidatorTransaction ||
+                    (this.ValidatorTransaction != null &&
+                    this.ValidatorTransaction.Equals(input.ValidatorTransaction))
                 );
         }
 
@@ -210,12 +181,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Network != null)
+                if (this.ValidatorTransaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
+                    hashCode = (hashCode * 59) + this.ValidatorTransaction.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
-                hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 return hashCode;
             }
         }
@@ -227,18 +196,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // FromStateVersion (long) maximum
-            if (this.FromStateVersion > (long)100000000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value less than or equal to 100000000000000.", new [] { "FromStateVersion" });
-            }
-
-            // FromStateVersion (long) minimum
-            if (this.FromStateVersion < (long)1)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
-            }
-
             yield break;
         }
     }

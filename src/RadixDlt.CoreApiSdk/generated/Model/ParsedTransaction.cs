@@ -147,6 +147,18 @@ namespace RadixDlt.CoreApiSdk.Model
             this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParsedTransaction" /> class
+        /// with the <see cref="ParsedLedgerTransaction" /> class
+        /// </summary>
+        /// <param name="actualInstance">An instance of ParsedLedgerTransaction.</param>
+        public ParsedTransaction(ParsedLedgerTransaction actualInstance)
+        {
+            this.IsNullable = false;
+            this.SchemaType= "oneOf";
+            this.ActualInstance = actualInstance ?? throw new ArgumentException("Invalid instance found. Must not be null.");
+        }
+
 
         private Object _actualInstance;
 
@@ -161,7 +173,11 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             set
             {
-                if (value.GetType() == typeof(ParsedNotarizedTransaction))
+                if (value.GetType() == typeof(ParsedLedgerTransaction))
+                {
+                    this._actualInstance = value;
+                }
+                else if (value.GetType() == typeof(ParsedNotarizedTransaction))
                 {
                     this._actualInstance = value;
                 }
@@ -179,7 +195,7 @@ namespace RadixDlt.CoreApiSdk.Model
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: ParsedNotarizedTransaction, ParsedSignedTransactionIntent, ParsedTransactionIntent, ParsedTransactionManifest");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: ParsedLedgerTransaction, ParsedNotarizedTransaction, ParsedSignedTransactionIntent, ParsedTransactionIntent, ParsedTransactionManifest");
                 }
             }
         }
@@ -225,6 +241,16 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
+        /// Get the actual instance of `ParsedLedgerTransaction`. If the actual instance is not `ParsedLedgerTransaction`,
+        /// the InvalidClassException will be thrown
+        /// </summary>
+        /// <returns>An instance of ParsedLedgerTransaction</returns>
+        public ParsedLedgerTransaction GetParsedLedgerTransaction()
+        {
+            return (ParsedLedgerTransaction)this.ActualInstance;
+        }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -266,8 +292,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
                 switch (discriminatorValue)
                 {
+                    case "LedgerTransaction":
+                        newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedLedgerTransaction>(jsonString, ParsedTransaction.AdditionalPropertiesSerializerSettings));
+                        return newParsedTransaction;
                     case "NotarizedTransaction":
                         newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedNotarizedTransaction>(jsonString, ParsedTransaction.AdditionalPropertiesSerializerSettings));
+                        return newParsedTransaction;
+                    case "ParsedLedgerTransaction":
+                        newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedLedgerTransaction>(jsonString, ParsedTransaction.AdditionalPropertiesSerializerSettings));
                         return newParsedTransaction;
                     case "ParsedNotarizedTransaction":
                         newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedNotarizedTransaction>(jsonString, ParsedTransaction.AdditionalPropertiesSerializerSettings));
@@ -291,7 +323,7 @@ namespace RadixDlt.CoreApiSdk.Model
                         newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedTransactionManifest>(jsonString, ParsedTransaction.AdditionalPropertiesSerializerSettings));
                         return newParsedTransaction;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for ParsedTransaction. Possible values: NotarizedTransaction ParsedNotarizedTransaction ParsedSignedTransactionIntent ParsedTransactionIntent ParsedTransactionManifest SignedTransactionIntent TransactionIntent TransactionManifest", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for ParsedTransaction. Possible values: LedgerTransaction NotarizedTransaction ParsedLedgerTransaction ParsedNotarizedTransaction ParsedSignedTransactionIntent ParsedTransactionIntent ParsedTransactionManifest SignedTransactionIntent TransactionIntent TransactionManifest", discriminatorValue));
                         break;
                 }
             }
@@ -302,6 +334,26 @@ namespace RadixDlt.CoreApiSdk.Model
 
             int match = 0;
             List<string> matchedTypes = new List<string>();
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(ParsedLedgerTransaction).GetProperty("AdditionalProperties") == null)
+                {
+                    newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedLedgerTransaction>(jsonString, ParsedTransaction.SerializerSettings));
+                }
+                else
+                {
+                    newParsedTransaction = new ParsedTransaction(JsonConvert.DeserializeObject<ParsedLedgerTransaction>(jsonString, ParsedTransaction.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("ParsedLedgerTransaction");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ParsedLedgerTransaction: {1}", jsonString, exception.ToString()));
+            }
 
             try
             {

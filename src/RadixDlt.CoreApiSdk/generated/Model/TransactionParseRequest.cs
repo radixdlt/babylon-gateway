@@ -97,6 +97,120 @@ namespace RadixDlt.CoreApiSdk.Model
     public partial class TransactionParseRequest : IEquatable<TransactionParseRequest>, IValidatableObject
     {
         /// <summary>
+        /// The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. 
+        /// </summary>
+        /// <value>The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. </value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ParseModeEnum
+        {
+            /// <summary>
+            /// Enum Any for value: Any
+            /// </summary>
+            [EnumMember(Value = "Any")]
+            Any = 1,
+
+            /// <summary>
+            /// Enum Notarized for value: Notarized
+            /// </summary>
+            [EnumMember(Value = "Notarized")]
+            Notarized = 2,
+
+            /// <summary>
+            /// Enum Signed for value: Signed
+            /// </summary>
+            [EnumMember(Value = "Signed")]
+            Signed = 3,
+
+            /// <summary>
+            /// Enum Unsigned for value: Unsigned
+            /// </summary>
+            [EnumMember(Value = "Unsigned")]
+            Unsigned = 4,
+
+            /// <summary>
+            /// Enum Manifest for value: Manifest
+            /// </summary>
+            [EnumMember(Value = "Manifest")]
+            Manifest = 5,
+
+            /// <summary>
+            /// Enum Ledger for value: Ledger
+            /// </summary>
+            [EnumMember(Value = "Ledger")]
+            Ledger = 6
+
+        }
+
+
+        /// <summary>
+        /// The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. 
+        /// </summary>
+        /// <value>The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. </value>
+        [DataMember(Name = "parse_mode", EmitDefaultValue = true)]
+        public ParseModeEnum? ParseMode { get; set; }
+        /// <summary>
+        /// The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. 
+        /// </summary>
+        /// <value>The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. </value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ValidationModeEnum
+        {
+            /// <summary>
+            /// Enum None for value: None
+            /// </summary>
+            [EnumMember(Value = "None")]
+            None = 1,
+
+            /// <summary>
+            /// Enum Static for value: Static
+            /// </summary>
+            [EnumMember(Value = "Static")]
+            Static = 2,
+
+            /// <summary>
+            /// Enum Full for value: Full
+            /// </summary>
+            [EnumMember(Value = "Full")]
+            Full = 3
+
+        }
+
+
+        /// <summary>
+        /// The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. 
+        /// </summary>
+        /// <value>The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. </value>
+        [DataMember(Name = "validation_mode", EmitDefaultValue = true)]
+        public ValidationModeEnum? ValidationMode { get; set; }
+        /// <summary>
+        /// The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. 
+        /// </summary>
+        /// <value>The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. </value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ResponseModeEnum
+        {
+            /// <summary>
+            /// Enum Basic for value: Basic
+            /// </summary>
+            [EnumMember(Value = "Basic")]
+            Basic = 1,
+
+            /// <summary>
+            /// Enum Full for value: Full
+            /// </summary>
+            [EnumMember(Value = "Full")]
+            Full = 2
+
+        }
+
+
+        /// <summary>
+        /// The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. 
+        /// </summary>
+        /// <value>The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. </value>
+        [DataMember(Name = "response_mode", EmitDefaultValue = true)]
+        public ResponseModeEnum? ResponseMode { get; set; }
+        /// <summary>
         /// Initializes a new instance of the <see cref="TransactionParseRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
@@ -106,7 +220,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="payloadHex">A hex-encoded payload of a full transaction or a partial transaction - either a notarized transaction, a signed transaction intent an unsigned transaction intent, or a transaction manifest.  (required).</param>
-        public TransactionParseRequest(string network = default(string), string payloadHex = default(string))
+        /// <param name="parseMode">The type of transaction payload that should be assumed. If omitted, \&quot;Any\&quot; is used - where the payload is attempted to be parsed as each of the following in turn: Notarized, Signed, Unsigned, Manifest, Ledger. .</param>
+        /// <param name="validationMode">The type of validation that should be performed, if the payload correctly decompiles as a Notarized Transaction. This is only relevant for Notarized payloads. If omitted, \&quot;Static\&quot; is used. .</param>
+        /// <param name="responseMode">The amount of information to return in the response. \&quot;Basic\&quot; includes the type, validity information, and any relevant identifiers. \&quot;Full\&quot; also includes the fully parsed information. If omitted, \&quot;Full\&quot; is used. .</param>
+        public TransactionParseRequest(string network = default(string), string payloadHex = default(string), ParseModeEnum? parseMode = default(ParseModeEnum?), ValidationModeEnum? validationMode = default(ValidationModeEnum?), ResponseModeEnum? responseMode = default(ResponseModeEnum?))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -120,6 +237,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("payloadHex is a required property for TransactionParseRequest and cannot be null");
             }
             this.PayloadHex = payloadHex;
+            this.ParseMode = parseMode;
+            this.ValidationMode = validationMode;
+            this.ResponseMode = responseMode;
         }
 
         /// <summary>
@@ -146,6 +266,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class TransactionParseRequest {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
+            sb.Append("  ParseMode: ").Append(ParseMode).Append("\n");
+            sb.Append("  ValidationMode: ").Append(ValidationMode).Append("\n");
+            sb.Append("  ResponseMode: ").Append(ResponseMode).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -190,6 +313,18 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.PayloadHex == input.PayloadHex ||
                     (this.PayloadHex != null &&
                     this.PayloadHex.Equals(input.PayloadHex))
+                ) && 
+                (
+                    this.ParseMode == input.ParseMode ||
+                    this.ParseMode.Equals(input.ParseMode)
+                ) && 
+                (
+                    this.ValidationMode == input.ValidationMode ||
+                    this.ValidationMode.Equals(input.ValidationMode)
+                ) && 
+                (
+                    this.ResponseMode == input.ResponseMode ||
+                    this.ResponseMode.Equals(input.ResponseMode)
                 );
         }
 
@@ -210,6 +345,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.ParseMode.GetHashCode();
+                hashCode = (hashCode * 59) + this.ValidationMode.GetHashCode();
+                hashCode = (hashCode * 59) + this.ResponseMode.GetHashCode();
                 return hashCode;
             }
         }

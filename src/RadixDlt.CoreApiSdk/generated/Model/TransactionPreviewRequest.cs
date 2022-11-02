@@ -107,9 +107,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="manifest">A text-representation of a transaction manifest (required).</param>
         /// <param name="blobsHex">An array of hex-encoded blob data (optional).</param>
-        /// <param name="costUnitLimit">An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution (required).</param>
-        /// <param name="tipPercentage">An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee. (required).</param>
-        /// <param name="nonce">A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique. (required).</param>
+        /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution (required).</param>
+        /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
+        /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
         public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobsHex = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
@@ -171,23 +171,23 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<string> BlobsHex { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution</value>
         [DataMember(Name = "cost_unit_limit", IsRequired = true, EmitDefaultValue = true)]
         public long CostUnitLimit { get; set; }
 
         /// <summary>
-        /// An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.
+        /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.
         /// </summary>
-        /// <value>An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of \&quot;1\&quot; corresponds to 1% of the fee.</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee.</value>
         [DataMember(Name = "tip_percentage", IsRequired = true, EmitDefaultValue = true)]
         public long TipPercentage { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.
+        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique.
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.</value>
+        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique.</value>
         [DataMember(Name = "nonce", IsRequired = true, EmitDefaultValue = true)]
         public string Nonce { get; set; }
 

@@ -91,28 +91,49 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// V0TransactionStatusRequest
+    /// ParsedNotarizedTransactionAllOfIdentifiers
     /// </summary>
-    [DataContract(Name = "V0TransactionStatusRequest")]
-    public partial class V0TransactionStatusRequest : IEquatable<V0TransactionStatusRequest>, IValidatableObject
+    [DataContract(Name = "ParsedNotarizedTransaction_allOf_identifiers")]
+    public partial class ParsedNotarizedTransactionAllOfIdentifiers : IEquatable<ParsedNotarizedTransactionAllOfIdentifiers>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="ParsedNotarizedTransactionAllOfIdentifiers" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected V0TransactionStatusRequest() { }
+        protected ParsedNotarizedTransactionAllOfIdentifiers() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="V0TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="ParsedNotarizedTransactionAllOfIdentifiers" /> class.
         /// </summary>
         /// <param name="intentHash">The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60; (required).</param>
-        public V0TransactionStatusRequest(string intentHash = default(string))
+        /// <param name="signaturesHash">The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60; (required).</param>
+        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60; (required).</param>
+        /// <param name="ledgerHash">The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is &#x60;SHA256(SHA256(ledger_transaction_bytes))&#x60; (required).</param>
+        public ParsedNotarizedTransactionAllOfIdentifiers(string intentHash = default(string), string signaturesHash = default(string), string payloadHash = default(string), string ledgerHash = default(string))
         {
             // to ensure "intentHash" is required (not null)
             if (intentHash == null)
             {
-                throw new ArgumentNullException("intentHash is a required property for V0TransactionStatusRequest and cannot be null");
+                throw new ArgumentNullException("intentHash is a required property for ParsedNotarizedTransactionAllOfIdentifiers and cannot be null");
             }
             this.IntentHash = intentHash;
+            // to ensure "signaturesHash" is required (not null)
+            if (signaturesHash == null)
+            {
+                throw new ArgumentNullException("signaturesHash is a required property for ParsedNotarizedTransactionAllOfIdentifiers and cannot be null");
+            }
+            this.SignaturesHash = signaturesHash;
+            // to ensure "payloadHash" is required (not null)
+            if (payloadHash == null)
+            {
+                throw new ArgumentNullException("payloadHash is a required property for ParsedNotarizedTransactionAllOfIdentifiers and cannot be null");
+            }
+            this.PayloadHash = payloadHash;
+            // to ensure "ledgerHash" is required (not null)
+            if (ledgerHash == null)
+            {
+                throw new ArgumentNullException("ledgerHash is a required property for ParsedNotarizedTransactionAllOfIdentifiers and cannot be null");
+            }
+            this.LedgerHash = ledgerHash;
         }
 
         /// <summary>
@@ -123,14 +144,38 @@ namespace RadixDlt.CoreApiSdk.Model
         public string IntentHash { get; set; }
 
         /// <summary>
+        /// The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60;
+        /// </summary>
+        /// <value>The hex-encoded signed transaction hash. This is known as the Signed Transaction Hash or Signatures Hash. This is the hash which is signed as part of notarization. This hash is &#x60;SHA256(SHA256(compiled_signed_transaction))&#x60;</value>
+        [DataMember(Name = "signatures_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string SignaturesHash { get; set; }
+
+        /// <summary>
+        /// The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60;
+        /// </summary>
+        /// <value>The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60;</value>
+        [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHash { get; set; }
+
+        /// <summary>
+        /// The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is &#x60;SHA256(SHA256(ledger_transaction_bytes))&#x60;
+        /// </summary>
+        /// <value>The hex-encoded ledger-wrapped transaction hash. This is known as the Ledger Hash. This hash is &#x60;SHA256(SHA256(ledger_transaction_bytes))&#x60;</value>
+        [DataMember(Name = "ledger_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string LedgerHash { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class V0TransactionStatusRequest {\n");
+            sb.Append("class ParsedNotarizedTransactionAllOfIdentifiers {\n");
             sb.Append("  IntentHash: ").Append(IntentHash).Append("\n");
+            sb.Append("  SignaturesHash: ").Append(SignaturesHash).Append("\n");
+            sb.Append("  PayloadHash: ").Append(PayloadHash).Append("\n");
+            sb.Append("  LedgerHash: ").Append(LedgerHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -151,15 +196,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as V0TransactionStatusRequest);
+            return this.Equals(input as ParsedNotarizedTransactionAllOfIdentifiers);
         }
 
         /// <summary>
-        /// Returns true if V0TransactionStatusRequest instances are equal
+        /// Returns true if ParsedNotarizedTransactionAllOfIdentifiers instances are equal
         /// </summary>
-        /// <param name="input">Instance of V0TransactionStatusRequest to be compared</param>
+        /// <param name="input">Instance of ParsedNotarizedTransactionAllOfIdentifiers to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(V0TransactionStatusRequest input)
+        public bool Equals(ParsedNotarizedTransactionAllOfIdentifiers input)
         {
             if (input == null)
             {
@@ -170,6 +215,21 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.IntentHash == input.IntentHash ||
                     (this.IntentHash != null &&
                     this.IntentHash.Equals(input.IntentHash))
+                ) && 
+                (
+                    this.SignaturesHash == input.SignaturesHash ||
+                    (this.SignaturesHash != null &&
+                    this.SignaturesHash.Equals(input.SignaturesHash))
+                ) && 
+                (
+                    this.PayloadHash == input.PayloadHash ||
+                    (this.PayloadHash != null &&
+                    this.PayloadHash.Equals(input.PayloadHash))
+                ) && 
+                (
+                    this.LedgerHash == input.LedgerHash ||
+                    (this.LedgerHash != null &&
+                    this.LedgerHash.Equals(input.LedgerHash))
                 );
         }
 
@@ -185,6 +245,18 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.IntentHash != null)
                 {
                     hashCode = (hashCode * 59) + this.IntentHash.GetHashCode();
+                }
+                if (this.SignaturesHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.SignaturesHash.GetHashCode();
+                }
+                if (this.PayloadHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHash.GetHashCode();
+                }
+                if (this.LedgerHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.LedgerHash.GetHashCode();
                 }
                 return hashCode;
             }
@@ -207,6 +279,42 @@ namespace RadixDlt.CoreApiSdk.Model
             if (this.IntentHash != null && this.IntentHash.Length < 64)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 64.", new [] { "IntentHash" });
+            }
+
+            // SignaturesHash (string) maxLength
+            if (this.SignaturesHash != null && this.SignaturesHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be less than 64.", new [] { "SignaturesHash" });
+            }
+
+            // SignaturesHash (string) minLength
+            if (this.SignaturesHash != null && this.SignaturesHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for SignaturesHash, length must be greater than 64.", new [] { "SignaturesHash" });
+            }
+
+            // PayloadHash (string) maxLength
+            if (this.PayloadHash != null && this.PayloadHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be less than 64.", new [] { "PayloadHash" });
+            }
+
+            // PayloadHash (string) minLength
+            if (this.PayloadHash != null && this.PayloadHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for PayloadHash, length must be greater than 64.", new [] { "PayloadHash" });
+            }
+
+            // LedgerHash (string) maxLength
+            if (this.LedgerHash != null && this.LedgerHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for LedgerHash, length must be less than 64.", new [] { "LedgerHash" });
+            }
+
+            // LedgerHash (string) minLength
+            if (this.LedgerHash != null && this.LedgerHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for LedgerHash, length must be greater than 64.", new [] { "LedgerHash" });
             }
 
             yield break;
