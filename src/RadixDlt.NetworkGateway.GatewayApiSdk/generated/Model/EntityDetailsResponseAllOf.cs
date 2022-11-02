@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="metadata">metadata (required).</param>
         /// <param name="details">details (required).</param>
-        public EntityDetailsResponseAllOf(string address = default(string), EntityDetailsResponseMetadata metadata = default(EntityDetailsResponseMetadata), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
+        public EntityDetailsResponseAllOf(string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection), EntityDetailsResponseDetails details = default(EntityDetailsResponseDetails))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -140,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Metadata
         /// </summary>
         [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseMetadata Metadata { get; set; }
+        public EntityMetadataCollection Metadata { get; set; }
 
         /// <summary>
         /// Gets or Sets Details

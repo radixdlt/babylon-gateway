@@ -314,6 +314,18 @@ components:
           type: integer
           format: int64
 
+    EntityMetadataCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: TBD
+              type: array
+              items:
+                $ref: "#/components/schemas/EntityMetadataItem"
     EntityMetadataItem:
       type: object
       required:
@@ -639,21 +651,9 @@ components:
             address:
               $ref: "#/components/schemas/EntityAddress"
             metadata:
-              $ref: "#/components/schemas/EntityDetailsResponseMetadata"
+              $ref: "#/components/schemas/EntityMetadataCollection"
             details:
               $ref: "#/components/schemas/EntityDetailsResponseDetails"
-    EntityDetailsResponseMetadata:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              description: TBD
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityMetadataItem"
     EntityDetailsResponseDetailsType:
       type: string
       enum:
@@ -759,19 +759,7 @@ components:
          address:
            $ref: "#/components/schemas/EntityAddress"
          metadata:
-           $ref: "#/components/schemas/EntityOverviewResponseEntityItemMetadata"
-    EntityOverviewResponseEntityItemMetadata:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              description: TBD
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityMetadataItem"
+           $ref: "#/components/schemas/EntityMetadataCollection"
 
     EntityMetadataRequest:
       type: object
@@ -802,19 +790,7 @@ components:
             address:
               $ref: "#/components/schemas/EntityAddress"
             metadata:
-              $ref: "#/components/schemas/EntityMetadataResponseMetadata"
-    EntityMetadataResponseMetadata:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              description: TBD
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityMetadataItem"
+              $ref: "#/components/schemas/EntityMetadataCollection"
 
     #
     # TODO Not categorized/cleaned yet

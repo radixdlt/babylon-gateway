@@ -66,8 +66,8 @@ using System.Collections.Generic;
 
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public partial class EntityMetadataResponseMetadata
+public partial class EntityMetadataCollection
 {
-    public static readonly EntityMetadataResponseMetadata Empty = new(items: new List<EntityMetadataItem>());
+    public static readonly EntityMetadataCollection Empty = new(items: new List<EntityMetadataItem>());
 }
 

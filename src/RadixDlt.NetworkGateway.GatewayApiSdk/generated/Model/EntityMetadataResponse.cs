@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
         /// <param name="metadata">metadata (required).</param>
-        public EntityMetadataResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityMetadataResponseMetadata metadata = default(EntityMetadataResponseMetadata))
+        public EntityMetadataResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -146,7 +146,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Metadata
         /// </summary>
         [DataMember(Name = "metadata", IsRequired = true, EmitDefaultValue = true)]
-        public EntityMetadataResponseMetadata Metadata { get; set; }
+        public EntityMetadataCollection Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

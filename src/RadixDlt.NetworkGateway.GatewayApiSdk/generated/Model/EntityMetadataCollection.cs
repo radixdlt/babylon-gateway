@@ -91,30 +91,30 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityMetadataResponseMetadata
+    /// EntityMetadataCollection
     /// </summary>
-    [DataContract(Name = "EntityMetadataResponseMetadata")]
-    public partial class EntityMetadataResponseMetadata : IEquatable<EntityMetadataResponseMetadata>, IValidatableObject
+    [DataContract(Name = "EntityMetadataCollection")]
+    public partial class EntityMetadataCollection : IEquatable<EntityMetadataCollection>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataResponseMetadata" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityMetadataResponseMetadata() { }
+        protected EntityMetadataCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityMetadataResponseMetadata" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataCollection" /> class.
         /// </summary>
         /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">TBD (required).</param>
-        public EntityMetadataResponseMetadata(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
+        public EntityMetadataCollection(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
         {
             this.TotalCount = totalCount;
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for EntityMetadataResponseMetadata and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntityMetadataCollection and cannot be null");
             }
             this.Items = items;
             this.PreviousCursor = previousCursor;
@@ -156,7 +156,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityMetadataResponseMetadata {\n");
+            sb.Append("class EntityMetadataCollection {\n");
             sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
             sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
             sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
@@ -181,15 +181,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityMetadataResponseMetadata);
+            return this.Equals(input as EntityMetadataCollection);
         }
 
         /// <summary>
-        /// Returns true if EntityMetadataResponseMetadata instances are equal
+        /// Returns true if EntityMetadataCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityMetadataResponseMetadata to be compared</param>
+        /// <param name="input">Instance of EntityMetadataCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityMetadataResponseMetadata input)
+        public bool Equals(EntityMetadataCollection input)
         {
             if (input == null)
             {

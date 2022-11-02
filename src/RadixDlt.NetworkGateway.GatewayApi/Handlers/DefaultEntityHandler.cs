@@ -115,7 +115,7 @@ internal class DefaultEntityHandler : IEntityHandler
         var pageRequest = new EntityMetadataPageRequest(
             Address: address,
             Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.Limit ?? 10
+            Limit: request.Limit ?? 10 // TODO make it configurable
         );
 
         return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);

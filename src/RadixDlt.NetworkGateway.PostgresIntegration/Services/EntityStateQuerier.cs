@@ -79,6 +79,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
+    private const int DefaultMetadataLimit = 10; // TODO make it configurable
+
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
 
@@ -210,7 +212,7 @@ INNER JOIN LATERAL (
                 break;
             }
 
-            case NonFungibleResourceManagerEntity nfrme:
+            case NonFungibleResourceManagerEntity:
                 // TODO add support for detailed ids
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseNonFungibleResourceDetails(
@@ -229,26 +231,13 @@ INNER JOIN LATERAL (
                 return null;
         }
 
-        var rawMetadata = new Dictionary<string, string>();
-        var metadataHistory = await _dbContext.EntityMetadataHistory
-            .Where(e => e.EntityId == entity.Id && e.FromStateVersion <= ledgerState._Version)
-            .OrderByDescending(e => e.FromStateVersion)
-            .FirstOrDefaultAsync(token);
-
-        if (metadataHistory != null)
-        {
-            rawMetadata = metadataHistory.Keys.Zip(metadataHistory.Values).ToDictionary(z => z.First, z => z.Second);
-        }
-
-        var metadata = new GatewayModel.EntityDetailsResponseMetadata(rawMetadata.Count, null, "TBD (currently everything is returned)", rawMetadata.Select(rm => new GatewayModel.EntityMetadataItem(rm.Key, rm.Value)).ToList());
+        var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
 
         return new GatewayModel.EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 
     public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        // TODO we could use just one query (select with lateral join) but it seems it is impossible to do it easily with EF Core (no foreign key)
-
         var addressesList = addresses.ToList();
 
         var entities = await _dbContext.Entities
@@ -256,41 +245,11 @@ INNER JOIN LATERAL (
             .Where(e => e.FromStateVersion <= ledgerState._Version)
             .ToListAsync(token);
 
-        var entityIds = entities.Select(e => e.Id).ToList();
+        var metadata = await GetMetadataSlices(entities.Select(e => e.Id).ToArray(), 0, DefaultMetadataLimit, ledgerState, token);
 
-        var metadataHistory = await _dbContext.EntityMetadataHistory
-            .FromSqlInterpolated($@"
-WITH entities (id) AS (
-    SELECT UNNEST({entityIds})
-)
-SELECT emh.*
-FROM ids
-INNER JOIN LATERAL (
-    SELECT *
-    FROM entity_metadata_history
-    WHERE
-       from_state_version <= {ledgerState._Version} AND entity_id = entities.id
-    ORDER BY from_state_version DESC
-    LIMIT 1
-) emh ON true;
-")
-            .ToDictionaryAsync(e => e.EntityId, token);
-
-        var items = new List<GatewayModel.EntityOverviewResponseEntityItem>();
-
-        foreach (var entity in entities)
-        {
-            var rawMetadata = new Dictionary<string, string>();
-
-            if (metadataHistory.ContainsKey(entity.Id))
-            {
-                rawMetadata = metadataHistory[entity.Id].Keys.Zip(metadataHistory[entity.Id].Values).ToDictionary(z => z.First, z => z.Second);
-            }
-
-            var metadata = new GatewayModel.EntityOverviewResponseEntityItemMetadata(rawMetadata.Count, null, "TBD (currently everything is returned)", rawMetadata.Select(rm => new GatewayModel.EntityMetadataItem(rm.Key, rm.Value)).ToList());
-
-            items.Add(new GatewayModel.EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata));
-        }
+        var items = entities
+            .Select(entity => new GatewayModel.EntityOverviewResponseEntityItem(entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata[entity.Id]))
+            .ToList();
 
         return new GatewayModel.EntityOverviewResponse(ledgerState, items);
     }
@@ -306,42 +265,69 @@ INNER JOIN LATERAL (
             return null;
         }
 
-        var metadata = GatewayModel.EntityMetadataResponseMetadata.Empty;
-
-        var dbMetadata = await _dbContext.Database.GetDbConnection().QuerySingleOrDefaultAsync<EntityMetadataHistorySlice>(
-            @"
-SELECT keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, array_length(keys, 1) AS TotalCount
-FROM entity_metadata_history
-WHERE entity_id = @entityId AND from_state_version <= @stateVersion
-ORDER BY from_state_version DESC
-LIMIT 1",
-            new
-            {
-                entityId = entity.Id,
-                stateVersion = ledgerState._Version,
-                offset = request.Offset + 1,
-                limit = request.Offset + request.Limit,
-            });
-
-        if (dbMetadata != null)
-        {
-            var items = dbMetadata.Keys.Zip(dbMetadata.Values)
-                .Select(rm => new GatewayModel.EntityMetadataItem(rm.First, rm.Second))
-                .ToList();
-
-            var previousCursor = request.Offset > 0
-                ? new GatewayModel.EntityMetadataRequestCursor(request.Offset - request.Limit).ToCursorString()
-                : null;
-
-            var nextCursor = request.Offset + request.Limit < dbMetadata.TotalCount
-                ? new GatewayModel.EntityMetadataRequestCursor(request.Offset + request.Limit).ToCursorString()
-                : null;
-
-            metadata = new GatewayModel.EntityMetadataResponseMetadata(dbMetadata.TotalCount, previousCursor, nextCursor, items);
-        }
+        var metadata = await GetMetadataSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityMetadataResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata);
     }
 
-    private record EntityMetadataHistorySlice(string[] Keys, string[] Values, int TotalCount);
+    private record EntityMetadataHistorySlice(long EntityId, string[] Keys, string[] Values, int TotalCount);
+
+    private async Task<GatewayModel.EntityMetadataCollection> GetMetadataSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var result = await GetMetadataSlices(new[] { entityId }, offset, limit, ledgerState, token);
+
+        return result[entityId];
+    }
+
+    private async Task<Dictionary<long, GatewayModel.EntityMetadataCollection>> GetMetadataSlices(long[] entityIds, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var result = new Dictionary<long, GatewayModel.EntityMetadataCollection>();
+
+        var cd = new CommandDefinition(
+            commandText: @"
+WITH entities (id) AS (
+    SELECT UNNEST(@entityIds)
+)
+SELECT emh.*
+FROM entities
+INNER JOIN LATERAL (
+    SELECT entity_id AS EntityId, keys[@offset:@limit] AS Keys, values[@offset:@limit] AS Values, array_length(keys, 1) AS TotalCount
+    FROM entity_metadata_history
+    WHERE entity_id = entities.id AND from_state_version <= @stateVersion
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON true;",
+            parameters: new
+            {
+                entityIds = entityIds,
+                stateVersion = ledgerState._Version,
+                offset = offset + 1,
+                limit = offset + limit,
+            },
+            cancellationToken: token);
+
+        foreach (var metadata in await _dbContext.Database.GetDbConnection().QueryAsync<EntityMetadataHistorySlice>(cd))
+        {
+            var items = metadata.Keys.Zip(metadata.Values)
+                .Select(rm => new GatewayModel.EntityMetadataItem(rm.First, rm.Second))
+                .ToList();
+
+            var previousCursor = offset > 0
+                ? new GatewayModel.EntityMetadataRequestCursor(Math.Max(offset - limit, 0)).ToCursorString()
+                : null;
+
+            var nextCursor = offset + limit < metadata.TotalCount
+                ? new GatewayModel.EntityMetadataRequestCursor(offset + limit).ToCursorString()
+                : null;
+
+            result[metadata.EntityId] = new GatewayModel.EntityMetadataCollection(metadata.TotalCount, previousCursor, nextCursor, items);
+        }
+
+        foreach (var missing in entityIds.Except(result.Keys))
+        {
+            result[missing] = GatewayModel.EntityMetadataCollection.Empty;
+        }
+
+        return result;
+    }
 }

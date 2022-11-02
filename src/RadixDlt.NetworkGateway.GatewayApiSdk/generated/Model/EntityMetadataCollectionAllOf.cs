@@ -91,56 +91,29 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseMetadata
+    /// EntityMetadataCollectionAllOf
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseMetadata")]
-    public partial class EntityDetailsResponseMetadata : IEquatable<EntityDetailsResponseMetadata>, IValidatableObject
+    [DataContract(Name = "EntityMetadataCollection_allOf")]
+    public partial class EntityMetadataCollectionAllOf : IEquatable<EntityMetadataCollectionAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseMetadata" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseMetadata() { }
+        protected EntityMetadataCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseMetadata" /> class.
+        /// Initializes a new instance of the <see cref="EntityMetadataCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">TBD (required).</param>
-        public EntityDetailsResponseMetadata(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
+        public EntityMetadataCollectionAllOf(List<EntityMetadataItem> items = default(List<EntityMetadataItem>))
         {
-            this.TotalCount = totalCount;
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for EntityDetailsResponseMetadata and cannot be null");
+                throw new ArgumentNullException("items is a required property for EntityMetadataCollectionAllOf and cannot be null");
             }
             this.Items = items;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
         }
-
-        /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
-        /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public int TotalCount { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
 
         /// <summary>
         /// TBD
@@ -156,10 +129,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseMetadata {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("class EntityMetadataCollectionAllOf {\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -181,35 +151,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseMetadata);
+            return this.Equals(input as EntityMetadataCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseMetadata instances are equal
+        /// Returns true if EntityMetadataCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseMetadata to be compared</param>
+        /// <param name="input">Instance of EntityMetadataCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseMetadata input)
+        public bool Equals(EntityMetadataCollectionAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
-                (
-                    this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
-                ) && 
-                (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
                 (
                     this.Items == input.Items ||
                     this.Items != null &&
@@ -227,15 +183,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                if (this.PreviousCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();
