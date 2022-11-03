@@ -305,9 +305,6 @@ SELECT
 
         // step: scan for any referenced entities
         {
-            var tmpRandom = new Random();
-            var tmpRound = 0;
-
             foreach (var ct in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = ct.StateVersion;
@@ -373,7 +370,10 @@ SELECT
                     if (sd is CoreModel.SystemSubstate systemSubstate)
                     {
                         newEpoch = systemSubstate.Epoch;
-                        tmpRound = 0;
+
+                        // TODO this is just some dirty hack to ease-up integration process while CoreApi is still missing round support
+                        newRoundInEpoch = 1;
+                        newRoundTimestamp = _clock.UtcNow;
                     }
 
                     // TODO implement roundInEpoch the same way once CoreApi expose round/roundInEpoch
@@ -387,14 +387,6 @@ SELECT
                     //         newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
                     //     }
                     // }
-
-                    // TODO this is just some dirty hack to ease-up integration process while CoreApi is still missing round support
-                    if (tmpRandom.NextDouble() < 0.25)
-                    {
-                        tmpRound += 1;
-                        newRoundInEpoch = tmpRound;
-                        newRoundTimestamp = _clock.UtcNow;
-                    }
                 }
 
                 foreach (var downSubstate in stateUpdates.DownSubstates)

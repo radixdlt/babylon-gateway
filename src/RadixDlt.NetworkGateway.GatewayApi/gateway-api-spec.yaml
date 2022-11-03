@@ -785,7 +785,6 @@ components:
           required:
             - address
             - metadata
-            - details
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"

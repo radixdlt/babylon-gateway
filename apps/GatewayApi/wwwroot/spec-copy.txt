@@ -785,7 +785,6 @@ components:
           required:
             - address
             - metadata
-            - details
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
@@ -838,8 +837,11 @@ components:
           type: object
           required:
             - unlimited_loan
+            - assume_all_signature_proofs
           properties:
             unlimited_loan:
+              type: boolean
+            assume_all_signature_proofs:
               type: boolean
     TransactionPreviewResponse:
       type: object
