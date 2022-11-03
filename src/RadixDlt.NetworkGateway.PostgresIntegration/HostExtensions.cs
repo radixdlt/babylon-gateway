@@ -66,6 +66,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration;
@@ -76,8 +77,13 @@ public static class HostExtensions
     {
         using var scope = host.Services.CreateScope();
 
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<MigrationsDbContext>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<MigrationsDbContext>();
+        await scope.ServiceProvider.ExecutePostgresMigrations(wipeDatabase);
+    }
+
+    public static async Task ExecutePostgresMigrations(this IServiceProvider services, bool wipeDatabase = false)
+    {
+        var logger = services.GetRequiredService<ILogger<MigrationsDbContext>>();
+        var dbContext = services.GetRequiredService<MigrationsDbContext>();
 
         if (wipeDatabase)
         {

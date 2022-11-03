@@ -104,33 +104,38 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
         /// </summary>
-        /// <param name="stateVersion">An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed (required).</param>
-        /// <param name="notarizedTransaction">notarizedTransaction.</param>
+        /// <param name="stateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed (required).</param>
+        /// <param name="ledgerTransaction">ledgerTransaction (required).</param>
         /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        public CommittedTransaction(long stateVersion = default(long), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt))
         {
             this.StateVersion = stateVersion;
+            // to ensure "ledgerTransaction" is required (not null)
+            if (ledgerTransaction == null)
+            {
+                throw new ArgumentNullException("ledgerTransaction is a required property for CommittedTransaction and cannot be null");
+            }
+            this.LedgerTransaction = ledgerTransaction;
             // to ensure "receipt" is required (not null)
             if (receipt == null)
             {
                 throw new ArgumentNullException("receipt is a required property for CommittedTransaction and cannot be null");
             }
             this.Receipt = receipt;
-            this.NotarizedTransaction = notarizedTransaction;
         }
 
         /// <summary>
-        /// An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed
         /// </summary>
-        /// <value>An integer between 1 and 10^13, giving the resultant state version after the transaction has been committed</value>
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed</value>
         [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
         public long StateVersion { get; set; }
 
         /// <summary>
-        /// Gets or Sets NotarizedTransaction
+        /// Gets or Sets LedgerTransaction
         /// </summary>
-        [DataMember(Name = "notarized_transaction", EmitDefaultValue = true)]
-        public NotarizedTransaction NotarizedTransaction { get; set; }
+        [DataMember(Name = "ledger_transaction", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerTransaction LedgerTransaction { get; set; }
 
         /// <summary>
         /// Gets or Sets Receipt
@@ -147,7 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransaction {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("  LedgerTransaction: ").Append(LedgerTransaction).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -189,9 +194,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.LedgerTransaction == input.LedgerTransaction ||
+                    (this.LedgerTransaction != null &&
+                    this.LedgerTransaction.Equals(input.LedgerTransaction))
                 ) && 
                 (
                     this.Receipt == input.Receipt ||
@@ -210,9 +215,9 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                if (this.NotarizedTransaction != null)
+                if (this.LedgerTransaction != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerTransaction.GetHashCode();
                 }
                 if (this.Receipt != null)
                 {

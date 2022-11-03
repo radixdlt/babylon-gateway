@@ -62,25 +62,25 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface INetworkConfigurationReader
 {
-    Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
+    Task<CoreModel.NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
 }
 
 internal class NetworkConfigurationReader : INetworkConfigurationReader
 {
-    private readonly StatusApi _statusApi;
+    private readonly CoreApi.StatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkConfigurationReaderObserver> _observers;
 
@@ -94,7 +94,7 @@ internal class NetworkConfigurationReader : INetworkConfigurationReader
         _statusApi = coreApiProvider.StatusApi;
     }
 
-    public async Task<NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
+    public async Task<CoreModel.NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token)
     {
         try
         {

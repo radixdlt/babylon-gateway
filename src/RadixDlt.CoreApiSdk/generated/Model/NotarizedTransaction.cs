@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash. (required).</param>
+        /// <param name="hash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60; (required).</param>
         /// <param name="payloadHex">The hex-encoded full notarized transaction payload (required).</param>
         /// <param name="signedIntent">signedIntent (required).</param>
         /// <param name="notarySignature">notarySignature (required).</param>
@@ -137,9 +137,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash.
+        /// The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60;
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the notarized transaction payload. Also known as the payload_hash or the notarized_transaction_hash.</value>
+        /// <value>The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60;</value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 
@@ -267,6 +267,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Hash (string) maxLength
+            if (this.Hash != null && this.Hash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be less than 64.", new [] { "Hash" });
+            }
+
+            // Hash (string) minLength
+            if (this.Hash != null && this.Hash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be greater than 64.", new [] { "Hash" });
+            }
+
             yield break;
         }
     }

@@ -64,9 +64,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -92,7 +92,7 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
             networkConfiguration.NetworkName,
             networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
             networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
-            new TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
+            new GatewayModel.TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
         );
     }
 }

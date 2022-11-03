@@ -63,20 +63,22 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IEntityStateQuerier
 {
-    Task<EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, LedgerState ledgerState, CancellationToken token = default);
+    Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }
+
+public sealed record EntityMetadataPageRequest(RadixAddress Address, int Offset, int Limit);

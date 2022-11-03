@@ -65,10 +65,10 @@
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
@@ -83,7 +83,7 @@ internal class DefaultEntityHandler : IEntityHandler
         _entityStateQuerier = entityStateQuerier;
     }
 
-    public async Task<EntityResourcesResponse?> Resources(EntityResourcesRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
     {
         var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
@@ -91,7 +91,7 @@ internal class DefaultEntityHandler : IEntityHandler
         return await _entityStateQuerier.EntityResourcesSnapshot(address, ledgerState, token);
     }
 
-    public async Task<EntityDetailsResponse?> Details(EntityDetailsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default)
     {
         var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
@@ -99,11 +99,25 @@ internal class DefaultEntityHandler : IEntityHandler
         return await _entityStateQuerier.EntityDetailsSnapshot(address, ledgerState, token);
     }
 
-    public async Task<EntityOverviewResponse> Overview(EntityOverviewRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)
     {
         var addresses = request.Addresses.Select(address => (RadixAddress)RadixBech32.Decode(address).Data).ToArray();
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
         return await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
+    {
+        var address = (RadixAddress)RadixBech32.Decode(request.Address).Data;
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var pageRequest = new EntityMetadataPageRequest(
+            Address: address,
+            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.Limit ?? 10 // TODO make it configurable
+        );
+
+        return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
     }
 }

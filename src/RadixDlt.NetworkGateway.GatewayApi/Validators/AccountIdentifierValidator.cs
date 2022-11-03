@@ -64,11 +64,11 @@
 
 using FluentValidation;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class AccountIdentifierValidator : AbstractValidator<AccountIdentifier>
+internal class AccountIdentifierValidator : AbstractValidator<GatewayModel.AccountIdentifier>
 {
     public AccountIdentifierValidator()
     {

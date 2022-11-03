@@ -105,11 +105,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="LedgerState" /> class.
         /// </summary>
         /// <param name="network">The name of the network against which the request is made. (required).</param>
-        /// <param name="version">The state version of the ledger. Each transaction increments the state version by 1. (required).</param>
+        /// <param name="stateVersion">The state version of the ledger. Each transaction increments the state version by 1. (required).</param>
         /// <param name="timestamp">The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled.  (required).</param>
         /// <param name="epoch">The epoch number of the ledger at this state version. (required).</param>
         /// <param name="round">The consensus round in the epoch that this state version was committed in. (required).</param>
-        public LedgerState(string network = default(string), long version = default(long), string timestamp = default(string), long epoch = default(long), long round = default(long))
+        public LedgerState(string network = default(string), long stateVersion = default(long), string timestamp = default(string), long epoch = default(long), long round = default(long))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -117,7 +117,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("network is a required property for LedgerState and cannot be null");
             }
             this.Network = network;
-            this._Version = version;
+            this.StateVersion = stateVersion;
             // to ensure "timestamp" is required (not null)
             if (timestamp == null)
             {
@@ -139,8 +139,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// The state version of the ledger. Each transaction increments the state version by 1.
         /// </summary>
         /// <value>The state version of the ledger. Each transaction increments the state version by 1.</value>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public long _Version { get; set; }
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long StateVersion { get; set; }
 
         /// <summary>
         /// The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled. 
@@ -172,7 +172,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class LedgerState {\n");
             sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  Timestamp: ").Append(Timestamp).Append("\n");
             sb.Append("  Epoch: ").Append(Epoch).Append("\n");
             sb.Append("  Round: ").Append(Round).Append("\n");
@@ -217,8 +217,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Network.Equals(input.Network))
                 ) && 
                 (
-                    this._Version == input._Version ||
-                    this._Version.Equals(input._Version)
+                    this.StateVersion == input.StateVersion ||
+                    this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
                     this.Timestamp == input.Timestamp ||
@@ -248,7 +248,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Network.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 if (this.Timestamp != null)
                 {
                     hashCode = (hashCode * 59) + this.Timestamp.GetHashCode();

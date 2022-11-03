@@ -104,9 +104,9 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
         /// </summary>
-        /// <param name="fromStateVersion">An integer between 1 and 10^13, giving the first (resultant) state version in the returned response (required).</param>
-        /// <param name="toStateVersion">An integer between 1 and 10^13, giving the final (resultant) state version in the returned response (required).</param>
-        /// <param name="maxStateVersion">An integer between 1 and 10^13, giving the maximum state version currently committed (required).</param>
+        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (required).</param>
+        /// <param name="toStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the final (resultant) state version in the returned response (required).</param>
+        /// <param name="maxStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed (required).</param>
         /// <param name="transactions">A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive). (required).</param>
         public CommittedTransactionsResponse(long fromStateVersion = default(long), long toStateVersion = default(long), long maxStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
         {
@@ -122,23 +122,23 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// An integer between 1 and 10^13, giving the first (resultant) state version in the returned response
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response
         /// </summary>
-        /// <value>An integer between 1 and 10^13, giving the first (resultant) state version in the returned response</value>
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response</value>
         [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long FromStateVersion { get; set; }
 
         /// <summary>
-        /// An integer between 1 and 10^13, giving the final (resultant) state version in the returned response
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the final (resultant) state version in the returned response
         /// </summary>
-        /// <value>An integer between 1 and 10^13, giving the final (resultant) state version in the returned response</value>
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the final (resultant) state version in the returned response</value>
         [DataMember(Name = "to_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long ToStateVersion { get; set; }
 
         /// <summary>
-        /// An integer between 1 and 10^13, giving the maximum state version currently committed
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed
         /// </summary>
-        /// <value>An integer between 1 and 10^13, giving the maximum state version currently committed</value>
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed</value>
         [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long MaxStateVersion { get; set; }
 

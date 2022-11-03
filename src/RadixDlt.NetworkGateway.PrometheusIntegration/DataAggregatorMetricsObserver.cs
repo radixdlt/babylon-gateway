@@ -63,7 +63,6 @@
  */
 
 using Prometheus;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
@@ -76,6 +75,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PrometheusIntegration;
 
@@ -696,7 +696,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask TransactionsFetched(string nodeName, List<CommittedTransaction> transactions, long fetchTransactionsMs)
+    public ValueTask TransactionsFetched(string nodeName, List<CoreModel.CommittedTransaction> transactions, long fetchTransactionsMs)
     {
         _totalFetchTimeSecondsUnlabeled.WithLabels(nodeName).Observe(fetchTransactionsMs / 1000D);
 

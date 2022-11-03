@@ -62,14 +62,14 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
 public sealed class InternalServerException : KnownGatewayErrorException
 {
-    private InternalServerException(InternalServerError internalServerError, string userFacingMessage, string internalMessage)
+    private InternalServerException(GatewayModel.InternalServerError internalServerError, string userFacingMessage, string internalMessage)
         : base(500, internalServerError, userFacingMessage, internalMessage)
     {
     }
@@ -78,7 +78,7 @@ public sealed class InternalServerException : KnownGatewayErrorException
     {
         var message = $"An unexpected error occurred handling the request. If reporting this issue, please include TraceId={traceId}";
         return new InternalServerException(
-            new InternalServerError(exception.GetType().Name, exception.Message),
+            new GatewayModel.InternalServerError(exception.GetType().Name, exception.Message),
             message,
             exception.Message
         );
@@ -88,7 +88,7 @@ public sealed class InternalServerException : KnownGatewayErrorException
     {
         var message = $"An unexpected error occurred handling the request. If reporting this issue, please include TraceId={traceId}";
         return new InternalServerException(
-            new InternalServerError("UnknownException", "N/A"),
+            new GatewayModel.InternalServerError("UnknownException", "N/A"),
             message,
             exception.Message
         );
@@ -98,7 +98,7 @@ public sealed class InternalServerException : KnownGatewayErrorException
     {
         var message = $"An unexpected error occurred handling the request. If reporting this issue, please include TraceId={traceId}";
         return new InternalServerException(
-            new InternalServerError("UpstreamCoreApiRequestException", "N/A"),
+            new GatewayModel.InternalServerError("UpstreamCoreApiRequestException", "N/A"),
             message,
             coreErrorJsonContent
         );
@@ -108,7 +108,7 @@ public sealed class InternalServerException : KnownGatewayErrorException
     {
         var message = $"An unexpected error occurred handling the request. If reporting this issue, please include TraceId={traceId}";
         return new InternalServerException(
-            new InternalServerError("InvalidCoreApiResponseException", "N/A"),
+            new GatewayModel.InternalServerError("InvalidCoreApiResponseException", "N/A"),
             message,
             exception.Message
         );
@@ -118,7 +118,7 @@ public sealed class InternalServerException : KnownGatewayErrorException
     {
         var message = $"An unexpected error occurred handling the request. If reporting this issue, please include TraceId={traceId}";
         return new InternalServerException(
-            new InternalServerError("BadGatewayException", "N/A"),
+            new GatewayModel.InternalServerError("BadGatewayException", "N/A"),
             message,
             "Could not receive valid response from upstream server"
         );
@@ -127,7 +127,7 @@ public sealed class InternalServerException : KnownGatewayErrorException
     public static InternalServerException OfNoValidCoreApiNodesAvailable(string internalMessage)
     {
         return new InternalServerException(
-            new InternalServerError("NoValidCoreApiNodesAvailable", "N/A"),
+            new GatewayModel.InternalServerError("NoValidCoreApiNodesAvailable", "N/A"),
             "An unexpected error occurred handling the request.",
             internalMessage
         );

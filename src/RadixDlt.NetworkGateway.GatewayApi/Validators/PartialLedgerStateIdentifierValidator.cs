@@ -64,11 +64,11 @@
 
 using FluentValidation;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class PartialLedgerStateIdentifierValidator : AbstractValidator<PartialLedgerStateIdentifier>
+internal class PartialLedgerStateIdentifierValidator : AbstractValidator<GatewayModel.PartialLedgerStateIdentifier>
 {
     public PartialLedgerStateIdentifierValidator(IClock clock)
     {

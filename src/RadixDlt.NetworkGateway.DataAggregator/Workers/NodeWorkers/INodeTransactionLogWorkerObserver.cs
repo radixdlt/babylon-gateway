@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
@@ -73,5 +73,5 @@ public interface INodeTransactionLogWorkerObserver
 {
     ValueTask DoWorkFailed(string nodeName, Exception exception);
 
-    ValueTask TransactionsFetched(string nodeName, List<CommittedTransaction> transactions, long fetchTransactionsMs);
+    ValueTask TransactionsFetched(string nodeName, List<CoreModel.CommittedTransaction> transactions, long fetchTransactionsMs);
 }

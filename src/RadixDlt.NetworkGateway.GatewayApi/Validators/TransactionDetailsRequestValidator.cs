@@ -63,11 +63,11 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class TransactionDetailsRequestValidator : AbstractValidator<TransactionDetailsRequest>
+internal class TransactionDetailsRequestValidator : AbstractValidator<GatewayModel.TransactionDetailsRequest>
 {
     public TransactionDetailsRequestValidator(
         TransactionLookupIdentifierValidator transactionLookupIdentifierValidator,

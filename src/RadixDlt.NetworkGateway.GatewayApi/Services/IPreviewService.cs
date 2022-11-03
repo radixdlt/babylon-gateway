@@ -69,11 +69,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-namespace RadixDlt.NetworkGateway.GatewayApi.Services;
-
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IPreviewService
 {

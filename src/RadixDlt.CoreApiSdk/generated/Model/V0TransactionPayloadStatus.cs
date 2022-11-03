@@ -122,10 +122,16 @@ namespace RadixDlt.CoreApiSdk.Model
             InMempool = 3,
 
             /// <summary>
-            /// Enum Rejected for value: Rejected
+            /// Enum TransientlyRejected for value: TransientlyRejected
             /// </summary>
-            [EnumMember(Value = "Rejected")]
-            Rejected = 4
+            [EnumMember(Value = "TransientlyRejected")]
+            TransientlyRejected = 4,
+
+            /// <summary>
+            /// Enum PermanentlyRejected for value: PermanentlyRejected
+            /// </summary>
+            [EnumMember(Value = "PermanentlyRejected")]
+            PermanentlyRejected = 5
 
         }
 
@@ -144,7 +150,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="V0TransactionPayloadStatus" /> class.
         /// </summary>
-        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction)) (required).</param>
+        /// <param name="payloadHash">The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60; (required).</param>
         /// <param name="status">The status of the transaction payload, as per this node (required).</param>
         /// <param name="errorMessage">An explanation for the error, if failed or rejected.</param>
         public V0TransactionPayloadStatus(string payloadHash = default(string), StatusEnum status = default(StatusEnum), string errorMessage = default(string))
@@ -160,9 +166,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))
+        /// The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60;
         /// </summary>
-        /// <value>The hex-encoded notarized transaction hash. This is also known as the payload hash. This hash is SHA256(SHA256(compiled_notarized_transaction))</value>
+        /// <value>The hex-encoded notarized transaction hash. This is known as the Notarized Transaction Hash, Payload Hash or User Payload Hash. This hash is &#x60;SHA256(SHA256(compiled_notarized_transaction))&#x60;</value>
         [DataMember(Name = "payload_hash", IsRequired = true, EmitDefaultValue = true)]
         public string PayloadHash { get; set; }
 

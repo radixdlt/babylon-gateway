@@ -104,16 +104,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemSubstateAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between 0 and 10^10, marking the current epoch (required).</param>
+        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
         public SystemSubstateAllOf(long epoch = default(long))
         {
             this.Epoch = epoch;
         }
 
         /// <summary>
-        /// An integer between 0 and 10^10, marking the current epoch
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
         /// </summary>
-        /// <value>An integer between 0 and 10^10, marking the current epoch</value>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
         [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
         public long Epoch { get; set; }
 

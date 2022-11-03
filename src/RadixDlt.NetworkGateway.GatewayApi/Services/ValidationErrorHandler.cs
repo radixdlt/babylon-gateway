@@ -64,10 +64,10 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
@@ -87,7 +87,7 @@ internal class ValidationErrorHandler : IValidationErrorHandler
 
     public IActionResult GetClientError(ActionContext actionContext)
     {
-        var errors = new List<ValidationErrorsAtPath>();
+        var errors = new List<GatewayModel.ValidationErrorsAtPath>();
         foreach (var (path, modelValue) in actionContext.ModelState)
         {
             var errorMessagesToShow = modelValue.Errors
@@ -97,7 +97,7 @@ internal class ValidationErrorHandler : IValidationErrorHandler
 
             if (errorMessagesToShow.Count > 0)
             {
-                errors.Add(new ValidationErrorsAtPath(path, errorMessagesToShow));
+                errors.Add(new GatewayModel.ValidationErrorsAtPath(path, errorMessagesToShow));
             }
         }
 

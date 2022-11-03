@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -71,12 +69,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface INetworkStatusReader
 {
-    Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
+    Task<CoreModel.NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
 }
 
 public interface INetworkStatusReaderObserver
@@ -87,7 +87,7 @@ public interface INetworkStatusReaderObserver
 internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly StatusApi _statusApi;
+    private readonly CoreApi.StatusApi _statusApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<INetworkStatusReaderObserver> _observers;
 
@@ -99,13 +99,13 @@ internal class NetworkStatusReader : INetworkStatusReader
         _statusApi = coreApiProvider.StatusApi;
     }
 
-    public async Task<NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
+    public async Task<CoreModel.NetworkStatusResponse> GetNetworkStatus(CancellationToken token)
     {
         try
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _statusApi.StatusNetworkStatusPostAsync(
-                    new NetworkStatusRequest(
+                    new CoreModel.NetworkStatusRequest(
                         network: _networkConfigurationProvider.GetNetworkName()
                     ),
                     token

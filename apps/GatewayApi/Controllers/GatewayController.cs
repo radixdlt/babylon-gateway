@@ -65,9 +65,9 @@
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace GatewayApi.Controllers;
 
@@ -85,7 +85,7 @@ public sealed class GatewayController : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<GatewayInfoResponse> Status(CancellationToken token)
+    public async Task<GatewayModel.GatewayInfoResponse> Status(CancellationToken token)
     {
         return await _gatewayHandler.Status(token);
     }

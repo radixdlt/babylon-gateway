@@ -64,8 +64,8 @@
 
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
@@ -74,12 +74,12 @@ public class InvalidTransactionException : ValidationException
     public WrappedCoreApiException? WrappedCoreApiException { get; }
 
     private InvalidTransactionException(string userFacingMessage, string internalMessage)
-        : base(new InvalidTransactionError(userFacingMessage), userFacingMessage, internalMessage)
+        : base(new GatewayModel.InvalidTransactionError(userFacingMessage), userFacingMessage, internalMessage)
     {
     }
 
     private InvalidTransactionException(string userFacingMessage, WrappedCoreApiException? wrappedCoreApiException = null)
-        : base(new InvalidTransactionError(userFacingMessage), userFacingMessage)
+        : base(new GatewayModel.InvalidTransactionError(userFacingMessage), userFacingMessage)
     {
         WrappedCoreApiException = wrappedCoreApiException;
     }
@@ -105,6 +105,6 @@ public class InvalidTransactionException : ValidationException
 
     public static Exception FromStaticallyInvalid(string validityError)
     {
-        return new InvalidTransactionException("Statically invalid transaction: " + validityError);
+        return new InvalidTransactionException("Invalid transaction: " + validityError);
     }
 }

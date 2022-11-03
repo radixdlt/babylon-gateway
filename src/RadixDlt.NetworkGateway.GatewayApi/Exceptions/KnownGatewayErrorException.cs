@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
@@ -71,13 +71,13 @@ public abstract class KnownGatewayErrorException : Exception
 {
     public int StatusCode { get; }
 
-    public GatewayError GatewayError { get; }
+    public GatewayModel.GatewayError GatewayError { get; }
 
     public string? UserFacingMessage { get; }
 
     public string? InternalMessage { get; }
 
-    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string userFacingMessage, string internalMessage)
+    public KnownGatewayErrorException(int statusCode, GatewayModel.GatewayError gatewayError, string userFacingMessage, string internalMessage)
         : base($"{userFacingMessage} ({internalMessage})")
     {
         StatusCode = statusCode;
@@ -86,7 +86,7 @@ public abstract class KnownGatewayErrorException : Exception
         InternalMessage = internalMessage;
     }
 
-    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError, string? userFacingMessage)
+    public KnownGatewayErrorException(int statusCode, GatewayModel.GatewayError gatewayError, string? userFacingMessage)
         : base(userFacingMessage)
     {
         StatusCode = statusCode;
@@ -94,7 +94,7 @@ public abstract class KnownGatewayErrorException : Exception
         UserFacingMessage = userFacingMessage;
     }
 
-    public KnownGatewayErrorException(int statusCode, GatewayError gatewayError)
+    public KnownGatewayErrorException(int statusCode, GatewayModel.GatewayError gatewayError)
     {
         StatusCode = statusCode;
         GatewayError = gatewayError;

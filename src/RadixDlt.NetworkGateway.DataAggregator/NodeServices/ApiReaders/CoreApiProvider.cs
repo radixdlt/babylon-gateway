@@ -62,28 +62,28 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface ICoreApiProvider
 {
-    TransactionApi TransactionsApi { get; }
+    CoreApi.TransactionApi TransactionsApi { get; }
 
-    StatusApi StatusApi { get; }
+    CoreApi.StatusApi StatusApi { get; }
 
-    MempoolApi MempoolApi { get; }
+    CoreApi.MempoolApi MempoolApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
 {
-    public TransactionApi TransactionsApi { get; }
+    public CoreApi.TransactionApi TransactionsApi { get; }
 
-    public StatusApi StatusApi { get; }
+    public CoreApi.StatusApi StatusApi { get; }
 
-    public MempoolApi MempoolApi { get; }
+    public CoreApi.MempoolApi MempoolApi { get; }
 
     public CoreApiProvider(INodeConfigProvider nodeConfig, HttpClient httpClient)
     {
@@ -92,8 +92,8 @@ internal class CoreApiProvider : ICoreApiProvider
             httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(nodeConfig.CoreApiNode.CoreApiAuthorizationHeader);
         }
 
-        TransactionsApi = new TransactionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        StatusApi = new StatusApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
-        MempoolApi = new MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        TransactionsApi = new CoreApi.TransactionApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        StatusApi = new CoreApi.StatusApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
+        MempoolApi = new CoreApi.MempoolApi(httpClient, nodeConfig.CoreApiNode.CoreApiAddress);
     }
 }

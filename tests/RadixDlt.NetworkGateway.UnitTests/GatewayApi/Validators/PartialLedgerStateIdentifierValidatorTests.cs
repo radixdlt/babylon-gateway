@@ -64,9 +64,9 @@
 
 using FluentValidation.TestHelper;
 using RadixDlt.NetworkGateway.GatewayApi.Validators;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using Xunit;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
 
@@ -90,7 +90,7 @@ public class PartialLedgerStateIdentifierValidatorTests
     [InlineData(null, null, 10000, 10000)]
     public void WhenGiven_ValidPartialLedgerStateIdentifier_ShouldNotHaveAnyValidationErrors(long? stateVersion, string? timestamp, long? epoch, long? round)
     {
-        var model = new PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
+        var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
 
         _validator.TestValidate(model).ShouldNotHaveAnyValidationErrors();
     }
@@ -115,7 +115,7 @@ public class PartialLedgerStateIdentifierValidatorTests
     [InlineData(null, null, 23, -1)]
     public void WhenGiven_InvalidPartialLedgerStateIdentifier_ShouldHaveAnyValidationError(long? stateVersion, string? timestamp, long? epoch, long? round)
     {
-        var model = new PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
+        var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
 
         _validator.TestValidate(model).ShouldHaveAnyValidationError();
     }

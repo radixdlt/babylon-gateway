@@ -104,22 +104,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedTransactionIntent" /> class.
         /// </summary>
-        /// <param name="intent">intent (required).</param>
-        public ParsedTransactionIntent(TransactionIntent intent = default(TransactionIntent))
+        /// <param name="intent">intent.</param>
+        /// <param name="identifiers">identifiers (required).</param>
+        public ParsedTransactionIntent(TransactionIntent intent = default(TransactionIntent), ParsedTransactionIntentAllOfIdentifiers identifiers = default(ParsedTransactionIntentAllOfIdentifiers))
         {
-            // to ensure "intent" is required (not null)
-            if (intent == null)
+            // to ensure "identifiers" is required (not null)
+            if (identifiers == null)
             {
-                throw new ArgumentNullException("intent is a required property for ParsedTransactionIntent and cannot be null");
+                throw new ArgumentNullException("identifiers is a required property for ParsedTransactionIntent and cannot be null");
             }
+            this.Identifiers = identifiers;
             this.Intent = intent;
         }
 
         /// <summary>
         /// Gets or Sets Intent
         /// </summary>
-        [DataMember(Name = "intent", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "intent", EmitDefaultValue = true)]
         public TransactionIntent Intent { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Identifiers
+        /// </summary>
+        [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
+        public ParsedTransactionIntentAllOfIdentifiers Identifiers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,6 +138,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedTransactionIntent {\n");
             sb.Append("  Intent: ").Append(Intent).Append("\n");
+            sb.Append("  Identifiers: ").Append(Identifiers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -169,6 +178,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Intent == input.Intent ||
                     (this.Intent != null &&
                     this.Intent.Equals(input.Intent))
+                ) && 
+                (
+                    this.Identifiers == input.Identifiers ||
+                    (this.Identifiers != null &&
+                    this.Identifiers.Equals(input.Identifiers))
                 );
         }
 
@@ -184,6 +198,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.Intent != null)
                 {
                     hashCode = (hashCode * 59) + this.Intent.GetHashCode();
+                }
+                if (this.Identifiers != null)
+                {
+                    hashCode = (hashCode * 59) + this.Identifiers.GetHashCode();
                 }
                 return hashCode;
             }

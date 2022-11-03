@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionIntent" /> class.
         /// </summary>
-        /// <param name="hash">The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash.  (required).</param>
+        /// <param name="hash">The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60; (required).</param>
         /// <param name="header">header (required).</param>
         /// <param name="manifest">manifest (required).</param>
         public TransactionIntent(string hash = default(string), TransactionHeader header = default(TransactionHeader), TransactionManifest manifest = default(TransactionManifest))
@@ -130,9 +130,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash. 
+        /// The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60;
         /// </summary>
-        /// <value>The hex-encoded double-SHA256 hash of the transaction intent. Also known as the Transaction ID, Transaction Hash, or Intent Hash. </value>
+        /// <value>The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60;</value>
         [DataMember(Name = "hash", IsRequired = true, EmitDefaultValue = true)]
         public string Hash { get; set; }
 
@@ -243,6 +243,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Hash (string) maxLength
+            if (this.Hash != null && this.Hash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be less than 64.", new [] { "Hash" });
+            }
+
+            // Hash (string) minLength
+            if (this.Hash != null && this.Hash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Hash, length must be greater than 64.", new [] { "Hash" });
+            }
+
             yield break;
         }
     }

@@ -64,7 +64,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
@@ -77,6 +76,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Workers.NodeWorkers;
 
@@ -193,7 +193,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         );
     }
 
-    private async Task<List<CommittedTransaction>> FetchTransactionsFromCoreApiWithLogging(
+    private async Task<List<CoreModel.CommittedTransaction>> FetchTransactionsFromCoreApiWithLogging(
         long fromStateVersion,
         int transactionsToPull,
         CancellationToken cancellationToken
@@ -224,7 +224,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         return transactions;
     }
 
-    private async Task<List<CommittedTransaction>> FetchTransactionsOrEmptyList(long fromStateVersion, int transactionsToPull, CancellationToken token)
+    private async Task<List<CoreModel.CommittedTransaction>> FetchTransactionsOrEmptyList(long fromStateVersion, int transactionsToPull, CancellationToken token)
     {
         var transactionLogReader = _services.GetRequiredService<ITransactionLogReader>();
         var transactionsResponse = await transactionLogReader.GetTransactions(fromStateVersion, transactionsToPull, token);

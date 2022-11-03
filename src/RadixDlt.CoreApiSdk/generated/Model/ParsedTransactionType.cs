@@ -119,7 +119,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Enum TransactionManifest for value: TransactionManifest
         /// </summary>
         [EnumMember(Value = "TransactionManifest")]
-        TransactionManifest = 4
+        TransactionManifest = 4,
+
+        /// <summary>
+        /// Enum LedgerTransaction for value: LedgerTransaction
+        /// </summary>
+        [EnumMember(Value = "LedgerTransaction")]
+        LedgerTransaction = 5
 
     }
 

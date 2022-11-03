@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EddsaEd25519Signature" /> class.
         /// </summary>
         /// <param name="keyType">keyType (required).</param>
-        /// <param name="signatureHex">A hex-encoded EdDSA Ed25519 signature (64 bytes). This is CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format. (required).</param>
+        /// <param name="signatureHex">A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format. (required).</param>
         public EddsaEd25519Signature(PublicKeyType keyType = default(PublicKeyType), string signatureHex = default(string))
         {
             this.KeyType = keyType;
@@ -124,9 +124,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// A hex-encoded EdDSA Ed25519 signature (64 bytes). This is CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.
+        /// A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.
         /// </summary>
-        /// <value>A hex-encoded EdDSA Ed25519 signature (64 bytes). This is CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.</value>
+        /// <value>A hex-encoded EdDSA Ed25519 signature (64 bytes). This is &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.</value>
         [DataMember(Name = "signature_hex", IsRequired = true, EmitDefaultValue = true)]
         public string SignatureHex { get; set; }
 

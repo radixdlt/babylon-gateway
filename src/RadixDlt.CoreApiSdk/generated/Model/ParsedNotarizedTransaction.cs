@@ -104,40 +104,38 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ParsedNotarizedTransaction" /> class.
         /// </summary>
-        /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        /// <param name="isStaticallyValid">Gives if the transaction is statically valid. Note that, even if statically valid, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid).  (required).</param>
-        /// <param name="validityError">If the transaction is not statically valid, this gives a reason. .</param>
-        public ParsedNotarizedTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), bool isStaticallyValid = default(bool), string validityError = default(string))
+        /// <param name="notarizedTransaction">notarizedTransaction.</param>
+        /// <param name="identifiers">identifiers (required).</param>
+        /// <param name="validationError">validationError.</param>
+        public ParsedNotarizedTransaction(NotarizedTransaction notarizedTransaction = default(NotarizedTransaction), ParsedNotarizedTransactionAllOfIdentifiers identifiers = default(ParsedNotarizedTransactionAllOfIdentifiers), ParsedNotarizedTransactionAllOfValidationError validationError = default(ParsedNotarizedTransactionAllOfValidationError))
         {
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "identifiers" is required (not null)
+            if (identifiers == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for ParsedNotarizedTransaction and cannot be null");
+                throw new ArgumentNullException("identifiers is a required property for ParsedNotarizedTransaction and cannot be null");
             }
+            this.Identifiers = identifiers;
             this.NotarizedTransaction = notarizedTransaction;
-            this.IsStaticallyValid = isStaticallyValid;
-            this.ValidityError = validityError;
+            this.ValidationError = validationError;
         }
 
         /// <summary>
         /// Gets or Sets NotarizedTransaction
         /// </summary>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "notarized_transaction", EmitDefaultValue = true)]
         public NotarizedTransaction NotarizedTransaction { get; set; }
 
         /// <summary>
-        /// Gives if the transaction is statically valid. Note that, even if statically valid, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid). 
+        /// Gets or Sets Identifiers
         /// </summary>
-        /// <value>Gives if the transaction is statically valid. Note that, even if statically valid, the transaction may still be rejected or fail due to issues at runtime (eg if the loan cannot be repaid). </value>
-        [DataMember(Name = "is_statically_valid", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsStaticallyValid { get; set; }
+        [DataMember(Name = "identifiers", IsRequired = true, EmitDefaultValue = true)]
+        public ParsedNotarizedTransactionAllOfIdentifiers Identifiers { get; set; }
 
         /// <summary>
-        /// If the transaction is not statically valid, this gives a reason. 
+        /// Gets or Sets ValidationError
         /// </summary>
-        /// <value>If the transaction is not statically valid, this gives a reason. </value>
-        [DataMember(Name = "validity_error", EmitDefaultValue = true)]
-        public string ValidityError { get; set; }
+        [DataMember(Name = "validation_error", EmitDefaultValue = true)]
+        public ParsedNotarizedTransactionAllOfValidationError ValidationError { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -148,8 +146,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ParsedNotarizedTransaction {\n");
             sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
-            sb.Append("  IsStaticallyValid: ").Append(IsStaticallyValid).Append("\n");
-            sb.Append("  ValidityError: ").Append(ValidityError).Append("\n");
+            sb.Append("  Identifiers: ").Append(Identifiers).Append("\n");
+            sb.Append("  ValidationError: ").Append(ValidationError).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -191,13 +189,14 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.NotarizedTransaction.Equals(input.NotarizedTransaction))
                 ) && 
                 (
-                    this.IsStaticallyValid == input.IsStaticallyValid ||
-                    this.IsStaticallyValid.Equals(input.IsStaticallyValid)
+                    this.Identifiers == input.Identifiers ||
+                    (this.Identifiers != null &&
+                    this.Identifiers.Equals(input.Identifiers))
                 ) && 
                 (
-                    this.ValidityError == input.ValidityError ||
-                    (this.ValidityError != null &&
-                    this.ValidityError.Equals(input.ValidityError))
+                    this.ValidationError == input.ValidationError ||
+                    (this.ValidationError != null &&
+                    this.ValidationError.Equals(input.ValidationError))
                 );
         }
 
@@ -214,10 +213,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsStaticallyValid.GetHashCode();
-                if (this.ValidityError != null)
+                if (this.Identifiers != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValidityError.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Identifiers.GetHashCode();
+                }
+                if (this.ValidationError != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValidationError.GetHashCode();
                 }
                 return hashCode;
             }

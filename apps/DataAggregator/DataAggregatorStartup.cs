@@ -91,9 +91,6 @@ public class DataAggregatorStartup
             .AddPrometheusMetrics();
 
         services
-            .AddEndpointsApiExplorer();
-
-        services
             .AddControllers()
             .AddControllersAsServices()
             .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);

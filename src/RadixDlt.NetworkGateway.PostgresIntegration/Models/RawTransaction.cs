@@ -73,25 +73,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 [Table("raw_transactions")]
 internal class RawTransaction
 {
-    public RawTransaction(long stateVersion, byte[] transactionPayloadHash, byte[] payload)
-    {
-        StateVersion = stateVersion;
-        TransactionPayloadHash = transactionPayloadHash;
-        Payload = payload;
-    }
-
-    // Public empty constructor created for use with the Upsert library
-    public RawTransaction()
-    {
-    }
-
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     [Column("state_version")]
     public long StateVersion { get; set; }
 
-    [Column("transaction_payload_hash")]
-    public byte[] TransactionPayloadHash { get; set; }
+    [Column("payload_hash")]
+    public byte[] PayloadHash { get; set; }
 
     /// <summary>
     /// The payload of the transaction.

@@ -102,7 +102,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
         /// <param name="fromStateIdentifier">fromStateIdentifier.</param>
         /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
-        /// <param name="limit">The page size requested. The maximum value is 30 at present..</param>
+        /// <param name="limit">The page size requested..</param>
         public RecentTransactionsRequest(PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), PartialLedgerStateIdentifier fromStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
         {
             this.AtStateIdentifier = atStateIdentifier;
@@ -131,9 +131,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Cursor { get; set; }
 
         /// <summary>
-        /// The page size requested. The maximum value is 30 at present.
+        /// The page size requested.
         /// </summary>
-        /// <value>The page size requested. The maximum value is 30 at present.</value>
+        /// <value>The page size requested.</value>
         [DataMember(Name = "limit", EmitDefaultValue = true)]
         public int? Limit { get; set; }
 

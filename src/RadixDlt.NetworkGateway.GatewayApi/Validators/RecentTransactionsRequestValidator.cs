@@ -65,11 +65,11 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class RecentTransactionsRequestValidator : AbstractValidator<RecentTransactionsRequest>
+internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayModel.RecentTransactionsRequest>
 {
     public RecentTransactionsRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,

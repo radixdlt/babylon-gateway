@@ -64,7 +64,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -95,8 +94,6 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<EntityResourceHistory> EntityResourceHistory => Set<EntityResourceHistory>();
 
-    public DbSet<EntityMetadataHistory> EntityMetadataHistory => Set<EntityMetadataHistory>();
-
     public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
 
     public CommonDbContext(DbContextOptions options)
@@ -111,53 +108,7 @@ internal abstract class CommonDbContext : DbContext
         HookupSingleEntries(modelBuilder);
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
-
-        modelBuilder.Entity<Entity>()
-            .HasDiscriminator<string>("discriminator")
-            .HasValue<SystemEntity>("system")
-            .HasValue<FungibleResourceManagerEntity>("fungible_resource_manager")
-            .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
-            .HasValue<NormalComponentEntity>("normal_component")
-            .HasValue<AccountComponentEntity>("account_component")
-            .HasValue<SystemComponentEntity>("system_component")
-            .HasValue<PackageEntity>("package")
-            .HasValue<KeyValueStoreEntity>("key_value_store")
-            .HasValue<VaultEntity>("vault")
-            .HasValue<NonFungibleStoreEntity>("non_fungible_store");
-
-        modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.Address)
-            .HasMethod("hash");
-
-        modelBuilder.Entity<Entity>()
-            .HasIndex(e => e.GlobalAddress)
-            .HasMethod("hash")
-            .HasFilter("global_address IS NOT NULL");
-
-        // TODO investigate what's more performant FromStateVersion+EntityId or EntityId+FromStateVersion
-        modelBuilder.Entity<EntityMetadataHistory>()
-            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { e.IsMostRecent, EntityId = e.EntityId })
-            .HasFilter("is_most_recent IS TRUE");
-
-        modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<EntityResourceHistory>()
-            .HasDiscriminator<string>("discriminator")
-            .HasValue<EntityFungibleResourceHistory>("fungible")
-            .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
-
-        modelBuilder.Entity<EntityResourceHistory>()
-            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<EntityResourceHistory>()
-            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion });
-
-        modelBuilder.Entity<FungibleResourceSupplyHistory>()
-            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
+        HookupEntities(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -186,8 +137,7 @@ internal abstract class CommonDbContext : DbContext
             .HasOne(ls => ls.TopOfLedgerTransaction)
             .WithMany()
             .HasForeignKey(ls => ls.TopOfLedgerStateVersion)
-            .HasConstraintName("FK_ledger_status_top_transactions_state_version")
-            .OnDelete(DeleteBehavior.NoAction); // Should handle this manually
+            .OnDelete(DeleteBehavior.NoAction);
     }
 
     private static void HookupTransactions(ModelBuilder modelBuilder)
@@ -195,48 +145,43 @@ internal abstract class CommonDbContext : DbContext
         // TODO we most likely want to drop most of those indices as they must slow down ingestion rate by quite some margin
 
         modelBuilder.Entity<LedgerTransaction>()
+            .HasDiscriminator<string>("discriminator")
+            .HasValue<UserLedgerTransaction>("user")
+            .HasValue<ValidatorLedgerTransaction>("validator");
+
+        modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.PayloadHash)
-            .HasMethod("hash");
-        modelBuilder.Entity<LedgerTransaction>()
+            .HasMethod("hash")
+            .HasFilter("payload_hash IS NOT NULL");
+        modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.IntentHash)
-            .HasMethod("hash");
-        modelBuilder.Entity<LedgerTransaction>()
+            .HasMethod("hash")
+            .HasFilter("intent_hash IS NOT NULL");
+        modelBuilder.Entity<UserLedgerTransaction>()
             .HasIndex(lt => lt.SignedIntentHash)
-            .HasMethod("hash");
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.TransactionAccumulator)
-            .HasMethod("hash");
+            .HasMethod("hash")
+            .HasFilter("signed_intent_hash IS NOT NULL");
 
         // Because StateVersion, RoundTimestamp and (Epoch, EndOfEpochRound) are correlated with the linear
         // history of the table,  we could consider defining them as a BRIN index, using .HasMethod("brin")
         // This is a lighter (lossy) index where the indexed data is correlated with the linear order of the table
         // See also https://www.postgresql.org/docs/current/indexes-types.html
 
-        // Fast filter for just user transactions
-        modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.StateVersion)
-            .IsUnique()
-            .HasFilter("is_user_transaction = true")
-            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_user_transactions");
-
         // This index lets you quickly translate Time => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
-            .HasIndex(lt => lt.RoundTimestamp)
-            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_round_timestamp");
+            .HasIndex(lt => lt.RoundTimestamp);
 
         // This index lets you quickly translate Epoch/Round => StateVersion
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch, lt.RoundInEpoch })
             .IsUnique()
-            .HasFilter("is_start_of_round = true")
-            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_round_starts");
+            .HasFilter("is_start_of_round = true");
 
         // This index allows us to use the LedgerTransactions as an Epoch table, to look up the start of each epoch
         modelBuilder.Entity<LedgerTransaction>()
             .HasIndex(lt => new { lt.Epoch })
             .IsUnique()
-            .HasFilter("is_start_of_epoch = true")
-            .HasDatabaseName($"IX_{nameof(LedgerTransaction).ToSnakeCase()}_epoch_starts");
+            .HasFilter("is_start_of_epoch = true");
     }
 
     private static void HookupPendingTransactions(ModelBuilder modelBuilder)
@@ -244,5 +189,55 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<PendingTransaction>()
             .HasIndex(pt => pt.PayloadHash)
             .HasMethod("hash");
+    }
+
+    private static void HookupEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Entity>()
+            .HasDiscriminator<string>("discriminator")
+            .HasValue<SystemEntity>("system")
+            .HasValue<FungibleResourceManagerEntity>("fungible_resource_manager")
+            .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
+            .HasValue<NormalComponentEntity>("normal_component")
+            .HasValue<AccountComponentEntity>("account_component")
+            .HasValue<SystemComponentEntity>("system_component")
+            .HasValue<PackageEntity>("package")
+            .HasValue<KeyValueStoreEntity>("key_value_store")
+            .HasValue<VaultEntity>("vault")
+            .HasValue<NonFungibleStoreEntity>("non_fungible_store");
+
+        modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.Address)
+            .HasMethod("hash");
+
+        modelBuilder.Entity<Entity>()
+            .HasIndex(e => e.GlobalAddress)
+            .HasMethod("hash")
+            .HasFilter("global_address IS NOT NULL");
+
+        // TODO investigate what's more performant FromStateVersion+EntityId or EntityId+FromStateVersion, then apply to all entities
+        modelBuilder.Entity<EntityMetadataHistory>()
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityResourceAggregateHistory>()
+            .HasIndex(e => new { e.IsMostRecent, EntityId = e.EntityId })
+            .HasFilter("is_most_recent IS TRUE");
+
+        modelBuilder.Entity<EntityResourceAggregateHistory>()
+            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityResourceHistory>()
+            .HasDiscriminator<string>("discriminator")
+            .HasValue<EntityFungibleResourceHistory>("fungible")
+            .HasValue<EntityNonFungibleResourceHistory>("non_fungible");
+
+        modelBuilder.Entity<EntityResourceHistory>()
+            .HasIndex(e => new { e.OwnerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<EntityResourceHistory>()
+            .HasIndex(e => new { e.GlobalEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<FungibleResourceSupplyHistory>()
+            .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
     }
 }

@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -90,7 +90,7 @@ internal static class DictionaryExtensions
     }
 }
 
-internal record ReferencedEntity(string Address, EntityType Type, long StateVersion)
+internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long StateVersion)
 {
     private Entity? _databaseEntity;
     private ReferencedEntity? _parent;
@@ -107,7 +107,7 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
 
-    public bool CanBeOwner => Type is EntityType.Component or EntityType.ResourceManager or EntityType.KeyValueStore or EntityType.Global;
+    public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.KeyValueStore or CoreModel.EntityType.Global;
 
     [MemberNotNullWhen(true, nameof(Parent))]
     public bool HasParent => _parent != null;
@@ -185,8 +185,6 @@ internal record ReferencedEntity(string Address, EntityType Type, long StateVers
         return de;
     }
 }
-
-internal record UppedSubstate(ReferencedEntity ReferencedEntity, string Key, SubstateType Type, long Version, byte[] DataHash, long StateVersion, CoreApiSdk.Model.Substate Data);
 
 internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
 

@@ -75,10 +75,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 /// This table forms a shell, to which other properties are connected.
 /// </summary>
 [Table("ledger_transactions")]
-// OnModelCreating: We also define an index by state version, filtered to user transactions.
-// OnModelCreating: We also define an index on Timestamp.
-// OnModelCreating: We also define a composite index on (Epoch, StartOfRound [Not Null]) - to easily query when rounds happened.
-internal class LedgerTransaction
+internal abstract class LedgerTransaction
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -88,47 +85,11 @@ internal class LedgerTransaction
     [Column("status")]
     public LedgerTransactionStatus Status { get; set; }
 
-    /// <summary>
-    /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
-    /// This shouldn't be used for user transaction tracking, because it could be mutated in transit.
-    /// The intent hash should be used for tracking of user transactions.
-    /// </summary>
-    [Column("payload_hash")]
-    // OnModelCreating: Also defined as an alternate key
-    public byte[] PayloadHash { get; set; }
-
-    /// <summary>
-    /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
-    /// </summary>
-    [Column("intent_hash")]
-    // OnModelCreating: Also defined as an alternate key
-    public byte[] IntentHash { get; set; }
-
-    /// <summary>
-    /// The hash of the signed transaction, which is what the notary signs.
-    /// </summary>
-    [Column("signed_intent_hash")]
-    // OnModelCreating: Also defined as an alternate key
-    public byte[] SignedIntentHash { get; set; }
-
     [Column("transaction_accumulator")]
-    // OnModelCreating: Also defined as an alternate key
     public byte[] TransactionAccumulator { get; set; }
-
-    /// <summary>
-    /// Currently equivalent to FeePaid != 0, but easier to filter on.
-    /// </summary>
-    [Column("is_user_transaction")]
-    public bool IsUserTransaction { get; set; }
 
     [Column("message")]
     public byte[]? Message { get; set; }
-
-    [Column("fee_paid")]
-    public TokenAmount FeePaid { get; set; }
-
-    [Column("tip_paid")]
-    public TokenAmount TipPaid { get; set; }
 
     [Column("epoch")]
     public long Epoch { get; set; }
@@ -167,11 +128,39 @@ internal class LedgerTransaction
     /// It calculates itself by clamping RoundTimestamp between the previous NormalizedTimestamp and CreatedTimestamp.
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
-    [Column("normalized_timestamp")]
+    [Column("normalized_round_timestamp")]
     public DateTimeOffset NormalizedRoundTimestamp { get; set; }
+}
 
-    [ForeignKey(nameof(StateVersion))]
-    public RawTransaction? RawTransaction { get; set; }
+internal class UserLedgerTransaction : LedgerTransaction
+{
+    /// <summary>
+    /// The transaction payload hash, also known as the notarized transaction hash (for user transactions).
+    /// This shouldn't be used for user transaction tracking, because it could be mutated in transit.
+    /// The intent hash should be used for tracking of user transactions.
+    /// </summary>
+    [Column("payload_hash")]
+    public byte[] PayloadHash { get; set; }
 
-    public bool IsSystemTransaction => !IsUserTransaction;
+    /// <summary>
+    /// The transaction intent hash. The engine ensures two transactions with the same intent hash cannot be committed.
+    /// </summary>
+    [Column("intent_hash")]
+    public byte[] IntentHash { get; set; }
+
+    /// <summary>
+    /// The hash of the signed transaction, which is what the notary signs.
+    /// </summary>
+    [Column("signed_intent_hash")]
+    public byte[] SignedIntentHash { get; set; }
+
+    [Column("fee_paid")]
+    public TokenAmount FeePaid { get; set; }
+
+    [Column("tip_paid")]
+    public TokenAmount TipPaid { get; set; }
+}
+
+internal class ValidatorLedgerTransaction : LedgerTransaction
+{
 }

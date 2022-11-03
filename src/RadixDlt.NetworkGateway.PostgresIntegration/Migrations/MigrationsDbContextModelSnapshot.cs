@@ -339,19 +339,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
 
-                    b.Property<BigInteger>("FeePaid")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("fee_paid");
-
                     b.Property<long>("IndexInEpoch")
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_epoch");
-
-                    b.Property<byte[]>("IntentHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("intent_hash");
 
                     b.Property<bool>("IsStartOfEpoch")
                         .HasColumnType("boolean")
@@ -361,22 +351,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_start_of_round");
 
-                    b.Property<bool>("IsUserTransaction")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_user_transaction");
-
                     b.Property<byte[]>("Message")
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
                     b.Property<DateTimeOffset>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("normalized_timestamp");
-
-                    b.Property<byte[]>("PayloadHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("payload_hash");
+                        .HasColumnName("normalized_round_timestamp");
 
                     b.Property<long[]>("ReferencedEntities")
                         .IsRequired()
@@ -391,63 +372,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
-                    b.Property<byte[]>("SignedIntentHash")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("signed_intent_hash");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
-
-                    b.Property<BigInteger>("TipPaid")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("tip_paid");
 
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("transaction_accumulator");
 
+                    b.Property<string>("discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("StateVersion");
 
                     b.HasIndex("Epoch")
                         .IsUnique()
-                        .HasDatabaseName("IX_ledger_transaction_epoch_starts")
                         .HasFilter("is_start_of_epoch = true");
 
-                    b.HasIndex("IntentHash");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
-
-                    b.HasIndex("PayloadHash");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
-
-                    b.HasIndex("RoundTimestamp")
-                        .HasDatabaseName("IX_ledger_transaction_round_timestamp");
-
-                    b.HasIndex("SignedIntentHash");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
-
-                    b.HasIndex("StateVersion")
-                        .IsUnique()
-                        .HasDatabaseName("IX_ledger_transaction_user_transactions")
-                        .HasFilter("is_user_transaction = true");
-
-                    b.HasIndex("TransactionAccumulator");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("TransactionAccumulator"), "hash");
+                    b.HasIndex("RoundTimestamp");
 
                     b.HasIndex("Epoch", "RoundInEpoch")
                         .IsUnique()
-                        .HasDatabaseName("IX_ledger_transaction_round_starts")
                         .HasFilter("is_start_of_round = true");
 
                     b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator<string>("discriminator").HasValue("LedgerTransaction");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
@@ -568,10 +521,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("payload");
 
-                    b.Property<byte[]>("TransactionPayloadHash")
+                    b.Property<byte[]>("PayloadHash")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("transaction_payload_hash");
+                        .HasColumnName("payload_hash");
 
                     b.HasKey("StateVersion");
 
@@ -691,6 +644,64 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasDiscriminator().HasValue("system");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.UserLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.Property<BigInteger>("FeePaid")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("fee_paid");
+
+                    b.Property<byte[]>("IntentHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("intent_hash");
+
+                    b.Property<byte[]>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<byte[]>("SignedIntentHash")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("signed_intent_hash");
+
+                    b.Property<BigInteger>("TipPaid")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("tip_paid");
+
+                    b.HasIndex("IntentHash")
+                        .HasFilter("intent_hash IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
+
+                    b.HasIndex("PayloadHash")
+                        .HasFilter("payload_hash IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
+
+                    b.HasIndex("SignedIntentHash")
+                        .HasFilter("signed_intent_hash IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue("user");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ValidatorLedgerTransaction", b =>
+                {
+                    b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
+
+                    b.ToTable("ledger_transactions");
+
+                    b.HasDiscriminator().HasValue("validator");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.VaultEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
@@ -706,21 +717,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .WithMany()
                         .HasForeignKey("TopOfLedgerStateVersion")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_ledger_status_top_transactions_state_version");
-
-                    b.Navigation("TopOfLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction", b =>
-                {
-                    b.HasOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", "RawTransaction")
-                        .WithMany()
-                        .HasForeignKey("StateVersion")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("RawTransaction");
+                    b.Navigation("TopOfLedgerTransaction");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>

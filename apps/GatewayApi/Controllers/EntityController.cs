@@ -65,9 +65,9 @@
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace GatewayApi.Controllers;
 
@@ -85,7 +85,7 @@ public class EntityController : ControllerBase
     }
 
     [HttpPost("resources")]
-    public async Task<IActionResult> Resources(EntityResourcesRequest request, CancellationToken token = default)
+    public async Task<IActionResult> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
     {
         var response = await _entityHandler.Resources(request, token);
 
@@ -95,7 +95,7 @@ public class EntityController : ControllerBase
     }
 
     [HttpPost("details")]
-    public async Task<IActionResult> Details(EntityDetailsRequest request, CancellationToken token = default)
+    public async Task<IActionResult> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default)
     {
         var response = await _entityHandler.Details(request, token);
 
@@ -105,10 +105,20 @@ public class EntityController : ControllerBase
     }
 
     [HttpPost("overview")]
-    public async Task<IActionResult> Overview(EntityOverviewRequest request, CancellationToken token = default)
+    public async Task<IActionResult> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)
     {
         var response = await _entityHandler.Overview(request, token);
 
         return Ok(response);
+    }
+
+    [HttpPost("metadata")]
+    public async Task<IActionResult> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Metadata(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
     }
 }

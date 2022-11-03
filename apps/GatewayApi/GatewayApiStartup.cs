@@ -92,15 +92,7 @@ public class GatewayApiStartup
             .AddPostgresPersistence()
             .AddPrometheusMetrics();
 
-        if (_enableSwagger)
-        {
-            services
-                .AddSwaggerGen()
-                .AddSwaggerGenNewtonsoftSupport();
-        }
-
         services
-            .AddEndpointsApiExplorer()
             .AddCors(options =>
             {
                 options.AddDefaultPolicy(corsPolicyBuilder =>
@@ -124,8 +116,11 @@ public class GatewayApiStartup
         if (_enableSwagger)
         {
             application
-                .UseSwagger()
-                .UseSwaggerUI();
+                .UseStaticFiles()
+                .UseSwaggerUI(o =>
+                {
+                    o.SwaggerEndpoint("/spec-copy.txt", "Radix Babylon Gateway API");
+                });
         }
 
         application

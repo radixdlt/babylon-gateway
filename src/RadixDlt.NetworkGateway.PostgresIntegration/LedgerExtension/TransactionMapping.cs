@@ -62,55 +62,60 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Model;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 
 internal static class TransactionMapping
 {
-    public static LedgerTransaction CreateLedgerTransaction(CommittedTransactionData transactionData)
+    public static LedgerTransaction CreateLedgerTransaction(CoreModel.CommittedTransaction committedTransaction, TransactionSummary summary)
     {
-        var (transaction, summary, _) = transactionData;
-        var feePaid = TokenAmount.FromSubUnitsString(transaction.Receipt.FeeSummary.XrdBurnedAttos);
-        var tipPaid = TokenAmount.FromSubUnitsString(transaction.Receipt.FeeSummary.XrdTippedAttos);
-
-        return new LedgerTransaction
+        LedgerTransaction ledgerTransaction = committedTransaction.LedgerTransaction.ActualInstance switch
         {
-            StateVersion = summary.StateVersion,
-            Status = ToLedgerStatus(transaction.Receipt.Status),
-            PayloadHash = summary.PayloadHash,
-            IntentHash = summary.IntentHash,
-            SignedIntentHash = summary.SignedIntentHash,
-            TransactionAccumulator = summary.TransactionAccumulator,
-            IsUserTransaction = feePaid != TokenAmount.Zero,
-            // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
-            // message: transaction.Metadata.Message?.ConvertFromHex(),
-            Message = null,
-            FeePaid = feePaid,
-            TipPaid = tipPaid,
-            Epoch = summary.Epoch,
-            IndexInEpoch = summary.IndexInEpoch,
-            RoundInEpoch = summary.RoundInEpoch,
-            IsStartOfEpoch = summary.IsStartOfEpoch,
-            IsStartOfRound = summary.IsStartOfRound,
-            RoundTimestamp = summary.RoundTimestamp,
-            CreatedTimestamp = summary.CreatedTimestamp,
-            NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp,
+            CoreModel.UserLedgerTransaction ult => new UserLedgerTransaction
+            {
+                PayloadHash = ult.NotarizedTransaction.Hash.ConvertFromHex(),
+                IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex(),
+                SignedIntentHash = ult.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex(),
+                FeePaid = TokenAmount.FromSubUnitsString(committedTransaction.Receipt.FeeSummary.XrdBurnedAttos),
+                TipPaid = TokenAmount.FromSubUnitsString(committedTransaction.Receipt.FeeSummary.XrdTippedAttos),
+            },
+            CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
+            _ => throw new ArgumentOutOfRangeException(nameof(committedTransaction.LedgerTransaction), committedTransaction.LedgerTransaction, null),
         };
+
+        ledgerTransaction.StateVersion = committedTransaction.StateVersion;
+        ledgerTransaction.Status = ToLedgerStatus(committedTransaction.Receipt.Status);
+        // TODO placeholder value as it is still not implemented by CoreApi
+        ledgerTransaction.TransactionAccumulator = HashingHelper.Sha256Twice(BitConverter.GetBytes(committedTransaction.StateVersion));
+        // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
+        ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
+        ledgerTransaction.Epoch = summary.Epoch;
+        ledgerTransaction.IndexInEpoch = summary.IndexInEpoch;
+        ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
+        ledgerTransaction.IsStartOfEpoch = summary.IsStartOfEpoch;
+        ledgerTransaction.IsStartOfRound = summary.IsStartOfRound;
+        ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
+        ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
+        ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
+
+        return ledgerTransaction;
     }
 
-    private static LedgerTransactionStatus ToLedgerStatus(TransactionStatus status)
+    private static LedgerTransactionStatus ToLedgerStatus(CoreModel.TransactionStatus status)
     {
         return status switch
         {
-            TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
-            TransactionStatus.Failed => LedgerTransactionStatus.Failed,
-            TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
+            CoreModel.TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
+            CoreModel.TransactionStatus.Failed => LedgerTransactionStatus.Failed,
+            CoreModel.TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }

@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="V0TransactionStatusRequest" /> class.
         /// </summary>
-        /// <param name="intentHash">A hex-encoded transaction intent hash. SHA256(SHA256(compiled_transaction_intent)) (required).</param>
+        /// <param name="intentHash">The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60; (required).</param>
         public V0TransactionStatusRequest(string intentHash = default(string))
         {
             // to ensure "intentHash" is required (not null)
@@ -116,9 +116,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// A hex-encoded transaction intent hash. SHA256(SHA256(compiled_transaction_intent))
+        /// The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60;
         /// </summary>
-        /// <value>A hex-encoded transaction intent hash. SHA256(SHA256(compiled_transaction_intent))</value>
+        /// <value>The hex-encoded transaction intent hash. This is known as the Intent Hash, Transaction ID or Transaction Identifier for user transactions. This hash is &#x60;SHA256(SHA256(compiled_intent))&#x60;</value>
         [DataMember(Name = "intent_hash", IsRequired = true, EmitDefaultValue = true)]
         public string IntentHash { get; set; }
 
@@ -198,15 +198,15 @@ namespace RadixDlt.CoreApiSdk.Model
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
             // IntentHash (string) maxLength
-            if (this.IntentHash != null && this.IntentHash.Length > 66)
+            if (this.IntentHash != null && this.IntentHash.Length > 64)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be less than 66.", new [] { "IntentHash" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be less than 64.", new [] { "IntentHash" });
             }
 
             // IntentHash (string) minLength
-            if (this.IntentHash != null && this.IntentHash.Length < 66)
+            if (this.IntentHash != null && this.IntentHash.Length < 64)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 66.", new [] { "IntentHash" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for IntentHash, length must be greater than 64.", new [] { "IntentHash" });
             }
 
             yield break;

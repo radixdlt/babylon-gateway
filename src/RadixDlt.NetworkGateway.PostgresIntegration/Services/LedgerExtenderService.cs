@@ -67,7 +67,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using NpgsqlTypes;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -83,6 +82,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -108,14 +108,14 @@ internal class LedgerExtenderService : ILedgerExtenderService
         _clock = clock;
     }
 
-    public async Task<TransactionSummary> GetTopOfLedger(CancellationToken token)
+    public async Task<TransactionSummary> GetLatestTransactionSummary(CancellationToken token = default)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        return await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(dbContext, _clock, token);
+        return await GetTopOfLedger(dbContext, token);
     }
 
-    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token)
+    public async Task<CommitTransactionsReport> CommitTransactions(ConsistentLedgerExtension ledgerExtension, SyncTargetCarrier latestSyncTarget, CancellationToken token = default)
     {
         var preparationReport = await PrepareForLedgerExtension(ledgerExtension, token);
         var ledgerExtensionReport = await ExtendLedger(ledgerExtension, latestSyncTarget.TargetStateVersion, token);
@@ -128,14 +128,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
             + ledgerExtensionReport.EntriesWritten;
 
         return new CommitTransactionsReport(
-            ledgerExtension.TransactionData.Count,
+            ledgerExtension.CommittedTransactions.Count,
             ledgerExtensionReport.FinalTransactionSummary,
             preparationReport.RawTxnPersistenceMs,
             preparationReport.MempoolTransactionUpdateMs,
             (long)processTransactionReport.ContentHandlingDuration.TotalMilliseconds,
             (long)processTransactionReport.DbReadDuration.TotalMilliseconds,
-            -1, // TODO unused
-            -1, // TODO unused
             ledgerExtensionReport.DbPersistenceMs,
             dbEntriesWritten
         );
@@ -156,12 +154,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
     {
         await using var preparationDbContext = await _dbContextFactory.CreateDbContextAsync(token);
 
-        var topOfLedgerSummary = await TransactionSummarisation.GetSummaryOfTransactionOnTopOfLedger(preparationDbContext, _clock, token);
+        var topOfLedgerSummary = await GetTopOfLedger(preparationDbContext, token);
 
-        if (ledgerExtension.ParentSummary.StateVersion != topOfLedgerSummary.StateVersion)
+        if (ledgerExtension.LatestTransactionSummary.StateVersion != topOfLedgerSummary.StateVersion)
         {
             throw new Exception(
-                $"Tried to commit transactions with parent state version {ledgerExtension.ParentSummary.StateVersion} " +
+                $"Tried to commit transactions with parent state version {ledgerExtension.LatestTransactionSummary.StateVersion} " +
                 $"on top of a ledger with state version {topOfLedgerSummary.StateVersion}"
             );
         }
@@ -171,18 +169,27 @@ internal class LedgerExtenderService : ILedgerExtenderService
             await EnsureDbLedgerIsInitialized(token);
         }
 
-        var rawTransactions = ledgerExtension.TransactionData.Select(td => new RawTransaction(
-            td.TransactionSummary.StateVersion,
-            td.TransactionSummary.PayloadHash,
-            td.TransactionContents
-        )).ToList();
+        var rawTransactions = ledgerExtension.CommittedTransactions
+            .Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction)
+            .Select(ct =>
+            {
+                var nt = ct.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
+
+                return new RawTransaction
+                {
+                    StateVersion = ct.StateVersion,
+                    PayloadHash = nt.Hash.ConvertFromHex(),
+                    Payload = nt.PayloadHex.ConvertFromHex(),
+                };
+            })
+            .ToList();
 
         var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(
             () => _rawTransactionWriter.EnsureRawTransactionsCreatedOrUpdated(preparationDbContext, rawTransactions, token)
         );
 
         var (mempoolTransactionsTouched, mempoolTransactionUpdateMs) = await CodeStopwatch.TimeInMs(
-            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, ledgerExtension.TransactionData, token)
+            () => _rawTransactionWriter.EnsureMempoolTransactionsMarkedAsCommitted(preparationDbContext, ledgerExtension.CommittedTransactions, token)
         );
 
         var preparationEntriesTouched = await preparationDbContext.SaveChangesAsync(token);
@@ -224,10 +231,9 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         try
         {
-            var processTransactionsReport = await ProcessTransactions(dbContext, ledgerExtension.TransactionData, token);
-            var finalTransactionSummary = ledgerExtension.TransactionData.Last().TransactionSummary;
+            var (finalTransaction, report) = await ProcessTransactions(dbContext, ledgerExtension, token);
 
-            await CreateOrUpdateLedgerStatus(dbContext, finalTransactionSummary, latestSyncTarget, token);
+            await CreateOrUpdateLedgerStatus(dbContext, finalTransaction, latestSyncTarget, token);
 
             var (remainingRowsTouched, remainingDbDuration) = await CodeStopwatch.TimeInMs(
                 () => dbContext.SaveChangesAsync(token)
@@ -236,10 +242,10 @@ internal class LedgerExtenderService : ILedgerExtenderService
             await tx.CommitAsync(token);
 
             return new LedgerExtensionReport(
-                processTransactionsReport,
-                finalTransactionSummary,
-                processTransactionsReport.RowsTouched + remainingRowsTouched,
-                ((long)processTransactionsReport.DbWriteDuration.TotalMilliseconds) + remainingDbDuration);
+                report,
+                finalTransaction,
+                report.RowsTouched + remainingRowsTouched,
+                ((long)report.DbWriteDuration.TotalMilliseconds) + remainingDbDuration);
         }
         catch (Exception)
         {
@@ -249,6 +255,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
         }
     }
 
+    private record ProcessTransactionsResult(TransactionSummary FinalTransaction, ProcessTransactionsReport Report);
+
     private record ProcessTransactionsReport(
         int RowsTouched,
         TimeSpan DbReadDuration,
@@ -256,11 +264,10 @@ internal class LedgerExtenderService : ILedgerExtenderService
         TimeSpan ContentHandlingDuration
     );
 
-    private async Task<ProcessTransactionsReport> ProcessTransactions(ReadWriteDbContext dbContext, List<CommittedTransactionData> transactionsData, CancellationToken token)
+    private async Task<ProcessTransactionsResult> ProcessTransactions(ReadWriteDbContext dbContext, ConsistentLedgerExtension ledgerExtension, CancellationToken token)
     {
         // TODO further improvements:
         // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
-        // - we must somehow benefit from EF-stored configuration (type mapping etc.)
 
         // TODO replace with proper Activity at some point
         var rowsInserted = 0;
@@ -270,15 +277,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var outerStopwatch = Stopwatch.StartNew();
 
         // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
-        var ledgerTransactions = new List<LedgerTransaction>(transactionsData.Count);
+        var ledgerTransactions = new List<LedgerTransaction>(ledgerExtension.CommittedTransactions.Count);
         var referencedEntities = new ReferencedEntityDictionary();
         var knownGlobalAddressesToLoad = new HashSet<string>();
-        var uppedSubstates = new List<UppedSubstate>();
         var childToParentEntities = new Dictionary<string, string>();
-        var fungibleResourceChanges = new List<FungibleResourceChange>();
-        var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
-        var metadataChanges = new List<MetadataChange>();
-        var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
+
+        var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
 
         SequencesHolder sequences;
@@ -301,21 +305,23 @@ SELECT
 
         // step: scan for any referenced entities
         {
-            foreach (var transactionData in transactionsData)
+            foreach (var ct in ledgerExtension.CommittedTransactions)
             {
-                ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(transactionData));
+                var stateVersion = ct.StateVersion;
+                var stateUpdates = ct.Receipt.StateUpdates;
 
-                var stateVersion = transactionData.CommittedTransaction.StateVersion;
-                var stateUpdates = transactionData.CommittedTransaction.Receipt.StateUpdates;
+                long? newEpoch = null;
+                long? newRoundInEpoch = null;
+                DateTimeOffset? newRoundTimestamp = null;
 
                 foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
                     var sid = upSubstate.SubstateId;
-                    var data = upSubstate.SubstateData.ActualInstance;
+                    var sd = upSubstate.SubstateData.ActualInstance;
 
-                    if (data is GlobalSubstate global)
+                    if (sd is CoreModel.GlobalSubstate globalData)
                     {
-                        var target = global.TargetEntity;
+                        var target = globalData.TargetEntity;
                         var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
                         te.Globalize(target.GlobalAddressHex, target.GlobalAddress);
@@ -327,9 +333,8 @@ SELECT
                     }
 
                     var re = referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
-                    var us = new UppedSubstate(re, sid.SubstateKeyHex, sid.SubstateType, upSubstate._Version, Convert.FromHexString(upSubstate.SubstateDataHash), stateVersion, upSubstate.SubstateData);
 
-                    if (data is IOwner owner)
+                    if (sd is CoreModel.IOwner owner)
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
@@ -339,7 +344,7 @@ SELECT
                         }
                     }
 
-                    if (data is IGlobalResourcePointer globalResourcePointer)
+                    if (sd is CoreModel.IGlobalResourcePointer globalResourcePointer)
                     {
                         foreach (var pointer in globalResourcePointer.Pointers)
                         {
@@ -350,19 +355,38 @@ SELECT
                         }
                     }
 
-                    if (data is ResourceManagerSubstate resourceManager)
+                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
                     {
                         Type typeHint = resourceManager.ResourceType switch
                         {
-                            ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
-                            ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
+                            CoreModel.ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
+                            CoreModel.ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
                             _ => throw new ArgumentOutOfRangeException(),
                         };
 
                         re.WithTypeHint(typeHint);
                     }
 
-                    uppedSubstates.Add(us);
+                    if (sd is CoreModel.SystemSubstate systemSubstate)
+                    {
+                        newEpoch = systemSubstate.Epoch;
+
+                        // TODO this is just some dirty hack to ease-up integration process while CoreApi is still missing round support
+                        newRoundInEpoch = 1;
+                        newRoundTimestamp = _clock.UtcNow;
+                    }
+
+                    // TODO implement roundInEpoch the same way once CoreApi expose round/roundInEpoch
+                    // if (operation.IsCreateOf<RoundData>(out var newRoundData))
+                    // {
+                    //     newRoundInEpoch = newRoundData.Round;
+                    //
+                    //     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
+                    //     if (newRoundData.Timestamp != 0)
+                    //     {
+                    //         newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+                    //     }
+                    // }
                 }
 
                 foreach (var downSubstate in stateUpdates.DownSubstates)
@@ -378,6 +402,35 @@ SELECT
 
                     referencedEntities.GetOrAdd(downVirtualSubstate.EntityIdHex, _ => new ReferencedEntity(downVirtualSubstate.EntityIdHex, downVirtualSubstate.EntityType, stateVersion));
                 }
+
+                /* NB:
+                   The Epoch Transition Transaction sort of fits between epochs, but it seems to fit slightly more naturally
+                   as the _first_ transaction of a new epoch, as creates the next EpochData, and the RoundData to 0.
+                */
+
+                var isStartOfEpoch = newEpoch != null;
+                var isStartOfRound = newRoundInEpoch != null;
+                var roundTimestamp = newRoundTimestamp ?? lastTransactionSummary.RoundTimestamp;
+                var createdTimestamp = _clock.UtcNow;
+                var normalizedRoundTimestamp = // Clamp between lastTransaction.NormalizedTimestamp and createdTimestamp
+                    roundTimestamp < lastTransactionSummary.NormalizedRoundTimestamp ? lastTransactionSummary.NormalizedRoundTimestamp
+                    : roundTimestamp > createdTimestamp ? createdTimestamp
+                    : roundTimestamp;
+
+                var summary = new TransactionSummary(
+                    StateVersion: stateVersion,
+                    RoundTimestamp: roundTimestamp,
+                    NormalizedRoundTimestamp: normalizedRoundTimestamp,
+                    CreatedTimestamp: createdTimestamp,
+                    Epoch: newEpoch ?? lastTransactionSummary.Epoch,
+                    IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
+                    RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
+                    IsStartOfEpoch: isStartOfEpoch,
+                    IsStartOfRound: isStartOfRound);
+
+                ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(ct, summary)); // TODO inline this for now on
+
+                lastTransactionSummary = summary;
             }
         }
 
@@ -418,9 +471,21 @@ WHERE id IN(
 
             dbReadDuration += sw.Elapsed;
 
-            foreach (var knownDbEntity in knownDbEntities.Values.OfType<ResourceManagerEntity>())
+            foreach (var knownDbEntity in knownDbEntities.Values.Where(e => e.GlobalAddress != null))
             {
-                referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, EntityType.ResourceManager, knownDbEntity.FromStateVersion));
+                var entityType = knownDbEntity switch
+                {
+                    SystemEntity => CoreModel.EntityType.System,
+                    ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
+                    ComponentEntity => CoreModel.EntityType.Component,
+                    PackageEntity => CoreModel.EntityType.Package,
+                    KeyValueStoreEntity => CoreModel.EntityType.KeyValueStore,
+                    VaultEntity => CoreModel.EntityType.Vault,
+                    NonFungibleStoreEntity => CoreModel.EntityType.NonFungibleStore,
+                    _ => throw new ArgumentOutOfRangeException(nameof(knownDbEntity), knownDbEntity.GetType().Name),
+                };
+
+                referencedEntities.GetOrAdd(knownDbEntity.Address.ToHex(), address => new ReferencedEntity(address, entityType, knownDbEntity.FromStateVersion));
             }
 
             var dbEntities = new List<Entity>();
@@ -436,14 +501,14 @@ WHERE id IN(
 
                 Entity dbEntity = e.Type switch
                 {
-                    EntityType.System => new SystemEntity(),
-                    EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
-                    EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
-                    EntityType.Package => new PackageEntity(),
-                    EntityType.Vault => new VaultEntity(),
-                    EntityType.KeyValueStore => new KeyValueStoreEntity(),
-                    EntityType.Global => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, "Global entities should be filtered out"),
-                    EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
+                    CoreModel.EntityType.System => new SystemEntity(),
+                    CoreModel.EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
+                    CoreModel.EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
+                    CoreModel.EntityType.Package => new PackageEntity(),
+                    CoreModel.EntityType.Vault => new VaultEntity(),
+                    CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
+                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, "Global entities should be filtered out"),
+                    CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
                     _ => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, null),
                 };
 
@@ -495,23 +560,13 @@ WHERE id IN(
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator) FROM STDIN (FORMAT BINARY)", token))
             {
-                // TODO ouh, we must somehow reuse information already held by EF
-                var typeMapping = new Dictionary<Type, string>
-                {
-                    [typeof(SystemEntity)] = "system",
-                    [typeof(FungibleResourceManagerEntity)] = "fungible_resource_manager",
-                    [typeof(NonFungibleResourceManagerEntity)] = "non_fungible_resource_manager",
-                    [typeof(NormalComponentEntity)] = "normal_component",
-                    [typeof(AccountComponentEntity)] = "account_component",
-                    [typeof(SystemComponentEntity)] = "system_component",
-                    [typeof(PackageEntity)] = "package",
-                    [typeof(KeyValueStoreEntity)] = "key_value_store",
-                    [typeof(VaultEntity)] = "vault",
-                    [typeof(NonFungibleStoreEntity)] = "non_fungible_store",
-                };
-
                 foreach (var dbEntity in dbEntities)
                 {
+                    if (dbContext.Model.FindEntityType(dbEntity.GetType())?.GetDiscriminatorValue() is not string discriminator)
+                    {
+                        throw new Exception("Unable to determine discriminator of entity " + dbEntity.Address.ToHex());
+                    }
+
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(dbEntity.Id, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(dbEntity.FromStateVersion, NpgsqlDbType.Bigint, token);
@@ -521,29 +576,33 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity.ParentAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.OwnerAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(typeMapping[dbEntity.GetType()], NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
                 }
 
                 await writer.CompleteAsync(token);
             }
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, payload_hash, intent_hash, signed_intent_hash, transaction_accumulator, is_user_transaction, message, fee_paid, tip_paid, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_timestamp) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, transaction_accumulator, message, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash, fee_paid, tip_paid) FROM STDIN (FORMAT BINARY)", token))
             {
                 var statusConverter = new LedgerTransactionStatusValueConverter().ConvertToProvider;
+
+                if (dbContext.Model.FindEntityType(typeof(UserLedgerTransaction))?.GetDiscriminatorValue() is not string userDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of UserLedgerTransaction");
+                }
+
+                if (dbContext.Model.FindEntityType(typeof(ValidatorLedgerTransaction))?.GetDiscriminatorValue() is not string validatorDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of ValidatorLedgerTransaction");
+                }
 
                 foreach (var lt in ledgerTransactions)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(lt.StateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(statusConverter(lt.Status), NpgsqlDbType.Text, token);
-                    await writer.WriteAsync(lt.PayloadHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.IntentHash, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.SignedIntentHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(lt.TransactionAccumulator, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.IsUserTransaction, NpgsqlDbType.Boolean, token);
                     await writer.WriteNullableAsync(lt.Message, NpgsqlDbType.Bytea, token);
-                    await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(lt.Epoch, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.IndexInEpoch, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.RoundInEpoch, NpgsqlDbType.Bigint, token);
@@ -553,6 +612,28 @@ WHERE id IN(
                     await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.CreatedTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.NormalizedRoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
+
+                    switch (lt)
+                    {
+                        case UserLedgerTransaction ult:
+                            await writer.WriteAsync(userDiscriminator, NpgsqlDbType.Text, token);
+                            await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
+                            await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
+                            await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
+                            await writer.WriteAsync(ult.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                            await writer.WriteAsync(ult.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                            break;
+                        case ValidatorLedgerTransaction:
+                            await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            await writer.WriteNullAsync(token);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(lt), lt, null);
+                    }
                 }
 
                 await writer.CompleteAsync(token);
@@ -562,106 +643,73 @@ WHERE id IN(
             dbWriteDuration += sw.Elapsed;
         }
 
-        // TODO can't we actually merge this with step "scan for any referenced entities"?
+        var fungibleResourceChanges = new List<FungibleResourceChange>();
+        var nonFungibleResourceChanges = new List<NonFungibleResourceChange>();
+        var metadataChanges = new List<MetadataChange>();
+        var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
+
         // step: scan all substates to figure out changes
         {
-            void HandleResourceManagerSubstate(UppedSubstate us)
+            foreach (var ct in ledgerExtension.CommittedTransactions)
             {
-                var data = us.Data.GetResourceManagerSubstate();
+                var stateVersion = ct.StateVersion;
+                var stateUpdates = ct.Receipt.StateUpdates;
 
-                metadataChanges.Add(new MetadataChange(us.ReferencedEntity, data.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), us.StateVersion));
-
-                var totalSupply = TokenAmount.FromSubUnitsString(data.TotalSupplyAttos);
-
-                if (data.ResourceType == ResourceType.Fungible)
+                foreach (var upSubstate in stateUpdates.UpSubstates)
                 {
-                    fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(us.ReferencedEntity, totalSupply, TokenAmount.Zero, TokenAmount.Zero, us.StateVersion)); // TODO support mint & burnt
-                }
-            }
+                    var sid = upSubstate.SubstateId;
+                    var sd = upSubstate.SubstateData.ActualInstance;
 
-            void HandleComponentStateSubstate(UppedSubstate us)
-            {
-                var data = us.Data.GetComponentStateSubstate();
-            }
+                    if (sd is CoreModel.GlobalSubstate)
+                    {
+                        continue;
+                    }
 
-            void HandleVaultSubstate(UppedSubstate us)
-            {
-                var data = us.Data.GetVaultSubstate();
+                    var re = referencedEntities.Get(sid.EntityIdHex);
 
-                // TODO handle fungible vs non-fungible properly (waiting for CoreApi to decide how they're going to represent the data)
+                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
+                    {
+                        metadataChanges.Add(new MetadataChange(re, resourceManager.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
 
-                // TODO ugh...
-                var resourceAmount = data.ResourceAmount.ActualInstance;
-                var substateEntity = us.ReferencedEntity;
+                        var totalSupply = TokenAmount.FromSubUnitsString(resourceManager.TotalSupplyAttos);
 
-                if (resourceAmount is FungibleResourceAmount fra)
-                {
-                    var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
+                        if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
+                        {
+                            fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(re, totalSupply, TokenAmount.Zero, TokenAmount.Zero, stateVersion)); // TODO support mint & burnt
+                        }
+                    }
 
-                    var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
-                    var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                    if (sd is CoreModel.VaultSubstate vault)
+                    {
+                        var resourceAmount = vault.ResourceAmount.ActualInstance;
 
-                    fungibleResourceChanges.Add(new FungibleResourceChange(substateEntity, resourceEntity, amount, us.StateVersion));
+                        switch (resourceAmount)
+                        {
+                            case CoreModel.FungibleResourceAmount fra:
+                            {
+                                var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
+                                var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
+                                var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                    return;
-                }
+                                fungibleResourceChanges.Add(new FungibleResourceChange(re, resourceEntity, amount, stateVersion));
 
-                if (resourceAmount is NonFungibleResourceAmount nfra)
-                {
-                    var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
-                    var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
+                                break;
+                            }
 
-                    nonFungibleResourceChanges.Add(new NonFungibleResourceChange(substateEntity, resourceEntity, nfra.NfIdsHex, us.StateVersion));
+                            case CoreModel.NonFungibleResourceAmount nfra:
+                            {
+                                var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
+                                var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                    return;
-                }
+                                nonFungibleResourceChanges.Add(new NonFungibleResourceChange(re, resourceEntity, nfra.NfIdsHex, stateVersion));
 
-                throw new Exception("bla bla bla bla x9"); // TODO fix me
-            }
+                                break;
+                            }
 
-            void HandleNonFungibleSubstate(UppedSubstate us)
-            {
-                var data = us.Data.GetNonFungibleSubstate();
-            }
-
-            void HandleKeyValueStoreEntrySubstate(UppedSubstate us)
-            {
-                // TODO handle referenced_entities properly (not sure if we can ensure references types have been seen)
-            }
-
-            foreach (var us in uppedSubstates)
-            {
-                switch (us.Type)
-                {
-                    case SubstateType.System:
-                        // TODO handle somehow
-                        break;
-                    case SubstateType.ResourceManager:
-                        HandleResourceManagerSubstate(us);
-                        break;
-                    case SubstateType.ComponentInfo:
-                        // TODO handle somehow
-                        break;
-                    case SubstateType.ComponentState:
-                        HandleComponentStateSubstate(us);
-                        break;
-                    case SubstateType.Package:
-                        // TODO handle somehow
-                        break;
-                    case SubstateType.Vault:
-                        HandleVaultSubstate(us);
-                        break;
-                    case SubstateType.NonFungible:
-                        HandleNonFungibleSubstate(us);
-                        break;
-                    case SubstateType.KeyValueStoreEntry:
-                        HandleKeyValueStoreEntrySubstate(us);
-                        break;
-                    case SubstateType.Global:
-                        // we do not want to handle them on purpose
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(us.Type), us.Type, null);
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(resourceAmount), resourceAmount.GetType().Name);
+                        }
+                    }
                 }
             }
         }
@@ -822,7 +870,15 @@ WHERE id IN(
 
             await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token))
             {
-                var type = "fungible";
+                if (dbContext.Model.FindEntityType(typeof(EntityFungibleResourceHistory))?.GetDiscriminatorValue() is not string fungibleDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of EntityFungibleResourceHistory");
+                }
+
+                if (dbContext.Model.FindEntityType(typeof(EntityNonFungibleResourceHistory))?.GetDiscriminatorValue() is not string nonFungibleDiscriminator)
+                {
+                    throw new Exception("Unable to determine discriminator of EntityNonFungibleResourceHistory");
+                }
 
                 foreach (var fungible in fungibles)
                 {
@@ -832,13 +888,11 @@ WHERE id IN(
                     await writer.WriteAsync(fungible.OwnerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.GlobalEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(fungible.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(type, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(fungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteAsync(fungible.Balance.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteNullAsync(token);
                 }
-
-                type = "non_fungible";
 
                 foreach (var nonFungible in nonFungibles)
                 {
@@ -848,7 +902,7 @@ WHERE id IN(
                     await writer.WriteAsync(nonFungible.OwnerEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.GlobalEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.ResourceEntityId, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(type, NpgsqlDbType.Text, token);
+                    await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
                     await writer.WriteAsync(nonFungible.IdsCount, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungible.Ids, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
@@ -918,12 +972,12 @@ SELECT
 
         var contentHandlingDuration = outerStopwatch.Elapsed - dbReadDuration - dbWriteDuration;
 
-        return new ProcessTransactionsReport(rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration);
+        return new ProcessTransactionsResult(lastTransactionSummary, new ProcessTransactionsReport(rowsInserted + rowsUpdated, dbReadDuration, dbWriteDuration, contentHandlingDuration));
     }
 
     private async Task CreateOrUpdateLedgerStatus(
         ReadWriteDbContext dbContext,
-        TransactionSummary finalTransactionSummary,
+        TransactionSummary finalTransaction,
         long latestSyncTarget,
         CancellationToken token
     )
@@ -937,7 +991,45 @@ SELECT
         }
 
         ledgerStatus.LastUpdated = _clock.UtcNow;
-        ledgerStatus.TopOfLedgerStateVersion = finalTransactionSummary.StateVersion;
+        ledgerStatus.TopOfLedgerStateVersion = finalTransaction.StateVersion;
         ledgerStatus.TargetStateVersion = latestSyncTarget;
+    }
+
+    private async Task<TransactionSummary> GetTopOfLedger(ReadWriteDbContext dbContext, CancellationToken token)
+    {
+        var lastTransaction = await dbContext.LedgerTransactions
+            .AsNoTracking()
+            .OrderByDescending(lt => lt.StateVersion)
+            .FirstOrDefaultAsync(token);
+
+        var lastOverview = lastTransaction == null ? null : new TransactionSummary(
+            StateVersion: lastTransaction.StateVersion,
+            RoundTimestamp: lastTransaction.RoundTimestamp,
+            NormalizedRoundTimestamp: lastTransaction.NormalizedRoundTimestamp,
+            CreatedTimestamp: lastTransaction.CreatedTimestamp,
+            Epoch: lastTransaction.Epoch,
+            IndexInEpoch: lastTransaction.IndexInEpoch,
+            RoundInEpoch: lastTransaction.RoundInEpoch,
+            IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
+            IsStartOfRound: lastTransaction.IsStartOfRound
+        );
+
+        return lastOverview ?? PreGenesisTransactionSummary();
+    }
+
+    private TransactionSummary PreGenesisTransactionSummary()
+    {
+        // Nearly all of theses turn out to be unused!
+        return new TransactionSummary(
+            StateVersion: 0,
+            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            CreatedTimestamp: _clock.UtcNow,
+            Epoch: 0,
+            IndexInEpoch: 0,
+            RoundInEpoch: 0,
+            IsStartOfEpoch: false,
+            IsStartOfRound: false
+        );
     }
 }

@@ -104,7 +104,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourceAmountAllOf" /> class.
         /// </summary>
-        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
+        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
         public FungibleResourceAmountAllOf(string amountAttos = default(string))
         {
             // to ensure "amountAttos" is required (not null)
@@ -116,9 +116,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
+        /// The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
         /// </summary>
-        /// <value>The string-encoded decimal subunits of the amount (10^-18) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
+        /// <value>The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
         [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
         public string AmountAttos { get; set; }
 

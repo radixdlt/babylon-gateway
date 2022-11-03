@@ -108,9 +108,6 @@ There are three different ways of running tests.
 
 - Unit tests only: `dotnet test --filter RadixDlt.NetworkGateway.UnitTests`
 
-- Integration tests only: `dotnet test --filter RadixDlt.NetworkGateway.IntegrationTests`
-
-
 For more information, see the [Tests project](../../src/Tests).
 
 ## Reformatting

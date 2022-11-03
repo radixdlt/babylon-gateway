@@ -62,13 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IGatewayHandler
 {
-    Task<GatewayInfoResponse> Status(CancellationToken token = default);
+    Task<GatewayModel.GatewayInfoResponse> Status(CancellationToken token = default);
 }

@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
-using RadixDlt.CoreApiSdk.Model;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
@@ -71,12 +69,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
+using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
 public interface ITransactionLogReader
 {
-    Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
+    Task<CoreModel.CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
 }
 
 public interface ITransactionLogReaderObserver
@@ -87,7 +87,7 @@ public interface ITransactionLogReaderObserver
 internal class TransactionLogReader : ITransactionLogReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
-    private readonly TransactionApi _transactionsApi;
+    private readonly CoreApi.TransactionApi _transactionsApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
     private readonly IEnumerable<ITransactionLogReaderObserver> _observers;
 
@@ -99,14 +99,14 @@ internal class TransactionLogReader : ITransactionLogReader
         _transactionsApi = coreApiProvider.TransactionsApi;
     }
 
-    public async Task<CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
+    public async Task<CoreModel.CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
     {
         try
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
                 await _transactionsApi
                     .TransactionStreamPostAsync(
-                        new CommittedTransactionsRequest(
+                        new CoreModel.CommittedTransactionsRequest(
                             network: _networkConfigurationProvider.GetNetworkName(),
                             fromStateVersion: stateVersion,
                             limit: count

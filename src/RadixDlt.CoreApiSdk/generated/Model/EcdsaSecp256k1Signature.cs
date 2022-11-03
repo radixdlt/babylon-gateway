@@ -111,7 +111,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="EcdsaSecp256k1Signature" /> class.
         /// </summary>
         /// <param name="keyType">keyType (required).</param>
-        /// <param name="signatureHex">A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format. (required).</param>
+        /// <param name="signatureHex">A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format. (required).</param>
         public EcdsaSecp256k1Signature(PublicKeyType keyType = default(PublicKeyType), string signatureHex = default(string))
         {
             this.KeyType = keyType;
@@ -124,9 +124,9 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.
+        /// A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.
         /// </summary>
-        /// <value>A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie CONCAT(R, s) where R and s are each 32-bytes in padded big-endian format.</value>
+        /// <value>A hex-encoded recoverable ECDSA Secp256k1 signature (65 bytes). The first byte is the recovery id, the remaining 64 bytes are the compact signature, ie &#x60;CONCAT(R, s)&#x60; where &#x60;R&#x60; and &#x60;s&#x60; are each 32-bytes in padded big-endian format.</value>
         [DataMember(Name = "signature_hex", IsRequired = true, EmitDefaultValue = true)]
         public string SignatureHex { get; set; }
 

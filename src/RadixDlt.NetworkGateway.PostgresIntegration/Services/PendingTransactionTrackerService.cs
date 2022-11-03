@@ -304,8 +304,9 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
 
         var transactionIdsInANodeMempoolWhichAreAlreadyCommitted = await dbContext.LedgerTransactions
-            .Where(lt => transactionIdsWhichMightNeedAdding.Contains(lt.PayloadHash))
-            .Select(lt => lt.PayloadHash)
+            .OfType<UserLedgerTransaction>()
+            .Where(ult => transactionIdsWhichMightNeedAdding.Contains(ult.PayloadHash))
+            .Select(ult => ult.PayloadHash)
             .ToHashSetAsync(ByteArrayEqualityComparer.Default, token);
 
         var transactionsToAdd = transactionsWhichMightNeedAdding

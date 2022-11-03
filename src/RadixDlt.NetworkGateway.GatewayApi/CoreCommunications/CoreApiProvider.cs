@@ -62,10 +62,10 @@
  * permissions under this License.
  */
 
-using RadixDlt.CoreApiSdk.Api;
 using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using CoreApi = RadixDlt.CoreApiSdk.Api;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 
@@ -73,18 +73,18 @@ public interface ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 
-    public StatusApi StatusApi { get; }
+    public CoreApi.StatusApi StatusApi { get; }
 
-    public TransactionApi TransactionApi { get; }
+    public CoreApi.TransactionApi TransactionApi { get; }
 }
 
 internal class CoreApiProvider : ICoreApiProvider
 {
     public CoreApiNode CoreApiNode { get; }
 
-    public StatusApi StatusApi { get; }
+    public CoreApi.StatusApi StatusApi { get; }
 
-    public TransactionApi TransactionApi { get; }
+    public CoreApi.TransactionApi TransactionApi { get; }
 
     public CoreApiProvider(CoreApiNode coreApiNode, HttpClient httpClient)
     {
@@ -94,7 +94,7 @@ internal class CoreApiProvider : ICoreApiProvider
         }
 
         CoreApiNode = coreApiNode;
-        StatusApi = new StatusApi(httpClient, coreApiNode.CoreApiAddress);
-        TransactionApi = new TransactionApi(httpClient, coreApiNode.CoreApiAddress);
+        StatusApi = new CoreApi.StatusApi(httpClient, coreApiNode.CoreApiAddress);
+        TransactionApi = new CoreApi.TransactionApi(httpClient, coreApiNode.CoreApiAddress);
     }
 }

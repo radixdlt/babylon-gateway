@@ -63,9 +63,9 @@
  */
 
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System.Threading;
 using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
@@ -78,7 +78,7 @@ internal class DefaultGatewayHandler : IGatewayHandler
         _ledgerStateQuerier = ledgerStateQuerier;
     }
 
-    public async Task<GatewayInfoResponse> Status(CancellationToken token)
+    public async Task<GatewayModel.GatewayInfoResponse> Status(CancellationToken token)
     {
         return await _ledgerStateQuerier.GetGatewayState(token);
     }
