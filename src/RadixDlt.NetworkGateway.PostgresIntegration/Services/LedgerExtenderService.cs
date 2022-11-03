@@ -582,7 +582,7 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, transaction_accumulator, message, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash, fee_paid, tip_paid) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY ledger_transactions (state_version, status, transaction_accumulator, message, epoch, index_in_epoch, round_in_epoch, is_start_of_epoch, is_start_of_round, referenced_entities, fee_paid, tip_paid, round_timestamp, created_timestamp, normalized_round_timestamp, discriminator, payload_hash, intent_hash, signed_intent_hash) FROM STDIN (FORMAT BINARY)", token))
             {
                 var statusConverter = new LedgerTransactionStatusValueConverter().ConvertToProvider;
 
@@ -609,6 +609,8 @@ WHERE id IN(
                     await writer.WriteAsync(lt.IsStartOfEpoch, NpgsqlDbType.Boolean, token);
                     await writer.WriteAsync(lt.IsStartOfRound, NpgsqlDbType.Boolean, token);
                     await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
+                    await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.CreatedTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
                     await writer.WriteAsync(lt.NormalizedRoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
@@ -620,13 +622,9 @@ WHERE id IN(
                             await writer.WriteAsync(ult.PayloadHash, NpgsqlDbType.Bytea, token);
                             await writer.WriteAsync(ult.IntentHash, NpgsqlDbType.Bytea, token);
                             await writer.WriteAsync(ult.SignedIntentHash, NpgsqlDbType.Bytea, token);
-                            await writer.WriteAsync(ult.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                            await writer.WriteAsync(ult.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                             break;
                         case ValidatorLedgerTransaction:
                             await writer.WriteAsync(validatorDiscriminator, NpgsqlDbType.Text, token);
-                            await writer.WriteNullAsync(token);
-                            await writer.WriteNullAsync(token);
                             await writer.WriteNullAsync(token);
                             await writer.WriteNullAsync(token);
                             await writer.WriteNullAsync(token);

@@ -109,6 +109,12 @@ internal abstract class LedgerTransaction
     [Column("referenced_entities")]
     public long[] ReferencedEntities { get; set; }
 
+    [Column("fee_paid")]
+    public TokenAmount FeePaid { get; set; }
+
+    [Column("tip_paid")]
+    public TokenAmount TipPaid { get; set; }
+
     /// <summary>
     /// The round timestamp of a round where vertex V was voted on is derived as the median of the timestamp of the
     /// votes on the vertex's QC to its parent vertex. These votes come from a subset of validators performing
@@ -153,12 +159,6 @@ internal class UserLedgerTransaction : LedgerTransaction
     /// </summary>
     [Column("signed_intent_hash")]
     public byte[] SignedIntentHash { get; set; }
-
-    [Column("fee_paid")]
-    public TokenAmount FeePaid { get; set; }
-
-    [Column("tip_paid")]
-    public TokenAmount TipPaid { get; set; }
 }
 
 internal class ValidatorLedgerTransaction : LedgerTransaction
