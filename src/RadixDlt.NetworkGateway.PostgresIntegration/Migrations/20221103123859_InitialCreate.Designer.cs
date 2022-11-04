@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221102222619_InitialCreate")]
+    [Migration("20221103123859_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -341,6 +341,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
 
+                    b.Property<BigInteger>("FeePaid")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("fee_paid");
+
                     b.Property<long>("IndexInEpoch")
                         .HasColumnType("bigint")
                         .HasColumnName("index_in_epoch");
@@ -378,6 +383,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
+
+                    b.Property<BigInteger>("TipPaid")
+                        .HasPrecision(1000)
+                        .HasColumnType("numeric(1000,0)")
+                        .HasColumnName("tip_paid");
 
                     b.Property<byte[]>("TransactionAccumulator")
                         .IsRequired()
@@ -650,11 +660,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.LedgerTransaction");
 
-                    b.Property<BigInteger>("FeePaid")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("fee_paid");
-
                     b.Property<byte[]>("IntentHash")
                         .IsRequired()
                         .HasColumnType("bytea")
@@ -669,11 +674,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("signed_intent_hash");
-
-                    b.Property<BigInteger>("TipPaid")
-                        .HasPrecision(1000)
-                        .HasColumnType("numeric(1000,0)")
-                        .HasColumnName("tip_paid");
 
                     b.HasIndex("IntentHash")
                         .HasFilter("intent_hash IS NOT NULL");

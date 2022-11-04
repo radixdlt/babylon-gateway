@@ -84,8 +84,6 @@ internal static class TransactionMapping
                 PayloadHash = ult.NotarizedTransaction.Hash.ConvertFromHex(),
                 IntentHash = ult.NotarizedTransaction.SignedIntent.Intent.Hash.ConvertFromHex(),
                 SignedIntentHash = ult.NotarizedTransaction.SignedIntent.Hash.ConvertFromHex(),
-                FeePaid = TokenAmount.FromSubUnitsString(committedTransaction.Receipt.FeeSummary.XrdBurnedAttos),
-                TipPaid = TokenAmount.FromSubUnitsString(committedTransaction.Receipt.FeeSummary.XrdTippedAttos),
             },
             CoreModel.ValidatorLedgerTransaction => new ValidatorLedgerTransaction(),
             _ => throw new ArgumentOutOfRangeException(nameof(committedTransaction.LedgerTransaction), committedTransaction.LedgerTransaction, null),
@@ -102,6 +100,8 @@ internal static class TransactionMapping
         ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
         ledgerTransaction.IsStartOfEpoch = summary.IsStartOfEpoch;
         ledgerTransaction.IsStartOfRound = summary.IsStartOfRound;
+        ledgerTransaction.FeePaid = TokenAmount.FromSubUnitsString(committedTransaction.Receipt.FeeSummary.XrdBurnedAttos);
+        ledgerTransaction.TipPaid = TokenAmount.FromSubUnitsString(committedTransaction.Receipt.FeeSummary.XrdTippedAttos);
         ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
         ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
         ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;

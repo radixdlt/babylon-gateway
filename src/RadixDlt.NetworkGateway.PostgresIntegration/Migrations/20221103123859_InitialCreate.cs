@@ -179,15 +179,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
                     is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
                     referenced_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
+                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     normalized_round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
                     intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true)
+                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
                 constraints: table =>
                 {
