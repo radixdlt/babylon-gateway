@@ -372,7 +372,7 @@ SELECT
                         newEpoch = systemSubstate.Epoch;
 
                         // TODO this is just some dirty hack to ease-up integration process while CoreApi is still missing round support
-                        newRoundInEpoch = 1;
+                        newRoundInEpoch = 0;
                         newRoundTimestamp = _clock.UtcNow;
                     }
 

@@ -161,7 +161,7 @@ internal class SubmissionService : ISubmissionService
                     payloadHex: request.NotarizedTransaction,
                     parseMode: CoreModel.TransactionParseRequest.ParseModeEnum.Notarized,
                     validationMode: CoreModel.TransactionParseRequest.ValidationModeEnum.Static,
-                    responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Basic),
+                    responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Full),
                 token);
 
             if (response.Parsed.ActualInstance is not CoreModel.ParsedNotarizedTransaction parsed)
