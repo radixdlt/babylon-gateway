@@ -91,31 +91,36 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SystemSubstateAllOf
+    /// AmountDynamicAmountAllOf
     /// </summary>
-    [DataContract(Name = "SystemSubstate_allOf")]
-    public partial class SystemSubstateAllOf : IEquatable<SystemSubstateAllOf>, IValidatableObject
+    [DataContract(Name = "AmountDynamicAmount_allOf")]
+    public partial class AmountDynamicAmountAllOf : IEquatable<AmountDynamicAmountAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SystemSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AmountDynamicAmountAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected SystemSubstateAllOf() { }
+        protected AmountDynamicAmountAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SystemSubstateAllOf" /> class.
+        /// Initializes a new instance of the <see cref="AmountDynamicAmountAllOf" /> class.
         /// </summary>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        public SystemSubstateAllOf(long epoch = default(long))
+        /// <param name="amount">The string-encoded decimal representing the amount of resource required to pass the proof rule. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public AmountDynamicAmountAllOf(string amount = default(string))
         {
-            this.Epoch = epoch;
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for AmountDynamicAmountAllOf and cannot be null");
+            }
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
+        /// The string-encoded decimal representing the amount of resource required to pass the proof rule. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
+        /// <value>The string-encoded decimal representing the amount of resource required to pass the proof rule. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -124,8 +129,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class SystemSubstateAllOf {\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("class AmountDynamicAmountAllOf {\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -146,15 +151,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as SystemSubstateAllOf);
+            return this.Equals(input as AmountDynamicAmountAllOf);
         }
 
         /// <summary>
-        /// Returns true if SystemSubstateAllOf instances are equal
+        /// Returns true if AmountDynamicAmountAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of SystemSubstateAllOf to be compared</param>
+        /// <param name="input">Instance of AmountDynamicAmountAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SystemSubstateAllOf input)
+        public bool Equals(AmountDynamicAmountAllOf input)
         {
             if (input == null)
             {
@@ -162,8 +167,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -176,7 +182,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                if (this.Amount != null)
+                {
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
+                }
                 return hashCode;
             }
         }
@@ -188,18 +197,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Epoch (long) maximum
-            if (this.Epoch > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to 10000000000.", new [] { "Epoch" });
-            }
-
-            // Epoch (long) minimum
-            if (this.Epoch < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value greater than or equal to 0.", new [] { "Epoch" });
-            }
-
             yield break;
         }
     }

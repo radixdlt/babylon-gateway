@@ -106,10 +106,14 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="unlimitedLoan">unlimitedLoan (required).</param>
         /// <param name="assumeAllSignatureProofs">assumeAllSignatureProofs (required).</param>
-        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool), bool assumeAllSignatureProofs = default(bool))
+        /// <param name="permitDuplicateIntentHash">permitDuplicateIntentHash (required).</param>
+        /// <param name="permitInvalidHeaderEpoch">permitInvalidHeaderEpoch (required).</param>
+        public TransactionPreviewRequestFlags(bool unlimitedLoan = default(bool), bool assumeAllSignatureProofs = default(bool), bool permitDuplicateIntentHash = default(bool), bool permitInvalidHeaderEpoch = default(bool))
         {
             this.UnlimitedLoan = unlimitedLoan;
             this.AssumeAllSignatureProofs = assumeAllSignatureProofs;
+            this.PermitDuplicateIntentHash = permitDuplicateIntentHash;
+            this.PermitInvalidHeaderEpoch = permitInvalidHeaderEpoch;
         }
 
         /// <summary>
@@ -125,6 +129,18 @@ namespace RadixDlt.CoreApiSdk.Model
         public bool AssumeAllSignatureProofs { get; set; }
 
         /// <summary>
+        /// Gets or Sets PermitDuplicateIntentHash
+        /// </summary>
+        [DataMember(Name = "permit_duplicate_intent_hash", IsRequired = true, EmitDefaultValue = true)]
+        public bool PermitDuplicateIntentHash { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PermitInvalidHeaderEpoch
+        /// </summary>
+        [DataMember(Name = "permit_invalid_header_epoch", IsRequired = true, EmitDefaultValue = true)]
+        public bool PermitInvalidHeaderEpoch { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -134,6 +150,8 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class TransactionPreviewRequestFlags {\n");
             sb.Append("  UnlimitedLoan: ").Append(UnlimitedLoan).Append("\n");
             sb.Append("  AssumeAllSignatureProofs: ").Append(AssumeAllSignatureProofs).Append("\n");
+            sb.Append("  PermitDuplicateIntentHash: ").Append(PermitDuplicateIntentHash).Append("\n");
+            sb.Append("  PermitInvalidHeaderEpoch: ").Append(PermitInvalidHeaderEpoch).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -176,6 +194,14 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.AssumeAllSignatureProofs == input.AssumeAllSignatureProofs ||
                     this.AssumeAllSignatureProofs.Equals(input.AssumeAllSignatureProofs)
+                ) && 
+                (
+                    this.PermitDuplicateIntentHash == input.PermitDuplicateIntentHash ||
+                    this.PermitDuplicateIntentHash.Equals(input.PermitDuplicateIntentHash)
+                ) && 
+                (
+                    this.PermitInvalidHeaderEpoch == input.PermitInvalidHeaderEpoch ||
+                    this.PermitInvalidHeaderEpoch.Equals(input.PermitInvalidHeaderEpoch)
                 );
         }
 
@@ -190,6 +216,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.UnlimitedLoan.GetHashCode();
                 hashCode = (hashCode * 59) + this.AssumeAllSignatureProofs.GetHashCode();
+                hashCode = (hashCode * 59) + this.PermitDuplicateIntentHash.GetHashCode();
+                hashCode = (hashCode * 59) + this.PermitInvalidHeaderEpoch.GetHashCode();
                 return hashCode;
             }
         }

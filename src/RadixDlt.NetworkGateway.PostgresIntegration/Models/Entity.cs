@@ -119,7 +119,7 @@ internal abstract class Entity
     }
 }
 
-internal class SystemEntity : Entity
+internal class EpochManagerEntity : Entity
 {
 }
 

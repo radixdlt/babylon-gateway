@@ -91,47 +91,35 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// SystemSubstate
+    /// AllOfFixedProofRuleAllOf
     /// </summary>
-    [DataContract(Name = "SystemSubstate")]
-    public partial class SystemSubstate : IEquatable<SystemSubstate>, IValidatableObject
+    [DataContract(Name = "AllOfFixedProofRule_allOf")]
+    public partial class AllOfFixedProofRuleAllOf : IEquatable<AllOfFixedProofRuleAllOf>, IValidatableObject
     {
-
         /// <summary>
-        /// Gets or Sets EntityType
-        /// </summary>
-        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
-        public EntityType EntityType { get; set; }
-
-        /// <summary>
-        /// Gets or Sets SubstateType
-        /// </summary>
-        [DataMember(Name = "substate_type", IsRequired = true, EmitDefaultValue = true)]
-        public SubstateType SubstateType { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SystemSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AllOfFixedProofRuleAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected SystemSubstate() { }
+        protected AllOfFixedProofRuleAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="SystemSubstate" /> class.
+        /// Initializes a new instance of the <see cref="AllOfFixedProofRuleAllOf" /> class.
         /// </summary>
-        /// <param name="entityType">entityType (required).</param>
-        /// <param name="substateType">substateType (required).</param>
-        /// <param name="epoch">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch (required).</param>
-        public SystemSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), long epoch = default(long))
+        /// <param name="resources">resources (required).</param>
+        public AllOfFixedProofRuleAllOf(List<FixedResourceDescriptor> resources = default(List<FixedResourceDescriptor>))
         {
-            this.EntityType = entityType;
-            this.SubstateType = substateType;
-            this.Epoch = epoch;
+            // to ensure "resources" is required (not null)
+            if (resources == null)
+            {
+                throw new ArgumentNullException("resources is a required property for AllOfFixedProofRuleAllOf and cannot be null");
+            }
+            this.Resources = resources;
         }
 
         /// <summary>
-        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch
+        /// Gets or Sets Resources
         /// </summary>
-        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the current epoch</value>
-        [DataMember(Name = "epoch", IsRequired = true, EmitDefaultValue = true)]
-        public long Epoch { get; set; }
+        [DataMember(Name = "resources", IsRequired = true, EmitDefaultValue = true)]
+        public List<FixedResourceDescriptor> Resources { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,10 +128,8 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class SystemSubstate {\n");
-            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
-            sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  Epoch: ").Append(Epoch).Append("\n");
+            sb.Append("class AllOfFixedProofRuleAllOf {\n");
+            sb.Append("  Resources: ").Append(Resources).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +150,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as SystemSubstate);
+            return this.Equals(input as AllOfFixedProofRuleAllOf);
         }
 
         /// <summary>
-        /// Returns true if SystemSubstate instances are equal
+        /// Returns true if AllOfFixedProofRuleAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of SystemSubstate to be compared</param>
+        /// <param name="input">Instance of AllOfFixedProofRuleAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(SystemSubstate input)
+        public bool Equals(AllOfFixedProofRuleAllOf input)
         {
             if (input == null)
             {
@@ -180,16 +166,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.EntityType == input.EntityType ||
-                    this.EntityType.Equals(input.EntityType)
-                ) && 
-                (
-                    this.SubstateType == input.SubstateType ||
-                    this.SubstateType.Equals(input.SubstateType)
-                ) && 
-                (
-                    this.Epoch == input.Epoch ||
-                    this.Epoch.Equals(input.Epoch)
+                    this.Resources == input.Resources ||
+                    this.Resources != null &&
+                    input.Resources != null &&
+                    this.Resources.SequenceEqual(input.Resources)
                 );
         }
 
@@ -202,9 +182,10 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
-                hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                hashCode = (hashCode * 59) + this.Epoch.GetHashCode();
+                if (this.Resources != null)
+                {
+                    hashCode = (hashCode * 59) + this.Resources.GetHashCode();
+                }
                 return hashCode;
             }
         }
@@ -216,18 +197,6 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Epoch (long) maximum
-            if (this.Epoch > (long)10000000000)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value less than or equal to 10000000000.", new [] { "Epoch" });
-            }
-
-            // Epoch (long) minimum
-            if (this.Epoch < (long)0)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Epoch, must be a value greater than or equal to 0.", new [] { "Epoch" });
-            }
-
             yield break;
         }
     }

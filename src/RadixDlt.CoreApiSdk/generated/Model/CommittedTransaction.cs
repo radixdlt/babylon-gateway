@@ -105,11 +105,18 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="CommittedTransaction" /> class.
         /// </summary>
         /// <param name="stateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the resultant state version after the transaction has been committed (required).</param>
+        /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator.  (required).</param>
         /// <param name="ledgerTransaction">ledgerTransaction (required).</param>
         /// <param name="receipt">receipt (required).</param>
-        public CommittedTransaction(long stateVersion = default(long), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt))
+        public CommittedTransaction(long stateVersion = default(long), string accumulatorHash = default(string), LedgerTransaction ledgerTransaction = default(LedgerTransaction), TransactionReceipt receipt = default(TransactionReceipt))
         {
             this.StateVersion = stateVersion;
+            // to ensure "accumulatorHash" is required (not null)
+            if (accumulatorHash == null)
+            {
+                throw new ArgumentNullException("accumulatorHash is a required property for CommittedTransaction and cannot be null");
+            }
+            this.AccumulatorHash = accumulatorHash;
             // to ensure "ledgerTransaction" is required (not null)
             if (ledgerTransaction == null)
             {
@@ -132,6 +139,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public long StateVersion { get; set; }
 
         /// <summary>
+        /// The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator. 
+        /// </summary>
+        /// <value>The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator. </value>
+        [DataMember(Name = "accumulator_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string AccumulatorHash { get; set; }
+
+        /// <summary>
         /// Gets or Sets LedgerTransaction
         /// </summary>
         [DataMember(Name = "ledger_transaction", IsRequired = true, EmitDefaultValue = true)]
@@ -152,6 +166,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransaction {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  AccumulatorHash: ").Append(AccumulatorHash).Append("\n");
             sb.Append("  LedgerTransaction: ").Append(LedgerTransaction).Append("\n");
             sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("}\n");
@@ -194,6 +209,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.StateVersion.Equals(input.StateVersion)
                 ) && 
                 (
+                    this.AccumulatorHash == input.AccumulatorHash ||
+                    (this.AccumulatorHash != null &&
+                    this.AccumulatorHash.Equals(input.AccumulatorHash))
+                ) && 
+                (
                     this.LedgerTransaction == input.LedgerTransaction ||
                     (this.LedgerTransaction != null &&
                     this.LedgerTransaction.Equals(input.LedgerTransaction))
@@ -215,6 +235,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.AccumulatorHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccumulatorHash.GetHashCode();
+                }
                 if (this.LedgerTransaction != null)
                 {
                     hashCode = (hashCode * 59) + this.LedgerTransaction.GetHashCode();
@@ -244,6 +268,18 @@ namespace RadixDlt.CoreApiSdk.Model
             if (this.StateVersion < (long)1)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 1.", new [] { "StateVersion" });
+            }
+
+            // AccumulatorHash (string) maxLength
+            if (this.AccumulatorHash != null && this.AccumulatorHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AccumulatorHash, length must be less than 64.", new [] { "AccumulatorHash" });
+            }
+
+            // AccumulatorHash (string) minLength
+            if (this.AccumulatorHash != null && this.AccumulatorHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AccumulatorHash, length must be greater than 64.", new [] { "AccumulatorHash" });
             }
 
             yield break;

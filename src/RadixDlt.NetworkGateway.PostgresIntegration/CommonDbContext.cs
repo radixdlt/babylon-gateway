@@ -195,7 +195,7 @@ internal abstract class CommonDbContext : DbContext
     {
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<string>("discriminator")
-            .HasValue<SystemEntity>("system")
+            .HasValue<EpochManagerEntity>("epoch_manager")
             .HasValue<FungibleResourceManagerEntity>("fungible_resource_manager")
             .HasValue<NonFungibleResourceManagerEntity>("non_fungible_resource_manager")
             .HasValue<NormalComponentEntity>("normal_component")

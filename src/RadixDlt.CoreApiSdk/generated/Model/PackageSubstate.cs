@@ -119,7 +119,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="entityType">entityType (required).</param>
         /// <param name="substateType">substateType (required).</param>
         /// <param name="codeHex">The hex-encoded package code (required).</param>
-        public PackageSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string codeHex = default(string))
+        /// <param name="blueprints">A map from the blueprint name to BlueprintData (required).</param>
+        public PackageSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string codeHex = default(string), Dictionary<string, BlueprintData> blueprints = default(Dictionary<string, BlueprintData>))
         {
             this.EntityType = entityType;
             this.SubstateType = substateType;
@@ -129,6 +130,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("codeHex is a required property for PackageSubstate and cannot be null");
             }
             this.CodeHex = codeHex;
+            // to ensure "blueprints" is required (not null)
+            if (blueprints == null)
+            {
+                throw new ArgumentNullException("blueprints is a required property for PackageSubstate and cannot be null");
+            }
+            this.Blueprints = blueprints;
         }
 
         /// <summary>
@@ -137,6 +144,13 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>The hex-encoded package code</value>
         [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
         public string CodeHex { get; set; }
+
+        /// <summary>
+        /// A map from the blueprint name to BlueprintData
+        /// </summary>
+        /// <value>A map from the blueprint name to BlueprintData</value>
+        [DataMember(Name = "blueprints", IsRequired = true, EmitDefaultValue = true)]
+        public Dictionary<string, BlueprintData> Blueprints { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -149,6 +163,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  EntityType: ").Append(EntityType).Append("\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("  Blueprints: ").Append(Blueprints).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -196,6 +211,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.CodeHex == input.CodeHex ||
                     (this.CodeHex != null &&
                     this.CodeHex.Equals(input.CodeHex))
+                ) && 
+                (
+                    this.Blueprints == input.Blueprints ||
+                    this.Blueprints != null &&
+                    input.Blueprints != null &&
+                    this.Blueprints.SequenceEqual(input.Blueprints)
                 );
         }
 
@@ -213,6 +234,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.CodeHex != null)
                 {
                     hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                }
+                if (this.Blueprints != null)
+                {
+                    hashCode = (hashCode * 59) + this.Blueprints.GetHashCode();
                 }
                 return hashCode;
             }

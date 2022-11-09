@@ -112,8 +112,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
-        public FungibleResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), string amountAttos = default(string))
+        /// <param name="amount">The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public FungibleResourceAmount(ResourceType resourceType = default(ResourceType), string resourceAddress = default(string), string amount = default(string))
         {
             this.ResourceType = resourceType;
             // to ensure "resourceAddress" is required (not null)
@@ -122,12 +122,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for FungibleResourceAmount and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            // to ensure "amountAttos" is required (not null)
-            if (amountAttos == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("amountAttos is a required property for FungibleResourceAmount and cannot be null");
+                throw new ArgumentNullException("amount is a required property for FungibleResourceAmount and cannot be null");
             }
-            this.AmountAttos = amountAttos;
+            this.Amount = amount;
         }
 
         /// <summary>
@@ -138,11 +138,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
+        /// The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        /// <value>The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
-        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountAttos { get; set; }
+        /// <value>The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,7 +154,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class FungibleResourceAmount {\n");
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,9 +200,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.AmountAttos == input.AmountAttos ||
-                    (this.AmountAttos != null &&
-                    this.AmountAttos.Equals(input.AmountAttos))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -220,9 +220,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.AmountAttos != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

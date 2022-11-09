@@ -314,10 +314,12 @@ SELECT
                 long? newRoundInEpoch = null;
                 DateTimeOffset? newRoundTimestamp = null;
 
-                foreach (var upSubstate in stateUpdates.UpSubstates)
+                // TODO can we even just dumbly concat both collections?
+
+                foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
-                    var sid = upSubstate.SubstateId;
-                    var sd = upSubstate.SubstateData.ActualInstance;
+                    var sid = newSubstate.SubstateId;
+                    var sd = newSubstate.SubstateData.ActualInstance;
 
                     if (sd is CoreModel.GlobalSubstate globalData)
                     {
@@ -367,9 +369,9 @@ SELECT
                         re.WithTypeHint(typeHint);
                     }
 
-                    if (sd is CoreModel.SystemSubstate systemSubstate)
+                    if (sd is CoreModel.EpochManagerSubstate epochManager)
                     {
-                        newEpoch = systemSubstate.Epoch;
+                        newEpoch = epochManager.Epoch;
 
                         // TODO this is just some dirty hack to ease-up integration process while CoreApi is still missing round support
                         newRoundInEpoch = 0;
@@ -389,18 +391,13 @@ SELECT
                     // }
                 }
 
-                foreach (var downSubstate in stateUpdates.DownSubstates)
+                foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
                 {
-                    var sid = downSubstate.SubstateId;
+                    // TODO not sure how to handle those;
+
+                    var sid = deletedSubstate.SubstateId;
 
                     referencedEntities.GetOrAdd(sid.EntityIdHex, _ => new ReferencedEntity(sid.EntityIdHex, sid.EntityType, stateVersion));
-                }
-
-                foreach (var downVirtualSubstate in stateUpdates.DownVirtualSubstates)
-                {
-                    // TODO not sure how to handle those; not sure what they even are
-
-                    referencedEntities.GetOrAdd(downVirtualSubstate.EntityIdHex, _ => new ReferencedEntity(downVirtualSubstate.EntityIdHex, downVirtualSubstate.EntityType, stateVersion));
                 }
 
                 /* NB:
@@ -475,7 +472,7 @@ WHERE id IN(
             {
                 var entityType = knownDbEntity switch
                 {
-                    SystemEntity => CoreModel.EntityType.System,
+                    EpochManagerEntity => CoreModel.EntityType.EpochManager,
                     ResourceManagerEntity => CoreModel.EntityType.ResourceManager,
                     ComponentEntity => CoreModel.EntityType.Component,
                     PackageEntity => CoreModel.EntityType.Package,
@@ -501,7 +498,7 @@ WHERE id IN(
 
                 Entity dbEntity = e.Type switch
                 {
-                    CoreModel.EntityType.System => new SystemEntity(),
+                    CoreModel.EntityType.EpochManager => new EpochManagerEntity(),
                     CoreModel.EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
                     CoreModel.EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
                     CoreModel.EntityType.Package => new PackageEntity(),
@@ -653,10 +650,12 @@ WHERE id IN(
                 var stateVersion = ct.StateVersion;
                 var stateUpdates = ct.Receipt.StateUpdates;
 
-                foreach (var upSubstate in stateUpdates.UpSubstates)
+                // TODO can we even just dumbly concat both collections?
+
+                foreach (var newSubstate in stateUpdates.CreatedSubstates.Concat(stateUpdates.UpdatedSubstates))
                 {
-                    var sid = upSubstate.SubstateId;
-                    var sd = upSubstate.SubstateData.ActualInstance;
+                    var sid = newSubstate.SubstateId;
+                    var sd = newSubstate.SubstateData.ActualInstance;
 
                     if (sd is CoreModel.GlobalSubstate)
                     {
@@ -669,7 +668,7 @@ WHERE id IN(
                     {
                         metadataChanges.Add(new MetadataChange(re, resourceManager.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
 
-                        var totalSupply = TokenAmount.FromSubUnitsString(resourceManager.TotalSupplyAttos);
+                        var totalSupply = TokenAmount.FromDecimalString(resourceManager.TotalSupply);
 
                         if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
                         {
@@ -685,7 +684,7 @@ WHERE id IN(
                         {
                             case CoreModel.FungibleResourceAmount fra:
                             {
-                                var amount = TokenAmount.FromSubUnitsString(fra.AmountAttos);
+                                var amount = TokenAmount.FromDecimalString(fra.Amount);
                                 var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
@@ -699,7 +698,7 @@ WHERE id IN(
                                 var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
-                                nonFungibleResourceChanges.Add(new NonFungibleResourceChange(re, resourceEntity, nfra.NfIdsHex, stateVersion));
+                                nonFungibleResourceChanges.Add(new NonFungibleResourceChange(re, resourceEntity, nfra.NonFungibleIdsHex, stateVersion));
 
                                 break;
                             }

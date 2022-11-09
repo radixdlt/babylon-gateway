@@ -105,9 +105,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="CommittedStateIdentifier" /> class.
         /// </summary>
         /// <param name="stateVersion">An integer between &#x60;0&#x60; and &#x60;10^13&#x60;, representing the state version. The state version increments with each transaction, starting at &#x60;0&#x60; pre-genesis. (required).</param>
-        public CommittedStateIdentifier(long stateVersion = default(long))
+        /// <param name="accumulatorHash">The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator.  (required).</param>
+        public CommittedStateIdentifier(long stateVersion = default(long), string accumulatorHash = default(string))
         {
             this.StateVersion = stateVersion;
+            // to ensure "accumulatorHash" is required (not null)
+            if (accumulatorHash == null)
+            {
+                throw new ArgumentNullException("accumulatorHash is a required property for CommittedStateIdentifier and cannot be null");
+            }
+            this.AccumulatorHash = accumulatorHash;
         }
 
         /// <summary>
@@ -118,6 +125,13 @@ namespace RadixDlt.CoreApiSdk.Model
         public long StateVersion { get; set; }
 
         /// <summary>
+        /// The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator. 
+        /// </summary>
+        /// <value>The hex-encoded transaction accumulator hash. This hash captures the order of all transactions on ledger. This hash is &#x60;ACC_{N+1} &#x3D; SHA256(SHA256(CONCAT(ACC_N, LEDGER_HASH_{N})))&#x60;, starting with &#x60;ACC_0 &#x3D; 000..000&#x60; the pre-genesis accumulator. </value>
+        [DataMember(Name = "accumulator_hash", IsRequired = true, EmitDefaultValue = true)]
+        public string AccumulatorHash { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -126,6 +140,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedStateIdentifier {\n");
             sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  AccumulatorHash: ").Append(AccumulatorHash).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,6 +179,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.StateVersion == input.StateVersion ||
                     this.StateVersion.Equals(input.StateVersion)
+                ) && 
+                (
+                    this.AccumulatorHash == input.AccumulatorHash ||
+                    (this.AccumulatorHash != null &&
+                    this.AccumulatorHash.Equals(input.AccumulatorHash))
                 );
         }
 
@@ -177,6 +197,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                if (this.AccumulatorHash != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccumulatorHash.GetHashCode();
+                }
                 return hashCode;
             }
         }
@@ -198,6 +222,18 @@ namespace RadixDlt.CoreApiSdk.Model
             if (this.StateVersion < (long)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StateVersion, must be a value greater than or equal to 0.", new [] { "StateVersion" });
+            }
+
+            // AccumulatorHash (string) maxLength
+            if (this.AccumulatorHash != null && this.AccumulatorHash.Length > 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AccumulatorHash, length must be less than 64.", new [] { "AccumulatorHash" });
+            }
+
+            // AccumulatorHash (string) minLength
+            if (this.AccumulatorHash != null && this.AccumulatorHash.Length < 64)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AccumulatorHash, length must be greater than 64.", new [] { "AccumulatorHash" });
             }
 
             yield break;
