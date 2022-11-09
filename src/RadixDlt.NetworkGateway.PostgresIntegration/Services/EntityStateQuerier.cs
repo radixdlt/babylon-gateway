@@ -150,7 +150,9 @@ INNER JOIN LATERAL (
             switch (dbResource)
             {
                 case EntityFungibleResourceHistory efrh:
-                    fungibles.Add(new GatewayModel.EntityResourcesResponseFungibleResourcesItem(ra, efrh.Balance.ToSubUnitString()));
+                    var amount = new GatewayModel.TokenAmount(efrh.Balance.ToString(), resources[efrh.ResourceEntityId].BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()));
+
+                    fungibles.Add(new GatewayModel.EntityResourcesResponseFungibleResourcesItem(ra, amount));
                     break;
                 case EntityNonFungibleResourceHistory enfrh:
                     nonFungibles.Add(new GatewayModel.EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
@@ -179,6 +181,8 @@ INNER JOIN LATERAL (
             return null;
         }
 
+        var responseAddress = entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
+
         GatewayModel.EntityDetailsResponseDetails details;
 
         switch (entity)
@@ -188,28 +192,14 @@ INNER JOIN LATERAL (
                 var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceEntityId == frme.Id)
                     .OrderByDescending(e => e.FromStateVersion)
-                    .FirstOrDefaultAsync(token);
+                    .FirstAsync(token);
 
-                // TODO handle null better
-
-                if (supplyHistory == null)
-                {
-                    details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
-                        discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
-                        divisibility: -1,
-                        totalSupplyAttos: "-1",
-                        totalMintedAttos: "-1",
-                        totalBurntAttos: "-1"));
-                }
-                else
-                {
-                    details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
-                        discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
-                        divisibility: frme.Divisibility,
-                        totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
-                        totalMintedAttos: supplyHistory.TotalMinted.ToString(),
-                        totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
-                }
+                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
+                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
+                    divisibility: frme.Divisibility,
+                    totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), responseAddress),
+                    totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), responseAddress),
+                    totalBurnt: new GatewayModel.TokenAmount(supplyHistory.TotalBurnt.ToString(), responseAddress)));
 
                 break;
             }
@@ -239,7 +229,7 @@ INNER JOIN LATERAL (
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
 
-        return new GatewayModel.EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
+        return new GatewayModel.EntityDetailsResponse(ledgerState, responseAddress, metadata, details);
     }
 
     public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

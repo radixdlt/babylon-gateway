@@ -245,12 +245,6 @@ components:
       type: string
       description: The Bech32m-encoded human readable version of the entity's global address
 
-    TokenAmountAttos: # TODO shouldn't we drop value of 18 in favor of token-specific divisibility number?
-      type: string
-      description: |
-        A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
-        the total supply of this resource.
-
     BigInteger:
       type: string
       pattern: "^-?[0-9]+$"
@@ -383,9 +377,9 @@ components:
         - token_identifier
       properties:
         value:
-          "$ref": "#/components/schemas/BigInteger"
-        token_identifier:
-          "$ref": "#/components/schemas/TokenIdentifier"
+          $ref: "#/components/schemas/BigInteger"
+        address:
+          $ref: "#/components/schemas/EntityAddress"
 
     #
     # Mixins
@@ -602,12 +596,12 @@ components:
       type: object
       required:
         - address
-        - amount_attos
+        - amount
       properties:
         address:
           $ref: "#/components/schemas/EntityAddress"
-        amount_attos:
-          $ref: "#/components/schemas/TokenAmountAttos"
+        amount:
+          $ref: "#/components/schemas/TokenAmount"
     EntityResourcesResponseNonFungibleResources:
       allOf:
         - $ref: "#/components/schemas/ResultSetCursorMixin"
@@ -677,9 +671,9 @@ components:
       required:
         - discriminator
         - divisibility
-        - total_supply_attos
-        - total_minted_attos
-        - total_burnt_attos
+        - total_supply
+        - total_minted
+        - total_burnt
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
@@ -687,12 +681,12 @@ components:
           type: integer
           format: int64
           minimum: 0
-        total_supply_attos:
-          $ref: "#/components/schemas/TokenAmountAttos"
-        total_minted_attos:
-          $ref: "#/components/schemas/TokenAmountAttos"
-        total_burnt_attos:
-          $ref: "#/components/schemas/TokenAmountAttos"
+        total_supply:
+          $ref: "#/components/schemas/TokenAmount"
+        total_minted:
+          $ref: "#/components/schemas/TokenAmount"
+        total_burnt:
+          $ref: "#/components/schemas/TokenAmount"
     EntityDetailsResponseNonFungibleResourceDetails:
       type: object
       required:

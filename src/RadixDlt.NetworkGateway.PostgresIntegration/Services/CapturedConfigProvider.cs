@@ -91,8 +91,7 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
         return new CapturedConfig(
             networkConfiguration.NetworkName,
             networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
-            new GatewayModel.TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
+            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition()
         );
     }
 }

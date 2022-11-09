@@ -105,8 +105,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TokenAmount" /> class.
         /// </summary>
         /// <param name="value">value (required).</param>
-        /// <param name="tokenIdentifier">tokenIdentifier (required).</param>
-        public TokenAmount(string value = default(string), TokenIdentifier tokenIdentifier = default(TokenIdentifier))
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address.</param>
+        public TokenAmount(string value = default(string), string address = default(string))
         {
             // to ensure "value" is required (not null)
             if (value == null)
@@ -114,12 +114,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("value is a required property for TokenAmount and cannot be null");
             }
             this.Value = value;
-            // to ensure "tokenIdentifier" is required (not null)
-            if (tokenIdentifier == null)
-            {
-                throw new ArgumentNullException("tokenIdentifier is a required property for TokenAmount and cannot be null");
-            }
-            this.TokenIdentifier = tokenIdentifier;
+            this.Address = address;
         }
 
         /// <summary>
@@ -129,10 +124,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Value { get; set; }
 
         /// <summary>
-        /// Gets or Sets TokenIdentifier
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
         /// </summary>
-        [DataMember(Name = "token_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TokenIdentifier TokenIdentifier { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "address", EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TokenAmount {\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
-            sb.Append("  TokenIdentifier: ").Append(TokenIdentifier).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -185,9 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Value.Equals(input.Value))
                 ) && 
                 (
-                    this.TokenIdentifier == input.TokenIdentifier ||
-                    (this.TokenIdentifier != null &&
-                    this.TokenIdentifier.Equals(input.TokenIdentifier))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -204,9 +200,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
-                if (this.TokenIdentifier != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.TokenIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }

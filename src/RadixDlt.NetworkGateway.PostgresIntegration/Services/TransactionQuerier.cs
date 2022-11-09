@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
-using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -203,7 +202,7 @@ internal class TransactionQuerier : ITransactionQuerier
             payloadHashHex: Array.Empty<byte>().ToHex(),
             intentHashHex: Array.Empty<byte>().ToHex(),
             transactionAccumulatorHex: Array.Empty<byte>().ToHex(),
-            feePaid: new GatewayModel.TokenAmount("0", new GatewayModel.TokenIdentifier("some rri")) // TODO TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+            feePaid: new GatewayModel.TokenAmount("0", "some rri") // TODO TokenAmount.FromSubUnitsString(transactionContents.FeePaidSubunits).AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
         );
     }
 
@@ -286,7 +285,7 @@ internal class TransactionQuerier : ITransactionQuerier
             payloadHashHex: ult.PayloadHash.ToHex(),
             intentHashHex: ult.IntentHash.ToHex(),
             transactionAccumulatorHex: ult.TransactionAccumulator.ToHex(),
-            feePaid: ult.FeePaid.AsGatewayTokenAmount(_networkConfigurationProvider.GetXrdTokenIdentifier())
+            feePaid: new GatewayModel.TokenAmount(ult.FeePaid.ToString(), _networkConfigurationProvider.GetXrdAddress())
         );
     }
 

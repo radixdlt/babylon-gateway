@@ -112,31 +112,31 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
         /// <param name="divisibility">divisibility (required).</param>
-        /// <param name="totalSupplyAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        /// <param name="totalMintedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        /// <param name="totalBurntAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), long divisibility = default(long), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
+        /// <param name="totalSupply">totalSupply (required).</param>
+        /// <param name="totalMinted">totalMinted (required).</param>
+        /// <param name="totalBurnt">totalBurnt (required).</param>
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), long divisibility = default(long), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
         {
             this.Discriminator = discriminator;
             this.Divisibility = divisibility;
-            // to ensure "totalSupplyAttos" is required (not null)
-            if (totalSupplyAttos == null)
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("totalSupplyAttos is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
-            this.TotalSupplyAttos = totalSupplyAttos;
-            // to ensure "totalMintedAttos" is required (not null)
-            if (totalMintedAttos == null)
+            this.TotalSupply = totalSupply;
+            // to ensure "totalMinted" is required (not null)
+            if (totalMinted == null)
             {
-                throw new ArgumentNullException("totalMintedAttos is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("totalMinted is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
-            this.TotalMintedAttos = totalMintedAttos;
-            // to ensure "totalBurntAttos" is required (not null)
-            if (totalBurntAttos == null)
+            this.TotalMinted = totalMinted;
+            // to ensure "totalBurnt" is required (not null)
+            if (totalBurnt == null)
             {
-                throw new ArgumentNullException("totalBurntAttos is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+                throw new ArgumentNullException("totalBurnt is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
             }
-            this.TotalBurntAttos = totalBurntAttos;
+            this.TotalBurnt = totalBurnt;
         }
 
         /// <summary>
@@ -146,25 +146,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public long Divisibility { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// Gets or Sets TotalSupply
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "total_supply_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupplyAttos { get; set; }
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public TokenAmount TotalSupply { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// Gets or Sets TotalMinted
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "total_minted_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalMintedAttos { get; set; }
+        [DataMember(Name = "total_minted", IsRequired = true, EmitDefaultValue = true)]
+        public TokenAmount TotalMinted { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// Gets or Sets TotalBurnt
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "total_burnt_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalBurntAttos { get; set; }
+        [DataMember(Name = "total_burnt", IsRequired = true, EmitDefaultValue = true)]
+        public TokenAmount TotalBurnt { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -176,9 +173,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityDetailsResponseFungibleResourceDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
             sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
-            sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
-            sb.Append("  TotalMintedAttos: ").Append(TotalMintedAttos).Append("\n");
-            sb.Append("  TotalBurntAttos: ").Append(TotalBurntAttos).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
+            sb.Append("  TotalBurnt: ").Append(TotalBurnt).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -223,19 +220,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Divisibility.Equals(input.Divisibility)
                 ) && 
                 (
-                    this.TotalSupplyAttos == input.TotalSupplyAttos ||
-                    (this.TotalSupplyAttos != null &&
-                    this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
                 ) && 
                 (
-                    this.TotalMintedAttos == input.TotalMintedAttos ||
-                    (this.TotalMintedAttos != null &&
-                    this.TotalMintedAttos.Equals(input.TotalMintedAttos))
+                    this.TotalMinted == input.TotalMinted ||
+                    (this.TotalMinted != null &&
+                    this.TotalMinted.Equals(input.TotalMinted))
                 ) && 
                 (
-                    this.TotalBurntAttos == input.TotalBurntAttos ||
-                    (this.TotalBurntAttos != null &&
-                    this.TotalBurntAttos.Equals(input.TotalBurntAttos))
+                    this.TotalBurnt == input.TotalBurnt ||
+                    (this.TotalBurnt != null &&
+                    this.TotalBurnt.Equals(input.TotalBurnt))
                 );
         }
 
@@ -250,17 +247,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
                 hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
-                if (this.TotalSupplyAttos != null)
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
                 }
-                if (this.TotalMintedAttos != null)
+                if (this.TotalMinted != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalMintedAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalMinted.GetHashCode();
                 }
-                if (this.TotalBurntAttos != null)
+                if (this.TotalBurnt != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalBurntAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalBurnt.GetHashCode();
                 }
                 return hashCode;
             }

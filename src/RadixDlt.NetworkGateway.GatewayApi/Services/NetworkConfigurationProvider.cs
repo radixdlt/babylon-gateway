@@ -77,11 +77,9 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
 
     string GetNetworkName();
-
-    GatewayModel.TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition, GatewayModel.TokenIdentifier XrdTokenIdentifier);
+public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition);
 
 public interface ICapturedConfigProvider
 {
@@ -121,11 +119,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
     public string GetXrdAddress()
     {
         return GetCapturedConfig().XrdAddress;
-    }
-
-    public GatewayModel.TokenIdentifier GetXrdTokenIdentifier()
-    {
-        return GetCapturedConfig().XrdTokenIdentifier;
     }
 
     private CapturedConfig GetCapturedConfig()
