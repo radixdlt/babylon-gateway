@@ -71,6 +71,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class TransactionConsistency
 {
+    // TODO restore from Olympia?
     public static void AssertChildTransactionConsistent(TransactionSummary parent, TransactionSummary child)
     {
         if (child.StateVersion != parent.StateVersion + 1)
@@ -98,6 +99,7 @@ public static class TransactionConsistency
         // }
     }
 
+    // TODO restore from Olympia?
     public static void AssertTransactionHashCorrect(byte[] payload, byte[] transactionIdentifierHash)
     {
         if (!RadixHashing.IsValidTransactionHashIdentifier(payload, transactionIdentifierHash))

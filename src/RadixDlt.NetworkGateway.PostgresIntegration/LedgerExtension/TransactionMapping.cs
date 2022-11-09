@@ -91,8 +91,7 @@ internal static class TransactionMapping
 
         ledgerTransaction.StateVersion = committedTransaction.StateVersion;
         ledgerTransaction.Status = ToLedgerStatus(committedTransaction.Receipt.Status);
-        // TODO placeholder value as it is still not implemented by CoreApi
-        ledgerTransaction.TransactionAccumulator = HashingHelper.Sha256Twice(BitConverter.GetBytes(committedTransaction.StateVersion));
+        ledgerTransaction.TransactionAccumulator = committedTransaction.AccumulatorHash.ConvertFromHex();
         // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
         ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
         ledgerTransaction.Epoch = summary.Epoch;

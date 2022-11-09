@@ -411,14 +411,13 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
     private void AddAccumulatorsToCache(ConsistentLedgerExtension ledgerExtension)
     {
-        // TODO not sure how this suits Babylon
-        // foreach (var transactionData in ledgerExtension.TransactionData)
-        // {
-        //     _quorumAccumulatorCacheByStateVersion.Set(
-        //         transactionData.TransactionSummary.StateVersion,
-        //         transactionData.TransactionSummary.TransactionAccumulator
-        //     );
-        // }
+        foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
+        {
+            _quorumAccumulatorCacheByStateVersion.Set(
+                committedTransaction.StateVersion,
+                committedTransaction.AccumulatorHash.ConvertFromHex()
+            );
+        }
     }
 
     private void UpdateRecordsOfTopOfLedger(TransactionSummary topOfLedger)

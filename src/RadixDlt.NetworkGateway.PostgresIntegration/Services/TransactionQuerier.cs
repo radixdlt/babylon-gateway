@@ -197,6 +197,7 @@ internal class TransactionQuerier : ITransactionQuerier
             _ => throw new ArgumentOutOfRangeException(),
         };
 
+        // TODO not implemented, we should probably fetch data from CoreApi?
         return new GatewayModel.TransactionInfo(
             transactionStatus: status,
             payloadHashHex: Array.Empty<byte>().ToHex(),

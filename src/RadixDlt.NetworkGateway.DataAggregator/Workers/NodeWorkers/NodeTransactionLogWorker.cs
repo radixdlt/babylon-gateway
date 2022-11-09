@@ -153,7 +153,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         _ledgerConfirmationService.SubmitNodeNetworkStatus(
             NodeName,
             nodeLedgerTip,
-            SHA256.HashData(BitConverter.GetBytes(nodeLedgerTip)), // TODO waiting for CoreApi: networkStatus.CurrentStateIdentifier.TransactionAccumulator.ConvertFromHex(),
+            networkStatus.CurrentStateIdentifier.AccumulatorHash.ConvertFromHex(),
             nodeLedgerTarget
         );
 
