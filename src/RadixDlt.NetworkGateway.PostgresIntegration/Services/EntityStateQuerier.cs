@@ -196,6 +196,7 @@ INNER JOIN LATERAL (
                 {
                     details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                         discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
+                        divisibility: -1,
                         totalSupplyAttos: "-1",
                         totalMintedAttos: "-1",
                         totalBurntAttos: "-1"));
@@ -204,6 +205,7 @@ INNER JOIN LATERAL (
                 {
                     details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                         discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
+                        divisibility: frme.Divisibility,
                         totalSupplyAttos: supplyHistory.TotalSupply.ToString(),
                         totalMintedAttos: supplyHistory.TotalMinted.ToString(),
                         totalBurntAttos: supplyHistory.TotalBurnt.ToString()));
@@ -223,9 +225,13 @@ INNER JOIN LATERAL (
                         nextCursor: "TBD (not implemented yet; currently everything is returned)",
                         items: new List<GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIdsItem>())));
                 break;
-            case AccountComponentEntity:
+            case AccountComponentEntity ace:
+                var package = await _dbContext.Entities
+                    .FirstAsync(e => e.Id == ace.PackageId, token);
+
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseAccountComponentDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.AccountComponent));
+                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.AccountComponent,
+                    packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())));
                 break;
             default:
                 return null;

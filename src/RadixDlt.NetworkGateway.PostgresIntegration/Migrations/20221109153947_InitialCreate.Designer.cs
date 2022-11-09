@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221109031153_InitialCreate")]
+    [Migration("20221109153947_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -547,6 +547,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("account_component");
@@ -597,6 +602,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<long>("Divisibility")
+                        .HasColumnType("bigint")
+                        .HasColumnName("divisibility");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("fungible_resource_manager");
@@ -633,6 +642,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("normal_component");
@@ -650,6 +664,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.SystemComponentEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<long>("PackageId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_id");
 
                     b.ToTable("entities");
 

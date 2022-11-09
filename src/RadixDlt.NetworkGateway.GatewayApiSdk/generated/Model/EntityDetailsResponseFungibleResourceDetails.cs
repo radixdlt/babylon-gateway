@@ -111,12 +111,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="divisibility">divisibility (required).</param>
         /// <param name="totalSupplyAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
         /// <param name="totalMintedAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
         /// <param name="totalBurntAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), long divisibility = default(long), string totalSupplyAttos = default(string), string totalMintedAttos = default(string), string totalBurntAttos = default(string))
         {
             this.Discriminator = discriminator;
+            this.Divisibility = divisibility;
             // to ensure "totalSupplyAttos" is required (not null)
             if (totalSupplyAttos == null)
             {
@@ -136,6 +138,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.TotalBurntAttos = totalBurntAttos;
         }
+
+        /// <summary>
+        /// Gets or Sets Divisibility
+        /// </summary>
+        [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
+        public long Divisibility { get; set; }
 
         /// <summary>
         /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
@@ -167,6 +175,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseFungibleResourceDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
             sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
             sb.Append("  TotalMintedAttos: ").Append(TotalMintedAttos).Append("\n");
             sb.Append("  TotalBurntAttos: ").Append(TotalBurntAttos).Append("\n");
@@ -210,6 +219,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Discriminator.Equals(input.Discriminator)
                 ) && 
                 (
+                    this.Divisibility == input.Divisibility ||
+                    this.Divisibility.Equals(input.Divisibility)
+                ) && 
+                (
                     this.TotalSupplyAttos == input.TotalSupplyAttos ||
                     (this.TotalSupplyAttos != null &&
                     this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
@@ -236,6 +249,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
                 if (this.TotalSupplyAttos != null)
                 {
                     hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();
@@ -259,6 +273,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Divisibility (long) minimum
+            if (this.Divisibility < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Divisibility, must be a value greater than or equal to 0.", new [] { "Divisibility" });
+            }
+
             yield break;
         }
     }

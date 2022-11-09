@@ -676,12 +676,17 @@ components:
       type: object
       required:
         - discriminator
+        - divisibility
         - total_supply_attos
         - total_minted_attos
         - total_burnt_attos
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        divisibility:
+          type: integer
+          format: int64
+          minimum: 0
         total_supply_attos:
           $ref: "#/components/schemas/TokenAmountAttos"
         total_minted_attos:
@@ -724,9 +729,12 @@ components:
       type: object
       required:
         - discriminator
+        - package_address
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        package_address:
+          $ref: "#/components/schemas/EntityAddress"
 
     EntityOverviewRequest:
       type: object

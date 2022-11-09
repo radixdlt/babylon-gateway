@@ -111,10 +111,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseAccountComponentDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
-        public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType))
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string))
         {
             this.Discriminator = discriminator;
+            // to ensure "packageAddress" is required (not null)
+            if (packageAddress == null)
+            {
+                throw new ArgumentNullException("packageAddress is a required property for EntityDetailsResponseAccountComponentDetails and cannot be null");
+            }
+            this.PackageAddress = packageAddress;
         }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
+        public string PackageAddress { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,6 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseAccountComponentDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,6 +178,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.Discriminator == input.Discriminator ||
                     this.Discriminator.Equals(input.Discriminator)
+                ) && 
+                (
+                    this.PackageAddress == input.PackageAddress ||
+                    (this.PackageAddress != null &&
+                    this.PackageAddress.Equals(input.PackageAddress))
                 );
         }
 
@@ -176,6 +196,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                if (this.PackageAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
                 return hashCode;
             }
         }

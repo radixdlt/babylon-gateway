@@ -97,8 +97,6 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public string? GlobalAddress { get; private set; }
 
-    public string? GlobalHrpAddress { get; private set; }
-
     public Type? TypeHint { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;
@@ -114,10 +112,9 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
 
-    public void Globalize(string addressHex, string hrpAddress)
+    public void Globalize(string globalAddressHex)
     {
-        GlobalAddress = addressHex;
-        GlobalHrpAddress = hrpAddress;
+        GlobalAddress = globalAddressHex;
     }
 
     public void Resolve(Entity entity)
@@ -128,14 +125,6 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
         {
             GlobalAddress = entity.GlobalAddress.ToHex();
         }
-    }
-
-    public void ResolveParentalIds(long[] ids, long parentId, long ownerId, long globalId)
-    {
-        GetDatabaseEntity().AncestorIds = ids;
-        GetDatabaseEntity().ParentAncestorId = parentId;
-        GetDatabaseEntity().OwnerAncestorId = ownerId;
-        GetDatabaseEntity().GlobalAncestorId = globalId;
     }
 
     public void IsChildOf(ReferencedEntity parent)
@@ -171,6 +160,19 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
         }
 
         return instance;
+    }
+
+    public void ConfigureDatabaseEntity<T>(Action<T> action)
+        where T : Entity
+    {
+        var dbEntity = GetDatabaseEntity();
+
+        if (dbEntity is not T typedDbEntity)
+        {
+            throw new Exception("bla bla bla x66");
+        }
+
+        action.Invoke(typedDbEntity);
     }
 
     private Entity GetDatabaseEntity()
@@ -317,9 +319,9 @@ internal class ReferencedEntityDictionary
         return _storage[addressHex];
     }
 
-    public ReferencedEntity GetByGlobal(string globalAddress)
+    public ReferencedEntity GetByGlobal(string globalAddressHex)
     {
-        return _globalsCache.GetOrAdd(globalAddress, _ => _storage.Values.First(re => re.GlobalAddress == globalAddress));
+        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddress == globalAddressHex));
     }
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)

@@ -276,11 +276,13 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var dbWriteDuration = TimeSpan.Zero;
         var outerStopwatch = Stopwatch.StartNew();
 
-        // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress?
+        // TODO replace usage of HEX-encoded strings in favor of raw RadixAddress? how about global addresses?
         var ledgerTransactions = new List<LedgerTransaction>(ledgerExtension.CommittedTransactions.Count);
         var referencedEntities = new ReferencedEntityDictionary();
         var knownGlobalAddressesToLoad = new HashSet<string>();
         var childToParentEntities = new Dictionary<string, string>();
+        var componentToGlobalPackage = new Dictionary<string, string>();
+        var fungibleResourceManagerDivisibility = new Dictionary<string, long>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
@@ -305,6 +307,8 @@ SELECT
 
         // step: scan for any referenced entities
         {
+            var hrp = _networkConfigurationProvider.GetHrpDefinition();
+
             foreach (var ct in ledgerExtension.CommittedTransactions)
             {
                 var stateVersion = ct.StateVersion;
@@ -326,7 +330,23 @@ SELECT
                         var target = globalData.TargetEntity;
                         var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
-                        te.Globalize(target.GlobalAddressHex, target.GlobalAddress);
+                        te.Globalize(target.GlobalAddressHex);
+
+                        if (target.TargetEntityType == CoreModel.EntityType.Component)
+                        {
+                            if (target.GlobalAddress.StartsWith(hrp.AccountComponent))
+                            {
+                                te.WithTypeHint(typeof(AccountComponentEntity));
+                            }
+                            else if (target.GlobalAddress.StartsWith(hrp.SystemComponent))
+                            {
+                                te.WithTypeHint(typeof(SystemComponentEntity));
+                            }
+                            else
+                            {
+                                te.WithTypeHint(typeof(NormalComponentEntity));
+                            }
+                        }
 
                         // we do not want to store GlobalEntities as they bring no value from NG perspective
                         // GlobalAddress is essentially a property of other entities
@@ -350,23 +370,8 @@ SELECT
                     {
                         foreach (var pointer in globalResourcePointer.Pointers)
                         {
-                            // TODO ugh...
-                            var globalAddress = RadixBech32.Decode(pointer.GlobalAddress).Data.ToHex();
-
-                            knownGlobalAddressesToLoad.Add(globalAddress);
+                            knownGlobalAddressesToLoad.Add(pointer.GlobalAddress);
                         }
-                    }
-
-                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
-                    {
-                        Type typeHint = resourceManager.ResourceType switch
-                        {
-                            CoreModel.ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
-                            CoreModel.ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
-                            _ => throw new ArgumentOutOfRangeException(),
-                        };
-
-                        re.WithTypeHint(typeHint);
                     }
 
                     if (sd is CoreModel.EpochManagerSubstate epochManager)
@@ -389,6 +394,29 @@ SELECT
                     //         newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
                     //     }
                     // }
+
+                    if (sd is CoreModel.ResourceManagerSubstate resourceManager)
+                    {
+                        Type typeHint = resourceManager.ResourceType switch
+                        {
+                            CoreModel.ResourceType.Fungible => typeof(FungibleResourceManagerEntity),
+                            CoreModel.ResourceType.NonFungible => typeof(NonFungibleResourceManagerEntity),
+                            _ => throw new ArgumentOutOfRangeException(),
+                        };
+
+                        re.WithTypeHint(typeHint);
+
+                        if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
+                        {
+                            fungibleResourceManagerDivisibility[sid.EntityIdHex] = resourceManager.FungibleDivisibility;
+                        }
+                    }
+
+                    if (sd is CoreModel.ComponentInfoSubstate componentInfo)
+                    {
+                        knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
+                        componentToGlobalPackage[sid.EntityIdHex] = componentInfo.PackageAddress;
+                    }
                 }
 
                 foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -433,23 +461,8 @@ SELECT
 
         // step: resolve known types & optionally create missing entities
         {
-            ComponentEntity CreateComponentEntity(ReferencedEntity re, HrpDefinition hrp)
-            {
-                if (re.GlobalHrpAddress?.StartsWith(hrp.AccountComponent) == true)
-                {
-                    return new AccountComponentEntity();
-                }
-
-                if (re.GlobalHrpAddress?.StartsWith(hrp.SystemComponent) == true)
-                {
-                    return new SystemComponentEntity();
-                }
-
-                return new NormalComponentEntity();
-            }
-
             var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => x.ConvertFromHex()).ToList();
+            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixBech32.Decode(x).Data).ToList();
             var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
             var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
 
@@ -487,34 +500,34 @@ WHERE id IN(
 
             var dbEntities = new List<Entity>();
 
-            foreach (var e in referencedEntities.All)
+            foreach (var re in referencedEntities.All)
             {
-                if (knownDbEntities.ContainsKey(e.Address))
+                if (knownDbEntities.ContainsKey(re.Address))
                 {
-                    e.Resolve(knownDbEntities[e.Address]);
+                    re.Resolve(knownDbEntities[re.Address]);
 
                     continue;
                 }
 
-                Entity dbEntity = e.Type switch
+                Entity dbEntity = re.Type switch
                 {
                     CoreModel.EntityType.EpochManager => new EpochManagerEntity(),
-                    CoreModel.EntityType.ResourceManager => e.CreateUsingTypeHint<ResourceManagerEntity>(),
-                    CoreModel.EntityType.Component => CreateComponentEntity(e, _networkConfigurationProvider.GetHrpDefinition()),
+                    CoreModel.EntityType.ResourceManager => re.CreateUsingTypeHint<ResourceManagerEntity>(),
+                    CoreModel.EntityType.Component => re.CreateUsingTypeHint<ComponentEntity>(),
                     CoreModel.EntityType.Package => new PackageEntity(),
                     CoreModel.EntityType.Vault => new VaultEntity(),
                     CoreModel.EntityType.KeyValueStore => new KeyValueStoreEntity(),
-                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, "Global entities should be filtered out"),
+                    CoreModel.EntityType.Global => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, "Global entities should be filtered out"),
                     CoreModel.EntityType.NonFungibleStore => new NonFungibleStoreEntity(),
-                    _ => throw new ArgumentOutOfRangeException(nameof(e.Type), e.Type, null),
+                    _ => throw new ArgumentOutOfRangeException(nameof(re.Type), re.Type, null),
                 };
 
                 dbEntity.Id = sequences.NextEntity;
-                dbEntity.FromStateVersion = e.StateVersion;
-                dbEntity.Address = e.Address.ConvertFromHex();
-                dbEntity.GlobalAddress = e.GlobalAddress == null ? null : (RadixAddress)e.GlobalAddress.ConvertFromHex();
+                dbEntity.FromStateVersion = re.StateVersion;
+                dbEntity.Address = re.Address.ConvertFromHex();
+                dbEntity.GlobalAddress = re.GlobalAddress == null ? null : (RadixAddress)re.GlobalAddress.ConvertFromHex();
 
-                e.Resolve(dbEntity);
+                re.Resolve(dbEntity);
                 dbEntities.Add(dbEntity);
             }
 
@@ -550,12 +563,33 @@ WHERE id IN(
                     throw new Exception("bla bla bla x22");
                 }
 
-                referencedEntities.Get(childAddress).ResolveParentalIds(allAncestors.ToArray(), parentId.Value, ownerId.Value, globalId.Value);
+                referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
+                {
+                    dbe.AncestorIds = allAncestors.ToArray();
+                    dbe.ParentAncestorId = parentId.Value;
+                    dbe.OwnerAncestorId = ownerId.Value;
+                    dbe.GlobalAncestorId = globalId.Value;
+                });
+            }
+
+            foreach (var (entityAddress, packageGlobalAddress) in componentToGlobalPackage)
+            {
+                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((ComponentEntity dbe) =>
+                {
+                    var packageAddress = RadixBech32.Decode(packageGlobalAddress).Data.ToHex();
+
+                    dbe.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
+                });
+            }
+
+            foreach (var (entityAddress, divisibility) in fungibleResourceManagerDivisibility)
+            {
+                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((FungibleResourceManagerEntity dbe) => dbe.Divisibility = divisibility);
             }
 
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, divisibility) FROM STDIN (FORMAT BINARY)", token))
             {
                 foreach (var dbEntity in dbEntities)
                 {
@@ -574,6 +608,8 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity.OwnerAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
+                    await writer.WriteNullableAsync(dbEntity is ComponentEntity ce ? ce.PackageId : null, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Bigint, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -674,6 +710,8 @@ WHERE id IN(
                         {
                             fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(re, totalSupply, TokenAmount.Zero, TokenAmount.Zero, stateVersion)); // TODO support mint & burnt
                         }
+
+                        var authRules = resourceManager.AuthRules; // TODO store somewhere? how? this is crazy complex structure!
                     }
 
                     if (sd is CoreModel.VaultSubstate vault)

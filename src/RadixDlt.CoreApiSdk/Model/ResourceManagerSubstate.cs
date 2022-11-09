@@ -62,111 +62,20 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
+namespace RadixDlt.CoreApiSdk.Model;
 
-[Table("entities")]
-internal abstract class Entity
+public partial class ResourceManagerSubstate : IOwner
 {
-    [Key]
-    [Column("id")]
-    public long Id { get; set; }
-
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
-
-    [Column("address")]
-    public RadixAddress Address { get; set; }
-
-    [Column("global_address")]
-    public RadixAddress? GlobalAddress { get; set; }
-
-    [Column("ancestor_ids")]
-    public long[]? AncestorIds { get; set; }
-
-    [Column("parent_ancestor_id")]
-    public long? ParentAncestorId { get; set; }
-
-    [Column("owner_ancestor_id")]
-    public long? OwnerAncestorId { get; set; }
-
-    [Column("global_ancestor_id")]
-    public long? GlobalAncestorId { get; set; }
-
-    public string? BuildHrpGlobalAddress(HrpDefinition hrp)
+    public IEnumerable<EntityReference> OwnedEntities
     {
-        return GlobalAddress == null
-            ? null
-            : RadixBech32.Encode(SelectHrp(hrp), GlobalAddress);
-    }
-
-    private string SelectHrp(HrpDefinition hrp)
-    {
-        return this switch
+        get
         {
-            PackageEntity => hrp.Package,
-            NormalComponentEntity => hrp.NormalComponent,
-            AccountComponentEntity => hrp.AccountComponent,
-            SystemComponentEntity => hrp.SystemComponent,
-            ResourceManagerEntity => hrp.Resource,
-            _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
-        };
+            if (OwnedNonFungibleStore != null)
+            {
+                yield return new EntityReference(OwnedNonFungibleStore.EntityType, OwnedNonFungibleStore.EntityIdHex);
+            }
+        }
     }
-}
-
-internal class EpochManagerEntity : Entity
-{
-}
-
-internal abstract class ResourceManagerEntity : Entity
-{
-}
-
-internal class FungibleResourceManagerEntity : ResourceManagerEntity
-{
-    [Column("divisibility")]
-    public long Divisibility { get; set; }
-}
-
-internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
-{
-}
-
-internal abstract class ComponentEntity : Entity
-{
-    [Column("package_id")]
-    public long PackageId { get; set; }
-}
-
-internal class NormalComponentEntity : ComponentEntity
-{
-}
-
-internal class AccountComponentEntity : ComponentEntity
-{
-}
-
-internal class SystemComponentEntity : ComponentEntity
-{
-}
-
-internal class PackageEntity : Entity
-{
-}
-
-internal class KeyValueStoreEntity : Entity
-{
-}
-
-internal class VaultEntity : Entity
-{
-}
-
-internal class NonFungibleStoreEntity : Entity
-{
 }
