@@ -158,7 +158,7 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
         var toFetch = _ledgerConfirmationService.GetWhichTransactionsAreRequestedFromNode(NodeName);
 
-        if (toFetch == null)
+        if (toFetch == null || toFetch.StateVersionInclusiveLowerBound > nodeLedgerTarget)
         {
             _logger.LogDebug(
                 "No new transactions to fetch, sleeping for {DelayMs}ms",

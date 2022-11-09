@@ -161,12 +161,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitNodeNetworkStatus(
-        string nodeName,
-        long ledgerTipStateVersion,
-        byte[] ledgerTipAccumulator,
-        long targetStateVersion
-    )
+    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion)
     {
         _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion, targetStateVersion));
 
@@ -178,7 +173,6 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             return;
         }
 
-        // TODO not sure how this suits Babylon
         var cachedAccumulator = _quorumAccumulatorCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
 
         if (cachedAccumulator == null)
