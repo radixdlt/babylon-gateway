@@ -95,7 +95,7 @@ internal class DataAggregatorMetricsObserver :
     IRawTransactionWriterObserver,
     INetworkConfigurationReaderObserver,
     INetworkStatusReaderObserver,
-    ITransactionLogReaderObserver
+    ITransactionStreamReaderObserver
 {
     private static readonly Counter _globalWorkerErrorsCount = Metrics
         .CreateCounter(
@@ -753,7 +753,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ITransactionLogReaderObserver.GetTransactionsFailed(string nodeName, Exception exception)
+    ValueTask ITransactionStreamReaderObserver.GetTransactionsFailed(string nodeName, Exception exception)
     {
         _failedTransactionsFetchCounterUnScoped.WithLabels(nodeName).Inc();
 

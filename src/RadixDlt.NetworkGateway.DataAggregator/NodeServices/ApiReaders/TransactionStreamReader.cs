@@ -74,24 +74,14 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
-public interface ITransactionLogReader
-{
-    Task<CoreModel.CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token);
-}
-
-public interface ITransactionLogReaderObserver
-{
-    ValueTask GetTransactionsFailed(string nodeName, Exception exception);
-}
-
-internal class TransactionLogReader : ITransactionLogReader
+internal class TransactionStreamReader : ITransactionStreamReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly CoreApi.TransactionApi _transactionsApi;
     private readonly INodeConfigProvider _nodeConfigProvider;
-    private readonly IEnumerable<ITransactionLogReaderObserver> _observers;
+    private readonly IEnumerable<ITransactionStreamReaderObserver> _observers;
 
-    public TransactionLogReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<ITransactionLogReaderObserver> observers)
+    public TransactionStreamReader(INetworkConfigurationProvider networkConfigurationProvider, ICoreApiProvider coreApiProvider, INodeConfigProvider nodeConfigProvider, IEnumerable<ITransactionStreamReaderObserver> observers)
     {
         _networkConfigurationProvider = networkConfigurationProvider;
         _nodeConfigProvider = nodeConfigProvider;
@@ -99,20 +89,19 @@ internal class TransactionLogReader : ITransactionLogReader
         _transactionsApi = coreApiProvider.TransactionsApi;
     }
 
-    public async Task<CoreModel.CommittedTransactionsResponse> GetTransactions(long stateVersion, int count, CancellationToken token)
+    public async Task<CoreModel.CommittedTransactionsResponse> GetTransactionStream(long fromStateVersion, int count, CancellationToken token)
     {
         try
         {
             return await CoreApiErrorWrapper.ExtractCoreApiErrors(async () =>
-                await _transactionsApi
-                    .TransactionStreamPostAsync(
-                        new CoreModel.CommittedTransactionsRequest(
-                            network: _networkConfigurationProvider.GetNetworkName(),
-                            fromStateVersion: stateVersion,
-                            limit: count
-                        ),
-                        token
-                    )
+                await _transactionsApi.TransactionStreamPostAsync(
+                    new CoreModel.CommittedTransactionsRequest(
+                        network: _networkConfigurationProvider.GetNetworkName(),
+                        fromStateVersion: fromStateVersion,
+                        limit: count
+                    ),
+                    token
+                )
             );
         }
         catch (Exception ex)

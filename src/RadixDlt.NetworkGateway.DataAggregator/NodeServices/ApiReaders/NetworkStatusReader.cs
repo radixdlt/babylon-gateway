@@ -74,16 +74,6 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
-public interface INetworkStatusReader
-{
-    Task<CoreModel.NetworkStatusResponse> GetNetworkStatus(CancellationToken token);
-}
-
-public interface INetworkStatusReaderObserver
-{
-    ValueTask GetNetworkStatusFailed(string nodeName, Exception exception);
-}
-
 internal class NetworkStatusReader : INetworkStatusReader
 {
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;

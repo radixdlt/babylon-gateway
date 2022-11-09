@@ -68,15 +68,6 @@ using CoreApi = RadixDlt.CoreApiSdk.Api;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
-public interface ICoreApiProvider
-{
-    CoreApi.TransactionApi TransactionsApi { get; }
-
-    CoreApi.StatusApi StatusApi { get; }
-
-    CoreApi.MempoolApi MempoolApi { get; }
-}
-
 internal class CoreApiProvider : ICoreApiProvider
 {
     public CoreApi.TransactionApi TransactionsApi { get; }

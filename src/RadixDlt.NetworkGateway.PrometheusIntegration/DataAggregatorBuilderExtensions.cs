@@ -102,7 +102,7 @@ public static class DataAggregatorBuilderExtensions
             .AddSingleton<IRawTransactionWriterObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INetworkConfigurationReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
             .AddSingleton<INetworkStatusReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>())
-            .AddSingleton<ITransactionLogReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>());
+            .AddSingleton<ITransactionStreamReaderObserver>(provider => provider.GetRequiredService<DataAggregatorMetricsObserver>());
 
         return builder;
     }

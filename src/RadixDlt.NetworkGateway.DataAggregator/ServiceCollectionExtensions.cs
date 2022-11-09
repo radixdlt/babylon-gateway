@@ -139,7 +139,7 @@ public static class ServiceCollectionExtensions
 
         // We can mock these out in tests
         // These should be transient so that they don't capture a transient HttpClient
-        services.TryAddTransient<ITransactionLogReader, TransactionLogReader>();
+        services.TryAddTransient<ITransactionStreamReader, TransactionStreamReader>();
         services.TryAddTransient<INetworkConfigurationReader, NetworkConfigurationReader>();
         services.TryAddTransient<INetworkStatusReader, NetworkStatusReader>();
     }
