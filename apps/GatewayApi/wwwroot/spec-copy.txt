@@ -337,16 +337,12 @@ components:
         - transaction_status
         - payload_hash_hex
         - intent_hash_hex
-        - transaction_accumulator_hex
-        - fee_paid
       properties:
         transaction_status:
           "$ref": "#/components/schemas/TransactionStatus"
         payload_hash_hex:
           type: string
         intent_hash_hex:
-          type: string
-        transaction_accumulator_hex:
           type: string
         fee_paid:
           $ref: "#/components/schemas/TokenAmount"
@@ -355,9 +351,6 @@ components:
       required:
         - status
       properties:
-        state_version:
-          type: integer
-          format: int64
         status:
           type: string
           enum:
@@ -365,7 +358,11 @@ components:
             - failed
             - rejected
             - pending
-        confirmed_time:
+        state_version:
+          nullable: true
+          type: integer
+          format: int64
+        confirmed_at:
           nullable: true
           type: string
           format: date-time

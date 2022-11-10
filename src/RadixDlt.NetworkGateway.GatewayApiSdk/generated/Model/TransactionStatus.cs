@@ -142,27 +142,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatus" /> class.
         /// </summary>
-        /// <param name="stateVersion">stateVersion.</param>
         /// <param name="status">status (required).</param>
-        /// <param name="confirmedTime">confirmedTime.</param>
-        public TransactionStatus(long stateVersion = default(long), StatusEnum status = default(StatusEnum), DateTimeOffset? confirmedTime = default(DateTimeOffset?))
+        /// <param name="stateVersion">stateVersion.</param>
+        /// <param name="confirmedAt">confirmedAt.</param>
+        public TransactionStatus(StatusEnum status = default(StatusEnum), long? stateVersion = default(long?), DateTimeOffset? confirmedAt = default(DateTimeOffset?))
         {
             this.Status = status;
             this.StateVersion = stateVersion;
-            this.ConfirmedTime = confirmedTime;
+            this.ConfirmedAt = confirmedAt;
         }
 
         /// <summary>
         /// Gets or Sets StateVersion
         /// </summary>
         [DataMember(Name = "state_version", EmitDefaultValue = true)]
-        public long StateVersion { get; set; }
+        public long? StateVersion { get; set; }
 
         /// <summary>
-        /// Gets or Sets ConfirmedTime
+        /// Gets or Sets ConfirmedAt
         /// </summary>
-        [DataMember(Name = "confirmed_time", EmitDefaultValue = true)]
-        public DateTimeOffset? ConfirmedTime { get; set; }
+        [DataMember(Name = "confirmed_at", EmitDefaultValue = true)]
+        public DateTimeOffset? ConfirmedAt { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -172,9 +172,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatus {\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  ConfirmedTime: ").Append(ConfirmedTime).Append("\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
+            sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -211,17 +211,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.StateVersion == input.StateVersion ||
-                    this.StateVersion.Equals(input.StateVersion)
-                ) && 
-                (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
                 ) && 
                 (
-                    this.ConfirmedTime == input.ConfirmedTime ||
-                    (this.ConfirmedTime != null &&
-                    this.ConfirmedTime.Equals(input.ConfirmedTime))
+                    this.StateVersion == input.StateVersion ||
+                    (this.StateVersion != null &&
+                    this.StateVersion.Equals(input.StateVersion))
+                ) && 
+                (
+                    this.ConfirmedAt == input.ConfirmedAt ||
+                    (this.ConfirmedAt != null &&
+                    this.ConfirmedAt.Equals(input.ConfirmedAt))
                 );
         }
 
@@ -234,11 +235,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.ConfirmedTime != null)
+                if (this.StateVersion != null)
                 {
-                    hashCode = (hashCode * 59) + this.ConfirmedTime.GetHashCode();
+                    hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
+                }
+                if (this.ConfirmedAt != null)
+                {
+                    hashCode = (hashCode * 59) + this.ConfirmedAt.GetHashCode();
                 }
                 return hashCode;
             }
