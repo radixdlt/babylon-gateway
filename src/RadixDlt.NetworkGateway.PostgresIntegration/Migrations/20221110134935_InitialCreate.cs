@@ -217,6 +217,39 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "non_fungible_id_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_resource_manager_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_id = table.Column<byte[]>(type: "bytea", nullable: false),
+                    immutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_id_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "non_fungible_id_mutable_data_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    non_fungible_id_history_id = table.Column<long>(type: "bigint", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    mutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_id_mutable_data_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pending_transactions",
                 columns: table => new
                 {
@@ -367,6 +400,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_id_history_non_fungible_resource_manager_enti~1",
+                table: "non_fungible_id_history",
+                columns: new[] { "non_fungible_resource_manager_entity_id", "non_fungible_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_id_history_non_fungible_resource_manager_entit~",
+                table: "non_fungible_id_history",
+                columns: new[] { "non_fungible_resource_manager_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_id_mutable_data_history_non_fungible_id_histor~",
+                table: "non_fungible_id_mutable_data_history",
+                columns: new[] { "non_fungible_id_history_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_payload_hash",
                 table: "pending_transactions",
                 column: "payload_hash")
@@ -395,6 +443,12 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "network_configuration");
+
+            migrationBuilder.DropTable(
+                name: "non_fungible_id_history");
+
+            migrationBuilder.DropTable(
+                name: "non_fungible_id_mutable_data_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

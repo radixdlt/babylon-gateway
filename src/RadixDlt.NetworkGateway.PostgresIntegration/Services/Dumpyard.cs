@@ -188,9 +188,11 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
     }
 }
 
-internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
+internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
 
-internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
+internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<byte[]> NonFungibleIds, long StateVersion);
+
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, byte[] NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData Data, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
@@ -347,6 +349,10 @@ internal class SequencesHolder
 
     public long FungibleResourceSupplyHistorySequence { get; set; }
 
+    public long NonFungibleIdHistorySequence { get; set; }
+
+    public long NonFungibleIdMutableDataHistorySequence { get; set; }
+
     public long NextEntity => EntitySequence++;
 
     public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
@@ -356,4 +362,8 @@ internal class SequencesHolder
     public long NextEntityResourceHistory => EntityResourceHistorySequence++;
 
     public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
+
+    public long NextNonFungibleIdHistory => NonFungibleIdHistorySequence++;
+
+    public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
 }

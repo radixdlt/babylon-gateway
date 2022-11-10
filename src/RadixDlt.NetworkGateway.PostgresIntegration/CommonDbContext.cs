@@ -96,6 +96,10 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
 
+    public DbSet<NonFungibleIdHistory> NonFungibleIdHistory => Set<NonFungibleIdHistory>();
+
+    public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -109,6 +113,7 @@ internal abstract class CommonDbContext : DbContext
         HookupTransactions(modelBuilder);
         HookupPendingTransactions(modelBuilder);
         HookupEntities(modelBuilder);
+        HookupHistory(modelBuilder);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -214,7 +219,10 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => e.GlobalAddress)
             .HasMethod("hash")
             .HasFilter("global_address IS NOT NULL");
+    }
 
+    private static void HookupHistory(ModelBuilder modelBuilder)
+    {
         // TODO investigate what's more performant FromStateVersion+EntityId or EntityId+FromStateVersion, then apply to all entities
         modelBuilder.Entity<EntityMetadataHistory>()
             .HasIndex(e => new { e.EntityId, e.FromStateVersion });
@@ -239,5 +247,14 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<FungibleResourceSupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<NonFungibleIdHistory>()
+            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<NonFungibleIdHistory>()
+            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId });
+
+        modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
+            .HasIndex(e => new { e.NonFungibleIdHistoryId, e.FromStateVersion });
     }
 }

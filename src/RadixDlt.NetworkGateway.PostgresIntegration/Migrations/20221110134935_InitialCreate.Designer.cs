@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221109153947_InitialCreate")]
+    [Migration("20221110134935_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -429,6 +429,80 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("network_configuration");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<byte[]>("ImmutableData")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("immutable_data");
+
+                    b.Property<byte[]>("NonFungibleId")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("non_fungible_id");
+
+                    b.Property<long>("NonFungibleResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_resource_manager_entity_id");
+
+                    b.Property<long>("NonFungibleStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_store_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NonFungibleResourceManagerEntityId", "FromStateVersion");
+
+                    b.HasIndex("NonFungibleResourceManagerEntityId", "NonFungibleId")
+                        .HasDatabaseName("IX_non_fungible_id_history_non_fungible_resource_manager_enti~1");
+
+                    b.ToTable("non_fungible_id_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdMutableDataHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<byte[]>("MutableData")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("mutable_data");
+
+                    b.Property<long>("NonFungibleIdHistoryId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_id_history_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NonFungibleIdHistoryId", "FromStateVersion");
+
+                    b.ToTable("non_fungible_id_mutable_data_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>

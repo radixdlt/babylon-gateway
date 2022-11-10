@@ -223,12 +223,22 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         var exclusiveLowerBound = currentTopOfLedger.StateVersion;
         var inclusiveUpperBound = currentTopOfLedger.StateVersion + Config.MaxTransactionPipelineSizePerNode;
-
         var firstMissingStateVersionGap = GetFirstStateVersionGapForNode(nodeName, exclusiveLowerBound, inclusiveUpperBound);
 
-        return (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
-            ? null
-            : new TransactionsRequested(firstMissingStateVersionGap.Value, inclusiveUpperBound);
+        if (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
+        {
+            return null;
+        }
+
+        var inclusiveLowerBound = firstMissingStateVersionGap.Value;
+        var knownNodeTip = _latestLedgerTipByNode[nodeName];
+
+        if (inclusiveLowerBound > knownNodeTip)
+        {
+            return null;
+        }
+
+        return new TransactionsRequested(inclusiveLowerBound, inclusiveUpperBound);
     }
 
     private void PrepareForLedgerExtensionCheck()
