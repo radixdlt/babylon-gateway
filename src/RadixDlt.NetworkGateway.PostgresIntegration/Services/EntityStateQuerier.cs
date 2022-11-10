@@ -66,6 +66,7 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -80,6 +81,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 internal class EntityStateQuerier : IEntityStateQuerier
 {
     private const int DefaultMetadataLimit = 10; // TODO make it configurable
+    private const int DefaultResourceLimit = 10; // TODO make it configurable
 
     private readonly INetworkConfigurationProvider _networkConfigurationProvider;
     private readonly ReadOnlyDbContext _dbContext;
@@ -168,6 +170,8 @@ INNER JOIN LATERAL (
         return new GatewayModel.EntityResourcesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungiblesPagination, nonFungiblesPagination);
     }
 
+    private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
+
     public async Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
@@ -204,17 +208,45 @@ INNER JOIN LATERAL (
                 break;
             }
 
-            case NonFungibleResourceManagerEntity:
-                // TODO add support for detailed ids
+            case NonFungibleResourceManagerEntity nfrme:
+            {
+                var dbConn = _dbContext.Database.GetDbConnection();
+
+                var nonFungibleIds = await dbConn.QueryAsync<NonFungibleIdViewModel>(new CommandDefinition(
+                    commandText: @"
+SELECT nfih.non_fungible_id AS NonFungibleId, nfimdh.is_deleted AS IsDeleted, nfih.immutable_data AS ImmutableData, nfimdh.mutable_data AS MutableData
+FROM non_fungible_id_history nfih
+INNER JOIN LATERAL (
+    SELECT is_deleted, mutable_data
+    FROM non_fungible_id_mutable_data_history nfimdh
+    WHERE nfimdh.from_state_version <= @stateVersion AND nfih.id = nfimdh.non_fungible_id_history_id
+    ORDER BY nfih.from_state_version DESC
+) nfimdh ON TRUE
+WHERE nfih.from_state_version <= @stateVersion AND nfih.non_fungible_resource_manager_entity_id = @entityId
+ORDER BY nfih.from_state_version DESC
+OFFSET @offset LIMIT @limit",
+                    parameters: new
+                    {
+                        stateVersion = ledgerState.StateVersion,
+                        entityId = nfrme.Id,
+                        offset = 0,
+                        limit = DefaultResourceLimit,
+                    },
+                    cancellationToken: token));
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseNonFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.NonFungibleResource,
                     ids: new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIds(
-                        totalCount: -1,
-                        previousCursor: null,
-                        nextCursor: "TBD (not implemented yet; currently everything is returned)",
-                        items: new List<GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIdsItem>())));
+                        nextCursor: "TBD (currently first 10 NFIDs are returned)",
+                        items: nonFungibleIds
+                            .Select(nfid => new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIdsItem(
+                                idHex: nfid.NonFungibleId.ToHex(),
+                                immutableDataHex: nfid.ImmutableData.ToHex(),
+                                mutableDataHex: nfid.MutableData.ToHex()))
+                            .ToList())));
                 break;
+            }
+
             case AccountComponentEntity ace:
                 var package = await _dbContext.Entities
                     .FirstAsync(e => e.Id == ace.PackageId, token);
