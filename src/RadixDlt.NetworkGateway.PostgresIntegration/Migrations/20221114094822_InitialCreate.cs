@@ -71,8 +71,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
+    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -81,15 +83,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     address = table.Column<byte[]>(type: "bytea", nullable: false),
-                    global_address = table.Column<byte[]>(type: "bytea", nullable: true),
-                    ancestor_ids = table.Column<long[]>(type: "bigint[]", nullable: true),
-                    parent_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    owner_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
-                    global_ancestor_id = table.Column<long>(type: "bigint", nullable: true),
+                    globaladdress = table.Column<byte[]>(name: "global_address", type: "bytea", nullable: true),
+                    ancestorids = table.Column<long[]>(name: "ancestor_ids", type: "bigint[]", nullable: true),
+                    parentancestorid = table.Column<long>(name: "parent_ancestor_id", type: "bigint", nullable: true),
+                    ownerancestorid = table.Column<long>(name: "owner_ancestor_id", type: "bigint", nullable: true),
+                    globalancestorid = table.Column<long>(name: "global_ancestor_id", type: "bigint", nullable: true),
                     discriminator = table.Column<string>(type: "text", nullable: false),
-                    package_id = table.Column<long>(type: "bigint", nullable: true),
+                    packageid = table.Column<long>(name: "package_id", type: "bigint", nullable: true),
                     divisibility = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -103,8 +105,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
                     keys = table.Column<string[]>(type: "text[]", nullable: false),
                     values = table.Column<string[]>(type: "text[]", nullable: false)
                 },
@@ -119,11 +121,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    is_most_recent = table.Column<bool>(type: "boolean", nullable: false),
-                    fungible_resource_ids = table.Column<long[]>(type: "bigint[]", nullable: false),
-                    non_fungible_resource_ids = table.Column<long[]>(type: "bigint[]", nullable: false)
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
+                    ismostrecent = table.Column<bool>(name: "is_most_recent", type: "boolean", nullable: false),
+                    fungibleresourceids = table.Column<long[]>(name: "fungible_resource_ids", type: "bigint[]", nullable: false),
+                    nonfungibleresourceids = table.Column<long[]>(name: "non_fungible_resource_ids", type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -136,13 +138,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    owner_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    global_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    ownerentityid = table.Column<long>(name: "owner_entity_id", type: "bigint", nullable: false),
+                    globalentityid = table.Column<long>(name: "global_entity_id", type: "bigint", nullable: false),
+                    resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    ids_count = table.Column<long>(type: "bigint", nullable: true),
+                    idscount = table.Column<long>(name: "ids_count", type: "bigint", nullable: true),
                     ids = table.Column<byte[][]>(type: "bytea[]", nullable: true)
                 },
                 constraints: table =>
@@ -156,11 +158,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    resource_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    total_supply = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_minted = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    total_burnt = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
+                    totalsupply = table.Column<BigInteger>(name: "total_supply", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    totalminted = table.Column<BigInteger>(name: "total_minted", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    totalburnt = table.Column<BigInteger>(name: "total_burnt", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -171,29 +173,29 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "ledger_transactions",
                 columns: table => new
                 {
-                    state_version = table.Column<long>(type: "bigint", nullable: false),
+                    stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
-                    transaction_accumulator = table.Column<byte[]>(type: "bytea", nullable: false),
+                    transactionaccumulator = table.Column<byte[]>(name: "transaction_accumulator", type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
-                    index_in_epoch = table.Column<long>(type: "bigint", nullable: false),
-                    round_in_epoch = table.Column<long>(type: "bigint", nullable: false),
-                    is_start_of_epoch = table.Column<bool>(type: "boolean", nullable: false),
-                    is_start_of_round = table.Column<bool>(type: "boolean", nullable: false),
-                    referenced_entities = table.Column<long[]>(type: "bigint[]", nullable: false),
-                    fee_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    tip_paid = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    created_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    normalized_round_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    indexinepoch = table.Column<long>(name: "index_in_epoch", type: "bigint", nullable: false),
+                    roundinepoch = table.Column<long>(name: "round_in_epoch", type: "bigint", nullable: false),
+                    isstartofepoch = table.Column<bool>(name: "is_start_of_epoch", type: "boolean", nullable: false),
+                    isstartofround = table.Column<bool>(name: "is_start_of_round", type: "boolean", nullable: false),
+                    referencedentities = table.Column<long[]>(name: "referenced_entities", type: "bigint[]", nullable: false),
+                    feepaid = table.Column<BigInteger>(name: "fee_paid", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    tippaid = table.Column<BigInteger>(name: "tip_paid", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
+                    roundtimestamp = table.Column<DateTimeOffset>(name: "round_timestamp", type: "timestamp with time zone", nullable: false),
+                    createdtimestamp = table.Column<DateTimeOffset>(name: "created_timestamp", type: "timestamp with time zone", nullable: false),
+                    normalizedroundtimestamp = table.Column<DateTimeOffset>(name: "normalized_round_timestamp", type: "timestamp with time zone", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
-                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: true),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: true)
+                    payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: true),
+                    intenthash = table.Column<byte[]>(name: "intent_hash", type: "bytea", nullable: true),
+                    signedintenthash = table.Column<byte[]>(name: "signed_intent_hash", type: "bytea", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ledger_transactions", x => x.state_version);
+                    table.PrimaryKey("PK_ledger_transactions", x => x.stateversion);
                 });
 
             migrationBuilder.CreateTable(
@@ -201,15 +203,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
-                    network_name = table.Column<string>(type: "text", nullable: false),
-                    package_hrp = table.Column<string>(type: "text", nullable: false),
-                    normal_component_hrp = table.Column<string>(type: "text", nullable: false),
-                    account_component_hrp = table.Column<string>(type: "text", nullable: false),
-                    system_component_hrp = table.Column<string>(type: "text", nullable: false),
-                    resource_hrp = table.Column<string>(type: "text", nullable: false),
-                    validator_hrp = table.Column<string>(type: "text", nullable: false),
-                    node_hrp = table.Column<string>(type: "text", nullable: false),
-                    xrd_address = table.Column<string>(type: "text", nullable: false)
+                    networkname = table.Column<string>(name: "network_name", type: "text", nullable: false),
+                    packagehrp = table.Column<string>(name: "package_hrp", type: "text", nullable: false),
+                    normalcomponenthrp = table.Column<string>(name: "normal_component_hrp", type: "text", nullable: false),
+                    accountcomponenthrp = table.Column<string>(name: "account_component_hrp", type: "text", nullable: false),
+                    systemcomponenthrp = table.Column<string>(name: "system_component_hrp", type: "text", nullable: false),
+                    resourcehrp = table.Column<string>(name: "resource_hrp", type: "text", nullable: false),
+                    validatorhrp = table.Column<string>(name: "validator_hrp", type: "text", nullable: false),
+                    nodehrp = table.Column<string>(name: "node_hrp", type: "text", nullable: false),
+                    xrdaddress = table.Column<string>(name: "xrd_address", type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -222,11 +224,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_store_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_resource_manager_entity_id = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_id = table.Column<byte[]>(type: "bytea", nullable: false),
-                    immutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    nonfungiblestoreentityid = table.Column<long>(name: "non_fungible_store_entity_id", type: "bigint", nullable: false),
+                    nonfungibleresourcemanagerentityid = table.Column<long>(name: "non_fungible_resource_manager_entity_id", type: "bigint", nullable: false),
+                    nonfungibleid = table.Column<byte[]>(name: "non_fungible_id", type: "bytea", nullable: false),
+                    immutabledata = table.Column<byte[]>(name: "immutable_data", type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,10 +241,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    from_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    non_fungible_id_history_id = table.Column<long>(type: "bigint", nullable: false),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
-                    mutable_data = table.Column<byte[]>(type: "bytea", nullable: false)
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    nonfungibleidhistoryid = table.Column<long>(name: "non_fungible_id_history_id", type: "bigint", nullable: false),
+                    isdeleted = table.Column<bool>(name: "is_deleted", type: "boolean", nullable: false),
+                    mutabledata = table.Column<byte[]>(name: "mutable_data", type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,23 +257,23 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    signed_intent_hash = table.Column<byte[]>(type: "bytea", nullable: false),
-                    notarized_transaction_blob = table.Column<byte[]>(type: "bytea", nullable: false),
+                    payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: false),
+                    intenthash = table.Column<byte[]>(name: "intent_hash", type: "bytea", nullable: false),
+                    signedintenthash = table.Column<byte[]>(name: "signed_intent_hash", type: "bytea", nullable: false),
+                    notarizedtransactionblob = table.Column<byte[]>(name: "notarized_transaction_blob", type: "bytea", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
-                    submitted_by_this_gateway = table.Column<bool>(type: "boolean", nullable: false),
-                    first_submitted_to_gateway_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    last_submitted_to_gateway_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    last_submitted_to_node_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    last_submitted_to_node_name = table.Column<string>(type: "text", nullable: true),
-                    submission_count = table.Column<int>(type: "integer", nullable: false),
-                    first_seen_in_mempool_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    last_missing_from_mempool_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    commit_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    failure_reason = table.Column<string>(type: "text", nullable: true),
-                    failure_explanation = table.Column<string>(type: "text", nullable: true),
-                    failure_timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    submittedbythisgateway = table.Column<bool>(name: "submitted_by_this_gateway", type: "boolean", nullable: false),
+                    firstsubmittedtogatewaytimestamp = table.Column<DateTimeOffset>(name: "first_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastsubmittedtogatewaytimestamp = table.Column<DateTimeOffset>(name: "last_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastsubmittedtonodetimestamp = table.Column<DateTimeOffset>(name: "last_submitted_to_node_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastsubmittedtonodename = table.Column<string>(name: "last_submitted_to_node_name", type: "text", nullable: true),
+                    submissioncount = table.Column<int>(name: "submission_count", type: "integer", nullable: false),
+                    firstseeninmempooltimestamp = table.Column<DateTimeOffset>(name: "first_seen_in_mempool_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastmissingfrommempooltimestamp = table.Column<DateTimeOffset>(name: "last_missing_from_mempool_timestamp", type: "timestamp with time zone", nullable: true),
+                    committimestamp = table.Column<DateTimeOffset>(name: "commit_timestamp", type: "timestamp with time zone", nullable: true),
+                    failurereason = table.Column<string>(name: "failure_reason", type: "text", nullable: true),
+                    failureexplanation = table.Column<string>(name: "failure_explanation", type: "text", nullable: true),
+                    failuretimestamp = table.Column<DateTimeOffset>(name: "failure_timestamp", type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -282,13 +284,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "raw_transactions",
                 columns: table => new
                 {
-                    state_version = table.Column<long>(type: "bigint", nullable: false),
-                    payload_hash = table.Column<byte[]>(type: "bytea", nullable: false),
+                    stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
+                    payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: false),
                     payload = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_raw_transactions", x => x.state_version);
+                    table.PrimaryKey("PK_raw_transactions", x => x.stateversion);
                 });
 
             migrationBuilder.CreateTable(
@@ -296,16 +298,16 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
-                    top_of_ledger_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    sync_status_target_state_version = table.Column<long>(type: "bigint", nullable: false),
-                    last_updated = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    topofledgerstateversion = table.Column<long>(name: "top_of_ledger_state_version", type: "bigint", nullable: false),
+                    syncstatustargetstateversion = table.Column<long>(name: "sync_status_target_state_version", type: "bigint", nullable: false),
+                    lastupdated = table.Column<DateTimeOffset>(name: "last_updated", type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ledger_status", x => x.id);
                     table.ForeignKey(
                         name: "FK_ledger_status_ledger_transactions_top_of_ledger_state_versi~",
-                        column: x => x.top_of_ledger_state_version,
+                        column: x => x.topofledgerstateversion,
                         principalTable: "ledger_transactions",
                         principalColumn: "state_version");
                 });
@@ -421,6 +423,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

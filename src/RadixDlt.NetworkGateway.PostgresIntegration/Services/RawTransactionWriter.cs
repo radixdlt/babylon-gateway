@@ -100,10 +100,10 @@ internal class RawTransactionWriter : IRawTransactionWriter
 
     public async Task<int> EnsureRawTransactionsCreatedOrUpdated(ReadWriteDbContext context, List<RawTransaction> rawTransactions, CancellationToken token)
     {
-        // See https://github.com/artiomchi/FlexLabs.Upsert/wiki/Usage
-        return await context.RawTransactions
-            .UpsertRange(rawTransactions)
-            .RunAsync(token);
+        // TODO do NOT commit this!, upgrade LIB once ready!!
+        await context.RawTransactions
+            .AddRangeAsync(rawTransactions, token);
+        return await context.SaveChangesAsync(token);
     }
 
     public async Task<int> EnsureMempoolTransactionsMarkedAsCommitted(ReadWriteDbContext context, List<CoreModel.CommittedTransaction> committedTransactions, CancellationToken token)
