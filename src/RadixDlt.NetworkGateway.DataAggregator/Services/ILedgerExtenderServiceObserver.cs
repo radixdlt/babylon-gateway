@@ -66,7 +66,7 @@ using System.Threading.Tasks;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
-public interface IRawTransactionWriterObserver
+public interface ILedgerExtenderServiceObserver
 {
     ValueTask TransactionsMarkedCommittedWhichWasFailed();
 

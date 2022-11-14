@@ -92,7 +92,7 @@ internal class DataAggregatorMetricsObserver :
     INodeTransactionLogWorkerObserver,
     INodeMempoolTransactionHashesReaderWorkerObserver,
     INodeMempoolFullTransactionReaderWorkerObserver,
-    IRawTransactionWriterObserver,
+    ILedgerExtenderServiceObserver,
     INetworkConfigurationReaderObserver,
     INetworkStatusReaderObserver,
     ITransactionStreamReaderObserver
@@ -725,14 +725,14 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IRawTransactionWriterObserver.TransactionsMarkedCommittedWhichWasFailed()
+    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedWhichWasFailed()
     {
         _transactionsMarkedCommittedWhichWereFailedCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IRawTransactionWriterObserver.TransactionsMarkedCommittedCount(int count)
+    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedCount(int count)
     {
         _transactionsMarkedCommittedCount.Inc(count);
 

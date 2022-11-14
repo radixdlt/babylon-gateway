@@ -25,7 +25,6 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
-    <PackageVersion Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageVersion Include="prometheus-net" Version="7.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="7.0.0" />
