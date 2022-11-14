@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: SonarScanner for .NET
-        uses: highbyte/sonarscan-dotnet@v2.1.2
+        uses: highbyte/sonarscan-dotnet@v2.2.1
         with:
           sonarProjectKey: radixdlt_babylon-gateway
           sonarProjectName: babylon-gateway
