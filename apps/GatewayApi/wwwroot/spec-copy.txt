@@ -77,14 +77,14 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/TransactionPreviewRequest"
+              type: object
       responses:
         '200':
           description: Successful Preview
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TransactionPreviewResponse"
+                type: object
   "/transaction/submit":
     post:
       operationId: SubmitTransaction
@@ -797,62 +797,6 @@ components:
     # TODO Not categorized/cleaned yet
     #
 
-    TransactionPreviewRequest:
-      type: object
-      required:
-        - manifest
-        - cost_unit_limit
-        - tip_percentage
-        - nonce
-        - signer_public_keys
-        - flags
-      properties:
-        manifest:
-          description: A transaction manifest. sbor encoded, and then hex encoded.
-          type: string
-        blobs_hex:
-          description: An array of hex-encoded blob data (optional)
-          type: array
-          items:
-            type: string
-        cost_unit_limit:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 4294967295
-          description: An integer between 0 and 2^32 - 1, giving the maximum number of cost units available for transaction execution
-        tip_percentage:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 4294967295
-          description: An integer between 0 and 2^32 - 1, specifying the validator tip as a percentage amount. A value of "1" corresponds to 1% of the fee.
-        nonce:
-          type: string
-          description: A decimal-string-encoded integer between 0 and 2^64-1, used to ensure the transaction intent is unique.
-        signer_public_keys:
-          type: array
-          items:
-            $ref: "#/components/schemas/PublicKey"
-          description: A list of public keys to be used as transaction signers
-        flags:
-          type: object
-          required:
-            - unlimited_loan
-            - assume_all_signature_proofs
-          properties:
-            unlimited_loan:
-              type: boolean
-            assume_all_signature_proofs:
-              type: boolean
-    TransactionPreviewResponse:
-      type: object
-      required:
-        - core_api_response
-      properties:
-        core_api_response:
-          type: object
-
     TokenProperties:
       type: object
       required:
@@ -1043,44 +987,3 @@ components:
           properties:
             transaction_not_found:
               $ref: "#/components/schemas/TransactionLookupIdentifier"
-    PublicKeyType:
-      type: string
-      enum:
-        - EcdsaSecp256k1
-        - EddsaEd25519
-    PublicKey:
-      oneOf:
-        - $ref: "#/components/schemas/EcdsaSecp256k1PublicKey"
-        - $ref: "#/components/schemas/EddsaEd25519PublicKey"
-      discriminator:
-        propertyName: key_type
-        mapping:
-          # NOTE: These need to match PublicKeyType
-          EcdsaSecp256k1: "#/components/schemas/EcdsaSecp256k1PublicKey"
-          EddsaEd25519: "#/components/schemas/EddsaEd25519PublicKey"
-    EcdsaSecp256k1PublicKey:
-      type: object
-      required:
-        - key_type
-        - key_hex
-      properties:
-        key_type:
-          type: string
-        key_hex:
-          type: string
-          minLength: 66
-          maxLength: 66
-          description: The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes)
-    EddsaEd25519PublicKey:
-      type: object
-      required:
-        - key_type
-        - key_hex
-      properties:
-        key_type:
-          type: string
-        key_hex:
-          type: string
-          minLength: 64
-          maxLength: 64
-          description: The hex-encoded compressed EdDSA Ed25519 public key (32 bytes)

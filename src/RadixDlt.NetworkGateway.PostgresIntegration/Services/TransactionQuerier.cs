@@ -189,7 +189,7 @@ internal class TransactionQuerier : ITransactionQuerier
             PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.StatusEnum.Pending,
             PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => GatewayModel.TransactionStatus.StatusEnum.Pending,
             PendingTransactionStatus.Failed => GatewayModel.TransactionStatus.StatusEnum.Failed,
-            _ => throw new ArgumentOutOfRangeException(),
+            _ => throw new ArgumentOutOfRangeException(nameof(pendingTransaction.Status), pendingTransaction.Status, null),
         };
 
         return new GatewayModel.TransactionInfo(

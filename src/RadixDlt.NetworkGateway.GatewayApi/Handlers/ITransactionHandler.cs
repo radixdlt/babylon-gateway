@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -76,7 +77,7 @@ public interface ITransactionHandler
 
     Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
+    Task<object> Preview(JObject request, CancellationToken token = default);
 
     Task<GatewayModel.TransactionSubmitResponse> Submit(GatewayModel.TransactionSubmitRequest request, CancellationToken token = default);
 }
