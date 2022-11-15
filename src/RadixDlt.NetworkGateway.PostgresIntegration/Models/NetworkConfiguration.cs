@@ -121,6 +121,9 @@ internal record NetworkConfigurationHrpDefinition
 [Owned]
 internal record NetworkConfigurationWellKnownAddresses
 {
+    [Column("account_package_address")]
+    public string AccountPackageAddress { get; set; }
+
     [Column("xrd_address")]
     public string XrdAddress { get; set; }
 

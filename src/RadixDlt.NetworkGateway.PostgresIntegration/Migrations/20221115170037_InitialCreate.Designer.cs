@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221115140355_InitialCreate")]
+    [Migration("20221115170037_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -878,6 +878,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         {
                             b1.Property<int>("NetworkConfigurationId")
                                 .HasColumnType("integer");
+
+                            b1.Property<string>("AccountPackageAddress")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("account_package_address");
 
                             b1.Property<string>("XrdAddress")
                                 .IsRequired()

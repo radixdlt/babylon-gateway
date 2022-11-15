@@ -70,5 +70,7 @@ public interface INetworkAddressConfigProvider
 {
     HrpDefinition GetHrpDefinition();
 
+    string GetAccountPackageAddress();
+
     string GetXrdAddress();
 }

@@ -159,6 +159,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().HrpDefinition;
     }
 
+    public string GetAccountPackageAddress()
+    {
+        return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.AccountPackageAddress;
+    }
+
     public string GetXrdAddress()
     {
         return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress;
@@ -183,6 +188,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             },
             NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
             {
+                AccountPackageAddress = networkConfiguration.WellKnownAddresses.AccountPackage,
                 XrdAddress = networkConfiguration.WellKnownAddresses.Xrd,
             },
         };
