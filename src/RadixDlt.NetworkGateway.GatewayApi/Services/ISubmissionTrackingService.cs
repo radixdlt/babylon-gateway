@@ -80,7 +80,7 @@ public interface ISubmissionTrackingService
     );
 
     Task MarkAsFailed(
-        byte[] transactionIdentifierHash,
+        byte[] payloadHash,
         PendingTransactionFailureReason failureReason,
         string failureExplanation,
         CancellationToken token = default

@@ -73,6 +73,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
 using RadixDlt.NetworkGateway.Abstractions.Utilities;
+using RadixDlt.NetworkGateway.DataAggregator;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.LedgerExtension;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
@@ -177,13 +178,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         {
             var topOfLedgerSummary = await GetTopOfLedger(dbContext, token);
 
-            if (ledgerExtension.LatestTransactionSummary.StateVersion != topOfLedgerSummary.StateVersion)
-            {
-                throw new Exception(
-                    $"Tried to commit transactions with parent state version {ledgerExtension.LatestTransactionSummary.StateVersion} " +
-                    $"on top of a ledger with state version {topOfLedgerSummary.StateVersion}"
-                );
-            }
+            TransactionConsistency.AssertLatestTransactionConsistent(ledgerExtension.LatestTransactionSummary.StateVersion, topOfLedgerSummary.StateVersion);
 
             if (topOfLedgerSummary.StateVersion == 0)
             {
@@ -617,7 +612,7 @@ WHERE id IN(
 
                 if (parentId == null || ownerId == null || globalId == null)
                 {
-                    throw new Exception("bla bla bla x22");
+                    throw new InvalidOperationException($"Unable to globalize entity {childAddress} as it was impossible to compute of its ancestors: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
                 referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
@@ -652,7 +647,7 @@ WHERE id IN(
                 {
                     if (dbContext.Model.FindEntityType(dbEntity.GetType())?.GetDiscriminatorValue() is not string discriminator)
                     {
-                        throw new Exception("Unable to determine discriminator of entity " + dbEntity.Address.ToHex());
+                        throw new InvalidOperationException("Unable to determine discriminator of entity " + dbEntity.Address.ToHex());
                     }
 
                     await writer.StartRowAsync(token);
@@ -678,12 +673,12 @@ WHERE id IN(
 
                 if (dbContext.Model.FindEntityType(typeof(UserLedgerTransaction))?.GetDiscriminatorValue() is not string userDiscriminator)
                 {
-                    throw new Exception("Unable to determine discriminator of UserLedgerTransaction");
+                    throw new InvalidOperationException("Unable to determine discriminator of UserLedgerTransaction");
                 }
 
                 if (dbContext.Model.FindEntityType(typeof(ValidatorLedgerTransaction))?.GetDiscriminatorValue() is not string validatorDiscriminator)
                 {
-                    throw new Exception("Unable to determine discriminator of ValidatorLedgerTransaction");
+                    throw new InvalidOperationException("Unable to determine discriminator of ValidatorLedgerTransaction");
                 }
 
                 foreach (var lt in ledgerTransactions)
@@ -1014,12 +1009,12 @@ WHERE id IN(
             {
                 if (dbContext.Model.FindEntityType(typeof(EntityFungibleResourceHistory))?.GetDiscriminatorValue() is not string fungibleDiscriminator)
                 {
-                    throw new Exception("Unable to determine discriminator of EntityFungibleResourceHistory");
+                    throw new InvalidOperationException("Unable to determine discriminator of EntityFungibleResourceHistory");
                 }
 
                 if (dbContext.Model.FindEntityType(typeof(EntityNonFungibleResourceHistory))?.GetDiscriminatorValue() is not string nonFungibleDiscriminator)
                 {
-                    throw new Exception("Unable to determine discriminator of EntityNonFungibleResourceHistory");
+                    throw new InvalidOperationException("Unable to determine discriminator of EntityNonFungibleResourceHistory");
                 }
 
                 await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token);

@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -199,7 +200,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         if (!_latestLedgerTipByNode.ContainsKey(nodeName))
         {
-            throw new Exception("The node's ledger tip must be written first");
+            throw new InvalidNodeStateException("The node's ledger tip must be written first");
         }
 
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
@@ -531,7 +532,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         if (ledgerTips.Count == 0)
         {
-            throw new Exception("At least one ledger tip must have been submitted");
+            throw new InvalidNodeStateException("At least one ledger tip must have been submitted");
         }
 
         return ledgerTips.Max();

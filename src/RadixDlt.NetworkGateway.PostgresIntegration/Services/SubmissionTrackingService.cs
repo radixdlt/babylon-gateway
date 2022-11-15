@@ -146,20 +146,20 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     }
 
     public async Task MarkAsFailed(
-        byte[] transactionIdentifierHash,
+        byte[] payloadHash,
         PendingTransactionFailureReason failureReason,
         string failureExplanation,
         CancellationToken token = default
     )
     {
-        var mempoolTransaction = await GetPendingTransaction(transactionIdentifierHash, token);
+        var pendingTransaction = await GetPendingTransaction(payloadHash, token);
 
-        if (mempoolTransaction == null)
+        if (pendingTransaction == null)
         {
-            throw new Exception($"Could not find mempool transaction {transactionIdentifierHash.ToHex()} to mark it as failed");
+            throw new PendingTransactionNotFoundException($"Could not find mempool transaction {payloadHash.ToHex()} to mark it as failed");
         }
 
-        mempoolTransaction.MarkAsFailed(failureReason, failureExplanation, _clock.UtcNow);
+        pendingTransaction.MarkAsFailed(failureReason, failureExplanation, _clock.UtcNow);
 
         await _observers.ForEachAsync(x => x.PostPendingTransactionMarkedAsFailed());
         await _dbContext.SaveChangesAsync(token);

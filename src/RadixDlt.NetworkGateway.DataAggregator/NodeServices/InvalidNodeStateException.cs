@@ -62,37 +62,22 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions.Configuration;
-using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
+namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
-internal class CapturedConfigProvider : ICapturedConfigProvider
+[Serializable]
+public sealed class InvalidNodeStateException : Exception
 {
-    private readonly ReadOnlyDbContext _dbContext;
-
-    public CapturedConfigProvider(ReadOnlyDbContext dbContext)
+    public InvalidNodeStateException()
     {
-        _dbContext = dbContext;
     }
 
-    public async Task<CapturedConfig> CaptureConfiguration()
+    public InvalidNodeStateException(string message) : base(message)
     {
-        var networkConfiguration = await _dbContext.NetworkConfiguration.AsNoTracking().SingleOrDefaultAsync();
+    }
 
-        if (networkConfiguration == null)
-        {
-            throw new ConfigurationException("Can't set current configuration from database as it's not there");
-        }
-
-        return new CapturedConfig(
-            networkConfiguration.NetworkName,
-            networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition()
-        );
+    public InvalidNodeStateException(string message, Exception inner) : base(message, inner)
+    {
     }
 }

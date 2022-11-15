@@ -101,16 +101,16 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
-    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new Exception("impossible bla bla bla");
+    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
+    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
     public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.KeyValueStore or CoreModel.EntityType.Global;
 
     [MemberNotNullWhen(true, nameof(Parent))]
     public bool HasParent => _parent != null;
 
-    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
+    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("Parent not set, probably global entity or incorrectly configured one.");
 
     public void Globalize(string globalAddressHex)
     {
@@ -156,7 +156,7 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
         if (Activator.CreateInstance(TypeHint) is not TEntity instance)
         {
-            throw new Exception("Unable to create instance");
+            throw new InvalidOperationException("Unable to create instance");
         }
 
         return instance;
@@ -169,7 +169,7 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
         if (dbEntity is not T typedDbEntity)
         {
-            throw new Exception("bla bla bla x66");
+            throw new ArgumentException("Action argument type does not match underlying entity type.", nameof(action));
         }
 
         action.Invoke(typedDbEntity);
@@ -177,11 +177,11 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     private Entity GetDatabaseEntity()
     {
-        var de = _databaseEntity ?? throw new Exception("bla bla"); // TODO fix me
+        var de = _databaseEntity ?? throw new InvalidOperationException("Database entity not loaded yet.");
 
         if (de.Id == 0)
         {
-            throw new Exception("bla bla bla bla x6"); // TODO fix me
+            throw new InvalidOperationException("Database entity not ready yet.");
         }
 
         return de;

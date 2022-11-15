@@ -193,7 +193,7 @@ public sealed class NodeWorkersRunner : IDisposable
                 case NodeWorkersRunnerStatus.Running:
                 case NodeWorkersRunnerStatus.Stopping:
                 case NodeWorkersRunnerStatus.Stopped:
-                    throw new Exception("Node set-up has already been initialized");
+                    throw new InvalidNodeStateException("Node set-up has already been initialized");
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -246,14 +246,14 @@ public sealed class NodeWorkersRunner : IDisposable
             {
                 case NodeWorkersRunnerStatus.Uninitialized:
                 case NodeWorkersRunnerStatus.Initializing:
-                    throw new Exception("Should be initialized first");
+                    throw new InvalidNodeStateException("Should be initialized first");
                 case NodeWorkersRunnerStatus.Initialized:
                     break; // The good case
                 case NodeWorkersRunnerStatus.Starting:
                 case NodeWorkersRunnerStatus.Running:
                 case NodeWorkersRunnerStatus.Stopping:
                 case NodeWorkersRunnerStatus.Stopped:
-                    throw new Exception("Workers have already been started");
+                    throw new InvalidNodeStateException("Workers have already been started");
                 default:
                     throw new ArgumentOutOfRangeException();
             }

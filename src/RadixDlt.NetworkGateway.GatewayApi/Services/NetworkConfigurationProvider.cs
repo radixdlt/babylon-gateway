@@ -63,8 +63,8 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -123,6 +123,6 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 
     private CapturedConfig GetCapturedConfig()
     {
-        return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
+        return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
     }
 }

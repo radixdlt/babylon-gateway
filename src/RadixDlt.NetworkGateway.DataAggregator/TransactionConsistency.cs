@@ -65,12 +65,23 @@
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class TransactionConsistency
 {
+
+    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
+    {
+        if (latestTransactionStateVersion != topOfLedgerStateVersion)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
+                $"on top of a ledger with state version {topOfLedgerStateVersion}"
+            );
+        }
+    }
+
     public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
     {
         if (stateVersion != previousStateVersion + 1)

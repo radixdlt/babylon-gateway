@@ -146,7 +146,7 @@ INNER JOIN LATERAL (
 
         foreach (var dbResource in dbResources)
         {
-            var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new Exception("xxx"); // TODO fix me
+            var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new InvalidOperationException("Non-global entity.");
             var ra = RadixBech32.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
             switch (dbResource)
