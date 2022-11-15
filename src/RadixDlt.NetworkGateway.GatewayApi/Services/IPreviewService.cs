@@ -62,14 +62,16 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -77,7 +79,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IPreviewService
 {
-    Task<object> HandlePreviewRequest(JObject request, CancellationToken token = default);
+    Task<object> HandlePreviewRequest(JToken request, CancellationToken token = default);
 }
 
 internal class PreviewService : IPreviewService
@@ -91,7 +93,7 @@ internal class PreviewService : IPreviewService
         _observers = observers;
     }
 
-    public async Task<object> HandlePreviewRequest(JObject request, CancellationToken token = default)
+    public async Task<object> HandlePreviewRequest(JToken request, CancellationToken token = default)
     {
         try
         {
@@ -111,21 +113,41 @@ internal class PreviewService : IPreviewService
         }
     }
 
-    private async Task<object> HandlePreviewAndCreateResponse(JObject request, CancellationToken token)
+    private async Task<object> HandlePreviewAndCreateResponse(JToken request, CancellationToken token)
     {
-        // todo consider this a mock/dumb implementation for testing purposes only
+        // TODO consider this a mock/dumb implementation for testing purposes only
 
-        var coreApiRequest = request.ToObject<CoreModel.TransactionPreviewRequest>();
+        CoreModel.TransactionPreviewRequest? coreApiRequest = null;
+
+        try
+        {
+            if (request is JObject requestObject)
+            {
+                requestObject["network"] = _coreApiHandler.GetNetworkIdentifier();
+                coreApiRequest = requestObject.ToObject<CoreModel.TransactionPreviewRequest>();
+            }
+            else
+            {
+                throw InvalidRequestException.FromOtherError("Expected JSON object.");
+            }
+        }
+        catch (JsonSerializationException ex)
+        {
+            throw InvalidRequestException.FromOtherError("Invalid request: " + ex.Message);
+        }
 
         if (coreApiRequest == null)
         {
-            throw new Exception("bla bla bla xxx32");
+            throw InvalidRequestException.FromOtherError("Expected JSON object.");
         }
 
-        coreApiRequest.Network = _coreApiHandler.GetNetworkIdentifier();
-
-        var result = await _coreApiHandler.PreviewTransaction(coreApiRequest, token);
-
-        return result;
+        try
+        {
+            return await _coreApiHandler.PreviewTransaction(coreApiRequest, token);
+        }
+        catch (CoreClient.ApiException ex)
+        {
+            throw InvalidRequestException.FromOtherError(ex.Message);
+        }
     }
 }
