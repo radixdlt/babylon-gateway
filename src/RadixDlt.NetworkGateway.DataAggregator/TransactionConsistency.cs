@@ -70,7 +70,6 @@ namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class TransactionConsistency
 {
-
     public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
     {
         if (latestTransactionStateVersion != topOfLedgerStateVersion)

@@ -70,6 +70,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreApi = RadixDlt.CoreApiSdk.Api;
+using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
@@ -103,6 +104,12 @@ internal class TransactionStreamReader : ITransactionStreamReader
                     token
                 )
             );
+        }
+        catch (CoreClient.ApiException ex) when (ex.ErrorCode == 404)
+        {
+            // TODO drop entire catch block once CoreApi start accepting requests with state_version >= ledger tip
+
+            return new CoreModel.CommittedTransactionsResponse(fromStateVersion, fromStateVersion, fromStateVersion, new List<CoreModel.CommittedTransaction>());
         }
         catch (Exception ex)
         {
