@@ -323,21 +323,21 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(JObject request)
+    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(JToken request)
     {
         _transactionPreviewRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(JObject request, JObject response)
+    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(JToken request, object response)
     {
         _transactionPreviewSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(JObject request, Exception exception)
+    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(JToken request, Exception exception)
     {
         _transactionPreviewErrorCount.Inc();
 

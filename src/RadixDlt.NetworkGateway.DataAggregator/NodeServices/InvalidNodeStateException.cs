@@ -73,11 +73,13 @@ public sealed class InvalidNodeStateException : Exception
     {
     }
 
-    public InvalidNodeStateException(string message) : base(message)
+    public InvalidNodeStateException(string message)
+        : base(message)
     {
     }
 
-    public InvalidNodeStateException(string message, Exception inner) : base(message, inner)
+    public InvalidNodeStateException(string message, Exception inner)
+        : base(message, inner)
     {
     }
 }

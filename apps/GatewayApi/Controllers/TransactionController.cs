@@ -104,7 +104,7 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("preview")]
-    public async Task<object> Preview(JObject request, CancellationToken token)
+    public async Task<object> Preview(JToken request, CancellationToken token)
     {
         return await _transactionHandler.Preview(request, token);
     }

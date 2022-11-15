@@ -72,9 +72,9 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IPreviewServiceObserver
 {
-    ValueTask PreHandlePreviewRequest(JObject request);
+    ValueTask PreHandlePreviewRequest(JToken request);
 
-    ValueTask PostHandlePreviewRequest(JObject request, object response);
+    ValueTask PostHandlePreviewRequest(JToken request, object response);
 
-    ValueTask HandlePreviewRequestFailed(JObject request, Exception exception);
+    ValueTask HandlePreviewRequestFailed(JToken request, Exception exception);
 }

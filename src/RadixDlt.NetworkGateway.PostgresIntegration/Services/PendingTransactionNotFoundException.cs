@@ -73,11 +73,13 @@ public class PendingTransactionNotFoundException : Exception
     {
     }
 
-    public PendingTransactionNotFoundException(string message) : base(message)
+    public PendingTransactionNotFoundException(string message)
+        : base(message)
     {
     }
 
-    public PendingTransactionNotFoundException(string message, Exception inner) : base(message, inner)
+    public PendingTransactionNotFoundException(string message, Exception inner)
+        : base(message, inner)
     {
     }
 }
