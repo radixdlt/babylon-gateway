@@ -244,13 +244,13 @@ components:
     EntityAddress:
       type: string
       description: The Bech32m-encoded human readable version of the entity's global address.
-    ResourceManagerEntityAddress:
+    ResourceAddress:
       type: string
       description: The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
 
-    BigInteger:
+    BigDecimal:
       type: string
-      pattern: "^-?[0-9]+$"
+      description: The string-encoded decimal representing the amount
 
     #
     # Generic Types
@@ -377,9 +377,9 @@ components:
         - token_identifier
       properties:
         value:
-          $ref: "#/components/schemas/BigInteger"
+          $ref: "#/components/schemas/BigDecimal"
         address:
-          $ref: "#/components/schemas/ResourceManagerEntityAddress"
+          $ref: "#/components/schemas/ResourceAddress"
 
     #
     # Mixins
@@ -599,7 +599,7 @@ components:
         - amount
       properties:
         address:
-          $ref: "#/components/schemas/ResourceManagerEntityAddress"
+          $ref: "#/components/schemas/ResourceAddress"
         amount:
           $ref: "#/components/schemas/TokenAmount"
     EntityResourcesResponseNonFungibleResources:
@@ -620,7 +620,7 @@ components:
         - amount
       properties:
         address:
-          $ref: "#/components/schemas/ResourceManagerEntityAddress"
+          $ref: "#/components/schemas/ResourceAddress"
         amount:
           type: number
 
@@ -878,7 +878,7 @@ components:
           description: If true, the token is allowed to be minted/burned by the owner.
           type: boolean
         granularity:
-          "$ref": "#/components/schemas/BigInteger"
+          "$ref": "#/components/schemas/BigDecimal"
         owner:
           "$ref": "#/components/schemas/AccountIdentifier"
 

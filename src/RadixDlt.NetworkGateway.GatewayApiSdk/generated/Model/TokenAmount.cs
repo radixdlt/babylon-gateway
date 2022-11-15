@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenAmount" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
+        /// <param name="value">The string-encoded decimal representing the amount (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address..</param>
         public TokenAmount(string value = default(string), string address = default(string))
         {
@@ -118,8 +118,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// The string-encoded decimal representing the amount
         /// </summary>
+        /// <value>The string-encoded decimal representing the amount</value>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
         public string Value { get; set; }
 
@@ -215,13 +216,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Value (string) pattern
-            Regex regexValue = new Regex(@"^-?[0-9]+$", RegexOptions.CultureInvariant);
-            if (false == regexValue.Match(this.Value).Success)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Value, must match a pattern of " + regexValue, new [] { "Value" });
-            }
-
             yield break;
         }
     }

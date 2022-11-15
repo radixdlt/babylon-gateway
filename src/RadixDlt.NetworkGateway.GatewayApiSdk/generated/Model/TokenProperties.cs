@@ -110,7 +110,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="url">url (required).</param>
         /// <param name="symbol">symbol (required).</param>
         /// <param name="isSupplyMutable">If true, the token is allowed to be minted/burned by the owner. (required).</param>
-        /// <param name="granularity">granularity (required).</param>
+        /// <param name="granularity">The string-encoded decimal representing the amount (required).</param>
         /// <param name="owner">owner.</param>
         public TokenProperties(string name = default(string), string description = default(string), string iconUrl = default(string), string url = default(string), string symbol = default(string), bool isSupplyMutable = default(bool), string granularity = default(string), AccountIdentifier owner = default(AccountIdentifier))
         {
@@ -192,8 +192,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public bool IsSupplyMutable { get; set; }
 
         /// <summary>
-        /// Gets or Sets Granularity
+        /// The string-encoded decimal representing the amount
         /// </summary>
+        /// <value>The string-encoded decimal representing the amount</value>
         [DataMember(Name = "granularity", IsRequired = true, EmitDefaultValue = true)]
         public string Granularity { get; set; }
 
@@ -344,13 +345,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Granularity (string) pattern
-            Regex regexGranularity = new Regex(@"^-?[0-9]+$", RegexOptions.CultureInvariant);
-            if (false == regexGranularity.Match(this.Granularity).Success)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Granularity, must match a pattern of " + regexGranularity, new [] { "Granularity" });
-            }
-
             yield break;
         }
     }
