@@ -231,15 +231,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             return null;
         }
 
-        var inclusiveLowerBound = firstMissingStateVersionGap.Value;
-        var knownNodeTip = _latestLedgerTipByNode[nodeName];
-
-        if (inclusiveLowerBound > knownNodeTip)
-        {
-            return null;
-        }
-
-        return new TransactionsRequested(inclusiveLowerBound, inclusiveUpperBound);
+        return new TransactionsRequested(firstMissingStateVersionGap.Value, inclusiveUpperBound);
     }
 
     private void PrepareForLedgerExtensionCheck()
