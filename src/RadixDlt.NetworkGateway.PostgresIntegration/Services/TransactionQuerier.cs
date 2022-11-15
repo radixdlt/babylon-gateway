@@ -184,7 +184,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
         var status = pendingTransaction.Status switch
         {
-            PendingTransactionStatus.Committed => GatewayModel.TransactionStatus.StatusEnum.Succeeded,
+            PendingTransactionStatus.Committed => GatewayModel.TransactionStatus.StatusEnum.Succeeded, // TODO we can't assume it has succeeded, see https://github.com/radixdlt/babylon-gateway/pull/64#discussion_r1021967257
             PendingTransactionStatus.SubmittedOrKnownInNodeMempool => GatewayModel.TransactionStatus.StatusEnum.Pending,
             PendingTransactionStatus.Missing => GatewayModel.TransactionStatus.StatusEnum.Pending,
             PendingTransactionStatus.ResolvedButUnknownTillSyncedUp => GatewayModel.TransactionStatus.StatusEnum.Pending,
