@@ -221,6 +221,7 @@ INNER JOIN LATERAL (
     FROM non_fungible_id_mutable_data_history nfimdh
     WHERE nfimdh.from_state_version <= @stateVersion AND nfih.id = nfimdh.non_fungible_id_history_id
     ORDER BY nfih.from_state_version DESC
+    LIMIT 1
 ) nfimdh ON TRUE
 WHERE nfih.from_state_version <= @stateVersion AND nfih.non_fungible_resource_manager_entity_id = @entityId
 ORDER BY nfih.from_state_version DESC
