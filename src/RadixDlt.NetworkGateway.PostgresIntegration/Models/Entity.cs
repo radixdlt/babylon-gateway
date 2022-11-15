@@ -119,7 +119,7 @@ internal abstract class Entity
     }
 }
 
-internal class SystemEntity : Entity
+internal class EpochManagerEntity : Entity
 {
 }
 
@@ -129,6 +129,8 @@ internal abstract class ResourceManagerEntity : Entity
 
 internal class FungibleResourceManagerEntity : ResourceManagerEntity
 {
+    [Column("divisibility")]
+    public long Divisibility { get; set; }
 }
 
 internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
@@ -137,6 +139,8 @@ internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
 
 internal abstract class ComponentEntity : Entity
 {
+    [Column("package_id")]
+    public long PackageId { get; set; }
 }
 
 internal class NormalComponentEntity : ComponentEntity

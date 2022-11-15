@@ -104,7 +104,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesRequest" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
         public EntityResourcesRequest(string address = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
@@ -118,9 +118,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

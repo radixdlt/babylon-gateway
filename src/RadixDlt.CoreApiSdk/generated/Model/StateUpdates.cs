@@ -104,30 +104,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="StateUpdates" /> class.
         /// </summary>
-        /// <param name="downVirtualSubstates">downVirtualSubstates (required).</param>
-        /// <param name="upSubstates">upSubstates (required).</param>
-        /// <param name="downSubstates">downSubstates (required).</param>
+        /// <param name="createdSubstates">createdSubstates (required).</param>
+        /// <param name="updatedSubstates">updatedSubstates (required).</param>
+        /// <param name="deletedSubstates">deletedSubstates (required).</param>
         /// <param name="newGlobalEntities">newGlobalEntities (required).</param>
-        public StateUpdates(List<SubstateId> downVirtualSubstates = default(List<SubstateId>), List<UpSubstate> upSubstates = default(List<UpSubstate>), List<DownSubstate> downSubstates = default(List<DownSubstate>), List<GlobalEntityAssignment> newGlobalEntities = default(List<GlobalEntityAssignment>))
+        public StateUpdates(List<NewSubstateVersion> createdSubstates = default(List<NewSubstateVersion>), List<NewSubstateVersion> updatedSubstates = default(List<NewSubstateVersion>), List<DeletedSubstateVersionRef> deletedSubstates = default(List<DeletedSubstateVersionRef>), List<GlobalEntityAssignment> newGlobalEntities = default(List<GlobalEntityAssignment>))
         {
-            // to ensure "downVirtualSubstates" is required (not null)
-            if (downVirtualSubstates == null)
+            // to ensure "createdSubstates" is required (not null)
+            if (createdSubstates == null)
             {
-                throw new ArgumentNullException("downVirtualSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("createdSubstates is a required property for StateUpdates and cannot be null");
             }
-            this.DownVirtualSubstates = downVirtualSubstates;
-            // to ensure "upSubstates" is required (not null)
-            if (upSubstates == null)
+            this.CreatedSubstates = createdSubstates;
+            // to ensure "updatedSubstates" is required (not null)
+            if (updatedSubstates == null)
             {
-                throw new ArgumentNullException("upSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("updatedSubstates is a required property for StateUpdates and cannot be null");
             }
-            this.UpSubstates = upSubstates;
-            // to ensure "downSubstates" is required (not null)
-            if (downSubstates == null)
+            this.UpdatedSubstates = updatedSubstates;
+            // to ensure "deletedSubstates" is required (not null)
+            if (deletedSubstates == null)
             {
-                throw new ArgumentNullException("downSubstates is a required property for StateUpdates and cannot be null");
+                throw new ArgumentNullException("deletedSubstates is a required property for StateUpdates and cannot be null");
             }
-            this.DownSubstates = downSubstates;
+            this.DeletedSubstates = deletedSubstates;
             // to ensure "newGlobalEntities" is required (not null)
             if (newGlobalEntities == null)
             {
@@ -137,22 +137,22 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// Gets or Sets DownVirtualSubstates
+        /// Gets or Sets CreatedSubstates
         /// </summary>
-        [DataMember(Name = "down_virtual_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<SubstateId> DownVirtualSubstates { get; set; }
+        [DataMember(Name = "created_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<NewSubstateVersion> CreatedSubstates { get; set; }
 
         /// <summary>
-        /// Gets or Sets UpSubstates
+        /// Gets or Sets UpdatedSubstates
         /// </summary>
-        [DataMember(Name = "up_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<UpSubstate> UpSubstates { get; set; }
+        [DataMember(Name = "updated_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<NewSubstateVersion> UpdatedSubstates { get; set; }
 
         /// <summary>
-        /// Gets or Sets DownSubstates
+        /// Gets or Sets DeletedSubstates
         /// </summary>
-        [DataMember(Name = "down_substates", IsRequired = true, EmitDefaultValue = true)]
-        public List<DownSubstate> DownSubstates { get; set; }
+        [DataMember(Name = "deleted_substates", IsRequired = true, EmitDefaultValue = true)]
+        public List<DeletedSubstateVersionRef> DeletedSubstates { get; set; }
 
         /// <summary>
         /// Gets or Sets NewGlobalEntities
@@ -168,9 +168,9 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class StateUpdates {\n");
-            sb.Append("  DownVirtualSubstates: ").Append(DownVirtualSubstates).Append("\n");
-            sb.Append("  UpSubstates: ").Append(UpSubstates).Append("\n");
-            sb.Append("  DownSubstates: ").Append(DownSubstates).Append("\n");
+            sb.Append("  CreatedSubstates: ").Append(CreatedSubstates).Append("\n");
+            sb.Append("  UpdatedSubstates: ").Append(UpdatedSubstates).Append("\n");
+            sb.Append("  DeletedSubstates: ").Append(DeletedSubstates).Append("\n");
             sb.Append("  NewGlobalEntities: ").Append(NewGlobalEntities).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -208,22 +208,22 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.DownVirtualSubstates == input.DownVirtualSubstates ||
-                    this.DownVirtualSubstates != null &&
-                    input.DownVirtualSubstates != null &&
-                    this.DownVirtualSubstates.SequenceEqual(input.DownVirtualSubstates)
+                    this.CreatedSubstates == input.CreatedSubstates ||
+                    this.CreatedSubstates != null &&
+                    input.CreatedSubstates != null &&
+                    this.CreatedSubstates.SequenceEqual(input.CreatedSubstates)
                 ) && 
                 (
-                    this.UpSubstates == input.UpSubstates ||
-                    this.UpSubstates != null &&
-                    input.UpSubstates != null &&
-                    this.UpSubstates.SequenceEqual(input.UpSubstates)
+                    this.UpdatedSubstates == input.UpdatedSubstates ||
+                    this.UpdatedSubstates != null &&
+                    input.UpdatedSubstates != null &&
+                    this.UpdatedSubstates.SequenceEqual(input.UpdatedSubstates)
                 ) && 
                 (
-                    this.DownSubstates == input.DownSubstates ||
-                    this.DownSubstates != null &&
-                    input.DownSubstates != null &&
-                    this.DownSubstates.SequenceEqual(input.DownSubstates)
+                    this.DeletedSubstates == input.DeletedSubstates ||
+                    this.DeletedSubstates != null &&
+                    input.DeletedSubstates != null &&
+                    this.DeletedSubstates.SequenceEqual(input.DeletedSubstates)
                 ) && 
                 (
                     this.NewGlobalEntities == input.NewGlobalEntities ||
@@ -242,17 +242,17 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.DownVirtualSubstates != null)
+                if (this.CreatedSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.DownVirtualSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CreatedSubstates.GetHashCode();
                 }
-                if (this.UpSubstates != null)
+                if (this.UpdatedSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.UpSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.UpdatedSubstates.GetHashCode();
                 }
-                if (this.DownSubstates != null)
+                if (this.DeletedSubstates != null)
                 {
-                    hashCode = (hashCode * 59) + this.DownSubstates.GetHashCode();
+                    hashCode = (hashCode * 59) + this.DeletedSubstates.GetHashCode();
                 }
                 if (this.NewGlobalEntities != null)
                 {

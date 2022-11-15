@@ -105,7 +105,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NetworkStatusResponse" /> class.
         /// </summary>
         /// <param name="preGenesisStateIdentifier">preGenesisStateIdentifier (required).</param>
-        /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier (required).</param>
+        /// <param name="postGenesisStateIdentifier">postGenesisStateIdentifier.</param>
         /// <param name="currentStateIdentifier">currentStateIdentifier (required).</param>
         public NetworkStatusResponse(CommittedStateIdentifier preGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier postGenesisStateIdentifier = default(CommittedStateIdentifier), CommittedStateIdentifier currentStateIdentifier = default(CommittedStateIdentifier))
         {
@@ -115,18 +115,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("preGenesisStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
             }
             this.PreGenesisStateIdentifier = preGenesisStateIdentifier;
-            // to ensure "postGenesisStateIdentifier" is required (not null)
-            if (postGenesisStateIdentifier == null)
-            {
-                throw new ArgumentNullException("postGenesisStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
-            }
-            this.PostGenesisStateIdentifier = postGenesisStateIdentifier;
             // to ensure "currentStateIdentifier" is required (not null)
             if (currentStateIdentifier == null)
             {
                 throw new ArgumentNullException("currentStateIdentifier is a required property for NetworkStatusResponse and cannot be null");
             }
             this.CurrentStateIdentifier = currentStateIdentifier;
+            this.PostGenesisStateIdentifier = postGenesisStateIdentifier;
         }
 
         /// <summary>
@@ -138,7 +133,7 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Gets or Sets PostGenesisStateIdentifier
         /// </summary>
-        [DataMember(Name = "post_genesis_state_identifier", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "post_genesis_state_identifier", EmitDefaultValue = true)]
         public CommittedStateIdentifier PostGenesisStateIdentifier { get; set; }
 
         /// <summary>

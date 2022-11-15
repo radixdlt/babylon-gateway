@@ -92,10 +92,10 @@ internal class DataAggregatorMetricsObserver :
     INodeTransactionLogWorkerObserver,
     INodeMempoolTransactionHashesReaderWorkerObserver,
     INodeMempoolFullTransactionReaderWorkerObserver,
-    IRawTransactionWriterObserver,
+    ILedgerExtenderServiceObserver,
     INetworkConfigurationReaderObserver,
     INetworkStatusReaderObserver,
-    ITransactionLogReaderObserver
+    ITransactionStreamReaderObserver
 {
     private static readonly Counter _globalWorkerErrorsCount = Metrics
         .CreateCounter(
@@ -725,14 +725,14 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IRawTransactionWriterObserver.TransactionsMarkedCommittedWhichWasFailed()
+    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedWhichWasFailed()
     {
         _transactionsMarkedCommittedWhichWereFailedCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IRawTransactionWriterObserver.TransactionsMarkedCommittedCount(int count)
+    ValueTask ILedgerExtenderServiceObserver.TransactionsMarkedCommittedCount(int count)
     {
         _transactionsMarkedCommittedCount.Inc(count);
 
@@ -753,7 +753,7 @@ internal class DataAggregatorMetricsObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask ITransactionLogReaderObserver.GetTransactionsFailed(string nodeName, Exception exception)
+    ValueTask ITransactionStreamReaderObserver.GetTransactionsFailed(string nodeName, Exception exception)
     {
         _failedTransactionsFetchCounterUnScoped.WithLabels(nodeName).Inc();
 

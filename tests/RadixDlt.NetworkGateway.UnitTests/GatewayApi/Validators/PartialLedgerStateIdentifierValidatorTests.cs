@@ -80,14 +80,14 @@ public class PartialLedgerStateIdentifierValidatorTests
     }
 
     [Theory]
-    [InlineData(1, null, null, null)]
-    [InlineData(10000, null, null, null)]
+    [InlineData(1L, null, null, null)]
+    [InlineData(10000L, null, null, null)]
     [InlineData(null, "2020-06-06T11:59:59Z", null, null)]
     [InlineData(null, "2000-06-06T12:00:00Z", null, null)]
-    [InlineData(null, null, 1, null)]
-    [InlineData(null, null, 10000, null)]
-    [InlineData(null, null, 10000, 1)]
-    [InlineData(null, null, 10000, 10000)]
+    [InlineData(null, null, 1L, null)]
+    [InlineData(null, null, 10000L, null)]
+    [InlineData(null, null, 10000L, 1L)]
+    [InlineData(null, null, 10000L, 10000L)]
     public void WhenGiven_ValidPartialLedgerStateIdentifier_ShouldNotHaveAnyValidationErrors(long? stateVersion, string? timestamp, long? epoch, long? round)
     {
         var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
@@ -97,22 +97,22 @@ public class PartialLedgerStateIdentifierValidatorTests
 
     [Theory]
     [InlineData(null, null, null, null)]
-    [InlineData(1, "2020-06-06T11:59:59Z", 1, 1)]
-    [InlineData(1, "2020-06-06T11:59:59Z", null, null)]
-    [InlineData(1, "2020-06-06T11:59:59Z", 1, null)]
-    [InlineData(1, null, 1, null)]
-    [InlineData(1, null, null, 1)]
-    [InlineData(null, "2020-06-06T11:59:59Z", 1, 1)]
-    [InlineData(null, "2020-06-06T11:59:59Z", 1, null)]
-    [InlineData(null, null, null, 1)]
-    [InlineData(0, null, null, null)]
-    [InlineData(-1, null, null, null)]
+    [InlineData(1L, "2020-06-06T11:59:59Z", 1L, 1L)]
+    [InlineData(1L, "2020-06-06T11:59:59Z", null, null)]
+    [InlineData(1L, "2020-06-06T11:59:59Z", 1L, null)]
+    [InlineData(1L, null, 1L, null)]
+    [InlineData(1L, null, null, 1L)]
+    [InlineData(null, "2020-06-06T11:59:59Z", 1L, 1L)]
+    [InlineData(null, "2020-06-06T11:59:59Z", 1L, null)]
+    [InlineData(null, null, null, 1L)]
+    [InlineData(0L, null, null, null)]
+    [InlineData(-1L, null, null, null)]
     [InlineData(null, "2020-06-06T12:00:01Z", null, null)]
     [InlineData(null, "2020-06-06T13:00:00Z", null, null)]
-    [InlineData(null, null, 0, null)]
-    [InlineData(null, null, -1, null)]
-    [InlineData(null, null, 23, 0)]
-    [InlineData(null, null, 23, -1)]
+    [InlineData(null, null, 0L, null)]
+    [InlineData(null, null, -1L, null)]
+    [InlineData(null, null, 23L, 0L)]
+    [InlineData(null, null, 23L, -1L)]
     public void WhenGiven_InvalidPartialLedgerStateIdentifier_ShouldHaveAnyValidationError(long? stateVersion, string? timestamp, long? epoch, long? round)
     {
         var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);

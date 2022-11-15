@@ -97,27 +97,24 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public string? GlobalAddress { get; private set; }
 
-    public string? GlobalHrpAddress { get; private set; }
-
     public Type? TypeHint { get; private set; }
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
-    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new Exception("impossible bla bla bla");
+    public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new Exception("impossible bla bla bla");
+    public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
     public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.KeyValueStore or CoreModel.EntityType.Global;
 
     [MemberNotNullWhen(true, nameof(Parent))]
     public bool HasParent => _parent != null;
 
-    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("bla bla bal bla x8");
+    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("Parent not set, probably global entity or incorrectly configured one.");
 
-    public void Globalize(string addressHex, string hrpAddress)
+    public void Globalize(string globalAddressHex)
     {
-        GlobalAddress = addressHex;
-        GlobalHrpAddress = hrpAddress;
+        GlobalAddress = globalAddressHex;
     }
 
     public void Resolve(Entity entity)
@@ -128,14 +125,6 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
         {
             GlobalAddress = entity.GlobalAddress.ToHex();
         }
-    }
-
-    public void ResolveParentalIds(long[] ids, long parentId, long ownerId, long globalId)
-    {
-        GetDatabaseEntity().AncestorIds = ids;
-        GetDatabaseEntity().ParentAncestorId = parentId;
-        GetDatabaseEntity().OwnerAncestorId = ownerId;
-        GetDatabaseEntity().GlobalAncestorId = globalId;
     }
 
     public void IsChildOf(ReferencedEntity parent)
@@ -167,28 +156,43 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
         if (Activator.CreateInstance(TypeHint) is not TEntity instance)
         {
-            throw new Exception("Unable to create instance");
+            throw new InvalidOperationException("Unable to create instance");
         }
 
         return instance;
     }
 
+    public void ConfigureDatabaseEntity<T>(Action<T> action)
+        where T : Entity
+    {
+        var dbEntity = GetDatabaseEntity();
+
+        if (dbEntity is not T typedDbEntity)
+        {
+            throw new ArgumentException("Action argument type does not match underlying entity type.", nameof(action));
+        }
+
+        action.Invoke(typedDbEntity);
+    }
+
     private Entity GetDatabaseEntity()
     {
-        var de = _databaseEntity ?? throw new Exception("bla bla"); // TODO fix me
+        var de = _databaseEntity ?? throw new InvalidOperationException("Database entity not loaded yet.");
 
         if (de.Id == 0)
         {
-            throw new Exception("bla bla bla bla x6"); // TODO fix me
+            throw new InvalidOperationException("Database entity not ready yet.");
         }
 
         return de;
     }
 }
 
-internal record FungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, TokenAmount Balance, long StateVersion);
+internal record FungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, TokenAmount Balance, long StateVersion);
 
-internal record NonFungibleResourceChange(ReferencedEntity SubstateEntity, ReferencedEntity ResourceEntity, List<string> Ids, long StateVersion);
+internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<byte[]> NonFungibleIds, long StateVersion);
+
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, byte[] NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData Data, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
@@ -317,9 +321,9 @@ internal class ReferencedEntityDictionary
         return _storage[addressHex];
     }
 
-    public ReferencedEntity GetByGlobal(string globalAddress)
+    public ReferencedEntity GetByGlobal(string globalAddressHex)
     {
-        return _globalsCache.GetOrAdd(globalAddress, _ => _storage.Values.First(re => re.GlobalAddress == globalAddress));
+        return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddress == globalAddressHex));
     }
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)
@@ -345,6 +349,10 @@ internal class SequencesHolder
 
     public long FungibleResourceSupplyHistorySequence { get; set; }
 
+    public long NonFungibleIdHistorySequence { get; set; }
+
+    public long NonFungibleIdMutableDataHistorySequence { get; set; }
+
     public long NextEntity => EntitySequence++;
 
     public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
@@ -354,4 +362,8 @@ internal class SequencesHolder
     public long NextEntityResourceHistory => EntityResourceHistorySequence++;
 
     public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
+
+    public long NextNonFungibleIdHistory => NonFungibleIdHistorySequence++;
+
+    public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
 }

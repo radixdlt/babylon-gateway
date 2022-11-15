@@ -101,10 +101,10 @@ namespace RadixDlt.CoreApiSdk.Model
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Substate" /> class
-        /// with the <see cref="SystemSubstate" /> class
+        /// with the <see cref="EpochManagerSubstate" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of SystemSubstate.</param>
-        public Substate(SystemSubstate actualInstance)
+        /// <param name="actualInstance">An instance of EpochManagerSubstate.</param>
+        public Substate(EpochManagerSubstate actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -229,6 +229,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     this._actualInstance = value;
                 }
+                else if (value.GetType() == typeof(EpochManagerSubstate))
+                {
+                    this._actualInstance = value;
+                }
                 else if (value.GetType() == typeof(GlobalSubstate))
                 {
                     this._actualInstance = value;
@@ -249,29 +253,25 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     this._actualInstance = value;
                 }
-                else if (value.GetType() == typeof(SystemSubstate))
-                {
-                    this._actualInstance = value;
-                }
                 else if (value.GetType() == typeof(VaultSubstate))
                 {
                     this._actualInstance = value;
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: ComponentInfoSubstate, ComponentStateSubstate, GlobalSubstate, KeyValueStoreEntrySubstate, NonFungibleSubstate, PackageSubstate, ResourceManagerSubstate, SystemSubstate, VaultSubstate");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: ComponentInfoSubstate, ComponentStateSubstate, EpochManagerSubstate, GlobalSubstate, KeyValueStoreEntrySubstate, NonFungibleSubstate, PackageSubstate, ResourceManagerSubstate, VaultSubstate");
                 }
             }
         }
 
         /// <summary>
-        /// Get the actual instance of `SystemSubstate`. If the actual instance is not `SystemSubstate`,
+        /// Get the actual instance of `EpochManagerSubstate`. If the actual instance is not `EpochManagerSubstate`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of SystemSubstate</returns>
-        public SystemSubstate GetSystemSubstate()
+        /// <returns>An instance of EpochManagerSubstate</returns>
+        public EpochManagerSubstate GetEpochManagerSubstate()
         {
-            return (SystemSubstate)this.ActualInstance;
+            return (EpochManagerSubstate)this.ActualInstance;
         }
 
         /// <summary>
@@ -408,6 +408,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     case "ComponentStateSubstate":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ComponentStateSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
+                    case "EpochManager":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
+                    case "EpochManagerSubstate":
+                        newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                        return newSubstate;
                     case "Global":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<GlobalSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
@@ -438,12 +444,6 @@ namespace RadixDlt.CoreApiSdk.Model
                     case "ResourceManagerSubstate":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<ResourceManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
-                    case "System":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<SystemSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
-                    case "SystemSubstate":
-                        newSubstate = new Substate(JsonConvert.DeserializeObject<SystemSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                        return newSubstate;
                     case "Vault":
                         newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
@@ -451,7 +451,7 @@ namespace RadixDlt.CoreApiSdk.Model
                         newSubstate = new Substate(JsonConvert.DeserializeObject<VaultSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
                         return newSubstate;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: ComponentInfo ComponentInfoSubstate ComponentState ComponentStateSubstate Global GlobalSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate NonFungible NonFungibleSubstate Package PackageSubstate ResourceManager ResourceManagerSubstate System SystemSubstate Vault VaultSubstate", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for Substate. Possible values: ComponentInfo ComponentInfoSubstate ComponentState ComponentStateSubstate EpochManager EpochManagerSubstate Global GlobalSubstate KeyValueStoreEntry KeyValueStoreEntrySubstate NonFungible NonFungibleSubstate Package PackageSubstate ResourceManager ResourceManagerSubstate Vault VaultSubstate", discriminatorValue));
                         break;
                 }
             }
@@ -501,6 +501,26 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 // deserialization failed, try the next one
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ComponentStateSubstate: {1}", jsonString, exception.ToString()));
+            }
+
+            try
+            {
+                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
+                if (typeof(EpochManagerSubstate).GetProperty("AdditionalProperties") == null)
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.SerializerSettings));
+                }
+                else
+                {
+                    newSubstate = new Substate(JsonConvert.DeserializeObject<EpochManagerSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
+                }
+                matchedTypes.Add("EpochManagerSubstate");
+                match++;
+            }
+            catch (Exception exception)
+            {
+                // deserialization failed, try the next one
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EpochManagerSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try
@@ -601,26 +621,6 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 // deserialization failed, try the next one
                 System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into ResourceManagerSubstate: {1}", jsonString, exception.ToString()));
-            }
-
-            try
-            {
-                // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(SystemSubstate).GetProperty("AdditionalProperties") == null)
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<SystemSubstate>(jsonString, Substate.SerializerSettings));
-                }
-                else
-                {
-                    newSubstate = new Substate(JsonConvert.DeserializeObject<SystemSubstate>(jsonString, Substate.AdditionalPropertiesSerializerSettings));
-                }
-                matchedTypes.Add("SystemSubstate");
-                match++;
-            }
-            catch (Exception exception)
-            {
-                // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into SystemSubstate: {1}", jsonString, exception.ToString()));
             }
 
             try

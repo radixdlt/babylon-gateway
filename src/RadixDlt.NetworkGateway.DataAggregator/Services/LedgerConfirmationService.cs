@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Abstractions.Utilities;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
 using RadixDlt.NetworkGateway.DataAggregator.Monitoring;
+using RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -161,12 +162,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     /// <summary>
     /// To be called from the node worker.
     /// </summary>
-    public void SubmitNodeNetworkStatus(
-        string nodeName,
-        long ledgerTipStateVersion,
-        byte[] ledgerTipAccumulator,
-        long targetStateVersion
-    )
+    public void SubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, byte[] ledgerTipAccumulator, long targetStateVersion)
     {
         _observers.ForEach(x => x.PreSubmitNodeNetworkStatus(nodeName, ledgerTipStateVersion, targetStateVersion));
 
@@ -178,7 +174,6 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
             return;
         }
 
-        // TODO not sure how this suits Babylon
         var cachedAccumulator = _quorumAccumulatorCacheByStateVersion.GetOrDefault(ledgerTipStateVersion);
 
         if (cachedAccumulator == null)
@@ -205,7 +200,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         if (!_latestLedgerTipByNode.ContainsKey(nodeName))
         {
-            throw new Exception("The node's ledger tip must be written first");
+            throw new InvalidNodeStateException("The node's ledger tip must be written first");
         }
 
         var transactionStoreForNode = GetTransactionsForNode(nodeName);
@@ -229,12 +224,22 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         var exclusiveLowerBound = currentTopOfLedger.StateVersion;
         var inclusiveUpperBound = currentTopOfLedger.StateVersion + Config.MaxTransactionPipelineSizePerNode;
-
         var firstMissingStateVersionGap = GetFirstStateVersionGapForNode(nodeName, exclusiveLowerBound, inclusiveUpperBound);
 
-        return (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
-            ? null
-            : new TransactionsRequested(firstMissingStateVersionGap.Value, inclusiveUpperBound);
+        if (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
+        {
+            return null;
+        }
+
+        var inclusiveLowerBound = firstMissingStateVersionGap.Value;
+        var knownNodeTip = _latestLedgerTipByNode[nodeName];
+
+        if (inclusiveLowerBound > knownNodeTip)
+        {
+            return null;
+        }
+
+        return new TransactionsRequested(inclusiveLowerBound, inclusiveUpperBound);
     }
 
     private void PrepareForLedgerExtensionCheck()
@@ -411,14 +416,13 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
     private void AddAccumulatorsToCache(ConsistentLedgerExtension ledgerExtension)
     {
-        // TODO not sure how this suits Babylon
-        // foreach (var transactionData in ledgerExtension.TransactionData)
-        // {
-        //     _quorumAccumulatorCacheByStateVersion.Set(
-        //         transactionData.TransactionSummary.StateVersion,
-        //         transactionData.TransactionSummary.TransactionAccumulator
-        //     );
-        // }
+        foreach (var committedTransaction in ledgerExtension.CommittedTransactions)
+        {
+            _quorumAccumulatorCacheByStateVersion.Set(
+                committedTransaction.StateVersion,
+                committedTransaction.AccumulatorHash.ConvertFromHex()
+            );
+        }
     }
 
     private void UpdateRecordsOfTopOfLedger(TransactionSummary topOfLedger)
@@ -490,18 +494,21 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions)
     {
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
-
-        // TODO leftover from Olympia
-        // var currentParentSummary = transactionBatchParentSummary;
+        var previousStateVersion = transactionBatchParentSummary.StateVersion;
 
         try
         {
-            // TODO adjust & restore
-            // foreach (var transaction in transactions)
-            // {
-            //     TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
-            //     TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
-            // }
+            foreach (var transaction in transactions)
+            {
+                TransactionConsistency.AssertChildTransactionConsistent(previousStateVersion, transaction.StateVersion);
+
+                if (transaction.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction ult)
+                {
+                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.PayloadHex.ConvertFromHex(), ult.NotarizedTransaction.Hash.ConvertFromHex());
+                }
+
+                previousStateVersion = transaction.StateVersion;
+            }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());
         }
@@ -525,7 +532,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
 
         if (ledgerTips.Count == 0)
         {
-            throw new Exception("At least one ledger tip must have been submitted");
+            throw new InvalidNodeStateException("At least one ledger tip must have been submitted");
         }
 
         return ledgerTips.Max();

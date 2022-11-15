@@ -113,8 +113,10 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="resourceType">resourceType (required).</param>
         /// <param name="fungibleDivisibility">fungibleDivisibility.</param>
         /// <param name="metadata">metadata (required).</param>
-        /// <param name="totalSupplyAttos">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total supply of this resource.  (required).</param>
-        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupplyAttos = default(string))
+        /// <param name="totalSupply">The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        /// <param name="ownedNonFungibleStore">ownedNonFungibleStore.</param>
+        /// <param name="authRules">authRules (required).</param>
+        public ResourceManagerSubstateAllOf(ResourceType resourceType = default(ResourceType), int fungibleDivisibility = default(int), List<ResourceManagerSubstateAllOfMetadata> metadata = default(List<ResourceManagerSubstateAllOfMetadata>), string totalSupply = default(string), EntityReference ownedNonFungibleStore = default(EntityReference), ResourceManagerSubstateAllOfAuthRules authRules = default(ResourceManagerSubstateAllOfAuthRules))
         {
             this.ResourceType = resourceType;
             // to ensure "metadata" is required (not null)
@@ -123,13 +125,20 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("metadata is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
             this.Metadata = metadata;
-            // to ensure "totalSupplyAttos" is required (not null)
-            if (totalSupplyAttos == null)
+            // to ensure "totalSupply" is required (not null)
+            if (totalSupply == null)
             {
-                throw new ArgumentNullException("totalSupplyAttos is a required property for ResourceManagerSubstateAllOf and cannot be null");
+                throw new ArgumentNullException("totalSupply is a required property for ResourceManagerSubstateAllOf and cannot be null");
             }
-            this.TotalSupplyAttos = totalSupplyAttos;
+            this.TotalSupply = totalSupply;
+            // to ensure "authRules" is required (not null)
+            if (authRules == null)
+            {
+                throw new ArgumentNullException("authRules is a required property for ResourceManagerSubstateAllOf and cannot be null");
+            }
+            this.AuthRules = authRules;
             this.FungibleDivisibility = fungibleDivisibility;
+            this.OwnedNonFungibleStore = ownedNonFungibleStore;
         }
 
         /// <summary>
@@ -145,11 +154,23 @@ namespace RadixDlt.CoreApiSdk.Model
         public List<ResourceManagerSubstateAllOfMetadata> Metadata { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total supply of this resource. 
+        /// The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        /// <value>A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^255 - 1&#x60;, which represents the total number of &#x60;10^(-18)&#x60; subunits in the total supply of this resource. </value>
-        [DataMember(Name = "total_supply_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string TotalSupplyAttos { get; set; }
+        /// <value>The string-encoded decimal representing the total supply of this resource. A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
+        public string TotalSupply { get; set; }
+
+        /// <summary>
+        /// Gets or Sets OwnedNonFungibleStore
+        /// </summary>
+        [DataMember(Name = "owned_non_fungible_store", EmitDefaultValue = true)]
+        public EntityReference OwnedNonFungibleStore { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AuthRules
+        /// </summary>
+        [DataMember(Name = "auth_rules", IsRequired = true, EmitDefaultValue = true)]
+        public ResourceManagerSubstateAllOfAuthRules AuthRules { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -162,7 +183,9 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  ResourceType: ").Append(ResourceType).Append("\n");
             sb.Append("  FungibleDivisibility: ").Append(FungibleDivisibility).Append("\n");
             sb.Append("  Metadata: ").Append(Metadata).Append("\n");
-            sb.Append("  TotalSupplyAttos: ").Append(TotalSupplyAttos).Append("\n");
+            sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
+            sb.Append("  OwnedNonFungibleStore: ").Append(OwnedNonFungibleStore).Append("\n");
+            sb.Append("  AuthRules: ").Append(AuthRules).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -213,9 +236,19 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Metadata.SequenceEqual(input.Metadata)
                 ) && 
                 (
-                    this.TotalSupplyAttos == input.TotalSupplyAttos ||
-                    (this.TotalSupplyAttos != null &&
-                    this.TotalSupplyAttos.Equals(input.TotalSupplyAttos))
+                    this.TotalSupply == input.TotalSupply ||
+                    (this.TotalSupply != null &&
+                    this.TotalSupply.Equals(input.TotalSupply))
+                ) && 
+                (
+                    this.OwnedNonFungibleStore == input.OwnedNonFungibleStore ||
+                    (this.OwnedNonFungibleStore != null &&
+                    this.OwnedNonFungibleStore.Equals(input.OwnedNonFungibleStore))
+                ) && 
+                (
+                    this.AuthRules == input.AuthRules ||
+                    (this.AuthRules != null &&
+                    this.AuthRules.Equals(input.AuthRules))
                 );
         }
 
@@ -234,9 +267,17 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
-                if (this.TotalSupplyAttos != null)
+                if (this.TotalSupply != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalSupplyAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalSupply.GetHashCode();
+                }
+                if (this.OwnedNonFungibleStore != null)
+                {
+                    hashCode = (hashCode * 59) + this.OwnedNonFungibleStore.GetHashCode();
+                }
+                if (this.AuthRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AuthRules.GetHashCode();
                 }
                 return hashCode;
             }

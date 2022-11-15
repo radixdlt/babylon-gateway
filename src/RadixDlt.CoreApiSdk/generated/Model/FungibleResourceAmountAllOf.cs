@@ -104,23 +104,23 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="FungibleResourceAmountAllOf" /> class.
         /// </summary>
-        /// <param name="amountAttos">The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types.  (required).</param>
-        public FungibleResourceAmountAllOf(string amountAttos = default(string))
+        /// <param name="amount">The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;.  (required).</param>
+        public FungibleResourceAmountAllOf(string amount = default(string))
         {
-            // to ensure "amountAttos" is required (not null)
-            if (amountAttos == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("amountAttos is a required property for FungibleResourceAmountAllOf and cannot be null");
+                throw new ArgumentNullException("amount is a required property for FungibleResourceAmountAllOf and cannot be null");
             }
-            this.AmountAttos = amountAttos;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. 
+        /// The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. 
         /// </summary>
-        /// <value>The string-encoded decimal subunits of the amount (&#x60;10^-18&#x60;) in a signed 256-bit integer. This is string-encoded as it doesn&#39;t fit well into common numeric types. </value>
-        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountAttos { get; set; }
+        /// <value>The string-encoded decimal representing the amount of this resource (some decimal for fungible resources, a whole integer for non-fungible resources). A decimal is formed of some signed integer &#x60;m&#x60; of attos (&#x60;10^(-18)&#x60;) units, where &#x60;-2^(256 - 1) &lt;&#x3D; m &lt; 2^(256 - 1)&#x60;. </value>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public string Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,7 +130,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class FungibleResourceAmountAllOf {\n");
-            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,9 +167,9 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.AmountAttos == input.AmountAttos ||
-                    (this.AmountAttos != null &&
-                    this.AmountAttos.Equals(input.AmountAttos))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -182,9 +182,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.AmountAttos != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

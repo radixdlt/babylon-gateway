@@ -63,8 +63,8 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.Abstractions.CoreCommunications;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -77,11 +77,9 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     Task Initialize(ICapturedConfigProvider capturedConfigProvider, CancellationToken token);
 
     string GetNetworkName();
-
-    GatewayModel.TokenIdentifier GetXrdTokenIdentifier();
 }
 
-public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition, GatewayModel.TokenIdentifier XrdTokenIdentifier);
+public sealed record CapturedConfig(string NetworkName, string XrdAddress, HrpDefinition HrpDefinition);
 
 public interface ICapturedConfigProvider
 {
@@ -123,13 +121,8 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().XrdAddress;
     }
 
-    public GatewayModel.TokenIdentifier GetXrdTokenIdentifier()
-    {
-        return GetCapturedConfig().XrdTokenIdentifier;
-    }
-
     private CapturedConfig GetCapturedConfig()
     {
-        return _capturedConfig ?? throw new Exception("Config hasn't been captured from a Node or from the Database yet.");
+        return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
     }
 }

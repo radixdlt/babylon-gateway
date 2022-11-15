@@ -116,19 +116,23 @@ internal class PreviewService : IPreviewService
 
         var result = await _coreApiHandler.PreviewTransaction(
             new CoreModel.TransactionPreviewRequest(
-                _coreApiHandler.GetNetworkIdentifier(),
-                request.Manifest,
-                request.BlobsHex,
-                request.CostUnitLimit,
-                request.TipPercentage,
-                request.Nonce,
-                request.SignerPublicKeys.Select(pk => pk.ActualInstance switch
+                network: _coreApiHandler.GetNetworkIdentifier(),
+                manifest: request.Manifest,
+                blobsHex: request.BlobsHex,
+                startEpochInclusive: default, // TODO fix me
+                endEpochExclusive: default, // TODO fix me
+                notaryPublicKey: default, // TODO fix me
+                notaryAsSignatory: default, // TODO fix me
+                costUnitLimit: request.CostUnitLimit,
+                tipPercentage: request.TipPercentage,
+                nonce: request.Nonce,
+                signerPublicKeys: request.SignerPublicKeys.Select(pk => pk.ActualInstance switch
                 {
                     GatewayModel.EcdsaSecp256k1PublicKey ecdsa => new CoreModel.PublicKey(new CoreModel.EcdsaSecp256k1PublicKey(CoreModel.PublicKeyType.EcdsaSecp256k1, ecdsa.KeyHex)),
                     GatewayModel.EddsaEd25519PublicKey eddsa => new CoreModel.PublicKey(new CoreModel.EddsaEd25519PublicKey(CoreModel.PublicKeyType.EddsaEd25519, eddsa.KeyHex)),
                     _ => throw new Exception("fix me"),
                 }).ToList(),
-                new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan, request.Flags.AssumeAllSignatureProofs)
+                flags: new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan, request.Flags.AssumeAllSignatureProofs)
             ),
             token
         );
