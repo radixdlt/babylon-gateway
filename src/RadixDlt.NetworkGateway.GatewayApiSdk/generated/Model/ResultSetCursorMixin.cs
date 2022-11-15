@@ -99,15 +99,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultSetCursorMixin" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected ResultSetCursorMixin() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResultSetCursorMixin" /> class.
-        /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        public ResultSetCursorMixin(int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string))
+        public ResultSetCursorMixin(int? totalCount = default(int?), string previousCursor = default(string), string nextCursor = default(string))
         {
             this.TotalCount = totalCount;
             this.PreviousCursor = previousCursor;
@@ -118,8 +113,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
         /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public int TotalCount { get; set; }
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public int? TotalCount { get; set; }
 
         /// <summary>
         /// TBD (maybe we should use HATEOAS-like permalinks?)
@@ -183,7 +178,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             return 
                 (
                     this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
                     this.PreviousCursor == input.PreviousCursor ||
@@ -206,7 +202,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.TotalCount != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                }
                 if (this.PreviousCursor != null)
                 {
                     hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
