@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
@@ -149,7 +150,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
-    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
+    public async Task<object> Preview(JObject request, CancellationToken token = default)
     {
         return await _previewService.HandlePreviewRequest(request, token);
     }

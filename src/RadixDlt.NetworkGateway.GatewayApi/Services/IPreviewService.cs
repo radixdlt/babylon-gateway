@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.CoreCommunications;
 using System;
@@ -76,7 +77,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IPreviewService
 {
-    Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default);
+    Task<object> HandlePreviewRequest(JObject request, CancellationToken token = default);
 }
 
 internal class PreviewService : IPreviewService
@@ -90,7 +91,7 @@ internal class PreviewService : IPreviewService
         _observers = observers;
     }
 
-    public async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, CancellationToken token = default)
+    public async Task<object> HandlePreviewRequest(JObject request, CancellationToken token = default)
     {
         try
         {
@@ -110,33 +111,21 @@ internal class PreviewService : IPreviewService
         }
     }
 
-    private async Task<GatewayModel.TransactionPreviewResponse> HandlePreviewAndCreateResponse(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
+    private async Task<object> HandlePreviewAndCreateResponse(JObject request, CancellationToken token)
     {
         // todo consider this a mock/dumb implementation for testing purposes only
 
-        var result = await _coreApiHandler.PreviewTransaction(
-            new CoreModel.TransactionPreviewRequest(
-                network: _coreApiHandler.GetNetworkIdentifier(),
-                manifest: request.Manifest,
-                blobsHex: request.BlobsHex,
-                startEpochInclusive: default, // TODO fix me
-                endEpochExclusive: default, // TODO fix me
-                notaryPublicKey: default, // TODO fix me
-                notaryAsSignatory: default, // TODO fix me
-                costUnitLimit: request.CostUnitLimit,
-                tipPercentage: request.TipPercentage,
-                nonce: request.Nonce,
-                signerPublicKeys: request.SignerPublicKeys.Select(pk => pk.ActualInstance switch
-                {
-                    GatewayModel.EcdsaSecp256k1PublicKey ecdsa => new CoreModel.PublicKey(new CoreModel.EcdsaSecp256k1PublicKey(CoreModel.PublicKeyType.EcdsaSecp256k1, ecdsa.KeyHex)),
-                    GatewayModel.EddsaEd25519PublicKey eddsa => new CoreModel.PublicKey(new CoreModel.EddsaEd25519PublicKey(CoreModel.PublicKeyType.EddsaEd25519, eddsa.KeyHex)),
-                    _ => throw new Exception("fix me"),
-                }).ToList(),
-                flags: new CoreModel.TransactionPreviewRequestFlags(request.Flags.UnlimitedLoan, request.Flags.AssumeAllSignatureProofs)
-            ),
-            token
-        );
+        var coreApiRequest = request.ToObject<CoreModel.TransactionPreviewRequest>();
 
-        return new GatewayModel.TransactionPreviewResponse(result);
+        if (coreApiRequest == null)
+        {
+            throw new Exception("bla bla bla xxx32");
+        }
+
+        coreApiRequest.Network = _coreApiHandler.GetNetworkIdentifier();
+
+        var result = await _coreApiHandler.PreviewTransaction(coreApiRequest, token);
+
+        return result;
     }
 }

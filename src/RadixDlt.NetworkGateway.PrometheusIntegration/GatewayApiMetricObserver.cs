@@ -63,6 +63,7 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Prometheus;
 using RadixDlt.NetworkGateway.Abstractions.Exceptions;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
@@ -322,21 +323,21 @@ internal class GatewayApiMetricObserver :
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request)
+    ValueTask IPreviewServiceObserver.PreHandlePreviewRequest(JObject request)
     {
         _transactionPreviewRequestCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(GatewayModel.TransactionPreviewRequest request, GatewayModel.TransactionPreviewResponse response)
+    ValueTask IPreviewServiceObserver.PostHandlePreviewRequest(JObject request, JObject response)
     {
         _transactionPreviewSuccessCount.Inc();
 
         return ValueTask.CompletedTask;
     }
 
-    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(GatewayModel.TransactionPreviewRequest request, Exception exception)
+    ValueTask IPreviewServiceObserver.HandlePreviewRequestFailed(JObject request, Exception exception)
     {
         _transactionPreviewErrorCount.Inc();
 
