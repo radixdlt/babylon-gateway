@@ -1118,21 +1118,21 @@ components:
           $ref: '#/components/schemas/FixedAuthorizationType'
     ProtectedFixedAuthorization:
       allOf:
+        - $ref: '#/components/schemas/FixedAuthorizationBase'
         - type: object
           required:
             - auth_rule
           properties:
             auth_rule:
               $ref: '#/components/schemas/FixedAuthRule'
-        - $ref: '#/components/schemas/FixedAuthorizationBase'
     AllowAllFixedAuthorization:
       allOf:
-        - type: object
         - $ref: '#/components/schemas/FixedAuthorizationBase'
+        - type: object
     DenyAllFixedAuthorization:
       allOf:
-        - type: object
         - $ref: '#/components/schemas/FixedAuthorizationBase'
+        - type: object
     FixedAuthRuleType:
       type: string
       enum:
@@ -1356,21 +1356,21 @@ components:
           $ref: '#/components/schemas/DynamicAuthorizationType'
     ProtectedDynamicAuthorization:
       allOf:
+        - $ref: '#/components/schemas/DynamicAuthorizationBase'
         - type: object
           required:
             - auth_rule
           properties:
             auth_rule:
               $ref: '#/components/schemas/DynamicAuthRule'
-        - $ref: '#/components/schemas/DynamicAuthorizationBase'
     AllowAllDynamicAuthorization:
       allOf:
-        - type: object
         - $ref: '#/components/schemas/DynamicAuthorizationBase'
+        - type: object
     DenyAllDynamicAuthorization:
       allOf:
-        - type: object
         - $ref: '#/components/schemas/DynamicAuthorizationBase'
+        - type: object
     DynamicAuthRuleType:
       type: string
       enum:

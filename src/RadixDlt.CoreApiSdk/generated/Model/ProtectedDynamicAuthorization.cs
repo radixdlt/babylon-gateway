@@ -110,17 +110,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProtectedDynamicAuthorization" /> class.
         /// </summary>
-        /// <param name="authRule">authRule (required).</param>
         /// <param name="type">type (required).</param>
-        public ProtectedDynamicAuthorization(DynamicAuthRule authRule = default(DynamicAuthRule), DynamicAuthorizationType type = default(DynamicAuthorizationType))
+        /// <param name="authRule">authRule (required).</param>
+        public ProtectedDynamicAuthorization(DynamicAuthorizationType type = default(DynamicAuthorizationType), DynamicAuthRule authRule = default(DynamicAuthRule))
         {
+            this.Type = type;
             // to ensure "authRule" is required (not null)
             if (authRule == null)
             {
                 throw new ArgumentNullException("authRule is a required property for ProtectedDynamicAuthorization and cannot be null");
             }
             this.AuthRule = authRule;
-            this.Type = type;
         }
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProtectedDynamicAuthorization {\n");
-            sb.Append("  AuthRule: ").Append(AuthRule).Append("\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  AuthRule: ").Append(AuthRule).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -175,13 +175,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                ) && 
+                (
                     this.AuthRule == input.AuthRule ||
                     (this.AuthRule != null &&
                     this.AuthRule.Equals(input.AuthRule))
-                ) && 
-                (
-                    this.Type == input.Type ||
-                    this.Type.Equals(input.Type)
                 );
         }
 
@@ -194,11 +194,11 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 if (this.AuthRule != null)
                 {
                     hashCode = (hashCode * 59) + this.AuthRule.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.Type.GetHashCode();
                 return hashCode;
             }
         }
