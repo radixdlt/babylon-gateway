@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityResourcesResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="fungibleResources">fungibleResources (required).</param>
         /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
         public EntityResourcesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityResourcesResponseFungibleResources fungibleResources = default(EntityResourcesResponseFungibleResources), EntityResourcesResponseNonFungibleResources nonFungibleResources = default(EntityResourcesResponseNonFungibleResources))
@@ -143,9 +143,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

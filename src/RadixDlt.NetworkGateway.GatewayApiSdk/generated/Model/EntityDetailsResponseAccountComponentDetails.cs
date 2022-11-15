@@ -111,7 +111,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseAccountComponentDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
-        /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string))
         {
             this.Discriminator = discriminator;
@@ -124,9 +124,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
         [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
         public string PackageAddress { get; set; }
 

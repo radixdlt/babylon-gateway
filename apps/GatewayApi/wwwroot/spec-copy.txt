@@ -243,7 +243,10 @@ components:
 
     EntityAddress:
       type: string
-      description: The Bech32m-encoded human readable version of the entity's global address
+      description: The Bech32m-encoded human readable version of the entity's global address.
+    ResourceManagerEntityAddress:
+      type: string
+      description: The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
 
     BigInteger:
       type: string
@@ -376,7 +379,7 @@ components:
         value:
           $ref: "#/components/schemas/BigInteger"
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/ResourceManagerEntityAddress"
 
     #
     # Mixins
@@ -596,7 +599,7 @@ components:
         - amount
       properties:
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/ResourceManagerEntityAddress"
         amount:
           $ref: "#/components/schemas/TokenAmount"
     EntityResourcesResponseNonFungibleResources:
@@ -617,7 +620,7 @@ components:
         - amount
       properties:
         address:
-          $ref: "#/components/schemas/EntityAddress"
+          $ref: "#/components/schemas/ResourceManagerEntityAddress"
         amount:
           type: number
 
