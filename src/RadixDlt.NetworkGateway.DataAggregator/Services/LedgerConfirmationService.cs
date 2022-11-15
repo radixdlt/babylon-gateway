@@ -493,18 +493,21 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     private ConsistentLedgerExtension GenerateConsistentLedgerExtension(List<CoreModel.CommittedTransaction> transactions)
     {
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
-
-        // TODO leftover from Olympia
-        // var currentParentSummary = transactionBatchParentSummary;
+        var previousStateVersion = transactionBatchParentSummary.StateVersion;
 
         try
         {
-            // TODO adjust & restore
-            // foreach (var transaction in transactions)
-            // {
-            //     TransactionConsistency.AssertTransactionHashCorrect(contents, summary.PayloadHash);
-            //     TransactionConsistency.AssertChildTransactionConsistent(currentParentSummary, summary);
-            // }
+            foreach (var transaction in transactions)
+            {
+                TransactionConsistency.AssertChildTransactionConsistent(previousStateVersion, transaction.StateVersion);
+
+                if (transaction.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction ult)
+                {
+                    TransactionConsistency.AssertTransactionHashCorrect(ult.NotarizedTransaction.PayloadHex.ConvertFromHex(), ult.NotarizedTransaction.Hash.ConvertFromHex());
+                }
+
+                previousStateVersion = transaction.StateVersion;
+            }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());
         }
