@@ -93,7 +93,7 @@ internal static class DictionaryExtensions
 internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long StateVersion)
 {
     private Entity? _databaseEntity;
-    private ReferencedEntity? _parent;
+    private ReferencedEntity? _immediateParentReference;
 
     public string? GlobalAddress { get; private set; }
 
@@ -101,16 +101,20 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
 
     public long DatabaseId => GetDatabaseEntity().Id;
 
+    public long? DatabaseParentAncestorId => GetDatabaseEntity().ParentAncestorId;
+
     public long DatabaseOwnerAncestorId => GetDatabaseEntity().OwnerAncestorId ?? throw new InvalidOperationException("OwnerAncestorId not set, probably global entity or incorrectly configured one.");
 
     public long DatabaseGlobalAncestorId => GetDatabaseEntity().GlobalAncestorId ?? throw new InvalidOperationException("GlobalAncestorId not set, probably global entity or incorrectly configured one.");
 
-    public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.KeyValueStore or CoreModel.EntityType.Global;
+    public bool CanBeOwner => Type is CoreModel.EntityType.Component or CoreModel.EntityType.ResourceManager or CoreModel.EntityType.KeyValueStore;
 
-    [MemberNotNullWhen(true, nameof(Parent))]
-    public bool HasParent => _parent != null;
+    public bool IsGlobal => GlobalAddress != null || GetDatabaseEntity().GlobalAddress != null;
 
-    public ReferencedEntity Parent => _parent ?? throw new InvalidOperationException("Parent not set, probably global entity or incorrectly configured one.");
+    [MemberNotNullWhen(true, nameof(ImmediateParentReference))]
+    public bool HasImmediateParentReference => _immediateParentReference != null;
+
+    public ReferencedEntity ImmediateParentReference => _immediateParentReference ?? throw new InvalidOperationException("Parent not set, probably global entity or incorrectly configured one.");
 
     public void Globalize(string globalAddressHex)
     {
@@ -127,9 +131,9 @@ internal record ReferencedEntity(string Address, CoreModel.EntityType Type, long
         }
     }
 
-    public void IsChildOf(ReferencedEntity parent)
+    public void IsImmediateChildOf(ReferencedEntity parent)
     {
-        _parent = parent;
+        _immediateParentReference = parent;
     }
 
     public void WithTypeHint(Type type)
@@ -291,6 +295,7 @@ internal class ReferencedEntityDictionary
     private readonly Dictionary<string, ReferencedEntity> _storage = new();
     private readonly Dictionary<long, List<ReferencedEntity>> _inversed = new();
     private readonly Dictionary<string, ReferencedEntity> _globalsCache = new();
+    private readonly Dictionary<long, ReferencedEntity> _dbIdCache = new();
 
     public ICollection<string> Addresses => _storage.Keys;
 
@@ -324,6 +329,11 @@ internal class ReferencedEntityDictionary
     public ReferencedEntity GetByGlobal(string globalAddressHex)
     {
         return _globalsCache.GetOrAdd(globalAddressHex, _ => _storage.Values.First(re => re.GlobalAddress == globalAddressHex));
+    }
+
+    public ReferencedEntity GetByDatabaseId(long id)
+    {
+        return _dbIdCache.GetOrAdd(id, _ => _storage.Values.First(re => re.DatabaseId == id));
     }
 
     public IEnumerable<ReferencedEntity> OfStateVersion(long stateVersion)

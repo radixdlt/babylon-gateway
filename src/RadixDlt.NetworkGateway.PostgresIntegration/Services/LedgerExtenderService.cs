@@ -413,7 +413,7 @@ SELECT
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
-                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsChildOf(re);
+                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(re);
 
                             childToParentEntities.Add(oe.EntityIdHex, sid.EntityIdHex);
                         }
@@ -608,17 +608,28 @@ WHERE id IN(
                         ownerId = currentParent.DatabaseId;
                     }
 
-                    if (!globalId.HasValue && !currentParent.HasParent)
+                    if (!globalId.HasValue && currentParent.IsGlobal)
                     {
                         globalId = currentParent.DatabaseId;
                     }
 
-                    currentParent = currentParent.HasParent ? currentParent.Parent : null;
+                    if (currentParent.HasImmediateParentReference)
+                    {
+                        currentParent = currentParent.ImmediateParentReference;
+                    }
+                    else if (currentParent.DatabaseParentAncestorId.HasValue)
+                    {
+                        currentParent = referencedEntities.GetByDatabaseId(currentParent.DatabaseParentAncestorId.Value);
+                    }
+                    else
+                    {
+                        currentParent = null;
+                    }
                 }
 
                 if (parentId == null || ownerId == null || globalId == null)
                 {
-                    throw new InvalidOperationException($"Unable to globalize entity {childAddress} as it was impossible to compute of its ancestors: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
+                    throw new InvalidOperationException($"Unable to globalize entity {childAddress} as it was impossible to compute its ancestors: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
                 referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
