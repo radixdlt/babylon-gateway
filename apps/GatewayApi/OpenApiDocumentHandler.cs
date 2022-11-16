@@ -64,13 +64,18 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using Microsoft.OpenApi.Writers;
 using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -80,8 +85,11 @@ namespace GatewayApi;
 
 public static class OpenApiDocumentHandler
 {
-    public static async Task Handle(HttpContext context, CancellationToken token = default)
+    public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
     {
+        var sampleResourceAddress = networkConfigurationProvider.GetXrdAddress();
+        var sampleTransaction = (await transactionHandler.Recent(new RecentTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
+
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-spec.yaml");
         var readResult = await new OpenApiStreamReader().ReadAsync(stream);
@@ -106,6 +114,15 @@ public static class OpenApiDocumentHandler
 
         document.SerializeAsV3(jsonWriter);
 
-        await context.Response.WriteAsync(textWriter.ToString(), Encoding.UTF8, token);
+        var response = textWriter.ToString();
+
+        response = response.Replace("<entity-address>", sampleResourceAddress);
+
+        if (sampleTransaction != null)
+        {
+            response = response.Replace("<transaction-payload-hash>", sampleTransaction.PayloadHashHex);
+        }
+
+        await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 }

@@ -470,6 +470,8 @@ components:
           description: The page size requested.
           type: integer
           nullable: true
+      example:
+        limit: 5
     RecentTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -513,8 +515,8 @@ components:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         transaction_identifier:
-          origin: intent
-          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+          origin: payload
+          value_hex: "<transaction-payload-hash>"
     TransactionStatusResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -536,8 +538,8 @@ components:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         transaction_identifier:
-          origin: intent
-          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+          origin: payload
+          value_hex: "<transaction-payload-hash>"
     TransactionDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -564,6 +566,8 @@ components:
           $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        address: "<component-entity-address>"
     EntityResourcesResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -631,6 +635,8 @@ components:
           $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        address: "<entity-address>"
     EntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -752,6 +758,9 @@ components:
             $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        addresses:
+          - "<entity-address>"
     EntityOverviewResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -791,6 +800,8 @@ components:
           description: The page size requested.
           type: integer
           nullable: true
+      example:
+        address: "<entity-address>"
     EntityMetadataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
