@@ -13,7 +13,7 @@ cd "$SCRIPT_DIR"
 #############
 
 packageName='RadixDlt.NetworkGateway.GatewayApiSdk'
-specLocation='../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml'
+specLocation='../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml'
 
 ################
 # CALCULATIONS #

@@ -91,7 +91,7 @@ public static class OpenApiDocumentHandler
         var sampleTransaction = (await transactionHandler.Recent(new RecentTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
-        var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-spec.yaml");
+        var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
         var readResult = await new OpenApiStreamReader().ReadAsync(stream);
         var document = readResult.OpenApiDocument;
 

@@ -119,7 +119,7 @@ public class GatewayApiStartup
             application
                 .UseSwaggerUI(o =>
                 {
-                    o.SwaggerEndpoint("/open-api-specs.json", "Radix Babylon Gateway API");
+                    o.SwaggerEndpoint("/gateway-api-schema.json", "Radix Babylon Gateway API");
                 });
         }
 
@@ -134,7 +134,7 @@ public class GatewayApiStartup
             {
                 if (_enableSwagger)
                 {
-                    endpoints.MapGet("/open-api-specs.json", OpenApiDocumentHandler.Handle);
+                    endpoints.MapGet("/gateway-api-schema.json", OpenApiDocumentHandler.Handle);
                 }
 
                 endpoints.MapHealthChecks("/health");

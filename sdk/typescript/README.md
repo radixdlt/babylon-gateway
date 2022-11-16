@@ -1,6 +1,6 @@
 # Gateway API SDK
 
-This SDK is a thin wrapper around the Babylon Gateway API, detailed in [the Open API schema](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/babylon-gateway/main/src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml).
+This SDK is a thin wrapper around the Babylon Gateway API, detailed in [the Open API schema](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/babylon-gateway/main/src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml).
 
 ## Usage
 
