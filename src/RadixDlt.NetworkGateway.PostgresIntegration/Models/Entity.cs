@@ -157,6 +157,8 @@ internal class SystemComponentEntity : ComponentEntity
 
 internal class PackageEntity : Entity
 {
+    [Column("code")]
+    public byte[] Code { get; set; }
 }
 
 internal class KeyValueStoreEntity : Entity

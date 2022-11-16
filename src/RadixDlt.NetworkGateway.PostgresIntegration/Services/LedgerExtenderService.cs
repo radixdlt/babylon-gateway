@@ -242,6 +242,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var childToParentEntities = new Dictionary<string, string>();
         var componentToGlobalPackage = new Dictionary<string, string>();
         var fungibleResourceManagerDivisibility = new Dictionary<string, long>();
+        var packageCode = new Dictionary<string, byte[]>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
@@ -469,6 +470,11 @@ SELECT
                         knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
                         componentToGlobalPackage[sid.EntityIdHex] = componentInfo.PackageAddress;
                     }
+
+                    if (sd is CoreModel.PackageSubstate package)
+                    {
+                        packageCode[sid.EntityIdHex] = package.CodeHex.ConvertFromHex();
+                    }
                 }
 
                 foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -639,9 +645,14 @@ WHERE id IN(
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((FungibleResourceManagerEntity dbe) => dbe.Divisibility = divisibility);
             }
 
+            foreach (var (entityAddress, code) in packageCode)
+            {
+                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((PackageEntity pe) => pe.Code = code);
+            }
+
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, divisibility) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, divisibility, code) FROM STDIN (FORMAT BINARY)", token))
             {
                 foreach (var dbEntity in dbEntities)
                 {
@@ -662,6 +673,7 @@ WHERE id IN(
                     await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullableAsync(dbEntity is ComponentEntity ce ? ce.PackageId : null, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
                 }
 
                 await writer.CompleteAsync(token);

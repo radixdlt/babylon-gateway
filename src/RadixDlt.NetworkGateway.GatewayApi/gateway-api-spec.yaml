@@ -651,11 +651,13 @@ components:
       enum:
         - fungible_resource
         - non_fungible_resource
+        - package
         - account_component
     EntityDetailsResponseDetails:
       oneOf:
         - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
         - $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
+        - $ref: "#/components/schemas/EntityDetailsResponsePackageDetails"
         - $ref: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
       discriminator:
         propertyName: discriminator
@@ -663,6 +665,7 @@ components:
           # Must match EntityDetailsResponseDetailsType
           fungible_resource: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
           non_fungible_resource: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
+          package: "#/components/schemas/EntityDetailsResponsePackageDetails"
           account_component: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
     EntityDetailsResponseFungibleResourceDetails:
       type: object
@@ -716,6 +719,16 @@ components:
         immutable_data_hex:
           type: string
         mutable_data_hex:
+          type: string
+    EntityDetailsResponsePackageDetails:
+      type: object
+      required:
+        - discriminator
+        - code_hex
+      properties:
+        discriminator:
+          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        code_hex:
           type: string
     EntityDetailsResponseAccountComponentDetails:
       type: object

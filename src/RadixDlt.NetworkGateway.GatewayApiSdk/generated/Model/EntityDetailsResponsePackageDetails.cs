@@ -91,35 +91,127 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines EntityDetailsResponseDetailsType
+    /// EntityDetailsResponsePackageDetails
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum EntityDetailsResponseDetailsType
+    [DataContract(Name = "EntityDetailsResponsePackageDetails")]
+    public partial class EntityDetailsResponsePackageDetails : IEquatable<EntityDetailsResponsePackageDetails>, IValidatableObject
     {
-        /// <summary>
-        /// Enum FungibleResource for value: fungible_resource
-        /// </summary>
-        [EnumMember(Value = "fungible_resource")]
-        FungibleResource = 1,
 
         /// <summary>
-        /// Enum NonFungibleResource for value: non_fungible_resource
+        /// Gets or Sets Discriminator
         /// </summary>
-        [EnumMember(Value = "non_fungible_resource")]
-        NonFungibleResource = 2,
+        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
+        public EntityDetailsResponseDetailsType Discriminator { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDetailsResponsePackageDetails" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected EntityDetailsResponsePackageDetails() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDetailsResponsePackageDetails" /> class.
+        /// </summary>
+        /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="codeHex">codeHex (required).</param>
+        public EntityDetailsResponsePackageDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string codeHex = default(string))
+        {
+            this.Discriminator = discriminator;
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
+            {
+                throw new ArgumentNullException("codeHex is a required property for EntityDetailsResponsePackageDetails and cannot be null");
+            }
+            this.CodeHex = codeHex;
+        }
 
         /// <summary>
-        /// Enum Package for value: package
+        /// Gets or Sets CodeHex
         /// </summary>
-        [EnumMember(Value = "package")]
-        Package = 3,
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
-        /// Enum AccountComponent for value: account_component
+        /// Returns the string presentation of the object
         /// </summary>
-        [EnumMember(Value = "account_component")]
-        AccountComponent = 4
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class EntityDetailsResponsePackageDetails {\n");
+            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
 
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as EntityDetailsResponsePackageDetails);
+        }
+
+        /// <summary>
+        /// Returns true if EntityDetailsResponsePackageDetails instances are equal
+        /// </summary>
+        /// <param name="input">Instance of EntityDetailsResponsePackageDetails to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(EntityDetailsResponsePackageDetails input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Discriminator == input.Discriminator ||
+                    this.Discriminator.Equals(input.Discriminator)
+                ) && 
+                (
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                if (this.CodeHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// To validate all properties of the instance
+        /// </summary>
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }
