@@ -71,6 +71,8 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
+public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32Codec.Variant Variant);
+
 public static class RadixAddressCodec
 {
     public static string Encode(string hrp, ReadOnlySpan<byte> addressData)
@@ -78,7 +80,7 @@ public static class RadixAddressCodec
         return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
     }
 
-    public static Bech32Codec.Decoded Decode(string encoded)
+    public static RadixBech32Data Decode(string encoded)
     {
         var (hrp, rawBase32Data, variant) = Bech32Codec.Decode(encoded);
         var addressData = DecodeBase32IntoAddressData(rawBase32Data);
@@ -88,7 +90,12 @@ public static class RadixAddressCodec
             throw new AddressException("The Bech32 address has no data");
         }
 
-        return new Bech32Codec.Decoded(hrp, addressData, variant);
+        if (variant != Bech32Codec.Variant.Bech32M)
+        {
+            throw new AddressException("Only Bech32M addresses are supported");
+        }
+
+        return new RadixBech32Data(hrp, addressData, variant);
     }
 
     /// <summary>

@@ -108,7 +108,7 @@ public static class Bech32Codec
         Bech32M,
     }
 
-    public sealed record Decoded(string Hrp, byte[] Data, Variant Variant);
+    public sealed record Bech32RawData(string Hrp, byte[] RawBase32Data, Variant Variant);
 
     // The Bech32 character set for encoding
     private const string Charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -205,7 +205,7 @@ public static class Bech32Codec
         return address;
     }
 
-    public static Decoded Decode(string encoded)
+    public static Bech32RawData Decode(string encoded)
     {
         AssertBech32StringValid(encoded);
         int endOfHrpPosition = encoded.LastIndexOf('1');
@@ -242,7 +242,7 @@ public static class Bech32Codec
 
         var encodedData = encodedDataWithChecksum[..^6];
 
-        return new Decoded(hrp, encodedData.ToArray(), variant);
+        return new Bech32RawData(hrp, encodedData.ToArray(), variant);
     }
 
     public static bool IsValid(string str, [MaybeNullWhen(true)] out string error)

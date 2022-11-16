@@ -629,7 +629,7 @@ WHERE id IN(
 
                 if (parentId == null || ownerId == null || globalId == null)
                 {
-                    throw new InvalidOperationException($"Unable to globalize entity {childAddress} as it was impossible to compute its ancestors: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
+                    throw new InvalidOperationException($"Unable to compute ancestors of entity {childAddress}: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
                 referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
