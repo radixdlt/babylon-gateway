@@ -72,7 +72,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
-public static class RadixAddress
+public static class RadixAddressCodec
 {
     public static string Encode(string hrp, ReadOnlySpan<byte> addressData)
     {

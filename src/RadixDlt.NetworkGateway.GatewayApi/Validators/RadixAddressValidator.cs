@@ -90,7 +90,7 @@ public sealed class RadixAddressValidator<T> : PropertyValidator<T, string?>
 
         context.MessageFormatter.AppendPropertyName(context.PropertyName);
 
-        if (!RadixAddress.IsValid(value, out _))
+        if (!RadixAddressCodec.IsValid(value, out _))
         {
             context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
 
@@ -99,7 +99,7 @@ public sealed class RadixAddressValidator<T> : PropertyValidator<T, string?>
 
         try
         {
-            var decoded = RadixAddress.Decode(value);
+            var decoded = RadixAddressCodec.Decode(value);
 
             if (_expectedHrp != null)
             {

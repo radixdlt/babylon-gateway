@@ -83,8 +83,8 @@ public class RadixAddressTests
     [InlineData("resource_rdx19yw75y2lqqqqmyacct")] // Possible account owner badge address
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeAndReencodeIsIdentity(string encodedString)
     {
-        var decodedData = RadixAddress.Decode(encodedString);
-        var reEncodedString = RadixAddress.Encode(decodedData.Hrp, decodedData.Data);
+        var decodedData = RadixAddressCodec.Decode(encodedString);
+        var reEncodedString = RadixAddressCodec.Encode(decodedData.Hrp, decodedData.Data);
 
         decodedData.Variant.Should().Be(Bech32Codec.Variant.Bech32M);
         reEncodedString.Should().Be(encodedString.ToLowerInvariant());
@@ -98,7 +98,7 @@ public class RadixAddressTests
     [InlineData("rn1qwa45jjf40vuf9xlq85xym86yegnm95h3g8d4lul5hskrws9gm6ykyx7hsf", "03BB5A4A49ABD9C494DF01E8626CFA26513D96978A0EDAFF9FA5E161BA0546F44B")] // Radix Node Address
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeGivesAddress(string encodedString, string expectedAddress)
     {
-        var decodedData = RadixAddress.Decode(encodedString);
+        var decodedData = RadixAddressCodec.Decode(encodedString);
         var decodedHex = Convert.ToHexString(decodedData.Data);
 
         decodedHex.Should().Be(expectedAddress);
@@ -124,7 +124,7 @@ public class RadixAddressTests
     [MemberData(nameof(Invalid_Bech32Strings))]
     public void WhenGiven_InvalidEncodedString_DecodeThrows(string encodedString)
     {
-        var act = () => RadixAddress.Decode(encodedString);
+        var act = () => RadixAddressCodec.Decode(encodedString);
 
         act.Should().Throw<AddressException>();
     }

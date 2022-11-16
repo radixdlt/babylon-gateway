@@ -67,7 +67,6 @@ using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using RadixAddress = RadixDlt.NetworkGateway.Abstractions.Addressing.RadixAddress;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
@@ -82,10 +81,10 @@ internal abstract class Entity
     public long FromStateVersion { get; set; }
 
     [Column("address")]
-    public Abstractions.RadixAddress Address { get; set; }
+    public RadixAddress Address { get; set; }
 
     [Column("global_address")]
-    public Abstractions.RadixAddress? GlobalAddress { get; set; }
+    public RadixAddress? GlobalAddress { get; set; }
 
     [Column("ancestor_ids")]
     public long[]? AncestorIds { get; set; }
@@ -103,7 +102,7 @@ internal abstract class Entity
     {
         return GlobalAddress == null
             ? null
-            : RadixAddress.Encode(SelectHrp(hrp), GlobalAddress);
+            : RadixAddressCodec.Encode(SelectHrp(hrp), GlobalAddress);
     }
 
     private string SelectHrp(HrpDefinition hrp)
