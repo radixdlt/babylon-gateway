@@ -62,31 +62,63 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using FluentValidation.TestHelper;
+using RadixDlt.NetworkGateway.GatewayApi.Validators;
+using Xunit;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
 
-internal class AccountIdentifierValidator : AbstractValidator<GatewayModel.AccountIdentifier>
+public class RadixAddressValidatorTests
 {
-    public AccountIdentifierValidator()
+    [Fact]
+    public void WhenGiven_NullValue_Succeeds()
     {
-        RuleLevelCascadeMode = CascadeMode.Stop;
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress());
+        var result = validator.TestValidate(new TestSubject { StringProperty = null });
 
-        RuleFor(x => x.Address)
-            .NotNull()
-            .Length(8, 90)
-            .Must((_, value, context) =>
-            {
-                if (!RadixAddress.IsValid(value, out var error))
-                {
-                    context.MessageFormatter.AppendArgument("Error", error);
+        result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
+    }
 
-                    return false;
-                }
+    [Theory]
+    [InlineData("account_loc1q0w8pk0vlwt75v4dhxrcvpyl3r2vzqkvwdwffzzu69zqvep9l2")]
+    [InlineData("resource_loc1qzxcrac59cy2v9lpcpmf82qel3cjj25v3k5m09rxurgqhdunz2")]
+    public void WhenGiven_ValidValue_Succeeds(string address)
+    {
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress());
+        var result = validator.TestValidate(new TestSubject { StringProperty = address });
 
-                return true;
-            }).WithMessage("{Error}");
+        result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
+    }
+
+    [Theory]
+    [InlineData("account_loc1q0w8pk0vlwt75v4dhxrcvpyl3r2vzqkvwdwffzzu69zqvep9l2", "account_loc")]
+    [InlineData("resource_loc1qzxcrac59cy2v9lpcpmf82qel3cjj25v3k5m09rxurgqhdunz2", "resource_loc")]
+    public void WhenGiven_ValidValueWithExpectedHrp_Succeeds(string address, string expectedHrp)
+    {
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress(expectedHrp));
+        var result = validator.TestValidate(new TestSubject { StringProperty = address });
+
+        result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
+    }
+
+    [Theory]
+    [InlineData("a")]
+    [InlineData("abc")]
+    [InlineData("account_loc1q0w8pk0vlwt75v4dhxrcvpzl3r2vzqkvwdwffzzu69zqvep9l2")] // single invalid character -> invalid checksum
+    public void WhenGiven_InvalidValue_Fails(string address)
+    {
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress());
+        var result = validator.TestValidate(new TestSubject { StringProperty = address });
+
+        result.ShouldHaveValidationErrorFor(x => x.StringProperty);
+    }
+
+    [Fact]
+    public void WhenGiven_ValidValueOfIncorrectHrp_Fails()
+    {
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress("resource_loc"));
+        var result = validator.TestValidate(new TestSubject { StringProperty = "account_loc1q0w8pk0vlwt75v4dhxrcvpyl3r2vzqkvwdwffzzu69zqvep9l2" });
+
+        result.ShouldHaveValidationErrorFor(x => x.StringProperty);
     }
 }

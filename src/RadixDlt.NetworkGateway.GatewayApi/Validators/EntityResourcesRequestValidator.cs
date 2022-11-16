@@ -63,36 +63,21 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class EntityOverviewRequestValidator : AbstractValidator<GatewayModel.EntityOverviewRequest>
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
+internal class EntityResourcesRequestValidator : AbstractValidator<GatewayModel.EntityResourcesRequest>
 {
-    public EntityOverviewRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public EntityResourcesRequestValidator(
+        INetworkConfigurationProvider _networkConfigurationProvider,
+        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        RuleFor(x => x.Addresses)
+        RuleFor(x => x.Address)
             .NotEmpty()
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.Addresses.Count)
-                    .GreaterThan(0)
-                    .LessThan(20);
-
-                RuleForEach(x => x.Addresses)
-                    .Must((_, value, context) =>
-                    {
-                        if (!RadixAddress.IsValid(value, out var error))
-                        {
-                            context.MessageFormatter.AppendArgument("Error", error);
-
-                            return false;
-                        }
-
-                        return true;
-                    }).WithMessage("{Error}");
-            });
+            .RadixAddress(_networkConfigurationProvider.GetHrpDefinition().AccountComponent);
 
         RuleFor(x => x.AtStateIdentifier)
             .SetValidator(partialLedgerStateIdentifierValidator);

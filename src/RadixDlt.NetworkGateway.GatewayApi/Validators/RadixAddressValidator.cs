@@ -63,38 +63,63 @@
  */
 
 using FluentValidation;
+using FluentValidation.Validators;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class EntityOverviewRequestValidator : AbstractValidator<GatewayModel.EntityOverviewRequest>
+public sealed class RadixAddressValidator<T> : PropertyValidator<T, string?>
 {
-    public EntityOverviewRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public override string Name => "RadixAddressValidator";
+
+    private readonly string? _expectedHrp;
+
+    public RadixAddressValidator(string? expectedHrp)
     {
-        RuleFor(x => x.Addresses)
-            .NotEmpty()
-            .DependentRules(() =>
+        _expectedHrp = expectedHrp;
+    }
+
+    public override bool IsValid(ValidationContext<T> context, string? value)
+    {
+        if (value == null)
+        {
+            return true;
+        }
+
+        context.MessageFormatter.AppendPropertyName(context.PropertyName);
+
+        if (!RadixAddress.IsValid(value, out _))
+        {
+            context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
+
+            return false;
+        }
+
+        try
+        {
+            var decoded = RadixAddress.Decode(value);
+
+            if (_expectedHrp != null)
             {
-                RuleFor(x => x.Addresses.Count)
-                    .GreaterThan(0)
-                    .LessThan(20);
+                context.MessageFormatter.AppendArgument("ExpectedHrp", _expectedHrp);
 
-                RuleForEach(x => x.Addresses)
-                    .Must((_, value, context) =>
-                    {
-                        if (!RadixAddress.IsValid(value, out var error))
-                        {
-                            context.MessageFormatter.AppendArgument("Error", error);
+                if (!_expectedHrp.Equals(decoded.Hrp, StringComparison.OrdinalIgnoreCase))
+                {
+                    context.AddFailure("'{PropertyName}' must begin with '{ExpectedHrp}'.");
 
-                            return false;
-                        }
+                    return false;
+                }
+            }
+        }
+        catch (AddressException)
+        {
+            context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
 
-                        return true;
-                    }).WithMessage("{Error}");
-            });
+            return false;
+        }
 
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        return true;
     }
 }

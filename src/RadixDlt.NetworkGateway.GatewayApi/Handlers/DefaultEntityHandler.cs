@@ -62,8 +62,6 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Collections.Generic;
 using System.Linq;

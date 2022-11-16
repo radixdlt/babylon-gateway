@@ -795,35 +795,6 @@ components:
     # TODO Not categorized/cleaned yet
     #
 
-    TokenProperties:
-      type: object
-      required:
-        - symbol
-        - is_supply_mutable
-        - granularity
-        - name
-        - description
-        - url
-        - icon_url
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        icon_url:
-          type: string
-        url:
-          type: string
-        symbol:
-          type: string
-        is_supply_mutable:
-          description: If true, the token is allowed to be minted/burned by the owner.
-          type: boolean
-        granularity:
-          "$ref": "#/components/schemas/BigDecimal"
-        owner:
-          "$ref": "#/components/schemas/AccountIdentifier"
-
     TransactionDetails:
       type: object
       required:
@@ -841,14 +812,6 @@ components:
           description: The message bytes, hex encoded.
           type: string
 
-    AccountIdentifier:
-      type: object
-      required:
-        - address
-      properties:
-        address:
-          description: The radix address of the account.
-          type: string
     ValidatorIdentifier:
       type: object
       required:
