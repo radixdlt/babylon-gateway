@@ -114,16 +114,8 @@ public class GatewayApiStartup
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
-        if (_enableSwagger)
-        {
-            application
-                .UseSwaggerUI(o =>
-                {
-                    o.SwaggerEndpoint("/gateway-api-schema.json", "Radix Babylon Gateway API");
-                });
-        }
-
         application
+            .UseForwardedHeaders() // TODO this is a potential security issue, make sure it is only enabled when explicitly configured (same as _enableSwagger)
             .UseAuthentication()
             .UseAuthorization()
             .UseCors()
@@ -140,6 +132,15 @@ public class GatewayApiStartup
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
+
+        if (_enableSwagger)
+        {
+            application
+                .UseSwaggerUI(o =>
+                {
+                    o.SwaggerEndpoint("/gateway-api-schema.json", "Radix Babylon Gateway API");
+                });
+        }
 
         StartMetricServer(logger);
     }
