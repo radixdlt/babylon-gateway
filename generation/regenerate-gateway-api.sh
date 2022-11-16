@@ -14,7 +14,6 @@ cd "$SCRIPT_DIR"
 
 packageName='RadixDlt.NetworkGateway.GatewayApiSdk'
 specLocation='../src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml'
-specCopyLocation='../apps/GatewayApi/wwwroot/spec-copy.txt'
 
 ################
 # CALCULATIONS #
@@ -59,7 +58,6 @@ java -jar ./openapi-generator-cli-6.1.0.jar \
 rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"
 rm "../src/${packageName}/generated/${packageName}.csproj"
-cp "$specLocation" "$specCopyLocation"
 
 ./ensure-license-headers.sh
 

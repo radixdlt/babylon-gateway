@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayApi.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -116,10 +117,9 @@ public class GatewayApiStartup
         if (_enableSwagger)
         {
             application
-                .UseStaticFiles()
                 .UseSwaggerUI(o =>
                 {
-                    o.SwaggerEndpoint("/spec-copy.txt", "Radix Babylon Gateway API");
+                    o.SwaggerEndpoint("/open-api-specs.json", "Radix Babylon Gateway API");
                 });
         }
 
@@ -132,6 +132,11 @@ public class GatewayApiStartup
             .UseRequestTimeout()
             .UseEndpoints(endpoints =>
             {
+                if (_enableSwagger)
+                {
+                    endpoints.MapGet("/open-api-specs.json", OpenApiDocumentHandler.Handle);
+                }
+
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
