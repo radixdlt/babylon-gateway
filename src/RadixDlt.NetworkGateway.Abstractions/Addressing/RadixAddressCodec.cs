@@ -68,7 +68,6 @@
 /* The above is a fix for ReShaper not liking the work "Bech" */
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
@@ -90,11 +89,6 @@ public static class RadixAddressCodec
         }
 
         return new Bech32Codec.Decoded(hrp, addressData, variant);
-    }
-
-    public static bool IsValid(string str, [MaybeNullWhen(true)] out string error)
-    {
-        return Bech32Codec.IsValid(str, out error);
     }
 
     /// <summary>

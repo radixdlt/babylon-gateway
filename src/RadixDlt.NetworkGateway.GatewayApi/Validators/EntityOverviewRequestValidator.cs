@@ -63,7 +63,6 @@
  */
 
 using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
@@ -81,17 +80,8 @@ internal class EntityOverviewRequestValidator : AbstractValidator<GatewayModel.E
                     .LessThan(20);
 
                 RuleForEach(x => x.Addresses)
-                    .Must((_, value, context) =>
-                    {
-                        if (!RadixAddressCodec.IsValid(value, out var error))
-                        {
-                            context.MessageFormatter.AppendArgument("Error", error);
-
-                            return false;
-                        }
-
-                        return true;
-                    }).WithMessage("{Error}");
+                    .NotNull()
+                    .RadixAddress();
             });
 
         RuleFor(x => x.AtStateIdentifier)
