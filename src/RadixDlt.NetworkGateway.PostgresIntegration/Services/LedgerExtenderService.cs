@@ -85,6 +85,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
+using RadixAddress = RadixDlt.NetworkGateway.Abstractions.Addressing.RadixAddress;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -514,7 +515,7 @@ SELECT
         // step: resolve known types & optionally create missing entities
         {
             var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixBech32.Decode(x).Data).ToList();
+            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixAddress.Decode(x).Data).ToList();
             var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
             var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
 
@@ -577,7 +578,7 @@ WHERE id IN(
                 dbEntity.Id = sequences.NextEntity;
                 dbEntity.FromStateVersion = re.StateVersion;
                 dbEntity.Address = re.Address.ConvertFromHex();
-                dbEntity.GlobalAddress = re.GlobalAddress == null ? null : (RadixAddress)re.GlobalAddress.ConvertFromHex();
+                dbEntity.GlobalAddress = re.GlobalAddress == null ? null : (Abstractions.RadixAddress)re.GlobalAddress.ConvertFromHex();
 
                 re.Resolve(dbEntity);
                 dbEntities.Add(dbEntity);
@@ -628,7 +629,7 @@ WHERE id IN(
             {
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((ComponentEntity dbe) =>
                 {
-                    var packageAddress = RadixBech32.Decode(packageGlobalAddress).Data.ToHex();
+                    var packageAddress = RadixAddress.Decode(packageGlobalAddress).Data.ToHex();
 
                     dbe.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
                 });
@@ -778,7 +779,7 @@ WHERE id IN(
                             case CoreModel.FungibleResourceAmount fra:
                             {
                                 var amount = TokenAmount.FromDecimalString(fra.Amount);
-                                var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
+                                var resourceAddress = RadixAddress.Decode(fra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
                                 fungibleVaultChanges.Add(new FungibleVaultChange(re, resourceEntity, amount, stateVersion));
@@ -788,7 +789,7 @@ WHERE id IN(
 
                             case CoreModel.NonFungibleResourceAmount nfra:
                             {
-                                var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
+                                var resourceAddress = RadixAddress.Decode(nfra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
                                 nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIdsHex.Select(id => id.ConvertFromHex()).ToList(), stateVersion));

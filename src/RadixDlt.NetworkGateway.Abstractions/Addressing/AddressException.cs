@@ -69,10 +69,20 @@ namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 /// <summary>
 /// An Exception thrown when parsing addresses.
 /// </summary>
+[Serializable]
 public sealed class AddressException : Exception
 {
+    public AddressException()
+    {
+    }
+
     public AddressException(string message)
         : base(message)
+    {
+    }
+
+    public AddressException(string message, Exception inner)
+        : base(message, inner)
     {
     }
 }

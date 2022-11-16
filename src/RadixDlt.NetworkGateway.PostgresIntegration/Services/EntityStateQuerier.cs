@@ -75,6 +75,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using RadixAddress = RadixDlt.NetworkGateway.Abstractions.Addressing.RadixAddress;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
@@ -92,7 +93,7 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityResourcesResponse?> EntityResourcesSnapshot(Abstractions.RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         // const int resourcesPerType = 5; // TODO add proper pagination support
         // const string referenceColumn = "global_entity_id"; // TODO or "owner_entity_id"
@@ -147,7 +148,7 @@ INNER JOIN LATERAL (
         foreach (var dbResource in dbResources)
         {
             var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new InvalidOperationException("Non-global entity.");
-            var ra = RadixBech32.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
+            var ra = RadixAddress.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
             switch (dbResource)
             {
@@ -172,7 +173,7 @@ INNER JOIN LATERAL (
 
     private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
 
-    public async Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(Abstractions.RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         // TODO just some quick and naive implementation
 
@@ -265,7 +266,7 @@ OFFSET @offset LIMIT @limit",
         return new GatewayModel.EntityDetailsResponse(ledgerState, responseAddress, metadata, details);
     }
 
-    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<Abstractions.RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
         var addressesList = addresses.ToList();
 

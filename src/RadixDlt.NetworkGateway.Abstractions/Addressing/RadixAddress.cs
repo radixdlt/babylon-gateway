@@ -68,30 +68,33 @@
 /* The above is a fix for ReShaper not liking the work "Bech" */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
-public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32.Variant Variant);
-
-public static class RadixBech32
+public static class RadixAddress
 {
-    private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32M;
-
-    public static string Encode(string hrp, ReadOnlySpan<byte> addressData, Bech32.Variant variant = DefaultVariant)
+    public static string Encode(string hrp, ReadOnlySpan<byte> addressData)
     {
-        return Bech32.EncodeFromRawData(hrp, EncodeAddressDataInBase32(addressData), variant);
+        return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
     }
 
-    public static RadixBech32Data Decode(string encoded)
+    public static Bech32Codec.Decoded Decode(string encoded)
     {
-        var (hrp, rawBase32Data, variant) = Bech32.DecodeToRawData(encoded);
+        var (hrp, rawBase32Data, variant) = Bech32Codec.Decode(encoded);
         var addressData = DecodeBase32IntoAddressData(rawBase32Data);
+
         if (addressData.Length == 0)
         {
             throw new AddressException("The Bech32 address has no data");
         }
 
-        return new RadixBech32Data(hrp, addressData, variant);
+        return new Bech32Codec.Decoded(hrp, addressData, variant);
+    }
+
+    public static bool IsValid(string str, [MaybeNullWhen(true)] out string error)
+    {
+        return Bech32Codec.IsValid(str, out error);
     }
 
     /// <summary>
@@ -100,7 +103,7 @@ public static class RadixBech32
     /// </summary>
     private static byte[] DecodeBase32IntoAddressData(ReadOnlySpan<byte> base32EncodedData)
     {
-        return Bech32.ConvertBits(base32EncodedData, 5, 8, false);
+        return Bech32Codec.ConvertBits(base32EncodedData, 5, 8, false);
     }
 
     /// <summary>
@@ -109,6 +112,6 @@ public static class RadixBech32
     /// </summary>
     private static ReadOnlySpan<byte> EncodeAddressDataInBase32(ReadOnlySpan<byte> dataToEncode)
     {
-        return Bech32.ConvertBits(dataToEncode, 8, 5, true);
+        return Bech32Codec.ConvertBits(dataToEncode, 8, 5, true);
     }
 }

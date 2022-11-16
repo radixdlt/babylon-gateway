@@ -79,7 +79,7 @@ internal class AccountIdentifierValidator : AbstractValidator<GatewayModel.Accou
             .Length(8, 90)
             .Must((_, value, context) =>
             {
-                if (!Bech32.IsBech32StringValid(value, out var error))
+                if (!RadixAddress.IsValid(value, out var error))
                 {
                     context.MessageFormatter.AppendArgument("Error", error);
 

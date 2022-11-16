@@ -100,7 +100,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 /// </list>
 /// </para>
 /// </summary>
-public static class Bech32
+public static class Bech32Codec
 {
     public enum Variant
     {
@@ -108,7 +108,7 @@ public static class Bech32
         Bech32M,
     }
 
-    public sealed record Bech32RawData(string Hrp, byte[] RawBase32Data, Variant Variant);
+    public sealed record Decoded(string Hrp, byte[] Data, Variant Variant);
 
     // The Bech32 character set for encoding
     private const string Charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -174,7 +174,7 @@ public static class Bech32
         return result.ToArray();
     }
 
-    public static string EncodeFromRawData(string hrp, ReadOnlySpan<byte> encodedBase32Data, Variant variant)
+    public static string Encode(string hrp, ReadOnlySpan<byte> encodedBase32Data, Variant variant)
     {
         if (hrp.Length is < 1 or > 83)
         {
@@ -205,7 +205,7 @@ public static class Bech32
         return address;
     }
 
-    public static Bech32RawData DecodeToRawData(string encoded)
+    public static Decoded Decode(string encoded)
     {
         AssertBech32StringValid(encoded);
         int endOfHrpPosition = encoded.LastIndexOf('1');
@@ -242,10 +242,10 @@ public static class Bech32
 
         var encodedData = encodedDataWithChecksum[..^6];
 
-        return new Bech32RawData(hrp, encodedData.ToArray(), variant);
+        return new Decoded(hrp, encodedData.ToArray(), variant);
     }
 
-    public static bool IsBech32StringValid(string str, [MaybeNullWhen(true)] out string error)
+    public static bool IsValid(string str, [MaybeNullWhen(true)] out string error)
     {
         error = null;
 
@@ -391,7 +391,7 @@ public static class Bech32
 
     private static void AssertBech32StringValid(string str)
     {
-        if (!IsBech32StringValid(str, out var error))
+        if (!IsValid(str, out var error))
         {
             throw new AddressException(error);
         }
