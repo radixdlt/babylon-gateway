@@ -226,7 +226,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
         var inclusiveUpperBound = currentTopOfLedger.StateVersion + Config.MaxTransactionPipelineSizePerNode;
         var firstMissingStateVersionGap = GetFirstStateVersionGapForNode(nodeName, exclusiveLowerBound, inclusiveUpperBound);
 
-        if (firstMissingStateVersionGap == null || firstMissingStateVersionGap > inclusiveUpperBound)
+        if (firstMissingStateVersionGap == null || firstMissingStateVersionGap >= inclusiveUpperBound)
         {
             return null;
         }

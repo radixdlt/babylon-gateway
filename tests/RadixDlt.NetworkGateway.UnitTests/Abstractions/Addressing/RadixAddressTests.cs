@@ -66,38 +66,30 @@ using FluentAssertions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace RadixDlt.NetworkGateway.UnitTests.Abstractions.Addressing;
 
-public class RadixBech32Tests
+public class RadixAddressTests
 {
     [Theory]
-    [InlineData("rdx1qspc9xtaqmquy88jvvuadjleudnsk0tt8dlhuwmcfv4zlqlya8ny3lc5jarf6")] // Radix Mainnet Wallet
-    [InlineData("rv1qf2x63qx4jdaxj83kkw2yytehvvmu6r2xll5gcp6c9rancmrfsgfwttnczx")] // Radix Validator
-    [InlineData("xrd_rr1qy5wfsfh")] // Radix Token definition Address (XRD)
-    [InlineData("usdc_rb1qvqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gwwwd")] // Radix Test Token definition Address
-    [InlineData("rn1qwa45jjf40vuf9xlq85xym86yegnm95h3g8d4lul5hskrws9gm6ykyx7hsf")] // Radix Node Address
-    [InlineData("resource_rdx1999a9220radxrd")] // Possible XRD address
-    [InlineData("resource_rdx19yw75y2lqqqqmyacct")] // Possible account owner badge address
+    [InlineData("account_loc1qdj0c2rrk5v9yv87gr9zz9mdcrjpxq60fyw0n6j57q3szeyglx")]
+    [InlineData("resource_loc1qrky4vgxu4pqpk07k6hem2kx23wshq4renre04smrlwsvvyu3v")]
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeAndReencodeIsIdentity(string encodedString)
     {
-        var decodedData = RadixBech32.Decode(encodedString);
-        var reEncodedString = RadixBech32.Encode(decodedData.Hrp, decodedData.Data, decodedData.Variant);
+        var decodedData = RadixAddressCodec.Decode(encodedString);
+        var reEncodedString = RadixAddressCodec.Encode(decodedData.Hrp, decodedData.Data);
 
+        decodedData.Variant.Should().Be(Bech32Codec.Variant.Bech32M);
         reEncodedString.Should().Be(encodedString.ToLowerInvariant());
     }
 
     [Theory]
-    [InlineData("rdx1qspc9xtaqmquy88jvvuadjleudnsk0tt8dlhuwmcfv4zlqlya8ny3lc5jarf6", "040382997D06C1C21CF26339D6CBF9E3670B3D6B3B7F7E3B784B2A2F83E4E9E648FF")] // Radix Mainnet Wallet
-    [InlineData("rv1qf2x63qx4jdaxj83kkw2yytehvvmu6r2xll5gcp6c9rancmrfsgfwttnczx", "02546D4406AC9BD348F1B59CA21179BB19BE686A37FF44603AC147D9E3634C1097")] // Radix Validator
-    [InlineData("xrd_rr1qy5wfsfh", "01")] // Radix Token definition Address (XRD)
-    [InlineData("usdc_rb1qvqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6gwwwd", "030000000000000000000000000000000000000000000000000000")] // Radix Test Token definition Address
-    [InlineData("rn1qwa45jjf40vuf9xlq85xym86yegnm95h3g8d4lul5hskrws9gm6ykyx7hsf", "03BB5A4A49ABD9C494DF01E8626CFA26513D96978A0EDAFF9FA5E161BA0546F44B")] // Radix Node Address
+    [InlineData("account_loc1qdj0c2rrk5v9yv87gr9zz9mdcrjpxq60fyw0n6j57q3szeyglx", "0364FC2863B5185230FE40CA21176DC0E413034F491CF9EA54F023")]
+    [InlineData("resource_loc1qrky4vgxu4pqpk07k6hem2kx23wshq4renre04smrlwsvvyu3v", "00EC4AB106E54200D9FEB6AF9DAAC6545D0B82A3CCC797D61B1FDD")]
     public void WhenGiven_EncodedStringWithValidRadixAddress_DecodeGivesAddress(string encodedString, string expectedAddress)
     {
-        var decodedData = RadixBech32.Decode(encodedString);
+        var decodedData = RadixAddressCodec.Decode(encodedString);
         var decodedHex = Convert.ToHexString(decodedData.Data);
 
         decodedHex.Should().Be(expectedAddress);
@@ -123,7 +115,7 @@ public class RadixBech32Tests
     [MemberData(nameof(Invalid_Bech32Strings))]
     public void WhenGiven_InvalidEncodedString_DecodeThrows(string encodedString)
     {
-        var act = () => Bech32.DecodeToRawData(encodedString);
+        var act = () => RadixAddressCodec.Decode(encodedString);
 
         act.Should().Throw<AddressException>();
     }

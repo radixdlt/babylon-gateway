@@ -63,23 +63,23 @@
  */
 
 using FluentValidation;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal static class Extensions
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
+internal class EntityResourcesRequestValidator : AbstractValidator<GatewayModel.EntityResourcesRequest>
 {
-    public static IRuleBuilderOptions<T, string?> Base64<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
+    public EntityResourcesRequestValidator(
+        INetworkConfigurationProvider _networkConfigurationProvider,
+        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        return ruleBuilder.SetValidator(new Base64Validator<T>(expectedLength));
-    }
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .RadixAddress(_networkConfigurationProvider.GetHrpDefinition().AccountComponent);
 
-    public static IRuleBuilderOptions<T, string?> Hex<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
-    {
-        return ruleBuilder.SetValidator(new HexValidator<T>(expectedLength));
-    }
-
-    public static IRuleBuilderOptions<T, string?> RadixAddress<T>(this IRuleBuilder<T, string?> ruleBuilder, string? expectedHrp = null)
-    {
-        return ruleBuilder.SetValidator(new RadixAddressValidator<T>(expectedHrp));
+        RuleFor(x => x.AtStateIdentifier)
+            .SetValidator(partialLedgerStateIdentifierValidator);
     }
 }

@@ -62,53 +62,63 @@
  * permissions under this License.
  */
 
-// ReSharper disable CommentTypo
-// ReSharper disable StringLiteralTypo
-// ReSharper disable IdentifierTypo
-/* The above is a fix for ReShaper not liking the work "Bech" */
+using FluentValidation.TestHelper;
+using RadixDlt.NetworkGateway.GatewayApi.Validators;
+using Xunit;
 
-using System;
+namespace RadixDlt.NetworkGateway.UnitTests.GatewayApi.Validators;
 
-namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
-
-public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32.Variant Variant);
-
-public static class RadixBech32
+public class RadixAddressValidatorTests
 {
-    private const Bech32.Variant DefaultVariant = Bech32.Variant.Bech32M;
-
-    public static string Encode(string hrp, ReadOnlySpan<byte> addressData, Bech32.Variant variant = DefaultVariant)
+    [Fact]
+    public void WhenGiven_NullValue_Succeeds()
     {
-        return Bech32.EncodeFromRawData(hrp, EncodeAddressDataInBase32(addressData), variant);
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress());
+        var result = validator.TestValidate(new TestSubject { StringProperty = null });
+
+        result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
     }
 
-    public static RadixBech32Data Decode(string encoded)
+    [Theory]
+    [InlineData("account_loc1q0w8pk0vlwt75v4dhxrcvpyl3r2vzqkvwdwffzzu69zqvep9l2")]
+    [InlineData("resource_loc1qzxcrac59cy2v9lpcpmf82qel3cjj25v3k5m09rxurgqhdunz2")]
+    public void WhenGiven_ValidValue_Succeeds(string address)
     {
-        var (hrp, rawBase32Data, variant) = Bech32.DecodeToRawData(encoded);
-        var addressData = DecodeBase32IntoAddressData(rawBase32Data);
-        if (addressData.Length == 0)
-        {
-            throw new AddressException("The Bech32 address has no data");
-        }
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress());
+        var result = validator.TestValidate(new TestSubject { StringProperty = address });
 
-        return new RadixBech32Data(hrp, addressData, variant);
+        result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
     }
 
-    /// <summary>
-    /// Defines how the 5-bit per byte (base32 per byte) data should be decoded.
-    /// This will likely making use of ConvertBits to unpack to 8 bits per byte.
-    /// </summary>
-    private static byte[] DecodeBase32IntoAddressData(ReadOnlySpan<byte> base32EncodedData)
+    [Theory]
+    [InlineData("account_loc1q0w8pk0vlwt75v4dhxrcvpyl3r2vzqkvwdwffzzu69zqvep9l2", "account_loc")]
+    [InlineData("resource_loc1qzxcrac59cy2v9lpcpmf82qel3cjj25v3k5m09rxurgqhdunz2", "resource_loc")]
+    public void WhenGiven_ValidValueWithExpectedHrp_Succeeds(string address, string expectedHrp)
     {
-        return Bech32.ConvertBits(base32EncodedData, 5, 8, false);
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress(expectedHrp));
+        var result = validator.TestValidate(new TestSubject { StringProperty = address });
+
+        result.ShouldNotHaveValidationErrorFor(x => x.StringProperty);
     }
 
-    /// <summary>
-    /// Defines how the data should be encoded as 5-bits per byte (base32 per byte) for the Bech32 data part.
-    /// This will likely making use of ConvertBits to convert from 8 bits per byte to 5 bits per byte.
-    /// </summary>
-    private static ReadOnlySpan<byte> EncodeAddressDataInBase32(ReadOnlySpan<byte> dataToEncode)
+    [Theory]
+    [InlineData("a")]
+    [InlineData("abc")]
+    [InlineData("account_loc1q0w8pk0vlwt75v4dhxrcvpzl3r2vzqkvwdwffzzu69zqvep9l2")] // single invalid character -> invalid checksum
+    public void WhenGiven_InvalidValue_Fails(string address)
     {
-        return Bech32.ConvertBits(dataToEncode, 8, 5, true);
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress());
+        var result = validator.TestValidate(new TestSubject { StringProperty = address });
+
+        result.ShouldHaveValidationErrorFor(x => x.StringProperty);
+    }
+
+    [Fact]
+    public void WhenGiven_ValidValueOfIncorrectHrp_Fails()
+    {
+        var validator = new TestValidator(v => v.RuleFor(x => x.StringProperty).RadixAddress("resource_loc"));
+        var result = validator.TestValidate(new TestSubject { StringProperty = "account_loc1q0w8pk0vlwt75v4dhxrcvpyl3r2vzqkvwdwffzzu69zqvep9l2" });
+
+        result.ShouldHaveValidationErrorFor(x => x.StringProperty);
     }
 }

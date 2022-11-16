@@ -3,14 +3,18 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="FluentValidation.AspNetCore" />  
+    <PackageReference Include="FluentValidation.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RadixDlt.NetworkGateway.GatewayApiSdk\RadixDlt.NetworkGateway.GatewayApiSdk.csproj" />
     <ProjectReference Include="..\RadixDlt.NetworkGateway.Abstractions\RadixDlt.NetworkGateway.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="gateway-api-schema.yaml" />
   </ItemGroup>
 
 </Project>

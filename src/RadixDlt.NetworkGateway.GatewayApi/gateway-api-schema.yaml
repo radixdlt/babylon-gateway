@@ -470,6 +470,8 @@ components:
           description: The page size requested.
           type: integer
           nullable: true
+      example:
+        limit: 5
     RecentTransactionsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -513,8 +515,8 @@ components:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         transaction_identifier:
-          origin: intent
-          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+          origin: payload
+          value_hex: "<transaction-payload-hash>"
     TransactionStatusResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -536,8 +538,8 @@ components:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         transaction_identifier:
-          origin: intent
-          value_hex: ef71a9d6c63444fce6abd2df8fab2755cfb51f6794e578f60d99337193811842
+          origin: payload
+          value_hex: "<transaction-payload-hash>"
     TransactionDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -564,6 +566,8 @@ components:
           $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        address: "<component-entity-address>"
     EntityResourcesResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -631,6 +635,8 @@ components:
           $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        address: "<entity-address>"
     EntityDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -651,11 +657,13 @@ components:
       enum:
         - fungible_resource
         - non_fungible_resource
+        - package
         - account_component
     EntityDetailsResponseDetails:
       oneOf:
         - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
         - $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
+        - $ref: "#/components/schemas/EntityDetailsResponsePackageDetails"
         - $ref: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
       discriminator:
         propertyName: discriminator
@@ -663,6 +671,7 @@ components:
           # Must match EntityDetailsResponseDetailsType
           fungible_resource: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
           non_fungible_resource: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
+          package: "#/components/schemas/EntityDetailsResponsePackageDetails"
           account_component: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
     EntityDetailsResponseFungibleResourceDetails:
       type: object
@@ -717,6 +726,16 @@ components:
           type: string
         mutable_data_hex:
           type: string
+    EntityDetailsResponsePackageDetails:
+      type: object
+      required:
+        - discriminator
+        - code_hex
+      properties:
+        discriminator:
+          $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        code_hex:
+          type: string
     EntityDetailsResponseAccountComponentDetails:
       type: object
       required:
@@ -739,6 +758,9 @@ components:
             $ref: "#/components/schemas/EntityAddress"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+      example:
+        addresses:
+          - "<entity-address>"
     EntityOverviewResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -778,6 +800,8 @@ components:
           description: The page size requested.
           type: integer
           nullable: true
+      example:
+        address: "<entity-address>"
     EntityMetadataResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -794,35 +818,6 @@ components:
     #
     # TODO Not categorized/cleaned yet
     #
-
-    TokenProperties:
-      type: object
-      required:
-        - symbol
-        - is_supply_mutable
-        - granularity
-        - name
-        - description
-        - url
-        - icon_url
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        icon_url:
-          type: string
-        url:
-          type: string
-        symbol:
-          type: string
-        is_supply_mutable:
-          description: If true, the token is allowed to be minted/burned by the owner.
-          type: boolean
-        granularity:
-          "$ref": "#/components/schemas/BigDecimal"
-        owner:
-          "$ref": "#/components/schemas/AccountIdentifier"
 
     TransactionDetails:
       type: object
@@ -841,14 +836,6 @@ components:
           description: The message bytes, hex encoded.
           type: string
 
-    AccountIdentifier:
-      type: object
-      required:
-        - address
-      properties:
-        address:
-          description: The radix address of the account.
-          type: string
     ValidatorIdentifier:
       type: object
       required:

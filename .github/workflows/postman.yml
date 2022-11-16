@@ -83,7 +83,7 @@ jobs:
       # ========== Actually updating the postman collection ==========
       - name: Update Postman's Gateway API collection from the spec
         run: |
-          npx @apideck/portman@1.18.1 -l src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-spec.yaml \
+          npx @apideck/portman@1.18.1 -l src/RadixDlt.NetworkGateway.GatewayApi/gateway-api-schema.yaml \
             --postmanUid ${{env.gateway_api_collection_id}} --syncPostman true --envFile .env
       - name: Download the collection
         run: |

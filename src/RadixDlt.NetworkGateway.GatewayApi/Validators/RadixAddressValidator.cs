@@ -63,23 +63,56 @@
  */
 
 using FluentValidation;
+using FluentValidation.Validators;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal static class Extensions
+public sealed class RadixAddressValidator<T> : PropertyValidator<T, string?>
 {
-    public static IRuleBuilderOptions<T, string?> Base64<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
+    public override string Name => "RadixAddressValidator";
+
+    private readonly string? _expectedHrp;
+
+    public RadixAddressValidator(string? expectedHrp)
     {
-        return ruleBuilder.SetValidator(new Base64Validator<T>(expectedLength));
+        _expectedHrp = expectedHrp;
     }
 
-    public static IRuleBuilderOptions<T, string?> Hex<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
+    public override bool IsValid(ValidationContext<T> context, string? value)
     {
-        return ruleBuilder.SetValidator(new HexValidator<T>(expectedLength));
-    }
+        if (value == null)
+        {
+            return true;
+        }
 
-    public static IRuleBuilderOptions<T, string?> RadixAddress<T>(this IRuleBuilder<T, string?> ruleBuilder, string? expectedHrp = null)
-    {
-        return ruleBuilder.SetValidator(new RadixAddressValidator<T>(expectedHrp));
+        context.MessageFormatter.AppendPropertyName(context.PropertyName);
+
+        try
+        {
+            var decoded = RadixAddressCodec.Decode(value);
+
+            if (_expectedHrp != null)
+            {
+                context.MessageFormatter.AppendArgument("ExpectedHrp", _expectedHrp);
+
+                if (!_expectedHrp.Equals(decoded.Hrp, StringComparison.OrdinalIgnoreCase))
+                {
+                    context.AddFailure("'{PropertyName}' must begin with '{ExpectedHrp}'.");
+
+                    return false;
+                }
+            }
+        }
+        catch (AddressException)
+        {
+            context.AddFailure("'{PropertyName}' must be a valid Bech32M-encoded RadixAddress.");
+
+            return false;
+        }
+
+        return true;
     }
 }

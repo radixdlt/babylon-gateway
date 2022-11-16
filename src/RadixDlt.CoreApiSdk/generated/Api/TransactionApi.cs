@@ -92,6 +92,27 @@ namespace RadixDlt.CoreApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Preview a scrypto function or method call against the latest network state
+        /// </summary>
+        /// <remarks>
+        /// Returns the result of the scrypto function or method call
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <returns>TransactionCallPreviewResponse</returns>
+        TransactionCallPreviewResponse TransactionCallPreviewPost(TransactionCallPreviewRequest transactionCallPreviewRequest);
+
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state
+        /// </summary>
+        /// <remarks>
+        /// Returns the result of the scrypto function or method call
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <returns>ApiResponse of TransactionCallPreviewResponse</returns>
+        ApiResponse<TransactionCallPreviewResponse> TransactionCallPreviewPostWithHttpInfo(TransactionCallPreviewRequest transactionCallPreviewRequest);
+        /// <summary>
         /// Parse a transaction payload
         /// </summary>
         /// <remarks>
@@ -235,6 +256,29 @@ namespace RadixDlt.CoreApiSdk.Api
     public interface ITransactionApiAsync : IApiAccessor
     {
         #region Asynchronous Operations
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state
+        /// </summary>
+        /// <remarks>
+        /// Returns the result of the scrypto function or method call
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionCallPreviewResponse</returns>
+        System.Threading.Tasks.Task<TransactionCallPreviewResponse> TransactionCallPreviewPostAsync(TransactionCallPreviewRequest transactionCallPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state
+        /// </summary>
+        /// <remarks>
+        /// Returns the result of the scrypto function or method call
+        /// </remarks>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionCallPreviewResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionCallPreviewResponse>> TransactionCallPreviewPostWithHttpInfoAsync(TransactionCallPreviewRequest transactionCallPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Parse a transaction payload
         /// </summary>
@@ -607,6 +651,123 @@ namespace RadixDlt.CoreApiSdk.Api
                 return _exceptionFactory;
             }
             set { _exceptionFactory = value; }
+        }
+
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state Returns the result of the scrypto function or method call
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <returns>TransactionCallPreviewResponse</returns>
+        public TransactionCallPreviewResponse TransactionCallPreviewPost(TransactionCallPreviewRequest transactionCallPreviewRequest)
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionCallPreviewResponse> localVarResponse = TransactionCallPreviewPostWithHttpInfo(transactionCallPreviewRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state Returns the result of the scrypto function or method call
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <returns>ApiResponse of TransactionCallPreviewResponse</returns>
+        public RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionCallPreviewResponse> TransactionCallPreviewPostWithHttpInfo(TransactionCallPreviewRequest transactionCallPreviewRequest)
+        {
+            // verify the required parameter 'transactionCallPreviewRequest' is set
+            if (transactionCallPreviewRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionCallPreviewRequest' when calling TransactionApi->TransactionCallPreviewPost");
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionCallPreviewRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionCallPreviewResponse>("/transaction/call-preview", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionCallPreviewPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state Returns the result of the scrypto function or method call
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionCallPreviewResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionCallPreviewResponse> TransactionCallPreviewPostAsync(TransactionCallPreviewRequest transactionCallPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionCallPreviewResponse> localVarResponse = await TransactionCallPreviewPostWithHttpInfoAsync(transactionCallPreviewRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Preview a scrypto function or method call against the latest network state Returns the result of the scrypto function or method call
+        /// </summary>
+        /// <exception cref="RadixDlt.CoreApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCallPreviewRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionCallPreviewResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.CoreApiSdk.Client.ApiResponse<TransactionCallPreviewResponse>> TransactionCallPreviewPostWithHttpInfoAsync(TransactionCallPreviewRequest transactionCallPreviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'transactionCallPreviewRequest' is set
+            if (transactionCallPreviewRequest == null)
+                throw new RadixDlt.CoreApiSdk.Client.ApiException(400, "Missing required parameter 'transactionCallPreviewRequest' when calling TransactionApi->TransactionCallPreviewPost");
+
+
+            RadixDlt.CoreApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.CoreApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.CoreApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionCallPreviewRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionCallPreviewResponse>("/transaction/call-preview", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionCallPreviewPost", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
         }
 
         /// <summary>

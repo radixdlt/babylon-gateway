@@ -63,23 +63,27 @@
  */
 
 using FluentValidation;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal static class Extensions
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
+internal class EntityMetadataRequestValidator : AbstractValidator<GatewayModel.EntityMetadataRequest>
 {
-    public static IRuleBuilderOptions<T, string?> Base64<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
+    public EntityMetadataRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        return ruleBuilder.SetValidator(new Base64Validator<T>(expectedLength));
-    }
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .RadixAddress();
 
-    public static IRuleBuilderOptions<T, string?> Hex<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
-    {
-        return ruleBuilder.SetValidator(new HexValidator<T>(expectedLength));
-    }
+        RuleFor(x => x.AtStateIdentifier)
+            .SetValidator(partialLedgerStateIdentifierValidator);
 
-    public static IRuleBuilderOptions<T, string?> RadixAddress<T>(this IRuleBuilder<T, string?> ruleBuilder, string? expectedHrp = null)
-    {
-        return ruleBuilder.SetValidator(new RadixAddressValidator<T>(expectedHrp));
+        RuleFor(x => x.Cursor);
+
+        RuleFor(x => x.Limit)
+            .GreaterThan(0);
+        // TODO .LessThanOrEqualTo(endpointOptions.MaxPageSize);
     }
 }

@@ -242,6 +242,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var childToParentEntities = new Dictionary<string, string>();
         var componentToGlobalPackage = new Dictionary<string, string>();
         var fungibleResourceManagerDivisibility = new Dictionary<string, long>();
+        var packageCode = new Dictionary<string, byte[]>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
@@ -412,7 +413,7 @@ SELECT
                     {
                         foreach (var oe in owner.OwnedEntities)
                         {
-                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsChildOf(re);
+                            referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(re);
 
                             childToParentEntities.Add(oe.EntityIdHex, sid.EntityIdHex);
                         }
@@ -469,6 +470,11 @@ SELECT
                         knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
                         componentToGlobalPackage[sid.EntityIdHex] = componentInfo.PackageAddress;
                     }
+
+                    if (sd is CoreModel.PackageSubstate package)
+                    {
+                        packageCode[sid.EntityIdHex] = package.CodeHex.ConvertFromHex();
+                    }
                 }
 
                 foreach (var deletedSubstate in stateUpdates.DeletedSubstates)
@@ -514,7 +520,7 @@ SELECT
         // step: resolve known types & optionally create missing entities
         {
             var entityAddresses = referencedEntities.Addresses.Select(x => x.ConvertFromHex()).ToList();
-            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixBech32.Decode(x).Data).ToList();
+            var globalEntityAddresses = knownGlobalAddressesToLoad.Select(x => RadixAddressCodec.Decode(x).Data).ToList();
             var entityAddressesParameter = new NpgsqlParameter("@entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = entityAddresses };
             var globalEntityAddressesParameter = new NpgsqlParameter("@global_entity_addresses", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = globalEntityAddresses };
 
@@ -602,17 +608,28 @@ WHERE id IN(
                         ownerId = currentParent.DatabaseId;
                     }
 
-                    if (!globalId.HasValue && !currentParent.HasParent)
+                    if (!globalId.HasValue && currentParent.IsGlobal)
                     {
                         globalId = currentParent.DatabaseId;
                     }
 
-                    currentParent = currentParent.HasParent ? currentParent.Parent : null;
+                    if (currentParent.HasImmediateParentReference)
+                    {
+                        currentParent = currentParent.ImmediateParentReference;
+                    }
+                    else if (currentParent.DatabaseParentAncestorId.HasValue)
+                    {
+                        currentParent = referencedEntities.GetByDatabaseId(currentParent.DatabaseParentAncestorId.Value);
+                    }
+                    else
+                    {
+                        currentParent = null;
+                    }
                 }
 
                 if (parentId == null || ownerId == null || globalId == null)
                 {
-                    throw new InvalidOperationException($"Unable to globalize entity {childAddress} as it was impossible to compute of its ancestors: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
+                    throw new InvalidOperationException($"Unable to compute ancestors of entity {childAddress}: parentId={parentId}, ownerId={ownerId}, globalId={globalId}.");
                 }
 
                 referencedEntities.Get(childAddress).ConfigureDatabaseEntity((Entity dbe) =>
@@ -628,7 +645,7 @@ WHERE id IN(
             {
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((ComponentEntity dbe) =>
                 {
-                    var packageAddress = RadixBech32.Decode(packageGlobalAddress).Data.ToHex();
+                    var packageAddress = RadixAddressCodec.Decode(packageGlobalAddress).Data.ToHex();
 
                     dbe.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
                 });
@@ -639,9 +656,14 @@ WHERE id IN(
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((FungibleResourceManagerEntity dbe) => dbe.Divisibility = divisibility);
             }
 
+            foreach (var (entityAddress, code) in packageCode)
+            {
+                referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((PackageEntity pe) => pe.Code = code);
+            }
+
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, divisibility) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, divisibility, code) FROM STDIN (FORMAT BINARY)", token))
             {
                 foreach (var dbEntity in dbEntities)
                 {
@@ -662,6 +684,7 @@ WHERE id IN(
                     await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullableAsync(dbEntity is ComponentEntity ce ? ce.PackageId : null, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -778,7 +801,7 @@ WHERE id IN(
                             case CoreModel.FungibleResourceAmount fra:
                             {
                                 var amount = TokenAmount.FromDecimalString(fra.Amount);
-                                var resourceAddress = RadixBech32.Decode(fra.ResourceAddress).Data.ToHex();
+                                var resourceAddress = RadixAddressCodec.Decode(fra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
                                 fungibleVaultChanges.Add(new FungibleVaultChange(re, resourceEntity, amount, stateVersion));
@@ -788,7 +811,7 @@ WHERE id IN(
 
                             case CoreModel.NonFungibleResourceAmount nfra:
                             {
-                                var resourceAddress = RadixBech32.Decode(nfra.ResourceAddress).Data.ToHex();
+                                var resourceAddress = RadixAddressCodec.Decode(nfra.ResourceAddress).Data.ToHex();
                                 var resourceEntity = referencedEntities.GetByGlobal(resourceAddress);
 
                                 nonFungibleVaultChanges.Add(new NonFungibleVaultChange(re, resourceEntity, nfra.NonFungibleIdsHex.Select(id => id.ConvertFromHex()).ToList(), stateVersion));

@@ -62,24 +62,57 @@
  * permissions under this License.
  */
 
-using FluentValidation;
+// ReSharper disable CommentTypo
+// ReSharper disable StringLiteralTypo
+// ReSharper disable IdentifierTypo
+/* The above is a fix for ReShaper not liking the work "Bech" */
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+using System;
 
-internal static class Extensions
+namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
+
+public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32Codec.Variant Variant);
+
+public static class RadixAddressCodec
 {
-    public static IRuleBuilderOptions<T, string?> Base64<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
+    public static string Encode(string hrp, ReadOnlySpan<byte> addressData)
     {
-        return ruleBuilder.SetValidator(new Base64Validator<T>(expectedLength));
+        return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
     }
 
-    public static IRuleBuilderOptions<T, string?> Hex<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
+    public static RadixBech32Data Decode(string encoded)
     {
-        return ruleBuilder.SetValidator(new HexValidator<T>(expectedLength));
+        var (hrp, rawBase32Data, variant) = Bech32Codec.Decode(encoded);
+        var addressData = DecodeBase32IntoAddressData(rawBase32Data);
+
+        if (addressData.Length == 0)
+        {
+            throw new AddressException("The Bech32 address has no data");
+        }
+
+        if (variant != Bech32Codec.Variant.Bech32M)
+        {
+            throw new AddressException("Only Bech32M addresses are supported");
+        }
+
+        return new RadixBech32Data(hrp, addressData, variant);
     }
 
-    public static IRuleBuilderOptions<T, string?> RadixAddress<T>(this IRuleBuilder<T, string?> ruleBuilder, string? expectedHrp = null)
+    /// <summary>
+    /// Defines how the 5-bit per byte (base32 per byte) data should be decoded.
+    /// This will likely making use of ConvertBits to unpack to 8 bits per byte.
+    /// </summary>
+    private static byte[] DecodeBase32IntoAddressData(ReadOnlySpan<byte> base32EncodedData)
     {
-        return ruleBuilder.SetValidator(new RadixAddressValidator<T>(expectedHrp));
+        return Bech32Codec.ConvertBits(base32EncodedData, 5, 8, false);
+    }
+
+    /// <summary>
+    /// Defines how the data should be encoded as 5-bits per byte (base32 per byte) for the Bech32 data part.
+    /// This will likely making use of ConvertBits to convert from 8 bits per byte to 5 bits per byte.
+    /// </summary>
+    private static ReadOnlySpan<byte> EncodeAddressDataInBase32(ReadOnlySpan<byte> dataToEncode)
+    {
+        return Bech32Codec.ConvertBits(dataToEncode, 8, 5, true);
     }
 }

@@ -702,6 +702,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
+                    b.Property<byte[]>("Code")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code");
+
                     b.ToTable("entities");
 
                     b.HasDiscriminator().HasValue("package");

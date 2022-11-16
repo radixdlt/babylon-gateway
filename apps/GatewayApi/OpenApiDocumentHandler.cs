@@ -62,31 +62,67 @@
  * permissions under this License.
  */
 
-using FluentValidation;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Readers;
+using Microsoft.OpenApi.Writers;
+using RadixDlt.NetworkGateway.GatewayApi;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using RadixDlt.NetworkGateway.GatewayApi.Services;
+using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
+namespace GatewayApi;
 
-internal class AccountIdentifierValidator : AbstractValidator<GatewayModel.AccountIdentifier>
+public static class OpenApiDocumentHandler
 {
-    public AccountIdentifierValidator()
+    public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
     {
-        RuleLevelCascadeMode = CascadeMode.Stop;
+        var sampleResourceAddress = networkConfigurationProvider.GetXrdAddress();
+        var sampleTransaction = (await transactionHandler.Recent(new RecentTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
 
-        RuleFor(x => x.Address)
-            .NotNull()
-            .Length(8, 90)
-            .Must((_, value, context) =>
+        var assembly = typeof(GatewayApiBuilder).Assembly;
+        var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
+        var readResult = await new OpenApiStreamReader().ReadAsync(stream);
+        var document = readResult.OpenApiDocument;
+
+        document.Servers.Clear();
+        document.Servers.Add(new OpenApiServer
+        {
+            Url = new UriBuilder(context.Request.GetEncodedUrl())
             {
-                if (!Bech32.IsBech32StringValid(value, out var error))
-                {
-                    context.MessageFormatter.AppendArgument("Error", error);
+                Path = context.Request.PathBase,
+                Query = null,
+                Fragment = null,
+            }.ToString(),
+        });
 
-                    return false;
-                }
+        context.Response.StatusCode = (int)HttpStatusCode.OK;
+        context.Response.ContentType = "application/json; charset=utf-8";
 
-                return true;
-            }).WithMessage("{Error}");
+        await using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
+        var jsonWriter = new OpenApiJsonWriter(textWriter);
+
+        document.SerializeAsV3(jsonWriter);
+
+        var response = textWriter.ToString();
+
+        response = response.Replace("<entity-address>", sampleResourceAddress);
+
+        if (sampleTransaction != null)
+        {
+            response = response.Replace("<transaction-payload-hash>", sampleTransaction.PayloadHashHex);
+        }
+
+        await context.Response.WriteAsync(response, Encoding.UTF8, token);
     }
 }

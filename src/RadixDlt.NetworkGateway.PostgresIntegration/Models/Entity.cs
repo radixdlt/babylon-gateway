@@ -102,7 +102,7 @@ internal abstract class Entity
     {
         return GlobalAddress == null
             ? null
-            : RadixBech32.Encode(SelectHrp(hrp), GlobalAddress);
+            : RadixAddressCodec.Encode(SelectHrp(hrp), GlobalAddress);
     }
 
     private string SelectHrp(HrpDefinition hrp)
@@ -157,6 +157,8 @@ internal class SystemComponentEntity : ComponentEntity
 
 internal class PackageEntity : Entity
 {
+    [Column("code")]
+    public byte[] Code { get; set; }
 }
 
 internal class KeyValueStoreEntity : Entity

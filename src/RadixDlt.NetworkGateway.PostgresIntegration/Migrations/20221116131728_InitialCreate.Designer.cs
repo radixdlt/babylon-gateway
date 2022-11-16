@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221115170037_InitialCreate")]
+    [Migration("20221116131728_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -704,6 +704,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PackageEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
+
+                    b.Property<byte[]>("Code")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("code");
 
                     b.ToTable("entities");
 

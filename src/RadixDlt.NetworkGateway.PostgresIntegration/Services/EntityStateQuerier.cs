@@ -147,7 +147,7 @@ INNER JOIN LATERAL (
         foreach (var dbResource in dbResources)
         {
             var rga = resources[dbResource.ResourceEntityId].GlobalAddress ?? throw new InvalidOperationException("Non-global entity.");
-            var ra = RadixBech32.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
+            var ra = RadixAddressCodec.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
             switch (dbResource)
             {
@@ -185,8 +185,6 @@ INNER JOIN LATERAL (
             return null;
         }
 
-        var responseAddress = entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
-
         GatewayModel.EntityDetailsResponseDetails details;
 
         switch (entity)
@@ -198,12 +196,14 @@ INNER JOIN LATERAL (
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
+                var tokenAddress = entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
+
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
                     divisibility: frme.Divisibility,
-                    totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), responseAddress),
-                    totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), responseAddress),
-                    totalBurnt: new GatewayModel.TokenAmount(supplyHistory.TotalBurnt.ToString(), responseAddress)));
+                    totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), tokenAddress),
+                    totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), tokenAddress),
+                    totalBurnt: new GatewayModel.TokenAmount(supplyHistory.TotalBurnt.ToString(), tokenAddress)));
 
                 break;
             }
@@ -248,6 +248,12 @@ OFFSET @offset LIMIT @limit",
                 break;
             }
 
+            case PackageEntity pe:
+                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponsePackageDetails(
+                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.Package,
+                    codeHex: pe.Code.ToHex()));
+                break;
+
             case AccountComponentEntity ace:
                 var package = await _dbContext.Entities
                     .FirstAsync(e => e.Id == ace.PackageId, token);
@@ -262,7 +268,7 @@ OFFSET @offset LIMIT @limit",
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
 
-        return new GatewayModel.EntityDetailsResponse(ledgerState, responseAddress, metadata, details);
+        return new GatewayModel.EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 
     public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)

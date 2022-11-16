@@ -91,36 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// AccountIdentifier
+    /// EntityDetailsResponsePackageDetails
     /// </summary>
-    [DataContract(Name = "AccountIdentifier")]
-    public partial class AccountIdentifier : IEquatable<AccountIdentifier>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponsePackageDetails")]
+    public partial class EntityDetailsResponsePackageDetails : IEquatable<EntityDetailsResponsePackageDetails>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountIdentifier" /> class.
+        /// Gets or Sets Discriminator
+        /// </summary>
+        [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
+        public EntityDetailsResponseDetailsType Discriminator { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDetailsResponsePackageDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected AccountIdentifier() { }
+        protected EntityDetailsResponsePackageDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccountIdentifier" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponsePackageDetails" /> class.
         /// </summary>
-        /// <param name="address">The radix address of the account. (required).</param>
-        public AccountIdentifier(string address = default(string))
+        /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="codeHex">codeHex (required).</param>
+        public EntityDetailsResponsePackageDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string codeHex = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            this.Discriminator = discriminator;
+            // to ensure "codeHex" is required (not null)
+            if (codeHex == null)
             {
-                throw new ArgumentNullException("address is a required property for AccountIdentifier and cannot be null");
+                throw new ArgumentNullException("codeHex is a required property for EntityDetailsResponsePackageDetails and cannot be null");
             }
-            this.Address = address;
+            this.CodeHex = codeHex;
         }
 
         /// <summary>
-        /// The radix address of the account.
+        /// Gets or Sets CodeHex
         /// </summary>
-        /// <value>The radix address of the account.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        [DataMember(Name = "code_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string CodeHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,8 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class AccountIdentifier {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("class EntityDetailsResponsePackageDetails {\n");
+            sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  CodeHex: ").Append(CodeHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -151,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AccountIdentifier);
+            return this.Equals(input as EntityDetailsResponsePackageDetails);
         }
 
         /// <summary>
-        /// Returns true if AccountIdentifier instances are equal
+        /// Returns true if EntityDetailsResponsePackageDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of AccountIdentifier to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponsePackageDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AccountIdentifier input)
+        public bool Equals(EntityDetailsResponsePackageDetails input)
         {
             if (input == null)
             {
@@ -167,9 +175,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.Discriminator == input.Discriminator ||
+                    this.Discriminator.Equals(input.Discriminator)
+                ) && 
+                (
+                    this.CodeHex == input.CodeHex ||
+                    (this.CodeHex != null &&
+                    this.CodeHex.Equals(input.CodeHex))
                 );
         }
 
@@ -182,9 +194,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                if (this.CodeHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.CodeHex.GetHashCode();
                 }
                 return hashCode;
             }
