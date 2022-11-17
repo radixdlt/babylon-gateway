@@ -212,6 +212,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     resourcehrp = table.Column<string>(name: "resource_hrp", type: "text", nullable: false),
                     validatorhrp = table.Column<string>(name: "validator_hrp", type: "text", nullable: false),
                     nodehrp = table.Column<string>(name: "node_hrp", type: "text", nullable: false),
+                    faucetaddress = table.Column<string>(name: "faucet_address", type: "text", nullable: false),
                     accountpackageaddress = table.Column<string>(name: "account_package_address", type: "text", nullable: false),
                     xrdaddress = table.Column<string>(name: "xrd_address", type: "text", nullable: false)
                 },

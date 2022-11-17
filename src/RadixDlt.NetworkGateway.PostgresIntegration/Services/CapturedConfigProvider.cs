@@ -93,6 +93,7 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
             networkConfiguration.NetworkName,
             networkConfiguration.NetworkConfigurationWellKnownAddresses.AccountPackageAddress,
             networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
+            networkConfiguration.NetworkConfigurationWellKnownAddresses.FaucetAddress,
             networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition()
         );
     }

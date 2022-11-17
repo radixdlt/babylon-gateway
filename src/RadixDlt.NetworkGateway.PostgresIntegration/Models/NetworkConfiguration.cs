@@ -74,10 +74,8 @@ internal class NetworkConfiguration : SingleEntryBase
     [Column("network_name")]
     public string NetworkName { get; set; }
 
-    // [Owned] below
     public NetworkConfigurationHrpDefinition NetworkConfigurationHrpDefinition { get; set; }
 
-    // [Owned] below
     public NetworkConfigurationWellKnownAddresses NetworkConfigurationWellKnownAddresses { get; set; }
 
     public bool HasEqualConfiguration(NetworkConfiguration other)
@@ -121,12 +119,12 @@ internal record NetworkConfigurationHrpDefinition
 [Owned]
 internal record NetworkConfigurationWellKnownAddresses
 {
+    [Column("faucet_address")]
+    public string FaucetAddress { get; set; }
+
     [Column("account_package_address")]
     public string AccountPackageAddress { get; set; }
 
     [Column("xrd_address")]
     public string XrdAddress { get; set; }
-
-    // TODO use RadixAddress over string?
-    // TODO add more? (account_package, faucet, ecdsa_*)
 }

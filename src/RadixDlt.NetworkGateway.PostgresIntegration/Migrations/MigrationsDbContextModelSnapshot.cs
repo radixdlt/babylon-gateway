@@ -886,6 +886,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("account_package_address");
 
+                            b1.Property<string>("FaucetAddress")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("faucet_address");
+
                             b1.Property<string>("XrdAddress")
                                 .IsRequired()
                                 .HasColumnType("text")

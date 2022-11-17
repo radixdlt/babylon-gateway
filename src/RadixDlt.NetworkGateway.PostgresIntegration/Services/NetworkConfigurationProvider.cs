@@ -169,6 +169,11 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress;
     }
 
+    public string GetFaucetAddress()
+    {
+        return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.FaucetAddress;
+    }
+
     private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
     {
         var hrpSuffix = networkConfiguration.NetworkHrpSuffix;
@@ -188,6 +193,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             },
             NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
             {
+                FaucetAddress = networkConfiguration.WellKnownAddresses.Faucet,
                 AccountPackageAddress = networkConfiguration.WellKnownAddresses.AccountPackage,
                 XrdAddress = networkConfiguration.WellKnownAddresses.Xrd,
             },

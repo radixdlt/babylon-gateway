@@ -73,4 +73,6 @@ public interface INetworkAddressConfigProvider
     string GetAccountPackageAddress();
 
     string GetXrdAddress();
+
+    string GetFaucetAddress();
 }

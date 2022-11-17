@@ -88,6 +88,7 @@ public static class OpenApiDocumentHandler
     public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
     {
         var sampleResourceAddress = networkConfigurationProvider.GetXrdAddress();
+        var sampleComponentAddress = networkConfigurationProvider.GetFaucetAddress();
         var sampleTransaction = (await transactionHandler.Recent(new RecentTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
@@ -116,7 +117,9 @@ public static class OpenApiDocumentHandler
 
         var response = textWriter.ToString();
 
-        response = response.Replace("<entity-address>", sampleResourceAddress);
+        response = response
+            .Replace("<entity-address>", sampleResourceAddress)
+            .Replace("<component-entity-address>", sampleComponentAddress);
 
         if (sampleTransaction != null)
         {
