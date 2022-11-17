@@ -83,7 +83,6 @@ public static class DataAggregatorBuilderExtensions
     public static DataAggregatorBuilder AddPostgresPersistenceCore(this DataAggregatorBuilder builder)
     {
         builder.Services
-            .AddSingleton<IRawTransactionWriter, RawTransactionWriter>()
             .AddSingleton<ILedgerExtenderService, LedgerExtenderService>()
             .AddSingleton<INetworkConfigurationProvider, NetworkConfigurationProvider>()
             .AddSingleton<IPendingTransactionTrackerService, PendingTransactionTrackerService>()

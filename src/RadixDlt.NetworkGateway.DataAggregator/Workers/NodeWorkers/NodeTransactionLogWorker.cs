@@ -73,7 +73,6 @@ using RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -148,12 +147,12 @@ public sealed class NodeTransactionLogWorker : NodeWorker
 
         var networkStatus = await _services.GetRequiredService<INetworkStatusReader>().GetNetworkStatus(cancellationToken);
         var nodeLedgerTip = networkStatus.CurrentStateIdentifier.StateVersion;
-        var nodeLedgerTarget = nodeLedgerTip + 1; // TODO waiting for CoreApi: networkStatus.SyncStatus.TargetStateVersion;
+        var nodeLedgerTarget = nodeLedgerTip; // TODO waiting for CoreApi: networkStatus.SyncStatus.TargetStateVersion;
 
         _ledgerConfirmationService.SubmitNodeNetworkStatus(
             NodeName,
             nodeLedgerTip,
-            SHA256.HashData(BitConverter.GetBytes(nodeLedgerTip)), // TODO waiting for CoreApi: networkStatus.CurrentStateIdentifier.TransactionAccumulator.ConvertFromHex(),
+            networkStatus.CurrentStateIdentifier.AccumulatorHash.ConvertFromHex(),
             nodeLedgerTarget
         );
 
@@ -193,21 +192,22 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         );
     }
 
-    private async Task<List<CoreModel.CommittedTransaction>> FetchTransactionsFromCoreApiWithLogging(
-        long fromStateVersion,
-        int transactionsToPull,
-        CancellationToken cancellationToken
-    )
+    private async Task<List<CoreModel.CommittedTransaction>> FetchTransactionsFromCoreApiWithLogging(long fromStateVersion, int count, CancellationToken token)
     {
         _logger.LogDebug(
             "Fetching up to {TransactionCount} transactions from version {FromStateVersion} from the core api",
-            transactionsToPull,
+            count,
             fromStateVersion
         );
 
-        var (transactions, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(
-            () => FetchTransactionsOrEmptyList(fromStateVersion, transactionsToPull, cancellationToken)
-        );
+        var transactionStreamReader = _services.GetRequiredService<ITransactionStreamReader>();
+
+        var (transactions, fetchTransactionsMs) = await CodeStopwatch.TimeInMs(async () =>
+        {
+            var response = await transactionStreamReader.GetTransactionStream(fromStateVersion, count, token);
+
+            return response.Transactions;
+        });
 
         await _observers.ForEachAsync(x => x.TransactionsFetched(NodeName, transactions, fetchTransactionsMs));
 
@@ -222,13 +222,5 @@ public sealed class NodeTransactionLogWorker : NodeWorker
         }
 
         return transactions;
-    }
-
-    private async Task<List<CoreModel.CommittedTransaction>> FetchTransactionsOrEmptyList(long fromStateVersion, int transactionsToPull, CancellationToken token)
-    {
-        var transactionLogReader = _services.GetRequiredService<ITransactionLogReader>();
-        var transactionsResponse = await transactionLogReader.GetTransactions(fromStateVersion, transactionsToPull, token);
-
-        return transactionsResponse.Transactions;
     }
 }

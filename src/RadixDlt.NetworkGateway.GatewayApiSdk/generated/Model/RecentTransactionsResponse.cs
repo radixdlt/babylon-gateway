@@ -105,11 +105,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="RecentTransactionsResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?) (required).</param>
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">The page of user transactions. (required).</param>
-        public RecentTransactionsResponse(LedgerState ledgerState = default(LedgerState), int totalCount = default(int), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
+        public RecentTransactionsResponse(LedgerState ledgerState = default(LedgerState), int? totalCount = default(int?), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -117,13 +117,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("ledgerState is a required property for RecentTransactionsResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
-            this.TotalCount = totalCount;
             // to ensure "items" is required (not null)
             if (items == null)
             {
                 throw new ArgumentNullException("items is a required property for RecentTransactionsResponse and cannot be null");
             }
             this.Items = items;
+            this.TotalCount = totalCount;
             this.PreviousCursor = previousCursor;
             this.NextCursor = nextCursor;
         }
@@ -138,8 +138,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
         /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", IsRequired = true, EmitDefaultValue = true)]
-        public int TotalCount { get; set; }
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public int? TotalCount { get; set; }
 
         /// <summary>
         /// TBD (maybe we should use HATEOAS-like permalinks?)
@@ -217,7 +217,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 ) && 
                 (
                     this.TotalCount == input.TotalCount ||
-                    this.TotalCount.Equals(input.TotalCount)
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
                     this.PreviousCursor == input.PreviousCursor ||
@@ -250,7 +251,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                if (this.TotalCount != null)
+                {
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                }
                 if (this.PreviousCursor != null)
                 {
                     hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();

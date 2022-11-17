@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Configuration;
-using System;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices;
 
@@ -78,7 +78,7 @@ internal class NodeConfigProvider : INodeConfigProvider
 
     public CoreApiNode CoreApiNode
     {
-        get => _nodeAppSettings ?? throw new Exception("NodeAppSettings in NodeConfigProvider should be set at init time");
+        get => _nodeAppSettings ?? throw new InvalidNodeStateException("NodeAppSettings in NodeConfigProvider should be set at init time");
         set => _nodeAppSettings = value;
     }
 }

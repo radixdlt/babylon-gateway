@@ -109,10 +109,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         NonFungibleResource = 2,
 
         /// <summary>
+        /// Enum Package for value: package
+        /// </summary>
+        [EnumMember(Value = "package")]
+        Package = 3,
+
+        /// <summary>
         /// Enum AccountComponent for value: account_component
         /// </summary>
         [EnumMember(Value = "account_component")]
-        AccountComponent = 3
+        AccountComponent = 4
 
     }
 

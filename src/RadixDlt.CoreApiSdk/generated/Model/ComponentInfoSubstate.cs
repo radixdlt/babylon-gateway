@@ -120,7 +120,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="substateType">substateType (required).</param>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the package address (required).</param>
         /// <param name="blueprintName">blueprintName (required).</param>
-        public ComponentInfoSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string packageAddress = default(string), string blueprintName = default(string))
+        /// <param name="accessRulesLayers">accessRulesLayers (required).</param>
+        public ComponentInfoSubstate(EntityType entityType = default(EntityType), SubstateType substateType = default(SubstateType), string packageAddress = default(string), string blueprintName = default(string), List<ComponentAccessRulesLayer> accessRulesLayers = default(List<ComponentAccessRulesLayer>))
         {
             this.EntityType = entityType;
             this.SubstateType = substateType;
@@ -136,6 +137,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("blueprintName is a required property for ComponentInfoSubstate and cannot be null");
             }
             this.BlueprintName = blueprintName;
+            // to ensure "accessRulesLayers" is required (not null)
+            if (accessRulesLayers == null)
+            {
+                throw new ArgumentNullException("accessRulesLayers is a required property for ComponentInfoSubstate and cannot be null");
+            }
+            this.AccessRulesLayers = accessRulesLayers;
         }
 
         /// <summary>
@@ -152,6 +159,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public string BlueprintName { get; set; }
 
         /// <summary>
+        /// Gets or Sets AccessRulesLayers
+        /// </summary>
+        [DataMember(Name = "access_rules_layers", IsRequired = true, EmitDefaultValue = true)]
+        public List<ComponentAccessRulesLayer> AccessRulesLayers { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -163,6 +176,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
+            sb.Append("  AccessRulesLayers: ").Append(AccessRulesLayers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -215,6 +229,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlueprintName == input.BlueprintName ||
                     (this.BlueprintName != null &&
                     this.BlueprintName.Equals(input.BlueprintName))
+                ) && 
+                (
+                    this.AccessRulesLayers == input.AccessRulesLayers ||
+                    this.AccessRulesLayers != null &&
+                    input.AccessRulesLayers != null &&
+                    this.AccessRulesLayers.SequenceEqual(input.AccessRulesLayers)
                 );
         }
 
@@ -236,6 +256,10 @@ namespace RadixDlt.CoreApiSdk.Model
                 if (this.BlueprintName != null)
                 {
                     hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
+                if (this.AccessRulesLayers != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRulesLayers.GetHashCode();
                 }
                 return hashCode;
             }

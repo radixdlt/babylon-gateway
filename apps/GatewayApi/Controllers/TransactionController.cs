@@ -63,6 +63,7 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using System.Threading;
@@ -102,9 +103,8 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Details(request, token);
     }
 
-    // TODO decide how do we want to model /this endpoint in our OAS
     [HttpPost("preview")]
-    public async Task<GatewayModel.TransactionPreviewResponse> Preview(GatewayModel.TransactionPreviewRequest request, CancellationToken token)
+    public async Task<object> Preview(JToken request, CancellationToken token)
     {
         return await _transactionHandler.Preview(request, token);
     }

@@ -71,7 +71,7 @@ namespace RadixDlt.NetworkGateway.Abstractions.Configuration;
 public abstract class AbstractOptionsValidator<T> : AbstractValidator<T>, IValidateOptions<T>
     where T : class
 {
-    public virtual ValidateOptionsResult Validate(string name, T options)
+    public virtual ValidateOptionsResult Validate(string? name, T options)
     {
         var validateResult = Validate(options);
 

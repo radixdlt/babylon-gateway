@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityMetadataResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="metadata">metadata (required).</param>
         public EntityMetadataResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), EntityMetadataCollection metadata = default(EntityMetadataCollection))
         {
@@ -136,9 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 

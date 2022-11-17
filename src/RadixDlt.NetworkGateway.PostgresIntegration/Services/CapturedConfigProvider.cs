@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System;
 using System.Threading.Tasks;
@@ -85,14 +86,14 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
 
         if (networkConfiguration == null)
         {
-            throw new Exception("Can't set current configuration from database as it's not there");
+            throw new ConfigurationException("Can't set current configuration from database as it's not there");
         }
 
         return new CapturedConfig(
             networkConfiguration.NetworkName,
+            networkConfiguration.NetworkConfigurationWellKnownAddresses.AccountPackageAddress,
             networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
-            new GatewayModel.TokenIdentifier(networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress)
+            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition()
         );
     }
 }

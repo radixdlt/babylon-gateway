@@ -65,22 +65,33 @@
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.StaticHelpers;
 using RadixDlt.NetworkGateway.DataAggregator.Exceptions;
-using RadixDlt.NetworkGateway.DataAggregator.Services;
 
 namespace RadixDlt.NetworkGateway.DataAggregator;
 
 public static class TransactionConsistency
 {
-    public static void AssertChildTransactionConsistent(TransactionSummary parent, TransactionSummary child)
+    public static void AssertLatestTransactionConsistent(long latestTransactionStateVersion, long topOfLedgerStateVersion)
     {
-        if (child.StateVersion != parent.StateVersion + 1)
+        if (latestTransactionStateVersion != topOfLedgerStateVersion)
         {
             throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with state version {child.StateVersion}" +
-                $" on top of transaction with state version {parent.StateVersion}"
+                $"Tried to commit transactions with parent state version {latestTransactionStateVersion} " +
+                $"on top of a ledger with state version {topOfLedgerStateVersion}"
+            );
+        }
+    }
+
+    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
+    {
+        if (stateVersion != previousStateVersion + 1)
+        {
+            throw new InvalidLedgerCommitException(
+                $"Attempted to commit a transaction with state version {stateVersion}" +
+                $" on top of transaction with state version {previousStateVersion}"
             );
         }
 
+        // TODO restore from Olympia once TransactionAccumulator gets exposed by CoreApi
         // if (!RadixHashing.IsValidAccumulator(
         //         parent.TransactionAccumulator,
         //         child.PayloadHash,
@@ -98,13 +109,13 @@ public static class TransactionConsistency
         // }
     }
 
-    public static void AssertTransactionHashCorrect(byte[] payload, byte[] transactionIdentifierHash)
+    public static void AssertTransactionHashCorrect(byte[] payload, byte[] payloadHash)
     {
-        if (!RadixHashing.IsValidTransactionHashIdentifier(payload, transactionIdentifierHash))
+        if (!RadixHashing.IsValidTransactionPayloadHash(payload, payloadHash))
         {
             throw new InvalidLedgerCommitException(
-                $"Attempted to commit a transaction with claimed identifier hash {transactionIdentifierHash.ToHex()} " +
-                $"but it was calculated to have identifier {RadixHashing.CreateTransactionHashIdentifierFromSignTransactionPayload(payload).ToHex()} " +
+                $"Attempted to commit a transaction with claimed payload hash {payloadHash.ToHex()} " +
+                $"but it was calculated to have hash {RadixHashing.CreateTransactionPayloadHash(payload).ToHex()} " +
                 $"(transaction contents: {payload.ToHex()})"
             );
         }

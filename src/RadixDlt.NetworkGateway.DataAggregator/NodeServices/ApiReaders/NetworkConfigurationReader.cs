@@ -73,11 +73,6 @@ using CoreModel = RadixDlt.CoreApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.DataAggregator.NodeServices.ApiReaders;
 
-public interface INetworkConfigurationReader
-{
-    Task<CoreModel.NetworkConfigurationResponse> GetNetworkConfiguration(CancellationToken token);
-}
-
 internal class NetworkConfigurationReader : INetworkConfigurationReader
 {
     private readonly CoreApi.StatusApi _statusApi;

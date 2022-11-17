@@ -97,10 +97,10 @@ namespace RadixDlt.CoreApiSdk.Model
     public enum EntityType
     {
         /// <summary>
-        /// Enum System for value: System
+        /// Enum EpochManager for value: EpochManager
         /// </summary>
-        [EnumMember(Value = "System")]
-        System = 1,
+        [EnumMember(Value = "EpochManager")]
+        EpochManager = 1,
 
         /// <summary>
         /// Enum ResourceManager for value: ResourceManager

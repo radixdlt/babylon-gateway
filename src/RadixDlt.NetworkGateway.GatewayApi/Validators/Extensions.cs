@@ -66,7 +66,7 @@ using FluentValidation;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-public static class Extensions
+internal static class Extensions
 {
     public static IRuleBuilderOptions<T, string?> Base64<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
     {
@@ -76,5 +76,10 @@ public static class Extensions
     public static IRuleBuilderOptions<T, string?> Hex<T>(this IRuleBuilder<T, string?> ruleBuilder, int? expectedLength = null)
     {
         return ruleBuilder.SetValidator(new HexValidator<T>(expectedLength));
+    }
+
+    public static IRuleBuilderOptions<T, string?> RadixAddress<T>(this IRuleBuilder<T, string?> ruleBuilder, string? expectedHrp = null)
+    {
+        return ruleBuilder.SetValidator(new RadixAddressValidator<T>(expectedHrp));
     }
 }

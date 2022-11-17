@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+using GatewayApi.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -113,17 +114,8 @@ public class GatewayApiStartup
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
-        if (_enableSwagger)
-        {
-            application
-                .UseStaticFiles()
-                .UseSwaggerUI(o =>
-                {
-                    o.SwaggerEndpoint("/spec-copy.txt", "Radix Babylon Gateway API");
-                });
-        }
-
         application
+            .UseForwardedHeaders() // TODO this is a potential security issue, make sure it is only enabled when explicitly configured (same as _enableSwagger)
             .UseAuthentication()
             .UseAuthorization()
             .UseCors()
@@ -132,9 +124,23 @@ public class GatewayApiStartup
             .UseRequestTimeout()
             .UseEndpoints(endpoints =>
             {
+                if (_enableSwagger)
+                {
+                    endpoints.MapGet("/gateway-api-schema.json", OpenApiDocumentHandler.Handle);
+                }
+
                 endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
+
+        if (_enableSwagger)
+        {
+            application
+                .UseSwaggerUI(o =>
+                {
+                    o.SwaggerEndpoint("/gateway-api-schema.json", "Radix Babylon Gateway API");
+                });
+        }
 
         StartMetricServer(logger);
     }

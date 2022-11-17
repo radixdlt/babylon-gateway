@@ -107,9 +107,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="transactionStatus">transactionStatus (required).</param>
         /// <param name="payloadHashHex">payloadHashHex (required).</param>
         /// <param name="intentHashHex">intentHashHex (required).</param>
-        /// <param name="transactionAccumulatorHex">transactionAccumulatorHex (required).</param>
-        /// <param name="feePaid">feePaid (required).</param>
-        public TransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), string transactionAccumulatorHex = default(string), TokenAmount feePaid = default(TokenAmount))
+        /// <param name="feePaid">feePaid.</param>
+        public TransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount))
         {
             // to ensure "transactionStatus" is required (not null)
             if (transactionStatus == null)
@@ -129,17 +128,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("intentHashHex is a required property for TransactionInfo and cannot be null");
             }
             this.IntentHashHex = intentHashHex;
-            // to ensure "transactionAccumulatorHex" is required (not null)
-            if (transactionAccumulatorHex == null)
-            {
-                throw new ArgumentNullException("transactionAccumulatorHex is a required property for TransactionInfo and cannot be null");
-            }
-            this.TransactionAccumulatorHex = transactionAccumulatorHex;
-            // to ensure "feePaid" is required (not null)
-            if (feePaid == null)
-            {
-                throw new ArgumentNullException("feePaid is a required property for TransactionInfo and cannot be null");
-            }
             this.FeePaid = feePaid;
         }
 
@@ -162,15 +150,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string IntentHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets TransactionAccumulatorHex
-        /// </summary>
-        [DataMember(Name = "transaction_accumulator_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string TransactionAccumulatorHex { get; set; }
-
-        /// <summary>
         /// Gets or Sets FeePaid
         /// </summary>
-        [DataMember(Name = "fee_paid", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "fee_paid", EmitDefaultValue = true)]
         public TokenAmount FeePaid { get; set; }
 
         /// <summary>
@@ -184,7 +166,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
             sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
-            sb.Append("  TransactionAccumulatorHex: ").Append(TransactionAccumulatorHex).Append("\n");
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -237,11 +218,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.IntentHashHex.Equals(input.IntentHashHex))
                 ) && 
                 (
-                    this.TransactionAccumulatorHex == input.TransactionAccumulatorHex ||
-                    (this.TransactionAccumulatorHex != null &&
-                    this.TransactionAccumulatorHex.Equals(input.TransactionAccumulatorHex))
-                ) && 
-                (
                     this.FeePaid == input.FeePaid ||
                     (this.FeePaid != null &&
                     this.FeePaid.Equals(input.FeePaid))
@@ -268,10 +244,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.IntentHashHex != null)
                 {
                     hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
-                }
-                if (this.TransactionAccumulatorHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.TransactionAccumulatorHex.GetHashCode();
                 }
                 if (this.FeePaid != null)
                 {

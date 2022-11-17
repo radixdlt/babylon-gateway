@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesItem" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address (required).</param>
-        /// <param name="amountAttos">A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource.  (required).</param>
-        public EntityResourcesResponseFungibleResourcesItem(string address = default(string), string amountAttos = default(string))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="amount">amount (required).</param>
+        public EntityResourcesResponseFungibleResourcesItem(string address = default(string), TokenAmount amount = default(TokenAmount))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -114,27 +114,26 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
             }
             this.Address = address;
-            // to ensure "amountAttos" is required (not null)
-            if (amountAttos == null)
+            // to ensure "amount" is required (not null)
+            if (amount == null)
             {
-                throw new ArgumentNullException("amountAttos is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
+                throw new ArgumentNullException("amount is a required property for EntityResourcesResponseFungibleResourcesItem and cannot be null");
             }
-            this.AmountAttos = amountAttos;
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address</value>
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
         /// <summary>
-        /// A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. 
+        /// Gets or Sets Amount
         /// </summary>
-        /// <value>A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in the total supply of this resource. </value>
-        [DataMember(Name = "amount_attos", IsRequired = true, EmitDefaultValue = true)]
-        public string AmountAttos { get; set; }
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public TokenAmount Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -145,7 +144,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityResourcesResponseFungibleResourcesItem {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  AmountAttos: ").Append(AmountAttos).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -187,9 +186,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.AmountAttos == input.AmountAttos ||
-                    (this.AmountAttos != null &&
-                    this.AmountAttos.Equals(input.AmountAttos))
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -206,9 +205,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.AmountAttos != null)
+                if (this.Amount != null)
                 {
-                    hashCode = (hashCode * 59) + this.AmountAttos.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

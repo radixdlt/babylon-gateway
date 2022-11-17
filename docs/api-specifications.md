@@ -2,7 +2,7 @@
 
 There are (at time of writing) three main Radix APIs:
 
-* [Gateway API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt-network-gateway/main/gateway-api-spec.yaml) - The main public facing API, exposed by the Network Gateway
+* [Gateway API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt-network-gateway/main/gateway-api-schema.yaml) - The main public facing API, exposed by the Network Gateway
 * [Core API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt/main/radixdlt-core/radixdlt/src/main/java/com/radixdlt/api/core/api.yaml) - An API exposed by radixdlt full nodes, intended to be exposed on private networks
 * [System API](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/radixdlt/radixdlt/main/radixdlt-core/radixdlt/src/main/java/com/radixdlt/api/system/api.yaml) - An API exposed privately by radixdlt nodes to get information about the node health/status.
 
@@ -10,7 +10,7 @@ The links above link to the ReDocly docs, reading the schemas on the `main` bran
 
 ## Gateway API
 
-As the Gateway API is exposed by the Gateway Service, the Gateway API specification source-of-truth lives in the [Open API Spec in the Network Gateway repository](../gateway-api-spec.yaml).
+As the Gateway API is exposed by the Gateway Service, the Gateway API specification source-of-truth lives in the [Open API Schema in the Network Gateway repository](../gateway-api-schema.yaml).
 
 The Open API specification should be kept up to date with the interface that the Gateway API service exposes.
 

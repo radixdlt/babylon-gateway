@@ -107,12 +107,16 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <param name="network">The logical name of the network (required).</param>
         /// <param name="manifest">A text-representation of a transaction manifest (required).</param>
         /// <param name="blobsHex">An array of hex-encoded blob data (optional).</param>
+        /// <param name="startEpochInclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid (required).</param>
+        /// <param name="endEpochExclusive">An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid (required).</param>
+        /// <param name="notaryPublicKey">notaryPublicKey.</param>
+        /// <param name="notaryAsSignatory">Whether the notary should count as a signatory (optional, default false).</param>
         /// <param name="costUnitLimit">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution (required).</param>
         /// <param name="tipPercentage">An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, specifying the validator tip as a percentage amount. A value of &#x60;1&#x60; corresponds to 1% of the fee. (required).</param>
         /// <param name="nonce">A decimal-string-encoded integer between &#x60;0&#x60; and &#x60;2^64 - 1&#x60;, used to ensure the transaction intent is unique. (required).</param>
         /// <param name="signerPublicKeys">A list of public keys to be used as transaction signers (required).</param>
         /// <param name="flags">flags (required).</param>
-        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobsHex = default(List<string>), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
+        public TransactionPreviewRequest(string network = default(string), string manifest = default(string), List<string> blobsHex = default(List<string>), long startEpochInclusive = default(long), long endEpochExclusive = default(long), PublicKey notaryPublicKey = default(PublicKey), bool notaryAsSignatory = default(bool), long costUnitLimit = default(long), long tipPercentage = default(long), string nonce = default(string), List<PublicKey> signerPublicKeys = default(List<PublicKey>), TransactionPreviewRequestFlags flags = default(TransactionPreviewRequestFlags))
         {
             // to ensure "network" is required (not null)
             if (network == null)
@@ -126,6 +130,8 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("manifest is a required property for TransactionPreviewRequest and cannot be null");
             }
             this.Manifest = manifest;
+            this.StartEpochInclusive = startEpochInclusive;
+            this.EndEpochExclusive = endEpochExclusive;
             this.CostUnitLimit = costUnitLimit;
             this.TipPercentage = tipPercentage;
             // to ensure "nonce" is required (not null)
@@ -147,6 +153,8 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.Flags = flags;
             this.BlobsHex = blobsHex;
+            this.NotaryPublicKey = notaryPublicKey;
+            this.NotaryAsSignatory = notaryAsSignatory;
         }
 
         /// <summary>
@@ -169,6 +177,33 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <value>An array of hex-encoded blob data (optional)</value>
         [DataMember(Name = "blobs_hex", EmitDefaultValue = true)]
         public List<string> BlobsHex { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction starts being valid</value>
+        [DataMember(Name = "start_epoch_inclusive", IsRequired = true, EmitDefaultValue = true)]
+        public long StartEpochInclusive { get; set; }
+
+        /// <summary>
+        /// An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid
+        /// </summary>
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10^10&#x60;, marking the epoch at which the transaction is no longer valid</value>
+        [DataMember(Name = "end_epoch_exclusive", IsRequired = true, EmitDefaultValue = true)]
+        public long EndEpochExclusive { get; set; }
+
+        /// <summary>
+        /// Gets or Sets NotaryPublicKey
+        /// </summary>
+        [DataMember(Name = "notary_public_key", EmitDefaultValue = true)]
+        public PublicKey NotaryPublicKey { get; set; }
+
+        /// <summary>
+        /// Whether the notary should count as a signatory (optional, default false)
+        /// </summary>
+        /// <value>Whether the notary should count as a signatory (optional, default false)</value>
+        [DataMember(Name = "notary_as_signatory", EmitDefaultValue = true)]
+        public bool NotaryAsSignatory { get; set; }
 
         /// <summary>
         /// An integer between &#x60;0&#x60; and &#x60;2^32 - 1&#x60;, giving the maximum number of cost units available for transaction execution
@@ -215,6 +250,10 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("  Network: ").Append(Network).Append("\n");
             sb.Append("  Manifest: ").Append(Manifest).Append("\n");
             sb.Append("  BlobsHex: ").Append(BlobsHex).Append("\n");
+            sb.Append("  StartEpochInclusive: ").Append(StartEpochInclusive).Append("\n");
+            sb.Append("  EndEpochExclusive: ").Append(EndEpochExclusive).Append("\n");
+            sb.Append("  NotaryPublicKey: ").Append(NotaryPublicKey).Append("\n");
+            sb.Append("  NotaryAsSignatory: ").Append(NotaryAsSignatory).Append("\n");
             sb.Append("  CostUnitLimit: ").Append(CostUnitLimit).Append("\n");
             sb.Append("  TipPercentage: ").Append(TipPercentage).Append("\n");
             sb.Append("  Nonce: ").Append(Nonce).Append("\n");
@@ -272,6 +311,23 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.BlobsHex.SequenceEqual(input.BlobsHex)
                 ) && 
                 (
+                    this.StartEpochInclusive == input.StartEpochInclusive ||
+                    this.StartEpochInclusive.Equals(input.StartEpochInclusive)
+                ) && 
+                (
+                    this.EndEpochExclusive == input.EndEpochExclusive ||
+                    this.EndEpochExclusive.Equals(input.EndEpochExclusive)
+                ) && 
+                (
+                    this.NotaryPublicKey == input.NotaryPublicKey ||
+                    (this.NotaryPublicKey != null &&
+                    this.NotaryPublicKey.Equals(input.NotaryPublicKey))
+                ) && 
+                (
+                    this.NotaryAsSignatory == input.NotaryAsSignatory ||
+                    this.NotaryAsSignatory.Equals(input.NotaryAsSignatory)
+                ) && 
+                (
                     this.CostUnitLimit == input.CostUnitLimit ||
                     this.CostUnitLimit.Equals(input.CostUnitLimit)
                 ) && 
@@ -318,6 +374,13 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.BlobsHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.StartEpochInclusive.GetHashCode();
+                hashCode = (hashCode * 59) + this.EndEpochExclusive.GetHashCode();
+                if (this.NotaryPublicKey != null)
+                {
+                    hashCode = (hashCode * 59) + this.NotaryPublicKey.GetHashCode();
+                }
+                hashCode = (hashCode * 59) + this.NotaryAsSignatory.GetHashCode();
                 hashCode = (hashCode * 59) + this.CostUnitLimit.GetHashCode();
                 hashCode = (hashCode * 59) + this.TipPercentage.GetHashCode();
                 if (this.Nonce != null)
@@ -343,6 +406,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // StartEpochInclusive (long) maximum
+            if (this.StartEpochInclusive > (long)10000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value less than or equal to 10000000000.", new [] { "StartEpochInclusive" });
+            }
+
+            // StartEpochInclusive (long) minimum
+            if (this.StartEpochInclusive < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for StartEpochInclusive, must be a value greater than or equal to 0.", new [] { "StartEpochInclusive" });
+            }
+
+            // EndEpochExclusive (long) maximum
+            if (this.EndEpochExclusive > (long)10000000000)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value less than or equal to 10000000000.", new [] { "EndEpochExclusive" });
+            }
+
+            // EndEpochExclusive (long) minimum
+            if (this.EndEpochExclusive < (long)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for EndEpochExclusive, must be a value greater than or equal to 0.", new [] { "EndEpochExclusive" });
+            }
+
             // CostUnitLimit (long) maximum
             if (this.CostUnitLimit > (long)4294967295)
             {

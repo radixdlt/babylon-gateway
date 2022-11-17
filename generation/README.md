@@ -23,7 +23,7 @@ With all paths relative to the repo root, proceed as follows:
 
 With all paths relative to the repo root, proceed as follows:
 
-* Update `./gateway-api-spec.yml` for any changes you'd like to make. Be sure to discuss any non-backwards compatible changes. Keep the docs updated in the schema.
+* Update `./gateway-api-schema.yaml` for any changes you'd like to make. Be sure to discuss any non-backwards compatible changes. Keep the docs updated in the schema.
 * You may need to temporarily change the spec version to "3.0.0" so that it works with code gen, until [openapi-generator supports 3.1.0](https://github.com/OpenAPITools/openapi-generator/issues/9083).
 * Run `./generation/regenerate-gateway-api.sh`
 

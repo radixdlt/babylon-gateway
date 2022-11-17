@@ -104,9 +104,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenAmount" /> class.
         /// </summary>
-        /// <param name="value">value (required).</param>
-        /// <param name="tokenIdentifier">tokenIdentifier (required).</param>
-        public TokenAmount(string value = default(string), TokenIdentifier tokenIdentifier = default(TokenIdentifier))
+        /// <param name="value">The string-encoded decimal representing the amount (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address..</param>
+        public TokenAmount(string value = default(string), string address = default(string))
         {
             // to ensure "value" is required (not null)
             if (value == null)
@@ -114,25 +114,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("value is a required property for TokenAmount and cannot be null");
             }
             this.Value = value;
-            // to ensure "tokenIdentifier" is required (not null)
-            if (tokenIdentifier == null)
-            {
-                throw new ArgumentNullException("tokenIdentifier is a required property for TokenAmount and cannot be null");
-            }
-            this.TokenIdentifier = tokenIdentifier;
+            this.Address = address;
         }
 
         /// <summary>
-        /// Gets or Sets Value
+        /// The string-encoded decimal representing the amount
         /// </summary>
+        /// <value>The string-encoded decimal representing the amount</value>
         [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
         public string Value { get; set; }
 
         /// <summary>
-        /// Gets or Sets TokenIdentifier
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
-        [DataMember(Name = "token_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TokenIdentifier TokenIdentifier { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        [DataMember(Name = "address", EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -143,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TokenAmount {\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
-            sb.Append("  TokenIdentifier: ").Append(TokenIdentifier).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -185,9 +182,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Value.Equals(input.Value))
                 ) && 
                 (
-                    this.TokenIdentifier == input.TokenIdentifier ||
-                    (this.TokenIdentifier != null &&
-                    this.TokenIdentifier.Equals(input.TokenIdentifier))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -204,9 +201,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Value.GetHashCode();
                 }
-                if (this.TokenIdentifier != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.TokenIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }
@@ -219,13 +216,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Value (string) pattern
-            Regex regexValue = new Regex(@"^-?[0-9]+$", RegexOptions.CultureInvariant);
-            if (false == regexValue.Match(this.Value).Success)
-            {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Value, must match a pattern of " + regexValue, new [] { "Value" });
-            }
-
             yield break;
         }
     }
