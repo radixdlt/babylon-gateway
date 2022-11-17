@@ -109,3 +109,28 @@ jobs:
                    "database_migrations_image_tag": "${{ needs.publish-docker.outputs.database-migrations-tag }}"
                }
            }'
+
+
+  ephemeral-deploy-and-test:
+    name: Run ephemeral deployment w/ gateway and test
+    needs: publish-docker
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Get docker image tag
+        run: |
+          echo "BABYLON_NODE_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+          echo "GATEWAY_TAG=${{ steps.setup_tags.outputs.gateway_api_tags }}" >> $GITHUB_ENV
+      - name: Deploy and test on ephemeral network
+        uses: toptal/jenkins-job-trigger-action@1.0.0
+        with:
+          jenkins_url: "${{ secrets.JENKINS_URL }}"
+          jenkins_user: ${{ secrets.JENKINS_USER }}
+          jenkins_token: ${{ secrets.BABYLON_NODE_JENKINS_API_TOKEN }}
+          job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
+          job_params: |
+            {
+              "nodeDockerTag": "main",
+              "gatewayDockerTag": "${{ env.GATEWAY_TAG }}",
+              "babylonNodeBranch": "${{ env.BABYLON_NODE_BRANCH }}"
+            }
+          job_timeout: "3600"
