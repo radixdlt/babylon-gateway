@@ -62,8 +62,8 @@
  * permissions under this License.
  */
 
-using GatewayApi.Controllers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -110,6 +110,17 @@ public class GatewayApiStartup
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
+
+        services.Configure<ForwardedHeadersOptions>(o =>
+        {
+            // TODO this is a potential security issue, make sure it is only enabled when explicitly configured (same as _enableSwagger)
+            o.ForwardLimit = 10;
+            o.ForwardedHeaders = ForwardedHeaders.All;
+            o.RequireHeaderSymmetry = false;
+            o.AllowedHosts.Clear();
+            o.KnownNetworks.Clear();
+            o.KnownProxies.Clear();
+        });
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
