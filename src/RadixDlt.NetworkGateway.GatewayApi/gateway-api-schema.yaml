@@ -399,6 +399,7 @@ components:
         total_count:
           description: TBD (make it nullable when we're dealing with unknown result set sizes?)
           type: integer
+          format: int64
           nullable: true
         previous_cursor:
           description: TBD (maybe we should use HATEOAS-like permalinks?)
@@ -624,7 +625,8 @@ components:
         address:
           $ref: "#/components/schemas/ResourceAddress"
         amount:
-          type: number
+          type: integer
+          format: int64
 
     EntityDetailsRequest:
       type: object
@@ -686,7 +688,6 @@ components:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
         divisibility:
           type: integer
-          format: int64
           minimum: 0
         total_supply:
           $ref: "#/components/schemas/TokenAmount"

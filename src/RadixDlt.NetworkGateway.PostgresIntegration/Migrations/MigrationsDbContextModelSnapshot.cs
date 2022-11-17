@@ -648,8 +648,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<long>("Divisibility")
-                        .HasColumnType("bigint")
+                    b.Property<int>("Divisibility")
+                        .HasColumnType("integer")
                         .HasColumnName("divisibility");
 
                     b.ToTable("entities");

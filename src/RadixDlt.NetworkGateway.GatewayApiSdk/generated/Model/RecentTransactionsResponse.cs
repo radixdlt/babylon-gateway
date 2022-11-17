@@ -109,7 +109,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">The page of user transactions. (required).</param>
-        public RecentTransactionsResponse(LedgerState ledgerState = default(LedgerState), int? totalCount = default(int?), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
+        public RecentTransactionsResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -139,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
         [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public int? TotalCount { get; set; }
+        public long? TotalCount { get; set; }
 
         /// <summary>
         /// TBD (maybe we should use HATEOAS-like permalinks?)

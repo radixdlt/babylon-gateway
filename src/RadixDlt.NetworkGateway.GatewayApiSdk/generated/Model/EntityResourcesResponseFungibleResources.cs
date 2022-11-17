@@ -108,7 +108,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">items (required).</param>
-        public EntityResourcesResponseFungibleResources(int? totalCount = default(int?), string previousCursor = default(string), string nextCursor = default(string), List<EntityResourcesResponseFungibleResourcesItem> items = default(List<EntityResourcesResponseFungibleResourcesItem>))
+        public EntityResourcesResponseFungibleResources(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<EntityResourcesResponseFungibleResourcesItem> items = default(List<EntityResourcesResponseFungibleResourcesItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
@@ -126,7 +126,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
         [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public int? TotalCount { get; set; }
+        public long? TotalCount { get; set; }
 
         /// <summary>
         /// TBD (maybe we should use HATEOAS-like permalinks?)

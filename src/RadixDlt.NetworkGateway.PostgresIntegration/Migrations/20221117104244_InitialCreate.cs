@@ -92,7 +92,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     globalancestorid = table.Column<long>(name: "global_ancestor_id", type: "bigint", nullable: true),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     packageid = table.Column<long>(name: "package_id", type: "bigint", nullable: true),
-                    divisibility = table.Column<long>(type: "bigint", nullable: true),
+                    divisibility = table.Column<int>(type: "integer", nullable: true),
                     code = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
                 constraints: table =>

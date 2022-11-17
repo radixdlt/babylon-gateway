@@ -130,7 +130,7 @@ internal abstract class ResourceManagerEntity : Entity
 internal class FungibleResourceManagerEntity : ResourceManagerEntity
 {
     [Column("divisibility")]
-    public long Divisibility { get; set; }
+    public int Divisibility { get; set; }
 }
 
 internal class NonFungibleResourceManagerEntity : ResourceManagerEntity

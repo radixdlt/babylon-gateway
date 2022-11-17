@@ -115,7 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalSupply">totalSupply (required).</param>
         /// <param name="totalMinted">totalMinted (required).</param>
         /// <param name="totalBurnt">totalBurnt (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), long divisibility = default(long), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), int divisibility = default(int), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
         {
             this.Discriminator = discriminator;
             this.Divisibility = divisibility;
@@ -143,7 +143,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Divisibility
         /// </summary>
         [DataMember(Name = "divisibility", IsRequired = true, EmitDefaultValue = true)]
-        public long Divisibility { get; set; }
+        public int Divisibility { get; set; }
 
         /// <summary>
         /// Gets or Sets TotalSupply
@@ -270,8 +270,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Divisibility (long) minimum
-            if (this.Divisibility < (long)0)
+            // Divisibility (int) minimum
+            if (this.Divisibility < (int)0)
             {
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Divisibility, must be a value greater than or equal to 0.", new [] { "Divisibility" });
             }

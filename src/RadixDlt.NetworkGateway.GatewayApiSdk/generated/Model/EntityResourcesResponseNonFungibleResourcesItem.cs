@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
         /// <param name="amount">amount (required).</param>
-        public EntityResourcesResponseNonFungibleResourcesItem(string address = default(string), decimal amount = default(decimal))
+        public EntityResourcesResponseNonFungibleResourcesItem(string address = default(string), long amount = default(long))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -128,7 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Amount
         /// </summary>
         [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
-        public decimal Amount { get; set; }
+        public long Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

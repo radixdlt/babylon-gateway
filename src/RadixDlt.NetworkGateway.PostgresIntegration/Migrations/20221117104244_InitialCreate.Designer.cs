@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221116131728_InitialCreate")]
+    [Migration("20221117104244_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -651,8 +651,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");
 
-                    b.Property<long>("Divisibility")
-                        .HasColumnType("bigint")
+                    b.Property<int>("Divisibility")
+                        .HasColumnType("integer")
                         .HasColumnName("divisibility");
 
                     b.ToTable("entities");

@@ -241,7 +241,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var knownGlobalAddressesToLoad = new HashSet<string>();
         var childToParentEntities = new Dictionary<string, string>();
         var componentToGlobalPackage = new Dictionary<string, string>();
-        var fungibleResourceManagerDivisibility = new Dictionary<string, long>();
+        var fungibleResourceManagerDivisibility = new Dictionary<string, int>();
         var packageCode = new Dictionary<string, byte[]>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
@@ -683,7 +683,7 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullableAsync(dbEntity is ComponentEntity ce ? ce.PackageId : null, NpgsqlDbType.Bigint, token);
-                    await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
                     await writer.WriteNullableAsync(dbEntity is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
                 }
 

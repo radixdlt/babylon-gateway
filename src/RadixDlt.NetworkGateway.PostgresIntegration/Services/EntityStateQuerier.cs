@@ -174,8 +174,6 @@ INNER JOIN LATERAL (
 
     public async Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        // TODO just some quick and naive implementation
-
         var entity = await _dbContext.Entities
             .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
             .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
@@ -211,6 +209,8 @@ INNER JOIN LATERAL (
             case NonFungibleResourceManagerEntity nfrme:
             {
                 var dbConn = _dbContext.Database.GetDbConnection();
+
+                // TODO ORDER BY nfih.from_state_version DESC might be insufficient as we might have more than one NFID created in single state_version (add ", id ASC"?)
 
                 var nonFungibleIds = await dbConn.QueryAsync<NonFungibleIdViewModel>(new CommandDefinition(
                     commandText: @"
