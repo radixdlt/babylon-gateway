@@ -81,7 +81,7 @@ public static class TransactionConsistency
         }
     }
 
-    public static void AssertChildTransactionConsistent(long previousStateVersion, long stateVersion)
+    public static void AssertChildTransactionConsistent(long previousStateVersion, byte[] previousAccumulator, long stateVersion, byte[] accumulator, byte[] payload)
     {
         if (stateVersion != previousStateVersion + 1)
         {
@@ -91,22 +91,19 @@ public static class TransactionConsistency
             );
         }
 
-        // TODO restore from Olympia once TransactionAccumulator gets exposed by CoreApi
-        // if (!RadixHashing.IsValidAccumulator(
-        //         parent.TransactionAccumulator,
-        //         child.PayloadHash,
-        //         child.TransactionAccumulator
-        //     ))
-        // {
-        //     throw new InconsistentLedgerException(
-        //         $"Failure to commit a child transaction with resultant state version {child.StateVersion}." +
-        //         $" The parent (with resultant state version {parent.StateVersion}) has accumulator {parent.TransactionAccumulator.ToHex()}" +
-        //         $" and the child has transaction id hash {child.PayloadHash.ToHex()}" +
-        //         " which should result in an accumulator of" +
-        //         $" {RadixHashing.CreateNewAccumulator(parent.TransactionAccumulator, child.PayloadHash).ToHex()}" +
-        //         $" but the child reports an inconsistent accumulator of {child.TransactionAccumulator.ToHex()}."
-        //     );
-        // }
+        var payloadHash = HashingHelper.Sha256Twice(payload);
+
+        if (!RadixHashing.IsValidAccumulator(previousAccumulator, payloadHash, accumulator))
+        {
+            throw new InconsistentLedgerException(
+                $"Failure to commit a child transaction with resultant state version {stateVersion}." +
+                $" The parent (with resultant state version {previousStateVersion}) has accumulator {previousAccumulator.ToHex()}" +
+                $" and the child has transaction id hash {payloadHash.ToHex()}" +
+                " which should result in an accumulator of" +
+                $" {RadixHashing.CreateNewAccumulator(previousAccumulator, payloadHash).ToHex()}" +
+                $" but the child reports an inconsistent accumulator of {accumulator.ToHex()}."
+            );
+        }
     }
 
     public static void AssertTransactionHashCorrect(byte[] payload, byte[] payloadHash)

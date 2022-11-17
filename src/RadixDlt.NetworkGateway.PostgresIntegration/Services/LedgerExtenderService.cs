@@ -509,7 +509,8 @@ SELECT
                     IndexInEpoch: isStartOfEpoch ? 0 : lastTransactionSummary.IndexInEpoch + 1,
                     RoundInEpoch: newRoundInEpoch ?? lastTransactionSummary.RoundInEpoch,
                     IsStartOfEpoch: isStartOfEpoch,
-                    IsStartOfRound: isStartOfRound);
+                    IsStartOfRound: isStartOfRound,
+                    TransactionAccumulator: ct.LedgerTransaction.PayloadHex.ConvertFromHex());
 
                 ledgerTransactions.Add(TransactionMapping.CreateLedgerTransaction(ct, summary)); // TODO inline this for now on
 
@@ -1217,7 +1218,8 @@ SELECT
             IndexInEpoch: lastTransaction.IndexInEpoch,
             RoundInEpoch: lastTransaction.RoundInEpoch,
             IsStartOfEpoch: lastTransaction.IsStartOfEpoch,
-            IsStartOfRound: lastTransaction.IsStartOfRound
+            IsStartOfRound: lastTransaction.IsStartOfRound,
+            TransactionAccumulator: lastTransaction.TransactionAccumulator
         );
 
         return lastOverview ?? PreGenesisTransactionSummary();
@@ -1235,7 +1237,8 @@ SELECT
             IndexInEpoch: 0,
             RoundInEpoch: 0,
             IsStartOfEpoch: false,
-            IsStartOfRound: false
+            IsStartOfRound: false,
+            TransactionAccumulator: new byte[32]
         );
     }
 }

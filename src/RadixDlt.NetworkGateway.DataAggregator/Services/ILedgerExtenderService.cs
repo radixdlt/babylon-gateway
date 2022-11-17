@@ -86,7 +86,8 @@ public sealed record TransactionSummary(
     long IndexInEpoch,
     long RoundInEpoch,
     bool IsStartOfEpoch,
-    bool IsStartOfRound
+    bool IsStartOfRound,
+    byte[] TransactionAccumulator
 );
 
 public sealed record SyncTargetCarrier(
