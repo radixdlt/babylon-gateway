@@ -67,25 +67,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("non_fungible_id_history")]
-internal class NonFungibleIdHistory
+/// <summary>
+/// The raw transaction details and payload.
+/// </summary>
+[Table("raw_user_transactions")]
+internal class RawUserTransaction
 {
     [Key]
-    [Column("id")]
-    public long Id { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [Column("state_version")]
+    public long StateVersion { get; set; }
 
-    [Column("from_state_version")]
-    public long FromStateVersion { get; set; }
+    [Column("payload_hash")]
+    public byte[] PayloadHash { get; set; }
 
-    [Column("non_fungible_store_entity_id")]
-    public long NonFungibleStoreEntityId { get; set; }
-
-    [Column("non_fungible_resource_manager_entity_id")]
-    public long NonFungibleResourceManagerEntityId { get; set; }
-
-    [Column("non_fungible_id")]
-    public byte[] NonFungibleId { get; set; }
-
-    [Column("immutable_data")]
-    public byte[] ImmutableData { get; set; }
+    /// <summary>
+    /// The payload of the transaction.
+    /// </summary>
+    [Column("payload")]
+    public byte[] Payload { get; set; }
 }

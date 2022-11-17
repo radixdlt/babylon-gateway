@@ -80,7 +80,7 @@ internal abstract class CommonDbContext : DbContext
 {
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
-    public DbSet<RawTransaction> RawTransactions => Set<RawTransaction>();
+    public DbSet<RawUserTransaction> RawUserTransactions => Set<RawUserTransaction>();
 
     public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
 
@@ -96,7 +96,7 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
 
-    public DbSet<NonFungibleIdHistory> NonFungibleIdHistory => Set<NonFungibleIdHistory>();
+    public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
     public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
 
@@ -248,13 +248,13 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<FungibleResourceSupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdHistory>()
+        modelBuilder.Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdHistory>()
+        modelBuilder.Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId });
 
         modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
-            .HasIndex(e => new { e.NonFungibleIdHistoryId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
     }
 }

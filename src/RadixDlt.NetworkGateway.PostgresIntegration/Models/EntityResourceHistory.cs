@@ -96,9 +96,9 @@ internal class EntityFungibleResourceHistory : EntityResourceHistory
 
 internal class EntityNonFungibleResourceHistory : EntityResourceHistory
 {
-    [Column("ids_count")]
-    public long IdsCount { get; set; } // TODO drop in favor of array_length(ids, 1)
+    [Column("non_fungible_ids_count")]
+    public long NonFungibleIdsCount { get; set; } // TODO drop in favor of array_length(ids, 1) ?
 
-    [Column("ids")]
-    public byte[][] Ids { get; set; }
+    [Column("non_fungible_ids")]
+    public byte[][] NonFungibleIds { get; set; }
 }

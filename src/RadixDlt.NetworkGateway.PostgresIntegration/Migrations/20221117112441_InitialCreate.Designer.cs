@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221117104244_InitialCreate")]
+    [Migration("20221117112441_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -201,19 +201,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("from_state_version");
 
-                    b.Property<long[]>("FungibleResourceIds")
+                    b.Property<long[]>("FungibleResourceEntityIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("fungible_resource_ids");
+                        .HasColumnName("fungible_resource_entity_ids");
 
                     b.Property<bool>("IsMostRecent")
                         .HasColumnType("boolean")
                         .HasColumnName("is_most_recent");
 
-                    b.Property<long[]>("NonFungibleResourceIds")
+                    b.Property<long[]>("NonFungibleResourceEntityIds")
                         .IsRequired()
                         .HasColumnType("bigint[]")
-                        .HasColumnName("non_fungible_resource_ids");
+                        .HasColumnName("non_fungible_resource_entity_ids");
 
                     b.HasKey("Id");
 
@@ -438,7 +438,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("network_configuration");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdHistory", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdData", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -474,9 +474,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("NonFungibleResourceManagerEntityId", "FromStateVersion");
 
                     b.HasIndex("NonFungibleResourceManagerEntityId", "NonFungibleId")
-                        .HasDatabaseName("IX_non_fungible_id_history_non_fungible_resource_manager_enti~1");
+                        .HasDatabaseName("IX_non_fungible_id_data_non_fungible_resource_manager_entity_~1");
 
-                    b.ToTable("non_fungible_id_history");
+                    b.ToTable("non_fungible_id_data");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdMutableDataHistory", b =>
@@ -501,13 +501,13 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("mutable_data");
 
-                    b.Property<long>("NonFungibleIdHistoryId")
+                    b.Property<long>("NonFungibleIdDataId")
                         .HasColumnType("bigint")
-                        .HasColumnName("non_fungible_id_history_id");
+                        .HasColumnName("non_fungible_id_data_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NonFungibleIdHistoryId", "FromStateVersion");
+                    b.HasIndex("NonFungibleIdDataId", "FromStateVersion");
 
                     b.ToTable("non_fungible_id_mutable_data_history");
                 });
@@ -603,7 +603,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("pending_transactions");
                 });
 
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawTransaction", b =>
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.RawUserTransaction", b =>
                 {
                     b.Property<long>("StateVersion")
                         .HasColumnType("bigint")
@@ -621,7 +621,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("StateVersion");
 
-                    b.ToTable("raw_transactions");
+                    b.ToTable("raw_user_transactions");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>
@@ -756,14 +756,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.EntityResourceHistory");
 
-                    b.Property<byte[][]>("Ids")
+                    b.Property<byte[][]>("NonFungibleIds")
                         .IsRequired()
                         .HasColumnType("bytea[]")
-                        .HasColumnName("ids");
+                        .HasColumnName("non_fungible_ids");
 
-                    b.Property<long>("IdsCount")
+                    b.Property<long>("NonFungibleIdsCount")
                         .HasColumnType("bigint")
-                        .HasColumnName("ids_count");
+                        .HasColumnName("non_fungible_ids_count");
 
                     b.ToTable("entity_resource_history");
 

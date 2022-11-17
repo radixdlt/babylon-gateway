@@ -125,8 +125,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
                     entityid = table.Column<long>(name: "entity_id", type: "bigint", nullable: false),
                     ismostrecent = table.Column<bool>(name: "is_most_recent", type: "boolean", nullable: false),
-                    fungibleresourceids = table.Column<long[]>(name: "fungible_resource_ids", type: "bigint[]", nullable: false),
-                    nonfungibleresourceids = table.Column<long[]>(name: "non_fungible_resource_ids", type: "bigint[]", nullable: false)
+                    fungibleresourceentityids = table.Column<long[]>(name: "fungible_resource_entity_ids", type: "bigint[]", nullable: false),
+                    nonfungibleresourceentityids = table.Column<long[]>(name: "non_fungible_resource_entity_ids", type: "bigint[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -145,8 +145,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     resourceentityid = table.Column<long>(name: "resource_entity_id", type: "bigint", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     balance = table.Column<BigInteger>(type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: true),
-                    idscount = table.Column<long>(name: "ids_count", type: "bigint", nullable: true),
-                    ids = table.Column<byte[][]>(type: "bytea[]", nullable: true)
+                    nonfungibleidscount = table.Column<long>(name: "non_fungible_ids_count", type: "bigint", nullable: true),
+                    nonfungibleids = table.Column<byte[][]>(name: "non_fungible_ids", type: "bytea[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -221,7 +221,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "non_fungible_id_history",
+                name: "non_fungible_id_data",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -234,7 +234,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_non_fungible_id_history", x => x.id);
+                    table.PrimaryKey("PK_non_fungible_id_data", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -244,7 +244,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
-                    nonfungibleidhistoryid = table.Column<long>(name: "non_fungible_id_history_id", type: "bigint", nullable: false),
+                    nonfungibleiddataid = table.Column<long>(name: "non_fungible_id_data_id", type: "bigint", nullable: false),
                     isdeleted = table.Column<bool>(name: "is_deleted", type: "boolean", nullable: false),
                     mutabledata = table.Column<byte[]>(name: "mutable_data", type: "bytea", nullable: false)
                 },
@@ -283,7 +283,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "raw_transactions",
+                name: "raw_user_transactions",
                 columns: table => new
                 {
                     stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
@@ -292,7 +292,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_raw_transactions", x => x.stateversion);
+                    table.PrimaryKey("PK_raw_user_transactions", x => x.stateversion);
                 });
 
             migrationBuilder.CreateTable(
@@ -404,19 +404,19 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
-                name: "IX_non_fungible_id_history_non_fungible_resource_manager_enti~1",
-                table: "non_fungible_id_history",
+                name: "IX_non_fungible_id_data_non_fungible_resource_manager_entity_~1",
+                table: "non_fungible_id_data",
                 columns: new[] { "non_fungible_resource_manager_entity_id", "non_fungible_id" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_non_fungible_id_history_non_fungible_resource_manager_entit~",
-                table: "non_fungible_id_history",
+                name: "IX_non_fungible_id_data_non_fungible_resource_manager_entity_i~",
+                table: "non_fungible_id_data",
                 columns: new[] { "non_fungible_resource_manager_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_non_fungible_id_mutable_data_history_non_fungible_id_histor~",
+                name: "IX_non_fungible_id_mutable_data_history_non_fungible_id_data_i~",
                 table: "non_fungible_id_mutable_data_history",
-                columns: new[] { "non_fungible_id_history_id", "from_state_version" });
+                columns: new[] { "non_fungible_id_data_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_payload_hash",
@@ -450,7 +450,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "network_configuration");
 
             migrationBuilder.DropTable(
-                name: "non_fungible_id_history");
+                name: "non_fungible_id_data");
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_mutable_data_history");
@@ -459,7 +459,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 name: "pending_transactions");
 
             migrationBuilder.DropTable(
-                name: "raw_transactions");
+                name: "raw_user_transactions");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");

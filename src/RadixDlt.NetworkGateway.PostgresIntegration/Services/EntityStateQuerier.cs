@@ -113,14 +113,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
         var dbResources = await _dbContext.EntityResourceHistory
             .FromSqlInterpolated($@"
 WITH aggregate_history_resources AS (
-    SELECT fungible_resource_ids, non_fungible_resource_ids
+    SELECT fungible_resource_entity_ids, non_fungible_resource_entity_ids
     FROM entity_resource_aggregate_history
     WHERE from_state_version <= {ledgerState.StateVersion} AND entity_id = {ce.Id}
     ORDER BY from_state_version DESC
     LIMIT 1
 ),
 aggregate_history AS (
-    SELECT UNNEST(fungible_resource_ids || non_fungible_resource_ids) AS resource_id
+    SELECT UNNEST(fungible_resource_entity_ids || non_fungible_resource_entity_ids) AS resource_entity_id
     FROM aggregate_history_resources
 )
 SELECT erh.*
@@ -128,7 +128,7 @@ FROM aggregate_history ah
 INNER JOIN LATERAL (
     SELECT *
     FROM entity_resource_history
-    WHERE from_state_version <= {ledgerState.StateVersion} AND global_entity_id = {ce.Id} AND resource_entity_id = ah.resource_id
+    WHERE from_state_version <= {ledgerState.StateVersion} AND global_entity_id = {ce.Id} AND resource_entity_id = ah.resource_entity_id
     ORDER BY from_state_version DESC
     LIMIT 1
 ) erh ON true;
@@ -157,7 +157,7 @@ INNER JOIN LATERAL (
                     fungibles.Add(new GatewayModel.EntityResourcesResponseFungibleResourcesItem(ra, amount));
                     break;
                 case EntityNonFungibleResourceHistory enfrh:
-                    nonFungibles.Add(new GatewayModel.EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.IdsCount));
+                    nonFungibles.Add(new GatewayModel.EntityResourcesResponseNonFungibleResourcesItem(ra, enfrh.NonFungibleIdsCount));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbResource));
@@ -214,17 +214,17 @@ INNER JOIN LATERAL (
 
                 var nonFungibleIds = await dbConn.QueryAsync<NonFungibleIdViewModel>(new CommandDefinition(
                     commandText: @"
-SELECT nfih.non_fungible_id AS NonFungibleId, nfimdh.is_deleted AS IsDeleted, nfih.immutable_data AS ImmutableData, nfimdh.mutable_data AS MutableData
-FROM non_fungible_id_history nfih
+SELECT nfid.non_fungible_id AS NonFungibleId, nfimdh.is_deleted AS IsDeleted, nfid.immutable_data AS ImmutableData, nfimdh.mutable_data AS MutableData
+FROM non_fungible_id_data nfid
 INNER JOIN LATERAL (
     SELECT is_deleted, mutable_data
     FROM non_fungible_id_mutable_data_history nfimdh
-    WHERE nfimdh.from_state_version <= @stateVersion AND nfih.id = nfimdh.non_fungible_id_history_id
-    ORDER BY nfih.from_state_version DESC
+    WHERE nfimdh.from_state_version <= @stateVersion AND nfid.id = nfimdh.non_fungible_id_data_id
+    ORDER BY nfid.from_state_version DESC
     LIMIT 1
 ) nfimdh ON TRUE
-WHERE nfih.from_state_version <= @stateVersion AND nfih.non_fungible_resource_manager_entity_id = @entityId
-ORDER BY nfih.from_state_version DESC
+WHERE nfid.from_state_version <= @stateVersion AND nfid.non_fungible_resource_manager_entity_id = @entityId
+ORDER BY nfid.from_state_version DESC
 OFFSET @offset LIMIT @limit",
                     parameters: new
                     {

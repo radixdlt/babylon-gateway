@@ -257,7 +257,7 @@ internal class TransactionQuerier : ITransactionQuerier
             .OrderByDescending(lt => lt.StateVersion)
             .FirstAsync(token);
 
-        var rawTransaction = await _dbContext.RawTransactions
+        var rawTransaction = await _dbContext.RawUserTransactions
             .FirstAsync(rt => rt.StateVersion == transaction.StateVersion, token);
 
         List<Entity> referencedEntities = new List<Entity>();
@@ -290,10 +290,10 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private LookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawTransaction rawTransaction, List<Entity> referencedEntities)
+    private LookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)
     {
         return new LookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionDetails(
-            rawHex: rawTransaction.Payload.ToHex(),
+            rawHex: rawUserTransaction.Payload.ToHex(),
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
             messageHex: ult.Message?.ToHex()
         ));

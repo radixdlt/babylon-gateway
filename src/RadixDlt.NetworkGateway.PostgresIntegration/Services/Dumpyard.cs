@@ -359,7 +359,7 @@ internal class SequencesHolder
 
     public long FungibleResourceSupplyHistorySequence { get; set; }
 
-    public long NonFungibleIdHistorySequence { get; set; }
+    public long NonFungibleIdDataSequence { get; set; }
 
     public long NonFungibleIdMutableDataHistorySequence { get; set; }
 
@@ -373,7 +373,7 @@ internal class SequencesHolder
 
     public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
 
-    public long NextNonFungibleIdHistory => NonFungibleIdHistorySequence++;
+    public long NextNonFungibleIdData => NonFungibleIdDataSequence++;
 
     public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
 }

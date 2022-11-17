@@ -252,28 +252,28 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
         // step: preparation (previously RawTransactionWriter logic)
         {
-            var rawTransactionsByPayloadHash = ledgerExtension.CommittedTransactions
+            var rawUserTransactionsByPayloadHash = ledgerExtension.CommittedTransactions
                 .Where(ct => ct.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction)
                 .Select(ult =>
                 {
                     var nt = ult.LedgerTransaction.GetUserLedgerTransaction().NotarizedTransaction;
 
-                    return new RawTransaction
+                    return new RawUserTransaction
                     {
                         StateVersion = ult.StateVersion,
                         PayloadHash = nt.Hash.ConvertFromHex(),
                         Payload = nt.PayloadHex.ConvertFromHex(),
                     };
                 })
-                .ToDictionary(rt => rt.PayloadHash, ByteArrayEqualityComparer.Default);
+                .ToDictionary(x => x.PayloadHash, ByteArrayEqualityComparer.Default);
 
-            var rawTransactions = rawTransactionsByPayloadHash.Values.ToList();
+            var rawUserTransactions = rawUserTransactionsByPayloadHash.Values.ToList();
 
             var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(async () =>
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY raw_transactions (state_version, payload_hash, payload) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY raw_user_transactions (state_version, payload_hash, payload) FROM STDIN (FORMAT BINARY)", token);
 
-                foreach (var rt in rawTransactions)
+                foreach (var rt in rawUserTransactions)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(rt.StateVersion, NpgsqlDbType.Bigint, token);
@@ -283,12 +283,12 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
                 await writer.CompleteAsync(token);
 
-                return rawTransactions.Count;
+                return rawUserTransactions.Count;
             });
 
             var (pendingTransactionsTouched, pendingTransactionUpdateMs) = await CodeStopwatch.TimeInMs(async () =>
             {
-                var transactionPayloadHashList = rawTransactionsByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
+                var transactionPayloadHashList = rawUserTransactionsByPayloadHash.Keys.ToList(); // List<> are optimised for PostgreSQL lookups
 
                 var toUpdate = await dbContext.PendingTransactions
                     .Where(mt => mt.Status != PendingTransactionStatus.Committed && transactionPayloadHashList.Contains(mt.PayloadHash))
@@ -352,7 +352,7 @@ SELECT
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
     nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
     nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence,
-    nextval('non_fungible_id_history_id_seq') AS NonFungibleIdHistorySequence,
+    nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence");
 
             dbReadDuration += sw.Elapsed;
@@ -874,8 +874,8 @@ WHERE id IN(
                         OwnerEntityId = e.ReferencedVault.DatabaseOwnerAncestorId,
                         GlobalEntityId = e.ReferencedVault.DatabaseGlobalAncestorId,
                         ResourceEntityId = e.ReferencedResource.DatabaseId,
-                        IdsCount = e.NonFungibleIds.Count,
-                        Ids = e.NonFungibleIds.ToArray(),
+                        NonFungibleIdsCount = e.NonFungibleIds.Count,
+                        NonFungibleIds = e.NonFungibleIds.ToArray(),
                     };
                 })
                 .ToList();
@@ -915,16 +915,16 @@ WHERE id IN(
                 })
                 .ToList();
 
-            List<NonFungibleIdHistory> nonFungibleIdsHistory = new List<NonFungibleIdHistory>();
+            List<NonFungibleIdData> nonFungibleIdsHistory = new List<NonFungibleIdData>();
             List<NonFungibleIdMutableDataHistory> nonFungibleIdsMutableDataHistory = new List<NonFungibleIdMutableDataHistory>();
 
             foreach (var e in nonFungibleIdChanges)
             {
-                // TODO only add NonFungibleIdHistory if does not exist, otherwise use existing one
+                // TODO only add NonFungibleIdData if does not exist, otherwise use existing one
 
-                var nonFungibleIdHistory = new NonFungibleIdHistory
+                var nonFungibleIdData = new NonFungibleIdData
                 {
-                    Id = sequences.NextNonFungibleIdHistory,
+                    Id = sequences.NextNonFungibleIdData,
                     FromStateVersion = e.StateVersion,
                     NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
                     NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseOwnerAncestorId, // TODO is it guaranteed to be ResourceManager?
@@ -932,12 +932,12 @@ WHERE id IN(
                     ImmutableData = e.Data.ImmutableData.StructData.DataHex.ConvertFromHex(),
                 };
 
-                nonFungibleIdsHistory.Add(nonFungibleIdHistory);
+                nonFungibleIdsHistory.Add(nonFungibleIdData);
                 nonFungibleIdsMutableDataHistory.Add(new NonFungibleIdMutableDataHistory
                 {
                     Id = sequences.NextNonFungibleIdMutableDataHistory,
                     FromStateVersion = e.StateVersion,
-                    NonFungibleIdHistoryId = nonFungibleIdHistory.Id,
+                    NonFungibleIdDataId = nonFungibleIdData.Id,
                     IsDeleted = e.IsDeleted,
                     MutableData = e.Data.MutableData.StructData.DataHex.ConvertFromHex(),
                 });
@@ -952,7 +952,7 @@ WHERE id IN(
                 .Where(e => vaultAggregateDeltaIds.Contains(e.EntityId))
                 .ToDictionaryAsync(e => e.EntityId, token);
 
-            // TODO we must find all existing NonFungibleIdHistory by ResourceManagerId+NfId so that for we can handle situation where NFID is not created but its mutable data has changed
+            // TODO we must find all existing NonFungibleIdData by ResourceManagerId+NfId so that for we can handle situation where NFID is not created but its mutable data has changed
 
             dbReadDuration += sw.Elapsed;
 
@@ -965,7 +965,7 @@ WHERE id IN(
                 {
                     var existingAggregate = existingVaultAggregates[entityId];
 
-                    aggregateChange.Add(existingAggregate.FromStateVersion, new AggregateChange(existingAggregate.FromStateVersion, existingAggregate.FungibleResourceIds, existingAggregate.NonFungibleResourceIds));
+                    aggregateChange.Add(existingAggregate.FromStateVersion, new AggregateChange(existingAggregate.FromStateVersion, existingAggregate.FungibleResourceEntityIds, existingAggregate.NonFungibleResourceEntityIds));
                 }
 
                 var orderedStateVersions = aggregateChange.Keys.OrderBy(k => k).ToArray();
@@ -984,8 +984,8 @@ WHERE id IN(
                             Id = sequences.NextEntityResourceAggregateHistory,
                             EntityId = entityId,
                             FromStateVersion = orderedStateVersions[i],
-                            FungibleResourceIds = current.FungibleIds.ToArray(),
-                            NonFungibleResourceIds = current.NonFungibleIds.ToArray(),
+                            FungibleResourceEntityIds = current.FungibleIds.ToArray(),
+                            NonFungibleResourceEntityIds = current.NonFungibleIds.ToArray(),
                         };
 
                         aggregates.Add(dbAggregate);
@@ -1012,7 +1012,7 @@ WHERE id IN(
 
             if (aggregates.Any())
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_ids, non_fungible_resource_ids) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_aggregate_history (id, from_state_version, entity_id, is_most_recent, fungible_resource_entity_ids, non_fungible_resource_entity_ids) FROM STDIN (FORMAT BINARY)", token);
 
                 foreach (var aggregate in aggregates)
                 {
@@ -1021,8 +1021,8 @@ WHERE id IN(
                     await writer.WriteAsync(aggregate.FromStateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(aggregate.EntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(aggregate.IsMostRecent, NpgsqlDbType.Boolean, token);
-                    await writer.WriteAsync(aggregate.FungibleResourceIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(aggregate.NonFungibleResourceIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(aggregate.FungibleResourceEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(aggregate.NonFungibleResourceEntityIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -1040,7 +1040,7 @@ WHERE id IN(
                     throw new InvalidOperationException("Unable to determine discriminator of EntityNonFungibleResourceHistory");
                 }
 
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, ids_count, ids) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY entity_resource_history (id, from_state_version, owner_entity_id, global_entity_id, resource_entity_id, discriminator, balance, non_fungible_ids_count, non_fungible_ids) FROM STDIN (FORMAT BINARY)", token);
 
                 foreach (var fungible in fungibleVaultsHistory)
                 {
@@ -1066,8 +1066,8 @@ WHERE id IN(
                     await writer.WriteAsync(nonFungible.ResourceEntityId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(nonFungibleDiscriminator, NpgsqlDbType.Text, token);
                     await writer.WriteNullAsync(token);
-                    await writer.WriteAsync(nonFungible.IdsCount, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(nonFungible.Ids, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(nonFungible.NonFungibleIdsCount, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(nonFungible.NonFungibleIds, NpgsqlDbType.Array | NpgsqlDbType.Bytea, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -1110,7 +1110,7 @@ WHERE id IN(
 
             if (nonFungibleIdsHistory.Any())
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_history (id, from_state_version, non_fungible_store_entity_id, non_fungible_resource_manager_entity_id, non_fungible_id, immutable_data) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, non_fungible_store_entity_id, non_fungible_resource_manager_entity_id, non_fungible_id, immutable_data) FROM STDIN (FORMAT BINARY)", token);
 
                 foreach (var md in nonFungibleIdsHistory)
                 {
@@ -1128,14 +1128,14 @@ WHERE id IN(
 
             if (nonFungibleIdsMutableDataHistory.Any())
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_mutable_data_history (id, from_state_version, non_fungible_id_history_id, is_deleted, mutable_data) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_mutable_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, mutable_data) FROM STDIN (FORMAT BINARY)", token);
 
                 foreach (var md in nonFungibleIdsMutableDataHistory)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(md.Id, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.FromStateVersion, NpgsqlDbType.Bigint, token);
-                    await writer.WriteAsync(md.NonFungibleIdHistoryId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(md.NonFungibleIdDataId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(md.IsDeleted, NpgsqlDbType.Boolean, token);
                     await writer.WriteAsync(md.MutableData, NpgsqlDbType.Bytea, token);
                 }
@@ -1159,7 +1159,7 @@ SELECT
     setval('entity_resource_aggregate_history_id_seq', @EntityResourceAggregateHistorySequence),
     setval('entity_resource_history_id_seq', @EntityResourceHistorySequence),
     setval('fungible_resource_supply_history_id_seq', @FungibleResourceSupplyHistorySequence),
-    setval('non_fungible_id_history_id_seq', @NonFungibleIdHistorySequence),
+    setval('non_fungible_id_data_id_seq', @NonFungibleIdDataSequence),
     setval('non_fungible_id_mutable_data_history_id_seq', @NonFungibleIdMutableDataHistorySequence)",
                 new
                 {
@@ -1168,7 +1168,7 @@ SELECT
                     EntityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
                     EntityResourceHistorySequence = sequences.EntityResourceHistorySequence,
                     FungibleResourceSupplyHistorySequence = sequences.FungibleResourceSupplyHistorySequence,
-                    NonFungibleIdHistorySequence = sequences.NonFungibleIdHistorySequence,
+                    NonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                     NonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
                 });
 
