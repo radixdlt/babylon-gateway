@@ -111,10 +111,24 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="LedgerTransactionBase" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
-        public LedgerTransactionBase(LedgerTransactionType type = default(LedgerTransactionType))
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
+        public LedgerTransactionBase(LedgerTransactionType type = default(LedgerTransactionType), string payloadHex = default(string))
         {
             this.Type = type;
+            // to ensure "payloadHex" is required (not null)
+            if (payloadHex == null)
+            {
+                throw new ArgumentNullException("payloadHex is a required property for LedgerTransactionBase and cannot be null");
+            }
+            this.PayloadHex = payloadHex;
         }
+
+        /// <summary>
+        /// The hex-encoded full ledger transaction payload
+        /// </summary>
+        /// <value>The hex-encoded full ledger transaction payload</value>
+        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -125,6 +139,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class LedgerTransactionBase {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -163,6 +178,11 @@ namespace RadixDlt.CoreApiSdk.Model
                 (
                     this.Type == input.Type ||
                     this.Type.Equals(input.Type)
+                ) && 
+                (
+                    this.PayloadHex == input.PayloadHex ||
+                    (this.PayloadHex != null &&
+                    this.PayloadHex.Equals(input.PayloadHex))
                 );
         }
 
@@ -176,6 +196,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.PayloadHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
+                }
                 return hashCode;
             }
         }

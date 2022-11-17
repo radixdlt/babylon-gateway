@@ -111,10 +111,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="ValidatorLedgerTransaction" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
         /// <param name="validatorTransaction">validatorTransaction (required).</param>
-        public ValidatorLedgerTransaction(LedgerTransactionType type = default(LedgerTransactionType), ValidatorTransaction validatorTransaction = default(ValidatorTransaction))
+        public ValidatorLedgerTransaction(LedgerTransactionType type = default(LedgerTransactionType), string payloadHex = default(string), ValidatorTransaction validatorTransaction = default(ValidatorTransaction))
         {
             this.Type = type;
+            // to ensure "payloadHex" is required (not null)
+            if (payloadHex == null)
+            {
+                throw new ArgumentNullException("payloadHex is a required property for ValidatorLedgerTransaction and cannot be null");
+            }
+            this.PayloadHex = payloadHex;
             // to ensure "validatorTransaction" is required (not null)
             if (validatorTransaction == null)
             {
@@ -122,6 +129,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.ValidatorTransaction = validatorTransaction;
         }
+
+        /// <summary>
+        /// The hex-encoded full ledger transaction payload
+        /// </summary>
+        /// <value>The hex-encoded full ledger transaction payload</value>
+        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Gets or Sets ValidatorTransaction
@@ -138,6 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ValidatorLedgerTransaction {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
             sb.Append("  ValidatorTransaction: ").Append(ValidatorTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,6 +194,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Type.Equals(input.Type)
                 ) && 
                 (
+                    this.PayloadHex == input.PayloadHex ||
+                    (this.PayloadHex != null &&
+                    this.PayloadHex.Equals(input.PayloadHex))
+                ) && 
+                (
                     this.ValidatorTransaction == input.ValidatorTransaction ||
                     (this.ValidatorTransaction != null &&
                     this.ValidatorTransaction.Equals(input.ValidatorTransaction))
@@ -195,6 +215,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.PayloadHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
+                }
                 if (this.ValidatorTransaction != null)
                 {
                     hashCode = (hashCode * 59) + this.ValidatorTransaction.GetHashCode();
