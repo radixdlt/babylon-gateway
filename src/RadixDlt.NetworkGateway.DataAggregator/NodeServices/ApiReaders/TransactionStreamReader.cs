@@ -105,12 +105,6 @@ internal class TransactionStreamReader : ITransactionStreamReader
                 )
             );
         }
-        catch (CoreClient.ApiException ex) when (ex.ErrorCode == 404)
-        {
-            // TODO drop entire catch block once CoreApi start accepting requests with state_version >= ledger tip
-
-            return new CoreModel.CommittedTransactionsResponse(fromStateVersion, fromStateVersion, fromStateVersion, new List<CoreModel.CommittedTransaction>());
-        }
         catch (Exception ex)
         {
             await _observers.ForEachAsync(x => x.GetTransactionsFailed(_nodeConfigProvider.CoreApiNode.Name, ex));

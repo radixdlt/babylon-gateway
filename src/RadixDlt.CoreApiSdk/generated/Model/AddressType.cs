@@ -91,89 +91,117 @@ using OpenAPIDateConverter = RadixDlt.CoreApiSdk.Client.OpenAPIDateConverter;
 namespace RadixDlt.CoreApiSdk.Model
 {
     /// <summary>
-    /// NetworkConfigurationResponse
+    /// AddressType
     /// </summary>
-    [DataContract(Name = "NetworkConfigurationResponse")]
-    public partial class NetworkConfigurationResponse : IEquatable<NetworkConfigurationResponse>, IValidatableObject
+    [DataContract(Name = "AddressType")]
+    public partial class AddressType : IEquatable<AddressType>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkConfigurationResponse" /> class.
+        /// Defines Subtype
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum SubtypeEnum
+        {
+            /// <summary>
+            /// Enum Resource for value: Resource
+            /// </summary>
+            [EnumMember(Value = "Resource")]
+            Resource = 1,
+
+            /// <summary>
+            /// Enum Package for value: Package
+            /// </summary>
+            [EnumMember(Value = "Package")]
+            Package = 2,
+
+            /// <summary>
+            /// Enum NormalComponent for value: NormalComponent
+            /// </summary>
+            [EnumMember(Value = "NormalComponent")]
+            NormalComponent = 3,
+
+            /// <summary>
+            /// Enum AccountComponent for value: AccountComponent
+            /// </summary>
+            [EnumMember(Value = "AccountComponent")]
+            AccountComponent = 4,
+
+            /// <summary>
+            /// Enum EcdsaSecp256k1VirtualAccountComponent for value: EcdsaSecp256k1VirtualAccountComponent
+            /// </summary>
+            [EnumMember(Value = "EcdsaSecp256k1VirtualAccountComponent")]
+            EcdsaSecp256k1VirtualAccountComponent = 5,
+
+            /// <summary>
+            /// Enum EddsaEd25519VirtualAccountComponent for value: EddsaEd25519VirtualAccountComponent
+            /// </summary>
+            [EnumMember(Value = "EddsaEd25519VirtualAccountComponent")]
+            EddsaEd25519VirtualAccountComponent = 6,
+
+            /// <summary>
+            /// Enum EpochManager for value: EpochManager
+            /// </summary>
+            [EnumMember(Value = "EpochManager")]
+            EpochManager = 7
+
+        }
+
+
+        /// <summary>
+        /// Gets or Sets Subtype
+        /// </summary>
+        [DataMember(Name = "subtype", IsRequired = true, EmitDefaultValue = true)]
+        public SubtypeEnum Subtype { get; set; }
+
+        /// <summary>
+        /// Gets or Sets EntityType
+        /// </summary>
+        [DataMember(Name = "entity_type", IsRequired = true, EmitDefaultValue = true)]
+        public EntityType EntityType { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddressType" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NetworkConfigurationResponse() { }
+        protected AddressType() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetworkConfigurationResponse" /> class.
+        /// Initializes a new instance of the <see cref="AddressType" /> class.
         /// </summary>
-        /// <param name="version">version (required).</param>
-        /// <param name="network">The logical name of the network (required).</param>
-        /// <param name="networkHrpSuffix">The network suffix used for Bech32m HRPs used for addressing. (required).</param>
-        /// <param name="addressTypes">addressTypes (required).</param>
-        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public NetworkConfigurationResponse(NetworkConfigurationResponseVersion version = default(NetworkConfigurationResponseVersion), string network = default(string), string networkHrpSuffix = default(string), List<AddressType> addressTypes = default(List<AddressType>), NetworkConfigurationResponseWellKnownAddresses wellKnownAddresses = default(NetworkConfigurationResponseWellKnownAddresses))
+        /// <param name="subtype">subtype (required).</param>
+        /// <param name="hrpPrefix">hrpPrefix (required).</param>
+        /// <param name="entityType">entityType (required).</param>
+        /// <param name="addressBytePrefix">addressBytePrefix (required).</param>
+        /// <param name="addressByteLength">addressByteLength (required).</param>
+        public AddressType(SubtypeEnum subtype = default(SubtypeEnum), string hrpPrefix = default(string), EntityType entityType = default(EntityType), int addressBytePrefix = default(int), int addressByteLength = default(int))
         {
-            // to ensure "version" is required (not null)
-            if (version == null)
+            this.Subtype = subtype;
+            // to ensure "hrpPrefix" is required (not null)
+            if (hrpPrefix == null)
             {
-                throw new ArgumentNullException("version is a required property for NetworkConfigurationResponse and cannot be null");
+                throw new ArgumentNullException("hrpPrefix is a required property for AddressType and cannot be null");
             }
-            this._Version = version;
-            // to ensure "network" is required (not null)
-            if (network == null)
-            {
-                throw new ArgumentNullException("network is a required property for NetworkConfigurationResponse and cannot be null");
-            }
-            this.Network = network;
-            // to ensure "networkHrpSuffix" is required (not null)
-            if (networkHrpSuffix == null)
-            {
-                throw new ArgumentNullException("networkHrpSuffix is a required property for NetworkConfigurationResponse and cannot be null");
-            }
-            this.NetworkHrpSuffix = networkHrpSuffix;
-            // to ensure "addressTypes" is required (not null)
-            if (addressTypes == null)
-            {
-                throw new ArgumentNullException("addressTypes is a required property for NetworkConfigurationResponse and cannot be null");
-            }
-            this.AddressTypes = addressTypes;
-            // to ensure "wellKnownAddresses" is required (not null)
-            if (wellKnownAddresses == null)
-            {
-                throw new ArgumentNullException("wellKnownAddresses is a required property for NetworkConfigurationResponse and cannot be null");
-            }
-            this.WellKnownAddresses = wellKnownAddresses;
+            this.HrpPrefix = hrpPrefix;
+            this.EntityType = entityType;
+            this.AddressBytePrefix = addressBytePrefix;
+            this.AddressByteLength = addressByteLength;
         }
 
         /// <summary>
-        /// Gets or Sets _Version
+        /// Gets or Sets HrpPrefix
         /// </summary>
-        [DataMember(Name = "version", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkConfigurationResponseVersion _Version { get; set; }
+        [DataMember(Name = "hrp_prefix", IsRequired = true, EmitDefaultValue = true)]
+        public string HrpPrefix { get; set; }
 
         /// <summary>
-        /// The logical name of the network
+        /// Gets or Sets AddressBytePrefix
         /// </summary>
-        /// <value>The logical name of the network</value>
-        [DataMember(Name = "network", IsRequired = true, EmitDefaultValue = true)]
-        public string Network { get; set; }
+        [DataMember(Name = "address_byte_prefix", IsRequired = true, EmitDefaultValue = true)]
+        public int AddressBytePrefix { get; set; }
 
         /// <summary>
-        /// The network suffix used for Bech32m HRPs used for addressing.
+        /// Gets or Sets AddressByteLength
         /// </summary>
-        /// <value>The network suffix used for Bech32m HRPs used for addressing.</value>
-        [DataMember(Name = "network_hrp_suffix", IsRequired = true, EmitDefaultValue = true)]
-        public string NetworkHrpSuffix { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AddressTypes
-        /// </summary>
-        [DataMember(Name = "address_types", IsRequired = true, EmitDefaultValue = true)]
-        public List<AddressType> AddressTypes { get; set; }
-
-        /// <summary>
-        /// Gets or Sets WellKnownAddresses
-        /// </summary>
-        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public NetworkConfigurationResponseWellKnownAddresses WellKnownAddresses { get; set; }
+        [DataMember(Name = "address_byte_length", IsRequired = true, EmitDefaultValue = true)]
+        public int AddressByteLength { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -182,12 +210,12 @@ namespace RadixDlt.CoreApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NetworkConfigurationResponse {\n");
-            sb.Append("  _Version: ").Append(_Version).Append("\n");
-            sb.Append("  Network: ").Append(Network).Append("\n");
-            sb.Append("  NetworkHrpSuffix: ").Append(NetworkHrpSuffix).Append("\n");
-            sb.Append("  AddressTypes: ").Append(AddressTypes).Append("\n");
-            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
+            sb.Append("class AddressType {\n");
+            sb.Append("  Subtype: ").Append(Subtype).Append("\n");
+            sb.Append("  HrpPrefix: ").Append(HrpPrefix).Append("\n");
+            sb.Append("  EntityType: ").Append(EntityType).Append("\n");
+            sb.Append("  AddressBytePrefix: ").Append(AddressBytePrefix).Append("\n");
+            sb.Append("  AddressByteLength: ").Append(AddressByteLength).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -208,15 +236,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NetworkConfigurationResponse);
+            return this.Equals(input as AddressType);
         }
 
         /// <summary>
-        /// Returns true if NetworkConfigurationResponse instances are equal
+        /// Returns true if AddressType instances are equal
         /// </summary>
-        /// <param name="input">Instance of NetworkConfigurationResponse to be compared</param>
+        /// <param name="input">Instance of AddressType to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NetworkConfigurationResponse input)
+        public bool Equals(AddressType input)
         {
             if (input == null)
             {
@@ -224,30 +252,25 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this._Version == input._Version ||
-                    (this._Version != null &&
-                    this._Version.Equals(input._Version))
+                    this.Subtype == input.Subtype ||
+                    this.Subtype.Equals(input.Subtype)
                 ) && 
                 (
-                    this.Network == input.Network ||
-                    (this.Network != null &&
-                    this.Network.Equals(input.Network))
+                    this.HrpPrefix == input.HrpPrefix ||
+                    (this.HrpPrefix != null &&
+                    this.HrpPrefix.Equals(input.HrpPrefix))
                 ) && 
                 (
-                    this.NetworkHrpSuffix == input.NetworkHrpSuffix ||
-                    (this.NetworkHrpSuffix != null &&
-                    this.NetworkHrpSuffix.Equals(input.NetworkHrpSuffix))
+                    this.EntityType == input.EntityType ||
+                    this.EntityType.Equals(input.EntityType)
                 ) && 
                 (
-                    this.AddressTypes == input.AddressTypes ||
-                    this.AddressTypes != null &&
-                    input.AddressTypes != null &&
-                    this.AddressTypes.SequenceEqual(input.AddressTypes)
+                    this.AddressBytePrefix == input.AddressBytePrefix ||
+                    this.AddressBytePrefix.Equals(input.AddressBytePrefix)
                 ) && 
                 (
-                    this.WellKnownAddresses == input.WellKnownAddresses ||
-                    (this.WellKnownAddresses != null &&
-                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
+                    this.AddressByteLength == input.AddressByteLength ||
+                    this.AddressByteLength.Equals(input.AddressByteLength)
                 );
         }
 
@@ -260,26 +283,14 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this._Version != null)
+                hashCode = (hashCode * 59) + this.Subtype.GetHashCode();
+                if (this.HrpPrefix != null)
                 {
-                    hashCode = (hashCode * 59) + this._Version.GetHashCode();
+                    hashCode = (hashCode * 59) + this.HrpPrefix.GetHashCode();
                 }
-                if (this.Network != null)
-                {
-                    hashCode = (hashCode * 59) + this.Network.GetHashCode();
-                }
-                if (this.NetworkHrpSuffix != null)
-                {
-                    hashCode = (hashCode * 59) + this.NetworkHrpSuffix.GetHashCode();
-                }
-                if (this.AddressTypes != null)
-                {
-                    hashCode = (hashCode * 59) + this.AddressTypes.GetHashCode();
-                }
-                if (this.WellKnownAddresses != null)
-                {
-                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.EntityType.GetHashCode();
+                hashCode = (hashCode * 59) + this.AddressBytePrefix.GetHashCode();
+                hashCode = (hashCode * 59) + this.AddressByteLength.GetHashCode();
                 return hashCode;
             }
         }
@@ -291,6 +302,30 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
+            // AddressBytePrefix (int) maximum
+            if (this.AddressBytePrefix > (int)255)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressBytePrefix, must be a value less than or equal to 255.", new [] { "AddressBytePrefix" });
+            }
+
+            // AddressBytePrefix (int) minimum
+            if (this.AddressBytePrefix < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressBytePrefix, must be a value greater than or equal to 0.", new [] { "AddressBytePrefix" });
+            }
+
+            // AddressByteLength (int) maximum
+            if (this.AddressByteLength > (int)255)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressByteLength, must be a value less than or equal to 255.", new [] { "AddressByteLength" });
+            }
+
+            // AddressByteLength (int) minimum
+            if (this.AddressByteLength < (int)0)
+            {
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for AddressByteLength, must be a value greater than or equal to 0.", new [] { "AddressByteLength" });
+            }
+
             yield break;
         }
     }

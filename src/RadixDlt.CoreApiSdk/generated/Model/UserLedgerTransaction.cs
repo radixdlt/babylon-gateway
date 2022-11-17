@@ -111,10 +111,17 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="UserLedgerTransaction" /> class.
         /// </summary>
         /// <param name="type">type (required).</param>
+        /// <param name="payloadHex">The hex-encoded full ledger transaction payload (required).</param>
         /// <param name="notarizedTransaction">notarizedTransaction (required).</param>
-        public UserLedgerTransaction(LedgerTransactionType type = default(LedgerTransactionType), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction))
+        public UserLedgerTransaction(LedgerTransactionType type = default(LedgerTransactionType), string payloadHex = default(string), NotarizedTransaction notarizedTransaction = default(NotarizedTransaction))
         {
             this.Type = type;
+            // to ensure "payloadHex" is required (not null)
+            if (payloadHex == null)
+            {
+                throw new ArgumentNullException("payloadHex is a required property for UserLedgerTransaction and cannot be null");
+            }
+            this.PayloadHex = payloadHex;
             // to ensure "notarizedTransaction" is required (not null)
             if (notarizedTransaction == null)
             {
@@ -122,6 +129,13 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             this.NotarizedTransaction = notarizedTransaction;
         }
+
+        /// <summary>
+        /// The hex-encoded full ledger transaction payload
+        /// </summary>
+        /// <value>The hex-encoded full ledger transaction payload</value>
+        [DataMember(Name = "payload_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHex { get; set; }
 
         /// <summary>
         /// Gets or Sets NotarizedTransaction
@@ -138,6 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class UserLedgerTransaction {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  PayloadHex: ").Append(PayloadHex).Append("\n");
             sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,6 +194,11 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.Type.Equals(input.Type)
                 ) && 
                 (
+                    this.PayloadHex == input.PayloadHex ||
+                    (this.PayloadHex != null &&
+                    this.PayloadHex.Equals(input.PayloadHex))
+                ) && 
+                (
                     this.NotarizedTransaction == input.NotarizedTransaction ||
                     (this.NotarizedTransaction != null &&
                     this.NotarizedTransaction.Equals(input.NotarizedTransaction))
@@ -195,6 +215,10 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.PayloadHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.PayloadHex.GetHashCode();
+                }
                 if (this.NotarizedTransaction != null)
                 {
                     hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();

@@ -104,15 +104,15 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionsResponse" /> class.
         /// </summary>
-        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (required).</param>
-        /// <param name="toStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the final (resultant) state version in the returned response (required).</param>
-        /// <param name="maxStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed (required).</param>
+        /// <param name="fromStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request.  (required).</param>
+        /// <param name="count">An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response (required).</param>
+        /// <param name="maxLedgerStateVersion">An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger. (required).</param>
         /// <param name="transactions">A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive). (required).</param>
-        public CommittedTransactionsResponse(long fromStateVersion = default(long), long toStateVersion = default(long), long maxStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
+        public CommittedTransactionsResponse(long fromStateVersion = default(long), int count = default(int), long maxLedgerStateVersion = default(long), List<CommittedTransaction> transactions = default(List<CommittedTransaction>))
         {
             this.FromStateVersion = fromStateVersion;
-            this.ToStateVersion = toStateVersion;
-            this.MaxStateVersion = maxStateVersion;
+            this.Count = count;
+            this.MaxLedgerStateVersion = maxLedgerStateVersion;
             // to ensure "transactions" is required (not null)
             if (transactions == null)
             {
@@ -122,25 +122,25 @@ namespace RadixDlt.CoreApiSdk.Model
         }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request. 
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response</value>
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the first (resultant) state version in the returned response (if any). This matches the &#x60;from_state_version&#x60; in the request. </value>
         [DataMember(Name = "from_state_version", IsRequired = true, EmitDefaultValue = true)]
         public long FromStateVersion { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the final (resultant) state version in the returned response
+        /// An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the final (resultant) state version in the returned response</value>
-        [DataMember(Name = "to_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long ToStateVersion { get; set; }
+        /// <value>An integer between &#x60;0&#x60; and &#x60;10000&#x60;, giving the total count of transactions in the returned response</value>
+        [DataMember(Name = "count", IsRequired = true, EmitDefaultValue = true)]
+        public int Count { get; set; }
 
         /// <summary>
-        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed
+        /// An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger.
         /// </summary>
-        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed</value>
-        [DataMember(Name = "max_state_version", IsRequired = true, EmitDefaultValue = true)]
-        public long MaxStateVersion { get; set; }
+        /// <value>An integer between &#x60;1&#x60; and &#x60;10^13&#x60;, giving the maximum state version currently committed on this node&#39;s ledger.</value>
+        [DataMember(Name = "max_ledger_state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long MaxLedgerStateVersion { get; set; }
 
         /// <summary>
         /// A committed transactions list starting from the &#x60;from_state_version&#x60; (inclusive).
@@ -158,8 +158,8 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransactionsResponse {\n");
             sb.Append("  FromStateVersion: ").Append(FromStateVersion).Append("\n");
-            sb.Append("  ToStateVersion: ").Append(ToStateVersion).Append("\n");
-            sb.Append("  MaxStateVersion: ").Append(MaxStateVersion).Append("\n");
+            sb.Append("  Count: ").Append(Count).Append("\n");
+            sb.Append("  MaxLedgerStateVersion: ").Append(MaxLedgerStateVersion).Append("\n");
             sb.Append("  Transactions: ").Append(Transactions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -201,12 +201,12 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.FromStateVersion.Equals(input.FromStateVersion)
                 ) && 
                 (
-                    this.ToStateVersion == input.ToStateVersion ||
-                    this.ToStateVersion.Equals(input.ToStateVersion)
+                    this.Count == input.Count ||
+                    this.Count.Equals(input.Count)
                 ) && 
                 (
-                    this.MaxStateVersion == input.MaxStateVersion ||
-                    this.MaxStateVersion.Equals(input.MaxStateVersion)
+                    this.MaxLedgerStateVersion == input.MaxLedgerStateVersion ||
+                    this.MaxLedgerStateVersion.Equals(input.MaxLedgerStateVersion)
                 ) && 
                 (
                     this.Transactions == input.Transactions ||
@@ -226,8 +226,8 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.FromStateVersion.GetHashCode();
-                hashCode = (hashCode * 59) + this.ToStateVersion.GetHashCode();
-                hashCode = (hashCode * 59) + this.MaxStateVersion.GetHashCode();
+                hashCode = (hashCode * 59) + this.Count.GetHashCode();
+                hashCode = (hashCode * 59) + this.MaxLedgerStateVersion.GetHashCode();
                 if (this.Transactions != null)
                 {
                     hashCode = (hashCode * 59) + this.Transactions.GetHashCode();
@@ -255,28 +255,28 @@ namespace RadixDlt.CoreApiSdk.Model
                 yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for FromStateVersion, must be a value greater than or equal to 1.", new [] { "FromStateVersion" });
             }
 
-            // ToStateVersion (long) maximum
-            if (this.ToStateVersion > (long)100000000000000)
+            // Count (int) maximum
+            if (this.Count > (int)10000)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for ToStateVersion, must be a value less than or equal to 100000000000000.", new [] { "ToStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Count, must be a value less than or equal to 10000.", new [] { "Count" });
             }
 
-            // ToStateVersion (long) minimum
-            if (this.ToStateVersion < (long)1)
+            // Count (int) minimum
+            if (this.Count < (int)0)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for ToStateVersion, must be a value greater than or equal to 1.", new [] { "ToStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for Count, must be a value greater than or equal to 0.", new [] { "Count" });
             }
 
-            // MaxStateVersion (long) maximum
-            if (this.MaxStateVersion > (long)100000000000000)
+            // MaxLedgerStateVersion (long) maximum
+            if (this.MaxLedgerStateVersion > (long)100000000000000)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxStateVersion, must be a value less than or equal to 100000000000000.", new [] { "MaxStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxLedgerStateVersion, must be a value less than or equal to 100000000000000.", new [] { "MaxLedgerStateVersion" });
             }
 
-            // MaxStateVersion (long) minimum
-            if (this.MaxStateVersion < (long)1)
+            // MaxLedgerStateVersion (long) minimum
+            if (this.MaxLedgerStateVersion < (long)1)
             {
-                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxStateVersion, must be a value greater than or equal to 1.", new [] { "MaxStateVersion" });
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("Invalid value for MaxLedgerStateVersion, must be a value greater than or equal to 1.", new [] { "MaxLedgerStateVersion" });
             }
 
             yield break;
