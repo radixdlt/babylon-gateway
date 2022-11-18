@@ -117,6 +117,8 @@ jobs:
     steps:
       - name: debug
         run: echo ${{ needs.publish-docker.outputs.gateway-api-tag }}
+      - name: debug2
+        run: echo $GITHUB_HEAD_REF
       - name: Get docker image tag
         run: |
           DOCKER_TAG="${{ needs.publish-docker.outputs.gateway-api-tag }}"
@@ -132,7 +134,7 @@ jobs:
           job_params: |
             {
               "nodeDockerTag": "main",
-              "gatewayDockerTag": "${{ env.DOCKER_TAG }}",
+              "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
               "babylonNodeBranch": "${{ env.BABYLON_NODE_BRANCH }}"
             }
           job_timeout: "3600"
