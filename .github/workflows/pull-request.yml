@@ -115,15 +115,6 @@ jobs:
     needs: publish-docker
     runs-on: ubuntu-22.04
     steps:
-      - name: debug
-        run: echo ${{ needs.publish-docker.outputs.gateway-api-tag }}
-      - name: debug2
-        run: echo $GITHUB_HEAD_REF
-      - name: Get docker image tag
-        run: |
-          DOCKER_TAG="${{ needs.publish-docker.outputs.gateway-api-tag }}"
-          echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
-          echo "BABYLON_NODE_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
       - name: Deploy and test on ephemeral network
         uses: toptal/jenkins-job-trigger-action@1.0.0
         with:
@@ -133,8 +124,8 @@ jobs:
           job_name: "ephemeral-deployments/job/ephemeral-gateway-env-deploy-and-test"
           job_params: |
             {
-              "nodeDockerTag": "main",
               "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-              "babylonNodeBranch": "${{ env.BABYLON_NODE_BRANCH }}"
+              "gatewayBranch": "${{ env.GITHUB_HEAD_REF }}"
+              "nodeDockerTag": "main",
             }
           job_timeout: "3600"
