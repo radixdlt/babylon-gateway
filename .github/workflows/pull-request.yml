@@ -116,11 +116,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: debug
-        run: echo ${{ steps.setup_tags.outputs.gateway_api_tags }}
+        run: echo ${{ needs.publish-docker.outputs.gateway-api-tag }}
       - name: Get docker image tag
         run: |
-          TAGS="${{ steps.setup_tags.outputs.gateway_api_tags }}"
-          DOCKER_TAG=$(echo $TAGS | awk 'NR==1{print $1}' | cut -d':' -f2)
+          DOCKER_TAG="${{ needs.publish-docker.outputs.gateway-api-tag }}"
           echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
           echo "BABYLON_NODE_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
       - name: Deploy and test on ephemeral network
