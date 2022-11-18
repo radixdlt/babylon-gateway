@@ -130,7 +130,7 @@ jobs:
           job_params: |
             {
               "nodeDockerTag": "main",
-              "gatewayDockerTag": "${{ env.GATEWAY_TAG }}",
+              "gatewayDockerTag": "${{ steps.setup_tags.outputs.gateway_api_tags }}"",
               "babylonNodeBranch": "${{ env.BABYLON_NODE_BRANCH }}"
             }
           job_timeout: "3600"
