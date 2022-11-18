@@ -115,6 +115,8 @@ jobs:
     needs: publish-docker
     runs-on: ubuntu-22.04
     steps:
+      - name: debug
+        run: echo ${{ steps.setup_tags.outputs.gateway_api_tags }}
       - name: Get docker image tag
         run: |
           TAGS="${{ steps.setup_tags.outputs.gateway_api_tags }}"
