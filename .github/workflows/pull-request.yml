@@ -115,6 +115,9 @@ jobs:
     needs: publish-docker
     runs-on: ubuntu-22.04
     steps:
+      - name: Export branch name in env
+        run: |
+          echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
       - name: Deploy and test on ephemeral network
         uses: toptal/jenkins-job-trigger-action@1.0.0
         with:
@@ -125,7 +128,7 @@ jobs:
           job_params: |
             {
               "gatewayDockerTag": "${{ needs.publish-docker.outputs.gateway-api-tag }}",
-              "gatewayBranch": "${{ env.GITHUB_HEAD_REF }}"
+              "gatewayBranch": "${{ env.GATEWAY_BRANCH }}",
               "nodeDockerTag": "main",
             }
           job_timeout: "3600"
