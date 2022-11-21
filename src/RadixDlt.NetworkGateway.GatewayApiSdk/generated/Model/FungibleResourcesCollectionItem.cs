@@ -91,35 +91,49 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseFungibleResourcesAllOf
+    /// FungibleResourcesCollectionItem
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseFungibleResources_allOf")]
-    public partial class EntityResourcesResponseFungibleResourcesAllOf : IEquatable<EntityResourcesResponseFungibleResourcesAllOf>, IValidatableObject
+    [DataContract(Name = "FungibleResourcesCollectionItem")]
+    public partial class FungibleResourcesCollectionItem : IEquatable<FungibleResourcesCollectionItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseFungibleResourcesAllOf() { }
+        protected FungibleResourcesCollectionItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResourcesAllOf" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourcesCollectionItem" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public EntityResourcesResponseFungibleResourcesAllOf(List<EntityResourcesResponseFungibleResourcesItem> items = default(List<EntityResourcesResponseFungibleResourcesItem>))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="amount">amount (required).</param>
+        public FungibleResourcesCollectionItem(string address = default(string), TokenAmount amount = default(TokenAmount))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("items is a required property for EntityResourcesResponseFungibleResourcesAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for FungibleResourcesCollectionItem and cannot be null");
             }
-            this.Items = items;
+            this.Address = address;
+            // to ensure "amount" is required (not null)
+            if (amount == null)
+            {
+                throw new ArgumentNullException("amount is a required property for FungibleResourcesCollectionItem and cannot be null");
+            }
+            this.Amount = amount;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseFungibleResourcesItem> Items { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Amount
+        /// </summary>
+        [DataMember(Name = "amount", IsRequired = true, EmitDefaultValue = true)]
+        public TokenAmount Amount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +142,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseFungibleResourcesAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class FungibleResourcesCollectionItem {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Amount: ").Append(Amount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +165,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseFungibleResourcesAllOf);
+            return this.Equals(input as FungibleResourcesCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseFungibleResourcesAllOf instances are equal
+        /// Returns true if FungibleResourcesCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseFungibleResourcesAllOf to be compared</param>
+        /// <param name="input">Instance of FungibleResourcesCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseFungibleResourcesAllOf input)
+        public bool Equals(FungibleResourcesCollectionItem input)
         {
             if (input == null)
             {
@@ -166,10 +181,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.Amount == input.Amount ||
+                    (this.Amount != null &&
+                    this.Amount.Equals(input.Amount))
                 );
         }
 
@@ -182,9 +201,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.Amount != null)
+                {
+                    hashCode = (hashCode * 59) + this.Amount.GetHashCode();
                 }
                 return hashCode;
             }

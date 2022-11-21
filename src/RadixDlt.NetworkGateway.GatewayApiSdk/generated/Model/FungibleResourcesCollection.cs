@@ -91,62 +91,62 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseAllOf
+    /// FungibleResourcesCollection
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponse_allOf")]
-    public partial class EntityResourcesResponseAllOf : IEquatable<EntityResourcesResponseAllOf>, IValidatableObject
+    [DataContract(Name = "FungibleResourcesCollection")]
+    public partial class FungibleResourcesCollection : IEquatable<FungibleResourcesCollection>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourcesCollection" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseAllOf() { }
+        protected FungibleResourcesCollection() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="FungibleResourcesCollection" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="fungibleResources">fungibleResources (required).</param>
-        /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
-        public EntityResourcesResponseAllOf(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection))
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="items">items (required).</param>
+        public FungibleResourcesCollection(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<FungibleResourcesCollectionItem> items = default(List<FungibleResourcesCollectionItem>))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityResourcesResponseAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for FungibleResourcesCollection and cannot be null");
             }
-            this.Address = address;
-            // to ensure "fungibleResources" is required (not null)
-            if (fungibleResources == null)
-            {
-                throw new ArgumentNullException("fungibleResources is a required property for EntityResourcesResponseAllOf and cannot be null");
-            }
-            this.FungibleResources = fungibleResources;
-            // to ensure "nonFungibleResources" is required (not null)
-            if (nonFungibleResources == null)
-            {
-                throw new ArgumentNullException("nonFungibleResources is a required property for EntityResourcesResponseAllOf and cannot be null");
-            }
-            this.NonFungibleResources = nonFungibleResources;
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets FungibleResources
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public FungibleResourcesCollection FungibleResources { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleResources
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "non_fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleResourcesCollection NonFungibleResources { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Items
+        /// </summary>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<FungibleResourcesCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,10 +155,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  FungibleResources: ").Append(FungibleResources).Append("\n");
-            sb.Append("  NonFungibleResources: ").Append(NonFungibleResources).Append("\n");
+            sb.Append("class FungibleResourcesCollection {\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -179,15 +180,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseAllOf);
+            return this.Equals(input as FungibleResourcesCollection);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseAllOf instances are equal
+        /// Returns true if FungibleResourcesCollection instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseAllOf to be compared</param>
+        /// <param name="input">Instance of FungibleResourcesCollection to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseAllOf input)
+        public bool Equals(FungibleResourcesCollection input)
         {
             if (input == null)
             {
@@ -195,19 +196,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.FungibleResources == input.FungibleResources ||
-                    (this.FungibleResources != null &&
-                    this.FungibleResources.Equals(input.FungibleResources))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
                 ) && 
                 (
-                    this.NonFungibleResources == input.NonFungibleResources ||
-                    (this.NonFungibleResources != null &&
-                    this.NonFungibleResources.Equals(input.NonFungibleResources))
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -220,17 +227,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.FungibleResources != null)
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.FungibleResources.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
                 }
-                if (this.NonFungibleResources != null)
+                if (this.NextCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleResources.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

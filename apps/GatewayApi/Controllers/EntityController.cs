@@ -65,6 +65,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
@@ -116,6 +117,26 @@ public class EntityController : ControllerBase
     public async Task<IActionResult> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
     {
         var response = await _entityHandler.Metadata(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("fungibles")]
+    public async Task<IActionResult> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.Fungibles(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
+
+    [HttpPost("non-fungibles")]
+    public async Task<IActionResult> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.NonFungibles(request, token);
 
         return response != null
             ? Ok(response)

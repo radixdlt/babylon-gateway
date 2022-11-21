@@ -62,23 +62,23 @@
  * permissions under this License.
  */
 
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System.Runtime.Serialization;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-public interface IEntityHandler
+[DataContract]
+public sealed record EntityFungiblesCursor(int? Offset)
 {
-    Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default);
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public int? Offset { get; set; } = Offset;
 
-    Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default);
+    public static EntityFungiblesCursor FromCursorString(string cursorString)
+    {
+        return Serializations.FromBase64JsonOrDefault<EntityFungiblesCursor>(cursorString);
+    }
 
-    Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default);
+    public string ToCursorString()
+    {
+        return Serializations.AsBase64Json(this);
+    }
 }

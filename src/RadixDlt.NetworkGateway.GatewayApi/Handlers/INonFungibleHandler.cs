@@ -62,23 +62,8 @@
  * permissions under this License.
  */
 
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
-public interface IEntityHandler
+public interface INonFungibleHandler
 {
-    Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default);
 }

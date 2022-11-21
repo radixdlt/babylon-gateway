@@ -72,13 +72,17 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface IEntityStateQuerier
 {
+    public sealed record PageRequest(RadixAddress Address, int Offset, int Limit);
+
     Task<GatewayModel.EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
     Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    Task<GatewayModel.EntityMetadataResponse?> EntityMetadata(EntityMetadataPageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
-}
+    Task<GatewayModel.EntityMetadataResponse?> EntityMetadata(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-public sealed record EntityMetadataPageRequest(RadixAddress Address, int Offset, int Limit);
+    Task<GatewayModel.EntityFungiblesResponse?> EntityFungibles(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+
+    Task<GatewayModel.EntityNonFungiblesResponse?> EntityNonFungibles(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
+}

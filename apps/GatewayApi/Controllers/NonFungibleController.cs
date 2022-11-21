@@ -62,23 +62,15 @@
  * permissions under this License.
  */
 
-using System.Threading;
-using System.Threading.Tasks;
-using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using Microsoft.AspNetCore.Mvc;
+using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
 
-namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
+namespace GatewayApi.Controllers;
 
-public interface IEntityHandler
+[ApiController]
+[Route("non-fungible")]
+[ServiceFilter(typeof(ExceptionFilter))]
+[ServiceFilter(typeof(InvalidModelStateFilter))]
+public class NonFungibleController : ControllerBase
 {
-    Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default);
-
-    Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default);
 }

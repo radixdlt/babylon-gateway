@@ -91,62 +91,57 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityResourcesResponseFungibleResources
+    /// EntityNonFungiblesResponse
     /// </summary>
-    [DataContract(Name = "EntityResourcesResponseFungibleResources")]
-    public partial class EntityResourcesResponseFungibleResources : IEquatable<EntityResourcesResponseFungibleResources>, IValidatableObject
+    [DataContract(Name = "EntityNonFungiblesResponse")]
+    public partial class EntityNonFungiblesResponse : IEquatable<EntityNonFungiblesResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResources" /> class.
+        /// Initializes a new instance of the <see cref="EntityNonFungiblesResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityResourcesResponseFungibleResources() { }
+        protected EntityNonFungiblesResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityResourcesResponseFungibleResources" /> class.
+        /// Initializes a new instance of the <see cref="EntityNonFungiblesResponse" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="items">items (required).</param>
-        public EntityResourcesResponseFungibleResources(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<EntityResourcesResponseFungibleResourcesItem> items = default(List<EntityResourcesResponseFungibleResourcesItem>))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="metadata">metadata.</param>
+        public EntityNonFungiblesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleResourcesCollection metadata = default(NonFungibleResourcesCollection))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("items is a required property for EntityResourcesResponseFungibleResources and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for EntityNonFungiblesResponse and cannot be null");
             }
-            this.Items = items;
-            this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
+            this.LedgerState = ledgerState;
+            // to ensure "address" is required (not null)
+            if (address == null)
+            {
+                throw new ArgumentNullException("address is a required property for EntityNonFungiblesResponse and cannot be null");
+            }
+            this.Address = address;
+            this.Metadata = metadata;
         }
 
         /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
+        /// Gets or Sets LedgerState
         /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// Gets or Sets Metadata
         /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Items
-        /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<EntityResourcesResponseFungibleResourcesItem> Items { get; set; }
+        [DataMember(Name = "metadata", EmitDefaultValue = true)]
+        public NonFungibleResourcesCollection Metadata { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,11 +150,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityResourcesResponseFungibleResources {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class EntityNonFungiblesResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,15 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityResourcesResponseFungibleResources);
+            return this.Equals(input as EntityNonFungiblesResponse);
         }
 
         /// <summary>
-        /// Returns true if EntityResourcesResponseFungibleResources instances are equal
+        /// Returns true if EntityNonFungiblesResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityResourcesResponseFungibleResources to be compared</param>
+        /// <param name="input">Instance of EntityNonFungiblesResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityResourcesResponseFungibleResources input)
+        public bool Equals(EntityNonFungiblesResponse input)
         {
             if (input == null)
             {
@@ -196,25 +190,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
-                (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Metadata == input.Metadata ||
+                    (this.Metadata != null &&
+                    this.Metadata.Equals(input.Metadata))
                 );
         }
 
@@ -227,21 +215,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.PreviousCursor != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.NextCursor != null)
+                if (this.Metadata != null)
                 {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
-                if (this.Items != null)
-                {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
                 }
                 return hashCode;
             }

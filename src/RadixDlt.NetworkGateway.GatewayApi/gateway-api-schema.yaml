@@ -233,6 +233,48 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/EntityMetadataResponse"
+  /entity/fungibles:
+    post:
+      operationId: EntityFungibles
+      summary: Entity Fungibles
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/EntityFungiblesRequest"
+      responses:
+        '200':
+          description: Entity Metadata
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EntityFungiblesResponse"
+  /entity/non-fungibles:
+    post:
+      operationId: EntityNonFungibles
+      summary: Entity Non-Fungibles
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/EntityNonFungiblesRequest"
+      responses:
+        '200':
+          description: Entity Metadata
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/EntityNonFungiblesResponse"
 
 components:
   schemas:
@@ -333,6 +375,50 @@ components:
           type: string
         value:
           type: string
+
+    FungibleResourcesCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/FungibleResourcesCollectionItem"
+    FungibleResourcesCollectionItem:
+      type: object
+      required:
+        - address
+        - amount
+      properties:
+        address:
+          $ref: "#/components/schemas/ResourceAddress"
+        amount:
+          $ref: "#/components/schemas/TokenAmount"
+    NonFungibleResourcesCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleResourcesCollectionItem"
+    NonFungibleResourcesCollectionItem:
+      type: object
+      required:
+        - address
+        - amount
+      properties:
+        address:
+          $ref: "#/components/schemas/ResourceAddress"
+        amount:
+          type: integer
+          format: int64
 
     TransactionInfo:
       type: object
@@ -581,52 +667,9 @@ components:
             address:
               $ref: "#/components/schemas/EntityAddress"
             fungible_resources:
-              $ref: "#/components/schemas/EntityResourcesResponseFungibleResources"
+              $ref: "#/components/schemas/FungibleResourcesCollection"
             non_fungible_resources:
-              $ref: "#/components/schemas/EntityResourcesResponseNonFungibleResources"
-    EntityResourcesResponseFungibleResources:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityResourcesResponseFungibleResourcesItem"
-    EntityResourcesResponseFungibleResourcesItem:
-      type: object
-      required:
-        - address
-        - amount
-      properties:
-        address:
-          $ref: "#/components/schemas/ResourceAddress"
-        amount:
-          $ref: "#/components/schemas/TokenAmount"
-    EntityResourcesResponseNonFungibleResources:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityResourcesResponseNonFungibleResourcesItem"
-    EntityResourcesResponseNonFungibleResourcesItem:
-      type: object
-      required:
-        - address
-        - amount
-      properties:
-        address:
-          $ref: "#/components/schemas/ResourceAddress"
-        amount:
-          type: integer
-          format: int64
+              $ref: "#/components/schemas/NonFungibleResourcesCollection"
 
     EntityDetailsRequest:
       type: object
@@ -815,6 +858,70 @@ components:
               $ref: "#/components/schemas/EntityAddress"
             metadata:
               $ref: "#/components/schemas/EntityMetadataCollection"
+
+    EntityFungiblesRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+      example:
+        address: "<component-entity-address>"
+    EntityFungiblesResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - address
+            - fungibles
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            metadata:
+              $ref: "#/components/schemas/FungibleResourcesCollection"
+
+    EntityNonFungiblesRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+      example:
+        address: "<component-entity-address>"
+    EntityNonFungiblesResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - address
+            - fungibles
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            metadata:
+              $ref: "#/components/schemas/NonFungibleResourcesCollection"
 
     #
     # TODO Not categorized/cleaned yet
