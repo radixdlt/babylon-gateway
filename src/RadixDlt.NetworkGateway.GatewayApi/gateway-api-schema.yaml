@@ -924,59 +924,9 @@ components:
               $ref: "#/components/schemas/NonFungibleResourcesCollection"
 
     #
-    # TODO Not categorized/cleaned yet
+    # Errors
     #
 
-    TransactionDetails:
-      type: object
-      required:
-        - raw_hex
-        - referenced_global_entities
-      properties:
-        raw_hex:
-          description: The raw transaction payload, hex encoded.
-          type: string
-        referenced_global_entities:
-          type: array
-          items:
-            type: string
-        message_hex:
-          description: The message bytes, hex encoded.
-          type: string
-
-    ValidatorIdentifier:
-      type: object
-      required:
-        - address
-      properties:
-        address:
-          description: The radix address of the validator.
-          type: string
-    TokenIdentifier:
-      type: object
-      required:
-        - rri
-      properties:
-        rri:
-          description: The radix resource identifier of the token.
-          type: string
-    TransactionLookupOrigin:
-      type: string
-      enum:
-        - intent
-        - signed_intent
-        - notarized
-        - payload
-    TransactionLookupIdentifier:
-      type: object
-      required:
-        - origin
-        - value_hex
-      properties:
-        origin:
-          $ref: "#/components/schemas/TransactionLookupOrigin"
-        value_hex:
-          type: string
     ErrorResponse:
       type: object
       required:
@@ -994,6 +944,7 @@ components:
         trace_id:
           description: A GUID to be used when reporting errors, to allow correlation with the Gateway API's error logs.
           type: string
+
     GatewayError:
       type: object
       required:
@@ -1005,11 +956,40 @@ components:
       discriminator:
         propertyName: type
         mapping:
+          EntityNotFoundError: "#/components/schemas/EntityNotFoundError"
+          InvalidEntityError: "#/components/schemas/InvalidEntityError"
+
+          #
+          # TODO Not categorized/cleaned yet
+          #
           NotSyncedUpError: "#/components/schemas/NotSyncedUpError"
           InvalidRequestError: "#/components/schemas/InvalidRequestError"
           InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
           TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
           InternalServerError: "#/components/schemas/InternalServerError"
+
+    EntityNotFoundError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+    InvalidEntityError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - address
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+
+    #
+    # TODO Not categorized/cleaned yet
+    #
     NotSyncedUpError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1080,3 +1060,58 @@ components:
           properties:
             transaction_not_found:
               $ref: "#/components/schemas/TransactionLookupIdentifier"
+
+    #
+    # TODO Not categorized/cleaned yet
+    #
+
+    TransactionDetails:
+      type: object
+      required:
+        - raw_hex
+        - referenced_global_entities
+      properties:
+        raw_hex:
+          description: The raw transaction payload, hex encoded.
+          type: string
+        referenced_global_entities:
+          type: array
+          items:
+            type: string
+        message_hex:
+          description: The message bytes, hex encoded.
+          type: string
+
+    ValidatorIdentifier:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          description: The radix address of the validator.
+          type: string
+    TokenIdentifier:
+      type: object
+      required:
+        - rri
+      properties:
+        rri:
+          description: The radix resource identifier of the token.
+          type: string
+    TransactionLookupOrigin:
+      type: string
+      enum:
+        - intent
+        - signed_intent
+        - notarized
+        - payload
+    TransactionLookupIdentifier:
+      type: object
+      required:
+        - origin
+        - value_hex
+      properties:
+        origin:
+          $ref: "#/components/schemas/TransactionLookupOrigin"
+        value_hex:
+          type: string

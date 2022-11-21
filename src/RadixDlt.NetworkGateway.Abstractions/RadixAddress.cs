@@ -72,31 +72,6 @@ namespace RadixDlt.NetworkGateway.Abstractions;
 [DebuggerDisplay("{ToHex()}")]
 public sealed record RadixAddress
 {
-    public sealed class EqualityComparer : IEqualityComparer<RadixAddress?>
-    {
-        public bool Equals(RadixAddress? x, RadixAddress? y)
-        {
-            if (ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (x == null || y == null)
-            {
-                return false;
-            }
-
-            return x._address.Equals(y._address);
-        }
-
-        public int GetHashCode(RadixAddress? obj)
-        {
-            ArgumentNullException.ThrowIfNull(obj);
-
-            return obj._address.GetHashCode();
-        }
-    }
-
     private readonly byte[] _address;
 
     private RadixAddress(byte[] address)

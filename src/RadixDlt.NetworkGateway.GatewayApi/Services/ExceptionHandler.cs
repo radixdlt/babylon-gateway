@@ -70,6 +70,7 @@ using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using CoreClient = RadixDlt.CoreApiSdk.Client;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -108,7 +109,7 @@ internal class ExceptionHandler : IExceptionHandler
             traceId: traceId
         ))
         {
-            StatusCode = 501,
+            StatusCode = (int)HttpStatusCode.NotImplemented,
         };
     }
 

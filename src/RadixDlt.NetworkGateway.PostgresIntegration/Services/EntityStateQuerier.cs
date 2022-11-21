@@ -64,10 +64,10 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
+using RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
 using System;
@@ -81,6 +81,14 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 
 internal class EntityStateQuerier : IEntityStateQuerier
 {
+    private record MetadataViewModel(long EntityId, string[] Keys, string[] Values, int TotalCount);
+
+    private record FungiblesViewModel(byte[] ResourceEntityGlobalAddress, string Balance, int TotalCount);
+
+    private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
+
+    private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
+
     private const int DefaultMetadataLimit = 10; // TODO make it configurable
     private const int DefaultResourceLimit = 5; // TODO make it configurable
 
@@ -93,16 +101,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
         _dbContext = dbContext;
     }
 
-    public async Task<GatewayModel.EntityResourcesResponse?> EntityResourcesSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityResourcesResponse> EntityResourcesSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
-
-        if (entity is not ComponentEntity)
-        {
-            return null;
-        }
+        var entity = await GetEntity<ComponentEntity>(address, ledgerState, token);
 
         // TODO refactor so that we drop EF completely and access two connections + Task.WhenAll at the same time
 
@@ -112,18 +113,9 @@ internal class EntityStateQuerier : IEntityStateQuerier
         return new GatewayModel.EntityResourcesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungibles, nonFungibles);
     }
 
-    private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
-
-    public async Task<GatewayModel.EntityDetailsResponse?> EntityDetailsSnapshot(RadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityDetailsResponse> EntityDetailsSnapshot(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == address, token);
-
-        if (entity == null)
-        {
-            return null;
-        }
+        var entity = await GetEntity(address, ledgerState, token);
 
         GatewayModel.EntityDetailsResponseDetails details;
 
@@ -204,8 +196,9 @@ OFFSET @offset LIMIT @limit",
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.AccountComponent,
                     packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())));
                 break;
+
             default:
-                return null;
+                throw new Exception("convert to api ex");
         }
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);
@@ -213,9 +206,9 @@ OFFSET @offset LIMIT @limit",
         return new GatewayModel.EntityDetailsResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata, details);
     }
 
-    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<RadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityOverviewResponse> EntityOverview(ICollection<DecodedRadixAddress> addresses, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var addressesList = addresses.ToList();
+        var addressesList = addresses.Select(x => x.Data).ToList();
 
         var entities = await _dbContext.Entities
             .Where(e => e.GlobalAddress != null && addressesList.Contains(e.GlobalAddress))
@@ -231,59 +224,29 @@ OFFSET @offset LIMIT @limit",
         return new GatewayModel.EntityOverviewResponse(ledgerState, items);
     }
 
-    public async Task<GatewayModel.EntityMetadataResponse?> EntityMetadata(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityMetadataResponse> EntityMetadata(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == request.Address, token);
-
-        if (entity == null)
-        {
-            return null;
-        }
-
+        var entity = await GetEntity(request.Address, ledgerState, token);
         var metadata = await GetMetadataSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityMetadataResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), metadata);
     }
 
-    public async Task<GatewayModel.EntityFungiblesResponse?> EntityFungibles(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityFungiblesResponse> EntityFungibles(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == request.Address, token);
-
-        if (entity == null)
-        {
-            return null;
-        }
-
+        var entity = await GetEntity(request.Address, ledgerState, token);
         var fungibles = await GetFungiblesSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityFungiblesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), fungibles);
     }
 
-    public async Task<GatewayModel.EntityNonFungiblesResponse?> EntityNonFungibles(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    public async Task<GatewayModel.EntityNonFungiblesResponse> EntityNonFungibles(IEntityStateQuerier.PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
     {
-        var entity = await _dbContext.Entities
-            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
-            .FirstOrDefaultAsync(e => e.GlobalAddress == request.Address, token);
-
-        if (entity == null)
-        {
-            return null;
-        }
-
+        var entity = await GetEntity(request.Address, ledgerState, token);
         var nonFungibles = await GetNonFungiblesSlice(entity.Id, request.Offset, request.Limit, ledgerState, token);
 
         return new GatewayModel.EntityNonFungiblesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), nonFungibles);
     }
-
-    private record MetadataViewModel(long EntityId, string[] Keys, string[] Values, int TotalCount);
-
-    private record FungiblesViewModel(byte[] ResourceEntityGlobalAddress, string Balance, int TotalCount);
-
-    private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
 
     private async Task<GatewayModel.EntityMetadataCollection> GetMetadataSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
@@ -462,5 +425,38 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.NonFungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+    }
+
+    private async Task<Entity> GetEntity(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var entity = await _dbContext.Entities
+            .Where(e => e.FromStateVersion <= ledgerState.StateVersion)
+            .FirstOrDefaultAsync(e => e.GlobalAddress == address.Data, token);
+
+        if (entity == null)
+        {
+            // TODO super quick & dirty support for virtual accounts, see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668528064132679
+            if (address.Data[0] is 0x05 or 0x06)
+            {
+                return new AccountComponentEntity { Id = -1, GlobalAddress = address.Data };
+            }
+
+            throw new EntityNotFoundException(address.ToString());
+        }
+
+        return entity;
+    }
+
+    private async Task<TEntity> GetEntity<TEntity>(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)
+        where TEntity : Entity
+    {
+        var entity = await GetEntity(address, ledgerState, token);
+
+        if (entity is not TEntity typedEntity)
+        {
+            throw new InvalidEntityException(address.ToString());
+        }
+
+        return typedEntity;
     }
 }

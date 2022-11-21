@@ -62,10 +62,12 @@
  * permissions under this License.
  */
 
+using System;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
+[Serializable]
 public sealed class TransactionNotFoundException : NotFoundException
 {
     public TransactionNotFoundException(GatewayModel.TransactionLookupIdentifier transactionIdentifier)

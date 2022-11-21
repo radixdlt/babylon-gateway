@@ -84,7 +84,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using JsonSubTypes;
 using System.ComponentModel.DataAnnotations;
 using FileParameter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.FileParameter;
 using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAPIDateConverter;
@@ -92,45 +91,36 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// InvalidRequestError
+    /// EntityNotFoundErrorAllOf
     /// </summary>
-    [DataContract(Name = "InvalidRequestError")]
-    [JsonConverter(typeof(JsonSubtypes), "Type")]
-    [JsonSubtypes.KnownSubType(typeof(EntityNotFoundError), "EntityNotFoundError")]
-    [JsonSubtypes.KnownSubType(typeof(InternalServerError), "InternalServerError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidEntityError), "InvalidEntityError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidRequestError), "InvalidRequestError")]
-    [JsonSubtypes.KnownSubType(typeof(InvalidTransactionError), "InvalidTransactionError")]
-    [JsonSubtypes.KnownSubType(typeof(NotSyncedUpError), "NotSyncedUpError")]
-    [JsonSubtypes.KnownSubType(typeof(TransactionNotFoundError), "TransactionNotFoundError")]
-    public partial class InvalidRequestError : GatewayError, IEquatable<InvalidRequestError>, IValidatableObject
+    [DataContract(Name = "EntityNotFoundError_allOf")]
+    public partial class EntityNotFoundErrorAllOf : IEquatable<EntityNotFoundErrorAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidRequestError" /> class.
+        /// Initializes a new instance of the <see cref="EntityNotFoundErrorAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected InvalidRequestError() { }
+        protected EntityNotFoundErrorAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidRequestError" /> class.
+        /// Initializes a new instance of the <see cref="EntityNotFoundErrorAllOf" /> class.
         /// </summary>
-        /// <param name="validationErrors">One or more validation errors which occurred when validating the request. (required).</param>
-        /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;InvalidRequestError&quot;).</param>
-        public InvalidRequestError(List<ValidationErrorsAtPath> validationErrors = default(List<ValidationErrorsAtPath>), string type = "InvalidRequestError") : base(type)
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        public EntityNotFoundErrorAllOf(string address = default(string))
         {
-            // to ensure "validationErrors" is required (not null)
-            if (validationErrors == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("validationErrors is a required property for InvalidRequestError and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityNotFoundErrorAllOf and cannot be null");
             }
-            this.ValidationErrors = validationErrors;
+            this.Address = address;
         }
 
         /// <summary>
-        /// One or more validation errors which occurred when validating the request.
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        /// <value>One or more validation errors which occurred when validating the request.</value>
-        [DataMember(Name = "validation_errors", IsRequired = true, EmitDefaultValue = true)]
-        public List<ValidationErrorsAtPath> ValidationErrors { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,9 +129,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class InvalidRequestError {\n");
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
-            sb.Append("  ValidationErrors: ").Append(ValidationErrors).Append("\n");
+            sb.Append("class EntityNotFoundErrorAllOf {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,7 +139,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public override string ToJson()
+        public virtual string ToJson()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
         }
@@ -162,26 +151,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as InvalidRequestError);
+            return this.Equals(input as EntityNotFoundErrorAllOf);
         }
 
         /// <summary>
-        /// Returns true if InvalidRequestError instances are equal
+        /// Returns true if EntityNotFoundErrorAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of InvalidRequestError to be compared</param>
+        /// <param name="input">Instance of EntityNotFoundErrorAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(InvalidRequestError input)
+        public bool Equals(EntityNotFoundErrorAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
-            return base.Equals(input) && 
+            return 
                 (
-                    this.ValidationErrors == input.ValidationErrors ||
-                    this.ValidationErrors != null &&
-                    input.ValidationErrors != null &&
-                    this.ValidationErrors.SequenceEqual(input.ValidationErrors)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
                 );
         }
 
@@ -193,10 +181,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             unchecked // Overflow is fine, just wrap
             {
-                int hashCode = base.GetHashCode();
-                if (this.ValidationErrors != null)
+                int hashCode = 41;
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.ValidationErrors.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
                 return hashCode;
             }
@@ -209,20 +197,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Validation Result</returns>
         public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
         {
-            return this.BaseValidate(validationContext);
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        protected IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> BaseValidate(ValidationContext validationContext)
-        {
-            foreach (var x in base.BaseValidate(validationContext))
-            {
-                yield return x;
-            }
             yield break;
         }
     }
