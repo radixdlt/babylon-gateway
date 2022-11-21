@@ -99,12 +99,7 @@ public static class OpenApiDocumentHandler
         document.Servers.Clear();
         document.Servers.Add(new OpenApiServer
         {
-            Url = new UriBuilder(context.Request.GetEncodedUrl())
-            {
-                Path = context.Request.PathBase,
-                Query = null,
-                Fragment = null,
-            }.ToString(),
+            Url = "/",
         });
 
         context.Response.StatusCode = (int)HttpStatusCode.OK;
