@@ -104,29 +104,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorResponse" /> class.
         /// </summary>
-        /// <param name="code">A numeric code corresponding to the given error type, roughly aligned with HTTP Status Code semantics (eg 400/404/500). (required).</param>
         /// <param name="message">A human-readable error message. (required).</param>
+        /// <param name="code">A numeric code corresponding to the given error type..</param>
         /// <param name="details">details.</param>
-        /// <param name="traceId">A GUID to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs..</param>
-        public ErrorResponse(int code = default(int), string message = default(string), GatewayError details = default(GatewayError), string traceId = default(string))
+        /// <param name="traceId">A unique request identifier to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs..</param>
+        public ErrorResponse(string message = default(string), int code = default(int), GatewayError details = default(GatewayError), string traceId = default(string))
         {
-            this.Code = code;
             // to ensure "message" is required (not null)
             if (message == null)
             {
                 throw new ArgumentNullException("message is a required property for ErrorResponse and cannot be null");
             }
             this.Message = message;
+            this.Code = code;
             this.Details = details;
             this.TraceId = traceId;
         }
-
-        /// <summary>
-        /// A numeric code corresponding to the given error type, roughly aligned with HTTP Status Code semantics (eg 400/404/500).
-        /// </summary>
-        /// <value>A numeric code corresponding to the given error type, roughly aligned with HTTP Status Code semantics (eg 400/404/500).</value>
-        [DataMember(Name = "code", IsRequired = true, EmitDefaultValue = true)]
-        public int Code { get; set; }
 
         /// <summary>
         /// A human-readable error message.
@@ -136,15 +129,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Message { get; set; }
 
         /// <summary>
+        /// A numeric code corresponding to the given error type.
+        /// </summary>
+        /// <value>A numeric code corresponding to the given error type.</value>
+        [DataMember(Name = "code", EmitDefaultValue = true)]
+        public int Code { get; set; }
+
+        /// <summary>
         /// Gets or Sets Details
         /// </summary>
         [DataMember(Name = "details", EmitDefaultValue = true)]
         public GatewayError Details { get; set; }
 
         /// <summary>
-        /// A GUID to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs.
+        /// A unique request identifier to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs.
         /// </summary>
-        /// <value>A GUID to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs.</value>
+        /// <value>A unique request identifier to be used when reporting errors, to allow correlation with the Gateway API&#39;s error logs.</value>
         [DataMember(Name = "trace_id", EmitDefaultValue = true)]
         public string TraceId { get; set; }
 
@@ -156,8 +156,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class ErrorResponse {\n");
-            sb.Append("  Code: ").Append(Code).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
+            sb.Append("  Code: ").Append(Code).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
             sb.Append("  TraceId: ").Append(TraceId).Append("\n");
             sb.Append("}\n");
@@ -196,13 +196,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Code == input.Code ||
-                    this.Code.Equals(input.Code)
-                ) && 
-                (
                     this.Message == input.Message ||
                     (this.Message != null &&
                     this.Message.Equals(input.Message))
+                ) && 
+                (
+                    this.Code == input.Code ||
+                    this.Code.Equals(input.Code)
                 ) && 
                 (
                     this.Details == input.Details ||
@@ -225,11 +225,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Code.GetHashCode();
                 if (this.Message != null)
                 {
                     hashCode = (hashCode * 59) + this.Message.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.Code.GetHashCode();
                 if (this.Details != null)
                 {
                     hashCode = (hashCode * 59) + this.Details.GetHashCode();

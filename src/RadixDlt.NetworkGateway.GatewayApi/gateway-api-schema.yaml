@@ -34,14 +34,14 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/GatewayInfoRequest"
+              $ref: "#/components/schemas/GatewayInfoRequest"
       responses:
-        '200':
+        "200":
           description: The Network
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/GatewayInfoResponse"
+                $ref: "#/components/schemas/GatewayInfoResponse"
   "/transaction/recent":
     post:
       operationId: RecentTransactions
@@ -56,14 +56,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/RecentTransactionsRequest"
+              $ref: "#/components/schemas/RecentTransactionsRequest"
       responses:
-        '200':
+        "200":
           description: A page of the most recent transactions
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/RecentTransactionsResponse"
+                $ref: "#/components/schemas/RecentTransactionsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   "/transaction/preview":
     post:
       operationId: PreviewTransaction
@@ -79,12 +81,14 @@ paths:
             schema:
               type: object
       responses:
-        '200':
+        "200":
           description: Successful Preview
           content:
             application/json:
               schema:
                 type: object
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   "/transaction/submit":
     post:
       operationId: SubmitTransaction
@@ -99,14 +103,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/TransactionSubmitRequest"
+              $ref: "#/components/schemas/TransactionSubmitRequest"
       responses:
-        '200':
+        "200":
           description: Successful Submission
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TransactionSubmitResponse"
+                $ref: "#/components/schemas/TransactionSubmitResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   "/transaction/status":
     post:
       operationId: TransactionStatus
@@ -120,14 +126,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/TransactionStatusRequest"
+              $ref: "#/components/schemas/TransactionStatusRequest"
       responses:
-        '200':
+        "200":
           description: Transaction Status
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TransactionStatusResponse"
+                $ref: "#/components/schemas/TransactionStatusResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   "/transaction/details":
     post:
       operationId: TransactionDetails
@@ -141,14 +149,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/TransactionDetailsRequest"
+              $ref: "#/components/schemas/TransactionDetailsRequest"
       responses:
-        '200':
+        "200":
           description: Transaction Status
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TransactionDetailsResponse"
+                $ref: "#/components/schemas/TransactionDetailsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/resources:
     post:
       operationId: EntityResources
@@ -162,14 +172,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/EntityResourcesRequest"
+              $ref: "#/components/schemas/EntityResourcesRequest"
       responses:
-        '200':
+        "200":
           description: Entity Resources
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/EntityResourcesResponse"
+                $ref: "#/components/schemas/EntityResourcesResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/details:
     post:
       operationId: EntityDetails
@@ -183,14 +195,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/EntityDetailsRequest"
+              $ref: "#/components/schemas/EntityDetailsRequest"
       responses:
-        '200':
+        "200":
           description: Entity Details
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/EntityDetailsResponse"
+                $ref: "#/components/schemas/EntityDetailsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/overview:
     post:
       operationId: EntityOverview
@@ -204,14 +218,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/EntityOverviewRequest"
+              $ref: "#/components/schemas/EntityOverviewRequest"
       responses:
-        '200':
+        "200":
           description: Entity Details
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/EntityOverviewResponse"
+                $ref: "#/components/schemas/EntityOverviewResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/metadata:
     post:
       operationId: EntityMetadata
@@ -225,14 +241,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/EntityMetadataRequest"
+              $ref: "#/components/schemas/EntityMetadataRequest"
       responses:
-        '200':
+        "200":
           description: Entity Metadata
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/EntityMetadataResponse"
+                $ref: "#/components/schemas/EntityMetadataResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/fungibles:
     post:
       operationId: EntityFungibles
@@ -246,14 +264,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/EntityFungiblesRequest"
+              $ref: "#/components/schemas/EntityFungiblesRequest"
       responses:
-        '200':
+        "200":
           description: Entity Metadata
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/EntityFungiblesResponse"
+                $ref: "#/components/schemas/EntityFungiblesResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/non-fungibles:
     post:
       operationId: EntityNonFungibles
@@ -267,16 +287,26 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/EntityNonFungiblesRequest"
+              $ref: "#/components/schemas/EntityNonFungiblesRequest"
       responses:
-        '200':
+        "200":
           description: Entity Metadata
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/EntityNonFungiblesResponse"
+                $ref: "#/components/schemas/EntityNonFungiblesResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
 
 components:
+  responses:
+    ErrorResponse:
+      description: Client-originated request error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
   schemas:
 
     #
@@ -428,7 +458,7 @@ components:
         - intent_hash_hex
       properties:
         transaction_status:
-          "$ref": "#/components/schemas/TransactionStatus"
+          $ref: "#/components/schemas/TransactionStatus"
         payload_hash_hex:
           type: string
         intent_hash_hex:
@@ -638,7 +668,7 @@ components:
             transaction:
               $ref: "#/components/schemas/TransactionInfo"
             details:
-              "$ref": "#/components/schemas/TransactionDetails"
+              $ref: "#/components/schemas/TransactionDetails"
 
     #
     # "Entity" Request & Response Types
@@ -930,19 +960,18 @@ components:
     ErrorResponse:
       type: object
       required:
-        - code
         - message
       properties:
-        code:
-          description: A numeric code corresponding to the given error type, roughly aligned with HTTP Status Code semantics (eg 400/404/500).
-          type: integer
         message:
           description: A human-readable error message.
           type: string
+        code:
+          description: A numeric code corresponding to the given error type.
+          type: integer
         details:
           $ref: "#/components/schemas/GatewayError"
         trace_id:
-          description: A GUID to be used when reporting errors, to allow correlation with the Gateway API's error logs.
+          description: A unique request identifier to be used when reporting errors, to allow correlation with the Gateway API's error logs.
           type: string
 
     GatewayError:
