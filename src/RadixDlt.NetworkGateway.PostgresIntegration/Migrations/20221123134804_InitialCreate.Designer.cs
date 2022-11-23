@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221117113603_InitialCreate")]
+    [Migration("20221123134804_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
