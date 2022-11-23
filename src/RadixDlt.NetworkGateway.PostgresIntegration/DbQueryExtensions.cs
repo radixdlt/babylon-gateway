@@ -95,7 +95,7 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
+    public static IQueryable<LedgerTransaction> GetLatestLedgerTransactionBeforeTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions
@@ -105,7 +105,7 @@ internal static class DbQueryExtensions
             .Take(1);
     }
 
-    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTimeOffset timestamp)
+    public static IQueryable<LedgerTransaction> GetFirstLedgerTransactionAfterTimestamp<TDbContext>(this TDbContext dbContext, DateTime timestamp)
         where TDbContext : CommonDbContext
     {
         return dbContext.LedgerTransactions

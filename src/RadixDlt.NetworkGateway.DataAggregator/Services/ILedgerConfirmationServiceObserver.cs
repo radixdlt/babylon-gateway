@@ -73,7 +73,7 @@ public interface ILedgerConfirmationServiceObserver
 
     void TrustWeightingRequirementsComputed(LedgerConfirmationService.TrustWeightingReport report);
 
-    ValueTask PreHandleLedgerExtensionIfQuorum(DateTimeOffset timestamp);
+    ValueTask PreHandleLedgerExtensionIfQuorum(DateTime timestamp);
 
     void PreSubmitNodeNetworkStatus(string nodeName, long ledgerTipStateVersion, long targetStateVersion);
 
@@ -93,9 +93,9 @@ public interface ILedgerConfirmationServiceObserver
 
     void QuorumGained();
 
-    void ReportOnLedgerExtensionSuccess(DateTimeOffset timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
+    void ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount);
 
-    void RecordTopOfDbLedger(long stateVersion, DateTimeOffset roundTimestamp);
+    void RecordTopOfDbLedger(long stateVersion, DateTime roundTimestamp);
 
     void QuorumExtensionConsistentGained();
 

@@ -70,15 +70,15 @@ using System.Threading.Tasks;
 namespace RadixDlt.NetworkGateway.DataAggregator.Services;
 
 // TODO rename as the name no longer reflects its usage
-public sealed record FullTransactionData(byte[] PayloadHash, DateTimeOffset SeenAt, byte[] Payload);
+public sealed record FullTransactionData(byte[] PayloadHash, DateTime SeenAt, byte[] Payload);
 
 public sealed record NodeMempoolHashes
 {
     public HashSet<byte[]> TransactionHashes { get; }
 
-    public DateTimeOffset AtTime { get; }
+    public DateTime AtTime { get; }
 
-    public NodeMempoolHashes(HashSet<byte[]> transactionHashes, DateTimeOffset atTime)
+    public NodeMempoolHashes(HashSet<byte[]> transactionHashes, DateTime atTime)
     {
         TransactionHashes = transactionHashes;
         AtTime = atTime;

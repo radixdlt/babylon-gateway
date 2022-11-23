@@ -68,10 +68,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
+using System.Globalization;
 
 namespace GatewayApi;
 
@@ -105,7 +107,15 @@ public class GatewayApiStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+            .AddNewtonsoftJson(o =>
+            {
+                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                o.SerializerSettings.Converters.Add(new IsoDateTimeConverter
+                {
+                    DateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ",
+                    DateTimeStyles = DateTimeStyles.AdjustToUniversal,
+                });
+            });
 
         services
             .AddHealthChecks()

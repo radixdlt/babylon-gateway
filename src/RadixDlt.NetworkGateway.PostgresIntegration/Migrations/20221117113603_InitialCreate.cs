@@ -186,9 +186,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     referencedentities = table.Column<long[]>(name: "referenced_entities", type: "bigint[]", nullable: false),
                     feepaid = table.Column<BigInteger>(name: "fee_paid", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
                     tippaid = table.Column<BigInteger>(name: "tip_paid", type: "numeric(1000,0)", precision: 1000, scale: 0, nullable: false),
-                    roundtimestamp = table.Column<DateTimeOffset>(name: "round_timestamp", type: "timestamp with time zone", nullable: false),
-                    createdtimestamp = table.Column<DateTimeOffset>(name: "created_timestamp", type: "timestamp with time zone", nullable: false),
-                    normalizedroundtimestamp = table.Column<DateTimeOffset>(name: "normalized_round_timestamp", type: "timestamp with time zone", nullable: false),
+                    roundtimestamp = table.Column<DateTime>(name: "round_timestamp", type: "timestamp with time zone", nullable: false),
+                    createdtimestamp = table.Column<DateTime>(name: "created_timestamp", type: "timestamp with time zone", nullable: false),
+                    normalizedroundtimestamp = table.Column<DateTime>(name: "normalized_round_timestamp", type: "timestamp with time zone", nullable: false),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: true),
                     intenthash = table.Column<byte[]>(name: "intent_hash", type: "bytea", nullable: true),
@@ -266,17 +266,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     notarizedtransactionblob = table.Column<byte[]>(name: "notarized_transaction_blob", type: "bytea", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
                     submittedbythisgateway = table.Column<bool>(name: "submitted_by_this_gateway", type: "boolean", nullable: false),
-                    firstsubmittedtogatewaytimestamp = table.Column<DateTimeOffset>(name: "first_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
-                    lastsubmittedtogatewaytimestamp = table.Column<DateTimeOffset>(name: "last_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
-                    lastsubmittedtonodetimestamp = table.Column<DateTimeOffset>(name: "last_submitted_to_node_timestamp", type: "timestamp with time zone", nullable: true),
+                    firstsubmittedtogatewaytimestamp = table.Column<DateTime>(name: "first_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastsubmittedtogatewaytimestamp = table.Column<DateTime>(name: "last_submitted_to_gateway_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastsubmittedtonodetimestamp = table.Column<DateTime>(name: "last_submitted_to_node_timestamp", type: "timestamp with time zone", nullable: true),
                     lastsubmittedtonodename = table.Column<string>(name: "last_submitted_to_node_name", type: "text", nullable: true),
                     submissioncount = table.Column<int>(name: "submission_count", type: "integer", nullable: false),
-                    firstseeninmempooltimestamp = table.Column<DateTimeOffset>(name: "first_seen_in_mempool_timestamp", type: "timestamp with time zone", nullable: true),
-                    lastmissingfrommempooltimestamp = table.Column<DateTimeOffset>(name: "last_missing_from_mempool_timestamp", type: "timestamp with time zone", nullable: true),
-                    committimestamp = table.Column<DateTimeOffset>(name: "commit_timestamp", type: "timestamp with time zone", nullable: true),
+                    firstseeninmempooltimestamp = table.Column<DateTime>(name: "first_seen_in_mempool_timestamp", type: "timestamp with time zone", nullable: true),
+                    lastmissingfrommempooltimestamp = table.Column<DateTime>(name: "last_missing_from_mempool_timestamp", type: "timestamp with time zone", nullable: true),
+                    committimestamp = table.Column<DateTime>(name: "commit_timestamp", type: "timestamp with time zone", nullable: true),
                     failurereason = table.Column<string>(name: "failure_reason", type: "text", nullable: true),
                     failureexplanation = table.Column<string>(name: "failure_explanation", type: "text", nullable: true),
-                    failuretimestamp = table.Column<DateTimeOffset>(name: "failure_timestamp", type: "timestamp with time zone", nullable: true)
+                    failuretimestamp = table.Column<DateTime>(name: "failure_timestamp", type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -303,7 +303,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     id = table.Column<int>(type: "integer", nullable: false),
                     topofledgerstateversion = table.Column<long>(name: "top_of_ledger_state_version", type: "bigint", nullable: false),
                     syncstatustargetstateversion = table.Column<long>(name: "sync_status_target_state_version", type: "bigint", nullable: false),
-                    lastupdated = table.Column<DateTimeOffset>(name: "last_updated", type: "timestamp with time zone", nullable: false)
+                    lastupdated = table.Column<DateTime>(name: "last_updated", type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

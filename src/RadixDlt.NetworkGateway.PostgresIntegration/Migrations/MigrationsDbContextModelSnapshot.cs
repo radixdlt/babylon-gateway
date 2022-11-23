@@ -309,7 +309,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("LastUpdated")
+                    b.Property<DateTime>("LastUpdated")
                         .IsConcurrencyToken()
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_updated");
@@ -335,7 +335,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("state_version");
 
-                    b.Property<DateTimeOffset>("CreatedTimestamp")
+                    b.Property<DateTime>("CreatedTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_timestamp");
 
@@ -364,7 +364,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("message");
 
-                    b.Property<DateTimeOffset>("NormalizedRoundTimestamp")
+                    b.Property<DateTime>("NormalizedRoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("normalized_round_timestamp");
 
@@ -377,7 +377,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("round_in_epoch");
 
-                    b.Property<DateTimeOffset>("RoundTimestamp")
+                    b.Property<DateTime>("RoundTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("round_timestamp");
 
@@ -517,7 +517,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTimeOffset?>("CommitTimestamp")
+                    b.Property<DateTime?>("CommitTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("commit_timestamp");
 
@@ -529,15 +529,15 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("failure_reason");
 
-                    b.Property<DateTimeOffset?>("FailureTimestamp")
+                    b.Property<DateTime?>("FailureTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("failure_timestamp");
 
-                    b.Property<DateTimeOffset?>("FirstSeenInMempoolTimestamp")
+                    b.Property<DateTime?>("FirstSeenInMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_seen_in_mempool_timestamp");
 
-                    b.Property<DateTimeOffset?>("FirstSubmittedToGatewayTimestamp")
+                    b.Property<DateTime?>("FirstSubmittedToGatewayTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_submitted_to_gateway_timestamp");
 
@@ -546,11 +546,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("intent_hash");
 
-                    b.Property<DateTimeOffset?>("LastDroppedOutOfMempoolTimestamp")
+                    b.Property<DateTime?>("LastDroppedOutOfMempoolTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_missing_from_mempool_timestamp");
 
-                    b.Property<DateTimeOffset?>("LastSubmittedToGatewayTimestamp")
+                    b.Property<DateTime?>("LastSubmittedToGatewayTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_gateway_timestamp");
 
@@ -558,7 +558,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_submitted_to_node_name");
 
-                    b.Property<DateTimeOffset?>("LastSubmittedToNodeTimestamp")
+                    b.Property<DateTime?>("LastSubmittedToNodeTimestamp")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_submitted_to_node_timestamp");
 

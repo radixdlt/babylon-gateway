@@ -87,5 +87,5 @@ internal class LedgerStatus : SingleEntryBase
 
     [ConcurrencyCheck]
     [Column("last_updated")]
-    public DateTimeOffset LastUpdated { get; set; }
+    public DateTime LastUpdated { get; set; }
 }

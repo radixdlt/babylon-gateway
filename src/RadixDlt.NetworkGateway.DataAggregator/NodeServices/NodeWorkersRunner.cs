@@ -110,7 +110,7 @@ public sealed class NodeWorkersRunner : IDisposable
 
     private IServiceScope? _nodeDependencyInjectionScope;
 
-    private DateTimeOffset _lastStatusChange;
+    private DateTime _lastStatusChange;
 
     // Items needing disposal
     private CancellationTokenSource? _cancellationTokenSource;

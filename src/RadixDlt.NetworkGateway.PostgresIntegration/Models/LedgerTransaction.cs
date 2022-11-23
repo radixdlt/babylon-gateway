@@ -121,13 +121,13 @@ internal abstract class LedgerTransaction
     /// consensus. As a consequence of this, the round timestamp is not guaranteed to be increasing.
     /// </summary>
     [Column("round_timestamp")]
-    public DateTimeOffset RoundTimestamp { get; set; }
+    public DateTime RoundTimestamp { get; set; }
 
     /// <summary>
     /// The time of the DataAggregator server when the LedgerTransaction was added to the service.
     /// </summary>
     [Column("created_timestamp")]
-    public DateTimeOffset CreatedTimestamp { get; set; }
+    public DateTime CreatedTimestamp { get; set; }
 
     /// <summary>
     /// This timestamp attempts to be "sensible" - ie increasing and semi-resistant to network time attacks.
@@ -135,7 +135,7 @@ internal abstract class LedgerTransaction
     /// Thus it ensures that NormalizedTimestamp is non-decreasing, and not after the ingest time.
     /// </summary>
     [Column("normalized_round_timestamp")]
-    public DateTimeOffset NormalizedRoundTimestamp { get; set; }
+    public DateTime NormalizedRoundTimestamp { get; set; }
 }
 
 internal class UserLedgerTransaction : LedgerTransaction

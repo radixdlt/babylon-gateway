@@ -369,7 +369,7 @@ SELECT
 
                 long? newEpoch = null;
                 long? newRoundInEpoch = null;
-                DateTimeOffset? newRoundTimestamp = null;
+                DateTime? newRoundTimestamp = null;
 
                 // TODO can we even just dumbly concat both collections?
 
@@ -444,7 +444,7 @@ SELECT
                     //     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
                     //     if (newRoundData.Timestamp != 0)
                     //     {
-                    //         newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(newRoundData.Timestamp);
+                    //         newRoundTimestamp = DateTime.FromUnixTimeMilliseconds(newRoundData.Timestamp);
                     //     }
                     // }
 
@@ -720,9 +720,10 @@ WHERE id IN(
                     await writer.WriteAsync(referencedEntities.OfStateVersion(lt.StateVersion).Select(re => re.DatabaseId).ToArray(), NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(lt.FeePaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
                     await writer.WriteAsync(lt.TipPaid.GetSubUnitsSafeForPostgres(), NpgsqlDbType.Numeric, token);
-                    await writer.WriteAsync(lt.RoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
-                    await writer.WriteAsync(lt.CreatedTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
-                    await writer.WriteAsync(lt.NormalizedRoundTimestamp.UtcDateTime, NpgsqlDbType.TimestampTz, token);
+                    // TODO all three below must be guaranteed to be of DateTimeKind == UTC
+                    await writer.WriteAsync(lt.RoundTimestamp, NpgsqlDbType.TimestampTz, token);
+                    await writer.WriteAsync(lt.CreatedTimestamp, NpgsqlDbType.TimestampTz, token);
+                    await writer.WriteAsync(lt.NormalizedRoundTimestamp, NpgsqlDbType.TimestampTz, token);
 
                     switch (lt)
                     {
@@ -1230,8 +1231,8 @@ SELECT
         // Nearly all of theses turn out to be unused!
         return new TransactionSummary(
             StateVersion: 0,
-            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
-            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0),
+            RoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
+            NormalizedRoundTimestamp: DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime,
             CreatedTimestamp: _clock.UtcNow,
             Epoch: 0,
             IndexInEpoch: 0,

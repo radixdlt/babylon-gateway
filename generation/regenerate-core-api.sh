@@ -53,7 +53,7 @@ java -jar ./openapi-generator-cli-6.1.0.jar \
     -g csharp-netcore \
     -o "$dummyApiDirectory" \
     --library httpclient \
-    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useDateTimeOffset=true,useOneOfDiscriminatorLookup=true
+    --additional-properties=packageName=$packageName,targetFramework=net6.0,optionalEmitDefaultValues=true,useOneOfDiscriminatorLookup=true
 
 rm -rf "../src/${packageName}/generated"
 cp -R "${dummyApiDirectory}src/${packageName}/" "../src/${packageName}/generated/"

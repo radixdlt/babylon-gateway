@@ -189,7 +189,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
         );
     }
 
-    private Dictionary<byte[], DateTimeOffset> CombineNodeMempools(MempoolOptions mempoolOptions)
+    private Dictionary<byte[], DateTime> CombineNodeMempools(MempoolOptions mempoolOptions)
     {
         var nodeMempoolsToConsider = _latestMempoolContentsByNode
             .Where(kvp => kvp.Value.AtTime.WithinPeriodOfNow(mempoolOptions.ExcludeNodeMempoolsFromUnionIfStaleFor, _clock))
@@ -202,7 +202,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
             );
         }
 
-        var combinedMempoolByLatestSeen = new Dictionary<byte[], DateTimeOffset>(ByteArrayEqualityComparer.Default);
+        var combinedMempoolByLatestSeen = new Dictionary<byte[], DateTime>(ByteArrayEqualityComparer.Default);
 
         foreach (var (_, mempoolContents) in nodeMempoolsToConsider)
         {
@@ -232,7 +232,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     }
 
     private async Task MarkRelevantMempoolTransactionsInCombinedMempoolAsReappeared(
-        Dictionary<byte[], DateTimeOffset> combinedMempoolWithLastSeen,
+        Dictionary<byte[], DateTime> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
@@ -271,7 +271,7 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
 
     private async Task CreateMempoolTransactionsFromNewTransactionsDiscoveredInCombinedMempool(
         MempoolOptions mempoolOptions,
-        Dictionary<byte[], DateTimeOffset> combinedMempoolWithLastSeen,
+        Dictionary<byte[], DateTime> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {
@@ -348,9 +348,9 @@ internal class PendingTransactionTrackerService : IPendingTransactionTrackerServ
     }
 
     private async Task MarkRelevantMempoolTransactionsNotInCombinedMempoolAsMissing(
-        DateTimeOffset currentTimestamp,
+        DateTime currentTimestamp,
         MempoolOptions mempoolOptions,
-        Dictionary<byte[], DateTimeOffset> combinedMempoolWithLastSeen,
+        Dictionary<byte[], DateTime> combinedMempoolWithLastSeen,
         CancellationToken token
     )
     {

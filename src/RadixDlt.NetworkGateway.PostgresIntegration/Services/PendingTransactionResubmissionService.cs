@@ -158,7 +158,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private async Task<List<PendingTransaction>> SelectTransactionsToResubmit(
         ReadWriteDbContext dbContext,
-        DateTimeOffset instantForTransactionChoosing,
+        DateTime instantForTransactionChoosing,
         MempoolOptions mempoolOptions,
         int batchSize,
         CancellationToken token
@@ -203,7 +203,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private List<PendingTransactionWithChosenNode> MarkTransactionsAsFailedForTimeoutOrPendingResubmissionToRandomNode(
         MempoolOptions mempoolConfiguration,
         List<PendingTransaction> transactionsWantingResubmission,
-        DateTimeOffset submittedAt
+        DateTime submittedAt
     )
     {
         var transactionsToResubmitWithNodes = new List<PendingTransactionWithChosenNode>();
@@ -240,7 +240,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
 
     private record PendingTransactionWithChosenNode(PendingTransaction PendingTransaction, CoreApiNode Node);
 
-    private IQueryable<PendingTransaction> GetMempoolTransactionsNeedingResubmission(DateTimeOffset currentTimestamp, MempoolOptions mempoolOptions, ReadWriteDbContext dbContext)
+    private IQueryable<PendingTransaction> GetMempoolTransactionsNeedingResubmission(DateTime currentTimestamp, MempoolOptions mempoolOptions, ReadWriteDbContext dbContext)
     {
         var allowResubmissionIfLastSubmittedBefore = currentTimestamp - mempoolOptions.MinDelayBetweenResubmissions;
         var allowResubmissionIfDroppedOutOfMempoolBefore = currentTimestamp - mempoolOptions.MinDelayBetweenMissingFromMempoolAndResubmission;
@@ -265,7 +265,7 @@ internal class PendingTransactionResubmissionService : IPendingTransactionResubm
     private async Task ResubmitAllAndUpdateTransactionStatusesOnFailure(
         MempoolOptions mempoolOptions,
         List<PendingTransactionWithChosenNode> transactionsToResubmitWithNodes,
-        DateTimeOffset submittedAt,
+        DateTime submittedAt,
         CancellationToken token
     )
     {

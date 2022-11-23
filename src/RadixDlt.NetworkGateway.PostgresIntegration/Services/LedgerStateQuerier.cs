@@ -243,7 +243,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerStatus;
     }
 
-    private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTimeOffset RoundTimestamp);
+    private record LedgerStateReport(GatewayModel.LedgerState LedgerState, DateTime RoundTimestamp);
 
     private async Task<LedgerStateReport> GetLedgerState(GatewayModel.PartialLedgerStateIdentifier? at = null, CancellationToken token = default)
     {
@@ -305,7 +305,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTimeOffset timestamp, CancellationToken token)
+    private async Task<LedgerStateReport> GetLedgerStateBeforeTimestamp(DateTime timestamp, CancellationToken token)
     {
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetLatestLedgerTransactionBeforeTimestamp(timestamp), token);
 
@@ -317,7 +317,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         return ledgerState;
     }
 
-    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTimeOffset timestamp, CancellationToken token)
+    private async Task<LedgerStateReport> GetLedgerStateAfterTimestamp(DateTime timestamp, CancellationToken token)
     {
         var ledgerState = await GetLedgerStateFromQuery(_dbContext.GetFirstLedgerTransactionAfterTimestamp(timestamp), token);
 
