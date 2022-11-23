@@ -110,11 +110,7 @@ public class GatewayApiStartup
             .AddNewtonsoftJson(o =>
             {
                 o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                o.SerializerSettings.Converters.Add(new IsoDateTimeConverter
-                {
-                    DateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ",
-                    DateTimeStyles = DateTimeStyles.AdjustToUniversal,
-                });
+                o.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
             });
 
         services
