@@ -123,8 +123,8 @@ public static class GatewayApiBuilderExtensions
     {
         builder.Services
             .AddHealthChecks()
-            .AddDbContextCheck<ReadOnlyDbContext>()
-            .AddDbContextCheck<ReadWriteDbContext>();
+            .AddDbContextCheck<ReadOnlyDbContext>("readonly_database_connection_check")
+            .AddDbContextCheck<ReadWriteDbContext>("readwrite_database_connection_check");
 
         return builder;
     }
