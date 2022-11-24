@@ -119,7 +119,7 @@ jobs:
         run: |
           echo "GATEWAY_BRANCH=$GITHUB_HEAD_REF" >> $GITHUB_ENV
       - name: Deploy and test on an ephemeral network
-        uses: toptal/jenkins-job-trigger-action@70ee28b6020e5894782308052ae4bba253256823
+        uses: toptal/jenkins-job-trigger-action@649c04c83c099c759aba134bf78138a303ec095f
         with:
           jenkins_url: "${{ secrets.JENKINS_URL }}"
           jenkins_user: ${{ secrets.JENKINS_USER }}
