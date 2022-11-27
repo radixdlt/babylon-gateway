@@ -64,6 +64,10 @@
 
 using Microsoft.AspNetCore.Mvc;
 using RadixDlt.NetworkGateway.GatewayApi.AspNetCore;
+using RadixDlt.NetworkGateway.GatewayApi.Handlers;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace GatewayApi.Controllers;
 
@@ -73,4 +77,22 @@ namespace GatewayApi.Controllers;
 [ServiceFilter(typeof(InvalidModelStateFilter))]
 public class NonFungibleController : ControllerBase
 {
+    private readonly INonFungibleHandler _nonFungibleHandler;
+
+    public NonFungibleController(INonFungibleHandler nonFungibleHandler)
+    {
+        _nonFungibleHandler = nonFungibleHandler;
+    }
+
+    [HttpPost("ids")]
+    public async Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token)
+    {
+        return await _nonFungibleHandler.Ids(request, token);
+    }
+
+    [HttpPost("data")]
+    public async Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token)
+    {
+        return await _nonFungibleHandler.Data(request, token);
+    }
 }

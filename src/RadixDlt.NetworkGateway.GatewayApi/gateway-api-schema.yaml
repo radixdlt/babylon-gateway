@@ -267,7 +267,7 @@ paths:
               $ref: "#/components/schemas/EntityFungiblesRequest"
       responses:
         "200":
-          description: Entity Metadata
+          description: Entity Fungibles
           content:
             application/json:
               schema:
@@ -290,11 +290,57 @@ paths:
               $ref: "#/components/schemas/EntityNonFungiblesRequest"
       responses:
         "200":
-          description: Entity Metadata
+          description: Entity Non-Fungibles
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EntityNonFungiblesResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+  /non-fungible/ids:
+    post:
+      operationId: NonFungibleIds
+      summary: Non-Fungible Ids
+      description: |
+        TBD
+      tags:
+        - Non-Fungible
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NonFungibleIdsRequest"
+      responses:
+        "200":
+          description: Non-Fungible Ids
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NonFungibleIdsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+  /non-fungible/data:
+    post:
+      operationId: NonFungibleData
+      summary: Non-Fungible Data
+      description: |
+        TBD
+      tags:
+        - Non-Fungible
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NonFungibleDataRequest"
+      responses:
+        "200":
+          description: Non-Fungible Data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NonFungibleDataResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -918,7 +964,7 @@ components:
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            metadata:
+            fungibles:
               $ref: "#/components/schemas/FungibleResourcesCollection"
 
     EntityNonFungiblesRequest:
@@ -946,12 +992,97 @@ components:
         - type: object
           required:
             - address
-            - fungibles
+            - non_fungibles
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-            metadata:
+            non_fungibles:
               $ref: "#/components/schemas/NonFungibleResourcesCollection"
+
+    NonFungibleIdsRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+      example:
+        address: "<non-fungible-entity-address>"
+    NonFungibleIdsResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - address
+            - non_fungible_ids
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            non_fungible_ids:
+              $ref: "#/components/schemas/NonFungibleIdsResponseIds"
+    NonFungibleIdsResponseIds:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                type: string
+
+    NonFungibleDataRequest:
+      type: object
+      required:
+        - address
+        - non_fungible_id_hex
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        non_fungible_id_hex:
+          type: string
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+      example:
+        address: "<non-fungible-entity-address>"
+        non_fungible_id_hex: "0a0100000000"
+    NonFungibleDataResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - address
+            - non_fungible_id_hex
+            - mutable_data_hex
+            - immutable_data_hex
+          properties:
+            address:
+              $ref: "#/components/schemas/ResourceAddress"
+            non_fungible_id_hex:
+              type: string
+            mutable_data_hex:
+              type: string
+            immutable_data_hex:
+              type: string
 
     #
     # Errors

@@ -67,14 +67,17 @@ using System.Runtime.Serialization;
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 [DataContract]
-public sealed record EntityFungiblesCursor(int? Offset)
+public sealed record NonFungibleIdsRequestCursor(int? Offset, long StateVersion)
 {
     [DataMember(Name = "o", EmitDefaultValue = false)]
     public int? Offset { get; set; } = Offset;
 
-    public static EntityFungiblesCursor FromCursorString(string cursorString)
+    [DataMember(Name = "v", EmitDefaultValue = false)]
+    public long StateVersion { get; set; } = StateVersion;
+
+    public static NonFungibleIdsRequestCursor FromCursorString(string cursorString)
     {
-        return Serializations.FromBase64JsonOrDefault<EntityFungiblesCursor>(cursorString);
+        return Serializations.FromBase64JsonOrDefault<NonFungibleIdsRequestCursor>(cursorString);
     }
 
     public string ToCursorString()

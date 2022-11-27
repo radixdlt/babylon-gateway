@@ -77,7 +77,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221123134804_InitialCreate")]
+    [Migration("20221126005038_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -510,6 +510,39 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.HasIndex("NonFungibleIdDataId", "FromStateVersion");
 
                     b.ToTable("non_fungible_id_mutable_data_history");
+                });
+
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NonFungibleIdStoreHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long[]>("NonFungibleIdDataIds")
+                        .IsRequired()
+                        .HasColumnType("bigint[]")
+                        .HasColumnName("non_fungible_id_data_ids");
+
+                    b.Property<long>("NonFungibleResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_resource_manager_entity_id");
+
+                    b.Property<long>("NonFungibleStoreEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("non_fungible_store_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NonFungibleResourceManagerEntityId", "FromStateVersion");
+
+                    b.ToTable("non_fungible_id_store_history");
                 });
 
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.PendingTransaction", b =>

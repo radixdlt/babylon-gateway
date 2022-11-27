@@ -91,49 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityNonFungiblesResponseAllOf
+    /// NonFungibleIdsResponseIdsAllOf
     /// </summary>
-    [DataContract(Name = "EntityNonFungiblesResponse_allOf")]
-    public partial class EntityNonFungiblesResponseAllOf : IEquatable<EntityNonFungiblesResponseAllOf>, IValidatableObject
+    [DataContract(Name = "NonFungibleIdsResponseIds_allOf")]
+    public partial class NonFungibleIdsResponseIdsAllOf : IEquatable<NonFungibleIdsResponseIdsAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNonFungiblesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseIdsAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityNonFungiblesResponseAllOf() { }
+        protected NonFungibleIdsResponseIdsAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNonFungiblesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseIdsAllOf" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="nonFungibles">nonFungibles (required).</param>
-        public EntityNonFungiblesResponseAllOf(string address = default(string), NonFungibleResourcesCollection nonFungibles = default(NonFungibleResourcesCollection))
+        /// <param name="items">items (required).</param>
+        public NonFungibleIdsResponseIdsAllOf(List<string> items = default(List<string>))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityNonFungiblesResponseAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for NonFungibleIdsResponseIdsAllOf and cannot be null");
             }
-            this.Address = address;
-            // to ensure "nonFungibles" is required (not null)
-            if (nonFungibles == null)
-            {
-                throw new ArgumentNullException("nonFungibles is a required property for EntityNonFungiblesResponseAllOf and cannot be null");
-            }
-            this.NonFungibles = nonFungibles;
+            this.Items = items;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets Items
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibles
-        /// </summary>
-        [DataMember(Name = "non_fungibles", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleResourcesCollection NonFungibles { get; set; }
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityNonFungiblesResponseAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibles: ").Append(NonFungibles).Append("\n");
+            sb.Append("class NonFungibleIdsResponseIdsAllOf {\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityNonFungiblesResponseAllOf);
+            return this.Equals(input as NonFungibleIdsResponseIdsAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityNonFungiblesResponseAllOf instances are equal
+        /// Returns true if NonFungibleIdsResponseIdsAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityNonFungiblesResponseAllOf to be compared</param>
+        /// <param name="input">Instance of NonFungibleIdsResponseIdsAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityNonFungiblesResponseAllOf input)
+        public bool Equals(NonFungibleIdsResponseIdsAllOf input)
         {
             if (input == null)
             {
@@ -181,14 +166,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.NonFungibles == input.NonFungibles ||
-                    (this.NonFungibles != null &&
-                    this.NonFungibles.Equals(input.NonFungibles))
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -201,13 +182,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.Items != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                if (this.NonFungibles != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibles.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }

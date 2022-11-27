@@ -62,8 +62,15 @@
  * permissions under this License.
  */
 
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+
 namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface INonFungibleHandler
 {
+    Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token = default);
 }

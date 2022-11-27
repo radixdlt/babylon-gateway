@@ -62,23 +62,27 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[DataContract]
-public sealed record EntityFungiblesCursor(int? Offset)
+[Table("non_fungible_id_store_history")]
+internal class NonFungibleIdStoreHistory
 {
-    [DataMember(Name = "o", EmitDefaultValue = false)]
-    public int? Offset { get; set; } = Offset;
+    [Key]
+    [Column("id")]
+    public long Id { get; set; }
 
-    public static EntityFungiblesCursor FromCursorString(string cursorString)
-    {
-        return Serializations.FromBase64JsonOrDefault<EntityFungiblesCursor>(cursorString);
-    }
+    [Column("from_state_version")]
+    public long FromStateVersion { get; set; }
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
-    }
+    [Column("non_fungible_store_entity_id")]
+    public long NonFungibleStoreEntityId { get; set; }
+
+    [Column("non_fungible_resource_manager_entity_id")]
+    public long NonFungibleResourceManagerEntityId { get; set; }
+
+    [Column("non_fungible_id_data_ids")]
+    public long[] NonFungibleIdDataIds { get; set; }
 }

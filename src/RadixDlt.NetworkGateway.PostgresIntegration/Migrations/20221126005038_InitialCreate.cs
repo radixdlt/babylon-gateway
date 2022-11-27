@@ -255,6 +255,22 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "non_fungible_id_store_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    nonfungiblestoreentityid = table.Column<long>(name: "non_fungible_store_entity_id", type: "bigint", nullable: false),
+                    nonfungibleresourcemanagerentityid = table.Column<long>(name: "non_fungible_resource_manager_entity_id", type: "bigint", nullable: false),
+                    nonfungibleiddataids = table.Column<long[]>(name: "non_fungible_id_data_ids", type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_non_fungible_id_store_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pending_transactions",
                 columns: table => new
                 {
@@ -420,6 +436,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "non_fungible_id_data_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_non_fungible_id_store_history_non_fungible_resource_manager~",
+                table: "non_fungible_id_store_history",
+                columns: new[] { "non_fungible_resource_manager_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_payload_hash",
                 table: "pending_transactions",
                 column: "payload_hash")
@@ -455,6 +476,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "non_fungible_id_mutable_data_history");
+
+            migrationBuilder.DropTable(
+                name: "non_fungible_id_store_history");
 
             migrationBuilder.DropTable(
                 name: "pending_transactions");

@@ -100,6 +100,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
 
+    public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -232,7 +234,7 @@ internal abstract class CommonDbContext : DbContext
             .HasFilter("is_most_recent IS TRUE");
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("discriminator")
@@ -256,5 +258,8 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
             .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
+
+        modelBuilder.Entity<NonFungibleIdStoreHistory>()
+            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
     }
 }

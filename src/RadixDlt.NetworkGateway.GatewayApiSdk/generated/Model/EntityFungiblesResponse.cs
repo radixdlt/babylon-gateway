@@ -106,8 +106,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="metadata">metadata.</param>
-        public EntityFungiblesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), FungibleResourcesCollection metadata = default(FungibleResourcesCollection))
+        /// <param name="fungibles">fungibles (required).</param>
+        public EntityFungiblesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), FungibleResourcesCollection fungibles = default(FungibleResourcesCollection))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -121,7 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for EntityFungiblesResponse and cannot be null");
             }
             this.Address = address;
-            this.Metadata = metadata;
+            // to ensure "fungibles" is required (not null)
+            if (fungibles == null)
+            {
+                throw new ArgumentNullException("fungibles is a required property for EntityFungiblesResponse and cannot be null");
+            }
+            this.Fungibles = fungibles;
         }
 
         /// <summary>
@@ -138,10 +143,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Gets or Sets Fungibles
         /// </summary>
-        [DataMember(Name = "metadata", EmitDefaultValue = true)]
-        public FungibleResourcesCollection Metadata { get; set; }
+        [DataMember(Name = "fungibles", IsRequired = true, EmitDefaultValue = true)]
+        public FungibleResourcesCollection Fungibles { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,7 +158,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityFungiblesResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  Fungibles: ").Append(Fungibles).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,9 +205,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
+                    this.Fungibles == input.Fungibles ||
+                    (this.Fungibles != null &&
+                    this.Fungibles.Equals(input.Fungibles))
                 );
         }
 
@@ -223,9 +228,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Metadata != null)
+                if (this.Fungibles != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Fungibles.GetHashCode();
                 }
                 return hashCode;
             }

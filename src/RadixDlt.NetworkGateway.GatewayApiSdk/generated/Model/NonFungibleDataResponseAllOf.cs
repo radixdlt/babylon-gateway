@@ -91,49 +91,75 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityNonFungiblesResponseAllOf
+    /// NonFungibleDataResponseAllOf
     /// </summary>
-    [DataContract(Name = "EntityNonFungiblesResponse_allOf")]
-    public partial class EntityNonFungiblesResponseAllOf : IEquatable<EntityNonFungiblesResponseAllOf>, IValidatableObject
+    [DataContract(Name = "NonFungibleDataResponse_allOf")]
+    public partial class NonFungibleDataResponseAllOf : IEquatable<NonFungibleDataResponseAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNonFungiblesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleDataResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityNonFungiblesResponseAllOf() { }
+        protected NonFungibleDataResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityNonFungiblesResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleDataResponseAllOf" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="nonFungibles">nonFungibles (required).</param>
-        public EntityNonFungiblesResponseAllOf(string address = default(string), NonFungibleResourcesCollection nonFungibles = default(NonFungibleResourcesCollection))
+        /// <param name="address">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="nonFungibleIdHex">nonFungibleIdHex (required).</param>
+        /// <param name="mutableDataHex">mutableDataHex (required).</param>
+        /// <param name="immutableDataHex">immutableDataHex (required).</param>
+        public NonFungibleDataResponseAllOf(string address = default(string), string nonFungibleIdHex = default(string), string mutableDataHex = default(string), string immutableDataHex = default(string))
         {
             // to ensure "address" is required (not null)
             if (address == null)
             {
-                throw new ArgumentNullException("address is a required property for EntityNonFungiblesResponseAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for NonFungibleDataResponseAllOf and cannot be null");
             }
             this.Address = address;
-            // to ensure "nonFungibles" is required (not null)
-            if (nonFungibles == null)
+            // to ensure "nonFungibleIdHex" is required (not null)
+            if (nonFungibleIdHex == null)
             {
-                throw new ArgumentNullException("nonFungibles is a required property for EntityNonFungiblesResponseAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleIdHex is a required property for NonFungibleDataResponseAllOf and cannot be null");
             }
-            this.NonFungibles = nonFungibles;
+            this.NonFungibleIdHex = nonFungibleIdHex;
+            // to ensure "mutableDataHex" is required (not null)
+            if (mutableDataHex == null)
+            {
+                throw new ArgumentNullException("mutableDataHex is a required property for NonFungibleDataResponseAllOf and cannot be null");
+            }
+            this.MutableDataHex = mutableDataHex;
+            // to ensure "immutableDataHex" is required (not null)
+            if (immutableDataHex == null)
+            {
+                throw new ArgumentNullException("immutableDataHex is a required property for NonFungibleDataResponseAllOf and cannot be null");
+            }
+            this.ImmutableDataHex = immutableDataHex;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
         [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibles
+        /// Gets or Sets NonFungibleIdHex
         /// </summary>
-        [DataMember(Name = "non_fungibles", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleResourcesCollection NonFungibles { get; set; }
+        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleIdHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MutableDataHex
+        /// </summary>
+        [DataMember(Name = "mutable_data_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string MutableDataHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ImmutableDataHex
+        /// </summary>
+        [DataMember(Name = "immutable_data_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string ImmutableDataHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +168,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityNonFungiblesResponseAllOf {\n");
+            sb.Append("class NonFungibleDataResponseAllOf {\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibles: ").Append(NonFungibles).Append("\n");
+            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
+            sb.Append("  MutableDataHex: ").Append(MutableDataHex).Append("\n");
+            sb.Append("  ImmutableDataHex: ").Append(ImmutableDataHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +193,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityNonFungiblesResponseAllOf);
+            return this.Equals(input as NonFungibleDataResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if EntityNonFungiblesResponseAllOf instances are equal
+        /// Returns true if NonFungibleDataResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityNonFungiblesResponseAllOf to be compared</param>
+        /// <param name="input">Instance of NonFungibleDataResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityNonFungiblesResponseAllOf input)
+        public bool Equals(NonFungibleDataResponseAllOf input)
         {
             if (input == null)
             {
@@ -186,9 +214,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.NonFungibles == input.NonFungibles ||
-                    (this.NonFungibles != null &&
-                    this.NonFungibles.Equals(input.NonFungibles))
+                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
+                    (this.NonFungibleIdHex != null &&
+                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
+                ) && 
+                (
+                    this.MutableDataHex == input.MutableDataHex ||
+                    (this.MutableDataHex != null &&
+                    this.MutableDataHex.Equals(input.MutableDataHex))
+                ) && 
+                (
+                    this.ImmutableDataHex == input.ImmutableDataHex ||
+                    (this.ImmutableDataHex != null &&
+                    this.ImmutableDataHex.Equals(input.ImmutableDataHex))
                 );
         }
 
@@ -205,9 +243,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.NonFungibles != null)
+                if (this.NonFungibleIdHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibles.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
+                }
+                if (this.MutableDataHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.MutableDataHex.GetHashCode();
+                }
+                if (this.ImmutableDataHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.ImmutableDataHex.GetHashCode();
                 }
                 return hashCode;
             }

@@ -106,8 +106,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="metadata">metadata.</param>
-        public EntityNonFungiblesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleResourcesCollection metadata = default(NonFungibleResourcesCollection))
+        /// <param name="nonFungibles">nonFungibles (required).</param>
+        public EntityNonFungiblesResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleResourcesCollection nonFungibles = default(NonFungibleResourcesCollection))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -121,7 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("address is a required property for EntityNonFungiblesResponse and cannot be null");
             }
             this.Address = address;
-            this.Metadata = metadata;
+            // to ensure "nonFungibles" is required (not null)
+            if (nonFungibles == null)
+            {
+                throw new ArgumentNullException("nonFungibles is a required property for EntityNonFungiblesResponse and cannot be null");
+            }
+            this.NonFungibles = nonFungibles;
         }
 
         /// <summary>
@@ -138,10 +143,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or Sets Metadata
+        /// Gets or Sets NonFungibles
         /// </summary>
-        [DataMember(Name = "metadata", EmitDefaultValue = true)]
-        public NonFungibleResourcesCollection Metadata { get; set; }
+        [DataMember(Name = "non_fungibles", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleResourcesCollection NonFungibles { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,7 +158,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityNonFungiblesResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  Metadata: ").Append(Metadata).Append("\n");
+            sb.Append("  NonFungibles: ").Append(NonFungibles).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -200,9 +205,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Address.Equals(input.Address))
                 ) && 
                 (
-                    this.Metadata == input.Metadata ||
-                    (this.Metadata != null &&
-                    this.Metadata.Equals(input.Metadata))
+                    this.NonFungibles == input.NonFungibles ||
+                    (this.NonFungibles != null &&
+                    this.NonFungibles.Equals(input.NonFungibles))
                 );
         }
 
@@ -223,9 +228,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.Address.GetHashCode();
                 }
-                if (this.Metadata != null)
+                if (this.NonFungibles != null)
                 {
-                    hashCode = (hashCode * 59) + this.Metadata.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibles.GetHashCode();
                 }
                 return hashCode;
             }

@@ -353,7 +353,8 @@ SELECT
     nextval('entity_resource_history_id_seq') AS EntityResourceHistorySequence,
     nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
-    nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence");
+    nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
+    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence");
 
             dbReadDuration += sw.Elapsed;
         }
@@ -753,7 +754,7 @@ WHERE id IN(
 
         var fungibleVaultChanges = new List<FungibleVaultChange>();
         var nonFungibleVaultChanges = new List<NonFungibleVaultChange>();
-        var nonFungibleIdChanges = new List<NonFungibleIdChange>();
+        var nonFungibleIdStoreChanges = new List<NonFungibleIdChange>();
         var metadataChanges = new List<MetadataChange>();
         var fungibleResourceSupplyChanges = new List<FungibleResourceSupply>();
 
@@ -828,9 +829,7 @@ WHERE id IN(
 
                     if (sd is CoreModel.NonFungibleSubstate nonFungible)
                     {
-                        // TODO we should probably handle nonFungible.NonFungibleData.[Im]mutableData.{OwnedEntities|ReferencedEntities}
-
-                        nonFungibleIdChanges.Add(new NonFungibleIdChange(re, nonFungible.NonFungibleIdHex.ConvertFromHex(), nonFungible.IsDeleted, nonFungible.NonFungibleData, stateVersion));
+                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, nonFungible.NonFungibleIdHex.ConvertFromHex(), nonFungible.IsDeleted, nonFungible.NonFungibleData, stateVersion));
                     }
                 }
             }
@@ -917,34 +916,6 @@ WHERE id IN(
                 })
                 .ToList();
 
-            List<NonFungibleIdData> nonFungibleIdsHistory = new List<NonFungibleIdData>();
-            List<NonFungibleIdMutableDataHistory> nonFungibleIdsMutableDataHistory = new List<NonFungibleIdMutableDataHistory>();
-
-            foreach (var e in nonFungibleIdChanges)
-            {
-                // TODO only add NonFungibleIdData if does not exist, otherwise use existing one
-
-                var nonFungibleIdData = new NonFungibleIdData
-                {
-                    Id = sequences.NextNonFungibleIdData,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
-                    NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseOwnerAncestorId, // TODO is it guaranteed to be ResourceManager?
-                    NonFungibleId = e.NonFungibleId,
-                    ImmutableData = e.Data.ImmutableData.StructData.DataHex.ConvertFromHex(),
-                };
-
-                nonFungibleIdsHistory.Add(nonFungibleIdData);
-                nonFungibleIdsMutableDataHistory.Add(new NonFungibleIdMutableDataHistory
-                {
-                    Id = sequences.NextNonFungibleIdMutableDataHistory,
-                    FromStateVersion = e.StateVersion,
-                    NonFungibleIdDataId = nonFungibleIdData.Id,
-                    IsDeleted = e.IsDeleted,
-                    MutableData = e.Data.MutableData.StructData.DataHex.ConvertFromHex(),
-                });
-            }
-
             var sw = Stopwatch.StartNew();
 
             var vaultAggregateDeltaIds = vaultAggregateDelta.Keys.ToList();
@@ -954,9 +925,82 @@ WHERE id IN(
                 .Where(e => vaultAggregateDeltaIds.Contains(e.EntityId))
                 .ToDictionaryAsync(e => e.EntityId, token);
 
-            // TODO we must find all existing NonFungibleIdData by ResourceManagerId+NfId so that for we can handle situation where NFID is not created but its mutable data has changed
+            // TODO is it guaranteed that given NonFungibleStore has always proper NF ResourceManager as its global ancestor?
+            var xxx = nonFungibleIdStoreChanges.Select(x => x.ReferencedStore.DatabaseGlobalAncestorId).Distinct().ToList();
+            var mostRecentNonFungibleStore = await dbContext.NonFungibleIdStoreHistory
+                .FromSqlInterpolated(@$"
+WITH entities (id) AS (
+    SELECT UNNEST({xxx})
+)
+SELECT emh.*
+FROM entities
+INNER JOIN LATERAL (
+    SELECT *
+    FROM non_fungible_id_store_history
+    WHERE non_fungible_resource_manager_entity_id = entities.id
+    ORDER BY from_state_version DESC
+    LIMIT 1
+) emh ON true;")
+                .AsNoTracking()
+                .ToDictionaryAsync(e => e.NonFungibleResourceManagerEntityId, token);
 
             dbReadDuration += sw.Elapsed;
+
+            var nonFungibleIdStoreHistoryToAdd = new Dictionary<NonFungibleStoreLookup, NonFungibleIdStoreHistory>();
+            var nonFungibleIdDataToAdd = new List<NonFungibleIdData>();
+            var nonFungibleIdsMutableDataHistoryToAdd = new List<NonFungibleIdMutableDataHistory>();
+
+            foreach (var e in nonFungibleIdStoreChanges)
+            {
+                // TODO we must find all existing NonFungibleIdData by ResourceManagerId+NfId so that for we can handle situation where NFID is not created but its mutable data has changed
+                // TODO only add NonFungibleIdData if does not exist, otherwise use existing one
+
+                var nfidData = new NonFungibleIdData
+                {
+                    Id = sequences.NextNonFungibleIdData,
+                    FromStateVersion = e.StateVersion,
+                    NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
+                    // TODO is it guaranteed to be ResourceManager?
+                    // TODO or maybe we should use OwnerAncestorId?
+                    // TODO or maybe we should iterate until we find entity of appropriate type?
+                    NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
+                    NonFungibleId = e.NonFungibleId,
+                    ImmutableData = e.Data?.ImmutableData.StructData.DataHex.ConvertFromHex() ?? Array.Empty<byte>(),
+                };
+
+                nonFungibleIdDataToAdd.Add(nfidData);
+                nonFungibleIdsMutableDataHistoryToAdd.Add(new NonFungibleIdMutableDataHistory
+                {
+                    Id = sequences.NextNonFungibleIdMutableDataHistory,
+                    FromStateVersion = e.StateVersion,
+                    NonFungibleIdDataId = nfidData.Id,
+                    IsDeleted = e.IsDeleted,
+                    MutableData = e.Data?.MutableData.StructData.DataHex.ConvertFromHex() ?? Array.Empty<byte>(),
+                });
+
+                var store = nonFungibleIdStoreHistoryToAdd.GetOrAdd(new NonFungibleStoreLookup(e.ReferencedStore.DatabaseGlobalAncestorId, e.StateVersion), _ =>
+                {
+                    if (mostRecentNonFungibleStore.ContainsKey(e.ReferencedStore.DatabaseGlobalAncestorId))
+                    {
+                        return mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId];
+                    }
+
+                    var ret = new NonFungibleIdStoreHistory
+                    {
+                        Id = sequences.NextNonFungibleIdStoreHistory,
+                        FromStateVersion = e.StateVersion,
+                        NonFungibleStoreEntityId = e.ReferencedStore.DatabaseId,
+                        NonFungibleResourceManagerEntityId = e.ReferencedStore.DatabaseGlobalAncestorId,
+                        NonFungibleIdDataIds = Array.Empty<long>(),
+                    };
+
+                    mostRecentNonFungibleStore[e.ReferencedStore.DatabaseGlobalAncestorId] = ret;
+
+                    return ret;
+                });
+
+                store.NonFungibleIdDataIds = store.NonFungibleIdDataIds.Concat(new[] { nfidData.Id }).ToArray(); // TODO super ineffective
+            }
 
             var aggregates = new List<EntityResourceAggregateHistory>();
             var lastAggregateByEntity = new Dictionary<long, EntityResourceAggregateHistory>();
@@ -1110,11 +1154,11 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            if (nonFungibleIdsHistory.Any())
+            if (nonFungibleIdDataToAdd.Any())
             {
                 await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_data (id, from_state_version, non_fungible_store_entity_id, non_fungible_resource_manager_entity_id, non_fungible_id, immutable_data) FROM STDIN (FORMAT BINARY)", token);
 
-                foreach (var md in nonFungibleIdsHistory)
+                foreach (var md in nonFungibleIdDataToAdd)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(md.Id, NpgsqlDbType.Bigint, token);
@@ -1128,11 +1172,11 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            if (nonFungibleIdsMutableDataHistory.Any())
+            if (nonFungibleIdsMutableDataHistoryToAdd.Any())
             {
                 await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_mutable_data_history (id, from_state_version, non_fungible_id_data_id, is_deleted, mutable_data) FROM STDIN (FORMAT BINARY)", token);
 
-                foreach (var md in nonFungibleIdsMutableDataHistory)
+                foreach (var md in nonFungibleIdsMutableDataHistoryToAdd)
                 {
                     await writer.StartRowAsync(token);
                     await writer.WriteAsync(md.Id, NpgsqlDbType.Bigint, token);
@@ -1145,7 +1189,24 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            rowsInserted += aggregates.Count + fungibleVaultsHistory.Count + nonFungibleVaultsHistory.Count + metadataHistory.Count + nonFungibleIdsHistory.Count + nonFungibleIdsMutableDataHistory.Count;
+            if (nonFungibleIdStoreHistoryToAdd.Any())
+            {
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY non_fungible_id_store_history (id, from_state_version, non_fungible_store_entity_id, non_fungible_resource_manager_entity_id, non_fungible_id_data_ids) FROM STDIN (FORMAT BINARY)", token);
+
+                foreach (var md in nonFungibleIdStoreHistoryToAdd.Values)
+                {
+                    await writer.StartRowAsync(token);
+                    await writer.WriteAsync(md.Id, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(md.FromStateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(md.NonFungibleStoreEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(md.NonFungibleResourceManagerEntityId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(md.NonFungibleIdDataIds, NpgsqlDbType.Array | NpgsqlDbType.Bigint, token);
+                }
+
+                await writer.CompleteAsync(token);
+            }
+
+            rowsInserted += aggregates.Count + fungibleVaultsHistory.Count + nonFungibleVaultsHistory.Count + metadataHistory.Count + nonFungibleIdDataToAdd.Count + nonFungibleIdsMutableDataHistoryToAdd.Count;
             dbWriteDuration += sw.Elapsed;
         }
 
@@ -1156,22 +1217,24 @@ WHERE id IN(
             await dbConn.QueryFirstAsync(
                 @"
 SELECT
-    setval('entities_id_seq', @EntitySequence),
-    setval('entity_metadata_history_id_seq', @EntityMetadataHistorySequence),
-    setval('entity_resource_aggregate_history_id_seq', @EntityResourceAggregateHistorySequence),
-    setval('entity_resource_history_id_seq', @EntityResourceHistorySequence),
-    setval('fungible_resource_supply_history_id_seq', @FungibleResourceSupplyHistorySequence),
-    setval('non_fungible_id_data_id_seq', @NonFungibleIdDataSequence),
-    setval('non_fungible_id_mutable_data_history_id_seq', @NonFungibleIdMutableDataHistorySequence)",
+    setval('entities_id_seq', @entitySequence),
+    setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
+    setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
+    setval('entity_resource_history_id_seq', @entityResourceHistorySequence),
+    setval('fungible_resource_supply_history_id_seq', @fungibleResourceSupplyHistorySequence),
+    setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
+    setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
+    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence)",
                 new
                 {
-                    EntitySequence = sequences.EntitySequence,
-                    EntityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
-                    EntityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
-                    EntityResourceHistorySequence = sequences.EntityResourceHistorySequence,
-                    FungibleResourceSupplyHistorySequence = sequences.FungibleResourceSupplyHistorySequence,
-                    NonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
-                    NonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
+                    entitySequence = sequences.EntitySequence,
+                    entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
+                    entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
+                    entityResourceHistorySequence = sequences.EntityResourceHistorySequence,
+                    fungibleResourceSupplyHistorySequence = sequences.FungibleResourceSupplyHistorySequence,
+                    nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
+                    nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
+                    nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
                 });
 
             dbWriteDuration += sw.Elapsed;

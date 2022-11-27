@@ -62,23 +62,18 @@
  * permissions under this License.
  */
 
-using System.Runtime.Serialization;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
+using System.Threading;
+using System.Threading.Tasks;
+using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
-namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
-[DataContract]
-public sealed record EntityFungiblesCursor(int? Offset)
+public interface INonFungibleStateQuerier
 {
-    [DataMember(Name = "o", EmitDefaultValue = false)]
-    public int? Offset { get; set; } = Offset;
+    public sealed record PageRequest(DecodedRadixAddress Address, long StateVersion, int Offset, int Limit);
 
-    public static EntityFungiblesCursor FromCursorString(string cursorString)
-    {
-        return Serializations.FromBase64JsonOrDefault<EntityFungiblesCursor>(cursorString);
-    }
+    Task<GatewayModel.NonFungibleIdsResponse> NonFungibleIds(PageRequest request, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 
-    public string ToCursorString()
-    {
-        return Serializations.AsBase64Json(this);
-    }
+    Task<GatewayModel.NonFungibleDataResponse> NonFungibleIdData(DecodedRadixAddress address, byte[] nonFungibleId, GatewayModel.LedgerState ledgerState, CancellationToken token = default);
 }
