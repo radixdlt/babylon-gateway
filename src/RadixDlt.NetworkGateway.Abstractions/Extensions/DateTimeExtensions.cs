@@ -71,16 +71,14 @@ public static class DateTimeExtensions
 {
     public static string AsUtcIsoDateWithMillisString(this DateTime instant)
     {
-        // TODO we should throw if this is not DateTimeKind == UTC
+        // same as JsonSerializerSettings.DefaultDateFormatString
 
-        return instant.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
+        return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK");
     }
 
     public static string AsUtcIsoDateToSecondsForLogs(this DateTime instant)
     {
-        // TODO we should throw if this is not DateTimeKind == UTC
-
-        return instant.ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
+        return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ssK");
     }
 
     public static TimeSpan GetTimeAgo(this DateTime instant, IClock clock)
