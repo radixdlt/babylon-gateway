@@ -64,6 +64,7 @@
 
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Numerics;
@@ -128,10 +129,16 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
+                var authRules = await _dbContext.ResourceManagerEntityAuthRulesHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == frme.Id)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
+
                 var tokenAddress = entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
 
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
+                    authRules: new JRaw(authRules.AuthRules),
                     divisibility: frme.Divisibility,
                     totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), tokenAddress),
                     totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), tokenAddress),
@@ -169,8 +176,14 @@ OFFSET @offset LIMIT @limit",
                     },
                     cancellationToken: token));
 
+                var authRules = await _dbContext.ResourceManagerEntityAuthRulesHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceManagerEntityId == nfrme.Id)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
+
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseNonFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.NonFungibleResource,
+                    authRules: new JRaw(authRules.AuthRules),
                     ids: new GatewayModel.EntityDetailsResponseNonFungibleResourceDetailsIds(
                         nextCursor: "TBD (currently first 10 NFIDs are returned)",
                         items: nonFungibleIds

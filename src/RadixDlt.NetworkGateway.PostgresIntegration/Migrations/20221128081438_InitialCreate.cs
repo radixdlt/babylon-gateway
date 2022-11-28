@@ -313,6 +313,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "resource_manager_entity_auth_rules_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    resourcemanagerentityid = table.Column<long>(name: "resource_manager_entity_id", type: "bigint", nullable: false),
+                    authrules = table.Column<string>(name: "auth_rules", type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resource_manager_entity_auth_rules_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ledger_status",
                 columns: table => new
                 {
@@ -445,6 +460,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 table: "pending_transactions",
                 column: "payload_hash")
                 .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_resource_manager_entity_auth_rules_history_resource_manager~",
+                table: "resource_manager_entity_auth_rules_history",
+                columns: new[] { "resource_manager_entity_id", "from_state_version" });
         }
 
         /// <inheritdoc />
@@ -485,6 +505,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
             migrationBuilder.DropTable(
                 name: "raw_user_transactions");
+
+            migrationBuilder.DropTable(
+                name: "resource_manager_entity_auth_rules_history");
 
             migrationBuilder.DropTable(
                 name: "ledger_transactions");

@@ -243,6 +243,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var componentToGlobalPackage = new Dictionary<string, string>();
         var fungibleResourceManagerDivisibility = new Dictionary<string, int>();
         var packageCode = new Dictionary<string, byte[]>();
+        var authRules = new Dictionary<string, string>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
@@ -354,7 +355,8 @@ SELECT
     nextval('fungible_resource_supply_history_id_seq') AS FungibleResourceSupplyHistorySequence,
     nextval('non_fungible_id_data_id_seq') AS NonFungibleIdDataSequence,
     nextval('non_fungible_id_mutable_data_history_id_seq') AS NonFungibleIdMutableDataHistorySequence,
-    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence");
+    nextval('non_fungible_id_store_history_id_seq') AS NonFungibleIdStoreHistorySequence,
+    nextval('resource_manager_entity_auth_rules_history_id_seq') AS ResourceManagerEntityAuthRulesHistorySequence");
 
             dbReadDuration += sw.Elapsed;
         }
@@ -464,6 +466,8 @@ SELECT
                         {
                             fungibleResourceManagerDivisibility[sid.EntityIdHex] = resourceManager.FungibleDivisibility;
                         }
+
+                        authRules[sid.EntityIdHex] = resourceManager.AuthRules.ToJson();
                     }
 
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
@@ -748,6 +752,24 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
+            if (authRules.Any())
+            {
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY resource_manager_entity_auth_rules_history (id, from_state_version, resource_manager_entity_id, auth_rules) FROM STDIN (FORMAT BINARY)", token);
+
+                foreach (var (entityAddress, authRule) in authRules)
+                {
+                    var re = referencedEntities.Get(entityAddress);
+
+                    await writer.StartRowAsync(token);
+                    await writer.WriteAsync(sequences.NextResourceManagerEntityAuthRulesHistory, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(re.StateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(re.DatabaseId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(authRule, NpgsqlDbType.Jsonb, token);
+                }
+
+                await writer.CompleteAsync(token);
+            }
+
             rowsInserted += dbEntities.Count + ledgerTransactions.Count;
             dbWriteDuration += sw.Elapsed;
         }
@@ -791,8 +813,6 @@ WHERE id IN(
                         {
                             fungibleResourceSupplyChanges.Add(new FungibleResourceSupply(re, totalSupply, TokenAmount.Zero, TokenAmount.Zero, stateVersion)); // TODO support mint & burnt
                         }
-
-                        var authRules = resourceManager.AuthRules; // TODO store somewhere? how? this is crazy complex structure!
                     }
 
                     if (sd is CoreModel.VaultSubstate vault)
@@ -1224,7 +1244,8 @@ SELECT
     setval('fungible_resource_supply_history_id_seq', @fungibleResourceSupplyHistorySequence),
     setval('non_fungible_id_data_id_seq', @nonFungibleIdDataSequence),
     setval('non_fungible_id_mutable_data_history_id_seq', @nonFungibleIdMutableDataHistorySequence),
-    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence)",
+    setval('non_fungible_id_store_history_id_seq', @nonFungibleIdStoreHistorySequence),
+    setval('resource_manager_entity_auth_rules_history_id_seq', @resourceManagerEntityAuthRulesHistorySequence)",
                 new
                 {
                     entitySequence = sequences.EntitySequence,
@@ -1235,6 +1256,7 @@ SELECT
                     nonFungibleIdDataSequence = sequences.NonFungibleIdDataSequence,
                     nonFungibleIdMutableDataHistorySequence = sequences.NonFungibleIdMutableDataHistorySequence,
                     nonFungibleIdStoreHistorySequence = sequences.NonFungibleIdStoreHistorySequence,
+                    resourceManagerEntityAuthRulesHistorySequence = sequences.ResourceManagerEntityAuthRulesHistorySequence,
                 });
 
             dbWriteDuration += sw.Elapsed;

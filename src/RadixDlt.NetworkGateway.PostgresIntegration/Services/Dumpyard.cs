@@ -367,6 +367,8 @@ internal class SequencesHolder
 
     public long NonFungibleIdStoreHistorySequence { get; set; }
 
+    public long ResourceManagerEntityAuthRulesHistorySequence { get; set; }
+
     public long NextEntity => EntitySequence++;
 
     public long NextEntityMetadataHistory => EntityMetadataHistorySequence++;
@@ -382,4 +384,6 @@ internal class SequencesHolder
     public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
 
     public long NextNonFungibleIdStoreHistory => NonFungibleIdStoreHistorySequence++;
+
+    public long NextResourceManagerEntityAuthRulesHistory => ResourceManagerEntityAuthRulesHistorySequence++;
 }

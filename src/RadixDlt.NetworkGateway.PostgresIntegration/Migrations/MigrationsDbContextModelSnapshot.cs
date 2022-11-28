@@ -654,6 +654,35 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     b.ToTable("raw_user_transactions");
                 });
 
+            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.ResourceManagerEntityAuthRulesHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AuthRules")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("auth_rules");
+
+                    b.Property<long>("FromStateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_state_version");
+
+                    b.Property<long>("ResourceManagerEntityId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("resource_manager_entity_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceManagerEntityId", "FromStateVersion");
+
+                    b.ToTable("resource_manager_entity_auth_rules_history");
+                });
+
             modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.AccountComponentEntity", b =>
                 {
                     b.HasBaseType("RadixDlt.NetworkGateway.PostgresIntegration.Models.Entity");

@@ -102,6 +102,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
 
+    public DbSet<ResourceManagerEntityAuthRulesHistory> ResourceManagerEntityAuthRulesHistory => Set<ResourceManagerEntityAuthRulesHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -261,5 +263,8 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<NonFungibleIdStoreHistory>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ResourceManagerEntityAuthRulesHistory>()
+            .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
     }
 }

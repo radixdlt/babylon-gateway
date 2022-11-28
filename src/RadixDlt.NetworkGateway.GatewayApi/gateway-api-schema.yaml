@@ -798,6 +798,7 @@ components:
       type: object
       required:
         - discriminator
+        - auth_rules
         - divisibility
         - total_supply
         - total_minted
@@ -805,6 +806,8 @@ components:
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        auth_rules:
+          type: object
         divisibility:
           type: integer
           minimum: 0
@@ -818,10 +821,13 @@ components:
       type: object
       required:
         - discriminator
+        - auth_rules
         - ids
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
+        auth_rules:
+          type: object
         ids:
           $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetailsIds"
     EntityDetailsResponseNonFungibleResourceDetailsIds:

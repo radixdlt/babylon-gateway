@@ -111,13 +111,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseFungibleResourceDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="authRules">authRules (required).</param>
         /// <param name="divisibility">divisibility (required).</param>
         /// <param name="totalSupply">totalSupply (required).</param>
         /// <param name="totalMinted">totalMinted (required).</param>
         /// <param name="totalBurnt">totalBurnt (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), int divisibility = default(int), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object authRules = default(Object), int divisibility = default(int), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
         {
             this.Discriminator = discriminator;
+            // to ensure "authRules" is required (not null)
+            if (authRules == null)
+            {
+                throw new ArgumentNullException("authRules is a required property for EntityDetailsResponseFungibleResourceDetails and cannot be null");
+            }
+            this.AuthRules = authRules;
             this.Divisibility = divisibility;
             // to ensure "totalSupply" is required (not null)
             if (totalSupply == null)
@@ -138,6 +145,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.TotalBurnt = totalBurnt;
         }
+
+        /// <summary>
+        /// Gets or Sets AuthRules
+        /// </summary>
+        [DataMember(Name = "auth_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Object AuthRules { get; set; }
 
         /// <summary>
         /// Gets or Sets Divisibility
@@ -172,6 +185,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseFungibleResourceDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  AuthRules: ").Append(AuthRules).Append("\n");
             sb.Append("  Divisibility: ").Append(Divisibility).Append("\n");
             sb.Append("  TotalSupply: ").Append(TotalSupply).Append("\n");
             sb.Append("  TotalMinted: ").Append(TotalMinted).Append("\n");
@@ -216,6 +230,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Discriminator.Equals(input.Discriminator)
                 ) && 
                 (
+                    this.AuthRules == input.AuthRules ||
+                    (this.AuthRules != null &&
+                    this.AuthRules.Equals(input.AuthRules))
+                ) && 
+                (
                     this.Divisibility == input.Divisibility ||
                     this.Divisibility.Equals(input.Divisibility)
                 ) && 
@@ -246,6 +265,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                if (this.AuthRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AuthRules.GetHashCode();
+                }
                 hashCode = (hashCode * 59) + this.Divisibility.GetHashCode();
                 if (this.TotalSupply != null)
                 {
