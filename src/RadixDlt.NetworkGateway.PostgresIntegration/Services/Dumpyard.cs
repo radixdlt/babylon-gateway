@@ -351,6 +351,8 @@ internal class ReferencedEntityDictionary
 
 internal class SequencesHolder
 {
+    public long ComponentEntityStateHistorySequence { get; set; }
+
     public long EntitySequence { get; set; }
 
     public long EntityMetadataHistorySequence { get; set; }
@@ -368,6 +370,8 @@ internal class SequencesHolder
     public long NonFungibleIdStoreHistorySequence { get; set; }
 
     public long ResourceManagerEntityAuthRulesHistorySequence { get; set; }
+
+    public long NextComponentEntityStateHistory => ComponentEntityStateHistorySequence++;
 
     public long NextEntity => EntitySequence++;
 

@@ -112,7 +112,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string))
+        /// <param name="state">state (required).</param>
+        public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), Object state = default(Object))
         {
             this.Discriminator = discriminator;
             // to ensure "packageAddress" is required (not null)
@@ -121,6 +122,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("packageAddress is a required property for EntityDetailsResponseAccountComponentDetails and cannot be null");
             }
             this.PackageAddress = packageAddress;
+            // to ensure "state" is required (not null)
+            if (state == null)
+            {
+                throw new ArgumentNullException("state is a required property for EntityDetailsResponseAccountComponentDetails and cannot be null");
+            }
+            this.State = state;
         }
 
         /// <summary>
@@ -129,6 +136,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
         [DataMember(Name = "package_address", IsRequired = true, EmitDefaultValue = true)]
         public string PackageAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets State
+        /// </summary>
+        [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
+        public Object State { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -140,6 +153,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityDetailsResponseAccountComponentDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  State: ").Append(State).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -183,6 +197,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.PackageAddress == input.PackageAddress ||
                     (this.PackageAddress != null &&
                     this.PackageAddress.Equals(input.PackageAddress))
+                ) && 
+                (
+                    this.State == input.State ||
+                    (this.State != null &&
+                    this.State.Equals(input.State))
                 );
         }
 
@@ -199,6 +218,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.PackageAddress != null)
                 {
                     hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
+                }
+                if (this.State != null)
+                {
+                    hashCode = (hashCode * 59) + this.State.GetHashCode();
                 }
                 return hashCode;
             }

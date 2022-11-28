@@ -104,6 +104,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ResourceManagerEntityAuthRulesHistory> ResourceManagerEntityAuthRulesHistory => Set<ResourceManagerEntityAuthRulesHistory>();
 
+    public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -266,5 +268,8 @@ internal abstract class CommonDbContext : DbContext
 
         modelBuilder.Entity<ResourceManagerEntityAuthRulesHistory>()
             .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentEntityStateHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
     }
 }

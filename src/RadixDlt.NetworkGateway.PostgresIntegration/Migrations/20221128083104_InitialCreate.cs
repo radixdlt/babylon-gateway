@@ -78,6 +78,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "component_entity_state_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    componententityid = table.Column<long>(name: "component_entity_id", type: "bigint", nullable: false),
+                    state = table.Column<string>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_entity_state_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "entities",
                 columns: table => new
                 {
@@ -347,6 +362,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_component_entity_state_history_component_entity_id_from_sta~",
+                table: "component_entity_state_history",
+                columns: new[] { "component_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_entities_address",
                 table: "entities",
                 column: "address")
@@ -470,6 +490,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "component_entity_state_history");
+
             migrationBuilder.DropTable(
                 name: "entities");
 

@@ -205,13 +205,19 @@ OFFSET @offset LIMIT @limit",
                 var package = await _dbContext.Entities
                     .FirstAsync(e => e.Id == ace.PackageId, token);
 
+                var state = await _dbContext.ComponentEntityStateHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ace.Id)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
+
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseAccountComponentDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.AccountComponent,
-                    packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())));
+                    packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()),
+                    state: new JRaw(state.State)));
                 break;
 
             default:
-                throw new Exception("convert to api ex");
+                throw new InvalidEntityException(address.ToString());
         }
 
         var metadata = await GetMetadataSlice(entity.Id, 0, DefaultMetadataLimit, ledgerState, token);

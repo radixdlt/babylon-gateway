@@ -867,11 +867,14 @@ components:
       required:
         - discriminator
         - package_address
+        - state
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
         package_address:
           $ref: "#/components/schemas/EntityAddress"
+        state:
+          type: object
 
     EntityOverviewRequest:
       type: object

@@ -243,7 +243,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var componentToGlobalPackage = new Dictionary<string, string>();
         var fungibleResourceManagerDivisibility = new Dictionary<string, int>();
         var packageCode = new Dictionary<string, byte[]>();
-        var authRules = new Dictionary<string, string>();
+        var resourceManagerEntityRawAuthRules = new Dictionary<string, string>();
+        var componentEntityRawState = new Dictionary<string, string>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
         var dbConn = (NpgsqlConnection)dbContext.Database.GetDbConnection();
@@ -348,6 +349,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
             sequences = await dbConn.QueryFirstAsync<SequencesHolder>(
                 @"
 SELECT
+    nextval('component_entity_state_history_id_seq') AS ComponentEntityStateHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
@@ -467,13 +469,18 @@ SELECT
                             fungibleResourceManagerDivisibility[sid.EntityIdHex] = resourceManager.FungibleDivisibility;
                         }
 
-                        authRules[sid.EntityIdHex] = resourceManager.AuthRules.ToJson();
+                        resourceManagerEntityRawAuthRules[sid.EntityIdHex] = resourceManager.AuthRules.ToJson();
                     }
 
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
                     {
                         knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
                         componentToGlobalPackage[sid.EntityIdHex] = componentInfo.PackageAddress;
+                    }
+
+                    if (sd is CoreModel.ComponentStateSubstate componentState)
+                    {
+                        componentEntityRawState[sid.EntityIdHex] = componentState.DataStruct.StructData.ToJson();
                     }
 
                     if (sd is CoreModel.PackageSubstate package)
@@ -752,11 +759,11 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            if (authRules.Any())
+            if (resourceManagerEntityRawAuthRules.Any())
             {
                 await using var writer = await dbConn.BeginBinaryImportAsync("COPY resource_manager_entity_auth_rules_history (id, from_state_version, resource_manager_entity_id, auth_rules) FROM STDIN (FORMAT BINARY)", token);
 
-                foreach (var (entityAddress, authRule) in authRules)
+                foreach (var (entityAddress, authRule) in resourceManagerEntityRawAuthRules)
                 {
                     var re = referencedEntities.Get(entityAddress);
 
@@ -770,7 +777,25 @@ WHERE id IN(
                 await writer.CompleteAsync(token);
             }
 
-            rowsInserted += dbEntities.Count + ledgerTransactions.Count;
+            if (componentEntityRawState.Any())
+            {
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY component_entity_state_history (id, from_state_version, component_entity_id, state) FROM STDIN (FORMAT BINARY)", token);
+
+                foreach (var (entityAddress, state) in componentEntityRawState)
+                {
+                    var re = referencedEntities.Get(entityAddress);
+
+                    await writer.StartRowAsync(token);
+                    await writer.WriteAsync(sequences.NextComponentEntityStateHistory, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(re.StateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(re.DatabaseId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(state, NpgsqlDbType.Jsonb, token);
+                }
+
+                await writer.CompleteAsync(token);
+            }
+
+            rowsInserted += dbEntities.Count + ledgerTransactions.Count + resourceManagerEntityRawAuthRules.Count + componentEntityRawState.Count;
             dbWriteDuration += sw.Elapsed;
         }
 
@@ -1237,6 +1262,7 @@ INNER JOIN LATERAL (
             await dbConn.QueryFirstAsync(
                 @"
 SELECT
+    setval('component_entity_state_history_id_seq', @componentEntityStateHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
@@ -1248,6 +1274,7 @@ SELECT
     setval('resource_manager_entity_auth_rules_history_id_seq', @resourceManagerEntityAuthRulesHistorySequence)",
                 new
                 {
+                    componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
                     entitySequence = sequences.EntitySequence,
                     entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                     entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,
