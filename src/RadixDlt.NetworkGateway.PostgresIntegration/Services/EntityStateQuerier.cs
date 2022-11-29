@@ -372,7 +372,7 @@ INNER JOIN LATERAL (
             },
             cancellationToken: token);
 
-        long? totalCount = null;
+        long? totalCount = 0;
 
         var items = (await _dbContext.Database.GetDbConnection().QueryAsync<FungiblesViewModel>(cd)).ToList()
             .Select(vm =>
@@ -380,7 +380,7 @@ INNER JOIN LATERAL (
                 var rga = vm.ResourceEntityGlobalAddress ?? throw new InvalidOperationException("Non-global entity.");
                 var ra = RadixAddressCodec.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
-                totalCount ??= vm.TotalCount;
+                totalCount = vm.TotalCount;
 
                 return new GatewayModel.FungibleResourcesCollectionItem(ra, new GatewayModel.TokenAmount(TokenAmount.FromSubUnitsString(vm.Balance).ToString(), ra));
             })
@@ -432,7 +432,7 @@ INNER JOIN LATERAL (
             },
             cancellationToken: token);
 
-        long? totalCount = null;
+        long? totalCount = 0;
 
         var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungiblesViewModel>(cd)).ToList()
             .Select(vm =>
@@ -440,7 +440,7 @@ INNER JOIN LATERAL (
                 var rga = vm.ResourceEntityGlobalAddress ?? throw new InvalidOperationException("Non-global entity.");
                 var ra = RadixAddressCodec.Encode(_networkConfigurationProvider.GetHrpDefinition().Resource, rga);
 
-                totalCount ??= vm.TotalCount;
+                totalCount = vm.TotalCount;
 
                 return new GatewayModel.NonFungibleResourcesCollectionItem(ra, vm.NonFungibleIdsCount);
             })
@@ -481,12 +481,12 @@ WHERE id = (
             },
             cancellationToken: token);
 
-        long? totalCount = null;
+        long? totalCount = 0;
 
         var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdsViewModel>(cd)).ToList()
             .Select(vm =>
             {
-                totalCount ??= vm.TotalCount;
+                totalCount = vm.TotalCount;
 
                 return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId.ToHex());
             })
