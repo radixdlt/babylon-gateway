@@ -65,6 +65,7 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
 using RadixDlt.NetworkGateway.Abstractions;
@@ -240,10 +241,11 @@ internal class LedgerExtenderService : ILedgerExtenderService
         var referencedEntities = new ReferencedEntityDictionary();
         var knownGlobalAddressesToLoad = new HashSet<string>();
         var childToParentEntities = new Dictionary<string, string>();
-        var componentToGlobalPackage = new Dictionary<string, string>();
+        var componentToGlobalPackage = new Dictionary<string, (string PackageAddress, string BlueprintName)>();
         var fungibleResourceManagerDivisibility = new Dictionary<string, int>();
         var packageCode = new Dictionary<string, byte[]>();
         var resourceManagerEntityRawAuthRules = new Dictionary<string, string>();
+        var componentEntityRawAccessRulesLayers = new Dictionary<string, string>();
         var componentEntityRawState = new Dictionary<string, string>();
 
         var lastTransactionSummary = ledgerExtension.LatestTransactionSummary;
@@ -352,6 +354,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                 @"
 SELECT
     nextval('component_entity_state_history_id_seq') AS ComponentEntityStateHistorySequence,
+    nextval('component_entity_access_rules_layers_history_id_seq') AS ComponentEntityAccessRulesLayersHistorySequence,
     nextval('entities_id_seq') AS EntitySequence,
     nextval('entity_metadata_history_id_seq') AS EntityMetadataHistorySequence,
     nextval('entity_resource_aggregate_history_id_seq') AS EntityResourceAggregateHistorySequence,
@@ -477,7 +480,8 @@ SELECT
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
                     {
                         knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
-                        componentToGlobalPackage[sid.EntityIdHex] = componentInfo.PackageAddress;
+                        componentToGlobalPackage[sid.EntityIdHex] = (componentInfo.PackageAddress, componentInfo.BlueprintName);
+                        componentEntityRawAccessRulesLayers[sid.EntityIdHex] = JsonConvert.SerializeObject(componentInfo.AccessRulesLayers);
                     }
 
                     if (sd is CoreModel.ComponentStateSubstate componentState)
@@ -656,13 +660,14 @@ WHERE id IN(
                 });
             }
 
-            foreach (var (entityAddress, packageGlobalAddress) in componentToGlobalPackage)
+            foreach (var (entityAddress, tuple) in componentToGlobalPackage)
             {
                 referencedEntities.Get(entityAddress).ConfigureDatabaseEntity((ComponentEntity dbe) =>
                 {
-                    var packageAddress = RadixAddressCodec.Decode(packageGlobalAddress).Data.ToHex();
+                    var packageAddress = RadixAddressCodec.Decode(tuple.PackageAddress).Data.ToHex();
 
                     dbe.PackageId = referencedEntities.GetByGlobal(packageAddress).DatabaseId;
+                    dbe.BlueprintName = tuple.BlueprintName;
                 });
             }
 
@@ -678,7 +683,7 @@ WHERE id IN(
 
             sw = Stopwatch.StartNew();
 
-            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, divisibility, code) FROM STDIN (FORMAT BINARY)", token))
+            await using (var writer = await dbConn.BeginBinaryImportAsync("COPY entities (id, from_state_version, address, global_address, ancestor_ids, parent_ancestor_id, owner_ancestor_id, global_ancestor_id, discriminator, package_id, blueprint_name, divisibility, code) FROM STDIN (FORMAT BINARY)", token))
             {
                 foreach (var dbEntity in dbEntities)
                 {
@@ -697,7 +702,8 @@ WHERE id IN(
                     await writer.WriteNullableAsync(dbEntity.OwnerAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteNullableAsync(dbEntity.GlobalAncestorId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(discriminator, NpgsqlDbType.Text, token);
-                    await writer.WriteNullableAsync(dbEntity is ComponentEntity ce ? ce.PackageId : null, NpgsqlDbType.Bigint, token);
+                    await writer.WriteNullableAsync(dbEntity is ComponentEntity ce1 ? ce1.PackageId : null, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(dbEntity is ComponentEntity ce2 ? ce2.BlueprintName : null, NpgsqlDbType.Text, token);
                     await writer.WriteNullableAsync(dbEntity is FungibleResourceManagerEntity frme ? frme.Divisibility : null, NpgsqlDbType.Integer, token);
                     await writer.WriteNullableAsync(dbEntity is PackageEntity pe ? pe.Code : null, NpgsqlDbType.Bytea, token);
                 }
@@ -774,6 +780,24 @@ WHERE id IN(
                     await writer.WriteAsync(re.StateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(re.DatabaseId, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(authRule, NpgsqlDbType.Jsonb, token);
+                }
+
+                await writer.CompleteAsync(token);
+            }
+
+            if (componentEntityRawAccessRulesLayers.Any())
+            {
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY component_entity_access_rules_layers_history (id, from_state_version, component_entity_id, access_rules_layers) FROM STDIN (FORMAT BINARY)", token);
+
+                foreach (var (entityAddress, accessRulesLayers) in componentEntityRawAccessRulesLayers)
+                {
+                    var re = referencedEntities.Get(entityAddress);
+
+                    await writer.StartRowAsync(token);
+                    await writer.WriteAsync(sequences.NextComponentEntityAccessRulesLayersHistory, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(re.StateVersion, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(re.DatabaseId, NpgsqlDbType.Bigint, token);
+                    await writer.WriteAsync(accessRulesLayers, NpgsqlDbType.Jsonb, token);
                 }
 
                 await writer.CompleteAsync(token);
@@ -1265,6 +1289,7 @@ INNER JOIN LATERAL (
                 @"
 SELECT
     setval('component_entity_state_history_id_seq', @componentEntityStateHistorySequence),
+    setval('component_entity_access_rules_layers_history_id_seq', @componentEntityAccessRulesLayersHistorySequence),
     setval('entities_id_seq', @entitySequence),
     setval('entity_metadata_history_id_seq', @entityMetadataHistorySequence),
     setval('entity_resource_aggregate_history_id_seq', @entityResourceAggregateHistorySequence),
@@ -1277,6 +1302,7 @@ SELECT
                 new
                 {
                     componentEntityStateHistorySequence = sequences.ComponentEntityStateHistorySequence,
+                    componentEntityAccessRulesLayersHistorySequence = sequences.ComponentEntityAccessRulesLayersHistorySequence,
                     entitySequence = sequences.EntitySequence,
                     entityMetadataHistorySequence = sequences.EntityMetadataHistorySequence,
                     entityResourceAggregateHistorySequence = sequences.EntityResourceAggregateHistorySequence,

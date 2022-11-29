@@ -940,13 +940,19 @@ components:
       required:
         - discriminator
         - package_address
+        - blueprint_name
         - state
+        - access_rules_layers
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
         package_address:
           $ref: "#/components/schemas/EntityAddress"
+        blueprint_name:
+          type: string
         state:
+          type: object
+        access_rules_layers:
           type: object
 
     EntityOverviewRequest:

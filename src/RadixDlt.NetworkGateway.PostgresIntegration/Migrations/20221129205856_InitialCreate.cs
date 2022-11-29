@@ -79,6 +79,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "component_entity_access_rules_layers_history",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    fromstateversion = table.Column<long>(name: "from_state_version", type: "bigint", nullable: false),
+                    componententityid = table.Column<long>(name: "component_entity_id", type: "bigint", nullable: false),
+                    accessruleslayers = table.Column<string>(name: "access_rules_layers", type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_component_entity_access_rules_layers_history", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "component_entity_state_history",
                 columns: table => new
                 {
@@ -108,6 +123,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                     globalancestorid = table.Column<long>(name: "global_ancestor_id", type: "bigint", nullable: true),
                     discriminator = table.Column<string>(type: "text", nullable: false),
                     packageid = table.Column<long>(name: "package_id", type: "bigint", nullable: true),
+                    blueprintname = table.Column<string>(name: "blueprint_name", type: "text", nullable: true),
                     divisibility = table.Column<int>(type: "integer", nullable: true),
                     code = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
@@ -356,6 +372,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_component_entity_access_rules_layers_history_component_enti~",
+                table: "component_entity_access_rules_layers_history",
+                columns: new[] { "component_entity_id", "from_state_version" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_component_entity_state_history_component_entity_id_from_sta~",
                 table: "component_entity_state_history",
                 columns: new[] { "component_entity_id", "from_state_version" });
@@ -484,6 +505,9 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "component_entity_access_rules_layers_history");
+
             migrationBuilder.DropTable(
                 name: "component_entity_state_history");
 

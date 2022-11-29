@@ -106,6 +106,8 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
 
+    public DbSet<ComponentEntityAccessRulesLayersHistory> ComponentEntityAccessRulesLayersHistory => Set<ComponentEntityAccessRulesLayersHistory>();
+
     public CommonDbContext(DbContextOptions options)
         : base(options)
     {
@@ -270,6 +272,9 @@ internal abstract class CommonDbContext : DbContext
             .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
 
         modelBuilder.Entity<ComponentEntityStateHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentEntityAccessRulesLayersHistory>()
             .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
     }
 }

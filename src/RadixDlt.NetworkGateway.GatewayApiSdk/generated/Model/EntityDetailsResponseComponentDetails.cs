@@ -112,8 +112,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="blueprintName">blueprintName (required).</param>
         /// <param name="state">state (required).</param>
-        public EntityDetailsResponseComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), Object state = default(Object))
+        /// <param name="accessRulesLayers">accessRulesLayers (required).</param>
+        public EntityDetailsResponseComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), string blueprintName = default(string), Object state = default(Object), Object accessRulesLayers = default(Object))
         {
             this.Discriminator = discriminator;
             // to ensure "packageAddress" is required (not null)
@@ -122,12 +124,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("packageAddress is a required property for EntityDetailsResponseComponentDetails and cannot be null");
             }
             this.PackageAddress = packageAddress;
+            // to ensure "blueprintName" is required (not null)
+            if (blueprintName == null)
+            {
+                throw new ArgumentNullException("blueprintName is a required property for EntityDetailsResponseComponentDetails and cannot be null");
+            }
+            this.BlueprintName = blueprintName;
             // to ensure "state" is required (not null)
             if (state == null)
             {
                 throw new ArgumentNullException("state is a required property for EntityDetailsResponseComponentDetails and cannot be null");
             }
             this.State = state;
+            // to ensure "accessRulesLayers" is required (not null)
+            if (accessRulesLayers == null)
+            {
+                throw new ArgumentNullException("accessRulesLayers is a required property for EntityDetailsResponseComponentDetails and cannot be null");
+            }
+            this.AccessRulesLayers = accessRulesLayers;
         }
 
         /// <summary>
@@ -138,10 +152,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string PackageAddress { get; set; }
 
         /// <summary>
+        /// Gets or Sets BlueprintName
+        /// </summary>
+        [DataMember(Name = "blueprint_name", IsRequired = true, EmitDefaultValue = true)]
+        public string BlueprintName { get; set; }
+
+        /// <summary>
         /// Gets or Sets State
         /// </summary>
         [DataMember(Name = "state", IsRequired = true, EmitDefaultValue = true)]
         public Object State { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AccessRulesLayers
+        /// </summary>
+        [DataMember(Name = "access_rules_layers", IsRequired = true, EmitDefaultValue = true)]
+        public Object AccessRulesLayers { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,7 +179,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class EntityDetailsResponseComponentDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
+            sb.Append("  BlueprintName: ").Append(BlueprintName).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
+            sb.Append("  AccessRulesLayers: ").Append(AccessRulesLayers).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -199,9 +227,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.PackageAddress.Equals(input.PackageAddress))
                 ) && 
                 (
+                    this.BlueprintName == input.BlueprintName ||
+                    (this.BlueprintName != null &&
+                    this.BlueprintName.Equals(input.BlueprintName))
+                ) && 
+                (
                     this.State == input.State ||
                     (this.State != null &&
                     this.State.Equals(input.State))
+                ) && 
+                (
+                    this.AccessRulesLayers == input.AccessRulesLayers ||
+                    (this.AccessRulesLayers != null &&
+                    this.AccessRulesLayers.Equals(input.AccessRulesLayers))
                 );
         }
 
@@ -219,9 +257,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.PackageAddress.GetHashCode();
                 }
+                if (this.BlueprintName != null)
+                {
+                    hashCode = (hashCode * 59) + this.BlueprintName.GetHashCode();
+                }
                 if (this.State != null)
                 {
                     hashCode = (hashCode * 59) + this.State.GetHashCode();
+                }
+                if (this.AccessRulesLayers != null)
+                {
+                    hashCode = (hashCode * 59) + this.AccessRulesLayers.GetHashCode();
                 }
                 return hashCode;
             }

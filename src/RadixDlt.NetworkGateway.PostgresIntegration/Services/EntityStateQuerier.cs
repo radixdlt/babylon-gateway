@@ -212,10 +212,17 @@ OFFSET @offset LIMIT @limit",
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
+                var accessRulesLayers = await _dbContext.ComponentEntityAccessRulesLayersHistory
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ce.Id)
+                    .OrderByDescending(e => e.FromStateVersion)
+                    .FirstAsync(token);
+
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
                     packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()),
-                    state: new JRaw(state.State)));
+                    blueprintName: ce.BlueprintName,
+                    state: new JRaw(state.State),
+                    accessRulesLayers: new JRaw(accessRulesLayers.AccessRulesLayers)));
                 break;
 
             default:

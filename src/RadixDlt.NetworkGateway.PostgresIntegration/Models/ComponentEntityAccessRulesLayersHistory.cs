@@ -62,16 +62,13 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
-using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Models;
 
-[Table("entities")]
-internal abstract class Entity
+[Table("component_entity_access_rules_layers_history")]
+internal class ComponentEntityAccessRulesLayersHistory
 {
     [Key]
     [Column("id")]
@@ -80,98 +77,9 @@ internal abstract class Entity
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("address")]
-    public RadixAddress Address { get; set; }
+    [Column("component_entity_id")]
+    public long ComponentEntityId { get; set; }
 
-    [Column("global_address")]
-    public RadixAddress? GlobalAddress { get; set; }
-
-    [Column("ancestor_ids")]
-    public long[]? AncestorIds { get; set; }
-
-    [Column("parent_ancestor_id")]
-    public long? ParentAncestorId { get; set; }
-
-    [Column("owner_ancestor_id")]
-    public long? OwnerAncestorId { get; set; }
-
-    [Column("global_ancestor_id")]
-    public long? GlobalAncestorId { get; set; }
-
-    public string? BuildHrpGlobalAddress(HrpDefinition hrp)
-    {
-        return GlobalAddress == null
-            ? null
-            : RadixAddressCodec.Encode(SelectHrp(hrp), GlobalAddress);
-    }
-
-    private string SelectHrp(HrpDefinition hrp)
-    {
-        return this switch
-        {
-            PackageEntity => hrp.Package,
-            NormalComponentEntity => hrp.NormalComponent,
-            AccountComponentEntity => hrp.AccountComponent,
-            SystemComponentEntity => hrp.SystemComponent,
-            ResourceManagerEntity => hrp.Resource,
-            _ => throw new InvalidOperationException("Unable to build HRP address on entity of type " + GetType().Name),
-        };
-    }
-}
-
-internal class EpochManagerEntity : Entity
-{
-}
-
-internal abstract class ResourceManagerEntity : Entity
-{
-}
-
-internal class FungibleResourceManagerEntity : ResourceManagerEntity
-{
-    [Column("divisibility")]
-    public int Divisibility { get; set; }
-}
-
-internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
-{
-}
-
-internal abstract class ComponentEntity : Entity
-{
-    [Column("package_id")]
-    public long PackageId { get; set; }
-
-    [Column("blueprint_name")]
-    public string BlueprintName { get; set; }
-}
-
-internal class NormalComponentEntity : ComponentEntity
-{
-}
-
-internal class AccountComponentEntity : ComponentEntity
-{
-}
-
-internal class SystemComponentEntity : ComponentEntity
-{
-}
-
-internal class PackageEntity : Entity
-{
-    [Column("code")]
-    public byte[] Code { get; set; }
-}
-
-internal class KeyValueStoreEntity : Entity
-{
-}
-
-internal class VaultEntity : Entity
-{
-}
-
-internal class NonFungibleStoreEntity : Entity
-{
+    [Column("access_rules_layers", TypeName = "jsonb")]
+    public string AccessRulesLayers { get; set; }
 }

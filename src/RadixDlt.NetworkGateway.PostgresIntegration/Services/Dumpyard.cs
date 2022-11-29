@@ -371,6 +371,8 @@ internal class SequencesHolder
 
     public long ResourceManagerEntityAuthRulesHistorySequence { get; set; }
 
+    public long ComponentEntityAccessRulesLayersHistorySequence { get; set; }
+
     public long NextComponentEntityStateHistory => ComponentEntityStateHistorySequence++;
 
     public long NextEntity => EntitySequence++;
@@ -390,4 +392,6 @@ internal class SequencesHolder
     public long NextNonFungibleIdStoreHistory => NonFungibleIdStoreHistorySequence++;
 
     public long NextResourceManagerEntityAuthRulesHistory => ResourceManagerEntityAuthRulesHistorySequence++;
+
+    public long NextComponentEntityAccessRulesLayersHistory => ComponentEntityAccessRulesLayersHistorySequence++;
 }
