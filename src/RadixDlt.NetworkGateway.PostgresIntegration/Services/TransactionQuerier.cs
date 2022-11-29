@@ -125,8 +125,6 @@ internal class TransactionQuerier : ITransactionQuerier
             case GatewayModel.TransactionLookupOrigin.SignedIntent:
                 query = query.Where(ult => ult.SignedIntentHash == hash);
                 break;
-            case GatewayModel.TransactionLookupOrigin.Notarized:
-                throw new NotImplementedException(); // TODO see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668072045704119
             case GatewayModel.TransactionLookupOrigin.Payload:
                 query = query.Where(ult => ult.PayloadHash == hash);
                 break;
@@ -161,8 +159,6 @@ internal class TransactionQuerier : ITransactionQuerier
             case GatewayModel.TransactionLookupOrigin.SignedIntent:
                 query = query.Where(pt => pt.SignedIntentHash == hash);
                 break;
-            case GatewayModel.TransactionLookupOrigin.Notarized:
-                throw new NotImplementedException(); // TODO see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668072045704119
             case GatewayModel.TransactionLookupOrigin.Payload:
                 query = query.Where(pt => pt.PayloadHash == hash);
                 break;

@@ -1339,7 +1339,6 @@ components:
       enum:
         - intent
         - signed_intent
-        - notarized
         - payload
     TransactionLookupIdentifier:
       type: object

@@ -109,16 +109,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         SignedIntent = 2,
 
         /// <summary>
-        /// Enum Notarized for value: notarized
-        /// </summary>
-        [EnumMember(Value = "notarized")]
-        Notarized = 3,
-
-        /// <summary>
         /// Enum Payload for value: payload
         /// </summary>
         [EnumMember(Value = "payload")]
-        Payload = 4
+        Payload = 3
 
     }
 
