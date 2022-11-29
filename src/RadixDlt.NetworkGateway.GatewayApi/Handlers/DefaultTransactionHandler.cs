@@ -147,13 +147,6 @@ internal class DefaultTransactionHandler : ITransactionHandler
             return new GatewayModel.TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
         }
 
-        var pendingTransaction = await _transactionQuerier.LookupPendingTransaction(request.TransactionIdentifier, token);
-
-        if (pendingTransaction != null)
-        {
-            return new GatewayModel.TransactionDetailsResponse(ledgerState, pendingTransaction);
-        }
-
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
