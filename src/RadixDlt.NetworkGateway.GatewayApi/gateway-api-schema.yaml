@@ -13,13 +13,12 @@ servers:
   - url: https://mainnet.radixdlt.com
 tags:
   - name: Status
-    x-displayName: Status Endpoints
-    description: To query information about the Gateway API status.
+    description: Query information about the Gateway API status.
   - name: Transaction
-    x-displayName: Transaction Endpoints
-    description: To build, finalize and submit transactions, and to query transaction status and contents.
+    description: Preview and submit transactions, and query transaction status and contents.
   - name: Entity
-    x-displayName: Entity State Endpoints
+    description: TBD
+  - name: Non-Fungible
     description: TBD
 paths:
   "/gateway":
@@ -159,56 +158,10 @@ paths:
                 $ref: "#/components/schemas/TransactionDetailsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  /entity/resources:
-    post:
-      operationId: EntityResources
-      summary: Entity Resources
-      description: |
-        TBD
-      tags:
-        - Entity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EntityResourcesRequest"
-      responses:
-        "200":
-          description: Entity Resources
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EntityResourcesResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
-  /entity/details:
-    post:
-      operationId: EntityDetails
-      summary: Entity Details
-      description: |
-        TBD
-      tags:
-        - Entity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EntityDetailsRequest"
-      responses:
-        "200":
-          description: Entity Details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EntityDetailsResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
   /entity/overview:
     post:
       operationId: EntityOverview
-      summary: Entity Overview
+      summary: Returns incomplete collection of basic information for a given collection of entities.
       description: |
         TBD
       tags:
@@ -228,10 +181,56 @@ paths:
                 $ref: "#/components/schemas/EntityOverviewResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+  /entity/details:
+    post:
+      operationId: EntityDetails
+      summary: Returns detailed information for a given entity.
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityDetailsRequest"
+      responses:
+        "200":
+          description: Entity Details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityDetailsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
+  /entity/resources:
+    post:
+      operationId: EntityResources
+      summary: Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityResourcesRequest"
+      responses:
+        "200":
+          description: Entity Resources
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityResourcesResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /entity/metadata:
     post:
       operationId: EntityMetadata
-      summary: Entity Metadata
+      summary: Iterates through all metadata associated with a given entity.
       description: |
         TBD
       tags:
@@ -254,7 +253,7 @@ paths:
   /entity/fungibles:
     post:
       operationId: EntityFungibles
-      summary: Entity Fungibles
+      summary: Iterates through all fungible resources associated with a given entity.
       description: |
         TBD
       tags:
@@ -277,7 +276,7 @@ paths:
   /entity/non-fungibles:
     post:
       operationId: EntityNonFungibles
-      summary: Entity Non-Fungibles
+      summary: Iterates through all non-fungible resources associated with a given entity.
       description: |
         TBD
       tags:
@@ -300,7 +299,7 @@ paths:
   /non-fungible/ids:
     post:
       operationId: NonFungibleIds
-      summary: Non-Fungible Ids
+      summary: Iterates through all non-fungible ids of a given non-fungible resource.
       description: |
         TBD
       tags:
@@ -323,7 +322,7 @@ paths:
   /non-fungible/data:
     post:
       operationId: NonFungibleData
-      summary: Non-Fungible Data
+      summary: Returns data associated with a given non-fungible id.
       description: |
         TBD
       tags:
