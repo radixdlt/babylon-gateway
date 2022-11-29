@@ -91,10 +91,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// EntityDetailsResponseAccountComponentDetails
+    /// EntityDetailsResponseComponentDetails
     /// </summary>
-    [DataContract(Name = "EntityDetailsResponseAccountComponentDetails")]
-    public partial class EntityDetailsResponseAccountComponentDetails : IEquatable<EntityDetailsResponseAccountComponentDetails>, IValidatableObject
+    [DataContract(Name = "EntityDetailsResponseComponentDetails")]
+    public partial class EntityDetailsResponseComponentDetails : IEquatable<EntityDetailsResponseComponentDetails>, IValidatableObject
     {
 
         /// <summary>
@@ -103,29 +103,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "discriminator", IsRequired = true, EmitDefaultValue = true)]
         public EntityDetailsResponseDetailsType Discriminator { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseAccountComponentDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseComponentDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected EntityDetailsResponseAccountComponentDetails() { }
+        protected EntityDetailsResponseComponentDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDetailsResponseAccountComponentDetails" /> class.
+        /// Initializes a new instance of the <see cref="EntityDetailsResponseComponentDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
         /// <param name="packageAddress">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="state">state (required).</param>
-        public EntityDetailsResponseAccountComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), Object state = default(Object))
+        public EntityDetailsResponseComponentDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), string packageAddress = default(string), Object state = default(Object))
         {
             this.Discriminator = discriminator;
             // to ensure "packageAddress" is required (not null)
             if (packageAddress == null)
             {
-                throw new ArgumentNullException("packageAddress is a required property for EntityDetailsResponseAccountComponentDetails and cannot be null");
+                throw new ArgumentNullException("packageAddress is a required property for EntityDetailsResponseComponentDetails and cannot be null");
             }
             this.PackageAddress = packageAddress;
             // to ensure "state" is required (not null)
             if (state == null)
             {
-                throw new ArgumentNullException("state is a required property for EntityDetailsResponseAccountComponentDetails and cannot be null");
+                throw new ArgumentNullException("state is a required property for EntityDetailsResponseComponentDetails and cannot be null");
             }
             this.State = state;
         }
@@ -150,7 +150,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class EntityDetailsResponseAccountComponentDetails {\n");
+            sb.Append("class EntityDetailsResponseComponentDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
             sb.Append("  PackageAddress: ").Append(PackageAddress).Append("\n");
             sb.Append("  State: ").Append(State).Append("\n");
@@ -174,15 +174,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as EntityDetailsResponseAccountComponentDetails);
+            return this.Equals(input as EntityDetailsResponseComponentDetails);
         }
 
         /// <summary>
-        /// Returns true if EntityDetailsResponseAccountComponentDetails instances are equal
+        /// Returns true if EntityDetailsResponseComponentDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of EntityDetailsResponseAccountComponentDetails to be compared</param>
+        /// <param name="input">Instance of EntityDetailsResponseComponentDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(EntityDetailsResponseAccountComponentDetails input)
+        public bool Equals(EntityDetailsResponseComponentDetails input)
         {
             if (input == null)
             {

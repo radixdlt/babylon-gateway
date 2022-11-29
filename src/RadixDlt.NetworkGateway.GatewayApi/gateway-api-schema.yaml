@@ -819,13 +819,13 @@ components:
         - fungible_resource
         - non_fungible_resource
         - package
-        - account_component
+        - component
     EntityDetailsResponseDetails:
       oneOf:
         - $ref: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
         - $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
         - $ref: "#/components/schemas/EntityDetailsResponsePackageDetails"
-        - $ref: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
+        - $ref: "#/components/schemas/EntityDetailsResponseComponentDetails"
       discriminator:
         propertyName: discriminator
         mapping:
@@ -833,7 +833,7 @@ components:
           fungible_resource: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
           non_fungible_resource: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
           package: "#/components/schemas/EntityDetailsResponsePackageDetails"
-          account_component: "#/components/schemas/EntityDetailsResponseAccountComponentDetails"
+          account_component: "#/components/schemas/EntityDetailsResponseComponentDetails"
     EntityDetailsResponseFungibleResourceDetails:
       type: object
       required:
@@ -902,7 +902,7 @@ components:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
         code_hex:
           type: string
-    EntityDetailsResponseAccountComponentDetails:
+    EntityDetailsResponseComponentDetails:
       type: object
       required:
         - discriminator

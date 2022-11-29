@@ -203,17 +203,17 @@ OFFSET @offset LIMIT @limit",
                     codeHex: pe.Code.ToHex()));
                 break;
 
-            case AccountComponentEntity ace:
+            case ComponentEntity ce:
                 var package = await _dbContext.Entities
-                    .FirstAsync(e => e.Id == ace.PackageId, token);
+                    .FirstAsync(e => e.Id == ce.PackageId, token);
 
                 var state = await _dbContext.ComponentEntityStateHistory
-                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ace.Id)
+                    .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ComponentEntityId == ce.Id)
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseAccountComponentDetails(
-                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.AccountComponent,
+                details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseComponentDetails(
+                    discriminator: GatewayModel.EntityDetailsResponseDetailsType.Component,
                     packageAddress: package.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()),
                     state: new JRaw(state.State)));
                 break;
