@@ -91,9 +91,9 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayInfoResponse
+    /// GatewayInformationResponse
     /// </summary>
-    [DataContract(Name = "GatewayInfoResponse")]
+    [DataContract(Name = "GatewayInformationResponse")]
     public partial class GatewayInformationResponse : IEquatable<GatewayInformationResponse>, IValidatableObject
     {
         /// <summary>
@@ -108,30 +108,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="knownTarget">knownTarget (required).</param>
         /// <param name="releaseInfo">releaseInfo (required).</param>
         /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public GatewayInformationResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInfoResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInfoResponseAllOfWellKnownAddresses))
+        public GatewayInformationResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInformationResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInformationResponseAllOfWellKnownAddresses))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for GatewayInformationResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
             // to ensure "knownTarget" is required (not null)
             if (knownTarget == null)
             {
-                throw new ArgumentNullException("knownTarget is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("knownTarget is a required property for GatewayInformationResponse and cannot be null");
             }
             this.KnownTarget = knownTarget;
             // to ensure "releaseInfo" is required (not null)
             if (releaseInfo == null)
             {
-                throw new ArgumentNullException("releaseInfo is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("releaseInfo is a required property for GatewayInformationResponse and cannot be null");
             }
             this.ReleaseInfo = releaseInfo;
             // to ensure "wellKnownAddresses" is required (not null)
             if (wellKnownAddresses == null)
             {
-                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInformationResponse and cannot be null");
             }
             this.WellKnownAddresses = wellKnownAddresses;
         }
@@ -158,7 +158,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets WellKnownAddresses
         /// </summary>
         [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
+        public GatewayInformationResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -167,7 +167,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayInfoResponse {\n");
+            sb.Append("class GatewayInformationResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
             sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
@@ -196,9 +196,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Returns true if GatewayInfoResponse instances are equal
+        /// Returns true if GatewayInformationResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayInfoResponse to be compared</param>
+        /// <param name="input">Instance of GatewayInformationResponse to be compared</param>
         /// <returns>Boolean</returns>
         public bool Equals(GatewayInformationResponse input)
         {

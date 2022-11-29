@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
@@ -72,7 +71,6 @@ using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -90,7 +88,7 @@ public static class OpenApiDocumentHandler
         var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
         var sampleResourceAddress = wellKnownAddresses.Xrd;
         var sampleComponentAddress = wellKnownAddresses.Faucet;
-        var sampleTransaction = (await transactionHandler.Recent(new RecentTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
+        var sampleTransaction = (await transactionHandler.Recent(new TransactionRecentRequest(limit: 1), token)).Items.FirstOrDefault();
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");

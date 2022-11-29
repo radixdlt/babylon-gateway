@@ -52,7 +52,7 @@ paths:
                 $ref: "#/components/schemas/TransactionConstructionResponse"
   "/transaction/recent":
     post:
-      operationId: RecentTransactions
+      operationId: TransactionRecent
       summary: Get Recent Transactions
       description: |
         Returns user-initiated transactions which have been succesfully committed to the ledger.
@@ -64,19 +64,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RecentTransactionsRequest"
+              $ref: "#/components/schemas/TransactionRecentRequest"
       responses:
         "200":
           description: A page of the most recent transactions
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecentTransactionsResponse"
+                $ref: "#/components/schemas/TransactionRecentResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
   "/transaction/preview":
     post:
-      operationId: PreviewTransaction
+      operationId: TransactionPreview
       summary: Preview Transaction
       description: |
         Previews transaction against the network.
@@ -99,7 +99,7 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
   "/transaction/submit":
     post:
-      operationId: SubmitTransaction
+      operationId: TransactionSubmit
       summary: Submit Transaction
       description: |
         Submits a signed transaction payload to the network.
@@ -625,7 +625,7 @@ components:
           nullable: true
 
     #
-    # "Status" Request & Response Types
+    # /gateway/* Request & Response Types
     #
 
     GatewayInformationResponse:
@@ -684,14 +684,14 @@ components:
           type: string
 
     #
-    # "Transaction" Request & Response Types
+    # /transaction/* Request & Response Types
     #
 
     TransactionConstructionResponse:
       allOf:
         - type: object
         - $ref: "#/components/schemas/LedgerStateMixin"
-    RecentTransactionsRequest:
+    TransactionRecentRequest:
       type: object
       properties:
         at_state_identifier:
@@ -708,7 +708,7 @@ components:
           nullable: true
       example:
         limit: 5
-    RecentTransactionsResponse:
+    TransactionRecentResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - allOf:
@@ -790,7 +790,7 @@ components:
               $ref: "#/components/schemas/TransactionDetails"
 
     #
-    # "Entity" Request & Response Types
+    # /entity/* Request & Response Types
     #
 
     EntityResourcesRequest:
@@ -1336,10 +1336,6 @@ components:
             transaction_not_found:
               $ref: "#/components/schemas/TransactionLookupIdentifier"
 
-    #
-    # TODO Not categorized/cleaned yet
-    #
-
     TransactionDetails:
       type: object
       required:
@@ -1360,14 +1356,6 @@ components:
           description: The message bytes, hex encoded.
           type: string
 
-    ValidatorIdentifier:
-      type: object
-      required:
-        - address
-      properties:
-        address:
-          description: The radix address of the validator.
-          type: string
     TokenIdentifier:
       type: object
       required:

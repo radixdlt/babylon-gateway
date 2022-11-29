@@ -97,7 +97,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         return new GatewayModel.TransactionConstructionResponse(ledgerState);
     }
 
-    public async Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
         var fromLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadForwardRequest(request.FromStateIdentifier, token);
@@ -110,7 +110,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var results = await _transactionQuerier.GetRecentUserTransactions(transactionsPageRequest, atLedgerState, fromLedgerState, token);
 
         // NB - We don't return a total here as we don't have an index on user transactions
-        return new GatewayModel.RecentTransactionsResponse(
+        return new GatewayModel.TransactionRecentResponse(
             atLedgerState,
             nextCursor: results.NextPageCursor?.ToCursorString(),
             items: results.Transactions

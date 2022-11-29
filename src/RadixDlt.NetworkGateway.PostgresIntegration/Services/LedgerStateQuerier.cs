@@ -126,7 +126,7 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
                 _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
                 _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
             ),
-            new GatewayModel.GatewayInfoResponseAllOfWellKnownAddresses(
+            new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
                 wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.Faucet,
                 wellKnownAddresses.EcdsaSecp256k1,

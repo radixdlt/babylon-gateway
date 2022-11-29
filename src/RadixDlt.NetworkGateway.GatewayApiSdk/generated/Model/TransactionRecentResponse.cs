@@ -91,61 +91,76 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayInfoResponseAllOf
+    /// TransactionRecentResponse
     /// </summary>
-    [DataContract(Name = "GatewayInfoResponse_allOf")]
-    public partial class GatewayInfoResponseAllOf : IEquatable<GatewayInfoResponseAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionRecentResponse")]
+    public partial class TransactionRecentResponse : IEquatable<TransactionRecentResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionRecentResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayInfoResponseAllOf() { }
+        protected TransactionRecentResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionRecentResponse" /> class.
         /// </summary>
-        /// <param name="knownTarget">knownTarget (required).</param>
-        /// <param name="releaseInfo">releaseInfo (required).</param>
-        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public GatewayInfoResponseAllOf(GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInfoResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInfoResponseAllOfWellKnownAddresses))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
+        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
+        /// <param name="items">The page of user transactions. (required).</param>
+        public TransactionRecentResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
         {
-            // to ensure "knownTarget" is required (not null)
-            if (knownTarget == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("knownTarget is a required property for GatewayInfoResponseAllOf and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for TransactionRecentResponse and cannot be null");
             }
-            this.KnownTarget = knownTarget;
-            // to ensure "releaseInfo" is required (not null)
-            if (releaseInfo == null)
+            this.LedgerState = ledgerState;
+            // to ensure "items" is required (not null)
+            if (items == null)
             {
-                throw new ArgumentNullException("releaseInfo is a required property for GatewayInfoResponseAllOf and cannot be null");
+                throw new ArgumentNullException("items is a required property for TransactionRecentResponse and cannot be null");
             }
-            this.ReleaseInfo = releaseInfo;
-            // to ensure "wellKnownAddresses" is required (not null)
-            if (wellKnownAddresses == null)
-            {
-                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInfoResponseAllOf and cannot be null");
-            }
-            this.WellKnownAddresses = wellKnownAddresses;
+            this.Items = items;
+            this.TotalCount = totalCount;
+            this.PreviousCursor = previousCursor;
+            this.NextCursor = nextCursor;
         }
 
         /// <summary>
-        /// Gets or Sets KnownTarget
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "known_target", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseKnownTarget KnownTarget { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReleaseInfo
+        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
         /// </summary>
-        [DataMember(Name = "release_info", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseReleaseInfo ReleaseInfo { get; set; }
+        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
+        [DataMember(Name = "total_count", EmitDefaultValue = true)]
+        public long? TotalCount { get; set; }
 
         /// <summary>
-        /// Gets or Sets WellKnownAddresses
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
         /// </summary>
-        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
+        public string PreviousCursor { get; set; }
+
+        /// <summary>
+        /// TBD (maybe we should use HATEOAS-like permalinks?)
+        /// </summary>
+        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
+        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
+        public string NextCursor { get; set; }
+
+        /// <summary>
+        /// The page of user transactions.
+        /// </summary>
+        /// <value>The page of user transactions.</value>
+        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionInfo> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,10 +169,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayInfoResponseAllOf {\n");
-            sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
-            sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
-            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
+            sb.Append("class TransactionRecentResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
+            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
+            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -178,15 +195,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayInfoResponseAllOf);
+            return this.Equals(input as TransactionRecentResponse);
         }
 
         /// <summary>
-        /// Returns true if GatewayInfoResponseAllOf instances are equal
+        /// Returns true if TransactionRecentResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayInfoResponseAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionRecentResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayInfoResponseAllOf input)
+        public bool Equals(TransactionRecentResponse input)
         {
             if (input == null)
             {
@@ -194,19 +211,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.KnownTarget == input.KnownTarget ||
-                    (this.KnownTarget != null &&
-                    this.KnownTarget.Equals(input.KnownTarget))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.ReleaseInfo == input.ReleaseInfo ||
-                    (this.ReleaseInfo != null &&
-                    this.ReleaseInfo.Equals(input.ReleaseInfo))
+                    this.TotalCount == input.TotalCount ||
+                    (this.TotalCount != null &&
+                    this.TotalCount.Equals(input.TotalCount))
                 ) && 
                 (
-                    this.WellKnownAddresses == input.WellKnownAddresses ||
-                    (this.WellKnownAddresses != null &&
-                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
+                    this.PreviousCursor == input.PreviousCursor ||
+                    (this.PreviousCursor != null &&
+                    this.PreviousCursor.Equals(input.PreviousCursor))
+                ) && 
+                (
+                    this.NextCursor == input.NextCursor ||
+                    (this.NextCursor != null &&
+                    this.NextCursor.Equals(input.NextCursor))
+                ) && 
+                (
+                    this.Items == input.Items ||
+                    this.Items != null &&
+                    input.Items != null &&
+                    this.Items.SequenceEqual(input.Items)
                 );
         }
 
@@ -219,17 +247,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.KnownTarget != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.KnownTarget.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.ReleaseInfo != null)
+                if (this.TotalCount != null)
                 {
-                    hashCode = (hashCode * 59) + this.ReleaseInfo.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
                 }
-                if (this.WellKnownAddresses != null)
+                if (this.PreviousCursor != null)
                 {
-                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
+                }
+                if (this.NextCursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
+                }
+                if (this.Items != null)
+                {
+                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
                 }
                 return hashCode;
             }
