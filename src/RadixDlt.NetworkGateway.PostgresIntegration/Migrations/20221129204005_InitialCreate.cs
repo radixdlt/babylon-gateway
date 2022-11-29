@@ -313,7 +313,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
                     payloadhash = table.Column<byte[]>(name: "payload_hash", type: "bytea", nullable: false),
-                    payload = table.Column<byte[]>(type: "bytea", nullable: false)
+                    payload = table.Column<byte[]>(type: "bytea", nullable: false),
+                    receipt = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

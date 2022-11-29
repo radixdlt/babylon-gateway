@@ -689,6 +689,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("payload_hash");
 
+                    b.Property<string>("Receipt")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("receipt");
+
                     b.HasKey("StateVersion");
 
                     b.ToTable("raw_user_transactions");

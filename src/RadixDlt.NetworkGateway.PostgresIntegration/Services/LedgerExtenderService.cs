@@ -265,6 +265,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                         StateVersion = ult.StateVersion,
                         PayloadHash = nt.Hash.ConvertFromHex(),
                         Payload = nt.PayloadHex.ConvertFromHex(),
+                        Receipt = ult.Receipt.ToJson(),
                     };
                 })
                 .ToDictionary(x => x.PayloadHash, ByteArrayEqualityComparer.Default);
@@ -273,7 +274,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
 
             var (rawTransactionsTouched, rawTransactionCommitMs) = await CodeStopwatch.TimeInMs(async () =>
             {
-                await using var writer = await dbConn.BeginBinaryImportAsync("COPY raw_user_transactions (state_version, payload_hash, payload) FROM STDIN (FORMAT BINARY)", token);
+                await using var writer = await dbConn.BeginBinaryImportAsync("COPY raw_user_transactions (state_version, payload_hash, payload, receipt) FROM STDIN (FORMAT BINARY)", token);
 
                 foreach (var rt in rawUserTransactions)
                 {
@@ -281,6 +282,7 @@ internal class LedgerExtenderService : ILedgerExtenderService
                     await writer.WriteAsync(rt.StateVersion, NpgsqlDbType.Bigint, token);
                     await writer.WriteAsync(rt.PayloadHash, NpgsqlDbType.Bytea, token);
                     await writer.WriteAsync(rt.Payload, NpgsqlDbType.Bytea, token);
+                    await writer.WriteAsync(rt.Receipt, NpgsqlDbType.Text, token);
                 }
 
                 await writer.CompleteAsync(token);

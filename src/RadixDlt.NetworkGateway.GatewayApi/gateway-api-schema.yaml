@@ -1338,11 +1338,14 @@ components:
       type: object
       required:
         - raw_hex
+        - receipt
         - referenced_global_entities
       properties:
         raw_hex:
           description: The raw transaction payload, hex encoded.
           type: string
+        receipt:
+          type: object
         referenced_global_entities:
           type: array
           items:

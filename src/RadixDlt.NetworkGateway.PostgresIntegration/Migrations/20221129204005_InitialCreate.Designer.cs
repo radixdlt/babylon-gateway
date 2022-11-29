@@ -78,7 +78,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221129203405_InitialCreate")]
+    [Migration("20221129204005_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -691,6 +691,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("payload_hash");
+
+                    b.Property<string>("Receipt")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("receipt");
 
                     b.HasKey("StateVersion");
 

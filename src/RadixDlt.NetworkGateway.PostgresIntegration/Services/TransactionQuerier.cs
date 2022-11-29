@@ -63,6 +63,7 @@
  */
 
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.Abstractions.Model;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
@@ -290,6 +291,7 @@ internal class TransactionQuerier : ITransactionQuerier
     {
         return new LookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionDetails(
             rawHex: rawUserTransaction.Payload.ToHex(),
+            receipt: new JRaw(rawUserTransaction.Receipt),
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),
             messageHex: ult.Message?.ToHex()
         ));

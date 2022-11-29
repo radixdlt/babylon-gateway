@@ -105,9 +105,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
         /// </summary>
         /// <param name="rawHex">The raw transaction payload, hex encoded. (required).</param>
+        /// <param name="receipt">receipt (required).</param>
         /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
         /// <param name="messageHex">The message bytes, hex encoded..</param>
-        public TransactionDetails(string rawHex = default(string), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
+        public TransactionDetails(string rawHex = default(string), Object receipt = default(Object), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
         {
             // to ensure "rawHex" is required (not null)
             if (rawHex == null)
@@ -115,6 +116,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("rawHex is a required property for TransactionDetails and cannot be null");
             }
             this.RawHex = rawHex;
+            // to ensure "receipt" is required (not null)
+            if (receipt == null)
+            {
+                throw new ArgumentNullException("receipt is a required property for TransactionDetails and cannot be null");
+            }
+            this.Receipt = receipt;
             // to ensure "referencedGlobalEntities" is required (not null)
             if (referencedGlobalEntities == null)
             {
@@ -130,6 +137,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <value>The raw transaction payload, hex encoded.</value>
         [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
         public string RawHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Receipt
+        /// </summary>
+        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
+        public Object Receipt { get; set; }
 
         /// <summary>
         /// Gets or Sets ReferencedGlobalEntities
@@ -153,6 +166,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionDetails {\n");
             sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
             sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
             sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
             sb.Append("}\n");
@@ -196,6 +210,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
+                    this.Receipt == input.Receipt ||
+                    (this.Receipt != null &&
+                    this.Receipt.Equals(input.Receipt))
+                ) && 
+                (
                     this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
                     this.ReferencedGlobalEntities != null &&
                     input.ReferencedGlobalEntities != null &&
@@ -220,6 +239,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.RawHex != null)
                 {
                     hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                }
+                if (this.Receipt != null)
+                {
+                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
                 }
                 if (this.ReferencedGlobalEntities != null)
                 {

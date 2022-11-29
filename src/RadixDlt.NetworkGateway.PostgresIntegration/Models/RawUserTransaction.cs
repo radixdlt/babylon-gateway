@@ -86,4 +86,7 @@ internal class RawUserTransaction
     /// </summary>
     [Column("payload")]
     public byte[] Payload { get; set; }
+
+    [Column("receipt")]
+    public string Receipt { get; set; }
 }
