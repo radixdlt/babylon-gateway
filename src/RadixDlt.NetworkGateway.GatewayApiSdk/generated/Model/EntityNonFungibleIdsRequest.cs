@@ -91,35 +91,71 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsResponseIdsAllOf
+    /// EntityNonFungibleIdsRequest
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsResponseIds_allOf")]
-    public partial class NonFungibleIdsResponseIdsAllOf : IEquatable<NonFungibleIdsResponseIdsAllOf>, IValidatableObject
+    [DataContract(Name = "EntityNonFungibleIdsRequest")]
+    public partial class EntityNonFungibleIdsRequest : IEquatable<EntityNonFungibleIdsRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseIdsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityNonFungibleIdsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsResponseIdsAllOf() { }
+        protected EntityNonFungibleIdsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseIdsAllOf" /> class.
+        /// Initializes a new instance of the <see cref="EntityNonFungibleIdsRequest" /> class.
         /// </summary>
-        /// <param name="items">items (required).</param>
-        public NonFungibleIdsResponseIdsAllOf(List<string> items = default(List<string>))
+        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address..</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        /// <param name="cursor">This cursor allows forward pagination, by providing the cursor from the previous request..</param>
+        /// <param name="limit">The page size requested..</param>
+        public EntityNonFungibleIdsRequest(string address = default(string), string resourceAddress = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier), string cursor = default(string), int? limit = default(int?))
         {
-            // to ensure "items" is required (not null)
-            if (items == null)
+            // to ensure "address" is required (not null)
+            if (address == null)
             {
-                throw new ArgumentNullException("items is a required property for NonFungibleIdsResponseIdsAllOf and cannot be null");
+                throw new ArgumentNullException("address is a required property for EntityNonFungibleIdsRequest and cannot be null");
             }
-            this.Items = items;
+            this.Address = address;
+            this.ResourceAddress = resourceAddress;
+            this.AtStateIdentifier = atStateIdentifier;
+            this.Cursor = cursor;
+            this.Limit = limit;
         }
 
         /// <summary>
-        /// Gets or Sets Items
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Items { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
+        public string Address { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        [DataMember(Name = "resource_address", EmitDefaultValue = true)]
+        public string ResourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or Sets AtStateIdentifier
+        /// </summary>
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+
+        /// <summary>
+        /// This cursor allows forward pagination, by providing the cursor from the previous request.
+        /// </summary>
+        /// <value>This cursor allows forward pagination, by providing the cursor from the previous request.</value>
+        [DataMember(Name = "cursor", EmitDefaultValue = true)]
+        public string Cursor { get; set; }
+
+        /// <summary>
+        /// The page size requested.
+        /// </summary>
+        /// <value>The page size requested.</value>
+        [DataMember(Name = "limit", EmitDefaultValue = true)]
+        public int? Limit { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,8 +164,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsResponseIdsAllOf {\n");
-            sb.Append("  Items: ").Append(Items).Append("\n");
+            sb.Append("class EntityNonFungibleIdsRequest {\n");
+            sb.Append("  Address: ").Append(Address).Append("\n");
+            sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("  Cursor: ").Append(Cursor).Append("\n");
+            sb.Append("  Limit: ").Append(Limit).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -150,15 +190,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsResponseIdsAllOf);
+            return this.Equals(input as EntityNonFungibleIdsRequest);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsResponseIdsAllOf instances are equal
+        /// Returns true if EntityNonFungibleIdsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsResponseIdsAllOf to be compared</param>
+        /// <param name="input">Instance of EntityNonFungibleIdsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsResponseIdsAllOf input)
+        public bool Equals(EntityNonFungibleIdsRequest input)
         {
             if (input == null)
             {
@@ -166,10 +206,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Items == input.Items ||
-                    this.Items != null &&
-                    input.Items != null &&
-                    this.Items.SequenceEqual(input.Items)
+                    this.Address == input.Address ||
+                    (this.Address != null &&
+                    this.Address.Equals(input.Address))
+                ) && 
+                (
+                    this.ResourceAddress == input.ResourceAddress ||
+                    (this.ResourceAddress != null &&
+                    this.ResourceAddress.Equals(input.ResourceAddress))
+                ) && 
+                (
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                ) && 
+                (
+                    this.Cursor == input.Cursor ||
+                    (this.Cursor != null &&
+                    this.Cursor.Equals(input.Cursor))
+                ) && 
+                (
+                    this.Limit == input.Limit ||
+                    (this.Limit != null &&
+                    this.Limit.Equals(input.Limit))
                 );
         }
 
@@ -182,9 +241,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Items != null)
+                if (this.Address != null)
                 {
-                    hashCode = (hashCode * 59) + this.Items.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
+                }
+                if (this.ResourceAddress != null)
+                {
+                    hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
+                }
+                if (this.AtStateIdentifier != null)
+                {
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                }
+                if (this.Cursor != null)
+                {
+                    hashCode = (hashCode * 59) + this.Cursor.GetHashCode();
+                }
+                if (this.Limit != null)
+                {
+                    hashCode = (hashCode * 59) + this.Limit.GetHashCode();
                 }
                 return hashCode;
             }

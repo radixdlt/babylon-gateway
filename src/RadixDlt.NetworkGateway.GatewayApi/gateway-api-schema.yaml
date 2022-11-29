@@ -296,6 +296,29 @@ paths:
                 $ref: "#/components/schemas/EntityNonFungiblesResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+  /entity/non-fungible/ids:
+    post:
+      operationId: EntityNonFungibleIds
+      summary: Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+      description: |
+        TBD
+      tags:
+        - Entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityNonFungibleIdsRequest"
+      responses:
+        "200":
+          description: Entity Non-Fungibles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityNonFungibleIdsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   /non-fungible/ids:
     post:
       operationId: NonFungibleIds
@@ -494,6 +517,24 @@ components:
         amount:
           type: integer
           format: int64
+    NonFungibleIdsCollection:
+      allOf:
+        - $ref: "#/components/schemas/ResultSetCursorMixin"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/NonFungibleIdsCollectionItem"
+    NonFungibleIdsCollectionItem:
+      type: object
+      required:
+        - id_hex
+      properties:
+        id_hex:
+          type: string
 
     TransactionInfo:
       type: object
@@ -1007,6 +1048,44 @@ components:
             non_fungibles:
               $ref: "#/components/schemas/NonFungibleResourcesCollection"
 
+    EntityNonFungibleIdsRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: "#/components/schemas/EntityAddress"
+        resource_address:
+          $ref: "#/components/schemas/ResourceAddress"
+        at_state_identifier:
+          $ref: "#/components/schemas/PartialLedgerStateIdentifier"
+        cursor:
+          description: This cursor allows forward pagination, by providing the cursor from the previous request.
+          type: string
+          nullable: true
+        limit:
+          description: The page size requested.
+          type: integer
+          nullable: true
+      example:
+        address: "<component-entity-address>"
+        resource_address: "<non-fungible-resource-entity-address>"
+    EntityNonFungibleIdsResponse:
+      allOf:
+        - $ref: "#/components/schemas/LedgerStateMixin"
+        - type: object
+          required:
+            - address
+            - resource_address
+            - non_fungible_ids
+          properties:
+            address:
+              $ref: "#/components/schemas/EntityAddress"
+            resource_address:
+              $ref: "#/components/schemas/ResourceAddress"
+            non_fungible_ids:
+              $ref: "#/components/schemas/NonFungibleIdsCollection"
+
     NonFungibleIdsRequest:
       type: object
       required:
@@ -1037,18 +1116,7 @@ components:
             address:
               $ref: "#/components/schemas/EntityAddress"
             non_fungible_ids:
-              $ref: "#/components/schemas/NonFungibleIdsResponseIds"
-    NonFungibleIdsResponseIds:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                type: string
+              $ref: "#/components/schemas/NonFungibleIdsCollection"
 
     NonFungibleDataRequest:
       type: object

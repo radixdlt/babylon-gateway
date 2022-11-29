@@ -91,62 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsResponseIds
+    /// NonFungibleIdsCollectionAllOf
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsResponseIds")]
-    public partial class NonFungibleIdsResponseIds : IEquatable<NonFungibleIdsResponseIds>, IValidatableObject
+    [DataContract(Name = "NonFungibleIdsCollection_allOf")]
+    public partial class NonFungibleIdsCollectionAllOf : IEquatable<NonFungibleIdsCollectionAllOf>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseIds" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsResponseIds() { }
+        protected NonFungibleIdsCollectionAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseIds" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionAllOf" /> class.
         /// </summary>
-        /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
-        /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">items (required).</param>
-        public NonFungibleIdsResponseIds(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<string> items = default(List<string>))
+        public NonFungibleIdsCollectionAllOf(List<NonFungibleIdsCollectionItem> items = default(List<NonFungibleIdsCollectionItem>))
         {
             // to ensure "items" is required (not null)
             if (items == null)
             {
-                throw new ArgumentNullException("items is a required property for NonFungibleIdsResponseIds and cannot be null");
+                throw new ArgumentNullException("items is a required property for NonFungibleIdsCollectionAllOf and cannot be null");
             }
             this.Items = items;
-            this.TotalCount = totalCount;
-            this.PreviousCursor = previousCursor;
-            this.NextCursor = nextCursor;
         }
-
-        /// <summary>
-        /// TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)
-        /// </summary>
-        /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
-        [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public long? TotalCount { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "previous_cursor", EmitDefaultValue = true)]
-        public string PreviousCursor { get; set; }
-
-        /// <summary>
-        /// TBD (maybe we should use HATEOAS-like permalinks?)
-        /// </summary>
-        /// <value>TBD (maybe we should use HATEOAS-like permalinks?)</value>
-        [DataMember(Name = "next_cursor", EmitDefaultValue = true)]
-        public string NextCursor { get; set; }
 
         /// <summary>
         /// Gets or Sets Items
         /// </summary>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> Items { get; set; }
+        public List<NonFungibleIdsCollectionItem> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -155,10 +128,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsResponseIds {\n");
-            sb.Append("  TotalCount: ").Append(TotalCount).Append("\n");
-            sb.Append("  PreviousCursor: ").Append(PreviousCursor).Append("\n");
-            sb.Append("  NextCursor: ").Append(NextCursor).Append("\n");
+            sb.Append("class NonFungibleIdsCollectionAllOf {\n");
             sb.Append("  Items: ").Append(Items).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -180,36 +150,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsResponseIds);
+            return this.Equals(input as NonFungibleIdsCollectionAllOf);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsResponseIds instances are equal
+        /// Returns true if NonFungibleIdsCollectionAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsResponseIds to be compared</param>
+        /// <param name="input">Instance of NonFungibleIdsCollectionAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsResponseIds input)
+        public bool Equals(NonFungibleIdsCollectionAllOf input)
         {
             if (input == null)
             {
                 return false;
             }
             return 
-                (
-                    this.TotalCount == input.TotalCount ||
-                    (this.TotalCount != null &&
-                    this.TotalCount.Equals(input.TotalCount))
-                ) && 
-                (
-                    this.PreviousCursor == input.PreviousCursor ||
-                    (this.PreviousCursor != null &&
-                    this.PreviousCursor.Equals(input.PreviousCursor))
-                ) && 
-                (
-                    this.NextCursor == input.NextCursor ||
-                    (this.NextCursor != null &&
-                    this.NextCursor.Equals(input.NextCursor))
-                ) && 
                 (
                     this.Items == input.Items ||
                     this.Items != null &&
@@ -227,18 +182,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TotalCount != null)
-                {
-                    hashCode = (hashCode * 59) + this.TotalCount.GetHashCode();
-                }
-                if (this.PreviousCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.PreviousCursor.GetHashCode();
-                }
-                if (this.NextCursor != null)
-                {
-                    hashCode = (hashCode * 59) + this.NextCursor.GetHashCode();
-                }
                 if (this.Items != null)
                 {
                     hashCode = (hashCode * 59) + this.Items.GetHashCode();

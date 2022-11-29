@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public NonFungibleIdsResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleIdsResponseIds nonFungibleIds = default(NonFungibleIdsResponseIds))
+        public NonFungibleIdsResponse(LedgerState ledgerState = default(LedgerState), string address = default(string), NonFungibleIdsCollection nonFungibleIds = default(NonFungibleIdsCollection))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -146,7 +146,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets NonFungibleIds
         /// </summary>
         [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdsResponseIds NonFungibleIds { get; set; }
+        public NonFungibleIdsCollection NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

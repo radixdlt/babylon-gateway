@@ -88,6 +88,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
 
     private record NonFungiblesViewModel(byte[] ResourceEntityGlobalAddress, long NonFungibleIdsCount, int TotalCount);
 
+    private record NonFungibleIdsViewModel(byte[] NonFungibleId, int TotalCount);
+
     private record NonFungibleIdViewModel(byte[] NonFungibleId, bool IsDeleted, byte[] ImmutableData, byte[] MutableData);
 
     private const int DefaultMetadataLimit = 10; // TODO make it configurable
@@ -267,6 +269,15 @@ OFFSET @offset LIMIT @limit",
         return new GatewayModel.EntityNonFungiblesResponse(ledgerState, entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition()), nonFungibles);
     }
 
+    public async Task<GatewayModel.EntityNonFungibleIdsResponse> EntityNonFungibleIds(IEntityStateQuerier.PageRequest request, DecodedRadixAddress resourceAddress, GatewayModel.LedgerState ledgerState, CancellationToken token = default)
+    {
+        var entity = await GetEntity<ComponentEntity>(request.Address, ledgerState, token);
+        var resourceEntity = await GetEntity<NonFungibleResourceManagerEntity>(resourceAddress, ledgerState, token);
+        var nonFungibleIds = await GetNonFungibleIdsSlice(entity.Id, resourceEntity.Id, request.Offset, request.Limit, ledgerState, token);
+
+        return new GatewayModel.EntityNonFungibleIdsResponse(ledgerState, request.Address.ToString(), resourceAddress.ToString(), nonFungibleIds);
+    }
+
     private async Task<GatewayModel.EntityMetadataCollection> GetMetadataSlice(long entityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
     {
         var result = await GetMetadataSlices(new[] { entityId }, offset, limit, ledgerState, token);
@@ -444,6 +455,52 @@ INNER JOIN LATERAL (
             : null;
 
         return new GatewayModel.NonFungibleResourcesCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
+    }
+
+    private async Task<GatewayModel.NonFungibleIdsCollection> GetNonFungibleIdsSlice(long entityId, long resourceEntityId, int offset, int limit, GatewayModel.LedgerState ledgerState, CancellationToken token)
+    {
+        var cd = new CommandDefinition(
+            commandText: @"
+SELECT UNNEST(non_fungible_ids[@offset:@limit]) AS NonFungibleId, array_length(non_fungible_ids, 1) AS TotalCount
+FROM entity_resource_history
+WHERE id = (
+    SELECT id
+    FROM entity_resource_history
+    WHERE from_state_version <= @stateVersion AND global_entity_id = @entityId AND resource_entity_id = @resourceEntityId
+    ORDER BY from_state_version DESC
+    LIMIT 1
+)
+",
+            parameters: new
+            {
+                stateVersion = ledgerState.StateVersion,
+                entityId = entityId,
+                resourceEntityId = resourceEntityId,
+                offset = offset + 1,
+                limit = offset + 1 + limit,
+            },
+            cancellationToken: token);
+
+        long? totalCount = null;
+
+        var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdsViewModel>(cd)).ToList()
+            .Select(vm =>
+            {
+                totalCount ??= vm.TotalCount;
+
+                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId.ToHex());
+            })
+            .ToList();
+
+        var previousCursor = offset > 0
+            ? new GatewayModel.EntityNonFungiblesCursor(Math.Max(offset - limit, 0)).ToCursorString()
+            : null;
+
+        var nextCursor = items.Count > limit
+            ? new GatewayModel.EntityNonFungiblesCursor(offset + limit).ToCursorString()
+            : null;
+
+        return new GatewayModel.NonFungibleIdsCollection(totalCount, previousCursor, nextCursor, items.Take(limit).ToList());
     }
 
     private async Task<Entity> GetEntity(DecodedRadixAddress address, GatewayModel.LedgerState ledgerState, CancellationToken token)

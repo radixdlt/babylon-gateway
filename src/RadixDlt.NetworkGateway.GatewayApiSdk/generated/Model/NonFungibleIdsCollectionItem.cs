@@ -91,49 +91,35 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// NonFungibleIdsResponseAllOf
+    /// NonFungibleIdsCollectionItem
     /// </summary>
-    [DataContract(Name = "NonFungibleIdsResponse_allOf")]
-    public partial class NonFungibleIdsResponseAllOf : IEquatable<NonFungibleIdsResponseAllOf>, IValidatableObject
+    [DataContract(Name = "NonFungibleIdsCollectionItem")]
+    public partial class NonFungibleIdsCollectionItem : IEquatable<NonFungibleIdsCollectionItem>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected NonFungibleIdsResponseAllOf() { }
+        protected NonFungibleIdsCollectionItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonFungibleIdsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="NonFungibleIdsCollectionItem" /> class.
         /// </summary>
-        /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
-        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public NonFungibleIdsResponseAllOf(string address = default(string), NonFungibleIdsCollection nonFungibleIds = default(NonFungibleIdsCollection))
+        /// <param name="idHex">idHex (required).</param>
+        public NonFungibleIdsCollectionItem(string idHex = default(string))
         {
-            // to ensure "address" is required (not null)
-            if (address == null)
+            // to ensure "idHex" is required (not null)
+            if (idHex == null)
             {
-                throw new ArgumentNullException("address is a required property for NonFungibleIdsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("idHex is a required property for NonFungibleIdsCollectionItem and cannot be null");
             }
-            this.Address = address;
-            // to ensure "nonFungibleIds" is required (not null)
-            if (nonFungibleIds == null)
-            {
-                throw new ArgumentNullException("nonFungibleIds is a required property for NonFungibleIdsResponseAllOf and cannot be null");
-            }
-            this.NonFungibleIds = nonFungibleIds;
+            this.IdHex = idHex;
         }
 
         /// <summary>
-        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// Gets or Sets IdHex
         /// </summary>
-        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
-        [DataMember(Name = "address", IsRequired = true, EmitDefaultValue = true)]
-        public string Address { get; set; }
-
-        /// <summary>
-        /// Gets or Sets NonFungibleIds
-        /// </summary>
-        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public NonFungibleIdsCollection NonFungibleIds { get; set; }
+        [DataMember(Name = "id_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string IdHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -142,9 +128,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class NonFungibleIdsResponseAllOf {\n");
-            sb.Append("  Address: ").Append(Address).Append("\n");
-            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
+            sb.Append("class NonFungibleIdsCollectionItem {\n");
+            sb.Append("  IdHex: ").Append(IdHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,15 +150,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as NonFungibleIdsResponseAllOf);
+            return this.Equals(input as NonFungibleIdsCollectionItem);
         }
 
         /// <summary>
-        /// Returns true if NonFungibleIdsResponseAllOf instances are equal
+        /// Returns true if NonFungibleIdsCollectionItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of NonFungibleIdsResponseAllOf to be compared</param>
+        /// <param name="input">Instance of NonFungibleIdsCollectionItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(NonFungibleIdsResponseAllOf input)
+        public bool Equals(NonFungibleIdsCollectionItem input)
         {
             if (input == null)
             {
@@ -181,14 +166,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Address == input.Address ||
-                    (this.Address != null &&
-                    this.Address.Equals(input.Address))
-                ) && 
-                (
-                    this.NonFungibleIds == input.NonFungibleIds ||
-                    (this.NonFungibleIds != null &&
-                    this.NonFungibleIds.Equals(input.NonFungibleIds))
+                    this.IdHex == input.IdHex ||
+                    (this.IdHex != null &&
+                    this.IdHex.Equals(input.IdHex))
                 );
         }
 
@@ -201,13 +181,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Address != null)
+                if (this.IdHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Address.GetHashCode();
-                }
-                if (this.NonFungibleIds != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IdHex.GetHashCode();
                 }
                 return hashCode;
             }

@@ -81,4 +81,6 @@ public interface IEntityHandler
     Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default);
 
     Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default);
+
+    Task<GatewayModel.EntityNonFungibleIdsResponse?> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default);
 }

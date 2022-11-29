@@ -142,4 +142,14 @@ public class EntityController : ControllerBase
             ? Ok(response)
             : NotFound();
     }
+
+    [HttpPost("non-fungible/ids")]
+    public async Task<IActionResult> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default)
+    {
+        var response = await _entityHandler.NonFungibleIds(request, token);
+
+        return response != null
+            ? Ok(response)
+            : NotFound();
+    }
 }

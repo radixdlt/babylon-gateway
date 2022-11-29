@@ -128,7 +128,7 @@ WHERE nfd.id IN(
             {
                 totalCount = vm.TotalCount;
 
-                return vm.NonFungibleId.ToHex();
+                return new GatewayModel.NonFungibleIdsCollectionItem(vm.NonFungibleId.ToHex());
             })
             .ToList();
 
@@ -143,7 +143,7 @@ WHERE nfd.id IN(
         return new GatewayModel.NonFungibleIdsResponse(
             ledgerState: ledgerState,
             address: request.Address.ToString(),
-            nonFungibleIds: new GatewayModel.NonFungibleIdsResponseIds(
+            nonFungibleIds: new GatewayModel.NonFungibleIdsCollection(
                 totalCount: totalCount,
                 previousCursor: previousCursor,
                 nextCursor: nextCursor,

@@ -149,4 +149,19 @@ internal class DefaultEntityHandler : IEntityHandler
 
         return await _entityStateQuerier.EntityNonFungibles(pageRequest, ledgerState, token);
     }
+
+    public async Task<GatewayModel.EntityNonFungibleIdsResponse?> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default)
+    {
+        var entityAddress = RadixAddressCodec.Decode(request.Address);
+        var resourceAddress = RadixAddressCodec.Decode(request.ResourceAddress);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: entityAddress,
+            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.Limit ?? DefaultPageLimit
+        );
+
+        return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, resourceAddress, ledgerState, token);
+    }
 }
