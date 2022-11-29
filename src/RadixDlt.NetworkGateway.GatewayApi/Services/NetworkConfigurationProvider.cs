@@ -79,7 +79,7 @@ public interface INetworkConfigurationProvider : INetworkAddressConfigProvider
     string GetNetworkName();
 }
 
-public sealed record CapturedConfig(string NetworkName, string AccountPackageAddress, string XrdAddress, string FaucetAddress, HrpDefinition HrpDefinition);
+public sealed record CapturedConfig(string NetworkName, HrpDefinition HrpDefinition, WellKnownAddresses WellKnownAddresses);
 
 public interface ICapturedConfigProvider
 {
@@ -116,19 +116,9 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().HrpDefinition;
     }
 
-    public string GetAccountPackageAddress()
+    public WellKnownAddresses GetWellKnownAddresses()
     {
-        return GetCapturedConfig().AccountPackageAddress;
-    }
-
-    public string GetXrdAddress()
-    {
-        return GetCapturedConfig().XrdAddress;
-    }
-
-    public string GetFaucetAddress()
-    {
-        return GetCapturedConfig().FaucetAddress;
+        return GetCapturedConfig().WellKnownAddresses;
     }
 
     private CapturedConfig GetCapturedConfig()

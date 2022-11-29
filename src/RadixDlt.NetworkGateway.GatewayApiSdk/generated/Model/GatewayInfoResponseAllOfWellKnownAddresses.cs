@@ -91,74 +91,92 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// GatewayInfoResponse
+    /// GatewayInfoResponseAllOfWellKnownAddresses
     /// </summary>
-    [DataContract(Name = "GatewayInfoResponse")]
-    public partial class GatewayInfoResponse : IEquatable<GatewayInfoResponse>, IValidatableObject
+    [DataContract(Name = "GatewayInfoResponse_allOf_well_known_addresses")]
+    public partial class GatewayInfoResponseAllOfWellKnownAddresses : IEquatable<GatewayInfoResponseAllOfWellKnownAddresses>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponse" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseAllOfWellKnownAddresses" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayInfoResponse() { }
+        protected GatewayInfoResponseAllOfWellKnownAddresses() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponse" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInfoResponseAllOfWellKnownAddresses" /> class.
         /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="knownTarget">knownTarget (required).</param>
-        /// <param name="releaseInfo">releaseInfo (required).</param>
-        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public GatewayInfoResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInfoResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInfoResponseAllOfWellKnownAddresses))
+        /// <param name="accountPackage">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="faucet">The Bech32m-encoded human readable version of the component (normal, account, system) global address. (required).</param>
+        /// <param name="ecdsaSecp256k1">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="eddsaEd25519">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        /// <param name="xrd">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
+        public GatewayInfoResponseAllOfWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
+            // to ensure "accountPackage" is required (not null)
+            if (accountPackage == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("accountPackage is a required property for GatewayInfoResponseAllOfWellKnownAddresses and cannot be null");
             }
-            this.LedgerState = ledgerState;
-            // to ensure "knownTarget" is required (not null)
-            if (knownTarget == null)
+            this.AccountPackage = accountPackage;
+            // to ensure "faucet" is required (not null)
+            if (faucet == null)
             {
-                throw new ArgumentNullException("knownTarget is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("faucet is a required property for GatewayInfoResponseAllOfWellKnownAddresses and cannot be null");
             }
-            this.KnownTarget = knownTarget;
-            // to ensure "releaseInfo" is required (not null)
-            if (releaseInfo == null)
+            this.Faucet = faucet;
+            // to ensure "ecdsaSecp256k1" is required (not null)
+            if (ecdsaSecp256k1 == null)
             {
-                throw new ArgumentNullException("releaseInfo is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("ecdsaSecp256k1 is a required property for GatewayInfoResponseAllOfWellKnownAddresses and cannot be null");
             }
-            this.ReleaseInfo = releaseInfo;
-            // to ensure "wellKnownAddresses" is required (not null)
-            if (wellKnownAddresses == null)
+            this.EcdsaSecp256k1 = ecdsaSecp256k1;
+            // to ensure "eddsaEd25519" is required (not null)
+            if (eddsaEd25519 == null)
             {
-                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInfoResponse and cannot be null");
+                throw new ArgumentNullException("eddsaEd25519 is a required property for GatewayInfoResponseAllOfWellKnownAddresses and cannot be null");
             }
-            this.WellKnownAddresses = wellKnownAddresses;
+            this.EddsaEd25519 = eddsaEd25519;
+            // to ensure "xrd" is required (not null)
+            if (xrd == null)
+            {
+                throw new ArgumentNullException("xrd is a required property for GatewayInfoResponseAllOfWellKnownAddresses and cannot be null");
+            }
+            this.Xrd = xrd;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "account_package", IsRequired = true, EmitDefaultValue = true)]
+        public string AccountPackage { get; set; }
 
         /// <summary>
-        /// Gets or Sets KnownTarget
+        /// The Bech32m-encoded human readable version of the component (normal, account, system) global address.
         /// </summary>
-        [DataMember(Name = "known_target", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseKnownTarget KnownTarget { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the component (normal, account, system) global address.</value>
+        [DataMember(Name = "faucet", IsRequired = true, EmitDefaultValue = true)]
+        public string Faucet { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReleaseInfo
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
-        [DataMember(Name = "release_info", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseReleaseInfo ReleaseInfo { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        [DataMember(Name = "ecdsa_secp256k1", IsRequired = true, EmitDefaultValue = true)]
+        public string EcdsaSecp256k1 { get; set; }
 
         /// <summary>
-        /// Gets or Sets WellKnownAddresses
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
-        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
-        public GatewayInfoResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        [DataMember(Name = "eddsa_ed25519", IsRequired = true, EmitDefaultValue = true)]
+        public string EddsaEd25519 { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
+        [DataMember(Name = "xrd", IsRequired = true, EmitDefaultValue = true)]
+        public string Xrd { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -167,11 +185,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class GatewayInfoResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
-            sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
-            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
+            sb.Append("class GatewayInfoResponseAllOfWellKnownAddresses {\n");
+            sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
+            sb.Append("  Faucet: ").Append(Faucet).Append("\n");
+            sb.Append("  EcdsaSecp256k1: ").Append(EcdsaSecp256k1).Append("\n");
+            sb.Append("  EddsaEd25519: ").Append(EddsaEd25519).Append("\n");
+            sb.Append("  Xrd: ").Append(Xrd).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -192,15 +211,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayInfoResponse);
+            return this.Equals(input as GatewayInfoResponseAllOfWellKnownAddresses);
         }
 
         /// <summary>
-        /// Returns true if GatewayInfoResponse instances are equal
+        /// Returns true if GatewayInfoResponseAllOfWellKnownAddresses instances are equal
         /// </summary>
-        /// <param name="input">Instance of GatewayInfoResponse to be compared</param>
+        /// <param name="input">Instance of GatewayInfoResponseAllOfWellKnownAddresses to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayInfoResponse input)
+        public bool Equals(GatewayInfoResponseAllOfWellKnownAddresses input)
         {
             if (input == null)
             {
@@ -208,24 +227,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.AccountPackage == input.AccountPackage ||
+                    (this.AccountPackage != null &&
+                    this.AccountPackage.Equals(input.AccountPackage))
                 ) && 
                 (
-                    this.KnownTarget == input.KnownTarget ||
-                    (this.KnownTarget != null &&
-                    this.KnownTarget.Equals(input.KnownTarget))
+                    this.Faucet == input.Faucet ||
+                    (this.Faucet != null &&
+                    this.Faucet.Equals(input.Faucet))
                 ) && 
                 (
-                    this.ReleaseInfo == input.ReleaseInfo ||
-                    (this.ReleaseInfo != null &&
-                    this.ReleaseInfo.Equals(input.ReleaseInfo))
+                    this.EcdsaSecp256k1 == input.EcdsaSecp256k1 ||
+                    (this.EcdsaSecp256k1 != null &&
+                    this.EcdsaSecp256k1.Equals(input.EcdsaSecp256k1))
                 ) && 
                 (
-                    this.WellKnownAddresses == input.WellKnownAddresses ||
-                    (this.WellKnownAddresses != null &&
-                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
+                    this.EddsaEd25519 == input.EddsaEd25519 ||
+                    (this.EddsaEd25519 != null &&
+                    this.EddsaEd25519.Equals(input.EddsaEd25519))
+                ) && 
+                (
+                    this.Xrd == input.Xrd ||
+                    (this.Xrd != null &&
+                    this.Xrd.Equals(input.Xrd))
                 );
         }
 
@@ -238,21 +262,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.AccountPackage != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AccountPackage.GetHashCode();
                 }
-                if (this.KnownTarget != null)
+                if (this.Faucet != null)
                 {
-                    hashCode = (hashCode * 59) + this.KnownTarget.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
                 }
-                if (this.ReleaseInfo != null)
+                if (this.EcdsaSecp256k1 != null)
                 {
-                    hashCode = (hashCode * 59) + this.ReleaseInfo.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EcdsaSecp256k1.GetHashCode();
                 }
-                if (this.WellKnownAddresses != null)
+                if (this.EddsaEd25519 != null)
                 {
-                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
+                    hashCode = (hashCode * 59) + this.EddsaEd25519.GetHashCode();
+                }
+                if (this.Xrd != null)
+                {
+                    hashCode = (hashCode * 59) + this.Xrd.GetHashCode();
                 }
                 return hashCode;
             }

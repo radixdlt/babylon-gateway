@@ -106,7 +106,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="knownTarget">knownTarget (required).</param>
         /// <param name="releaseInfo">releaseInfo (required).</param>
-        public GatewayInfoResponseAllOf(GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo))
+        /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
+        public GatewayInfoResponseAllOf(GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInfoResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInfoResponseAllOfWellKnownAddresses))
         {
             // to ensure "knownTarget" is required (not null)
             if (knownTarget == null)
@@ -120,6 +121,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("releaseInfo is a required property for GatewayInfoResponseAllOf and cannot be null");
             }
             this.ReleaseInfo = releaseInfo;
+            // to ensure "wellKnownAddresses" is required (not null)
+            if (wellKnownAddresses == null)
+            {
+                throw new ArgumentNullException("wellKnownAddresses is a required property for GatewayInfoResponseAllOf and cannot be null");
+            }
+            this.WellKnownAddresses = wellKnownAddresses;
         }
 
         /// <summary>
@@ -135,6 +142,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public GatewayInfoResponseReleaseInfo ReleaseInfo { get; set; }
 
         /// <summary>
+        /// Gets or Sets WellKnownAddresses
+        /// </summary>
+        [DataMember(Name = "well_known_addresses", IsRequired = true, EmitDefaultValue = true)]
+        public GatewayInfoResponseAllOfWellKnownAddresses WellKnownAddresses { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -144,6 +157,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class GatewayInfoResponseAllOf {\n");
             sb.Append("  KnownTarget: ").Append(KnownTarget).Append("\n");
             sb.Append("  ReleaseInfo: ").Append(ReleaseInfo).Append("\n");
+            sb.Append("  WellKnownAddresses: ").Append(WellKnownAddresses).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -188,6 +202,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ReleaseInfo == input.ReleaseInfo ||
                     (this.ReleaseInfo != null &&
                     this.ReleaseInfo.Equals(input.ReleaseInfo))
+                ) && 
+                (
+                    this.WellKnownAddresses == input.WellKnownAddresses ||
+                    (this.WellKnownAddresses != null &&
+                    this.WellKnownAddresses.Equals(input.WellKnownAddresses))
                 );
         }
 
@@ -207,6 +226,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ReleaseInfo != null)
                 {
                     hashCode = (hashCode * 59) + this.ReleaseInfo.GetHashCode();
+                }
+                if (this.WellKnownAddresses != null)
+                {
+                    hashCode = (hashCode * 59) + this.WellKnownAddresses.GetHashCode();
                 }
                 return hashCode;
             }

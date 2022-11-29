@@ -66,6 +66,7 @@
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 
 #nullable disable
 
@@ -220,16 +221,8 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
                     networkname = table.Column<string>(name: "network_name", type: "text", nullable: false),
-                    packagehrp = table.Column<string>(name: "package_hrp", type: "text", nullable: false),
-                    normalcomponenthrp = table.Column<string>(name: "normal_component_hrp", type: "text", nullable: false),
-                    accountcomponenthrp = table.Column<string>(name: "account_component_hrp", type: "text", nullable: false),
-                    systemcomponenthrp = table.Column<string>(name: "system_component_hrp", type: "text", nullable: false),
-                    resourcehrp = table.Column<string>(name: "resource_hrp", type: "text", nullable: false),
-                    validatorhrp = table.Column<string>(name: "validator_hrp", type: "text", nullable: false),
-                    nodehrp = table.Column<string>(name: "node_hrp", type: "text", nullable: false),
-                    faucetaddress = table.Column<string>(name: "faucet_address", type: "text", nullable: false),
-                    accountpackageaddress = table.Column<string>(name: "account_package_address", type: "text", nullable: false),
-                    xrdaddress = table.Column<string>(name: "xrd_address", type: "text", nullable: false)
+                    hrpdefinition = table.Column<HrpDefinition>(name: "hrp_definition", type: "jsonb", nullable: false),
+                    wellknownaddresses = table.Column<WellKnownAddresses>(name: "well_known_addresses", type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {

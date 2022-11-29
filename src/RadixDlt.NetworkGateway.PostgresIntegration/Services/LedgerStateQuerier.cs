@@ -111,6 +111,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
     public async Task<GatewayModel.GatewayInfoResponse> GetGatewayState(CancellationToken token)
     {
         var ledgerStatus = await GetLedgerStatus(token);
+        var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
+
         return new GatewayModel.GatewayInfoResponse(
             new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
@@ -123,6 +125,13 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             new GatewayModel.GatewayInfoResponseReleaseInfo(
                 _endpointOptionsMonitor.CurrentValue.GatewayApiVersion,
                 _endpointOptionsMonitor.CurrentValue.GatewayOpenApiSchemaVersion
+            ),
+            new GatewayModel.GatewayInfoResponseAllOfWellKnownAddresses(
+                wellKnownAddresses.AccountPackage,
+                wellKnownAddresses.Faucet,
+                wellKnownAddresses.EcdsaSecp256k1,
+                wellKnownAddresses.EddsaEd25519,
+                wellKnownAddresses.Xrd
             )
         );
     }

@@ -393,6 +393,9 @@ components:
     EntityAddress:
       type: string
       description: The Bech32m-encoded human readable version of the entity's global address.
+    ComponentAddress:
+      type: string
+      description: The Bech32m-encoded human readable version of the component (normal, account, system) global address.
     ResourceAddress:
       type: string
       description: The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
@@ -632,11 +635,31 @@ components:
           required:
             - known_target
             - release_info
+            - well_known_addresses
           properties:
             known_target:
               $ref: "#/components/schemas/GatewayInfoResponseKnownTarget"
             release_info:
               $ref: "#/components/schemas/GatewayInfoResponseReleaseInfo"
+            well_known_addresses:
+              type: object
+              required:
+                - account_package
+                - faucet
+                - ecdsa_secp256k1
+                - eddsa_ed25519
+                - xrd
+              properties:
+                account_package:
+                  $ref: "#/components/schemas/EntityAddress"
+                faucet:
+                  $ref: "#/components/schemas/ComponentAddress"
+                ecdsa_secp256k1:
+                  $ref: "#/components/schemas/ResourceAddress"
+                eddsa_ed25519:
+                  $ref: "#/components/schemas/ResourceAddress"
+                xrd:
+                  $ref: "#/components/schemas/ResourceAddress"
     GatewayInfoResponseKnownTarget:
       type: object
       required:

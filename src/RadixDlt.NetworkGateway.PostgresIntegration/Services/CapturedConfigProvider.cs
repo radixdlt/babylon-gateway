@@ -65,7 +65,6 @@
 using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System;
 using System.Threading.Tasks;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
@@ -91,10 +90,8 @@ internal class CapturedConfigProvider : ICapturedConfigProvider
 
         return new CapturedConfig(
             networkConfiguration.NetworkName,
-            networkConfiguration.NetworkConfigurationWellKnownAddresses.AccountPackageAddress,
-            networkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress,
-            networkConfiguration.NetworkConfigurationWellKnownAddresses.FaucetAddress,
-            networkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition()
+            networkConfiguration.HrpDefinition,
+            networkConfiguration.WellKnownAddresses
         );
     }
 }

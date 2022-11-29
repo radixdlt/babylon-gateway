@@ -70,6 +70,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 
 #nullable disable
@@ -77,7 +78,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221128083104_InitialCreate")]
+    [Migration("20221129203405_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -457,10 +458,20 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<HrpDefinition>("HrpDefinition")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("hrp_definition");
+
                     b.Property<string>("NetworkName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("network_name");
+
+                    b.Property<WellKnownAddresses>("WellKnownAddresses")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("well_known_addresses");
 
                     b.HasKey("Id");
 
@@ -918,91 +929,6 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .IsRequired();
 
                     b.Navigation("TopOfLedgerTransaction");
-                });
-
-            modelBuilder.Entity("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfiguration", b =>
-                {
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfigurationHrpDefinition", "NetworkConfigurationHrpDefinition", b1 =>
-                        {
-                            b1.Property<int>("NetworkConfigurationId")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("AccountComponentHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("account_component_hrp");
-
-                            b1.Property<string>("NodeHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("node_hrp");
-
-                            b1.Property<string>("NormalComponentHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("normal_component_hrp");
-
-                            b1.Property<string>("PackageHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("package_hrp");
-
-                            b1.Property<string>("ResourceHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("resource_hrp");
-
-                            b1.Property<string>("SystemComponentHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("system_component_hrp");
-
-                            b1.Property<string>("ValidatorHrp")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("validator_hrp");
-
-                            b1.HasKey("NetworkConfigurationId");
-
-                            b1.ToTable("network_configuration");
-
-                            b1.WithOwner()
-                                .HasForeignKey("NetworkConfigurationId");
-                        });
-
-                    b.OwnsOne("RadixDlt.NetworkGateway.PostgresIntegration.Models.NetworkConfigurationWellKnownAddresses", "NetworkConfigurationWellKnownAddresses", b1 =>
-                        {
-                            b1.Property<int>("NetworkConfigurationId")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("AccountPackageAddress")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("account_package_address");
-
-                            b1.Property<string>("FaucetAddress")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("faucet_address");
-
-                            b1.Property<string>("XrdAddress")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("xrd_address");
-
-                            b1.HasKey("NetworkConfigurationId");
-
-                            b1.ToTable("network_configuration");
-
-                            b1.WithOwner()
-                                .HasForeignKey("NetworkConfigurationId");
-                        });
-
-                    b.Navigation("NetworkConfigurationHrpDefinition")
-                        .IsRequired();
-
-                    b.Navigation("NetworkConfigurationWellKnownAddresses")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

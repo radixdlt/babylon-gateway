@@ -68,7 +68,6 @@ using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.Abstractions.Configuration;
 using RadixDlt.NetworkGateway.DataAggregator.Services;
 using RadixDlt.NetworkGateway.PostgresIntegration.Models;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreModel = RadixDlt.CoreApiSdk.Model;
@@ -82,13 +81,11 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Services;
 /// </summary>
 internal class NetworkConfigurationProvider : INetworkConfigurationProvider
 {
-    private record CapturedConfig(NetworkConfiguration NetworkConfiguration, HrpDefinition HrpDefinition, string NetworkName);
-
     private readonly IDbContextFactory<ReadWriteDbContext> _dbContextFactory;
     private readonly ILogger<NetworkConfigurationProvider> _logger;
 
     private readonly object _writeLock = new();
-    private CapturedConfig? _capturedConfig;
+    private NetworkConfiguration? _capturedConfig;
 
     public NetworkConfigurationProvider(IDbContextFactory<ReadWriteDbContext> dbContextFactory, ILogger<NetworkConfigurationProvider> logger)
     {
@@ -111,7 +108,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             }
         }
 
-        if (!GetCapturedConfig().NetworkConfiguration.HasEqualConfiguration(inputNetworkConfiguration))
+        if (!GetCapturedConfig().HasEqualConfiguration(inputNetworkConfiguration))
         {
             throw new ConfigurationException("Network configuration does does not match those stored from other nodes.");
         }
@@ -144,7 +141,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             return false;
         }
 
-        dbContext.Add(GetCapturedConfig().NetworkConfiguration);
+        dbContext.Add(GetCapturedConfig());
         await dbContext.SaveChangesAsync(token);
         return true;
     }
@@ -159,19 +156,9 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return GetCapturedConfig().HrpDefinition;
     }
 
-    public string GetAccountPackageAddress()
+    public WellKnownAddresses GetWellKnownAddresses()
     {
-        return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.AccountPackageAddress;
-    }
-
-    public string GetXrdAddress()
-    {
-        return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.XrdAddress;
-    }
-
-    public string GetFaucetAddress()
-    {
-        return GetCapturedConfig().NetworkConfiguration.NetworkConfigurationWellKnownAddresses.FaucetAddress;
+        return GetCapturedConfig().WellKnownAddresses;
     }
 
     private static NetworkConfiguration MapNetworkConfigurationResponse(CoreModel.NetworkConfigurationResponse networkConfiguration)
@@ -181,26 +168,26 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
         return new NetworkConfiguration
         {
             NetworkName = networkConfiguration.Network,
-            NetworkConfigurationHrpDefinition = new NetworkConfigurationHrpDefinition
-            {
-                PackageHrp = $"package_{hrpSuffix}",
-                NormalComponentHrp = $"component_{hrpSuffix}",
-                AccountComponentHrp = $"account_{hrpSuffix}",
-                SystemComponentHrp = $"system_{hrpSuffix}",
-                ResourceHrp = $"resource_{hrpSuffix}",
-                ValidatorHrp = $"validator_{hrpSuffix}",
-                NodeHrp = $"node_{hrpSuffix}",
-            },
-            NetworkConfigurationWellKnownAddresses = new NetworkConfigurationWellKnownAddresses
-            {
-                FaucetAddress = networkConfiguration.WellKnownAddresses.Faucet,
-                AccountPackageAddress = networkConfiguration.WellKnownAddresses.AccountPackage,
-                XrdAddress = networkConfiguration.WellKnownAddresses.Xrd,
-            },
+            HrpDefinition = new HrpDefinition(
+                Package: $"package_{hrpSuffix}",
+                NormalComponent: $"component_{hrpSuffix}",
+                AccountComponent: $"account_{hrpSuffix}",
+                SystemComponent: $"system_{hrpSuffix}",
+                Resource: $"resource_{hrpSuffix}",
+                Validator: $"validator_{hrpSuffix}",
+                Node: $"node_{hrpSuffix}"
+            ),
+            WellKnownAddresses = new WellKnownAddresses(
+                AccountPackage: networkConfiguration.WellKnownAddresses.AccountPackage,
+                Faucet: networkConfiguration.WellKnownAddresses.Faucet,
+                EcdsaSecp256k1: networkConfiguration.WellKnownAddresses.EcdsaSecp256k1,
+                EddsaEd25519: networkConfiguration.WellKnownAddresses.EddsaEd25519,
+                Xrd: networkConfiguration.WellKnownAddresses.Xrd
+            ),
         };
     }
 
-    private CapturedConfig GetCapturedConfig()
+    private NetworkConfiguration GetCapturedConfig()
     {
         return _capturedConfig ?? throw new ConfigurationException("Config hasn't been captured from a Node or from the Database yet.");
     }
@@ -214,11 +201,7 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
                 return;
             }
 
-            _capturedConfig = new CapturedConfig(
-                inputNetworkConfiguration,
-                inputNetworkConfiguration.NetworkConfigurationHrpDefinition.CreateDefinition(),
-                inputNetworkConfiguration.NetworkName
-            );
+            _capturedConfig = inputNetworkConfiguration;
         }
     }
 
