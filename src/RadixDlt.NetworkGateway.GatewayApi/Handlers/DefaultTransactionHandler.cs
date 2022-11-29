@@ -90,6 +90,13 @@ internal class DefaultTransactionHandler : ITransactionHandler
         _submissionService = submissionService;
     }
 
+    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default)
+    {
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(null, token);
+
+        return new GatewayModel.TransactionConstructionResponse(ledgerState);
+    }
+
     public async Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token = default)
     {
         var atLedgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);

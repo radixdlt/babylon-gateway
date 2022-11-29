@@ -28,12 +28,6 @@ paths:
       description: Returns the Gateway API version, network and current ledger state.
       tags:
         - Status
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/GatewayInfoRequest"
       responses:
         "200":
           description: The Network
@@ -41,6 +35,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GatewayInfoResponse"
+  "/transaction/construction":
+    post:
+      operationId: TransactionConstruction
+      summary: TBD
+      description: |
+        TBD
+      tags:
+        - Transaction
+      responses:
+        "200":
+          description: TBD
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionConstructionResponse"
   "/transaction/recent":
     post:
       operationId: RecentTransactions
@@ -616,9 +625,6 @@ components:
     # "Status" Request & Response Types
     #
 
-    GatewayInfoRequest:
-      type: object
-      example: {}
     GatewayInfoResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -658,6 +664,10 @@ components:
     # "Transaction" Request & Response Types
     #
 
+    TransactionConstructionResponse:
+      allOf:
+        - type: object
+        - $ref: "#/components/schemas/LedgerStateMixin"
     RecentTransactionsRequest:
       type: object
       properties:

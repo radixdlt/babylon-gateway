@@ -71,6 +71,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface ITransactionHandler
 {
+    Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default);
+
     Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token = default);
 
     Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default);
