@@ -78,8 +78,8 @@ internal class DefaultGatewayHandler : IGatewayHandler
         _ledgerStateQuerier = ledgerStateQuerier;
     }
 
-    public async Task<GatewayModel.GatewayInfoResponse> Status(CancellationToken token)
+    public async Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token)
     {
-        return await _ledgerStateQuerier.GetGatewayState(token);
+        return await _ledgerStateQuerier.GetGatewayInformation(token);
     }
 }

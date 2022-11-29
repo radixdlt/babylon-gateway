@@ -85,8 +85,8 @@ public sealed class GatewayController : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<GatewayModel.GatewayInfoResponse> Status(CancellationToken token)
+    public async Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token)
     {
-        return await _gatewayHandler.Status(token);
+        return await _gatewayHandler.Information(token);
     }
 }

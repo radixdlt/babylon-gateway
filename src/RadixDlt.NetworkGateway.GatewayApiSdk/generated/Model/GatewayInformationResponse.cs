@@ -94,21 +94,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     /// GatewayInfoResponse
     /// </summary>
     [DataContract(Name = "GatewayInfoResponse")]
-    public partial class GatewayInfoResponse : IEquatable<GatewayInfoResponse>, IValidatableObject
+    public partial class GatewayInformationResponse : IEquatable<GatewayInformationResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponse" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInformationResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected GatewayInfoResponse() { }
+        protected GatewayInformationResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="GatewayInfoResponse" /> class.
+        /// Initializes a new instance of the <see cref="GatewayInformationResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="knownTarget">knownTarget (required).</param>
         /// <param name="releaseInfo">releaseInfo (required).</param>
         /// <param name="wellKnownAddresses">wellKnownAddresses (required).</param>
-        public GatewayInfoResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInfoResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInfoResponseAllOfWellKnownAddresses))
+        public GatewayInformationResponse(LedgerState ledgerState = default(LedgerState), GatewayInfoResponseKnownTarget knownTarget = default(GatewayInfoResponseKnownTarget), GatewayInfoResponseReleaseInfo releaseInfo = default(GatewayInfoResponseReleaseInfo), GatewayInfoResponseAllOfWellKnownAddresses wellKnownAddresses = default(GatewayInfoResponseAllOfWellKnownAddresses))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -192,7 +192,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as GatewayInfoResponse);
+            return this.Equals(input as GatewayInformationResponse);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="input">Instance of GatewayInfoResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(GatewayInfoResponse input)
+        public bool Equals(GatewayInformationResponse input)
         {
             if (input == null)
             {

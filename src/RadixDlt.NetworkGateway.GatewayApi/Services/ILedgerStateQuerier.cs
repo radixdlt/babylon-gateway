@@ -70,7 +70,7 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Services;
 
 public interface ILedgerStateQuerier
 {
-    Task<GatewayModel.GatewayInfoResponse> GetGatewayState(CancellationToken token = default);
+    Task<GatewayModel.GatewayInformationResponse> GetGatewayInformation(CancellationToken token = default);
 
     Task<GatewayModel.LedgerState> GetValidLedgerStateForReadRequest(GatewayModel.PartialLedgerStateIdentifier? atLedgerStateIdentifier, CancellationToken token = default);
 

@@ -70,5 +70,5 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface IGatewayHandler
 {
-    Task<GatewayModel.GatewayInfoResponse> Status(CancellationToken token = default);
+    Task<GatewayModel.GatewayInformationResponse> Information(CancellationToken token = default);
 }

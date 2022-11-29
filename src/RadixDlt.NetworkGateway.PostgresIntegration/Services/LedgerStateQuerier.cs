@@ -108,12 +108,12 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
         _clock = clock;
     }
 
-    public async Task<GatewayModel.GatewayInfoResponse> GetGatewayState(CancellationToken token)
+    public async Task<GatewayModel.GatewayInformationResponse> GetGatewayInformation(CancellationToken token)
     {
         var ledgerStatus = await GetLedgerStatus(token);
         var wellKnownAddresses = _networkConfigurationProvider.GetWellKnownAddresses();
 
-        return new GatewayModel.GatewayInfoResponse(
+        return new GatewayModel.GatewayInformationResponse(
             new GatewayModel.LedgerState(
                 _networkConfigurationProvider.GetNetworkName(),
                 ledgerStatus.TopOfLedgerTransaction.StateVersion,

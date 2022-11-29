@@ -21,10 +21,10 @@ tags:
   - name: Non-Fungible
     description: TBD
 paths:
-  "/gateway":
+  "/gateway/information":
     post:
-      operationId: GatewayInfo
-      summary: Get Gateway Info
+      operationId: GatewayInformation
+      summary: Get Gateway Information
       description: Returns the Gateway API version, network and current ledger state.
       tags:
         - Status
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GatewayInfoResponse"
+                $ref: "#/components/schemas/GatewayInformationResponse"
   "/transaction/construction":
     post:
       operationId: TransactionConstruction
@@ -628,7 +628,7 @@ components:
     # "Status" Request & Response Types
     #
 
-    GatewayInfoResponse:
+    GatewayInformationResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
