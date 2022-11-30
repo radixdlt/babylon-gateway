@@ -137,14 +137,14 @@ internal class DefaultTransactionHandler : ITransactionHandler
         throw new TransactionNotFoundException(request.TransactionIdentifier);
     }
 
-    public async Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionCommittedDetailsResponse> Details(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)
     {
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
         var committedTransaction = await _transactionQuerier.LookupCommittedTransaction(request.TransactionIdentifier, ledgerState, true, token);
 
         if (committedTransaction != null)
         {
-            return new GatewayModel.TransactionDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
+            return new GatewayModel.TransactionCommittedDetailsResponse(ledgerState, committedTransaction.Info, committedTransaction.Details);
         }
 
         throw new TransactionNotFoundException(request.TransactionIdentifier);

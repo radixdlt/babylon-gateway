@@ -91,40 +91,40 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionDetailsResponse
+    /// TransactionCommittedDetailsResponse
     /// </summary>
-    [DataContract(Name = "TransactionDetailsResponse")]
-    public partial class TransactionDetailsResponse : IEquatable<TransactionDetailsResponse>, IValidatableObject
+    [DataContract(Name = "TransactionCommittedDetailsResponse")]
+    public partial class TransactionCommittedDetailsResponse : IEquatable<TransactionCommittedDetailsResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetailsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionDetailsResponse() { }
+        protected TransactionCommittedDetailsResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetailsResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponse" /> class.
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="transaction">transaction (required).</param>
         /// <param name="details">details (required).</param>
-        public TransactionDetailsResponse(LedgerState ledgerState = default(LedgerState), TransactionInfo transaction = default(TransactionInfo), TransactionDetails details = default(TransactionDetails))
+        public TransactionCommittedDetailsResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo), TransactionCommittedDetailsResponseDetails details = default(TransactionCommittedDetailsResponseDetails))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
             {
-                throw new ArgumentNullException("ledgerState is a required property for TransactionDetailsResponse and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for TransactionCommittedDetailsResponse and cannot be null");
             }
             this.LedgerState = ledgerState;
             // to ensure "transaction" is required (not null)
             if (transaction == null)
             {
-                throw new ArgumentNullException("transaction is a required property for TransactionDetailsResponse and cannot be null");
+                throw new ArgumentNullException("transaction is a required property for TransactionCommittedDetailsResponse and cannot be null");
             }
             this.Transaction = transaction;
             // to ensure "details" is required (not null)
             if (details == null)
             {
-                throw new ArgumentNullException("details is a required property for TransactionDetailsResponse and cannot be null");
+                throw new ArgumentNullException("details is a required property for TransactionCommittedDetailsResponse and cannot be null");
             }
             this.Details = details;
         }
@@ -139,13 +139,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Transaction
         /// </summary>
         [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionInfo Transaction { get; set; }
+        public CommittedTransactionInfo Transaction { get; set; }
 
         /// <summary>
         /// Gets or Sets Details
         /// </summary>
         [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionDetails Details { get; set; }
+        public TransactionCommittedDetailsResponseDetails Details { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,7 +154,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionDetailsResponse {\n");
+            sb.Append("class TransactionCommittedDetailsResponse {\n");
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Transaction: ").Append(Transaction).Append("\n");
             sb.Append("  Details: ").Append(Details).Append("\n");
@@ -178,15 +178,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionDetailsResponse);
+            return this.Equals(input as TransactionCommittedDetailsResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionDetailsResponse instances are equal
+        /// Returns true if TransactionCommittedDetailsResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionDetailsResponse to be compared</param>
+        /// <param name="input">Instance of TransactionCommittedDetailsResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionDetailsResponse input)
+        public bool Equals(TransactionCommittedDetailsResponse input)
         {
             if (input == null)
             {

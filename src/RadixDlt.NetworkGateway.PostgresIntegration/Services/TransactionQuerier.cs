@@ -147,7 +147,7 @@ internal class TransactionQuerier : ITransactionQuerier
             : new LookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
-    public async Task<GatewayModel.TransactionInfo?> LookupPendingTransaction(GatewayModel.TransactionLookupIdentifier lookup, CancellationToken token = default)
+    public async Task<GatewayModel.CommittedTransactionInfo?> LookupPendingTransaction(GatewayModel.TransactionLookupIdentifier lookup, CancellationToken token = default)
     {
         var hash = lookup.ValueHex.ConvertFromHex();
         var query = _rwDbContext.PendingTransactions.AsQueryable();
@@ -189,7 +189,7 @@ internal class TransactionQuerier : ITransactionQuerier
             _ => throw new ArgumentOutOfRangeException(nameof(pendingTransaction.Status), pendingTransaction.Status, null),
         };
 
-        return new GatewayModel.TransactionInfo(
+        return new GatewayModel.CommittedTransactionInfo(
             transactionStatus: new GatewayModel.TransactionStatus(status),
             payloadHashHex: pendingTransaction.PayloadHash.ToHex(),
             intentHashHex: pendingTransaction.IntentHash.ToHex(),
@@ -233,7 +233,7 @@ internal class TransactionQuerier : ITransactionQuerier
         }
     }
 
-    private async Task<List<GatewayModel.TransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
+    private async Task<List<GatewayModel.CommittedTransactionInfo>> GetTransactions(List<long> transactionStateVersions, CancellationToken token)
     {
         var transactions = await _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
@@ -269,7 +269,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return MapToGatewayAccountTransactionWithDetails(transaction, rawTransaction, referencedEntities);
     }
 
-    private GatewayModel.TransactionInfo MapToGatewayAccountTransaction(UserLedgerTransaction ult)
+    private GatewayModel.CommittedTransactionInfo MapToGatewayAccountTransaction(UserLedgerTransaction ult)
     {
         var status = ult.Status switch
         {
@@ -279,7 +279,7 @@ internal class TransactionQuerier : ITransactionQuerier
             _ => throw new ArgumentOutOfRangeException(),
         };
 
-        return new GatewayModel.TransactionInfo(
+        return new GatewayModel.CommittedTransactionInfo(
             transactionStatus: new GatewayModel.TransactionStatus(status, ult.StateVersion, ult.RoundTimestamp),
             payloadHashHex: ult.PayloadHash.ToHex(),
             intentHashHex: ult.IntentHash.ToHex(),
@@ -289,7 +289,7 @@ internal class TransactionQuerier : ITransactionQuerier
 
     private LookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)
     {
-        return new LookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionDetails(
+        return new LookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
             rawHex: rawUserTransaction.Payload.ToHex(),
             receipt: new JRaw(rawUserTransaction.Receipt),
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),

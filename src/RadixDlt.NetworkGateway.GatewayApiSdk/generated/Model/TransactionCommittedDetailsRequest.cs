@@ -91,48 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionDetailsResponseAllOf
+    /// TransactionCommittedDetailsRequest
     /// </summary>
-    [DataContract(Name = "TransactionDetailsResponse_allOf")]
-    public partial class TransactionDetailsResponseAllOf : IEquatable<TransactionDetailsResponseAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionCommittedDetailsRequest")]
+    public partial class TransactionCommittedDetailsRequest : IEquatable<TransactionCommittedDetailsRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequest" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionDetailsResponseAllOf() { }
+        protected TransactionCommittedDetailsRequest() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetailsResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequest" /> class.
         /// </summary>
-        /// <param name="transaction">transaction (required).</param>
-        /// <param name="details">details (required).</param>
-        public TransactionDetailsResponseAllOf(TransactionInfo transaction = default(TransactionInfo), TransactionDetails details = default(TransactionDetails))
+        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        public TransactionCommittedDetailsRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
-            // to ensure "transaction" is required (not null)
-            if (transaction == null)
+            // to ensure "transactionIdentifier" is required (not null)
+            if (transactionIdentifier == null)
             {
-                throw new ArgumentNullException("transaction is a required property for TransactionDetailsResponseAllOf and cannot be null");
+                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionCommittedDetailsRequest and cannot be null");
             }
-            this.Transaction = transaction;
-            // to ensure "details" is required (not null)
-            if (details == null)
-            {
-                throw new ArgumentNullException("details is a required property for TransactionDetailsResponseAllOf and cannot be null");
-            }
-            this.Details = details;
+            this.TransactionIdentifier = transactionIdentifier;
+            this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets Transaction
+        /// Gets or Sets TransactionIdentifier
         /// </summary>
-        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionInfo Transaction { get; set; }
+        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
 
         /// <summary>
-        /// Gets or Sets Details
+        /// Gets or Sets AtStateIdentifier
         /// </summary>
-        [DataMember(Name = "details", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionDetails Details { get; set; }
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionDetailsResponseAllOf {\n");
-            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
-            sb.Append("  Details: ").Append(Details).Append("\n");
+            sb.Append("class TransactionCommittedDetailsRequest {\n");
+            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionDetailsResponseAllOf);
+            return this.Equals(input as TransactionCommittedDetailsRequest);
         }
 
         /// <summary>
-        /// Returns true if TransactionDetailsResponseAllOf instances are equal
+        /// Returns true if TransactionCommittedDetailsRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionDetailsResponseAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionCommittedDetailsRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionDetailsResponseAllOf input)
+        public bool Equals(TransactionCommittedDetailsRequest input)
         {
             if (input == null)
             {
@@ -180,14 +175,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.Transaction == input.Transaction ||
-                    (this.Transaction != null &&
-                    this.Transaction.Equals(input.Transaction))
+                    this.TransactionIdentifier == input.TransactionIdentifier ||
+                    (this.TransactionIdentifier != null &&
+                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
                 ) && 
                 (
-                    this.Details == input.Details ||
-                    (this.Details != null &&
-                    this.Details.Equals(input.Details))
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -200,13 +195,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.Transaction != null)
+                if (this.TransactionIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
                 }
-                if (this.Details != null)
+                if (this.AtStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.Details.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

@@ -106,7 +106,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="transaction">transaction (required).</param>
-        public TransactionStatusResponse(LedgerState ledgerState = default(LedgerState), TransactionInfo transaction = default(TransactionInfo))
+        public TransactionStatusResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -132,7 +132,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Transaction
         /// </summary>
         [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionInfo Transaction { get; set; }
+        public CommittedTransactionInfo Transaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

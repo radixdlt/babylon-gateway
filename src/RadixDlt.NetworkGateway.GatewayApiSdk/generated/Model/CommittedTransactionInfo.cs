@@ -91,71 +91,69 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionDetails
+    /// CommittedTransactionInfo
     /// </summary>
-    [DataContract(Name = "TransactionDetails")]
-    public partial class TransactionDetails : IEquatable<TransactionDetails>, IValidatableObject
+    [DataContract(Name = "CommittedTransactionInfo")]
+    public partial class CommittedTransactionInfo : IEquatable<CommittedTransactionInfo>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
+        /// Initializes a new instance of the <see cref="CommittedTransactionInfo" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionDetails() { }
+        protected CommittedTransactionInfo() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetails" /> class.
+        /// Initializes a new instance of the <see cref="CommittedTransactionInfo" /> class.
         /// </summary>
-        /// <param name="rawHex">The raw transaction payload, hex encoded. (required).</param>
-        /// <param name="receipt">receipt (required).</param>
-        /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
-        /// <param name="messageHex">The message bytes, hex encoded..</param>
-        public TransactionDetails(string rawHex = default(string), Object receipt = default(Object), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
+        /// <param name="transactionStatus">transactionStatus (required).</param>
+        /// <param name="payloadHashHex">payloadHashHex (required).</param>
+        /// <param name="intentHashHex">intentHashHex (required).</param>
+        /// <param name="feePaid">feePaid.</param>
+        public CommittedTransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount))
         {
-            // to ensure "rawHex" is required (not null)
-            if (rawHex == null)
+            // to ensure "transactionStatus" is required (not null)
+            if (transactionStatus == null)
             {
-                throw new ArgumentNullException("rawHex is a required property for TransactionDetails and cannot be null");
+                throw new ArgumentNullException("transactionStatus is a required property for CommittedTransactionInfo and cannot be null");
             }
-            this.RawHex = rawHex;
-            // to ensure "receipt" is required (not null)
-            if (receipt == null)
+            this.TransactionStatus = transactionStatus;
+            // to ensure "payloadHashHex" is required (not null)
+            if (payloadHashHex == null)
             {
-                throw new ArgumentNullException("receipt is a required property for TransactionDetails and cannot be null");
+                throw new ArgumentNullException("payloadHashHex is a required property for CommittedTransactionInfo and cannot be null");
             }
-            this.Receipt = receipt;
-            // to ensure "referencedGlobalEntities" is required (not null)
-            if (referencedGlobalEntities == null)
+            this.PayloadHashHex = payloadHashHex;
+            // to ensure "intentHashHex" is required (not null)
+            if (intentHashHex == null)
             {
-                throw new ArgumentNullException("referencedGlobalEntities is a required property for TransactionDetails and cannot be null");
+                throw new ArgumentNullException("intentHashHex is a required property for CommittedTransactionInfo and cannot be null");
             }
-            this.ReferencedGlobalEntities = referencedGlobalEntities;
-            this.MessageHex = messageHex;
+            this.IntentHashHex = intentHashHex;
+            this.FeePaid = feePaid;
         }
 
         /// <summary>
-        /// The raw transaction payload, hex encoded.
+        /// Gets or Sets TransactionStatus
         /// </summary>
-        /// <value>The raw transaction payload, hex encoded.</value>
-        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string RawHex { get; set; }
+        [DataMember(Name = "transaction_status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionStatus TransactionStatus { get; set; }
 
         /// <summary>
-        /// Gets or Sets Receipt
+        /// Gets or Sets PayloadHashHex
         /// </summary>
-        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
-        public Object Receipt { get; set; }
+        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets ReferencedGlobalEntities
+        /// Gets or Sets IntentHashHex
         /// </summary>
-        [DataMember(Name = "referenced_global_entities", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> ReferencedGlobalEntities { get; set; }
+        [DataMember(Name = "intent_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string IntentHashHex { get; set; }
 
         /// <summary>
-        /// The message bytes, hex encoded.
+        /// Gets or Sets FeePaid
         /// </summary>
-        /// <value>The message bytes, hex encoded.</value>
-        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
-        public string MessageHex { get; set; }
+        [DataMember(Name = "fee_paid", EmitDefaultValue = true)]
+        public TokenAmount FeePaid { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -164,11 +162,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionDetails {\n");
-            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
-            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
-            sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
-            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
+            sb.Append("class CommittedTransactionInfo {\n");
+            sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
+            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
+            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -189,15 +187,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionDetails);
+            return this.Equals(input as CommittedTransactionInfo);
         }
 
         /// <summary>
-        /// Returns true if TransactionDetails instances are equal
+        /// Returns true if CommittedTransactionInfo instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionDetails to be compared</param>
+        /// <param name="input">Instance of CommittedTransactionInfo to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionDetails input)
+        public bool Equals(CommittedTransactionInfo input)
         {
             if (input == null)
             {
@@ -205,25 +203,24 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.RawHex == input.RawHex ||
-                    (this.RawHex != null &&
-                    this.RawHex.Equals(input.RawHex))
+                    this.TransactionStatus == input.TransactionStatus ||
+                    (this.TransactionStatus != null &&
+                    this.TransactionStatus.Equals(input.TransactionStatus))
                 ) && 
                 (
-                    this.Receipt == input.Receipt ||
-                    (this.Receipt != null &&
-                    this.Receipt.Equals(input.Receipt))
+                    this.PayloadHashHex == input.PayloadHashHex ||
+                    (this.PayloadHashHex != null &&
+                    this.PayloadHashHex.Equals(input.PayloadHashHex))
                 ) && 
                 (
-                    this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
-                    this.ReferencedGlobalEntities != null &&
-                    input.ReferencedGlobalEntities != null &&
-                    this.ReferencedGlobalEntities.SequenceEqual(input.ReferencedGlobalEntities)
+                    this.IntentHashHex == input.IntentHashHex ||
+                    (this.IntentHashHex != null &&
+                    this.IntentHashHex.Equals(input.IntentHashHex))
                 ) && 
                 (
-                    this.MessageHex == input.MessageHex ||
-                    (this.MessageHex != null &&
-                    this.MessageHex.Equals(input.MessageHex))
+                    this.FeePaid == input.FeePaid ||
+                    (this.FeePaid != null &&
+                    this.FeePaid.Equals(input.FeePaid))
                 );
         }
 
@@ -236,21 +233,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.RawHex != null)
+                if (this.TransactionStatus != null)
                 {
-                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
                 }
-                if (this.Receipt != null)
+                if (this.PayloadHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
                 }
-                if (this.ReferencedGlobalEntities != null)
+                if (this.IntentHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.ReferencedGlobalEntities.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
                 }
-                if (this.MessageHex != null)
+                if (this.FeePaid != null)
                 {
-                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.FeePaid.GetHashCode();
                 }
                 return hashCode;
             }

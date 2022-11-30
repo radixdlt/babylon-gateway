@@ -91,43 +91,71 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionDetailsRequest
+    /// TransactionCommittedDetailsResponseDetails
     /// </summary>
-    [DataContract(Name = "TransactionDetailsRequest")]
-    public partial class TransactionDetailsRequest : IEquatable<TransactionDetailsRequest>, IValidatableObject
+    [DataContract(Name = "TransactionCommittedDetailsResponseDetails")]
+    public partial class TransactionCommittedDetailsResponseDetails : IEquatable<TransactionCommittedDetailsResponseDetails>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponseDetails" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionDetailsRequest() { }
+        protected TransactionCommittedDetailsResponseDetails() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionDetailsRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsResponseDetails" /> class.
         /// </summary>
-        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionDetailsRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        /// <param name="rawHex">The raw transaction payload, hex encoded. (required).</param>
+        /// <param name="receipt">receipt (required).</param>
+        /// <param name="referencedGlobalEntities">referencedGlobalEntities (required).</param>
+        /// <param name="messageHex">The message bytes, hex encoded..</param>
+        public TransactionCommittedDetailsResponseDetails(string rawHex = default(string), Object receipt = default(Object), List<string> referencedGlobalEntities = default(List<string>), string messageHex = default(string))
         {
-            // to ensure "transactionIdentifier" is required (not null)
-            if (transactionIdentifier == null)
+            // to ensure "rawHex" is required (not null)
+            if (rawHex == null)
             {
-                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionDetailsRequest and cannot be null");
+                throw new ArgumentNullException("rawHex is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
             }
-            this.TransactionIdentifier = transactionIdentifier;
-            this.AtStateIdentifier = atStateIdentifier;
+            this.RawHex = rawHex;
+            // to ensure "receipt" is required (not null)
+            if (receipt == null)
+            {
+                throw new ArgumentNullException("receipt is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
+            }
+            this.Receipt = receipt;
+            // to ensure "referencedGlobalEntities" is required (not null)
+            if (referencedGlobalEntities == null)
+            {
+                throw new ArgumentNullException("referencedGlobalEntities is a required property for TransactionCommittedDetailsResponseDetails and cannot be null");
+            }
+            this.ReferencedGlobalEntities = referencedGlobalEntities;
+            this.MessageHex = messageHex;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionIdentifier
+        /// The raw transaction payload, hex encoded.
         /// </summary>
-        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
+        /// <value>The raw transaction payload, hex encoded.</value>
+        [DataMember(Name = "raw_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string RawHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets AtStateIdentifier
+        /// Gets or Sets Receipt
         /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        [DataMember(Name = "receipt", IsRequired = true, EmitDefaultValue = true)]
+        public Object Receipt { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ReferencedGlobalEntities
+        /// </summary>
+        [DataMember(Name = "referenced_global_entities", IsRequired = true, EmitDefaultValue = true)]
+        public List<string> ReferencedGlobalEntities { get; set; }
+
+        /// <summary>
+        /// The message bytes, hex encoded.
+        /// </summary>
+        /// <value>The message bytes, hex encoded.</value>
+        [DataMember(Name = "message_hex", EmitDefaultValue = true)]
+        public string MessageHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +164,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionDetailsRequest {\n");
-            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("class TransactionCommittedDetailsResponseDetails {\n");
+            sb.Append("  RawHex: ").Append(RawHex).Append("\n");
+            sb.Append("  Receipt: ").Append(Receipt).Append("\n");
+            sb.Append("  ReferencedGlobalEntities: ").Append(ReferencedGlobalEntities).Append("\n");
+            sb.Append("  MessageHex: ").Append(MessageHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +189,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionDetailsRequest);
+            return this.Equals(input as TransactionCommittedDetailsResponseDetails);
         }
 
         /// <summary>
-        /// Returns true if TransactionDetailsRequest instances are equal
+        /// Returns true if TransactionCommittedDetailsResponseDetails instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionDetailsRequest to be compared</param>
+        /// <param name="input">Instance of TransactionCommittedDetailsResponseDetails to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionDetailsRequest input)
+        public bool Equals(TransactionCommittedDetailsResponseDetails input)
         {
             if (input == null)
             {
@@ -175,14 +205,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TransactionIdentifier == input.TransactionIdentifier ||
-                    (this.TransactionIdentifier != null &&
-                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
+                    this.RawHex == input.RawHex ||
+                    (this.RawHex != null &&
+                    this.RawHex.Equals(input.RawHex))
                 ) && 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.Receipt == input.Receipt ||
+                    (this.Receipt != null &&
+                    this.Receipt.Equals(input.Receipt))
+                ) && 
+                (
+                    this.ReferencedGlobalEntities == input.ReferencedGlobalEntities ||
+                    this.ReferencedGlobalEntities != null &&
+                    input.ReferencedGlobalEntities != null &&
+                    this.ReferencedGlobalEntities.SequenceEqual(input.ReferencedGlobalEntities)
+                ) && 
+                (
+                    this.MessageHex == input.MessageHex ||
+                    (this.MessageHex != null &&
+                    this.MessageHex.Equals(input.MessageHex))
                 );
         }
 
@@ -195,13 +236,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionIdentifier != null)
+                if (this.RawHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.RawHex.GetHashCode();
                 }
-                if (this.AtStateIdentifier != null)
+                if (this.Receipt != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.Receipt.GetHashCode();
+                }
+                if (this.ReferencedGlobalEntities != null)
+                {
+                    hashCode = (hashCode * 59) + this.ReferencedGlobalEntities.GetHashCode();
+                }
+                if (this.MessageHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.MessageHex.GetHashCode();
                 }
                 return hashCode;
             }

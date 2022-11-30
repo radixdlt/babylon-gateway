@@ -105,7 +105,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
         /// <param name="transaction">transaction (required).</param>
-        public TransactionStatusResponseAllOf(TransactionInfo transaction = default(TransactionInfo))
+        public TransactionStatusResponseAllOf(CommittedTransactionInfo transaction = default(CommittedTransactionInfo))
         {
             // to ensure "transaction" is required (not null)
             if (transaction == null)
@@ -119,7 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets Transaction
         /// </summary>
         [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionInfo Transaction { get; set; }
+        public CommittedTransactionInfo Transaction { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

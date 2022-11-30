@@ -21,6 +21,11 @@ tags:
   - name: Non-Fungible
     description: TBD
 paths:
+
+  #
+  # /gateway/* Requests & Responses
+  #
+
   "/gateway/information":
     post:
       operationId: GatewayInformation
@@ -35,6 +40,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GatewayInformationResponse"
+
+  #
+  # /transaction/* Requests & Responses
+  #
+
   "/transaction/construction":
     post:
       operationId: TransactionConstruction
@@ -121,6 +131,29 @@ paths:
                 $ref: "#/components/schemas/TransactionSubmitResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+  "/transaction/committed-details":
+    post:
+      operationId: TransactionCommittedDetails
+      summary: Transaction Committed Details
+      description: |
+        Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren't recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionCommittedDetailsRequest"
+      responses:
+        "200":
+          description: Transaction Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionCommittedDetailsResponse"
+        "4XX":
+          $ref: "#/components/responses/ErrorResponse"
   "/transaction/status":
     post:
       operationId: TransactionStatus
@@ -144,29 +177,11 @@ paths:
                 $ref: "#/components/schemas/TransactionStatusResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  "/transaction/details":
-    post:
-      operationId: TransactionDetails
-      summary: Transaction Details
-      description: |
-        Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren't recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
-      tags:
-        - Transaction
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TransactionDetailsRequest"
-      responses:
-        "200":
-          description: Transaction Status
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TransactionDetailsResponse"
-        "4XX":
-          $ref: "#/components/responses/ErrorResponse"
+
+  #
+  # /gateway/* Requests & Responses
+  #
+
   /entity/overview:
     post:
       operationId: EntityOverview
@@ -328,6 +343,11 @@ paths:
                 $ref: "#/components/schemas/EntityNonFungibleIdsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
+
+  #
+  # /non-fungible/* Requests & Responses
+  #
+
   /non-fungible/ids:
     post:
       operationId: NonFungibleIds
@@ -548,7 +568,7 @@ components:
         id_hex:
           type: string
 
-    TransactionInfo:
+    CommittedTransactionInfo:
       type: object
       required:
         - transaction_status
@@ -721,7 +741,7 @@ components:
                   description: The page of user transactions.
                   type: array
                   items:
-                    $ref: "#/components/schemas/TransactionInfo"
+                    $ref: "#/components/schemas/CommittedTransactionInfo"
 
     TransactionSubmitRequest:
       type: object
@@ -761,9 +781,9 @@ components:
             - transaction
           properties:
             transaction:
-              $ref: "#/components/schemas/TransactionInfo"
+              $ref: "#/components/schemas/CommittedTransactionInfo"
 
-    TransactionDetailsRequest:
+    TransactionCommittedDetailsRequest:
       type: object
       required:
         - transaction_identifier
@@ -776,7 +796,7 @@ components:
         transaction_identifier:
           origin: payload
           value_hex: "<transaction-payload-hash>"
-    TransactionDetailsResponse:
+    TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
@@ -785,9 +805,28 @@ components:
             - details
           properties:
             transaction:
-              $ref: "#/components/schemas/TransactionInfo"
+              $ref: "#/components/schemas/CommittedTransactionInfo"
             details:
-              $ref: "#/components/schemas/TransactionDetails"
+              $ref: "#/components/schemas/TransactionCommittedDetailsResponseDetails"
+    TransactionCommittedDetailsResponseDetails:
+      type: object
+      required:
+        - raw_hex
+        - receipt
+        - referenced_global_entities
+      properties:
+        raw_hex:
+          description: The raw transaction payload, hex encoded.
+          type: string
+        receipt:
+          type: object
+        referenced_global_entities:
+          type: array
+          items:
+            type: string
+        message_hex:
+          description: The message bytes, hex encoded.
+          type: string
 
     #
     # /entity/* Request & Response Types
@@ -1336,25 +1375,6 @@ components:
             transaction_not_found:
               $ref: "#/components/schemas/TransactionLookupIdentifier"
 
-    TransactionDetails:
-      type: object
-      required:
-        - raw_hex
-        - receipt
-        - referenced_global_entities
-      properties:
-        raw_hex:
-          description: The raw transaction payload, hex encoded.
-          type: string
-        receipt:
-          type: object
-        referenced_global_entities:
-          type: array
-          items:
-            type: string
-        message_hex:
-          description: The message bytes, hex encoded.
-          type: string
 
     TokenIdentifier:
       type: object

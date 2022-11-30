@@ -79,11 +79,11 @@ public interface ITransactionQuerier
 
     Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionLookupIdentifier lookup, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
-    Task<GatewayModel.TransactionInfo?> LookupPendingTransaction(GatewayModel.TransactionLookupIdentifier lookup, CancellationToken token = default);
+    Task<GatewayModel.CommittedTransactionInfo?> LookupPendingTransaction(GatewayModel.TransactionLookupIdentifier lookup, CancellationToken token = default);
 }
 
-public sealed record LookupResult(GatewayModel.TransactionInfo? Info, GatewayModel.TransactionDetails? Details);
+public sealed record LookupResult(GatewayModel.CommittedTransactionInfo? Info, GatewayModel.TransactionCommittedDetailsResponseDetails? Details);
 
-public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.TransactionInfo> Transactions);
+public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions);
 
 public sealed record RecentTransactionPageRequest(GatewayModel.LedgerTransactionsCursor? Cursor, int PageSize);

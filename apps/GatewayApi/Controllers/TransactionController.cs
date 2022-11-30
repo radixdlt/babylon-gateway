@@ -104,7 +104,7 @@ public sealed class TransactionController : ControllerBase
     }
 
     [HttpPost("details")]
-    public async Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token)
+    public async Task<GatewayModel.TransactionCommittedDetailsResponse> Details(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
     {
         return await _transactionHandler.Details(request, token);
     }

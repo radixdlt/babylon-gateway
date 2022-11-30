@@ -109,7 +109,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="items">The page of user transactions. (required).</param>
-        public TransactionRecentResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<TransactionInfo> items = default(List<TransactionInfo>))
+        public TransactionRecentResponse(LedgerState ledgerState = default(LedgerState), long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string), List<CommittedTransactionInfo> items = default(List<CommittedTransactionInfo>))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -160,7 +160,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>The page of user transactions.</value>
         [DataMember(Name = "items", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionInfo> Items { get; set; }
+        public List<CommittedTransactionInfo> Items { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

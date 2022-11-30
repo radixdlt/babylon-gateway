@@ -77,7 +77,7 @@ public interface ITransactionHandler
 
     Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionCommittedDetailsResponse> Details(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default);
 
     Task<object> Preview(JToken request, CancellationToken token = default);
 
