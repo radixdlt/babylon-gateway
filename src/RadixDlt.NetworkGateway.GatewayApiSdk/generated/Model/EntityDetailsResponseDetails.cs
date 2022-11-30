@@ -278,7 +278,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     case "EntityDetailsResponsePackageDetails":
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponsePackageDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
-                    case "account_component":
+                    case "component":
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     case "fungible_resource":
@@ -291,7 +291,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponsePackageDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for EntityDetailsResponseDetails. Possible values: EntityDetailsResponseComponentDetails EntityDetailsResponseFungibleResourceDetails EntityDetailsResponseNonFungibleResourceDetails EntityDetailsResponsePackageDetails account_component fungible_resource non_fungible_resource package", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for EntityDetailsResponseDetails. Possible values: EntityDetailsResponseComponentDetails EntityDetailsResponseFungibleResourceDetails EntityDetailsResponseNonFungibleResourceDetails EntityDetailsResponsePackageDetails component fungible_resource non_fungible_resource package", discriminatorValue));
                         break;
                 }
             }

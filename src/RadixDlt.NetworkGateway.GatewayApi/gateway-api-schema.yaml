@@ -941,7 +941,7 @@ components:
           fungible_resource: "#/components/schemas/EntityDetailsResponseFungibleResourceDetails"
           non_fungible_resource: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetails"
           package: "#/components/schemas/EntityDetailsResponsePackageDetails"
-          account_component: "#/components/schemas/EntityDetailsResponseComponentDetails"
+          component: "#/components/schemas/EntityDetailsResponseComponentDetails"
     EntityDetailsResponseFungibleResourceDetails:
       type: object
       required:
