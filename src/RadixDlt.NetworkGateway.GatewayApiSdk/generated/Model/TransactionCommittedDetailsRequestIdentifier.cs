@@ -91,29 +91,127 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// Defines TransactionLookupOrigin
+    /// TransactionCommittedDetailsRequestIdentifier
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum TransactionLookupOrigin
+    [DataContract(Name = "TransactionCommittedDetailsRequestIdentifier")]
+    public partial class TransactionCommittedDetailsRequestIdentifier : IEquatable<TransactionCommittedDetailsRequestIdentifier>, IValidatableObject
     {
-        /// <summary>
-        /// Enum Intent for value: intent
-        /// </summary>
-        [EnumMember(Value = "intent")]
-        Intent = 1,
 
         /// <summary>
-        /// Enum SignedIntent for value: signed_intent
+        /// Gets or Sets Type
         /// </summary>
-        [EnumMember(Value = "signed_intent")]
-        SignedIntent = 2,
+        [DataMember(Name = "type", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionCommittedDetailsRequestIdentifierType Type { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequestIdentifier" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected TransactionCommittedDetailsRequestIdentifier() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionCommittedDetailsRequestIdentifier" /> class.
+        /// </summary>
+        /// <param name="type">type (required).</param>
+        /// <param name="valueHex">valueHex (required).</param>
+        public TransactionCommittedDetailsRequestIdentifier(TransactionCommittedDetailsRequestIdentifierType type = default(TransactionCommittedDetailsRequestIdentifierType), string valueHex = default(string))
+        {
+            this.Type = type;
+            // to ensure "valueHex" is required (not null)
+            if (valueHex == null)
+            {
+                throw new ArgumentNullException("valueHex is a required property for TransactionCommittedDetailsRequestIdentifier and cannot be null");
+            }
+            this.ValueHex = valueHex;
+        }
 
         /// <summary>
-        /// Enum Payload for value: payload
+        /// Gets or Sets ValueHex
         /// </summary>
-        [EnumMember(Value = "payload")]
-        Payload = 3
+        [DataMember(Name = "value_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string ValueHex { get; set; }
 
+        /// <summary>
+        /// Returns the string presentation of the object
+        /// </summary>
+        /// <returns>String presentation of the object</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("class TransactionCommittedDetailsRequestIdentifier {\n");
+            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  ValueHex: ").Append(ValueHex).Append("\n");
+            sb.Append("}\n");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public virtual string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Returns true if objects are equal
+        /// </summary>
+        /// <param name="input">Object to be compared</param>
+        /// <returns>Boolean</returns>
+        public override bool Equals(object input)
+        {
+            return this.Equals(input as TransactionCommittedDetailsRequestIdentifier);
+        }
+
+        /// <summary>
+        /// Returns true if TransactionCommittedDetailsRequestIdentifier instances are equal
+        /// </summary>
+        /// <param name="input">Instance of TransactionCommittedDetailsRequestIdentifier to be compared</param>
+        /// <returns>Boolean</returns>
+        public bool Equals(TransactionCommittedDetailsRequestIdentifier input)
+        {
+            if (input == null)
+            {
+                return false;
+            }
+            return 
+                (
+                    this.Type == input.Type ||
+                    this.Type.Equals(input.Type)
+                ) && 
+                (
+                    this.ValueHex == input.ValueHex ||
+                    (this.ValueHex != null &&
+                    this.ValueHex.Equals(input.ValueHex))
+                );
+        }
+
+        /// <summary>
+        /// Gets the hash code
+        /// </summary>
+        /// <returns>Hash code</returns>
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hashCode = 41;
+                hashCode = (hashCode * 59) + this.Type.GetHashCode();
+                if (this.ValueHex != null)
+                {
+                    hashCode = (hashCode * 59) + this.ValueHex.GetHashCode();
+                }
+                return hashCode;
+            }
+        }
+
+        /// <summary>
+        /// To validate all properties of the instance
+        /// </summary>
+        /// <param name="validationContext">Validation context</param>
+        /// <returns>Validation Result</returns>
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
     }
 
 }

@@ -112,26 +112,26 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionLookupIdentifier lookup, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
-        var hash = lookup.ValueHex.ConvertFromHex();
+        var hash = identifier.ValueHex.ConvertFromHex();
         var query = _dbContext.LedgerTransactions
             .OfType<UserLedgerTransaction>()
             .Where(ult => ult.StateVersion <= ledgerState.StateVersion);
 
-        switch (lookup.Origin)
+        switch (identifier.Type)
         {
-            case GatewayModel.TransactionLookupOrigin.Intent:
+            case GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash:
                 query = query.Where(ult => ult.IntentHash == hash);
                 break;
-            case GatewayModel.TransactionLookupOrigin.SignedIntent:
+            case GatewayModel.TransactionCommittedDetailsRequestIdentifierType.SignedIntentHash:
                 query = query.Where(ult => ult.SignedIntentHash == hash);
                 break;
-            case GatewayModel.TransactionLookupOrigin.Payload:
+            case GatewayModel.TransactionCommittedDetailsRequestIdentifierType.PayloadHash:
                 query = query.Where(ult => ult.PayloadHash == hash);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(lookup.Origin), lookup.Origin, null);
+                throw new ArgumentOutOfRangeException(nameof(identifier.Type), identifier.Type, null);
         }
 
         var stateVersion = await query

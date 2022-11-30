@@ -800,13 +800,29 @@ components:
         - transaction_identifier
       properties:
         transaction_identifier:
-          $ref: "#/components/schemas/TransactionLookupIdentifier"
+          $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdentifier"
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         transaction_identifier:
-          origin: payload
+          type: payload_hash
           value_hex: "<transaction-payload-hash>"
+    TransactionCommittedDetailsRequestIdentifierType:
+      type: string
+      enum:
+        - intent_hash
+        - signed_intent_hash
+        - payload_hash
+    TransactionCommittedDetailsRequestIdentifier:
+      type: object
+      required:
+        - type
+        - value_hex
+      properties:
+        type:
+          $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdentifierType"
+        value_hex:
+          type: string
     TransactionCommittedDetailsResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
@@ -1384,7 +1400,8 @@ components:
             - transaction_not_found
           properties:
             transaction_not_found:
-              $ref: "#/components/schemas/TransactionLookupIdentifier"
+              $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdenti\
+                    fier"
 
 
     TokenIdentifier:
@@ -1394,20 +1411,4 @@ components:
       properties:
         rri:
           description: The radix resource identifier of the token.
-          type: string
-    TransactionLookupOrigin:
-      type: string
-      enum:
-        - intent
-        - signed_intent
-        - payload
-    TransactionLookupIdentifier:
-      type: object
-      required:
-        - origin
-        - value_hex
-      properties:
-        origin:
-          $ref: "#/components/schemas/TransactionLookupOrigin"
-        value_hex:
           type: string

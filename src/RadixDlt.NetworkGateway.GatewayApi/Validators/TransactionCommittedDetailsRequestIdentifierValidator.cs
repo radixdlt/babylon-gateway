@@ -63,21 +63,21 @@
  */
 
 using FluentValidation;
+using RadixDlt.NetworkGateway.Abstractions;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class TransactionDetailsRequestValidator : AbstractValidator<GatewayModel.TransactionCommittedDetailsRequest>
+internal class TransactionCommittedDetailsRequestIdentifierValidator : AbstractValidator<GatewayModel.TransactionCommittedDetailsRequestIdentifier>
 {
-    public TransactionDetailsRequestValidator(
-        TransactionLookupIdentifierValidator transactionLookupIdentifierValidator,
-        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public TransactionCommittedDetailsRequestIdentifierValidator()
     {
-        RuleFor(x => x.TransactionIdentifier)
+        RuleFor(x => x.Type)
             .NotNull()
-            .SetValidator(transactionLookupIdentifierValidator);
+            .IsInEnum();
 
-        RuleFor(x => x.AtStateIdentifier)
-            .SetValidator(partialLedgerStateIdentifierValidator);
+        RuleFor(x => x.ValueHex)
+            .NotNull()
+            .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
     }
 }

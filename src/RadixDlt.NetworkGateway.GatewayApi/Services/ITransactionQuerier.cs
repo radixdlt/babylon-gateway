@@ -77,7 +77,7 @@ public interface ITransactionQuerier
         GatewayModel.LedgerState? fromLedgerState,
         CancellationToken token = default);
 
-    Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionLookupIdentifier lookup, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
+    Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default);
 
     Task<ICollection<IntentLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default);
 }

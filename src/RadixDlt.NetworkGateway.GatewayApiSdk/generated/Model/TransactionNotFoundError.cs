@@ -115,7 +115,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="transactionNotFound">transactionNotFound (required).</param>
         /// <param name="type">The type of error. Each subtype may have its own additional structured fields. (required) (default to &quot;TransactionNotFoundError&quot;).</param>
-        public TransactionNotFoundError(TransactionLookupIdentifier transactionNotFound = default(TransactionLookupIdentifier), string type = "TransactionNotFoundError") : base(type)
+        public TransactionNotFoundError(TransactionCommittedDetailsRequestIdentifier transactionNotFound = default(TransactionCommittedDetailsRequestIdentifier), string type = "TransactionNotFoundError") : base(type)
         {
             // to ensure "transactionNotFound" is required (not null)
             if (transactionNotFound == null)
@@ -129,7 +129,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets TransactionNotFound
         /// </summary>
         [DataMember(Name = "transaction_not_found", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionLookupIdentifier TransactionNotFound { get; set; }
+        public TransactionCommittedDetailsRequestIdentifier TransactionNotFound { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

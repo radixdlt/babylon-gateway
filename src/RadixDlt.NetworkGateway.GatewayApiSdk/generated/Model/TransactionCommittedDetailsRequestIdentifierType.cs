@@ -91,127 +91,29 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionLookupIdentifier
+    /// Defines TransactionCommittedDetailsRequestIdentifierType
     /// </summary>
-    [DataContract(Name = "TransactionLookupIdentifier")]
-    public partial class TransactionLookupIdentifier : IEquatable<TransactionLookupIdentifier>, IValidatableObject
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TransactionCommittedDetailsRequestIdentifierType
     {
+        /// <summary>
+        /// Enum IntentHash for value: intent_hash
+        /// </summary>
+        [EnumMember(Value = "intent_hash")]
+        IntentHash = 1,
 
         /// <summary>
-        /// Gets or Sets Origin
+        /// Enum SignedIntentHash for value: signed_intent_hash
         /// </summary>
-        [DataMember(Name = "origin", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionLookupOrigin Origin { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionLookupIdentifier" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionLookupIdentifier() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionLookupIdentifier" /> class.
-        /// </summary>
-        /// <param name="origin">origin (required).</param>
-        /// <param name="valueHex">valueHex (required).</param>
-        public TransactionLookupIdentifier(TransactionLookupOrigin origin = default(TransactionLookupOrigin), string valueHex = default(string))
-        {
-            this.Origin = origin;
-            // to ensure "valueHex" is required (not null)
-            if (valueHex == null)
-            {
-                throw new ArgumentNullException("valueHex is a required property for TransactionLookupIdentifier and cannot be null");
-            }
-            this.ValueHex = valueHex;
-        }
+        [EnumMember(Value = "signed_intent_hash")]
+        SignedIntentHash = 2,
 
         /// <summary>
-        /// Gets or Sets ValueHex
+        /// Enum PayloadHash for value: payload_hash
         /// </summary>
-        [DataMember(Name = "value_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string ValueHex { get; set; }
+        [EnumMember(Value = "payload_hash")]
+        PayloadHash = 3
 
-        /// <summary>
-        /// Returns the string presentation of the object
-        /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionLookupIdentifier {\n");
-            sb.Append("  Origin: ").Append(Origin).Append("\n");
-            sb.Append("  ValueHex: ").Append(ValueHex).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as TransactionLookupIdentifier);
-        }
-
-        /// <summary>
-        /// Returns true if TransactionLookupIdentifier instances are equal
-        /// </summary>
-        /// <param name="input">Instance of TransactionLookupIdentifier to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(TransactionLookupIdentifier input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Origin == input.Origin ||
-                    this.Origin.Equals(input.Origin)
-                ) && 
-                (
-                    this.ValueHex == input.ValueHex ||
-                    (this.ValueHex != null &&
-                    this.ValueHex.Equals(input.ValueHex))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Origin.GetHashCode();
-                if (this.ValueHex != null)
-                {
-                    hashCode = (hashCode * 59) + this.ValueHex.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }
