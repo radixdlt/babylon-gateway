@@ -425,7 +425,7 @@ SELECT
                         {
                             referencedEntities.GetOrAdd(oe.EntityIdHex, _ => new ReferencedEntity(oe.EntityIdHex, oe.EntityType, stateVersion)).IsImmediateChildOf(re);
 
-                            childToParentEntities.Add(oe.EntityIdHex, sid.EntityIdHex);
+                            childToParentEntities[oe.EntityIdHex] = sid.EntityIdHex;
                         }
                     }
 
