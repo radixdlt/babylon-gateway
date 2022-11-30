@@ -13,24 +13,24 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { EntityResourcesResponseFungibleResources } from './EntityResourcesResponseFungibleResources';
+import type { FungibleResourcesCollection } from './FungibleResourcesCollection';
 import {
-    EntityResourcesResponseFungibleResourcesFromJSON,
-    EntityResourcesResponseFungibleResourcesFromJSONTyped,
-    EntityResourcesResponseFungibleResourcesToJSON,
-} from './EntityResourcesResponseFungibleResources';
-import type { EntityResourcesResponseNonFungibleResources } from './EntityResourcesResponseNonFungibleResources';
-import {
-    EntityResourcesResponseNonFungibleResourcesFromJSON,
-    EntityResourcesResponseNonFungibleResourcesFromJSONTyped,
-    EntityResourcesResponseNonFungibleResourcesToJSON,
-} from './EntityResourcesResponseNonFungibleResources';
+    FungibleResourcesCollectionFromJSON,
+    FungibleResourcesCollectionFromJSONTyped,
+    FungibleResourcesCollectionToJSON,
+} from './FungibleResourcesCollection';
 import type { LedgerState } from './LedgerState';
 import {
     LedgerStateFromJSON,
     LedgerStateFromJSONTyped,
     LedgerStateToJSON,
 } from './LedgerState';
+import type { NonFungibleResourcesCollection } from './NonFungibleResourcesCollection';
+import {
+    NonFungibleResourcesCollectionFromJSON,
+    NonFungibleResourcesCollectionFromJSONTyped,
+    NonFungibleResourcesCollectionToJSON,
+} from './NonFungibleResourcesCollection';
 
 /**
  * 
@@ -45,23 +45,23 @@ export interface EntityResourcesResponse {
      */
     ledger_state: LedgerState;
     /**
-     * The Bech32m-encoded human readable version of the entity's global address
+     * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
      * @memberof EntityResourcesResponse
      */
     address: string;
     /**
      * 
-     * @type {EntityResourcesResponseFungibleResources}
+     * @type {FungibleResourcesCollection}
      * @memberof EntityResourcesResponse
      */
-    fungible_resources: EntityResourcesResponseFungibleResources;
+    fungible_resources: FungibleResourcesCollection;
     /**
      * 
-     * @type {EntityResourcesResponseNonFungibleResources}
+     * @type {NonFungibleResourcesCollection}
      * @memberof EntityResourcesResponse
      */
-    non_fungible_resources: EntityResourcesResponseNonFungibleResources;
+    non_fungible_resources: NonFungibleResourcesCollection;
 }
 
 /**
@@ -89,8 +89,8 @@ export function EntityResourcesResponseFromJSONTyped(json: any, ignoreDiscrimina
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'address': json['address'],
-        'fungible_resources': EntityResourcesResponseFungibleResourcesFromJSON(json['fungible_resources']),
-        'non_fungible_resources': EntityResourcesResponseNonFungibleResourcesFromJSON(json['non_fungible_resources']),
+        'fungible_resources': FungibleResourcesCollectionFromJSON(json['fungible_resources']),
+        'non_fungible_resources': NonFungibleResourcesCollectionFromJSON(json['non_fungible_resources']),
     };
 }
 
@@ -105,8 +105,8 @@ export function EntityResourcesResponseToJSON(value?: EntityResourcesResponse | 
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
         'address': value.address,
-        'fungible_resources': EntityResourcesResponseFungibleResourcesToJSON(value.fungible_resources),
-        'non_fungible_resources': EntityResourcesResponseNonFungibleResourcesToJSON(value.non_fungible_resources),
+        'fungible_resources': FungibleResourcesCollectionToJSON(value.fungible_resources),
+        'non_fungible_resources': NonFungibleResourcesCollectionToJSON(value.non_fungible_resources),
     };
 }
 

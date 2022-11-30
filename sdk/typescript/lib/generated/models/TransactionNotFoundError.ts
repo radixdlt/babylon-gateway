@@ -19,12 +19,12 @@ import {
     GatewayErrorFromJSONTyped,
     GatewayErrorToJSON,
 } from './GatewayError';
-import type { TransactionLookupIdentifier } from './TransactionLookupIdentifier';
+import type { TransactionCommittedDetailsRequestIdentifier } from './TransactionCommittedDetailsRequestIdentifier';
 import {
-    TransactionLookupIdentifierFromJSON,
-    TransactionLookupIdentifierFromJSONTyped,
-    TransactionLookupIdentifierToJSON,
-} from './TransactionLookupIdentifier';
+    TransactionCommittedDetailsRequestIdentifierFromJSON,
+    TransactionCommittedDetailsRequestIdentifierFromJSONTyped,
+    TransactionCommittedDetailsRequestIdentifierToJSON,
+} from './TransactionCommittedDetailsRequestIdentifier';
 
 /**
  * 
@@ -34,10 +34,10 @@ import {
 export interface TransactionNotFoundError extends GatewayError {
     /**
      * 
-     * @type {TransactionLookupIdentifier}
+     * @type {TransactionCommittedDetailsRequestIdentifier}
      * @memberof TransactionNotFoundError
      */
-    transaction_not_found: TransactionLookupIdentifier;
+    transaction_not_found: TransactionCommittedDetailsRequestIdentifier;
 }
 
 /**
@@ -60,7 +60,7 @@ export function TransactionNotFoundErrorFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         ...GatewayErrorFromJSONTyped(json, ignoreDiscriminator),
-        'transaction_not_found': TransactionLookupIdentifierFromJSON(json['transaction_not_found']),
+        'transaction_not_found': TransactionCommittedDetailsRequestIdentifierFromJSON(json['transaction_not_found']),
     };
 }
 
@@ -73,7 +73,7 @@ export function TransactionNotFoundErrorToJSON(value?: TransactionNotFoundError 
     }
     return {
         ...GatewayErrorToJSON(value),
-        'transaction_not_found': TransactionLookupIdentifierToJSON(value.transaction_not_found),
+        'transaction_not_found': TransactionCommittedDetailsRequestIdentifierToJSON(value.transaction_not_found),
     };
 }
 

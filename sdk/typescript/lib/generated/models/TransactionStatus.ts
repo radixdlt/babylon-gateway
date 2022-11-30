@@ -12,84 +12,30 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+
 /**
  * 
  * @export
- * @interface TransactionStatus
  */
-export interface TransactionStatus {
-    /**
-     * 
-     * @type {number}
-     * @memberof TransactionStatus
-     */
-    state_version?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof TransactionStatus
-     */
-    status: TransactionStatusStatusEnum;
-    /**
-     * 
-     * @type {Date}
-     * @memberof TransactionStatus
-     */
-    confirmed_time?: Date | null;
-}
-
-
-/**
- * @export
- */
-export const TransactionStatusStatusEnum = {
-    Succeeded: 'succeeded',
-    Failed: 'failed',
-    Rejected: 'rejected',
-    Pending: 'pending'
+export const TransactionStatus = {
+    Unknown: 'unknown',
+    CommittedSuccess: 'committed_success',
+    CommittedFailure: 'committed_failure',
+    Pending: 'pending',
+    Rejected: 'rejected'
 } as const;
-export type TransactionStatusStatusEnum = typeof TransactionStatusStatusEnum[keyof typeof TransactionStatusStatusEnum];
+export type TransactionStatus = typeof TransactionStatus[keyof typeof TransactionStatus];
 
-
-/**
- * Check if a given object implements the TransactionStatus interface.
- */
-export function instanceOfTransactionStatus(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "status" in value;
-
-    return isInstance;
-}
 
 export function TransactionStatusFromJSON(json: any): TransactionStatus {
     return TransactionStatusFromJSONTyped(json, false);
 }
 
 export function TransactionStatusFromJSONTyped(json: any, ignoreDiscriminator: boolean): TransactionStatus {
-    if ((json === undefined) || (json === null)) {
-        return json;
-    }
-    return {
-        
-        'state_version': !exists(json, 'state_version') ? undefined : json['state_version'],
-        'status': json['status'],
-        'confirmed_time': !exists(json, 'confirmed_time') ? undefined : (json['confirmed_time'] === null ? null : new Date(json['confirmed_time'])),
-    };
+    return json as TransactionStatus;
 }
 
 export function TransactionStatusToJSON(value?: TransactionStatus | null): any {
-    if (value === undefined) {
-        return undefined;
-    }
-    if (value === null) {
-        return null;
-    }
-    return {
-        
-        'state_version': value.state_version,
-        'status': value.status,
-        'confirmed_time': value.confirmed_time === undefined ? undefined : (value.confirmed_time === null ? null : value.confirmed_time.toISOString()),
-    };
+    return value as any;
 }
 

@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { EntityOverviewResponseEntityItemMetadata } from './EntityOverviewResponseEntityItemMetadata';
+import type { EntityMetadataCollection } from './EntityMetadataCollection';
 import {
-    EntityOverviewResponseEntityItemMetadataFromJSON,
-    EntityOverviewResponseEntityItemMetadataFromJSONTyped,
-    EntityOverviewResponseEntityItemMetadataToJSON,
-} from './EntityOverviewResponseEntityItemMetadata';
+    EntityMetadataCollectionFromJSON,
+    EntityMetadataCollectionFromJSONTyped,
+    EntityMetadataCollectionToJSON,
+} from './EntityMetadataCollection';
 
 /**
  * 
@@ -27,17 +27,17 @@ import {
  */
 export interface EntityOverviewResponseEntityItem {
     /**
-     * The Bech32m-encoded human readable version of the entity's global address
+     * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
      * @memberof EntityOverviewResponseEntityItem
      */
     address: string;
     /**
      * 
-     * @type {EntityOverviewResponseEntityItemMetadata}
+     * @type {EntityMetadataCollection}
      * @memberof EntityOverviewResponseEntityItem
      */
-    metadata: EntityOverviewResponseEntityItemMetadata;
+    metadata: EntityMetadataCollection;
 }
 
 /**
@@ -62,7 +62,7 @@ export function EntityOverviewResponseEntityItemFromJSONTyped(json: any, ignoreD
     return {
         
         'address': json['address'],
-        'metadata': EntityOverviewResponseEntityItemMetadataFromJSON(json['metadata']),
+        'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
     };
 }
 
@@ -76,7 +76,7 @@ export function EntityOverviewResponseEntityItemToJSON(value?: EntityOverviewRes
     return {
         
         'address': value.address,
-        'metadata': EntityOverviewResponseEntityItemMetadataToJSON(value.metadata),
+        'metadata': EntityMetadataCollectionToJSON(value.metadata),
     };
 }
 

@@ -30,7 +30,7 @@ export interface LedgerState {
      * @type {number}
      * @memberof LedgerState
      */
-    version: number;
+    state_version: number;
     /**
      * The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled.
      * @type {string}
@@ -57,7 +57,7 @@ export interface LedgerState {
 export function instanceOfLedgerState(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "network" in value;
-    isInstance = isInstance && "version" in value;
+    isInstance = isInstance && "state_version" in value;
     isInstance = isInstance && "timestamp" in value;
     isInstance = isInstance && "epoch" in value;
     isInstance = isInstance && "round" in value;
@@ -76,7 +76,7 @@ export function LedgerStateFromJSONTyped(json: any, ignoreDiscriminator: boolean
     return {
         
         'network': json['network'],
-        'version': json['version'],
+        'state_version': json['state_version'],
         'timestamp': json['timestamp'],
         'epoch': json['epoch'],
         'round': json['round'],
@@ -93,7 +93,7 @@ export function LedgerStateToJSON(value?: LedgerState | null): any {
     return {
         
         'network': value.network,
-        'version': value.version,
+        'state_version': value.state_version,
         'timestamp': value.timestamp,
         'epoch': value.epoch,
         'round': value.round,

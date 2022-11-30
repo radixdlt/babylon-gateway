@@ -24,7 +24,7 @@ export interface TransactionSubmitRequest {
      * @type {string}
      * @memberof TransactionSubmitRequest
      */
-    notarized_transaction: string;
+    notarized_transaction_hex: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export interface TransactionSubmitRequest {
  */
 export function instanceOfTransactionSubmitRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "notarized_transaction" in value;
+    isInstance = isInstance && "notarized_transaction_hex" in value;
 
     return isInstance;
 }
@@ -47,7 +47,7 @@ export function TransactionSubmitRequestFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'notarized_transaction': json['notarized_transaction'],
+        'notarized_transaction_hex': json['notarized_transaction_hex'],
     };
 }
 
@@ -60,7 +60,7 @@ export function TransactionSubmitRequestToJSON(value?: TransactionSubmitRequest 
     }
     return {
         
-        'notarized_transaction': value.notarized_transaction,
+        'notarized_transaction_hex': value.notarized_transaction_hex,
     };
 }
 

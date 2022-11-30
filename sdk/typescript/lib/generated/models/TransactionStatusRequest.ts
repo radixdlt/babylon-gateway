@@ -19,12 +19,6 @@ import {
     PartialLedgerStateIdentifierFromJSONTyped,
     PartialLedgerStateIdentifierToJSON,
 } from './PartialLedgerStateIdentifier';
-import type { TransactionLookupIdentifier } from './TransactionLookupIdentifier';
-import {
-    TransactionLookupIdentifierFromJSON,
-    TransactionLookupIdentifierFromJSONTyped,
-    TransactionLookupIdentifierToJSON,
-} from './TransactionLookupIdentifier';
 
 /**
  * 
@@ -34,10 +28,10 @@ import {
 export interface TransactionStatusRequest {
     /**
      * 
-     * @type {TransactionLookupIdentifier}
+     * @type {string}
      * @memberof TransactionStatusRequest
      */
-    transaction_identifier: TransactionLookupIdentifier;
+    intent_hash_hex?: string;
     /**
      * 
      * @type {PartialLedgerStateIdentifier}
@@ -51,7 +45,6 @@ export interface TransactionStatusRequest {
  */
 export function instanceOfTransactionStatusRequest(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "transaction_identifier" in value;
 
     return isInstance;
 }
@@ -66,7 +59,7 @@ export function TransactionStatusRequestFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'transaction_identifier': TransactionLookupIdentifierFromJSON(json['transaction_identifier']),
+        'intent_hash_hex': !exists(json, 'intent_hash_hex') ? undefined : json['intent_hash_hex'],
         'at_state_identifier': !exists(json, 'at_state_identifier') ? undefined : PartialLedgerStateIdentifierFromJSON(json['at_state_identifier']),
     };
 }
@@ -80,7 +73,7 @@ export function TransactionStatusRequestToJSON(value?: TransactionStatusRequest 
     }
     return {
         
-        'transaction_identifier': TransactionLookupIdentifierToJSON(value.transaction_identifier),
+        'intent_hash_hex': value.intent_hash_hex,
         'at_state_identifier': PartialLedgerStateIdentifierToJSON(value.at_state_identifier),
     };
 }

@@ -27,17 +27,17 @@ import {
  */
 export interface ErrorResponse {
     /**
-     * A numeric code corresponding to the given error type, roughly aligned with HTTP Status Code semantics (eg 400/404/500).
-     * @type {number}
-     * @memberof ErrorResponse
-     */
-    code: number;
-    /**
      * A human-readable error message.
      * @type {string}
      * @memberof ErrorResponse
      */
     message: string;
+    /**
+     * A numeric code corresponding to the given error type.
+     * @type {number}
+     * @memberof ErrorResponse
+     */
+    code?: number;
     /**
      * 
      * @type {GatewayError}
@@ -45,7 +45,7 @@ export interface ErrorResponse {
      */
     details?: GatewayError;
     /**
-     * A GUID to be used when reporting errors, to allow correlation with the Gateway API's error logs.
+     * A unique request identifier to be used when reporting errors, to allow correlation with the Gateway API's error logs.
      * @type {string}
      * @memberof ErrorResponse
      */
@@ -57,7 +57,6 @@ export interface ErrorResponse {
  */
 export function instanceOfErrorResponse(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "code" in value;
     isInstance = isInstance && "message" in value;
 
     return isInstance;
@@ -73,8 +72,8 @@ export function ErrorResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
-        'code': json['code'],
         'message': json['message'],
+        'code': !exists(json, 'code') ? undefined : json['code'],
         'details': !exists(json, 'details') ? undefined : GatewayErrorFromJSON(json['details']),
         'trace_id': !exists(json, 'trace_id') ? undefined : json['trace_id'],
     };
@@ -89,8 +88,8 @@ export function ErrorResponseToJSON(value?: ErrorResponse | null): any {
     }
     return {
         
-        'code': value.code,
         'message': value.message,
+        'code': value.code,
         'details': GatewayErrorToJSON(value.details),
         'trace_id': value.trace_id,
     };

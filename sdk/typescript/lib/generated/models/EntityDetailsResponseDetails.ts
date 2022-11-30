@@ -13,12 +13,12 @@
  */
 
 import {
-    EntityDetailsResponseAccountComponentDetails,
-    instanceOfEntityDetailsResponseAccountComponentDetails,
-    EntityDetailsResponseAccountComponentDetailsFromJSON,
-    EntityDetailsResponseAccountComponentDetailsFromJSONTyped,
-    EntityDetailsResponseAccountComponentDetailsToJSON,
-} from './EntityDetailsResponseAccountComponentDetails';
+    EntityDetailsResponseComponentDetails,
+    instanceOfEntityDetailsResponseComponentDetails,
+    EntityDetailsResponseComponentDetailsFromJSON,
+    EntityDetailsResponseComponentDetailsFromJSONTyped,
+    EntityDetailsResponseComponentDetailsToJSON,
+} from './EntityDetailsResponseComponentDetails';
 import {
     EntityDetailsResponseFungibleResourceDetails,
     instanceOfEntityDetailsResponseFungibleResourceDetails,
@@ -33,13 +33,20 @@ import {
     EntityDetailsResponseNonFungibleResourceDetailsFromJSONTyped,
     EntityDetailsResponseNonFungibleResourceDetailsToJSON,
 } from './EntityDetailsResponseNonFungibleResourceDetails';
+import {
+    EntityDetailsResponsePackageDetails,
+    instanceOfEntityDetailsResponsePackageDetails,
+    EntityDetailsResponsePackageDetailsFromJSON,
+    EntityDetailsResponsePackageDetailsFromJSONTyped,
+    EntityDetailsResponsePackageDetailsToJSON,
+} from './EntityDetailsResponsePackageDetails';
 
 /**
  * @type EntityDetailsResponseDetails
  * 
  * @export
  */
-export type EntityDetailsResponseDetails = { discriminator: 'account_component' } & EntityDetailsResponseAccountComponentDetails | { discriminator: 'fungible_resource' } & EntityDetailsResponseFungibleResourceDetails | { discriminator: 'non_fungible_resource' } & EntityDetailsResponseNonFungibleResourceDetails;
+export type EntityDetailsResponseDetails = { discriminator: 'component' } & EntityDetailsResponseComponentDetails | { discriminator: 'fungible_resource' } & EntityDetailsResponseFungibleResourceDetails | { discriminator: 'non_fungible_resource' } & EntityDetailsResponseNonFungibleResourceDetails | { discriminator: 'package' } & EntityDetailsResponsePackageDetails;
 
 export function EntityDetailsResponseDetailsFromJSON(json: any): EntityDetailsResponseDetails {
     return EntityDetailsResponseDetailsFromJSONTyped(json, false);
@@ -50,12 +57,14 @@ export function EntityDetailsResponseDetailsFromJSONTyped(json: any, ignoreDiscr
         return json;
     }
     switch (json['discriminator']) {
-        case 'account_component':
-            return {...EntityDetailsResponseAccountComponentDetailsFromJSONTyped(json, true), discriminator: 'account_component'};
+        case 'component':
+            return {...EntityDetailsResponseComponentDetailsFromJSONTyped(json, true), discriminator: 'component'};
         case 'fungible_resource':
             return {...EntityDetailsResponseFungibleResourceDetailsFromJSONTyped(json, true), discriminator: 'fungible_resource'};
         case 'non_fungible_resource':
             return {...EntityDetailsResponseNonFungibleResourceDetailsFromJSONTyped(json, true), discriminator: 'non_fungible_resource'};
+        case 'package':
+            return {...EntityDetailsResponsePackageDetailsFromJSONTyped(json, true), discriminator: 'package'};
         default:
             throw new Error(`No variant of EntityDetailsResponseDetails exists with 'discriminator=${json['discriminator']}'`);
     }
@@ -69,12 +78,14 @@ export function EntityDetailsResponseDetailsToJSON(value?: EntityDetailsResponse
         return null;
     }
     switch (value['discriminator']) {
-        case 'account_component':
-            return EntityDetailsResponseAccountComponentDetailsToJSON(value);
+        case 'component':
+            return EntityDetailsResponseComponentDetailsToJSON(value);
         case 'fungible_resource':
             return EntityDetailsResponseFungibleResourceDetailsToJSON(value);
         case 'non_fungible_resource':
             return EntityDetailsResponseNonFungibleResourceDetailsToJSON(value);
+        case 'package':
+            return EntityDetailsResponsePackageDetailsToJSON(value);
         default:
             throw new Error(`No variant of EntityDetailsResponseDetails exists with 'discriminator=${value['discriminator']}'`);
     }

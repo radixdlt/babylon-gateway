@@ -13,12 +13,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TransactionInfo } from './TransactionInfo';
+import type { TransactionStatus } from './TransactionStatus';
 import {
-    TransactionInfoFromJSON,
-    TransactionInfoFromJSONTyped,
-    TransactionInfoToJSON,
-} from './TransactionInfo';
+    TransactionStatusFromJSON,
+    TransactionStatusFromJSONTyped,
+    TransactionStatusToJSON,
+} from './TransactionStatus';
+import type { TransactionStatusResponseKnownPayloadItem } from './TransactionStatusResponseKnownPayloadItem';
+import {
+    TransactionStatusResponseKnownPayloadItemFromJSON,
+    TransactionStatusResponseKnownPayloadItemFromJSONTyped,
+    TransactionStatusResponseKnownPayloadItemToJSON,
+} from './TransactionStatusResponseKnownPayloadItem';
 
 /**
  * 
@@ -28,10 +34,22 @@ import {
 export interface TransactionStatusResponseAllOf {
     /**
      * 
-     * @type {TransactionInfo}
+     * @type {TransactionStatus}
      * @memberof TransactionStatusResponseAllOf
      */
-    transaction: TransactionInfo;
+    status: TransactionStatus;
+    /**
+     * 
+     * @type {Array<TransactionStatusResponseKnownPayloadItem>}
+     * @memberof TransactionStatusResponseAllOf
+     */
+    known_payloads: Array<TransactionStatusResponseKnownPayloadItem>;
+    /**
+     * 
+     * @type {string}
+     * @memberof TransactionStatusResponseAllOf
+     */
+    error_message?: string | null;
 }
 
 /**
@@ -39,7 +57,8 @@ export interface TransactionStatusResponseAllOf {
  */
 export function instanceOfTransactionStatusResponseAllOf(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "transaction" in value;
+    isInstance = isInstance && "status" in value;
+    isInstance = isInstance && "known_payloads" in value;
 
     return isInstance;
 }
@@ -54,7 +73,9 @@ export function TransactionStatusResponseAllOfFromJSONTyped(json: any, ignoreDis
     }
     return {
         
-        'transaction': TransactionInfoFromJSON(json['transaction']),
+        'status': TransactionStatusFromJSON(json['status']),
+        'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
+        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
 
@@ -67,7 +88,9 @@ export function TransactionStatusResponseAllOfToJSON(value?: TransactionStatusRe
     }
     return {
         
-        'transaction': TransactionInfoToJSON(value.transaction),
+        'status': TransactionStatusToJSON(value.status),
+        'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
+        'error_message': value.error_message,
     };
 }
 

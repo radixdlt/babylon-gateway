@@ -24,7 +24,7 @@ export interface ResultSetCursorMixin {
      * @type {number}
      * @memberof ResultSetCursorMixin
      */
-    total_count: number;
+    total_count?: number | null;
     /**
      * TBD (maybe we should use HATEOAS-like permalinks?)
      * @type {string}
@@ -44,7 +44,6 @@ export interface ResultSetCursorMixin {
  */
 export function instanceOfResultSetCursorMixin(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "total_count" in value;
 
     return isInstance;
 }
@@ -59,7 +58,7 @@ export function ResultSetCursorMixinFromJSONTyped(json: any, ignoreDiscriminator
     }
     return {
         
-        'total_count': json['total_count'],
+        'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
         'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
     };

@@ -40,6 +40,12 @@ export interface EntityDetailsResponseNonFungibleResourceDetails {
     discriminator: EntityDetailsResponseDetailsType;
     /**
      * 
+     * @type {object}
+     * @memberof EntityDetailsResponseNonFungibleResourceDetails
+     */
+    auth_rules: object;
+    /**
+     * 
      * @type {EntityDetailsResponseNonFungibleResourceDetailsIds}
      * @memberof EntityDetailsResponseNonFungibleResourceDetails
      */
@@ -52,6 +58,7 @@ export interface EntityDetailsResponseNonFungibleResourceDetails {
 export function instanceOfEntityDetailsResponseNonFungibleResourceDetails(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "discriminator" in value;
+    isInstance = isInstance && "auth_rules" in value;
     isInstance = isInstance && "ids" in value;
 
     return isInstance;
@@ -68,6 +75,7 @@ export function EntityDetailsResponseNonFungibleResourceDetailsFromJSONTyped(jso
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeFromJSON(json['discriminator']),
+        'auth_rules': json['auth_rules'],
         'ids': EntityDetailsResponseNonFungibleResourceDetailsIdsFromJSON(json['ids']),
     };
 }
@@ -82,6 +90,7 @@ export function EntityDetailsResponseNonFungibleResourceDetailsToJSON(value?: En
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeToJSON(value.discriminator),
+        'auth_rules': value.auth_rules,
         'ids': EntityDetailsResponseNonFungibleResourceDetailsIdsToJSON(value.ids),
     };
 }

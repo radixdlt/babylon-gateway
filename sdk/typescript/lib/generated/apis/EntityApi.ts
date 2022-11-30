@@ -17,16 +17,41 @@ import * as runtime from '../runtime';
 import type {
   EntityDetailsRequest,
   EntityDetailsResponse,
+  EntityFungiblesRequest,
+  EntityFungiblesResponse,
+  EntityMetadataRequest,
+  EntityMetadataResponse,
+  EntityNonFungibleIdsRequest,
+  EntityNonFungibleIdsResponse,
+  EntityNonFungiblesRequest,
+  EntityNonFungiblesResponse,
   EntityOverviewRequest,
   EntityOverviewResponse,
   EntityResourcesRequest,
   EntityResourcesResponse,
+  ErrorResponse,
 } from '../models';
 import {
     EntityDetailsRequestFromJSON,
     EntityDetailsRequestToJSON,
     EntityDetailsResponseFromJSON,
     EntityDetailsResponseToJSON,
+    EntityFungiblesRequestFromJSON,
+    EntityFungiblesRequestToJSON,
+    EntityFungiblesResponseFromJSON,
+    EntityFungiblesResponseToJSON,
+    EntityMetadataRequestFromJSON,
+    EntityMetadataRequestToJSON,
+    EntityMetadataResponseFromJSON,
+    EntityMetadataResponseToJSON,
+    EntityNonFungibleIdsRequestFromJSON,
+    EntityNonFungibleIdsRequestToJSON,
+    EntityNonFungibleIdsResponseFromJSON,
+    EntityNonFungibleIdsResponseToJSON,
+    EntityNonFungiblesRequestFromJSON,
+    EntityNonFungiblesRequestToJSON,
+    EntityNonFungiblesResponseFromJSON,
+    EntityNonFungiblesResponseToJSON,
     EntityOverviewRequestFromJSON,
     EntityOverviewRequestToJSON,
     EntityOverviewResponseFromJSON,
@@ -35,10 +60,28 @@ import {
     EntityResourcesRequestToJSON,
     EntityResourcesResponseFromJSON,
     EntityResourcesResponseToJSON,
+    ErrorResponseFromJSON,
+    ErrorResponseToJSON,
 } from '../models';
 
 export interface EntityDetailsOperationRequest {
     entityDetailsRequest: EntityDetailsRequest;
+}
+
+export interface EntityFungiblesOperationRequest {
+    entityFungiblesRequest: EntityFungiblesRequest;
+}
+
+export interface EntityMetadataOperationRequest {
+    entityMetadataRequest: EntityMetadataRequest;
+}
+
+export interface EntityNonFungibleIdsOperationRequest {
+    entityNonFungibleIdsRequest: EntityNonFungibleIdsRequest;
+}
+
+export interface EntityNonFungiblesOperationRequest {
+    entityNonFungiblesRequest: EntityNonFungiblesRequest;
 }
 
 export interface EntityOverviewOperationRequest {
@@ -56,7 +99,7 @@ export class EntityApi extends runtime.BaseAPI {
 
     /**
      * TBD 
-     * Entity Details
+     * Returns detailed information for a given entity.
      */
     async entityDetailsRaw(requestParameters: EntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityDetailsResponse>> {
         if (requestParameters.entityDetailsRequest === null || requestParameters.entityDetailsRequest === undefined) {
@@ -82,7 +125,7 @@ export class EntityApi extends runtime.BaseAPI {
 
     /**
      * TBD 
-     * Entity Details
+     * Returns detailed information for a given entity.
      */
     async entityDetails(requestParameters: EntityDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityDetailsResponse> {
         const response = await this.entityDetailsRaw(requestParameters, initOverrides);
@@ -91,7 +134,147 @@ export class EntityApi extends runtime.BaseAPI {
 
     /**
      * TBD 
-     * Entity Overview
+     * Iterates through all fungible resources associated with a given entity.
+     */
+    async entityFungiblesRaw(requestParameters: EntityFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityFungiblesResponse>> {
+        if (requestParameters.entityFungiblesRequest === null || requestParameters.entityFungiblesRequest === undefined) {
+            throw new runtime.RequiredError('entityFungiblesRequest','Required parameter requestParameters.entityFungiblesRequest was null or undefined when calling entityFungibles.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/entity/fungibles`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EntityFungiblesRequestToJSON(requestParameters.entityFungiblesRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntityFungiblesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * TBD 
+     * Iterates through all fungible resources associated with a given entity.
+     */
+    async entityFungibles(requestParameters: EntityFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityFungiblesResponse> {
+        const response = await this.entityFungiblesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * TBD 
+     * Iterates through all metadata associated with a given entity.
+     */
+    async entityMetadataRaw(requestParameters: EntityMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityMetadataResponse>> {
+        if (requestParameters.entityMetadataRequest === null || requestParameters.entityMetadataRequest === undefined) {
+            throw new runtime.RequiredError('entityMetadataRequest','Required parameter requestParameters.entityMetadataRequest was null or undefined when calling entityMetadata.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/entity/metadata`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EntityMetadataRequestToJSON(requestParameters.entityMetadataRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntityMetadataResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * TBD 
+     * Iterates through all metadata associated with a given entity.
+     */
+    async entityMetadata(requestParameters: EntityMetadataOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityMetadataResponse> {
+        const response = await this.entityMetadataRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * TBD 
+     * Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+     */
+    async entityNonFungibleIdsRaw(requestParameters: EntityNonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityNonFungibleIdsResponse>> {
+        if (requestParameters.entityNonFungibleIdsRequest === null || requestParameters.entityNonFungibleIdsRequest === undefined) {
+            throw new runtime.RequiredError('entityNonFungibleIdsRequest','Required parameter requestParameters.entityNonFungibleIdsRequest was null or undefined when calling entityNonFungibleIds.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/entity/non-fungible/ids`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EntityNonFungibleIdsRequestToJSON(requestParameters.entityNonFungibleIdsRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntityNonFungibleIdsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * TBD 
+     * Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+     */
+    async entityNonFungibleIds(requestParameters: EntityNonFungibleIdsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityNonFungibleIdsResponse> {
+        const response = await this.entityNonFungibleIdsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * TBD 
+     * Iterates through all non-fungible resources associated with a given entity.
+     */
+    async entityNonFungiblesRaw(requestParameters: EntityNonFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityNonFungiblesResponse>> {
+        if (requestParameters.entityNonFungiblesRequest === null || requestParameters.entityNonFungiblesRequest === undefined) {
+            throw new runtime.RequiredError('entityNonFungiblesRequest','Required parameter requestParameters.entityNonFungiblesRequest was null or undefined when calling entityNonFungibles.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/entity/non-fungibles`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: EntityNonFungiblesRequestToJSON(requestParameters.entityNonFungiblesRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EntityNonFungiblesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * TBD 
+     * Iterates through all non-fungible resources associated with a given entity.
+     */
+    async entityNonFungibles(requestParameters: EntityNonFungiblesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityNonFungiblesResponse> {
+        const response = await this.entityNonFungiblesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * TBD 
+     * Returns incomplete collection of basic information for a given collection of entities.
      */
     async entityOverviewRaw(requestParameters: EntityOverviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityOverviewResponse>> {
         if (requestParameters.entityOverviewRequest === null || requestParameters.entityOverviewRequest === undefined) {
@@ -117,7 +300,7 @@ export class EntityApi extends runtime.BaseAPI {
 
     /**
      * TBD 
-     * Entity Overview
+     * Returns incomplete collection of basic information for a given collection of entities.
      */
     async entityOverview(requestParameters: EntityOverviewOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityOverviewResponse> {
         const response = await this.entityOverviewRaw(requestParameters, initOverrides);
@@ -126,7 +309,7 @@ export class EntityApi extends runtime.BaseAPI {
 
     /**
      * TBD 
-     * Entity Resources
+     * Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
      */
     async entityResourcesRaw(requestParameters: EntityResourcesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EntityResourcesResponse>> {
         if (requestParameters.entityResourcesRequest === null || requestParameters.entityResourcesRequest === undefined) {
@@ -152,7 +335,7 @@ export class EntityApi extends runtime.BaseAPI {
 
     /**
      * TBD 
-     * Entity Resources
+     * Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
      */
     async entityResources(requestParameters: EntityResourcesOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EntityResourcesResponse> {
         const response = await this.entityResourcesRaw(requestParameters, initOverrides);

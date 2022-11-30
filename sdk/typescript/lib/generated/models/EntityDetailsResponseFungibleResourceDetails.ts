@@ -19,6 +19,12 @@ import {
     EntityDetailsResponseDetailsTypeFromJSONTyped,
     EntityDetailsResponseDetailsTypeToJSON,
 } from './EntityDetailsResponseDetailsType';
+import type { TokenAmount } from './TokenAmount';
+import {
+    TokenAmountFromJSON,
+    TokenAmountFromJSONTyped,
+    TokenAmountToJSON,
+} from './TokenAmount';
 
 /**
  * 
@@ -33,26 +39,35 @@ export interface EntityDetailsResponseFungibleResourceDetails {
      */
     discriminator: EntityDetailsResponseDetailsType;
     /**
-     * A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
-     * the total supply of this resource.
-     * @type {string}
+     * 
+     * @type {object}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    total_supply_attos: string;
+    auth_rules: object;
     /**
-     * A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
-     * the total supply of this resource.
-     * @type {string}
+     * 
+     * @type {number}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    total_minted_attos: string;
+    divisibility: number;
     /**
-     * A decimal-string-encoded integer between 0 and 2^255-1, which represents the total number of 10^(-18) subunits in
-     * the total supply of this resource.
-     * @type {string}
+     * 
+     * @type {TokenAmount}
      * @memberof EntityDetailsResponseFungibleResourceDetails
      */
-    total_burnt_attos: string;
+    total_supply: TokenAmount;
+    /**
+     * 
+     * @type {TokenAmount}
+     * @memberof EntityDetailsResponseFungibleResourceDetails
+     */
+    total_minted: TokenAmount;
+    /**
+     * 
+     * @type {TokenAmount}
+     * @memberof EntityDetailsResponseFungibleResourceDetails
+     */
+    total_burnt: TokenAmount;
 }
 
 /**
@@ -61,9 +76,11 @@ export interface EntityDetailsResponseFungibleResourceDetails {
 export function instanceOfEntityDetailsResponseFungibleResourceDetails(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "discriminator" in value;
-    isInstance = isInstance && "total_supply_attos" in value;
-    isInstance = isInstance && "total_minted_attos" in value;
-    isInstance = isInstance && "total_burnt_attos" in value;
+    isInstance = isInstance && "auth_rules" in value;
+    isInstance = isInstance && "divisibility" in value;
+    isInstance = isInstance && "total_supply" in value;
+    isInstance = isInstance && "total_minted" in value;
+    isInstance = isInstance && "total_burnt" in value;
 
     return isInstance;
 }
@@ -79,9 +96,11 @@ export function EntityDetailsResponseFungibleResourceDetailsFromJSONTyped(json: 
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeFromJSON(json['discriminator']),
-        'total_supply_attos': json['total_supply_attos'],
-        'total_minted_attos': json['total_minted_attos'],
-        'total_burnt_attos': json['total_burnt_attos'],
+        'auth_rules': json['auth_rules'],
+        'divisibility': json['divisibility'],
+        'total_supply': TokenAmountFromJSON(json['total_supply']),
+        'total_minted': TokenAmountFromJSON(json['total_minted']),
+        'total_burnt': TokenAmountFromJSON(json['total_burnt']),
     };
 }
 
@@ -95,9 +114,11 @@ export function EntityDetailsResponseFungibleResourceDetailsToJSON(value?: Entit
     return {
         
         'discriminator': EntityDetailsResponseDetailsTypeToJSON(value.discriminator),
-        'total_supply_attos': value.total_supply_attos,
-        'total_minted_attos': value.total_minted_attos,
-        'total_burnt_attos': value.total_burnt_attos,
+        'auth_rules': value.auth_rules,
+        'divisibility': value.divisibility,
+        'total_supply': TokenAmountToJSON(value.total_supply),
+        'total_minted': TokenAmountToJSON(value.total_minted),
+        'total_burnt': TokenAmountToJSON(value.total_burnt),
     };
 }
 
