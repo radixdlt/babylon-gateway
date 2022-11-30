@@ -19,12 +19,18 @@ import {
     LedgerStateFromJSONTyped,
     LedgerStateToJSON,
 } from './LedgerState';
-import type { TransactionInfo } from './TransactionInfo';
+import type { TransactionStatus } from './TransactionStatus';
 import {
-    TransactionInfoFromJSON,
-    TransactionInfoFromJSONTyped,
-    TransactionInfoToJSON,
-} from './TransactionInfo';
+    TransactionStatusFromJSON,
+    TransactionStatusFromJSONTyped,
+    TransactionStatusToJSON,
+} from './TransactionStatus';
+import type { TransactionStatusResponseKnownPayloadItem } from './TransactionStatusResponseKnownPayloadItem';
+import {
+    TransactionStatusResponseKnownPayloadItemFromJSON,
+    TransactionStatusResponseKnownPayloadItemFromJSONTyped,
+    TransactionStatusResponseKnownPayloadItemToJSON,
+} from './TransactionStatusResponseKnownPayloadItem';
 
 /**
  * 
@@ -40,10 +46,22 @@ export interface TransactionStatusResponse {
     ledger_state: LedgerState;
     /**
      * 
-     * @type {TransactionInfo}
+     * @type {TransactionStatus}
      * @memberof TransactionStatusResponse
      */
-    transaction: TransactionInfo;
+    status: TransactionStatus;
+    /**
+     * 
+     * @type {Array<TransactionStatusResponseKnownPayloadItem>}
+     * @memberof TransactionStatusResponse
+     */
+    known_payloads: Array<TransactionStatusResponseKnownPayloadItem>;
+    /**
+     * 
+     * @type {string}
+     * @memberof TransactionStatusResponse
+     */
+    error_message?: string | null;
 }
 
 /**
@@ -52,7 +70,8 @@ export interface TransactionStatusResponse {
 export function instanceOfTransactionStatusResponse(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "ledger_state" in value;
-    isInstance = isInstance && "transaction" in value;
+    isInstance = isInstance && "status" in value;
+    isInstance = isInstance && "known_payloads" in value;
 
     return isInstance;
 }
@@ -68,7 +87,9 @@ export function TransactionStatusResponseFromJSONTyped(json: any, ignoreDiscrimi
     return {
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
-        'transaction': TransactionInfoFromJSON(json['transaction']),
+        'status': TransactionStatusFromJSON(json['status']),
+        'known_payloads': ((json['known_payloads'] as Array<any>).map(TransactionStatusResponseKnownPayloadItemFromJSON)),
+        'error_message': !exists(json, 'error_message') ? undefined : json['error_message'],
     };
 }
 
@@ -82,7 +103,9 @@ export function TransactionStatusResponseToJSON(value?: TransactionStatusRespons
     return {
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
-        'transaction': TransactionInfoToJSON(value.transaction),
+        'status': TransactionStatusToJSON(value.status),
+        'known_payloads': ((value.known_payloads as Array<any>).map(TransactionStatusResponseKnownPayloadItemToJSON)),
+        'error_message': value.error_message,
     };
 }
 

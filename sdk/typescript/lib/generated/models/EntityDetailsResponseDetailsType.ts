@@ -20,7 +20,8 @@
 export const EntityDetailsResponseDetailsType = {
     FungibleResource: 'fungible_resource',
     NonFungibleResource: 'non_fungible_resource',
-    AccountComponent: 'account_component'
+    Package: 'package',
+    Component: 'component'
 } as const;
 export type EntityDetailsResponseDetailsType = typeof EntityDetailsResponseDetailsType[keyof typeof EntityDetailsResponseDetailsType];
 

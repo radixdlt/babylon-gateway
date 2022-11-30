@@ -19,12 +19,12 @@ import {
     EntityDetailsResponseDetailsFromJSONTyped,
     EntityDetailsResponseDetailsToJSON,
 } from './EntityDetailsResponseDetails';
-import type { EntityDetailsResponseMetadata } from './EntityDetailsResponseMetadata';
+import type { EntityMetadataCollection } from './EntityMetadataCollection';
 import {
-    EntityDetailsResponseMetadataFromJSON,
-    EntityDetailsResponseMetadataFromJSONTyped,
-    EntityDetailsResponseMetadataToJSON,
-} from './EntityDetailsResponseMetadata';
+    EntityMetadataCollectionFromJSON,
+    EntityMetadataCollectionFromJSONTyped,
+    EntityMetadataCollectionToJSON,
+} from './EntityMetadataCollection';
 import type { LedgerState } from './LedgerState';
 import {
     LedgerStateFromJSON,
@@ -45,17 +45,17 @@ export interface EntityDetailsResponse {
      */
     ledger_state: LedgerState;
     /**
-     * The Bech32m-encoded human readable version of the entity's global address
+     * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
      * @memberof EntityDetailsResponse
      */
     address: string;
     /**
      * 
-     * @type {EntityDetailsResponseMetadata}
+     * @type {EntityMetadataCollection}
      * @memberof EntityDetailsResponse
      */
-    metadata: EntityDetailsResponseMetadata;
+    metadata: EntityMetadataCollection;
     /**
      * 
      * @type {EntityDetailsResponseDetails}
@@ -89,7 +89,7 @@ export function EntityDetailsResponseFromJSONTyped(json: any, ignoreDiscriminato
         
         'ledger_state': LedgerStateFromJSON(json['ledger_state']),
         'address': json['address'],
-        'metadata': EntityDetailsResponseMetadataFromJSON(json['metadata']),
+        'metadata': EntityMetadataCollectionFromJSON(json['metadata']),
         'details': EntityDetailsResponseDetailsFromJSON(json['details']),
     };
 }
@@ -105,7 +105,7 @@ export function EntityDetailsResponseToJSON(value?: EntityDetailsResponse | null
         
         'ledger_state': LedgerStateToJSON(value.ledger_state),
         'address': value.address,
-        'metadata': EntityDetailsResponseMetadataToJSON(value.metadata),
+        'metadata': EntityMetadataCollectionToJSON(value.metadata),
         'details': EntityDetailsResponseDetailsToJSON(value.details),
     };
 }

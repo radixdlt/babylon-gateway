@@ -27,7 +27,7 @@ import {
  */
 export interface EntityResourcesRequest {
     /**
-     * The Bech32m-encoded human readable version of the entity's global address
+     * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
      * @memberof EntityResourcesRequest
      */

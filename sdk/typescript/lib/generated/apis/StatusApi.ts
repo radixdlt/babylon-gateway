@@ -15,16 +15,12 @@
 
 import * as runtime from '../runtime';
 import type {
-  GatewayInfoResponse,
+  GatewayInformationResponse,
 } from '../models';
 import {
-    GatewayInfoResponseFromJSON,
-    GatewayInfoResponseToJSON,
+    GatewayInformationResponseFromJSON,
+    GatewayInformationResponseToJSON,
 } from '../models';
-
-export interface GatewayInfoRequest {
-    body: object;
-}
 
 /**
  * 
@@ -33,36 +29,29 @@ export class StatusApi extends runtime.BaseAPI {
 
     /**
      * Returns the Gateway API version, network and current ledger state.
-     * Get Gateway Info
+     * Get Gateway Information
      */
-    async gatewayInfoRaw(requestParameters: GatewayInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GatewayInfoResponse>> {
-        if (requestParameters.body === null || requestParameters.body === undefined) {
-            throw new runtime.RequiredError('body','Required parameter requestParameters.body was null or undefined when calling gatewayInfo.');
-        }
-
+    async gatewayInformationRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GatewayInformationResponse>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        headerParameters['Content-Type'] = 'application/json';
-
         const response = await this.request({
-            path: `/gateway`,
+            path: `/gateway/information`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters.body as any,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GatewayInfoResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => GatewayInformationResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns the Gateway API version, network and current ledger state.
-     * Get Gateway Info
+     * Get Gateway Information
      */
-    async gatewayInfo(requestParameters: GatewayInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GatewayInfoResponse> {
-        const response = await this.gatewayInfoRaw(requestParameters, initOverrides);
+    async gatewayInformation(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GatewayInformationResponse> {
+        const response = await this.gatewayInformationRaw(initOverrides);
         return await response.value();
     }
 

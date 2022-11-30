@@ -13,18 +13,18 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { EntityResourcesResponseFungibleResources } from './EntityResourcesResponseFungibleResources';
+import type { FungibleResourcesCollection } from './FungibleResourcesCollection';
 import {
-    EntityResourcesResponseFungibleResourcesFromJSON,
-    EntityResourcesResponseFungibleResourcesFromJSONTyped,
-    EntityResourcesResponseFungibleResourcesToJSON,
-} from './EntityResourcesResponseFungibleResources';
-import type { EntityResourcesResponseNonFungibleResources } from './EntityResourcesResponseNonFungibleResources';
+    FungibleResourcesCollectionFromJSON,
+    FungibleResourcesCollectionFromJSONTyped,
+    FungibleResourcesCollectionToJSON,
+} from './FungibleResourcesCollection';
+import type { NonFungibleResourcesCollection } from './NonFungibleResourcesCollection';
 import {
-    EntityResourcesResponseNonFungibleResourcesFromJSON,
-    EntityResourcesResponseNonFungibleResourcesFromJSONTyped,
-    EntityResourcesResponseNonFungibleResourcesToJSON,
-} from './EntityResourcesResponseNonFungibleResources';
+    NonFungibleResourcesCollectionFromJSON,
+    NonFungibleResourcesCollectionFromJSONTyped,
+    NonFungibleResourcesCollectionToJSON,
+} from './NonFungibleResourcesCollection';
 
 /**
  * 
@@ -33,23 +33,23 @@ import {
  */
 export interface EntityResourcesResponseAllOf {
     /**
-     * The Bech32m-encoded human readable version of the entity's global address
+     * The Bech32m-encoded human readable version of the entity's global address.
      * @type {string}
      * @memberof EntityResourcesResponseAllOf
      */
     address: string;
     /**
      * 
-     * @type {EntityResourcesResponseFungibleResources}
+     * @type {FungibleResourcesCollection}
      * @memberof EntityResourcesResponseAllOf
      */
-    fungible_resources: EntityResourcesResponseFungibleResources;
+    fungible_resources: FungibleResourcesCollection;
     /**
      * 
-     * @type {EntityResourcesResponseNonFungibleResources}
+     * @type {NonFungibleResourcesCollection}
      * @memberof EntityResourcesResponseAllOf
      */
-    non_fungible_resources: EntityResourcesResponseNonFungibleResources;
+    non_fungible_resources: NonFungibleResourcesCollection;
 }
 
 /**
@@ -75,8 +75,8 @@ export function EntityResourcesResponseAllOfFromJSONTyped(json: any, ignoreDiscr
     return {
         
         'address': json['address'],
-        'fungible_resources': EntityResourcesResponseFungibleResourcesFromJSON(json['fungible_resources']),
-        'non_fungible_resources': EntityResourcesResponseNonFungibleResourcesFromJSON(json['non_fungible_resources']),
+        'fungible_resources': FungibleResourcesCollectionFromJSON(json['fungible_resources']),
+        'non_fungible_resources': NonFungibleResourcesCollectionFromJSON(json['non_fungible_resources']),
     };
 }
 
@@ -90,8 +90,8 @@ export function EntityResourcesResponseAllOfToJSON(value?: EntityResourcesRespon
     return {
         
         'address': value.address,
-        'fungible_resources': EntityResourcesResponseFungibleResourcesToJSON(value.fungible_resources),
-        'non_fungible_resources': EntityResourcesResponseNonFungibleResourcesToJSON(value.non_fungible_resources),
+        'fungible_resources': FungibleResourcesCollectionToJSON(value.fungible_resources),
+        'non_fungible_resources': NonFungibleResourcesCollectionToJSON(value.non_fungible_resources),
     };
 }
 

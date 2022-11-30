@@ -13,13 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TokenIdentifier } from './TokenIdentifier';
-import {
-    TokenIdentifierFromJSON,
-    TokenIdentifierFromJSONTyped,
-    TokenIdentifierToJSON,
-} from './TokenIdentifier';
-
 /**
  * 
  * @export
@@ -27,17 +20,17 @@ import {
  */
 export interface TokenAmount {
     /**
-     * 
+     * The string-encoded decimal representing the amount
      * @type {string}
      * @memberof TokenAmount
      */
     value: string;
     /**
-     * 
-     * @type {TokenIdentifier}
+     * The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
+     * @type {string}
      * @memberof TokenAmount
      */
-    token_identifier: TokenIdentifier;
+    address?: string;
 }
 
 /**
@@ -46,7 +39,6 @@ export interface TokenAmount {
 export function instanceOfTokenAmount(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "value" in value;
-    isInstance = isInstance && "token_identifier" in value;
 
     return isInstance;
 }
@@ -62,7 +54,7 @@ export function TokenAmountFromJSONTyped(json: any, ignoreDiscriminator: boolean
     return {
         
         'value': json['value'],
-        'token_identifier': TokenIdentifierFromJSON(json['token_identifier']),
+        'address': !exists(json, 'address') ? undefined : json['address'],
     };
 }
 
@@ -76,7 +68,7 @@ export function TokenAmountToJSON(value?: TokenAmount | null): any {
     return {
         
         'value': value.value,
-        'token_identifier': TokenIdentifierToJSON(value.token_identifier),
+        'address': value.address,
     };
 }
 

@@ -31,7 +31,7 @@ export interface EntityDetailsResponseNonFungibleResourceDetailsIds {
      * @type {number}
      * @memberof EntityDetailsResponseNonFungibleResourceDetailsIds
      */
-    total_count: number;
+    total_count?: number | null;
     /**
      * TBD (maybe we should use HATEOAS-like permalinks?)
      * @type {string}
@@ -57,7 +57,6 @@ export interface EntityDetailsResponseNonFungibleResourceDetailsIds {
  */
 export function instanceOfEntityDetailsResponseNonFungibleResourceDetailsIds(value: object): boolean {
     let isInstance = true;
-    isInstance = isInstance && "total_count" in value;
     isInstance = isInstance && "items" in value;
 
     return isInstance;
@@ -73,7 +72,7 @@ export function EntityDetailsResponseNonFungibleResourceDetailsIdsFromJSONTyped(
     }
     return {
         
-        'total_count': json['total_count'],
+        'total_count': !exists(json, 'total_count') ? undefined : json['total_count'],
         'previous_cursor': !exists(json, 'previous_cursor') ? undefined : json['previous_cursor'],
         'next_cursor': !exists(json, 'next_cursor') ? undefined : json['next_cursor'],
         'items': ((json['items'] as Array<any>).map(EntityDetailsResponseNonFungibleResourceDetailsIdsItemFromJSON)),

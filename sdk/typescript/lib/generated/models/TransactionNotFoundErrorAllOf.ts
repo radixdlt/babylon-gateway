@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { TransactionLookupIdentifier } from './TransactionLookupIdentifier';
+import type { TransactionCommittedDetailsRequestIdentifier } from './TransactionCommittedDetailsRequestIdentifier';
 import {
-    TransactionLookupIdentifierFromJSON,
-    TransactionLookupIdentifierFromJSONTyped,
-    TransactionLookupIdentifierToJSON,
-} from './TransactionLookupIdentifier';
+    TransactionCommittedDetailsRequestIdentifierFromJSON,
+    TransactionCommittedDetailsRequestIdentifierFromJSONTyped,
+    TransactionCommittedDetailsRequestIdentifierToJSON,
+} from './TransactionCommittedDetailsRequestIdentifier';
 
 /**
  * 
@@ -28,10 +28,10 @@ import {
 export interface TransactionNotFoundErrorAllOf {
     /**
      * 
-     * @type {TransactionLookupIdentifier}
+     * @type {TransactionCommittedDetailsRequestIdentifier}
      * @memberof TransactionNotFoundErrorAllOf
      */
-    transaction_not_found: TransactionLookupIdentifier;
+    transaction_not_found: TransactionCommittedDetailsRequestIdentifier;
 }
 
 /**
@@ -54,7 +54,7 @@ export function TransactionNotFoundErrorAllOfFromJSONTyped(json: any, ignoreDisc
     }
     return {
         
-        'transaction_not_found': TransactionLookupIdentifierFromJSON(json['transaction_not_found']),
+        'transaction_not_found': TransactionCommittedDetailsRequestIdentifierFromJSON(json['transaction_not_found']),
     };
 }
 
@@ -67,7 +67,7 @@ export function TransactionNotFoundErrorAllOfToJSON(value?: TransactionNotFoundE
     }
     return {
         
-        'transaction_not_found': TransactionLookupIdentifierToJSON(value.transaction_not_found),
+        'transaction_not_found': TransactionCommittedDetailsRequestIdentifierToJSON(value.transaction_not_found),
     };
 }
 

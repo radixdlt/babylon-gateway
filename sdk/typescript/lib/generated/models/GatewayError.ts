@@ -14,7 +14,9 @@
 
 import { exists, mapValues } from '../runtime';
 import {
+     EntityNotFoundErrorFromJSONTyped,
      InternalServerErrorFromJSONTyped,
+     InvalidEntityErrorFromJSONTyped,
      InvalidRequestErrorFromJSONTyped,
      InvalidTransactionErrorFromJSONTyped,
      NotSyncedUpErrorFromJSONTyped,
@@ -54,8 +56,14 @@ export function GatewayErrorFromJSONTyped(json: any, ignoreDiscriminator: boolea
         return json;
     }
     if (!ignoreDiscriminator) {
+        if (json['type'] === 'EntityNotFoundError') {
+            return EntityNotFoundErrorFromJSONTyped(json, true);
+        }
         if (json['type'] === 'InternalServerError') {
             return InternalServerErrorFromJSONTyped(json, true);
+        }
+        if (json['type'] === 'InvalidEntityError') {
+            return InvalidEntityErrorFromJSONTyped(json, true);
         }
         if (json['type'] === 'InvalidRequestError') {
             return InvalidRequestErrorFromJSONTyped(json, true);

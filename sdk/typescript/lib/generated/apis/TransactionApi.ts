@@ -15,30 +15,30 @@
 
 import * as runtime from '../runtime';
 import type {
-  RecentTransactionsRequest,
-  RecentTransactionsResponse,
-  TransactionDetailsRequest,
-  TransactionDetailsResponse,
-  TransactionPreviewRequest,
-  TransactionPreviewResponse,
+  ErrorResponse,
+  TransactionCommittedDetailsRequest,
+  TransactionCommittedDetailsResponse,
+  TransactionConstructionResponse,
+  TransactionRecentRequest,
+  TransactionRecentResponse,
   TransactionStatusRequest,
   TransactionStatusResponse,
   TransactionSubmitRequest,
   TransactionSubmitResponse,
 } from '../models';
 import {
-    RecentTransactionsRequestFromJSON,
-    RecentTransactionsRequestToJSON,
-    RecentTransactionsResponseFromJSON,
-    RecentTransactionsResponseToJSON,
-    TransactionDetailsRequestFromJSON,
-    TransactionDetailsRequestToJSON,
-    TransactionDetailsResponseFromJSON,
-    TransactionDetailsResponseToJSON,
-    TransactionPreviewRequestFromJSON,
-    TransactionPreviewRequestToJSON,
-    TransactionPreviewResponseFromJSON,
-    TransactionPreviewResponseToJSON,
+    ErrorResponseFromJSON,
+    ErrorResponseToJSON,
+    TransactionCommittedDetailsRequestFromJSON,
+    TransactionCommittedDetailsRequestToJSON,
+    TransactionCommittedDetailsResponseFromJSON,
+    TransactionCommittedDetailsResponseToJSON,
+    TransactionConstructionResponseFromJSON,
+    TransactionConstructionResponseToJSON,
+    TransactionRecentRequestFromJSON,
+    TransactionRecentRequestToJSON,
+    TransactionRecentResponseFromJSON,
+    TransactionRecentResponseToJSON,
     TransactionStatusRequestFromJSON,
     TransactionStatusRequestToJSON,
     TransactionStatusResponseFromJSON,
@@ -49,24 +49,24 @@ import {
     TransactionSubmitResponseToJSON,
 } from '../models';
 
-export interface PreviewTransactionRequest {
-    transactionPreviewRequest: TransactionPreviewRequest;
+export interface TransactionCommittedDetailsOperationRequest {
+    transactionCommittedDetailsRequest: TransactionCommittedDetailsRequest;
 }
 
-export interface RecentTransactionsOperationRequest {
-    recentTransactionsRequest: RecentTransactionsRequest;
+export interface TransactionPreviewRequest {
+    body: object;
 }
 
-export interface SubmitTransactionRequest {
-    transactionSubmitRequest: TransactionSubmitRequest;
-}
-
-export interface TransactionDetailsOperationRequest {
-    transactionDetailsRequest: TransactionDetailsRequest;
+export interface TransactionRecentOperationRequest {
+    transactionRecentRequest: TransactionRecentRequest;
 }
 
 export interface TransactionStatusOperationRequest {
     transactionStatusRequest: TransactionStatusRequest;
+}
+
+export interface TransactionSubmitOperationRequest {
+    transactionSubmitRequest: TransactionSubmitRequest;
 }
 
 /**
@@ -75,12 +75,75 @@ export interface TransactionStatusOperationRequest {
 export class TransactionApi extends runtime.BaseAPI {
 
     /**
+     * Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren\'t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`. 
+     * Transaction Committed Details
+     */
+    async transactionCommittedDetailsRaw(requestParameters: TransactionCommittedDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionCommittedDetailsResponse>> {
+        if (requestParameters.transactionCommittedDetailsRequest === null || requestParameters.transactionCommittedDetailsRequest === undefined) {
+            throw new runtime.RequiredError('transactionCommittedDetailsRequest','Required parameter requestParameters.transactionCommittedDetailsRequest was null or undefined when calling transactionCommittedDetails.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/transaction/committed-details`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TransactionCommittedDetailsRequestToJSON(requestParameters.transactionCommittedDetailsRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionCommittedDetailsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren\'t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`. 
+     * Transaction Committed Details
+     */
+    async transactionCommittedDetails(requestParameters: TransactionCommittedDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionCommittedDetailsResponse> {
+        const response = await this.transactionCommittedDetailsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * TBD 
+     * TBD
+     */
+    async transactionConstructionRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionConstructionResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/transaction/construction`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionConstructionResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * TBD 
+     * TBD
+     */
+    async transactionConstruction(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionConstructionResponse> {
+        const response = await this.transactionConstructionRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Previews transaction against the network. 
      * Preview Transaction
      */
-    async previewTransactionRaw(requestParameters: PreviewTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionPreviewResponse>> {
-        if (requestParameters.transactionPreviewRequest === null || requestParameters.transactionPreviewRequest === undefined) {
-            throw new runtime.RequiredError('transactionPreviewRequest','Required parameter requestParameters.transactionPreviewRequest was null or undefined when calling previewTransaction.');
+    async transactionPreviewRaw(requestParameters: TransactionPreviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+        if (requestParameters.body === null || requestParameters.body === undefined) {
+            throw new runtime.RequiredError('body','Required parameter requestParameters.body was null or undefined when calling transactionPreview.');
         }
 
         const queryParameters: any = {};
@@ -94,18 +157,18 @@ export class TransactionApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: TransactionPreviewRequestToJSON(requestParameters.transactionPreviewRequest),
+            body: requestParameters.body as any,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionPreviewResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
      * Previews transaction against the network. 
      * Preview Transaction
      */
-    async previewTransaction(requestParameters: PreviewTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionPreviewResponse> {
-        const response = await this.previewTransactionRaw(requestParameters, initOverrides);
+    async transactionPreview(requestParameters: TransactionPreviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.transactionPreviewRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -113,9 +176,9 @@ export class TransactionApi extends runtime.BaseAPI {
      * Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
      * Get Recent Transactions
      */
-    async recentTransactionsRaw(requestParameters: RecentTransactionsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RecentTransactionsResponse>> {
-        if (requestParameters.recentTransactionsRequest === null || requestParameters.recentTransactionsRequest === undefined) {
-            throw new runtime.RequiredError('recentTransactionsRequest','Required parameter requestParameters.recentTransactionsRequest was null or undefined when calling recentTransactions.');
+    async transactionRecentRaw(requestParameters: TransactionRecentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionRecentResponse>> {
+        if (requestParameters.transactionRecentRequest === null || requestParameters.transactionRecentRequest === undefined) {
+            throw new runtime.RequiredError('transactionRecentRequest','Required parameter requestParameters.transactionRecentRequest was null or undefined when calling transactionRecent.');
         }
 
         const queryParameters: any = {};
@@ -129,93 +192,23 @@ export class TransactionApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: RecentTransactionsRequestToJSON(requestParameters.recentTransactionsRequest),
+            body: TransactionRecentRequestToJSON(requestParameters.transactionRecentRequest),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => RecentTransactionsResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionRecentResponseFromJSON(jsonValue));
     }
 
     /**
      * Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
      * Get Recent Transactions
      */
-    async recentTransactions(requestParameters: RecentTransactionsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RecentTransactionsResponse> {
-        const response = await this.recentTransactionsRaw(requestParameters, initOverrides);
+    async transactionRecent(requestParameters: TransactionRecentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionRecentResponse> {
+        const response = await this.transactionRecentRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-     * Submit Transaction
-     */
-    async submitTransactionRaw(requestParameters: SubmitTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionSubmitResponse>> {
-        if (requestParameters.transactionSubmitRequest === null || requestParameters.transactionSubmitRequest === undefined) {
-            throw new runtime.RequiredError('transactionSubmitRequest','Required parameter requestParameters.transactionSubmitRequest was null or undefined when calling submitTransaction.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/transaction/submit`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: TransactionSubmitRequestToJSON(requestParameters.transactionSubmitRequest),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionSubmitResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-     * Submit Transaction
-     */
-    async submitTransaction(requestParameters: SubmitTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionSubmitResponse> {
-        const response = await this.submitTransactionRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren\'t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`. 
-     * Transaction Details
-     */
-    async transactionDetailsRaw(requestParameters: TransactionDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionDetailsResponse>> {
-        if (requestParameters.transactionDetailsRequest === null || requestParameters.transactionDetailsRequest === undefined) {
-            throw new runtime.RequiredError('transactionDetailsRequest','Required parameter requestParameters.transactionDetailsRequest was null or undefined when calling transactionDetails.');
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'application/json';
-
-        const response = await this.request({
-            path: `/transaction/details`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: TransactionDetailsRequestToJSON(requestParameters.transactionDetailsRequest),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionDetailsResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren\'t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`. 
-     * Transaction Details
-     */
-    async transactionDetails(requestParameters: TransactionDetailsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionDetailsResponse> {
-        const response = await this.transactionDetailsRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren\'t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`. 
+     * TBD 
      * Transaction Status
      */
     async transactionStatusRaw(requestParameters: TransactionStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionStatusResponse>> {
@@ -241,11 +234,46 @@ export class TransactionApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren\'t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`. 
+     * TBD 
      * Transaction Status
      */
     async transactionStatus(requestParameters: TransactionStatusOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionStatusResponse> {
         const response = await this.transactionStatusRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+     * Submit Transaction
+     */
+    async transactionSubmitRaw(requestParameters: TransactionSubmitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionSubmitResponse>> {
+        if (requestParameters.transactionSubmitRequest === null || requestParameters.transactionSubmitRequest === undefined) {
+            throw new runtime.RequiredError('transactionSubmitRequest','Required parameter requestParameters.transactionSubmitRequest was null or undefined when calling transactionSubmit.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/transaction/submit`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TransactionSubmitRequestToJSON(requestParameters.transactionSubmitRequest),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionSubmitResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+     * Submit Transaction
+     */
+    async transactionSubmit(requestParameters: TransactionSubmitOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionSubmitResponse> {
+        const response = await this.transactionSubmitRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
