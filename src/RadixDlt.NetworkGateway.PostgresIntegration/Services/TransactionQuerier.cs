@@ -235,7 +235,6 @@ internal class TransactionQuerier : ITransactionQuerier
         {
             LedgerTransactionStatus.Succeeded => GatewayModel.TransactionStatus.CommittedSuccess,
             LedgerTransactionStatus.Failed => GatewayModel.TransactionStatus.CommittedFailure,
-            LedgerTransactionStatus.Rejected => GatewayModel.TransactionStatus.Rejected,
             _ => throw new UnreachableException(),
         };
 

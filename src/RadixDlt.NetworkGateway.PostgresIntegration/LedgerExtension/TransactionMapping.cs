@@ -114,7 +114,6 @@ internal static class TransactionMapping
         {
             CoreModel.TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
             CoreModel.TransactionStatus.Failed => LedgerTransactionStatus.Failed,
-            CoreModel.TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }
