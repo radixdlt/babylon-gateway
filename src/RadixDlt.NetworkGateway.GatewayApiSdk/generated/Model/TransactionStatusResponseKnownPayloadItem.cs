@@ -112,7 +112,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="payloadHashHex">payloadHashHex (required).</param>
         /// <param name="status">status (required).</param>
-        public TransactionStatusResponseKnownPayloadItem(string payloadHashHex = default(string), TransactionStatus status = default(TransactionStatus))
+        /// <param name="errorMessage">errorMessage.</param>
+        public TransactionStatusResponseKnownPayloadItem(string payloadHashHex = default(string), TransactionStatus status = default(TransactionStatus), string errorMessage = default(string))
         {
             // to ensure "payloadHashHex" is required (not null)
             if (payloadHashHex == null)
@@ -121,6 +122,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.PayloadHashHex = payloadHashHex;
             this.Status = status;
+            this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
@@ -128,6 +130,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
         public string PayloadHashHex { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ErrorMessage
+        /// </summary>
+        [DataMember(Name = "error_message", EmitDefaultValue = true)]
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -139,6 +147,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class TransactionStatusResponseKnownPayloadItem {\n");
             sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -182,6 +191,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
+                ) && 
+                (
+                    this.ErrorMessage == input.ErrorMessage ||
+                    (this.ErrorMessage != null &&
+                    this.ErrorMessage.Equals(input.ErrorMessage))
                 );
         }
 
@@ -199,6 +213,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                if (this.ErrorMessage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
+                }
                 return hashCode;
             }
         }

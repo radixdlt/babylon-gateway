@@ -78,7 +78,7 @@ using RadixDlt.NetworkGateway.PostgresIntegration;
 namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 {
     [DbContext(typeof(MigrationsDbContext))]
-    [Migration("20221129205856_InitialCreate")]
+    [Migration("20221130142509_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -405,6 +405,10 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("epoch");
 
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text")
+                        .HasColumnName("error_message");
+
                     b.Property<BigInteger>("FeePaid")
                         .HasPrecision(1000)
                         .HasColumnType("numeric")
@@ -698,9 +702,17 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IntentHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("IntentHash"), "hash");
+
                     b.HasIndex("PayloadHash");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PayloadHash"), "hash");
+
+                    b.HasIndex("SignedIntentHash");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SignedIntentHash"), "hash");
 
                     b.ToTable("pending_transactions");
                 });

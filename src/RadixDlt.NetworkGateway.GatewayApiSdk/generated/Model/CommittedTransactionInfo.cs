@@ -116,7 +116,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="intentHashHex">intentHashHex (required).</param>
         /// <param name="feePaid">feePaid.</param>
         /// <param name="confirmedAt">confirmedAt.</param>
-        public CommittedTransactionInfo(long? stateVersion = default(long?), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?))
+        /// <param name="errorMessage">errorMessage.</param>
+        public CommittedTransactionInfo(long? stateVersion = default(long?), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?), string errorMessage = default(string))
         {
             // to ensure "stateVersion" is required (not null)
             if (stateVersion == null)
@@ -139,6 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             this.IntentHashHex = intentHashHex;
             this.FeePaid = feePaid;
             this.ConfirmedAt = confirmedAt;
+            this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
@@ -172,6 +174,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public DateTime? ConfirmedAt { get; set; }
 
         /// <summary>
+        /// Gets or Sets ErrorMessage
+        /// </summary>
+        [DataMember(Name = "error_message", EmitDefaultValue = true)]
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -185,6 +193,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
             sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
+            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -248,6 +257,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.ConfirmedAt == input.ConfirmedAt ||
                     (this.ConfirmedAt != null &&
                     this.ConfirmedAt.Equals(input.ConfirmedAt))
+                ) && 
+                (
+                    this.ErrorMessage == input.ErrorMessage ||
+                    (this.ErrorMessage != null &&
+                    this.ErrorMessage.Equals(input.ErrorMessage))
                 );
         }
 
@@ -280,6 +294,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.ConfirmedAt != null)
                 {
                     hashCode = (hashCode * 59) + this.ConfirmedAt.GetHashCode();
+                }
+                if (this.ErrorMessage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
                 }
                 return hashCode;
             }

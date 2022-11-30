@@ -129,15 +129,18 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;
+        var errorMessage = (string?)null;
         var knownPayloads = new List<GatewayModel.TransactionStatusResponseKnownPayloadItem>();
 
         if (committedTransaction != null)
         {
             status = committedTransaction.Info.TransactionStatus;
+            errorMessage = committedTransaction.Info.ErrorMessage;
 
             knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
                 payloadHashHex: committedTransaction.Info.PayloadHashHex,
-                status: status));
+                status: status,
+                errorMessage: committedTransaction.Info.ErrorMessage));
         }
         else if (remainingPendingTransactions.Any())
         {
@@ -146,9 +149,10 @@ internal class DefaultTransactionHandler : ITransactionHandler
 
         knownPayloads.AddRange(remainingPendingTransactions.Select(pt => new GatewayModel.TransactionStatusResponseKnownPayloadItem(
             payloadHashHex: pt.PayloadHashHex,
-            status: pt.Status)));
+            status: pt.Status,
+            errorMessage: pt.ErrorMessage)));
 
-        return new GatewayModel.TransactionStatusResponse(ledgerState, status, knownPayloads);
+        return new GatewayModel.TransactionStatusResponse(ledgerState, status, knownPayloads, errorMessage);
     }
 
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)

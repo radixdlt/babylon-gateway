@@ -592,6 +592,9 @@ components:
           nullable: true
           type: string
           format: date-time
+        error_message:
+          type: string
+          nullable: true
 
     TransactionStatus:
       type: string
@@ -783,6 +786,9 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/TransactionStatusResponseKnownPayloadItem"
+            error_message:
+              type: string
+              nullable: true
     TransactionStatusResponseKnownPayloadItem:
       type: object
       required:
@@ -793,6 +799,9 @@ components:
           type: string
         status:
           $ref: "#/components/schemas/TransactionStatus"
+        error_message:
+          type: string
+          nullable: true
 
     TransactionCommittedDetailsRequest:
       type: object

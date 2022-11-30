@@ -84,7 +84,7 @@ public interface ITransactionQuerier
 
 public sealed record DetailsLookupResult(GatewayModel.CommittedTransactionInfo Info, GatewayModel.TransactionCommittedDetailsResponseDetails? Details);
 
-public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status);
+public sealed record StatusLookupResult(string PayloadHashHex, GatewayModel.TransactionStatus Status, string? ErrorMessage);
 
 public sealed record TransactionPageWithoutTotal(GatewayModel.LedgerTransactionsCursor? NextPageCursor, List<GatewayModel.CommittedTransactionInfo> Transactions);
 

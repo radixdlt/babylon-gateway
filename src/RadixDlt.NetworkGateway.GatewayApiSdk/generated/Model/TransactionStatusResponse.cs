@@ -113,7 +113,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="status">status (required).</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
-        public TransactionStatusResponse(LedgerState ledgerState = default(LedgerState), TransactionStatus status = default(TransactionStatus), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>))
+        /// <param name="errorMessage">errorMessage.</param>
+        public TransactionStatusResponse(LedgerState ledgerState = default(LedgerState), TransactionStatus status = default(TransactionStatus), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>), string errorMessage = default(string))
         {
             // to ensure "ledgerState" is required (not null)
             if (ledgerState == null)
@@ -128,6 +129,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("knownPayloads is a required property for TransactionStatusResponse and cannot be null");
             }
             this.KnownPayloads = knownPayloads;
+            this.ErrorMessage = errorMessage;
         }
 
         /// <summary>
@@ -143,6 +145,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public List<TransactionStatusResponseKnownPayloadItem> KnownPayloads { get; set; }
 
         /// <summary>
+        /// Gets or Sets ErrorMessage
+        /// </summary>
+        [DataMember(Name = "error_message", EmitDefaultValue = true)]
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -153,6 +161,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
+            sb.Append("  ErrorMessage: ").Append(ErrorMessage).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -202,6 +211,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.KnownPayloads != null &&
                     input.KnownPayloads != null &&
                     this.KnownPayloads.SequenceEqual(input.KnownPayloads)
+                ) && 
+                (
+                    this.ErrorMessage == input.ErrorMessage ||
+                    (this.ErrorMessage != null &&
+                    this.ErrorMessage.Equals(input.ErrorMessage))
                 );
         }
 
@@ -222,6 +236,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.KnownPayloads != null)
                 {
                     hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
+                }
+                if (this.ErrorMessage != null)
+                {
+                    hashCode = (hashCode * 59) + this.ErrorMessage.GetHashCode();
                 }
                 return hashCode;
             }

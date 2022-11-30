@@ -244,7 +244,8 @@ internal class TransactionQuerier : ITransactionQuerier
             payloadHashHex: ult.PayloadHash.ToHex(),
             intentHashHex: ult.IntentHash.ToHex(),
             feePaid: new GatewayModel.TokenAmount(ult.FeePaid.ToString(), _networkConfigurationProvider.GetWellKnownAddresses().Xrd),
-            confirmedAt: ult.RoundTimestamp
+            confirmedAt: ult.RoundTimestamp,
+            errorMessage: ult.ErrorMessage
         );
     }
 
@@ -262,7 +263,7 @@ internal class TransactionQuerier : ITransactionQuerier
             _ => throw new UnreachableException(),
         };
 
-        return new StatusLookupResult(pt.PayloadHash.ToHex(), status);
+        return new StatusLookupResult(pt.PayloadHash.ToHex(), status, pt.FailureExplanation);
     }
 
     private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)

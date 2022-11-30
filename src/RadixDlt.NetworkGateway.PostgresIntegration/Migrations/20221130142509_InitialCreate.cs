@@ -208,6 +208,7 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 {
                     stateversion = table.Column<long>(name: "state_version", type: "bigint", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
+                    errormessage = table.Column<string>(name: "error_message", type: "text", nullable: true),
                     transactionaccumulator = table.Column<byte[]>(name: "transaction_accumulator", type: "bytea", nullable: false),
                     message = table.Column<byte[]>(type: "bytea", nullable: true),
                     epoch = table.Column<long>(type: "bigint", nullable: false),
@@ -491,9 +492,21 @@ namespace RadixDlt.NetworkGateway.PostgresIntegration.Migrations
                 columns: new[] { "non_fungible_resource_manager_entity_id", "from_state_version" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_pending_transactions_intent_hash",
+                table: "pending_transactions",
+                column: "intent_hash")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_pending_transactions_payload_hash",
                 table: "pending_transactions",
                 column: "payload_hash")
+                .Annotation("Npgsql:IndexMethod", "hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pending_transactions_signed_intent_hash",
+                table: "pending_transactions",
+                column: "signed_intent_hash")
                 .Annotation("Npgsql:IndexMethod", "hash");
 
             migrationBuilder.CreateIndex(
