@@ -154,10 +154,10 @@ paths:
                 $ref: "#/components/schemas/TransactionCommittedDetailsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  "/transaction/intent-lookup":
+  "/transaction/status":
     post:
-      operationId: TransactionIntentLookup
-      summary: Transaction Intent Lookup
+      operationId: TransactionStatus
+      summary: Transaction Status
       description: |
         TBD
       tags:
@@ -167,14 +167,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransactionIntentLookupRequest"
+              $ref: "#/components/schemas/TransactionStatusRequest"
       responses:
         "200":
           description: Transaction Status
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionIntentLookupResponse"
+                $ref: "#/components/schemas/TransactionStatusResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -758,7 +758,7 @@ components:
           type: boolean
           description: Is true if the transaction is a duplicate of an existing pending transaction.
 
-    TransactionIntentLookupRequest:
+    TransactionStatusRequest:
       type: object
       required:
         - transaction_identifier
@@ -769,7 +769,7 @@ components:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
         intent_hash_hex: "<transaction-intent-hash>"
-    TransactionIntentLookupResponse:
+    TransactionStatusResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
@@ -782,8 +782,8 @@ components:
             known_payloads:
               type: array
               items:
-                $ref: "#/components/schemas/TransactionIntentLookupResponseKnownPayloadItem"
-    TransactionIntentLookupResponseKnownPayloadItem:
+                $ref: "#/components/schemas/TransactionStatusResponseKnownPayloadItem"
+    TransactionStatusResponseKnownPayloadItem:
       type: object
       required:
         - payload_hash_hex

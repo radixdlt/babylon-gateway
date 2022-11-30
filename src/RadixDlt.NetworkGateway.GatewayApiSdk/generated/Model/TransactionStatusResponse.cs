@@ -91,10 +91,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionIntentLookupResponseKnownPayloadItem
+    /// TransactionStatusResponse
     /// </summary>
-    [DataContract(Name = "TransactionIntentLookupResponseKnownPayloadItem")]
-    public partial class TransactionIntentLookupResponseKnownPayloadItem : IEquatable<TransactionIntentLookupResponseKnownPayloadItem>, IValidatableObject
+    [DataContract(Name = "TransactionStatusResponse")]
+    public partial class TransactionStatusResponse : IEquatable<TransactionStatusResponse>, IValidatableObject
     {
 
         /// <summary>
@@ -103,31 +103,44 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
         public TransactionStatus Status { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponseKnownPayloadItem" /> class.
+        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionIntentLookupResponseKnownPayloadItem() { }
+        protected TransactionStatusResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponseKnownPayloadItem" /> class.
+        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
         /// </summary>
-        /// <param name="payloadHashHex">payloadHashHex (required).</param>
+        /// <param name="ledgerState">ledgerState (required).</param>
         /// <param name="status">status (required).</param>
-        public TransactionIntentLookupResponseKnownPayloadItem(string payloadHashHex = default(string), TransactionStatus status = default(TransactionStatus))
+        /// <param name="knownPayloads">knownPayloads (required).</param>
+        public TransactionStatusResponse(LedgerState ledgerState = default(LedgerState), TransactionStatus status = default(TransactionStatus), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>))
         {
-            // to ensure "payloadHashHex" is required (not null)
-            if (payloadHashHex == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("payloadHashHex is a required property for TransactionIntentLookupResponseKnownPayloadItem and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for TransactionStatusResponse and cannot be null");
             }
-            this.PayloadHashHex = payloadHashHex;
+            this.LedgerState = ledgerState;
             this.Status = status;
+            // to ensure "knownPayloads" is required (not null)
+            if (knownPayloads == null)
+            {
+                throw new ArgumentNullException("knownPayloads is a required property for TransactionStatusResponse and cannot be null");
+            }
+            this.KnownPayloads = knownPayloads;
         }
 
         /// <summary>
-        /// Gets or Sets PayloadHashHex
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string PayloadHashHex { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
+
+        /// <summary>
+        /// Gets or Sets KnownPayloads
+        /// </summary>
+        [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionStatusResponseKnownPayloadItem> KnownPayloads { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +149,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionIntentLookupResponseKnownPayloadItem {\n");
-            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
+            sb.Append("class TransactionStatusResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +173,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionIntentLookupResponseKnownPayloadItem);
+            return this.Equals(input as TransactionStatusResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionIntentLookupResponseKnownPayloadItem instances are equal
+        /// Returns true if TransactionStatusResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionIntentLookupResponseKnownPayloadItem to be compared</param>
+        /// <param name="input">Instance of TransactionStatusResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionIntentLookupResponseKnownPayloadItem input)
+        public bool Equals(TransactionStatusResponse input)
         {
             if (input == null)
             {
@@ -175,13 +189,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.PayloadHashHex == input.PayloadHashHex ||
-                    (this.PayloadHashHex != null &&
-                    this.PayloadHashHex.Equals(input.PayloadHashHex))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
                     this.Status == input.Status ||
                     this.Status.Equals(input.Status)
+                ) && 
+                (
+                    this.KnownPayloads == input.KnownPayloads ||
+                    this.KnownPayloads != null &&
+                    input.KnownPayloads != null &&
+                    this.KnownPayloads.SequenceEqual(input.KnownPayloads)
                 );
         }
 
@@ -194,11 +214,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.PayloadHashHex != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                if (this.KnownPayloads != null)
+                {
+                    hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
+                }
                 return hashCode;
             }
         }

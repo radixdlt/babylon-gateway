@@ -120,7 +120,7 @@ internal class DefaultTransactionHandler : ITransactionHandler
         );
     }
 
-    public async Task<GatewayModel.TransactionIntentLookupResponse> IntentLookup(GatewayModel.TransactionIntentLookupRequest request, CancellationToken token = default)
+    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default)
     {
         var identifier = new GatewayModel.TransactionCommittedDetailsRequestIdentifier(GatewayModel.TransactionCommittedDetailsRequestIdentifierType.IntentHash, request.IntentHashHex);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
@@ -129,13 +129,13 @@ internal class DefaultTransactionHandler : ITransactionHandler
         var remainingPendingTransactions = pendingTransactions.Where(pt => pt.PayloadHashHex != committedTransaction?.Info.PayloadHashHex).ToList();
 
         var status = GatewayModel.TransactionStatus.Unknown;
-        var knownPayloads = new List<GatewayModel.TransactionIntentLookupResponseKnownPayloadItem>();
+        var knownPayloads = new List<GatewayModel.TransactionStatusResponseKnownPayloadItem>();
 
         if (committedTransaction != null)
         {
             status = committedTransaction.Info.TransactionStatus;
 
-            knownPayloads.Add(new GatewayModel.TransactionIntentLookupResponseKnownPayloadItem(
+            knownPayloads.Add(new GatewayModel.TransactionStatusResponseKnownPayloadItem(
                 payloadHashHex: committedTransaction.Info.PayloadHashHex,
                 status: status));
         }
@@ -144,11 +144,11 @@ internal class DefaultTransactionHandler : ITransactionHandler
             status = GatewayModel.TransactionStatus.Pending;
         }
 
-        knownPayloads.AddRange(remainingPendingTransactions.Select(pt => new GatewayModel.TransactionIntentLookupResponseKnownPayloadItem(
+        knownPayloads.AddRange(remainingPendingTransactions.Select(pt => new GatewayModel.TransactionStatusResponseKnownPayloadItem(
             payloadHashHex: pt.PayloadHashHex,
             status: pt.Status)));
 
-        return new GatewayModel.TransactionIntentLookupResponse(ledgerState, status, knownPayloads);
+        return new GatewayModel.TransactionStatusResponse(ledgerState, status, knownPayloads);
     }
 
     public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default)

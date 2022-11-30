@@ -132,27 +132,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of TransactionConstructionResponse</returns>
         ApiResponse<TransactionConstructionResponse> TransactionConstructionWithHttpInfo();
         /// <summary>
-        /// Transaction Intent Lookup
-        /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <returns>TransactionIntentLookupResponse</returns>
-        TransactionIntentLookupResponse TransactionIntentLookup(TransactionIntentLookupRequest transactionIntentLookupRequest);
-
-        /// <summary>
-        /// Transaction Intent Lookup
-        /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <returns>ApiResponse of TransactionIntentLookupResponse</returns>
-        ApiResponse<TransactionIntentLookupResponse> TransactionIntentLookupWithHttpInfo(TransactionIntentLookupRequest transactionIntentLookupRequest);
-        /// <summary>
         /// Preview Transaction
         /// </summary>
         /// <remarks>
@@ -194,6 +173,27 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="transactionRecentRequest"></param>
         /// <returns>ApiResponse of TransactionRecentResponse</returns>
         ApiResponse<TransactionRecentResponse> TransactionRecentWithHttpInfo(TransactionRecentRequest transactionRecentRequest);
+        /// <summary>
+        /// Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <returns>TransactionStatusResponse</returns>
+        TransactionStatusResponse TransactionStatus(TransactionStatusRequest transactionStatusRequest);
+
+        /// <summary>
+        /// Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <returns>ApiResponse of TransactionStatusResponse</returns>
+        ApiResponse<TransactionStatusResponse> TransactionStatusWithHttpInfo(TransactionStatusRequest transactionStatusRequest);
         /// <summary>
         /// Submit Transaction
         /// </summary>
@@ -269,29 +269,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (TransactionConstructionResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionConstructionResponse>> TransactionConstructionWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Transaction Intent Lookup
-        /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionIntentLookupResponse</returns>
-        System.Threading.Tasks.Task<TransactionIntentLookupResponse> TransactionIntentLookupAsync(TransactionIntentLookupRequest transactionIntentLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Transaction Intent Lookup
-        /// </summary>
-        /// <remarks>
-        /// TBD 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionIntentLookupResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionIntentLookupResponse>> TransactionIntentLookupWithHttpInfoAsync(TransactionIntentLookupRequest transactionIntentLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
         /// Preview Transaction
         /// </summary>
         /// <remarks>
@@ -337,6 +314,29 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (TransactionRecentResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionRecentResponse>> TransactionRecentWithHttpInfoAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionStatusResponse</returns>
+        System.Threading.Tasks.Task<TransactionStatusResponse> TransactionStatusAsync(TransactionStatusRequest transactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Transaction Status
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionStatusResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionStatusResponse>> TransactionStatusWithHttpInfoAsync(TransactionStatusRequest transactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Submit Transaction
         /// </summary>
@@ -792,123 +792,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Intent Lookup TBD 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <returns>TransactionIntentLookupResponse</returns>
-        public TransactionIntentLookupResponse TransactionIntentLookup(TransactionIntentLookupRequest transactionIntentLookupRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionIntentLookupResponse> localVarResponse = TransactionIntentLookupWithHttpInfo(transactionIntentLookupRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Transaction Intent Lookup TBD 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <returns>ApiResponse of TransactionIntentLookupResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionIntentLookupResponse> TransactionIntentLookupWithHttpInfo(TransactionIntentLookupRequest transactionIntentLookupRequest)
-        {
-            // verify the required parameter 'transactionIntentLookupRequest' is set
-            if (transactionIntentLookupRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionIntentLookupRequest' when calling TransactionApi->TransactionIntentLookup");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionIntentLookupRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionIntentLookupResponse>("/transaction/intent-lookup", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionIntentLookup", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Transaction Intent Lookup TBD 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionIntentLookupResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionIntentLookupResponse> TransactionIntentLookupAsync(TransactionIntentLookupRequest transactionIntentLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionIntentLookupResponse> localVarResponse = await TransactionIntentLookupWithHttpInfoAsync(transactionIntentLookupRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Transaction Intent Lookup TBD 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionIntentLookupRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionIntentLookupResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionIntentLookupResponse>> TransactionIntentLookupWithHttpInfoAsync(TransactionIntentLookupRequest transactionIntentLookupRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'transactionIntentLookupRequest' is set
-            if (transactionIntentLookupRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionIntentLookupRequest' when calling TransactionApi->TransactionIntentLookup");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionIntentLookupRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionIntentLookupResponse>("/transaction/intent-lookup", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionIntentLookup", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
         /// Preview Transaction Previews transaction against the network. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
@@ -1136,6 +1019,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("TransactionRecent", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Status TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <returns>TransactionStatusResponse</returns>
+        public TransactionStatusResponse TransactionStatus(TransactionStatusRequest transactionStatusRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionStatusResponse> localVarResponse = TransactionStatusWithHttpInfo(transactionStatusRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Status TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <returns>ApiResponse of TransactionStatusResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionStatusResponse> TransactionStatusWithHttpInfo(TransactionStatusRequest transactionStatusRequest)
+        {
+            // verify the required parameter 'transactionStatusRequest' is set
+            if (transactionStatusRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionStatusRequest' when calling TransactionApi->TransactionStatus");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionStatusRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionStatusResponse>("/transaction/status", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionStatus", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Status TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionStatusResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionStatusResponse> TransactionStatusAsync(TransactionStatusRequest transactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionStatusResponse> localVarResponse = await TransactionStatusWithHttpInfoAsync(transactionStatusRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Status TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionStatusRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionStatusResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionStatusResponse>> TransactionStatusWithHttpInfoAsync(TransactionStatusRequest transactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'transactionStatusRequest' is set
+            if (transactionStatusRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionStatusRequest' when calling TransactionApi->TransactionStatus");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionStatusRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionStatusResponse>("/transaction/status", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionStatus", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

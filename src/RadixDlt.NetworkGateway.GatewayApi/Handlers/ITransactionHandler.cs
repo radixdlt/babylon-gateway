@@ -75,7 +75,7 @@ public interface ITransactionHandler
 
     Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.TransactionIntentLookupResponse> IntentLookup(GatewayModel.TransactionIntentLookupRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default);
 
     Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default);
 

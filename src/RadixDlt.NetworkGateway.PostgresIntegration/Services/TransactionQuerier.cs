@@ -112,7 +112,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return new TransactionPageWithoutTotal(nextCursor, transactions);
     }
 
-    public async Task<LookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
+    public async Task<DetailsLookupResult?> LookupCommittedTransaction(GatewayModel.TransactionCommittedDetailsRequestIdentifier identifier, GatewayModel.LedgerState ledgerState, bool withDetails, CancellationToken token = default)
     {
         var hash = identifier.ValueHex.ConvertFromHex();
         var query = _dbContext.LedgerTransactions
@@ -145,16 +145,16 @@ internal class TransactionQuerier : ITransactionQuerier
 
         return withDetails
             ? await GetTransactionWithDetails(stateVersion, token)
-            : new LookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
+            : new DetailsLookupResult((await GetTransactions(new List<long> { stateVersion }, token)).First(), null);
     }
 
-    public async Task<ICollection<IntentLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default)
+    public async Task<ICollection<StatusLookupResult>> LookupPendingTransactionsByIntentHash(byte[] intentHash, CancellationToken token = default)
     {
         var pendingTransactions = await _rwDbContext.PendingTransactions
             .Where(pt => pt.IntentHash == intentHash)
             .ToListAsync(token);
 
-        return pendingTransactions.Select(MapToIntentLookupResult).ToArray();
+        return pendingTransactions.Select(MapToStatusLookupResult).ToArray();
     }
 
     private async Task<List<long>> GetRecentUserTransactionStateVersions(
@@ -204,7 +204,7 @@ internal class TransactionQuerier : ITransactionQuerier
         return transactions.Select(MapToGatewayAccountTransaction).ToList();
     }
 
-    private async Task<LookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
+    private async Task<DetailsLookupResult> GetTransactionWithDetails(long stateVersion, CancellationToken token)
     {
         // TODO how to execute that with join?
 
@@ -248,7 +248,7 @@ internal class TransactionQuerier : ITransactionQuerier
         );
     }
 
-    private IntentLookupResult MapToIntentLookupResult(PendingTransaction pt)
+    private StatusLookupResult MapToStatusLookupResult(PendingTransaction pt)
     {
         // TODO this HAS TO be changed ?
 
@@ -262,12 +262,12 @@ internal class TransactionQuerier : ITransactionQuerier
             _ => throw new UnreachableException(),
         };
 
-        return new IntentLookupResult(pt.PayloadHash.ToHex(), status);
+        return new StatusLookupResult(pt.PayloadHash.ToHex(), status);
     }
 
-    private LookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)
+    private DetailsLookupResult MapToGatewayAccountTransactionWithDetails(UserLedgerTransaction ult, RawUserTransaction rawUserTransaction, List<Entity> referencedEntities)
     {
-        return new LookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
+        return new DetailsLookupResult(MapToGatewayAccountTransaction(ult), new GatewayModel.TransactionCommittedDetailsResponseDetails(
             rawHex: rawUserTransaction.Payload.ToHex(),
             receipt: new JRaw(rawUserTransaction.Receipt),
             referencedGlobalEntities: referencedEntities.Where(re => re.GlobalAddress != null).Select(re => re.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition())).ToList(),

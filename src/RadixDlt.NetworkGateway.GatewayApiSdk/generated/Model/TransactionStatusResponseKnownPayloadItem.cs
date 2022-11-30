@@ -91,33 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionIntentLookupRequest
+    /// TransactionStatusResponseKnownPayloadItem
     /// </summary>
-    [DataContract(Name = "TransactionIntentLookupRequest")]
-    public partial class TransactionIntentLookupRequest : IEquatable<TransactionIntentLookupRequest>, IValidatableObject
+    [DataContract(Name = "TransactionStatusResponseKnownPayloadItem")]
+    public partial class TransactionStatusResponseKnownPayloadItem : IEquatable<TransactionStatusResponseKnownPayloadItem>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionIntentLookupRequest" /> class.
+        /// Gets or Sets Status
         /// </summary>
-        /// <param name="intentHashHex">intentHashHex.</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionIntentLookupRequest(string intentHashHex = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionStatus Status { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionStatusResponseKnownPayloadItem" /> class.
+        /// </summary>
+        [JsonConstructorAttribute]
+        protected TransactionStatusResponseKnownPayloadItem() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionStatusResponseKnownPayloadItem" /> class.
+        /// </summary>
+        /// <param name="payloadHashHex">payloadHashHex (required).</param>
+        /// <param name="status">status (required).</param>
+        public TransactionStatusResponseKnownPayloadItem(string payloadHashHex = default(string), TransactionStatus status = default(TransactionStatus))
         {
-            this.IntentHashHex = intentHashHex;
-            this.AtStateIdentifier = atStateIdentifier;
+            // to ensure "payloadHashHex" is required (not null)
+            if (payloadHashHex == null)
+            {
+                throw new ArgumentNullException("payloadHashHex is a required property for TransactionStatusResponseKnownPayloadItem and cannot be null");
+            }
+            this.PayloadHashHex = payloadHashHex;
+            this.Status = status;
         }
 
         /// <summary>
-        /// Gets or Sets IntentHashHex
+        /// Gets or Sets PayloadHashHex
         /// </summary>
-        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
-        public string IntentHashHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets AtStateIdentifier
-        /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHashHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -126,9 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionIntentLookupRequest {\n");
-            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("class TransactionStatusResponseKnownPayloadItem {\n");
+            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
+            sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -149,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionIntentLookupRequest);
+            return this.Equals(input as TransactionStatusResponseKnownPayloadItem);
         }
 
         /// <summary>
-        /// Returns true if TransactionIntentLookupRequest instances are equal
+        /// Returns true if TransactionStatusResponseKnownPayloadItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionIntentLookupRequest to be compared</param>
+        /// <param name="input">Instance of TransactionStatusResponseKnownPayloadItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionIntentLookupRequest input)
+        public bool Equals(TransactionStatusResponseKnownPayloadItem input)
         {
             if (input == null)
             {
@@ -165,14 +175,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.IntentHashHex == input.IntentHashHex ||
-                    (this.IntentHashHex != null &&
-                    this.IntentHashHex.Equals(input.IntentHashHex))
+                    this.PayloadHashHex == input.PayloadHashHex ||
+                    (this.PayloadHashHex != null &&
+                    this.PayloadHashHex.Equals(input.PayloadHashHex))
                 ) && 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.Status == input.Status ||
+                    this.Status.Equals(input.Status)
                 );
         }
 
@@ -185,14 +194,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.IntentHashHex != null)
+                if (this.PayloadHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
                 }
-                if (this.AtStateIdentifier != null)
-                {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
-                }
+                hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 return hashCode;
             }
         }

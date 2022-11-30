@@ -91,10 +91,10 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionIntentLookupResponseAllOf
+    /// TransactionStatusResponseAllOf
     /// </summary>
-    [DataContract(Name = "TransactionIntentLookupResponse_allOf")]
-    public partial class TransactionIntentLookupResponseAllOf : IEquatable<TransactionIntentLookupResponseAllOf>, IValidatableObject
+    [DataContract(Name = "TransactionStatusResponse_allOf")]
+    public partial class TransactionStatusResponseAllOf : IEquatable<TransactionStatusResponseAllOf>, IValidatableObject
     {
 
         /// <summary>
@@ -103,22 +103,22 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
         public TransactionStatus Status { get; set; }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionIntentLookupResponseAllOf() { }
+        protected TransactionStatusResponseAllOf() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponseAllOf" /> class.
+        /// Initializes a new instance of the <see cref="TransactionStatusResponseAllOf" /> class.
         /// </summary>
         /// <param name="status">status (required).</param>
         /// <param name="knownPayloads">knownPayloads (required).</param>
-        public TransactionIntentLookupResponseAllOf(TransactionStatus status = default(TransactionStatus), List<TransactionIntentLookupResponseKnownPayloadItem> knownPayloads = default(List<TransactionIntentLookupResponseKnownPayloadItem>))
+        public TransactionStatusResponseAllOf(TransactionStatus status = default(TransactionStatus), List<TransactionStatusResponseKnownPayloadItem> knownPayloads = default(List<TransactionStatusResponseKnownPayloadItem>))
         {
             this.Status = status;
             // to ensure "knownPayloads" is required (not null)
             if (knownPayloads == null)
             {
-                throw new ArgumentNullException("knownPayloads is a required property for TransactionIntentLookupResponseAllOf and cannot be null");
+                throw new ArgumentNullException("knownPayloads is a required property for TransactionStatusResponseAllOf and cannot be null");
             }
             this.KnownPayloads = knownPayloads;
         }
@@ -127,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets KnownPayloads
         /// </summary>
         [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
-        public List<TransactionIntentLookupResponseKnownPayloadItem> KnownPayloads { get; set; }
+        public List<TransactionStatusResponseKnownPayloadItem> KnownPayloads { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,7 +136,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionIntentLookupResponseAllOf {\n");
+            sb.Append("class TransactionStatusResponseAllOf {\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
             sb.Append("}\n");
@@ -159,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionIntentLookupResponseAllOf);
+            return this.Equals(input as TransactionStatusResponseAllOf);
         }
 
         /// <summary>
-        /// Returns true if TransactionIntentLookupResponseAllOf instances are equal
+        /// Returns true if TransactionStatusResponseAllOf instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionIntentLookupResponseAllOf to be compared</param>
+        /// <param name="input">Instance of TransactionStatusResponseAllOf to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionIntentLookupResponseAllOf input)
+        public bool Equals(TransactionStatusResponseAllOf input)
         {
             if (input == null)
             {
