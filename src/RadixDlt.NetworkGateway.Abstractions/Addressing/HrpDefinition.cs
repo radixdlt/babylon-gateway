@@ -73,3 +73,11 @@ public sealed record HrpDefinition(
     string Validator,
     string Node
 );
+
+public sealed record WellKnownAddresses(
+    string AccountPackage,
+    string Faucet,
+    string EcdsaSecp256k1,
+    string EddsaEd25519,
+    string Xrd
+);

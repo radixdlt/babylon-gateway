@@ -92,6 +92,46 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
+        /// Transaction Committed Details
+        /// </summary>
+        /// <remarks>
+        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <returns>TransactionCommittedDetailsResponse</returns>
+        TransactionCommittedDetailsResponse TransactionCommittedDetails(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest);
+
+        /// <summary>
+        /// Transaction Committed Details
+        /// </summary>
+        /// <remarks>
+        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <returns>ApiResponse of TransactionCommittedDetailsResponse</returns>
+        ApiResponse<TransactionCommittedDetailsResponse> TransactionCommittedDetailsWithHttpInfo(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest);
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>TransactionConstructionResponse</returns>
+        TransactionConstructionResponse TransactionConstruction();
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>ApiResponse of TransactionConstructionResponse</returns>
+        ApiResponse<TransactionConstructionResponse> TransactionConstructionWithHttpInfo();
+        /// <summary>
         /// Preview Transaction
         /// </summary>
         /// <remarks>
@@ -100,7 +140,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <returns>Object</returns>
-        Object PreviewTransaction(Object body);
+        Object TransactionPreview(Object body);
 
         /// <summary>
         /// Preview Transaction
@@ -111,7 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <returns>ApiResponse of Object</returns>
-        ApiResponse<Object> PreviewTransactionWithHttpInfo(Object body);
+        ApiResponse<Object> TransactionPreviewWithHttpInfo(Object body);
         /// <summary>
         /// Get Recent Transactions
         /// </summary>
@@ -119,9 +159,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
-        /// <returns>RecentTransactionsResponse</returns>
-        RecentTransactionsResponse RecentTransactions(RecentTransactionsRequest recentTransactionsRequest);
+        /// <param name="transactionRecentRequest"></param>
+        /// <returns>TransactionRecentResponse</returns>
+        TransactionRecentResponse TransactionRecent(TransactionRecentRequest transactionRecentRequest);
 
         /// <summary>
         /// Get Recent Transactions
@@ -130,56 +170,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
-        /// <returns>ApiResponse of RecentTransactionsResponse</returns>
-        ApiResponse<RecentTransactionsResponse> RecentTransactionsWithHttpInfo(RecentTransactionsRequest recentTransactionsRequest);
-        /// <summary>
-        /// Submit Transaction
-        /// </summary>
-        /// <remarks>
-        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>TransactionSubmitResponse</returns>
-        TransactionSubmitResponse SubmitTransaction(TransactionSubmitRequest transactionSubmitRequest);
-
-        /// <summary>
-        /// Submit Transaction
-        /// </summary>
-        /// <remarks>
-        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>ApiResponse of TransactionSubmitResponse</returns>
-        ApiResponse<TransactionSubmitResponse> SubmitTransactionWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest);
-        /// <summary>
-        /// Transaction Details
-        /// </summary>
-        /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <returns>TransactionDetailsResponse</returns>
-        TransactionDetailsResponse TransactionDetails(TransactionDetailsRequest transactionDetailsRequest);
-
-        /// <summary>
-        /// Transaction Details
-        /// </summary>
-        /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <returns>ApiResponse of TransactionDetailsResponse</returns>
-        ApiResponse<TransactionDetailsResponse> TransactionDetailsWithHttpInfo(TransactionDetailsRequest transactionDetailsRequest);
+        /// <param name="transactionRecentRequest"></param>
+        /// <returns>ApiResponse of TransactionRecentResponse</returns>
+        ApiResponse<TransactionRecentResponse> TransactionRecentWithHttpInfo(TransactionRecentRequest transactionRecentRequest);
         /// <summary>
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -190,12 +188,33 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
         /// <returns>ApiResponse of TransactionStatusResponse</returns>
         ApiResponse<TransactionStatusResponse> TransactionStatusWithHttpInfo(TransactionStatusRequest transactionStatusRequest);
+        /// <summary>
+        /// Submit Transaction
+        /// </summary>
+        /// <remarks>
+        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <returns>TransactionSubmitResponse</returns>
+        TransactionSubmitResponse TransactionSubmit(TransactionSubmitRequest transactionSubmitRequest);
+
+        /// <summary>
+        /// Submit Transaction
+        /// </summary>
+        /// <remarks>
+        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <returns>ApiResponse of TransactionSubmitResponse</returns>
+        ApiResponse<TransactionSubmitResponse> TransactionSubmitWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest);
         #endregion Synchronous Operations
     }
 
@@ -206,6 +225,50 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
+        /// Transaction Committed Details
+        /// </summary>
+        /// <remarks>
+        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionCommittedDetailsResponse</returns>
+        System.Threading.Tasks.Task<TransactionCommittedDetailsResponse> TransactionCommittedDetailsAsync(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Transaction Committed Details
+        /// </summary>
+        /// <remarks>
+        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionCommittedDetailsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionCommittedDetailsResponse>> TransactionCommittedDetailsWithHttpInfoAsync(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionConstructionResponse</returns>
+        System.Threading.Tasks.Task<TransactionConstructionResponse> TransactionConstructionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionConstructionResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionConstructionResponse>> TransactionConstructionWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
         /// Preview Transaction
         /// </summary>
         /// <remarks>
@@ -215,7 +278,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of Object</returns>
-        System.Threading.Tasks.Task<Object> PreviewTransactionAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<Object> TransactionPreviewAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Preview Transaction
@@ -227,7 +290,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (Object)</returns>
-        System.Threading.Tasks.Task<ApiResponse<Object>> PreviewTransactionWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<ApiResponse<Object>> TransactionPreviewWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Get Recent Transactions
         /// </summary>
@@ -235,10 +298,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
+        /// <param name="transactionRecentRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of RecentTransactionsResponse</returns>
-        System.Threading.Tasks.Task<RecentTransactionsResponse> RecentTransactionsAsync(RecentTransactionsRequest recentTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of TransactionRecentResponse</returns>
+        System.Threading.Tasks.Task<TransactionRecentResponse> TransactionRecentAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
         /// Get Recent Transactions
@@ -247,61 +310,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
+        /// <param name="transactionRecentRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (RecentTransactionsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<RecentTransactionsResponse>> RecentTransactionsWithHttpInfoAsync(RecentTransactionsRequest recentTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Submit Transaction
-        /// </summary>
-        /// <remarks>
-        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionSubmitResponse</returns>
-        System.Threading.Tasks.Task<TransactionSubmitResponse> SubmitTransactionAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Submit Transaction
-        /// </summary>
-        /// <remarks>
-        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionSubmitResponse>> SubmitTransactionWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-        /// <summary>
-        /// Transaction Details
-        /// </summary>
-        /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionDetailsResponse</returns>
-        System.Threading.Tasks.Task<TransactionDetailsResponse> TransactionDetailsAsync(TransactionDetailsRequest transactionDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-        /// <summary>
-        /// Transaction Details
-        /// </summary>
-        /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </remarks>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionDetailsResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<TransactionDetailsResponse>> TransactionDetailsWithHttpInfoAsync(TransactionDetailsRequest transactionDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (TransactionRecentResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionRecentResponse>> TransactionRecentWithHttpInfoAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -313,13 +330,36 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Transaction Status
         /// </summary>
         /// <remarks>
-        /// Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// TBD 
         /// </remarks>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (TransactionStatusResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<TransactionStatusResponse>> TransactionStatusWithHttpInfoAsync(TransactionStatusRequest transactionStatusRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Submit Transaction
+        /// </summary>
+        /// <remarks>
+        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionSubmitResponse</returns>
+        System.Threading.Tasks.Task<TransactionSubmitResponse> TransactionSubmitAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Submit Transaction
+        /// </summary>
+        /// <remarks>
+        /// Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<TransactionSubmitResponse>> TransactionSubmitWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         #endregion Asynchronous Operations
     }
 
@@ -534,14 +574,232 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
+        /// Transaction Committed Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <returns>TransactionCommittedDetailsResponse</returns>
+        public TransactionCommittedDetailsResponse TransactionCommittedDetails(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedDetailsResponse> localVarResponse = TransactionCommittedDetailsWithHttpInfo(transactionCommittedDetailsRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Committed Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <returns>ApiResponse of TransactionCommittedDetailsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedDetailsResponse> TransactionCommittedDetailsWithHttpInfo(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest)
+        {
+            // verify the required parameter 'transactionCommittedDetailsRequest' is set
+            if (transactionCommittedDetailsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionCommittedDetailsRequest' when calling TransactionApi->TransactionCommittedDetails");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionCommittedDetailsRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionCommittedDetailsResponse>("/transaction/committed-details", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionCommittedDetails", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Transaction Committed Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionCommittedDetailsResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionCommittedDetailsResponse> TransactionCommittedDetailsAsync(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedDetailsResponse> localVarResponse = await TransactionCommittedDetailsWithHttpInfoAsync(transactionCommittedDetailsRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Transaction Committed Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionCommittedDetailsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionCommittedDetailsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionCommittedDetailsResponse>> TransactionCommittedDetailsWithHttpInfoAsync(TransactionCommittedDetailsRequest transactionCommittedDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'transactionCommittedDetailsRequest' is set
+            if (transactionCommittedDetailsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionCommittedDetailsRequest' when calling TransactionApi->TransactionCommittedDetails");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionCommittedDetailsRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionCommittedDetailsResponse>("/transaction/committed-details", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionCommittedDetails", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TBD TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>TransactionConstructionResponse</returns>
+        public TransactionConstructionResponse TransactionConstruction()
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionConstructionResponse> localVarResponse = TransactionConstructionWithHttpInfo();
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TBD TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <returns>ApiResponse of TransactionConstructionResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionConstructionResponse> TransactionConstructionWithHttpInfo()
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionConstructionResponse>("/transaction/construction", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionConstruction", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// TBD TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionConstructionResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionConstructionResponse> TransactionConstructionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionConstructionResponse> localVarResponse = await TransactionConstructionWithHttpInfoAsync(cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// TBD TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionConstructionResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionConstructionResponse>> TransactionConstructionWithHttpInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionConstructionResponse>("/transaction/construction", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionConstruction", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
         /// Preview Transaction Previews transaction against the network. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <returns>Object</returns>
-        public Object PreviewTransaction(Object body)
+        public Object TransactionPreview(Object body)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object> localVarResponse = PreviewTransactionWithHttpInfo(body);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object> localVarResponse = TransactionPreviewWithHttpInfo(body);
             return localVarResponse.Data;
         }
 
@@ -551,11 +809,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="body"></param>
         /// <returns>ApiResponse of Object</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object> PreviewTransactionWithHttpInfo(Object body)
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object> TransactionPreviewWithHttpInfo(Object body)
         {
             // verify the required parameter 'body' is set
             if (body == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling TransactionApi->PreviewTransaction");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling TransactionApi->TransactionPreview");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -582,7 +840,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("PreviewTransaction", localVarResponse);
+                Exception _exception = this.ExceptionFactory("TransactionPreview", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -596,9 +854,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of Object</returns>
-        public async System.Threading.Tasks.Task<Object> PreviewTransactionAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<Object> TransactionPreviewAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object> localVarResponse = await PreviewTransactionWithHttpInfoAsync(body, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object> localVarResponse = await TransactionPreviewWithHttpInfoAsync(body, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -609,11 +867,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <param name="body"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns>Task of ApiResponse (Object)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object>> PreviewTransactionWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<Object>> TransactionPreviewWithHttpInfoAsync(Object body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             // verify the required parameter 'body' is set
             if (body == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling TransactionApi->PreviewTransaction");
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'body' when calling TransactionApi->TransactionPreview");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -643,7 +901,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("PreviewTransaction", localVarResponse);
+                Exception _exception = this.ExceptionFactory("TransactionPreview", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -654,11 +912,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
-        /// <returns>RecentTransactionsResponse</returns>
-        public RecentTransactionsResponse RecentTransactions(RecentTransactionsRequest recentTransactionsRequest)
+        /// <param name="transactionRecentRequest"></param>
+        /// <returns>TransactionRecentResponse</returns>
+        public TransactionRecentResponse TransactionRecent(TransactionRecentRequest transactionRecentRequest)
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<RecentTransactionsResponse> localVarResponse = RecentTransactionsWithHttpInfo(recentTransactionsRequest);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse> localVarResponse = TransactionRecentWithHttpInfo(transactionRecentRequest);
             return localVarResponse.Data;
         }
 
@@ -666,13 +924,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
-        /// <returns>ApiResponse of RecentTransactionsResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<RecentTransactionsResponse> RecentTransactionsWithHttpInfo(RecentTransactionsRequest recentTransactionsRequest)
+        /// <param name="transactionRecentRequest"></param>
+        /// <returns>ApiResponse of TransactionRecentResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse> TransactionRecentWithHttpInfo(TransactionRecentRequest transactionRecentRequest)
         {
-            // verify the required parameter 'recentTransactionsRequest' is set
-            if (recentTransactionsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'recentTransactionsRequest' when calling TransactionApi->RecentTransactions");
+            // verify the required parameter 'transactionRecentRequest' is set
+            if (transactionRecentRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionRecentRequest' when calling TransactionApi->TransactionRecent");
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
 
@@ -691,15 +949,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = recentTransactionsRequest;
+            localVarRequestOptions.Data = transactionRecentRequest;
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post<RecentTransactionsResponse>("/transaction/recent", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<TransactionRecentResponse>("/transaction/recent", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("RecentTransactions", localVarResponse);
+                Exception _exception = this.ExceptionFactory("TransactionRecent", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -710,12 +968,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
+        /// <param name="transactionRecentRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of RecentTransactionsResponse</returns>
-        public async System.Threading.Tasks.Task<RecentTransactionsResponse> RecentTransactionsAsync(RecentTransactionsRequest recentTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of TransactionRecentResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionRecentResponse> TransactionRecentAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<RecentTransactionsResponse> localVarResponse = await RecentTransactionsWithHttpInfoAsync(recentTransactionsRequest, cancellationToken).ConfigureAwait(false);
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse> localVarResponse = await TransactionRecentWithHttpInfoAsync(transactionRecentRequest, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -723,14 +981,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// Get Recent Transactions Returns user-initiated transactions which have been succesfully committed to the ledger. The transactions are returned in a paginated format, ordered by most recent. 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="recentTransactionsRequest"></param>
+        /// <param name="transactionRecentRequest"></param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (RecentTransactionsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<RecentTransactionsResponse>> RecentTransactionsWithHttpInfoAsync(RecentTransactionsRequest recentTransactionsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (TransactionRecentResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionRecentResponse>> TransactionRecentWithHttpInfoAsync(TransactionRecentRequest transactionRecentRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
-            // verify the required parameter 'recentTransactionsRequest' is set
-            if (recentTransactionsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'recentTransactionsRequest' when calling TransactionApi->RecentTransactions");
+            // verify the required parameter 'transactionRecentRequest' is set
+            if (transactionRecentRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionRecentRequest' when calling TransactionApi->TransactionRecent");
 
 
             RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
@@ -751,16 +1009,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
-            localVarRequestOptions.Data = recentTransactionsRequest;
+            localVarRequestOptions.Data = transactionRecentRequest;
 
 
             // make the HTTP request
 
-            var localVarResponse = await this.AsynchronousClient.PostAsync<RecentTransactionsResponse>("/transaction/recent", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionRecentResponse>("/transaction/recent", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {
-                Exception _exception = this.ExceptionFactory("RecentTransactions", localVarResponse);
+                Exception _exception = this.ExceptionFactory("TransactionRecent", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 
@@ -768,241 +1026,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>TransactionSubmitResponse</returns>
-        public TransactionSubmitResponse SubmitTransaction(TransactionSubmitRequest transactionSubmitRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse> localVarResponse = SubmitTransactionWithHttpInfo(transactionSubmitRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <returns>ApiResponse of TransactionSubmitResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse> SubmitTransactionWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest)
-        {
-            // verify the required parameter 'transactionSubmitRequest' is set
-            if (transactionSubmitRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionSubmitRequest' when calling TransactionApi->SubmitTransaction");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionSubmitRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionSubmitResponse>("/transaction/submit", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("SubmitTransaction", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionSubmitResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionSubmitResponse> SubmitTransactionAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse> localVarResponse = await SubmitTransactionWithHttpInfoAsync(transactionSubmitRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionSubmitRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse>> SubmitTransactionWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'transactionSubmitRequest' is set
-            if (transactionSubmitRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionSubmitRequest' when calling TransactionApi->SubmitTransaction");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionSubmitRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionSubmitResponse>("/transaction/submit", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("SubmitTransaction", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Transaction Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <returns>TransactionDetailsResponse</returns>
-        public TransactionDetailsResponse TransactionDetails(TransactionDetailsRequest transactionDetailsRequest)
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionDetailsResponse> localVarResponse = TransactionDetailsWithHttpInfo(transactionDetailsRequest);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Transaction Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <returns>ApiResponse of TransactionDetailsResponse</returns>
-        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionDetailsResponse> TransactionDetailsWithHttpInfo(TransactionDetailsRequest transactionDetailsRequest)
-        {
-            // verify the required parameter 'transactionDetailsRequest' is set
-            if (transactionDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionDetailsRequest' when calling TransactionApi->TransactionDetails");
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionDetailsRequest;
-
-
-            // make the HTTP request
-            var localVarResponse = this.Client.Post<TransactionDetailsResponse>("/transaction/details", localVarRequestOptions, this.Configuration);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionDetails", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Transaction Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of TransactionDetailsResponse</returns>
-        public async System.Threading.Tasks.Task<TransactionDetailsResponse> TransactionDetailsAsync(TransactionDetailsRequest transactionDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionDetailsResponse> localVarResponse = await TransactionDetailsWithHttpInfoAsync(transactionDetailsRequest, cancellationToken).ConfigureAwait(false);
-            return localVarResponse.Data;
-        }
-
-        /// <summary>
-        /// Transaction Details Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
-        /// </summary>
-        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="transactionDetailsRequest"></param>
-        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (TransactionDetailsResponse)</returns>
-        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionDetailsResponse>> TransactionDetailsWithHttpInfoAsync(TransactionDetailsRequest transactionDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
-        {
-            // verify the required parameter 'transactionDetailsRequest' is set
-            if (transactionDetailsRequest == null)
-                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionDetailsRequest' when calling TransactionApi->TransactionDetails");
-
-
-            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
-
-            string[] _contentTypes = new string[] {
-                "application/json"
-            };
-
-            // to determine the Accept header
-            string[] _accepts = new string[] {
-                "application/json"
-            };
-
-
-            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
-            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
-
-            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
-            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
-
-            localVarRequestOptions.Data = transactionDetailsRequest;
-
-
-            // make the HTTP request
-
-            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionDetailsResponse>("/transaction/details", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
-
-            if (this.ExceptionFactory != null)
-            {
-                Exception _exception = this.ExceptionFactory("TransactionDetails", localVarResponse);
-                if (_exception != null) throw _exception;
-            }
-
-            return localVarResponse;
-        }
-
-        /// <summary>
-        /// Transaction Status Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// Transaction Status TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1014,7 +1038,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// Transaction Status TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1058,7 +1082,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// Transaction Status TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1071,7 +1095,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Transaction Status Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren&#39;t recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a &#x60;TransactionNotFoundError&#x60;. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a &#x60;TransactionNotFoundError&#x60;. 
+        /// Transaction Status TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="transactionStatusRequest"></param>
@@ -1112,6 +1136,123 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("TransactionStatus", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <returns>TransactionSubmitResponse</returns>
+        public TransactionSubmitResponse TransactionSubmit(TransactionSubmitRequest transactionSubmitRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse> localVarResponse = TransactionSubmitWithHttpInfo(transactionSubmitRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <returns>ApiResponse of TransactionSubmitResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse> TransactionSubmitWithHttpInfo(TransactionSubmitRequest transactionSubmitRequest)
+        {
+            // verify the required parameter 'transactionSubmitRequest' is set
+            if (transactionSubmitRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionSubmitRequest' when calling TransactionApi->TransactionSubmit");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionSubmitRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<TransactionSubmitResponse>("/transaction/submit", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionSubmit", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of TransactionSubmitResponse</returns>
+        public async System.Threading.Tasks.Task<TransactionSubmitResponse> TransactionSubmitAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse> localVarResponse = await TransactionSubmitWithHttpInfoAsync(transactionSubmitRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Submit Transaction Submits a signed transaction payload to the network. The transaction identifier from finalize or submit can then be used to track the transaction status. 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="transactionSubmitRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (TransactionSubmitResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<TransactionSubmitResponse>> TransactionSubmitWithHttpInfoAsync(TransactionSubmitRequest transactionSubmitRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'transactionSubmitRequest' is set
+            if (transactionSubmitRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'transactionSubmitRequest' when calling TransactionApi->TransactionSubmit");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = transactionSubmitRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<TransactionSubmitResponse>("/transaction/submit", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("TransactionSubmit", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

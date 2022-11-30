@@ -84,7 +84,7 @@ public sealed class DataAggregatorBuilder
     {
         Services
             .AddHealthChecks()
-            .AddCheck<AggregatorHealthCheck>("network_gateway_data_aggregator");
+            .AddCheck<AggregatorHealthCheck>("aggregator_health_check");
 
         return this;
     }

@@ -102,7 +102,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="totalCount">TBD (make it nullable when we&#39;re dealing with unknown result set sizes?).</param>
         /// <param name="previousCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
         /// <param name="nextCursor">TBD (maybe we should use HATEOAS-like permalinks?).</param>
-        public ResultSetCursorMixin(int? totalCount = default(int?), string previousCursor = default(string), string nextCursor = default(string))
+        public ResultSetCursorMixin(long? totalCount = default(long?), string previousCursor = default(string), string nextCursor = default(string))
         {
             this.TotalCount = totalCount;
             this.PreviousCursor = previousCursor;
@@ -114,7 +114,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>TBD (make it nullable when we&#39;re dealing with unknown result set sizes?)</value>
         [DataMember(Name = "total_count", EmitDefaultValue = true)]
-        public int? TotalCount { get; set; }
+        public long? TotalCount { get; set; }
 
         /// <summary>
         /// TBD (maybe we should use HATEOAS-like permalinks?)

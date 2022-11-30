@@ -68,5 +68,4 @@ public enum LedgerTransactionStatus
 {
     Succeeded,
     Failed,
-    Rejected,
 }

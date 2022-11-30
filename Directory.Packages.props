@@ -1,10 +1,11 @@
 <Project>
 
-  <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
   <ItemGroup>
-    <!-- PRODUCTION DEPENDENCIES -->
-
-    <!-- PUBLIC NUGET: Microsoft -->
+    <!-- runtime dependencies -->
+    <PackageVersion Include="Dapper" Version="2.0.123" />
+    <PackageVersion Include="FluentValidation" Version="11.4.0" />
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.2" />
+    <PackageVersion Include="JsonSubTypes" Version="2.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
@@ -15,33 +16,23 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.4.1" />
-
-    <!-- PUBLIC NUGET: Non-Microsoft -->
-    <PackageVersion Include="Dapper" Version="2.0.123" />
-    <PackageVersion Include="FluentValidation" Version="11.3.0" />
-    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.2.2" />
-    <PackageVersion Include="JsonSubTypes" Version="2.0.1" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageVersion Include="Polly" Version="7.2.3" />
+    <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.4.4" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="prometheus-net" Version="7.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="7.0.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 
-    <!-- NON-PRODUCTION DEPENDENCIES -->
-
-    <!-- PUBLIC NUGET: Microsoft -->
+    <!-- build time dependencies -->
+    <PackageVersion Include="coverlet.collector" Version="3.2.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-
-    <!-- PUBLIC NUGET: Non-Microsoft -->
+    <PackageVersion Include="Moq" Version="4.18.2" />
     <PackageVersion Include="FluentAssertions" Version="6.8.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.435" />
-    <PackageVersion Include="Moq" Version="4.18.2" />
     <PackageVersion Include="xunit" Version="2.4.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageVersion Include="coverlet.collector" Version="3.2.0" />
   </ItemGroup>
 
 </Project>

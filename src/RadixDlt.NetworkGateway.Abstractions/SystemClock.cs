@@ -68,10 +68,10 @@ namespace RadixDlt.NetworkGateway.Abstractions;
 
 public interface IClock
 {
-    public DateTimeOffset UtcNow { get; }
+    public DateTime UtcNow { get; }
 }
 
 internal class SystemClock : IClock
 {
-    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+    public DateTime UtcNow => DateTime.UtcNow;
 }

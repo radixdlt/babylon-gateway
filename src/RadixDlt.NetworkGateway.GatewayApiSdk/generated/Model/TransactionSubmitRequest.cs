@@ -104,23 +104,23 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
         /// </summary>
-        /// <param name="notarizedTransaction">The notarized transaction payload which can be submitted, hex encoded. (required).</param>
-        public TransactionSubmitRequest(string notarizedTransaction = default(string))
+        /// <param name="notarizedTransactionHex">The notarized transaction payload which can be submitted, hex encoded. (required).</param>
+        public TransactionSubmitRequest(string notarizedTransactionHex = default(string))
         {
-            // to ensure "notarizedTransaction" is required (not null)
-            if (notarizedTransaction == null)
+            // to ensure "notarizedTransactionHex" is required (not null)
+            if (notarizedTransactionHex == null)
             {
-                throw new ArgumentNullException("notarizedTransaction is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("notarizedTransactionHex is a required property for TransactionSubmitRequest and cannot be null");
             }
-            this.NotarizedTransaction = notarizedTransaction;
+            this.NotarizedTransactionHex = notarizedTransactionHex;
         }
 
         /// <summary>
         /// The notarized transaction payload which can be submitted, hex encoded.
         /// </summary>
         /// <value>The notarized transaction payload which can be submitted, hex encoded.</value>
-        [DataMember(Name = "notarized_transaction", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransaction { get; set; }
+        [DataMember(Name = "notarized_transaction_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string NotarizedTransactionHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -130,7 +130,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  NotarizedTransaction: ").Append(NotarizedTransaction).Append("\n");
+            sb.Append("  NotarizedTransactionHex: ").Append(NotarizedTransactionHex).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -167,9 +167,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.NotarizedTransaction == input.NotarizedTransaction ||
-                    (this.NotarizedTransaction != null &&
-                    this.NotarizedTransaction.Equals(input.NotarizedTransaction))
+                    this.NotarizedTransactionHex == input.NotarizedTransactionHex ||
+                    (this.NotarizedTransactionHex != null &&
+                    this.NotarizedTransactionHex.Equals(input.NotarizedTransactionHex))
                 );
         }
 
@@ -182,9 +182,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NotarizedTransaction != null)
+                if (this.NotarizedTransactionHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NotarizedTransactionHex.GetHashCode();
                 }
                 return hashCode;
             }

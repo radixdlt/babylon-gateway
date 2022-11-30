@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-using Microsoft.EntityFrameworkCore;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -74,59 +73,16 @@ internal class NetworkConfiguration : SingleEntryBase
     [Column("network_name")]
     public string NetworkName { get; set; }
 
-    // [Owned] below
-    public NetworkConfigurationHrpDefinition NetworkConfigurationHrpDefinition { get; set; }
+    [Column("hrp_definition", TypeName = "jsonb")]
+    public HrpDefinition HrpDefinition { get; set; }
 
-    // [Owned] below
-    public NetworkConfigurationWellKnownAddresses NetworkConfigurationWellKnownAddresses { get; set; }
+    [Column("well_known_addresses", TypeName = "jsonb")]
+    public WellKnownAddresses WellKnownAddresses { get; set; }
 
     public bool HasEqualConfiguration(NetworkConfiguration other)
     {
         return NetworkName == other.NetworkName
-               && NetworkConfigurationHrpDefinition == other.NetworkConfigurationHrpDefinition
-               && NetworkConfigurationWellKnownAddresses == other.NetworkConfigurationWellKnownAddresses;
+               && HrpDefinition == other.HrpDefinition
+               && WellKnownAddresses == other.WellKnownAddresses;
     }
-}
-
-[Owned]
-internal record NetworkConfigurationHrpDefinition
-{
-    [Column("package_hrp")]
-    public string PackageHrp { get; set; }
-
-    [Column("normal_component_hrp")]
-    public string NormalComponentHrp { get; set; }
-
-    [Column("account_component_hrp")]
-    public string AccountComponentHrp { get; set; }
-
-    [Column("system_component_hrp")]
-    public string SystemComponentHrp { get; set; }
-
-    [Column("resource_hrp")]
-    public string ResourceHrp { get; set; }
-
-    [Column("validator_hrp")]
-    public string ValidatorHrp { get; set; }
-
-    [Column("node_hrp")]
-    public string NodeHrp { get; set; }
-
-    public HrpDefinition CreateDefinition()
-    {
-        return new HrpDefinition(PackageHrp, NormalComponentHrp, AccountComponentHrp, SystemComponentHrp, ResourceHrp, ValidatorHrp, NodeHrp);
-    }
-}
-
-[Owned]
-internal record NetworkConfigurationWellKnownAddresses
-{
-    [Column("account_package_address")]
-    public string AccountPackageAddress { get; set; }
-
-    [Column("xrd_address")]
-    public string XrdAddress { get; set; }
-
-    // TODO use RadixAddress over string?
-    // TODO add more? (account_package, faucet, ecdsa_*)
 }

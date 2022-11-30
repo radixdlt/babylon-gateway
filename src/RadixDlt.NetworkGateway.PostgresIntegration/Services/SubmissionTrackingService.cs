@@ -95,7 +95,7 @@ internal class SubmissionTrackingService : ISubmissionTrackingService
     }
 
     public async Task<TackingGuidance> TrackInitialSubmission(
-        DateTimeOffset submittedTimestamp,
+        DateTime submittedTimestamp,
         CoreModel.NotarizedTransaction notarizedTransaction,
         string submittedToNodeName,
         CancellationToken token = default

@@ -111,10 +111,17 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Initializes a new instance of the <see cref="EntityDetailsResponseNonFungibleResourceDetails" /> class.
         /// </summary>
         /// <param name="discriminator">discriminator (required).</param>
+        /// <param name="authRules">authRules (required).</param>
         /// <param name="ids">ids (required).</param>
-        public EntityDetailsResponseNonFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), EntityDetailsResponseNonFungibleResourceDetailsIds ids = default(EntityDetailsResponseNonFungibleResourceDetailsIds))
+        public EntityDetailsResponseNonFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object authRules = default(Object), EntityDetailsResponseNonFungibleResourceDetailsIds ids = default(EntityDetailsResponseNonFungibleResourceDetailsIds))
         {
             this.Discriminator = discriminator;
+            // to ensure "authRules" is required (not null)
+            if (authRules == null)
+            {
+                throw new ArgumentNullException("authRules is a required property for EntityDetailsResponseNonFungibleResourceDetails and cannot be null");
+            }
+            this.AuthRules = authRules;
             // to ensure "ids" is required (not null)
             if (ids == null)
             {
@@ -122,6 +129,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.Ids = ids;
         }
+
+        /// <summary>
+        /// Gets or Sets AuthRules
+        /// </summary>
+        [DataMember(Name = "auth_rules", IsRequired = true, EmitDefaultValue = true)]
+        public Object AuthRules { get; set; }
 
         /// <summary>
         /// Gets or Sets Ids
@@ -138,6 +151,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class EntityDetailsResponseNonFungibleResourceDetails {\n");
             sb.Append("  Discriminator: ").Append(Discriminator).Append("\n");
+            sb.Append("  AuthRules: ").Append(AuthRules).Append("\n");
             sb.Append("  Ids: ").Append(Ids).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -179,6 +193,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Discriminator.Equals(input.Discriminator)
                 ) && 
                 (
+                    this.AuthRules == input.AuthRules ||
+                    (this.AuthRules != null &&
+                    this.AuthRules.Equals(input.AuthRules))
+                ) && 
+                (
                     this.Ids == input.Ids ||
                     (this.Ids != null &&
                     this.Ids.Equals(input.Ids))
@@ -195,6 +214,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.Discriminator.GetHashCode();
+                if (this.AuthRules != null)
+                {
+                    hashCode = (hashCode * 59) + this.AuthRules.GetHashCode();
+                }
                 if (this.Ids != null)
                 {
                     hashCode = (hashCode * 59) + this.Ids.GetHashCode();

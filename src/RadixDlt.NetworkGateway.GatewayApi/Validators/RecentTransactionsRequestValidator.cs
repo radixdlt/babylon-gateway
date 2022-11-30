@@ -69,7 +69,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayModel.RecentTransactionsRequest>
+internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayModel.TransactionRecentRequest>
 {
     public RecentTransactionsRequestValidator(
         IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,

@@ -85,8 +85,14 @@ public sealed class TransactionController : ControllerBase
         _transactionHandler = transactionHandler;
     }
 
+    [HttpPost("construction")]
+    public async Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token)
+    {
+        return await _transactionHandler.Construction(token);
+    }
+
     [HttpPost("recent")]
-    public async Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token)
+    public async Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token)
     {
         return await _transactionHandler.Recent(request, token);
     }
@@ -97,10 +103,10 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Status(request, token);
     }
 
-    [HttpPost("details")]
-    public async Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token)
+    [HttpPost("committed-details")]
+    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
     {
-        return await _transactionHandler.Details(request, token);
+        return await _transactionHandler.CommittedDetails(request, token);
     }
 
     [HttpPost("preview")]

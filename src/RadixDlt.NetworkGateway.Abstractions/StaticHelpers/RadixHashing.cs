@@ -73,6 +73,23 @@ public static class RadixHashing
         return HashingHelper.VerifyConcatHashesAndTakeSha256Twice(parentAccumulator, childHash, newAccumulator);
     }
 
+    // NB - There is some repetition with the above for performance gains regarding stackalloc.
+    // By using dynamic sizes we can ensure this always returns a value
+    public static byte[] CreateNewAccumulator(byte[] parentAccumulator, byte[] childHash)
+    {
+        if (parentAccumulator.Length != 32)
+        {
+            throw new ArgumentException("Parent accumulator must to be 32 bytes long", nameof(parentAccumulator));
+        }
+
+        if (childHash.Length != 32)
+        {
+            throw new ArgumentException("Child hash must to be 32 bytes long", nameof(childHash));
+        }
+
+        return HashingHelper.ConcatHashesAndTakeSha256Twice(parentAccumulator, childHash);
+    }
+
     /// <summary>
     ///  Creates the 32-byte TransactionHash of a signed transaction payload.
     /// </summary>

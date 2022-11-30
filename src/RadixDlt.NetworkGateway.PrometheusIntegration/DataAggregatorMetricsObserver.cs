@@ -464,7 +464,7 @@ internal class DataAggregatorMetricsObserver :
         _ledgerNodeTrustWeightingRequiredForQuorumIfAllNodesSufficientlySynced.Set((double)report.TrustWeightingRequiredForQuorumIfAllNodesAvailableForQuorum);
     }
 
-    ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtensionIfQuorum(DateTimeOffset timestamp)
+    ValueTask ILedgerConfirmationServiceObserver.PreHandleLedgerExtensionIfQuorum(DateTime timestamp)
     {
         _ledgerLastExtensionAttemptStartTimestamp.Set(timestamp.ToUnixTimeSecondsWithMilliPrecision());
 
@@ -517,7 +517,7 @@ internal class DataAggregatorMetricsObserver :
         _quorumExistsStatus.SetStatus(MetricStatus.Yes);
     }
 
-    void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(DateTimeOffset timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
+    void ILedgerConfirmationServiceObserver.ReportOnLedgerExtensionSuccess(DateTime timestamp, TimeSpan parentSummaryRoundTimestamp, long totalCommitMs, int transactionsCommittedCount)
     {
         _peakLedgerLagBeforeLastCommit.Set(parentSummaryRoundTimestamp.TotalSeconds);
         _batchCommitTimeSeconds.Observe(totalCommitMs / 1000D);
@@ -525,7 +525,7 @@ internal class DataAggregatorMetricsObserver :
         _ledgerLastCommitTimestamp.Set(timestamp.ToUnixTimeSecondsWithMilliPrecision());
     }
 
-    void ILedgerConfirmationServiceObserver.RecordTopOfDbLedger(long stateVersion, DateTimeOffset roundTimestamp)
+    void ILedgerConfirmationServiceObserver.RecordTopOfDbLedger(long stateVersion, DateTime roundTimestamp)
     {
         _ledgerStateVersion.Set(stateVersion);
         _ledgerUnixRoundTimestamp.Set(roundTimestamp.ToUnixTimeSecondsWithMilliPrecision());

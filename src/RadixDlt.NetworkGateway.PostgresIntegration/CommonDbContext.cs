@@ -80,7 +80,7 @@ internal abstract class CommonDbContext : DbContext
 {
     public DbSet<NetworkConfiguration> NetworkConfiguration => Set<NetworkConfiguration>();
 
-    public DbSet<RawTransaction> RawTransactions => Set<RawTransaction>();
+    public DbSet<RawUserTransaction> RawUserTransactions => Set<RawUserTransaction>();
 
     public DbSet<LedgerStatus> LedgerStatus => Set<LedgerStatus>();
 
@@ -96,9 +96,17 @@ internal abstract class CommonDbContext : DbContext
 
     public DbSet<FungibleResourceSupplyHistory> FungibleResourceSupplyHistory => Set<FungibleResourceSupplyHistory>();
 
-    public DbSet<NonFungibleIdHistory> NonFungibleIdHistory => Set<NonFungibleIdHistory>();
+    public DbSet<NonFungibleIdData> NonFungibleIdData => Set<NonFungibleIdData>();
 
     public DbSet<NonFungibleIdMutableDataHistory> NonFungibleIdMutableDataHistory => Set<NonFungibleIdMutableDataHistory>();
+
+    public DbSet<NonFungibleIdStoreHistory> NonFungibleIdStoreHistory => Set<NonFungibleIdStoreHistory>();
+
+    public DbSet<ResourceManagerEntityAuthRulesHistory> ResourceManagerEntityAuthRulesHistory => Set<ResourceManagerEntityAuthRulesHistory>();
+
+    public DbSet<ComponentEntityStateHistory> ComponentEntityStateHistory => Set<ComponentEntityStateHistory>();
+
+    public DbSet<ComponentEntityAccessRulesLayersHistory> ComponentEntityAccessRulesLayersHistory => Set<ComponentEntityAccessRulesLayersHistory>();
 
     public CommonDbContext(DbContextOptions options)
         : base(options)
@@ -194,6 +202,12 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<PendingTransaction>()
             .HasIndex(pt => pt.PayloadHash)
             .HasMethod("hash");
+        modelBuilder.Entity<PendingTransaction>()
+            .HasIndex(pt => pt.IntentHash)
+            .HasMethod("hash");
+        modelBuilder.Entity<PendingTransaction>()
+            .HasIndex(pt => pt.SignedIntentHash)
+            .HasMethod("hash");
     }
 
     private static void HookupEntities(ModelBuilder modelBuilder)
@@ -232,7 +246,7 @@ internal abstract class CommonDbContext : DbContext
             .HasFilter("is_most_recent IS TRUE");
 
         modelBuilder.Entity<EntityResourceAggregateHistory>()
-            .HasIndex(e => new { EntityId = e.EntityId, e.FromStateVersion });
+            .HasIndex(e => new { e.EntityId, e.FromStateVersion });
 
         modelBuilder.Entity<EntityResourceHistory>()
             .HasDiscriminator<string>("discriminator")
@@ -248,13 +262,25 @@ internal abstract class CommonDbContext : DbContext
         modelBuilder.Entity<FungibleResourceSupplyHistory>()
             .HasIndex(e => new { e.ResourceEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdHistory>()
+        modelBuilder.Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
 
-        modelBuilder.Entity<NonFungibleIdHistory>()
+        modelBuilder.Entity<NonFungibleIdData>()
             .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.NonFungibleId });
 
         modelBuilder.Entity<NonFungibleIdMutableDataHistory>()
-            .HasIndex(e => new { e.NonFungibleIdHistoryId, e.FromStateVersion });
+            .HasIndex(e => new { e.NonFungibleIdDataId, e.FromStateVersion });
+
+        modelBuilder.Entity<NonFungibleIdStoreHistory>()
+            .HasIndex(e => new { e.NonFungibleResourceManagerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ResourceManagerEntityAuthRulesHistory>()
+            .HasIndex(e => new { e.ResourceManagerEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentEntityStateHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
+
+        modelBuilder.Entity<ComponentEntityAccessRulesLayersHistory>()
+            .HasIndex(e => new { e.ComponentEntityId, e.FromStateVersion });
     }
 }

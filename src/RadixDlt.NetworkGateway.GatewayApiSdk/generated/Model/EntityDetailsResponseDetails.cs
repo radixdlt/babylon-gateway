@@ -137,10 +137,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDetailsResponseDetails" /> class
-        /// with the <see cref="EntityDetailsResponseAccountComponentDetails" /> class
+        /// with the <see cref="EntityDetailsResponseComponentDetails" /> class
         /// </summary>
-        /// <param name="actualInstance">An instance of EntityDetailsResponseAccountComponentDetails.</param>
-        public EntityDetailsResponseDetails(EntityDetailsResponseAccountComponentDetails actualInstance)
+        /// <param name="actualInstance">An instance of EntityDetailsResponseComponentDetails.</param>
+        public EntityDetailsResponseDetails(EntityDetailsResponseComponentDetails actualInstance)
         {
             this.IsNullable = false;
             this.SchemaType= "oneOf";
@@ -161,7 +161,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             set
             {
-                if (value.GetType() == typeof(EntityDetailsResponseAccountComponentDetails))
+                if (value.GetType() == typeof(EntityDetailsResponseComponentDetails))
                 {
                     this._actualInstance = value;
                 }
@@ -179,7 +179,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid instance found. Must be the following types: EntityDetailsResponseAccountComponentDetails, EntityDetailsResponseFungibleResourceDetails, EntityDetailsResponseNonFungibleResourceDetails, EntityDetailsResponsePackageDetails");
+                    throw new ArgumentException("Invalid instance found. Must be the following types: EntityDetailsResponseComponentDetails, EntityDetailsResponseFungibleResourceDetails, EntityDetailsResponseNonFungibleResourceDetails, EntityDetailsResponsePackageDetails");
                 }
             }
         }
@@ -215,13 +215,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         }
 
         /// <summary>
-        /// Get the actual instance of `EntityDetailsResponseAccountComponentDetails`. If the actual instance is not `EntityDetailsResponseAccountComponentDetails`,
+        /// Get the actual instance of `EntityDetailsResponseComponentDetails`. If the actual instance is not `EntityDetailsResponseComponentDetails`,
         /// the InvalidClassException will be thrown
         /// </summary>
-        /// <returns>An instance of EntityDetailsResponseAccountComponentDetails</returns>
-        public EntityDetailsResponseAccountComponentDetails GetEntityDetailsResponseAccountComponentDetails()
+        /// <returns>An instance of EntityDetailsResponseComponentDetails</returns>
+        public EntityDetailsResponseComponentDetails GetEntityDetailsResponseComponentDetails()
         {
-            return (EntityDetailsResponseAccountComponentDetails)this.ActualInstance;
+            return (EntityDetailsResponseComponentDetails)this.ActualInstance;
         }
 
         /// <summary>
@@ -266,8 +266,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 string discriminatorValue =  discriminatorObj == null ?string.Empty :discriminatorObj.ToString();
                 switch (discriminatorValue)
                 {
-                    case "EntityDetailsResponseAccountComponentDetails":
-                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    case "EntityDetailsResponseComponentDetails":
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     case "EntityDetailsResponseFungibleResourceDetails":
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
@@ -279,7 +279,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponsePackageDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     case "account_component":
-                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                        newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     case "fungible_resource":
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseFungibleResourceDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
@@ -291,7 +291,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                         newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponsePackageDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                         return newEntityDetailsResponseDetails;
                     default:
-                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for EntityDetailsResponseDetails. Possible values: EntityDetailsResponseAccountComponentDetails EntityDetailsResponseFungibleResourceDetails EntityDetailsResponseNonFungibleResourceDetails EntityDetailsResponsePackageDetails account_component fungible_resource non_fungible_resource package", discriminatorValue));
+                        System.Diagnostics.Debug.WriteLine(string.Format("Failed to lookup discriminator value `{0}` for EntityDetailsResponseDetails. Possible values: EntityDetailsResponseComponentDetails EntityDetailsResponseFungibleResourceDetails EntityDetailsResponseNonFungibleResourceDetails EntityDetailsResponsePackageDetails account_component fungible_resource non_fungible_resource package", discriminatorValue));
                         break;
                 }
             }
@@ -306,21 +306,21 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             try
             {
                 // if it does not contains "AdditionalProperties", use SerializerSettings to deserialize
-                if (typeof(EntityDetailsResponseAccountComponentDetails).GetProperty("AdditionalProperties") == null)
+                if (typeof(EntityDetailsResponseComponentDetails).GetProperty("AdditionalProperties") == null)
                 {
-                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseComponentDetails>(jsonString, EntityDetailsResponseDetails.SerializerSettings));
                 }
                 else
                 {
-                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseAccountComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
+                    newEntityDetailsResponseDetails = new EntityDetailsResponseDetails(JsonConvert.DeserializeObject<EntityDetailsResponseComponentDetails>(jsonString, EntityDetailsResponseDetails.AdditionalPropertiesSerializerSettings));
                 }
-                matchedTypes.Add("EntityDetailsResponseAccountComponentDetails");
+                matchedTypes.Add("EntityDetailsResponseComponentDetails");
                 match++;
             }
             catch (Exception exception)
             {
                 // deserialization failed, try the next one
-                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseAccountComponentDetails: {1}", jsonString, exception.ToString()));
+                System.Diagnostics.Debug.WriteLine(string.Format("Failed to deserialize `{0}` into EntityDetailsResponseComponentDetails: {1}", jsonString, exception.ToString()));
             }
 
             try

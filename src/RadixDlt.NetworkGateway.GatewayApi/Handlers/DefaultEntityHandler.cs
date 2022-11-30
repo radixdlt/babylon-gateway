@@ -62,10 +62,8 @@
  * permissions under this License.
  */
 
-using RadixDlt.NetworkGateway.Abstractions;
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,59 +73,36 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 internal class DefaultEntityHandler : IEntityHandler
 {
+    private const int DefaultPageLimit = 10; // TODO make it configurable
+
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
     private readonly IEntityStateQuerier _entityStateQuerier;
-    private readonly INetworkConfigurationProvider _networkConfigurationProvider;
 
-    public DefaultEntityHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier, INetworkConfigurationProvider networkConfigurationProvider)
+    public DefaultEntityHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
         _entityStateQuerier = entityStateQuerier;
-        _networkConfigurationProvider = networkConfigurationProvider;
     }
 
     public async Task<GatewayModel.EntityResourcesResponse?> Resources(GatewayModel.EntityResourcesRequest request, CancellationToken token = default)
     {
-        var address = RadixAddressCodec.Decode(request.Address).Data;
+        var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var response = await _entityStateQuerier.EntityResourcesSnapshot(address, ledgerState, token);
-
-        // TODO super quick & dirty support for virtual accounts, see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668528064132679
-        if (response == null && (address[0] is 0x05 or 0x06))
-        {
-            var fungibles = new GatewayModel.EntityResourcesResponseFungibleResources(items: new List<GatewayModel.EntityResourcesResponseFungibleResourcesItem>());
-            var nonFungibles = new GatewayModel.EntityResourcesResponseNonFungibleResources(items: new List<GatewayModel.EntityResourcesResponseNonFungibleResourcesItem>());
-
-            response = new GatewayModel.EntityResourcesResponse(ledgerState, request.Address, fungibles, nonFungibles);
-        }
-
-        return response;
+        return await _entityStateQuerier.EntityResourcesSnapshot(address, ledgerState, token);
     }
 
     public async Task<GatewayModel.EntityDetailsResponse?> Details(GatewayModel.EntityDetailsRequest request, CancellationToken token = default)
     {
-        var address = RadixAddressCodec.Decode(request.Address).Data;
+        var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var response = await _entityStateQuerier.EntityDetailsSnapshot(address, ledgerState, token);
-
-        // TODO super quick & dirty support for virtual accounts, see https://rdxworks.slack.com/archives/D03P4L6J0RM/p1668528064132679
-        if (response == null && (address[0] is 0x05 or 0x06))
-        {
-            var details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseAccountComponentDetails(
-                discriminator: GatewayModel.EntityDetailsResponseDetailsType.AccountComponent,
-                packageAddress: _networkConfigurationProvider.GetAccountPackageAddress()));
-
-            response = new GatewayModel.EntityDetailsResponse(ledgerState, request.Address, GatewayModel.EntityMetadataCollection.Empty, details);
-        }
-
-        return response;
+        return await _entityStateQuerier.EntityDetailsSnapshot(address, ledgerState, token);
     }
 
     public async Task<GatewayModel.EntityOverviewResponse> Overview(GatewayModel.EntityOverviewRequest request, CancellationToken token = default)
     {
-        var addresses = request.Addresses.Select(address => (RadixAddress)RadixAddressCodec.Decode(address).Data).ToArray();
+        var addresses = request.Addresses.Select(RadixAddressCodec.Decode).ToArray();
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
         return await _entityStateQuerier.EntityOverview(addresses, ledgerState, token);
@@ -135,15 +110,58 @@ internal class DefaultEntityHandler : IEntityHandler
 
     public async Task<GatewayModel.EntityMetadataResponse?> Metadata(GatewayModel.EntityMetadataRequest request, CancellationToken token = default)
     {
-        var address = (RadixAddress)RadixAddressCodec.Decode(request.Address).Data;
+        var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        var pageRequest = new EntityMetadataPageRequest(
+        var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: address,
             Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
-            Limit: request.Limit ?? 10 // TODO make it configurable
+            Limit: request.Limit ?? DefaultPageLimit
         );
 
         return await _entityStateQuerier.EntityMetadata(pageRequest, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.EntityFungiblesResponse?> Fungibles(GatewayModel.EntityFungiblesRequest request, CancellationToken token = default)
+    {
+        var address = RadixAddressCodec.Decode(request.Address);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: address,
+            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.Limit ?? DefaultPageLimit
+        );
+
+        return await _entityStateQuerier.EntityFungibles(pageRequest, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.EntityNonFungiblesResponse?> NonFungibles(GatewayModel.EntityNonFungiblesRequest request, CancellationToken token = default)
+    {
+        var address = RadixAddressCodec.Decode(request.Address);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: address,
+            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.Limit ?? DefaultPageLimit
+        );
+
+        return await _entityStateQuerier.EntityNonFungibles(pageRequest, ledgerState, token);
+    }
+
+    public async Task<GatewayModel.EntityNonFungibleIdsResponse?> NonFungibleIds(GatewayModel.EntityNonFungibleIdsRequest request, CancellationToken token = default)
+    {
+        var entityAddress = RadixAddressCodec.Decode(request.Address);
+        var resourceAddress = RadixAddressCodec.Decode(request.ResourceAddress);
+        var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
+
+        var pageRequest = new IEntityStateQuerier.PageRequest(
+            Address: entityAddress,
+            Offset: GatewayModel.EntityMetadataRequestCursor.FromCursorString(request.Cursor)?.Offset ?? 0,
+            Limit: request.Limit ?? DefaultPageLimit
+        );
+
+        return await _entityStateQuerier.EntityNonFungibleIds(pageRequest, resourceAddress, ledgerState, token);
     }
 }

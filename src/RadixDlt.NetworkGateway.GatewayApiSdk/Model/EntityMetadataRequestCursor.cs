@@ -69,7 +69,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 [DataContract]
 public sealed record EntityMetadataRequestCursor(int? Offset)
 {
-    [DataMember(Name = "v", EmitDefaultValue = false)]
+    [DataMember(Name = "o", EmitDefaultValue = false)]
     public int? Offset { get; set; } = Offset;
 
     public static EntityMetadataRequestCursor FromCursorString(string cursorString)

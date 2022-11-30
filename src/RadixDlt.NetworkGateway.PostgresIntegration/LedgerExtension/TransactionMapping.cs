@@ -91,6 +91,7 @@ internal static class TransactionMapping
 
         ledgerTransaction.StateVersion = committedTransaction.StateVersion;
         ledgerTransaction.Status = ToLedgerStatus(committedTransaction.Receipt.Status);
+        ledgerTransaction.ErrorMessage = committedTransaction.Receipt.ErrorMessage;
         ledgerTransaction.TransactionAccumulator = committedTransaction.AccumulatorHash.ConvertFromHex();
         // TODO commented out as incompatible with current Core API version, not sure if we want to remove it permanently
         ledgerTransaction.Message = null; // message: transaction.Metadata.Message?.ConvertFromHex(),
@@ -114,7 +115,6 @@ internal static class TransactionMapping
         {
             CoreModel.TransactionStatus.Succeeded => LedgerTransactionStatus.Succeeded,
             CoreModel.TransactionStatus.Failed => LedgerTransactionStatus.Failed,
-            CoreModel.TransactionStatus.Rejected => LedgerTransactionStatus.Rejected,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
     }

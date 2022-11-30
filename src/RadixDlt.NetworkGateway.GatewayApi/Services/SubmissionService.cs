@@ -158,7 +158,7 @@ internal class SubmissionService : ISubmissionService
             var response = await _coreApiHandler.ParseTransaction(
                 new CoreModel.TransactionParseRequest(
                     network: _coreApiHandler.GetNetworkIdentifier(),
-                    payloadHex: request.NotarizedTransaction,
+                    payloadHex: request.NotarizedTransactionHex,
                     parseMode: CoreModel.TransactionParseRequest.ParseModeEnum.Notarized,
                     validationMode: CoreModel.TransactionParseRequest.ValidationModeEnum.Static,
                     responseMode: CoreModel.TransactionParseRequest.ResponseModeEnum.Full),
@@ -207,7 +207,7 @@ internal class SubmissionService : ISubmissionService
         using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // TODO configurable
         using var finalTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, token);
 
-        var notarizedTransaction = request.NotarizedTransaction.ConvertFromHex();
+        var notarizedTransaction = request.NotarizedTransactionHex.ConvertFromHex();
 
         try
         {
@@ -275,7 +275,7 @@ internal class SubmissionService : ISubmissionService
         {
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedTimeout(request, ex));
 
-            _logger.LogWarning(ex, "Request timeout submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
+            _logger.LogWarning(ex, "Request timeout submitting transaction with hash {TransactionHash}", request.NotarizedTransactionHex);
         }
         catch (Exception ex)
         {
@@ -285,7 +285,7 @@ internal class SubmissionService : ISubmissionService
             // any case.
             await _observers.ForEachAsync(x => x.HandleSubmissionFailedUnknown(request, ex));
 
-            _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransaction);
+            _logger.LogWarning(ex, "Unknown error submitting transaction with hash {TransactionHash}", request.NotarizedTransactionHex);
         }
 
         // TODO ok, so we're not throwing, should we actually return this value?

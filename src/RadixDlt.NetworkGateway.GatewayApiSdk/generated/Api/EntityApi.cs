@@ -92,7 +92,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Synchronous Operations
         /// <summary>
-        /// Entity Details
+        /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         EntityDetailsResponse EntityDetails(EntityDetailsRequest entityDetailsRequest);
 
         /// <summary>
-        /// Entity Details
+        /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -113,7 +113,28 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntityDetailsResponse</returns>
         ApiResponse<EntityDetailsResponse> EntityDetailsWithHttpInfo(EntityDetailsRequest entityDetailsRequest);
         /// <summary>
-        /// Entity Metadata
+        /// Iterates through all fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <returns>EntityFungiblesResponse</returns>
+        EntityFungiblesResponse EntityFungibles(EntityFungiblesRequest entityFungiblesRequest);
+
+        /// <summary>
+        /// Iterates through all fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <returns>ApiResponse of EntityFungiblesResponse</returns>
+        ApiResponse<EntityFungiblesResponse> EntityFungiblesWithHttpInfo(EntityFungiblesRequest entityFungiblesRequest);
+        /// <summary>
+        /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -124,7 +145,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         EntityMetadataResponse EntityMetadata(EntityMetadataRequest entityMetadataRequest);
 
         /// <summary>
-        /// Entity Metadata
+        /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -134,7 +155,49 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntityMetadataResponse</returns>
         ApiResponse<EntityMetadataResponse> EntityMetadataWithHttpInfo(EntityMetadataRequest entityMetadataRequest);
         /// <summary>
-        /// Entity Overview
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <returns>EntityNonFungibleIdsResponse</returns>
+        EntityNonFungibleIdsResponse EntityNonFungibleIds(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest);
+
+        /// <summary>
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <returns>ApiResponse of EntityNonFungibleIdsResponse</returns>
+        ApiResponse<EntityNonFungibleIdsResponse> EntityNonFungibleIdsWithHttpInfo(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest);
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <returns>EntityNonFungiblesResponse</returns>
+        EntityNonFungiblesResponse EntityNonFungibles(EntityNonFungiblesRequest entityNonFungiblesRequest);
+
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <returns>ApiResponse of EntityNonFungiblesResponse</returns>
+        ApiResponse<EntityNonFungiblesResponse> EntityNonFungiblesWithHttpInfo(EntityNonFungiblesRequest entityNonFungiblesRequest);
+        /// <summary>
+        /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -145,7 +208,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         EntityOverviewResponse EntityOverview(EntityOverviewRequest entityOverviewRequest);
 
         /// <summary>
-        /// Entity Overview
+        /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -155,7 +218,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>ApiResponse of EntityOverviewResponse</returns>
         ApiResponse<EntityOverviewResponse> EntityOverviewWithHttpInfo(EntityOverviewRequest entityOverviewRequest);
         /// <summary>
-        /// Entity Resources
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -166,7 +229,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         EntityResourcesResponse EntityResources(EntityResourcesRequest entityResourcesRequest);
 
         /// <summary>
-        /// Entity Resources
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -185,7 +248,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
     {
         #region Asynchronous Operations
         /// <summary>
-        /// Entity Details
+        /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -197,7 +260,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<EntityDetailsResponse> EntityDetailsAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Entity Details
+        /// Returns detailed information for a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -208,7 +271,30 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (EntityDetailsResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntityDetailsResponse>> EntityDetailsWithHttpInfoAsync(EntityDetailsRequest entityDetailsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Entity Metadata
+        /// Iterates through all fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityFungiblesResponse</returns>
+        System.Threading.Tasks.Task<EntityFungiblesResponse> EntityFungiblesAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Iterates through all fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityFungiblesResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntityFungiblesResponse>> EntityFungiblesWithHttpInfoAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -220,7 +306,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<EntityMetadataResponse> EntityMetadataAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Entity Metadata
+        /// Iterates through all metadata associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -231,7 +317,53 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (EntityMetadataResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntityMetadataResponse>> EntityMetadataWithHttpInfoAsync(EntityMetadataRequest entityMetadataRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Entity Overview
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityNonFungibleIdsResponse</returns>
+        System.Threading.Tasks.Task<EntityNonFungibleIdsResponse> EntityNonFungibleIdsAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityNonFungibleIdsResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntityNonFungibleIdsResponse>> EntityNonFungibleIdsWithHttpInfoAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityNonFungiblesResponse</returns>
+        System.Threading.Tasks.Task<EntityNonFungiblesResponse> EntityNonFungiblesAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity.
+        /// </summary>
+        /// <remarks>
+        /// TBD 
+        /// </remarks>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityNonFungiblesResponse)</returns>
+        System.Threading.Tasks.Task<ApiResponse<EntityNonFungiblesResponse>> EntityNonFungiblesWithHttpInfoAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <summary>
+        /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -243,7 +375,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<EntityOverviewResponse> EntityOverviewAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Entity Overview
+        /// Returns incomplete collection of basic information for a given collection of entities.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -254,7 +386,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         /// <returns>Task of ApiResponse (EntityOverviewResponse)</returns>
         System.Threading.Tasks.Task<ApiResponse<EntityOverviewResponse>> EntityOverviewWithHttpInfoAsync(EntityOverviewRequest entityOverviewRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
         /// <summary>
-        /// Entity Resources
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -266,7 +398,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         System.Threading.Tasks.Task<EntityResourcesResponse> EntityResourcesAsync(EntityResourcesRequest entityResourcesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <summary>
-        /// Entity Resources
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity.
         /// </summary>
         /// <remarks>
         /// TBD 
@@ -490,7 +622,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Details TBD 
+        /// Returns detailed information for a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -502,7 +634,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Details TBD 
+        /// Returns detailed information for a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -546,7 +678,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Details TBD 
+        /// Returns detailed information for a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -559,7 +691,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Details TBD 
+        /// Returns detailed information for a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityDetailsRequest"></param>
@@ -607,7 +739,124 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Metadata TBD 
+        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <returns>EntityFungiblesResponse</returns>
+        public EntityFungiblesResponse EntityFungibles(EntityFungiblesRequest entityFungiblesRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse> localVarResponse = EntityFungiblesWithHttpInfo(entityFungiblesRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <returns>ApiResponse of EntityFungiblesResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse> EntityFungiblesWithHttpInfo(EntityFungiblesRequest entityFungiblesRequest)
+        {
+            // verify the required parameter 'entityFungiblesRequest' is set
+            if (entityFungiblesRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityFungiblesRequest' when calling EntityApi->EntityFungibles");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityFungiblesRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<EntityFungiblesResponse>("/entity/fungibles", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityFungibles", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityFungiblesResponse</returns>
+        public async System.Threading.Tasks.Task<EntityFungiblesResponse> EntityFungiblesAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse> localVarResponse = await EntityFungiblesWithHttpInfoAsync(entityFungiblesRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Iterates through all fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityFungiblesResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityFungiblesResponse>> EntityFungiblesWithHttpInfoAsync(EntityFungiblesRequest entityFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'entityFungiblesRequest' is set
+            if (entityFungiblesRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityFungiblesRequest' when calling EntityApi->EntityFungibles");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityFungiblesRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityFungiblesResponse>("/entity/fungibles", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityFungibles", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Iterates through all metadata associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -619,7 +868,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Metadata TBD 
+        /// Iterates through all metadata associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -663,7 +912,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Metadata TBD 
+        /// Iterates through all metadata associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -676,7 +925,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Metadata TBD 
+        /// Iterates through all metadata associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityMetadataRequest"></param>
@@ -724,7 +973,241 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Overview TBD 
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <returns>EntityNonFungibleIdsResponse</returns>
+        public EntityNonFungibleIdsResponse EntityNonFungibleIds(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse> localVarResponse = EntityNonFungibleIdsWithHttpInfo(entityNonFungibleIdsRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <returns>ApiResponse of EntityNonFungibleIdsResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse> EntityNonFungibleIdsWithHttpInfo(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest)
+        {
+            // verify the required parameter 'entityNonFungibleIdsRequest' is set
+            if (entityNonFungibleIdsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungibleIdsRequest' when calling EntityApi->EntityNonFungibleIds");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityNonFungibleIdsRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<EntityNonFungibleIdsResponse>("/entity/non-fungible/ids", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityNonFungibleIds", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityNonFungibleIdsResponse</returns>
+        public async System.Threading.Tasks.Task<EntityNonFungibleIdsResponse> EntityNonFungibleIdsAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse> localVarResponse = await EntityNonFungibleIdsWithHttpInfoAsync(entityNonFungibleIdsRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible ids associated with a given non-fungible resource of a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungibleIdsRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityNonFungibleIdsResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungibleIdsResponse>> EntityNonFungibleIdsWithHttpInfoAsync(EntityNonFungibleIdsRequest entityNonFungibleIdsRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'entityNonFungibleIdsRequest' is set
+            if (entityNonFungibleIdsRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungibleIdsRequest' when calling EntityApi->EntityNonFungibleIds");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityNonFungibleIdsRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityNonFungibleIdsResponse>("/entity/non-fungible/ids", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityNonFungibleIds", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <returns>EntityNonFungiblesResponse</returns>
+        public EntityNonFungiblesResponse EntityNonFungibles(EntityNonFungiblesRequest entityNonFungiblesRequest)
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse> localVarResponse = EntityNonFungiblesWithHttpInfo(entityNonFungiblesRequest);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <returns>ApiResponse of EntityNonFungiblesResponse</returns>
+        public RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse> EntityNonFungiblesWithHttpInfo(EntityNonFungiblesRequest entityNonFungiblesRequest)
+        {
+            // verify the required parameter 'entityNonFungiblesRequest' is set
+            if (entityNonFungiblesRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungiblesRequest' when calling EntityApi->EntityNonFungibles");
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityNonFungiblesRequest;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<EntityNonFungiblesResponse>("/entity/non-fungibles", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityNonFungibles", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of EntityNonFungiblesResponse</returns>
+        public async System.Threading.Tasks.Task<EntityNonFungiblesResponse> EntityNonFungiblesAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse> localVarResponse = await EntityNonFungiblesWithHttpInfoAsync(entityNonFungiblesRequest, cancellationToken).ConfigureAwait(false);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// Iterates through all non-fungible resources associated with a given entity. TBD 
+        /// </summary>
+        /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="entityNonFungiblesRequest"></param>
+        /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
+        /// <returns>Task of ApiResponse (EntityNonFungiblesResponse)</returns>
+        public async System.Threading.Tasks.Task<RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiResponse<EntityNonFungiblesResponse>> EntityNonFungiblesWithHttpInfoAsync(EntityNonFungiblesRequest entityNonFungiblesRequest, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            // verify the required parameter 'entityNonFungiblesRequest' is set
+            if (entityNonFungiblesRequest == null)
+                throw new RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException(400, "Missing required parameter 'entityNonFungiblesRequest' when calling EntityApi->EntityNonFungibles");
+
+
+            RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions localVarRequestOptions = new RadixDlt.NetworkGateway.GatewayApiSdk.Client.RequestOptions();
+
+            string[] _contentTypes = new string[] {
+                "application/json"
+            };
+
+            // to determine the Accept header
+            string[] _accepts = new string[] {
+                "application/json"
+            };
+
+
+            var localVarContentType = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = RadixDlt.NetworkGateway.GatewayApiSdk.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.Data = entityNonFungiblesRequest;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<EntityNonFungiblesResponse>("/entity/non-fungibles", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("EntityNonFungibles", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -736,7 +1219,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Overview TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -780,7 +1263,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Overview TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -793,7 +1276,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Overview TBD 
+        /// Returns incomplete collection of basic information for a given collection of entities. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityOverviewRequest"></param>
@@ -841,7 +1324,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Resources TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -853,7 +1336,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Resources TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -897,7 +1380,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Resources TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>
@@ -910,7 +1393,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Api
         }
 
         /// <summary>
-        /// Entity Resources TBD 
+        /// Returns incomplete collection of fungible and non-fungible resources associated with a given entity. TBD 
         /// </summary>
         /// <exception cref="RadixDlt.NetworkGateway.GatewayApiSdk.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="entityResourcesRequest"></param>

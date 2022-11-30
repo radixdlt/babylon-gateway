@@ -487,12 +487,18 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
     {
         var transactionBatchParentSummary = _knownTopOfCommittedLedger!;
         var previousStateVersion = transactionBatchParentSummary.StateVersion;
+        var previousAccumulator = transactionBatchParentSummary.TransactionAccumulator;
 
         try
         {
             foreach (var transaction in transactions)
             {
-                TransactionConsistency.AssertChildTransactionConsistent(previousStateVersion, transaction.StateVersion);
+                TransactionConsistency.AssertChildTransactionConsistent(
+                    previousStateVersion: previousStateVersion,
+                    previousAccumulator: previousAccumulator,
+                    stateVersion: transaction.StateVersion,
+                    accumulator: transaction.AccumulatorHash.ConvertFromHex(),
+                    payload: transaction.LedgerTransaction.PayloadHex.ConvertFromHex());
 
                 if (transaction.LedgerTransaction.ActualInstance is CoreModel.UserLedgerTransaction ult)
                 {
@@ -500,6 +506,7 @@ public sealed class LedgerConfirmationService : ILedgerConfirmationService
                 }
 
                 previousStateVersion = transaction.StateVersion;
+                previousAccumulator = transaction.AccumulatorHash.ConvertFromHex();
             }
 
             _observers.ForEach(x => x.QuorumExtensionConsistentGained());

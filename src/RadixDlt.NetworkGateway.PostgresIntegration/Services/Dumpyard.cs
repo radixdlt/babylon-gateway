@@ -196,7 +196,9 @@ internal record FungibleVaultChange(ReferencedEntity ReferencedVault, Referenced
 
 internal record NonFungibleVaultChange(ReferencedEntity ReferencedVault, ReferencedEntity ReferencedResource, List<byte[]> NonFungibleIds, long StateVersion);
 
-internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, byte[] NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData Data, long StateVersion);
+internal record NonFungibleIdChange(ReferencedEntity ReferencedStore, byte[] NonFungibleId, bool IsDeleted, CoreModel.NonFungibleData? Data, long StateVersion);
+
+internal record NonFungibleStoreLookup(long NonFungibleResourceManagerEntityId, long StateVersion);
 
 internal record MetadataChange(ReferencedEntity ResourceEntity, Dictionary<string, string> Metadata, long StateVersion);
 
@@ -349,6 +351,8 @@ internal class ReferencedEntityDictionary
 
 internal class SequencesHolder
 {
+    public long ComponentEntityStateHistorySequence { get; set; }
+
     public long EntitySequence { get; set; }
 
     public long EntityMetadataHistorySequence { get; set; }
@@ -359,9 +363,17 @@ internal class SequencesHolder
 
     public long FungibleResourceSupplyHistorySequence { get; set; }
 
-    public long NonFungibleIdHistorySequence { get; set; }
+    public long NonFungibleIdDataSequence { get; set; }
 
     public long NonFungibleIdMutableDataHistorySequence { get; set; }
+
+    public long NonFungibleIdStoreHistorySequence { get; set; }
+
+    public long ResourceManagerEntityAuthRulesHistorySequence { get; set; }
+
+    public long ComponentEntityAccessRulesLayersHistorySequence { get; set; }
+
+    public long NextComponentEntityStateHistory => ComponentEntityStateHistorySequence++;
 
     public long NextEntity => EntitySequence++;
 
@@ -373,7 +385,13 @@ internal class SequencesHolder
 
     public long NextFungibleResourceSupplyHistory => FungibleResourceSupplyHistorySequence++;
 
-    public long NextNonFungibleIdHistory => NonFungibleIdHistorySequence++;
+    public long NextNonFungibleIdData => NonFungibleIdDataSequence++;
 
     public long NextNonFungibleIdMutableDataHistory => NonFungibleIdMutableDataHistorySequence++;
+
+    public long NextNonFungibleIdStoreHistory => NonFungibleIdStoreHistorySequence++;
+
+    public long NextResourceManagerEntityAuthRulesHistory => ResourceManagerEntityAuthRulesHistorySequence++;
+
+    public long NextComponentEntityAccessRulesLayersHistory => ComponentEntityAccessRulesLayersHistorySequence++;
 }

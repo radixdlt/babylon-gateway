@@ -67,6 +67,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Exceptions;
 
+[Serializable]
 public abstract class KnownGatewayErrorException : Exception
 {
     public int StatusCode { get; }

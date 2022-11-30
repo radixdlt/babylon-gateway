@@ -91,172 +91,41 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatus
+    /// Defines TransactionStatus
     /// </summary>
-    [DataContract(Name = "TransactionStatus")]
-    public partial class TransactionStatus : IEquatable<TransactionStatus>, IValidatableObject
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TransactionStatus
     {
         /// <summary>
-        /// Defines Status
+        /// Enum Unknown for value: unknown
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum StatusEnum
-        {
-            /// <summary>
-            /// Enum Succeeded for value: succeeded
-            /// </summary>
-            [EnumMember(Value = "succeeded")]
-            Succeeded = 1,
-
-            /// <summary>
-            /// Enum Failed for value: failed
-            /// </summary>
-            [EnumMember(Value = "failed")]
-            Failed = 2,
-
-            /// <summary>
-            /// Enum Rejected for value: rejected
-            /// </summary>
-            [EnumMember(Value = "rejected")]
-            Rejected = 3,
-
-            /// <summary>
-            /// Enum Pending for value: pending
-            /// </summary>
-            [EnumMember(Value = "pending")]
-            Pending = 4
-
-        }
-
+        [EnumMember(Value = "unknown")]
+        Unknown = 1,
 
         /// <summary>
-        /// Gets or Sets Status
+        /// Enum CommittedSuccess for value: committed_success
         /// </summary>
-        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
-        public StatusEnum Status { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatus" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionStatus() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatus" /> class.
-        /// </summary>
-        /// <param name="status">status (required).</param>
-        /// <param name="stateVersion">stateVersion.</param>
-        /// <param name="confirmedAt">confirmedAt.</param>
-        public TransactionStatus(StatusEnum status = default(StatusEnum), long? stateVersion = default(long?), DateTimeOffset? confirmedAt = default(DateTimeOffset?))
-        {
-            this.Status = status;
-            this.StateVersion = stateVersion;
-            this.ConfirmedAt = confirmedAt;
-        }
+        [EnumMember(Value = "committed_success")]
+        CommittedSuccess = 2,
 
         /// <summary>
-        /// Gets or Sets StateVersion
+        /// Enum CommittedFailure for value: committed_failure
         /// </summary>
-        [DataMember(Name = "state_version", EmitDefaultValue = true)]
-        public long? StateVersion { get; set; }
+        [EnumMember(Value = "committed_failure")]
+        CommittedFailure = 3,
 
         /// <summary>
-        /// Gets or Sets ConfirmedAt
+        /// Enum Pending for value: pending
         /// </summary>
-        [DataMember(Name = "confirmed_at", EmitDefaultValue = true)]
-        public DateTimeOffset? ConfirmedAt { get; set; }
+        [EnumMember(Value = "pending")]
+        Pending = 4,
 
         /// <summary>
-        /// Returns the string presentation of the object
+        /// Enum Rejected for value: rejected
         /// </summary>
-        /// <returns>String presentation of the object</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatus {\n");
-            sb.Append("  Status: ").Append(Status).Append("\n");
-            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
-            sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
-        }
+        [EnumMember(Value = "rejected")]
+        Rejected = 5
 
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public virtual string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-        }
-
-        /// <summary>
-        /// Returns true if objects are equal
-        /// </summary>
-        /// <param name="input">Object to be compared</param>
-        /// <returns>Boolean</returns>
-        public override bool Equals(object input)
-        {
-            return this.Equals(input as TransactionStatus);
-        }
-
-        /// <summary>
-        /// Returns true if TransactionStatus instances are equal
-        /// </summary>
-        /// <param name="input">Instance of TransactionStatus to be compared</param>
-        /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatus input)
-        {
-            if (input == null)
-            {
-                return false;
-            }
-            return 
-                (
-                    this.Status == input.Status ||
-                    this.Status.Equals(input.Status)
-                ) && 
-                (
-                    this.StateVersion == input.StateVersion ||
-                    (this.StateVersion != null &&
-                    this.StateVersion.Equals(input.StateVersion))
-                ) && 
-                (
-                    this.ConfirmedAt == input.ConfirmedAt ||
-                    (this.ConfirmedAt != null &&
-                    this.ConfirmedAt.Equals(input.ConfirmedAt))
-                );
-        }
-
-        /// <summary>
-        /// Gets the hash code
-        /// </summary>
-        /// <returns>Hash code</returns>
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hashCode = 41;
-                hashCode = (hashCode * 59) + this.Status.GetHashCode();
-                if (this.StateVersion != null)
-                {
-                    hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
-                }
-                if (this.ConfirmedAt != null)
-                {
-                    hashCode = (hashCode * 59) + this.ConfirmedAt.GetHashCode();
-                }
-                return hashCode;
-            }
-        }
-
-        /// <summary>
-        /// To validate all properties of the instance
-        /// </summary>
-        /// <param name="validationContext">Validation context</param>
-        /// <returns>Validation Result</returns>
-        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
-        {
-            yield break;
-        }
     }
 
 }

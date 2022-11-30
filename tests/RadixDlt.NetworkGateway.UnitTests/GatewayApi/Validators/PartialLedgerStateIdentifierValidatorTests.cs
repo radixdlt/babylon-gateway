@@ -76,7 +76,7 @@ public class PartialLedgerStateIdentifierValidatorTests
 
     public PartialLedgerStateIdentifierValidatorTests()
     {
-        _validator = new PartialLedgerStateIdentifierValidator(new FakeClock(DateTimeOffset.Parse("2020-06-06T12:00:00Z")));
+        _validator = new PartialLedgerStateIdentifierValidator(new FakeClock(DateTime.Parse("2020-06-06T12:00:00Z")));
     }
 
     [Theory]
@@ -90,7 +90,7 @@ public class PartialLedgerStateIdentifierValidatorTests
     [InlineData(null, null, 10000L, 10000L)]
     public void WhenGiven_ValidPartialLedgerStateIdentifier_ShouldNotHaveAnyValidationErrors(long? stateVersion, string? timestamp, long? epoch, long? round)
     {
-        var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
+        var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTime.Parse(timestamp) : null, epoch, round);
 
         _validator.TestValidate(model).ShouldNotHaveAnyValidationErrors();
     }
@@ -115,7 +115,7 @@ public class PartialLedgerStateIdentifierValidatorTests
     [InlineData(null, null, 23L, -1L)]
     public void WhenGiven_InvalidPartialLedgerStateIdentifier_ShouldHaveAnyValidationError(long? stateVersion, string? timestamp, long? epoch, long? round)
     {
-        var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTimeOffset.Parse(timestamp) : null, epoch, round);
+        var model = new GatewayModel.PartialLedgerStateIdentifier(stateVersion, timestamp != null ? DateTime.Parse(timestamp) : null, epoch, round);
 
         _validator.TestValidate(model).ShouldHaveAnyValidationError();
     }

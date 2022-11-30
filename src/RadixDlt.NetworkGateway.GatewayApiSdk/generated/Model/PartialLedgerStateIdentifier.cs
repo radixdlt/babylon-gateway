@@ -103,7 +103,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="timestamp">If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned..</param>
         /// <param name="epoch">If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned..</param>
         /// <param name="round">round.</param>
-        public PartialLedgerStateIdentifier(long? stateVersion = default(long?), DateTimeOffset? timestamp = default(DateTimeOffset?), long? epoch = default(long?), long? round = default(long?))
+        public PartialLedgerStateIdentifier(long? stateVersion = default(long?), DateTime? timestamp = default(DateTime?), long? epoch = default(long?), long? round = default(long?))
         {
             this.StateVersion = stateVersion;
             this.Timestamp = timestamp;
@@ -123,7 +123,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <value>If a timestamp is provided, the latest ledger state &lt;&#x3D; the given timestamp is returned.</value>
         [DataMember(Name = "timestamp", EmitDefaultValue = true)]
-        public DateTimeOffset? Timestamp { get; set; }
+        public DateTime? Timestamp { get; set; }
 
         /// <summary>
         /// If an epoch is provided, the ledger state at the given epoch &lt;&#x3D; the given round (else round 0) is returned.

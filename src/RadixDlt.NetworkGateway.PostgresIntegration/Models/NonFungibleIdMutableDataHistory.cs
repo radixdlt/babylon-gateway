@@ -77,8 +77,8 @@ internal class NonFungibleIdMutableDataHistory
     [Column("from_state_version")]
     public long FromStateVersion { get; set; }
 
-    [Column("non_fungible_id_history_id")]
-    public long NonFungibleIdHistoryId { get; set; }
+    [Column("non_fungible_id_data_id")]
+    public long NonFungibleIdDataId { get; set; }
 
     [Column("is_deleted")]
     public bool IsDeleted { get; set; }

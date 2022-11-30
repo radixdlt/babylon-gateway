@@ -63,7 +63,6 @@
  */
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
@@ -72,7 +71,6 @@ using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
-using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -87,8 +85,10 @@ public static class OpenApiDocumentHandler
 {
     public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
     {
-        var sampleResourceAddress = networkConfigurationProvider.GetXrdAddress();
-        var sampleTransaction = (await transactionHandler.Recent(new RecentTransactionsRequest(limit: 1), token)).Items.FirstOrDefault();
+        var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
+        var sampleResourceAddress = wellKnownAddresses.Xrd;
+        var sampleComponentAddress = wellKnownAddresses.Faucet;
+        var sampleTransaction = (await transactionHandler.Recent(new TransactionRecentRequest(limit: 1), token)).Items.FirstOrDefault();
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
@@ -98,12 +98,7 @@ public static class OpenApiDocumentHandler
         document.Servers.Clear();
         document.Servers.Add(new OpenApiServer
         {
-            Url = new UriBuilder(context.Request.GetEncodedUrl())
-            {
-                Path = context.Request.PathBase,
-                Query = null,
-                Fragment = null,
-            }.ToString(),
+            Url = "/",
         });
 
         context.Response.StatusCode = (int)HttpStatusCode.OK;
@@ -116,7 +111,9 @@ public static class OpenApiDocumentHandler
 
         var response = textWriter.ToString();
 
-        response = response.Replace("<entity-address>", sampleResourceAddress);
+        response = response
+            .Replace("<entity-address>", sampleResourceAddress)
+            .Replace("<component-entity-address>", sampleComponentAddress);
 
         if (sampleTransaction != null)
         {

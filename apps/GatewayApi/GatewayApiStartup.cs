@@ -68,10 +68,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Prometheus;
 using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.PostgresIntegration;
 using RadixDlt.NetworkGateway.PrometheusIntegration;
+using System.Globalization;
 
 namespace GatewayApi;
 
@@ -105,28 +107,20 @@ public class GatewayApiStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+            .AddNewtonsoftJson(o =>
+            {
+                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                o.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+            });
 
         services
             .AddHealthChecks()
             .ForwardToPrometheus();
-
-        services.Configure<ForwardedHeadersOptions>(o =>
-        {
-            // TODO this is a potential security issue, make sure it is only enabled when explicitly configured (same as _enableSwagger)
-            o.ForwardLimit = 10;
-            o.ForwardedHeaders = ForwardedHeaders.All;
-            o.RequireHeaderSymmetry = false;
-            o.AllowedHosts.Clear();
-            o.KnownNetworks.Clear();
-            o.KnownProxies.Clear();
-        });
     }
 
     public void Configure(IApplicationBuilder application, IConfiguration configuration, ILogger<GatewayApiStartup> logger)
     {
         application
-            .UseForwardedHeaders() // TODO this is a potential security issue, make sure it is only enabled when explicitly configured (same as _enableSwagger)
             .UseAuthentication()
             .UseAuthorization()
             .UseCors()

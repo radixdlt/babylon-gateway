@@ -130,7 +130,7 @@ internal abstract class ResourceManagerEntity : Entity
 internal class FungibleResourceManagerEntity : ResourceManagerEntity
 {
     [Column("divisibility")]
-    public long Divisibility { get; set; }
+    public int Divisibility { get; set; }
 }
 
 internal class NonFungibleResourceManagerEntity : ResourceManagerEntity
@@ -141,6 +141,9 @@ internal abstract class ComponentEntity : Entity
 {
     [Column("package_id")]
     public long PackageId { get; set; }
+
+    [Column("blueprint_name")]
+    public string BlueprintName { get; set; }
 }
 
 internal class NormalComponentEntity : ComponentEntity

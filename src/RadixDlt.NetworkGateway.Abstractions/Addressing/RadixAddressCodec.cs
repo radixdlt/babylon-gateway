@@ -71,7 +71,13 @@ using System;
 
 namespace RadixDlt.NetworkGateway.Abstractions.Addressing;
 
-public sealed record RadixBech32Data(string Hrp, byte[] Data, Bech32Codec.Variant Variant);
+public sealed record DecodedRadixAddress(string Hrp, byte[] Data, Bech32Codec.Variant Variant)
+{
+    public override string ToString()
+    {
+        return RadixAddressCodec.Encode(Hrp, Data);
+    }
+}
 
 public static class RadixAddressCodec
 {
@@ -80,7 +86,7 @@ public static class RadixAddressCodec
         return Bech32Codec.Encode(hrp, EncodeAddressDataInBase32(addressData), Bech32Codec.Variant.Bech32M);
     }
 
-    public static RadixBech32Data Decode(string encoded)
+    public static DecodedRadixAddress Decode(string encoded)
     {
         var (hrp, rawBase32Data, variant) = Bech32Codec.Decode(encoded);
         var addressData = DecodeBase32IntoAddressData(rawBase32Data);
@@ -95,7 +101,7 @@ public static class RadixAddressCodec
             throw new AddressException("Only Bech32M addresses are supported");
         }
 
-        return new RadixBech32Data(hrp, addressData, variant);
+        return new DecodedRadixAddress(hrp, addressData, variant);
     }
 
     /// <summary>

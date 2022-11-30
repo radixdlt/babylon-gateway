@@ -93,7 +93,11 @@ public class DataAggregatorStartup
         services
             .AddControllers()
             .AddControllersAsServices()
-            .AddNewtonsoftJson(o => o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+            .AddNewtonsoftJson(o =>
+            {
+                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                o.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+            });
 
         services
             .AddHealthChecks()

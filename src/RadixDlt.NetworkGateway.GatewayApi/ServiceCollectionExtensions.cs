@@ -144,6 +144,7 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IEntityHandler, DefaultEntityHandler>();
         services.TryAddScoped<IGatewayHandler, DefaultGatewayHandler>();
         services.TryAddScoped<ITransactionHandler, DefaultTransactionHandler>();
+        services.TryAddScoped<INonFungibleHandler, DefaultNonFungibleHandler>();
         services.TryAddScoped<IPreviewService, PreviewService>();
         services.TryAddScoped<ISubmissionService, SubmissionService>();
     }

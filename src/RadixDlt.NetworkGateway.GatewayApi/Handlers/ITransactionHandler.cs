@@ -71,11 +71,13 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Handlers;
 
 public interface ITransactionHandler
 {
-    Task<GatewayModel.RecentTransactionsResponse> Recent(GatewayModel.RecentTransactionsRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionConstructionResponse> Construction(CancellationToken token = default);
+
+    Task<GatewayModel.TransactionRecentResponse> Recent(GatewayModel.TransactionRecentRequest request, CancellationToken token = default);
 
     Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token = default);
 
-    Task<GatewayModel.TransactionDetailsResponse> Details(GatewayModel.TransactionDetailsRequest request, CancellationToken token = default);
+    Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token = default);
 
     Task<object> Preview(JToken request, CancellationToken token = default);
 

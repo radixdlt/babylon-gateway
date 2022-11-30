@@ -73,7 +73,6 @@ internal class LedgerTransactionStatusValueConverter : EnumTypeValueConverterBas
     {
         { LedgerTransactionStatus.Succeeded, "SUCCEEDED" },
         { LedgerTransactionStatus.Failed, "FAILED" },
-        { LedgerTransactionStatus.Rejected, "REJECTED" },
     };
 
     public LedgerTransactionStatusValueConverter()

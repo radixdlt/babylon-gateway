@@ -83,9 +83,9 @@ internal class EntityResourceAggregateHistory
     [Column("is_most_recent")]
     public bool IsMostRecent { get; set; }
 
-    [Column("fungible_resource_ids")]
-    public long[] FungibleResourceIds { get; set; }
+    [Column("fungible_resource_entity_ids")]
+    public long[] FungibleResourceEntityIds { get; set; }
 
-    [Column("non_fungible_resource_ids")]
-    public long[] NonFungibleResourceIds { get; set; }
+    [Column("non_fungible_resource_entity_ids")]
+    public long[] NonFungibleResourceEntityIds { get; set; }
 }

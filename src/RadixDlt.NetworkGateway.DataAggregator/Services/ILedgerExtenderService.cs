@@ -79,14 +79,15 @@ public interface ILedgerExtenderService
 
 public sealed record TransactionSummary(
     long StateVersion,
-    DateTimeOffset RoundTimestamp,
-    DateTimeOffset NormalizedRoundTimestamp,
-    DateTimeOffset CreatedTimestamp,
+    DateTime RoundTimestamp,
+    DateTime NormalizedRoundTimestamp,
+    DateTime CreatedTimestamp,
     long Epoch,
     long IndexInEpoch,
     long RoundInEpoch,
     bool IsStartOfEpoch,
-    bool IsStartOfRound
+    bool IsStartOfRound,
+    byte[] TransactionAccumulator
 );
 
 public sealed record SyncTargetCarrier(

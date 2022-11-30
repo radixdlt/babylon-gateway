@@ -115,10 +115,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         Package = 3,
 
         /// <summary>
-        /// Enum AccountComponent for value: account_component
+        /// Enum Component for value: component
         /// </summary>
-        [EnumMember(Value = "account_component")]
-        AccountComponent = 4
+        [EnumMember(Value = "component")]
+        Component = 4
 
     }
 

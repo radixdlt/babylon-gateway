@@ -99,29 +99,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionStatusRequest() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
-        /// </summary>
-        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
+        /// <param name="intentHashHex">intentHashHex.</param>
         /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionStatusRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        public TransactionStatusRequest(string intentHashHex = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
-            // to ensure "transactionIdentifier" is required (not null)
-            if (transactionIdentifier == null)
-            {
-                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionStatusRequest and cannot be null");
-            }
-            this.TransactionIdentifier = transactionIdentifier;
+            this.IntentHashHex = intentHashHex;
             this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionIdentifier
+        /// Gets or Sets IntentHashHex
         /// </summary>
-        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
+        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
+        public string IntentHashHex { get; set; }
 
         /// <summary>
         /// Gets or Sets AtStateIdentifier
@@ -137,7 +127,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class TransactionStatusRequest {\n");
-            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
+            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
             sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
@@ -175,9 +165,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TransactionIdentifier == input.TransactionIdentifier ||
-                    (this.TransactionIdentifier != null &&
-                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
+                    this.IntentHashHex == input.IntentHashHex ||
+                    (this.IntentHashHex != null &&
+                    this.IntentHashHex.Equals(input.IntentHashHex))
                 ) && 
                 (
                     this.AtStateIdentifier == input.AtStateIdentifier ||
@@ -195,9 +185,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionIdentifier != null)
+                if (this.IntentHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
                 }
                 if (this.AtStateIdentifier != null)
                 {

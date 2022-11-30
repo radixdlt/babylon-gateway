@@ -107,7 +107,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="address">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="fungibleResources">fungibleResources (required).</param>
         /// <param name="nonFungibleResources">nonFungibleResources (required).</param>
-        public EntityResourcesResponseAllOf(string address = default(string), EntityResourcesResponseFungibleResources fungibleResources = default(EntityResourcesResponseFungibleResources), EntityResourcesResponseNonFungibleResources nonFungibleResources = default(EntityResourcesResponseNonFungibleResources))
+        public EntityResourcesResponseAllOf(string address = default(string), FungibleResourcesCollection fungibleResources = default(FungibleResourcesCollection), NonFungibleResourcesCollection nonFungibleResources = default(NonFungibleResourcesCollection))
         {
             // to ensure "address" is required (not null)
             if (address == null)
@@ -140,13 +140,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// Gets or Sets FungibleResources
         /// </summary>
         [DataMember(Name = "fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public EntityResourcesResponseFungibleResources FungibleResources { get; set; }
+        public FungibleResourcesCollection FungibleResources { get; set; }
 
         /// <summary>
         /// Gets or Sets NonFungibleResources
         /// </summary>
         [DataMember(Name = "non_fungible_resources", IsRequired = true, EmitDefaultValue = true)]
-        public EntityResourcesResponseNonFungibleResources NonFungibleResources { get; set; }
+        public NonFungibleResourcesCollection NonFungibleResources { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

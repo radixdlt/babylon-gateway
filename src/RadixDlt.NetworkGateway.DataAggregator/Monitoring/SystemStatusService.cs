@@ -73,7 +73,7 @@ namespace RadixDlt.NetworkGateway.DataAggregator.Monitoring;
 
 public interface ISystemStatusService
 {
-    void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTimeOffset topOfLedgerNormalizedRoundTimestamp);
+    void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTime topOfLedgerNormalizedRoundTimestamp);
 
     void RecordTransactionsCommitted();
 
@@ -85,22 +85,22 @@ public interface ISystemStatusService
 
     bool IsTopOfDbLedgerValidatorCommitTimestampCloseToPresent(TimeSpan duration);
 
-    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTimeOffset instant);
+    bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTime instant);
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global - Because they're used in the health response
-public sealed record HealthReport(bool IsHealthy, string Reason, DateTimeOffset StartUpTime);
+public sealed record HealthReport(bool IsHealthy, string Reason, DateTime StartUpTime);
 
 internal class SystemStatusService : ISystemStatusService
 {
     private readonly IOptionsMonitor<MonitoringOptions> _configuration;
     private readonly IEnumerable<ISystemStatusServiceObserver> _observers;
     private readonly IClock _clock;
-    private readonly DateTimeOffset _startupTime;
+    private readonly DateTime _startupTime;
 
-    private DateTimeOffset? _lastTransactionCommitment;
+    private DateTime? _lastTransactionCommitment;
     private bool _isPrimary;
-    private DateTimeOffset? _topOfLedgerNormalizedRoundTimestamp;
+    private DateTime? _topOfLedgerNormalizedRoundTimestamp;
 
     private TimeSpan StartupGracePeriod => TimeSpan.FromSeconds(_configuration.CurrentValue.StartupGracePeriodSeconds);
 
@@ -121,7 +121,7 @@ internal class SystemStatusService : ISystemStatusService
         _lastTransactionCommitment = _clock.UtcNow;
     }
 
-    public void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTimeOffset topOfLedgerNormalizedRoundTimestamp)
+    public void SetTopOfDbLedgerNormalizedRoundTimestamp(DateTime topOfLedgerNormalizedRoundTimestamp)
     {
         _topOfLedgerNormalizedRoundTimestamp = topOfLedgerNormalizedRoundTimestamp;
     }
@@ -139,7 +139,7 @@ internal class SystemStatusService : ISystemStatusService
                && _topOfLedgerNormalizedRoundTimestamp.Value.WithinPeriodOfNow(duration, _clock);
     }
 
-    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTimeOffset instant)
+    public bool GivenClockDriftBoundIsTopOfDbLedgerValidatorCommitTimestampConfidentlyAfter(TimeSpan assumedBoundOnClockDrift, DateTime instant)
     {
         return _topOfLedgerNormalizedRoundTimestamp.HasValue
                && _topOfLedgerNormalizedRoundTimestamp.Value + assumedBoundOnClockDrift >= instant;

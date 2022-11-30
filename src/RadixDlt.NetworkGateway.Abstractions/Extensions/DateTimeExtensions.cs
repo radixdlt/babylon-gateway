@@ -69,17 +69,19 @@ namespace RadixDlt.NetworkGateway.Abstractions.Extensions;
 
 public static class DateTimeExtensions
 {
-    public static string AsUtcIsoDateWithMillisString(this DateTimeOffset instant)
+    public static string AsUtcIsoDateWithMillisString(this DateTime instant)
     {
-        return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffK");
+        // same as JsonSerializerSettings.DefaultDateFormatString
+
+        return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK");
     }
 
-    public static string AsUtcIsoDateToSecondsForLogs(this DateTimeOffset instant)
+    public static string AsUtcIsoDateToSecondsForLogs(this DateTime instant)
     {
-        return instant.UtcDateTime.ToString("yyyy-MM-ddTHH\\:mm\\:ssK");
+        return instant.ToString(@"yyyy'-'MM'-'dd'T'HH':'mm':'ssK");
     }
 
-    public static TimeSpan GetTimeAgo(this DateTimeOffset instant, IClock clock)
+    public static TimeSpan GetTimeAgo(this DateTime instant, IClock clock)
     {
         return clock.UtcNow - instant;
     }
@@ -89,19 +91,21 @@ public static class DateTimeExtensions
         return duration.Ticks >= 0 ? duration : -duration;
     }
 
-    public static bool WithinPeriodOfNow(this DateTimeOffset dateTime, TimeSpan duration, IClock clock)
+    public static bool WithinPeriodOfNow(this DateTime dateTime, TimeSpan duration, IClock clock)
     {
         return dateTime.GetTimeAgo(clock).Absolute() <= duration;
     }
 
-    public static DateTimeOffset LatestOf(DateTimeOffset a, DateTimeOffset b)
+    public static DateTime LatestOf(DateTime a, DateTime b)
     {
         return a >= b ? a : b;
     }
 
-    public static double ToUnixTimeSecondsWithMilliPrecision(this DateTimeOffset a)
+    public static double ToUnixTimeSecondsWithMilliPrecision(this DateTime a)
     {
-        return ((double)a.ToUnixTimeMilliseconds()) / 1000;
+        // TODO we should throw if this is not DateTimeKind == UTC
+
+        return new DateTimeOffset(a).ToUnixTimeMilliseconds() / 1000.0;
     }
 
     public static string FormatSecondsHumanReadable(this TimeSpan duration)
@@ -109,12 +113,12 @@ public static class DateTimeExtensions
         return $"{duration.Absolute().TotalSeconds:F3}s";
     }
 
-    public static string FormatSecondsAgo(this DateTimeOffset instant, IClock clock)
+    public static string FormatSecondsAgo(this DateTime instant, IClock clock)
     {
         return $"{(clock.UtcNow - instant).FormatSecondsHumanReadable()} ago";
     }
 
-    public static string FormatSecondsAgo(this DateTimeOffset? instant, IClock clock)
+    public static string FormatSecondsAgo(this DateTime? instant, IClock clock)
     {
         return instant == null ? "never" : $"{(clock.UtcNow - instant.Value).FormatSecondsHumanReadable()} ago";
     }

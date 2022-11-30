@@ -114,19 +114,19 @@ internal class PendingTransaction
     /// The timestamp when the transaction was initially submitted to a node through this gateway.
     /// </summary>
     [Column("first_submitted_to_gateway_timestamp")]
-    public DateTimeOffset? FirstSubmittedToGatewayTimestamp { get; private set; }
+    public DateTime? FirstSubmittedToGatewayTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_gateway_timestamp")]
-    public DateTimeOffset? LastSubmittedToGatewayTimestamp { get; private set; }
+    public DateTime? LastSubmittedToGatewayTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
     /// </summary>
     [Column("last_submitted_to_node_timestamp")]
-    public DateTimeOffset? LastSubmittedToNodeTimestamp { get; private set; }
+    public DateTime? LastSubmittedToNodeTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last submitted to a node.
@@ -141,19 +141,19 @@ internal class PendingTransaction
     /// The timestamp when the transaction was first seen in a node's mempool.
     /// </summary>
     [Column("first_seen_in_mempool_timestamp")]
-    public DateTimeOffset? FirstSeenInMempoolTimestamp { get; private set; }
+    public DateTime? FirstSeenInMempoolTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was last changed to a MISSING state.
     /// </summary>
     [Column("last_missing_from_mempool_timestamp")]
-    public DateTimeOffset? LastDroppedOutOfMempoolTimestamp { get; private set; }
+    public DateTime? LastDroppedOutOfMempoolTimestamp { get; private set; }
 
     /// <summary>
     /// The timestamp when the transaction was committed to the DB ledger.
     /// </summary>
     [Column("commit_timestamp")]
-    public DateTimeOffset? CommitTimestamp { get; private set; }
+    public DateTime? CommitTimestamp { get; private set; }
 
     [Column("failure_reason")]
     public PendingTransactionFailureReason? FailureReason { get; private set; }
@@ -162,13 +162,13 @@ internal class PendingTransaction
     public string? FailureExplanation { get; private set; }
 
     [Column("failure_timestamp")]
-    public DateTimeOffset? FailureTimestamp { get; private set; }
+    public DateTime? FailureTimestamp { get; private set; }
 
     public static PendingTransaction NewFirstSeenInMempool(
         byte[] payloadHash,
         byte[] intentHash,
         byte[] notarizedTransaction,
-        DateTimeOffset firstSeenAt
+        DateTime firstSeenAt
     )
     {
         var mempoolTransaction = new PendingTransaction
@@ -189,7 +189,7 @@ internal class PendingTransaction
         byte[] signedIntentHash,
         byte[] notarizedTransactionBlob,
         string submittedToNodeName,
-        DateTimeOffset submittedTimestamp
+        DateTime submittedTimestamp
     )
     {
         var pendingTransaction = new PendingTransaction
@@ -210,25 +210,25 @@ internal class PendingTransaction
         return pendingTransaction;
     }
 
-    public void MarkAsMissing(DateTimeOffset timestamp)
+    public void MarkAsMissing(DateTime timestamp)
     {
         Status = PendingTransactionStatus.Missing;
         LastDroppedOutOfMempoolTimestamp = timestamp;
     }
 
-    public void MarkAsCommitted(DateTimeOffset timestamp)
+    public void MarkAsCommitted(DateTime timestamp)
     {
         Status = PendingTransactionStatus.Committed;
         CommitTimestamp = timestamp;
     }
 
-    public void MarkAsSeenInAMempool(DateTimeOffset timestamp)
+    public void MarkAsSeenInAMempool(DateTime timestamp)
     {
         Status = PendingTransactionStatus.SubmittedOrKnownInNodeMempool;
         FirstSeenInMempoolTimestamp ??= timestamp;
     }
 
-    public void MarkAsFailed(PendingTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset timestamp)
+    public void MarkAsFailed(PendingTransactionFailureReason failureReason, string failureExplanation, DateTime timestamp)
     {
         Status = PendingTransactionStatus.Failed;
         FailureReason = failureReason;
@@ -236,32 +236,32 @@ internal class PendingTransaction
         FailureTimestamp = timestamp;
     }
 
-    public void MarkAsSubmittedToGateway(DateTimeOffset submittedAt)
+    public void MarkAsSubmittedToGateway(DateTime submittedAt)
     {
         SubmittedByThisGateway = true;
         FirstSubmittedToGatewayTimestamp ??= submittedAt;
         LastSubmittedToGatewayTimestamp = submittedAt;
     }
 
-    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
+    public void MarkAsAssumedSuccessfullySubmittedToNode(string nodeSubmittedTo, DateTime submittedAt)
     {
         Status = PendingTransactionStatus.SubmittedOrKnownInNodeMempool;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, PendingTransactionFailureReason failureReason, string failureExplanation, DateTimeOffset submittedAt, DateTimeOffset timestamp)
+    public void MarkAsFailedAfterSubmittedToNode(string nodeSubmittedTo, PendingTransactionFailureReason failureReason, string failureExplanation, DateTime submittedAt, DateTime timestamp)
     {
         MarkAsFailed(failureReason, failureExplanation, timestamp);
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTimeOffset submittedAt)
+    public void MarkAsResolvedButUnknownAfterSubmittedToNode(string nodeSubmittedTo, DateTime submittedAt)
     {
         Status = PendingTransactionStatus.ResolvedButUnknownTillSyncedUp;
         RecordSubmission(nodeSubmittedTo, submittedAt);
     }
 
-    private void RecordSubmission(string nodeSubmittedTo, DateTimeOffset submittedAt)
+    private void RecordSubmission(string nodeSubmittedTo, DateTime submittedAt)
     {
         LastSubmittedToNodeTimestamp = submittedAt;
         LastSubmittedToNodeName = nodeSubmittedTo;
