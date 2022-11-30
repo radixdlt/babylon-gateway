@@ -91,36 +91,43 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionSubmitRequest
+    /// TransactionIntentLookupResponseKnownPayloadItem
     /// </summary>
-    [DataContract(Name = "TransactionSubmitRequest")]
-    public partial class TransactionSubmitRequest : IEquatable<TransactionSubmitRequest>, IValidatableObject
+    [DataContract(Name = "TransactionIntentLookupResponseKnownPayloadItem")]
+    public partial class TransactionIntentLookupResponseKnownPayloadItem : IEquatable<TransactionIntentLookupResponseKnownPayloadItem>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Gets or Sets Status
+        /// </summary>
+        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionStatus Status { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponseKnownPayloadItem" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionSubmitRequest() { }
+        protected TransactionIntentLookupResponseKnownPayloadItem() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionSubmitRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponseKnownPayloadItem" /> class.
         /// </summary>
-        /// <param name="notarizedTransactionHex">The notarized transaction payload which can be submitted, hex encoded. (required).</param>
-        public TransactionSubmitRequest(string notarizedTransactionHex = default(string))
+        /// <param name="payloadHashHex">payloadHashHex (required).</param>
+        /// <param name="status">status (required).</param>
+        public TransactionIntentLookupResponseKnownPayloadItem(string payloadHashHex = default(string), TransactionStatus status = default(TransactionStatus))
         {
-            // to ensure "notarizedTransactionHex" is required (not null)
-            if (notarizedTransactionHex == null)
+            // to ensure "payloadHashHex" is required (not null)
+            if (payloadHashHex == null)
             {
-                throw new ArgumentNullException("notarizedTransactionHex is a required property for TransactionSubmitRequest and cannot be null");
+                throw new ArgumentNullException("payloadHashHex is a required property for TransactionIntentLookupResponseKnownPayloadItem and cannot be null");
             }
-            this.NotarizedTransactionHex = notarizedTransactionHex;
+            this.PayloadHashHex = payloadHashHex;
+            this.Status = status;
         }
 
         /// <summary>
-        /// The notarized transaction payload which can be submitted, hex encoded.
+        /// Gets or Sets PayloadHashHex
         /// </summary>
-        /// <value>The notarized transaction payload which can be submitted, hex encoded.</value>
-        [DataMember(Name = "notarized_transaction_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NotarizedTransactionHex { get; set; }
+        [DataMember(Name = "payload_hash_hex", IsRequired = true, EmitDefaultValue = true)]
+        public string PayloadHashHex { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -129,8 +136,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionSubmitRequest {\n");
-            sb.Append("  NotarizedTransactionHex: ").Append(NotarizedTransactionHex).Append("\n");
+            sb.Append("class TransactionIntentLookupResponseKnownPayloadItem {\n");
+            sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
+            sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -151,15 +159,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionSubmitRequest);
+            return this.Equals(input as TransactionIntentLookupResponseKnownPayloadItem);
         }
 
         /// <summary>
-        /// Returns true if TransactionSubmitRequest instances are equal
+        /// Returns true if TransactionIntentLookupResponseKnownPayloadItem instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionSubmitRequest to be compared</param>
+        /// <param name="input">Instance of TransactionIntentLookupResponseKnownPayloadItem to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionSubmitRequest input)
+        public bool Equals(TransactionIntentLookupResponseKnownPayloadItem input)
         {
             if (input == null)
             {
@@ -167,9 +175,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.NotarizedTransactionHex == input.NotarizedTransactionHex ||
-                    (this.NotarizedTransactionHex != null &&
-                    this.NotarizedTransactionHex.Equals(input.NotarizedTransactionHex))
+                    this.PayloadHashHex == input.PayloadHashHex ||
+                    (this.PayloadHashHex != null &&
+                    this.PayloadHashHex.Equals(input.PayloadHashHex))
+                ) && 
+                (
+                    this.Status == input.Status ||
+                    this.Status.Equals(input.Status)
                 );
         }
 
@@ -182,10 +194,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NotarizedTransactionHex != null)
+                if (this.PayloadHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.NotarizedTransactionHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.Status.GetHashCode();
                 return hashCode;
             }
         }

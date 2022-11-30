@@ -97,16 +97,16 @@ public sealed class TransactionController : ControllerBase
         return await _transactionHandler.Recent(request, token);
     }
 
-    [HttpPost("status")]
-    public async Task<GatewayModel.TransactionStatusResponse> Status(GatewayModel.TransactionStatusRequest request, CancellationToken token)
+    [HttpPost("intent-lookup")]
+    public async Task<GatewayModel.TransactionIntentLookupResponse> IntentLookup(GatewayModel.TransactionIntentLookupRequest request, CancellationToken token)
     {
-        return await _transactionHandler.Status(request, token);
+        return await _transactionHandler.IntentLookup(request, token);
     }
 
-    [HttpPost("details")]
-    public async Task<GatewayModel.TransactionCommittedDetailsResponse> Details(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
+    [HttpPost("committed-details")]
+    public async Task<GatewayModel.TransactionCommittedDetailsResponse> CommittedDetails(GatewayModel.TransactionCommittedDetailsRequest request, CancellationToken token)
     {
-        return await _transactionHandler.Details(request, token);
+        return await _transactionHandler.CommittedDetails(request, token);
     }
 
     [HttpPost("preview")]

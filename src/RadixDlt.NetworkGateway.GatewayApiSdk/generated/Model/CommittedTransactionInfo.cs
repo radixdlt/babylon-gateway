@@ -96,6 +96,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
     [DataContract(Name = "CommittedTransactionInfo")]
     public partial class CommittedTransactionInfo : IEquatable<CommittedTransactionInfo>, IValidatableObject
     {
+
+        /// <summary>
+        /// Gets or Sets TransactionStatus
+        /// </summary>
+        [DataMember(Name = "transaction_status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionStatus TransactionStatus { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionInfo" /> class.
         /// </summary>
@@ -104,17 +110,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedTransactionInfo" /> class.
         /// </summary>
+        /// <param name="stateVersion">stateVersion (required).</param>
         /// <param name="transactionStatus">transactionStatus (required).</param>
         /// <param name="payloadHashHex">payloadHashHex (required).</param>
         /// <param name="intentHashHex">intentHashHex (required).</param>
         /// <param name="feePaid">feePaid.</param>
-        public CommittedTransactionInfo(TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount))
+        /// <param name="confirmedAt">confirmedAt.</param>
+        public CommittedTransactionInfo(long? stateVersion = default(long?), TransactionStatus transactionStatus = default(TransactionStatus), string payloadHashHex = default(string), string intentHashHex = default(string), TokenAmount feePaid = default(TokenAmount), DateTime? confirmedAt = default(DateTime?))
         {
-            // to ensure "transactionStatus" is required (not null)
-            if (transactionStatus == null)
+            // to ensure "stateVersion" is required (not null)
+            if (stateVersion == null)
             {
-                throw new ArgumentNullException("transactionStatus is a required property for CommittedTransactionInfo and cannot be null");
+                throw new ArgumentNullException("stateVersion is a required property for CommittedTransactionInfo and cannot be null");
             }
+            this.StateVersion = stateVersion;
             this.TransactionStatus = transactionStatus;
             // to ensure "payloadHashHex" is required (not null)
             if (payloadHashHex == null)
@@ -129,13 +138,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.IntentHashHex = intentHashHex;
             this.FeePaid = feePaid;
+            this.ConfirmedAt = confirmedAt;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionStatus
+        /// Gets or Sets StateVersion
         /// </summary>
-        [DataMember(Name = "transaction_status", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionStatus TransactionStatus { get; set; }
+        [DataMember(Name = "state_version", IsRequired = true, EmitDefaultValue = true)]
+        public long? StateVersion { get; set; }
 
         /// <summary>
         /// Gets or Sets PayloadHashHex
@@ -156,6 +166,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public TokenAmount FeePaid { get; set; }
 
         /// <summary>
+        /// Gets or Sets ConfirmedAt
+        /// </summary>
+        [DataMember(Name = "confirmed_at", EmitDefaultValue = true)]
+        public DateTime? ConfirmedAt { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -163,10 +179,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class CommittedTransactionInfo {\n");
+            sb.Append("  StateVersion: ").Append(StateVersion).Append("\n");
             sb.Append("  TransactionStatus: ").Append(TransactionStatus).Append("\n");
             sb.Append("  PayloadHashHex: ").Append(PayloadHashHex).Append("\n");
             sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
             sb.Append("  FeePaid: ").Append(FeePaid).Append("\n");
+            sb.Append("  ConfirmedAt: ").Append(ConfirmedAt).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -203,9 +221,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
+                    this.StateVersion == input.StateVersion ||
+                    (this.StateVersion != null &&
+                    this.StateVersion.Equals(input.StateVersion))
+                ) && 
+                (
                     this.TransactionStatus == input.TransactionStatus ||
-                    (this.TransactionStatus != null &&
-                    this.TransactionStatus.Equals(input.TransactionStatus))
+                    this.TransactionStatus.Equals(input.TransactionStatus)
                 ) && 
                 (
                     this.PayloadHashHex == input.PayloadHashHex ||
@@ -221,6 +243,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.FeePaid == input.FeePaid ||
                     (this.FeePaid != null &&
                     this.FeePaid.Equals(input.FeePaid))
+                ) && 
+                (
+                    this.ConfirmedAt == input.ConfirmedAt ||
+                    (this.ConfirmedAt != null &&
+                    this.ConfirmedAt.Equals(input.ConfirmedAt))
                 );
         }
 
@@ -233,10 +260,11 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionStatus != null)
+                if (this.StateVersion != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
+                    hashCode = (hashCode * 59) + this.StateVersion.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.TransactionStatus.GetHashCode();
                 if (this.PayloadHashHex != null)
                 {
                     hashCode = (hashCode * 59) + this.PayloadHashHex.GetHashCode();
@@ -248,6 +276,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.FeePaid != null)
                 {
                     hashCode = (hashCode * 59) + this.FeePaid.GetHashCode();
+                }
+                if (this.ConfirmedAt != null)
+                {
+                    hashCode = (hashCode * 59) + this.ConfirmedAt.GetHashCode();
                 }
                 return hashCode;
             }

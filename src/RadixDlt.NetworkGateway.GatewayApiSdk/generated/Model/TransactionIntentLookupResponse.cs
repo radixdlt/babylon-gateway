@@ -91,43 +91,56 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusRequest
+    /// TransactionIntentLookupResponse
     /// </summary>
-    [DataContract(Name = "TransactionStatusRequest")]
-    public partial class TransactionStatusRequest : IEquatable<TransactionStatusRequest>, IValidatableObject
+    [DataContract(Name = "TransactionIntentLookupResponse")]
+    public partial class TransactionIntentLookupResponse : IEquatable<TransactionIntentLookupResponse>, IValidatableObject
     {
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
+        /// Gets or Sets Status
+        /// </summary>
+        [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
+        public TransactionStatus Status { get; set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponse" /> class.
         /// </summary>
         [JsonConstructorAttribute]
-        protected TransactionStatusRequest() { }
+        protected TransactionIntentLookupResponse() { }
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusRequest" /> class.
+        /// Initializes a new instance of the <see cref="TransactionIntentLookupResponse" /> class.
         /// </summary>
-        /// <param name="transactionIdentifier">transactionIdentifier (required).</param>
-        /// <param name="atStateIdentifier">atStateIdentifier.</param>
-        public TransactionStatusRequest(TransactionLookupIdentifier transactionIdentifier = default(TransactionLookupIdentifier), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
+        /// <param name="ledgerState">ledgerState (required).</param>
+        /// <param name="status">status (required).</param>
+        /// <param name="knownPayloads">knownPayloads (required).</param>
+        public TransactionIntentLookupResponse(LedgerState ledgerState = default(LedgerState), TransactionStatus status = default(TransactionStatus), List<TransactionIntentLookupResponseKnownPayloadItem> knownPayloads = default(List<TransactionIntentLookupResponseKnownPayloadItem>))
         {
-            // to ensure "transactionIdentifier" is required (not null)
-            if (transactionIdentifier == null)
+            // to ensure "ledgerState" is required (not null)
+            if (ledgerState == null)
             {
-                throw new ArgumentNullException("transactionIdentifier is a required property for TransactionStatusRequest and cannot be null");
+                throw new ArgumentNullException("ledgerState is a required property for TransactionIntentLookupResponse and cannot be null");
             }
-            this.TransactionIdentifier = transactionIdentifier;
-            this.AtStateIdentifier = atStateIdentifier;
+            this.LedgerState = ledgerState;
+            this.Status = status;
+            // to ensure "knownPayloads" is required (not null)
+            if (knownPayloads == null)
+            {
+                throw new ArgumentNullException("knownPayloads is a required property for TransactionIntentLookupResponse and cannot be null");
+            }
+            this.KnownPayloads = knownPayloads;
         }
 
         /// <summary>
-        /// Gets or Sets TransactionIdentifier
+        /// Gets or Sets LedgerState
         /// </summary>
-        [DataMember(Name = "transaction_identifier", IsRequired = true, EmitDefaultValue = true)]
-        public TransactionLookupIdentifier TransactionIdentifier { get; set; }
+        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
+        public LedgerState LedgerState { get; set; }
 
         /// <summary>
-        /// Gets or Sets AtStateIdentifier
+        /// Gets or Sets KnownPayloads
         /// </summary>
-        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
-        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
+        [DataMember(Name = "known_payloads", IsRequired = true, EmitDefaultValue = true)]
+        public List<TransactionIntentLookupResponseKnownPayloadItem> KnownPayloads { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -136,9 +149,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusRequest {\n");
-            sb.Append("  TransactionIdentifier: ").Append(TransactionIdentifier).Append("\n");
-            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
+            sb.Append("class TransactionIntentLookupResponse {\n");
+            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
+            sb.Append("  Status: ").Append(Status).Append("\n");
+            sb.Append("  KnownPayloads: ").Append(KnownPayloads).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -159,15 +173,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusRequest);
+            return this.Equals(input as TransactionIntentLookupResponse);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusRequest instances are equal
+        /// Returns true if TransactionIntentLookupResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusRequest to be compared</param>
+        /// <param name="input">Instance of TransactionIntentLookupResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusRequest input)
+        public bool Equals(TransactionIntentLookupResponse input)
         {
             if (input == null)
             {
@@ -175,14 +189,19 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.TransactionIdentifier == input.TransactionIdentifier ||
-                    (this.TransactionIdentifier != null &&
-                    this.TransactionIdentifier.Equals(input.TransactionIdentifier))
+                    this.LedgerState == input.LedgerState ||
+                    (this.LedgerState != null &&
+                    this.LedgerState.Equals(input.LedgerState))
                 ) && 
                 (
-                    this.AtStateIdentifier == input.AtStateIdentifier ||
-                    (this.AtStateIdentifier != null &&
-                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
+                    this.Status == input.Status ||
+                    this.Status.Equals(input.Status)
+                ) && 
+                (
+                    this.KnownPayloads == input.KnownPayloads ||
+                    this.KnownPayloads != null &&
+                    input.KnownPayloads != null &&
+                    this.KnownPayloads.SequenceEqual(input.KnownPayloads)
                 );
         }
 
@@ -195,13 +214,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.TransactionIdentifier != null)
+                if (this.LedgerState != null)
                 {
-                    hashCode = (hashCode * 59) + this.TransactionIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
                 }
-                if (this.AtStateIdentifier != null)
+                hashCode = (hashCode * 59) + this.Status.GetHashCode();
+                if (this.KnownPayloads != null)
                 {
-                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
+                    hashCode = (hashCode * 59) + this.KnownPayloads.GetHashCode();
                 }
                 return hashCode;
             }

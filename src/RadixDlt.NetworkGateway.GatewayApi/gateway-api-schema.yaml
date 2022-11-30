@@ -154,12 +154,12 @@ paths:
                 $ref: "#/components/schemas/TransactionCommittedDetailsResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-  "/transaction/status":
+  "/transaction/intent-lookup":
     post:
-      operationId: TransactionStatus
-      summary: Transaction Status
+      operationId: TransactionIntentLookup
+      summary: Transaction Intent Lookup
       description: |
-        Returns the status and contents of the transaction with the given transaction identifier. Transaction identifiers which aren't recognised as either belonging to a committed transaction or a transaction submitted through this Network Gateway may return a `TransactionNotFoundError`. Transaction identifiers relating to failed transactions will, after a delay, also be reported as a `TransactionNotFoundError`.
+        TBD
       tags:
         - Transaction
       requestBody:
@@ -167,14 +167,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransactionStatusRequest"
+              $ref: "#/components/schemas/TransactionIntentLookupRequest"
       responses:
         "200":
           description: Transaction Status
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionStatusResponse"
+                $ref: "#/components/schemas/TransactionIntentLookupResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
@@ -571,10 +571,15 @@ components:
     CommittedTransactionInfo:
       type: object
       required:
+        - state_version
         - transaction_status
         - payload_hash_hex
         - intent_hash_hex
       properties:
+        state_version:
+          nullable: true
+          type: integer
+          format: int64
         transaction_status:
           $ref: "#/components/schemas/TransactionStatus"
         payload_hash_hex:
@@ -583,26 +588,19 @@ components:
           type: string
         fee_paid:
           $ref: "#/components/schemas/TokenAmount"
-    TransactionStatus:
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          type: string
-          enum:
-            - succeeded
-            - failed
-            - rejected
-            - pending
-        state_version:
-          nullable: true
-          type: integer
-          format: int64
         confirmed_at:
           nullable: true
           type: string
           format: date-time
+
+    TransactionStatus:
+      type: string
+      enum:
+        - unknown
+        - committed_success
+        - committed_failure
+        - pending
+        - rejected
 
     TokenAmount:
       type: object
@@ -746,9 +744,9 @@ components:
     TransactionSubmitRequest:
       type: object
       required:
-        - notarized_transaction
+        - notarized_transaction_hex
       properties:
-        notarized_transaction:
+        notarized_transaction_hex:
           description: The notarized transaction payload which can be submitted, hex encoded.
           type: string
     TransactionSubmitResponse:
@@ -760,28 +758,41 @@ components:
           type: boolean
           description: Is true if the transaction is a duplicate of an existing pending transaction.
 
-    TransactionStatusRequest:
+    TransactionIntentLookupRequest:
       type: object
       required:
         - transaction_identifier
       properties:
-        transaction_identifier:
-          $ref: "#/components/schemas/TransactionLookupIdentifier"
+        intent_hash_hex:
+          type: string
         at_state_identifier:
           $ref: "#/components/schemas/PartialLedgerStateIdentifier"
       example:
-        transaction_identifier:
-          origin: payload
-          value_hex: "<transaction-payload-hash>"
-    TransactionStatusResponse:
+        intent_hash_hex: "<transaction-intent-hash>"
+    TransactionIntentLookupResponse:
       allOf:
         - $ref: "#/components/schemas/LedgerStateMixin"
         - type: object
           required:
-            - transaction
+            - status
+            - known_payloads
           properties:
-            transaction:
-              $ref: "#/components/schemas/CommittedTransactionInfo"
+            status:
+              $ref: "#/components/schemas/TransactionStatus"
+            known_payloads:
+              type: array
+              items:
+                $ref: "#/components/schemas/TransactionIntentLookupResponseKnownPayloadItem"
+    TransactionIntentLookupResponseKnownPayloadItem:
+      type: object
+      required:
+        - payload_hash_hex
+        - status
+      properties:
+        payload_hash_hex:
+          type: string
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
 
     TransactionCommittedDetailsRequest:
       type: object

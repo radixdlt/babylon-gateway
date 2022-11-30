@@ -91,48 +91,33 @@ using OpenAPIDateConverter = RadixDlt.NetworkGateway.GatewayApiSdk.Client.OpenAP
 namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
 {
     /// <summary>
-    /// TransactionStatusResponse
+    /// TransactionIntentLookupRequest
     /// </summary>
-    [DataContract(Name = "TransactionStatusResponse")]
-    public partial class TransactionStatusResponse : IEquatable<TransactionStatusResponse>, IValidatableObject
+    [DataContract(Name = "TransactionIntentLookupRequest")]
+    public partial class TransactionIntentLookupRequest : IEquatable<TransactionIntentLookupRequest>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
+        /// Initializes a new instance of the <see cref="TransactionIntentLookupRequest" /> class.
         /// </summary>
-        [JsonConstructorAttribute]
-        protected TransactionStatusResponse() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionStatusResponse" /> class.
-        /// </summary>
-        /// <param name="ledgerState">ledgerState (required).</param>
-        /// <param name="transaction">transaction (required).</param>
-        public TransactionStatusResponse(LedgerState ledgerState = default(LedgerState), CommittedTransactionInfo transaction = default(CommittedTransactionInfo))
+        /// <param name="intentHashHex">intentHashHex.</param>
+        /// <param name="atStateIdentifier">atStateIdentifier.</param>
+        public TransactionIntentLookupRequest(string intentHashHex = default(string), PartialLedgerStateIdentifier atStateIdentifier = default(PartialLedgerStateIdentifier))
         {
-            // to ensure "ledgerState" is required (not null)
-            if (ledgerState == null)
-            {
-                throw new ArgumentNullException("ledgerState is a required property for TransactionStatusResponse and cannot be null");
-            }
-            this.LedgerState = ledgerState;
-            // to ensure "transaction" is required (not null)
-            if (transaction == null)
-            {
-                throw new ArgumentNullException("transaction is a required property for TransactionStatusResponse and cannot be null");
-            }
-            this.Transaction = transaction;
+            this.IntentHashHex = intentHashHex;
+            this.AtStateIdentifier = atStateIdentifier;
         }
 
         /// <summary>
-        /// Gets or Sets LedgerState
+        /// Gets or Sets IntentHashHex
         /// </summary>
-        [DataMember(Name = "ledger_state", IsRequired = true, EmitDefaultValue = true)]
-        public LedgerState LedgerState { get; set; }
+        [DataMember(Name = "intent_hash_hex", EmitDefaultValue = true)]
+        public string IntentHashHex { get; set; }
 
         /// <summary>
-        /// Gets or Sets Transaction
+        /// Gets or Sets AtStateIdentifier
         /// </summary>
-        [DataMember(Name = "transaction", IsRequired = true, EmitDefaultValue = true)]
-        public CommittedTransactionInfo Transaction { get; set; }
+        [DataMember(Name = "at_state_identifier", EmitDefaultValue = true)]
+        public PartialLedgerStateIdentifier AtStateIdentifier { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -141,9 +126,9 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TransactionStatusResponse {\n");
-            sb.Append("  LedgerState: ").Append(LedgerState).Append("\n");
-            sb.Append("  Transaction: ").Append(Transaction).Append("\n");
+            sb.Append("class TransactionIntentLookupRequest {\n");
+            sb.Append("  IntentHashHex: ").Append(IntentHashHex).Append("\n");
+            sb.Append("  AtStateIdentifier: ").Append(AtStateIdentifier).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -164,15 +149,15 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as TransactionStatusResponse);
+            return this.Equals(input as TransactionIntentLookupRequest);
         }
 
         /// <summary>
-        /// Returns true if TransactionStatusResponse instances are equal
+        /// Returns true if TransactionIntentLookupRequest instances are equal
         /// </summary>
-        /// <param name="input">Instance of TransactionStatusResponse to be compared</param>
+        /// <param name="input">Instance of TransactionIntentLookupRequest to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(TransactionStatusResponse input)
+        public bool Equals(TransactionIntentLookupRequest input)
         {
             if (input == null)
             {
@@ -180,14 +165,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             return 
                 (
-                    this.LedgerState == input.LedgerState ||
-                    (this.LedgerState != null &&
-                    this.LedgerState.Equals(input.LedgerState))
+                    this.IntentHashHex == input.IntentHashHex ||
+                    (this.IntentHashHex != null &&
+                    this.IntentHashHex.Equals(input.IntentHashHex))
                 ) && 
                 (
-                    this.Transaction == input.Transaction ||
-                    (this.Transaction != null &&
-                    this.Transaction.Equals(input.Transaction))
+                    this.AtStateIdentifier == input.AtStateIdentifier ||
+                    (this.AtStateIdentifier != null &&
+                    this.AtStateIdentifier.Equals(input.AtStateIdentifier))
                 );
         }
 
@@ -200,13 +185,13 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.LedgerState != null)
+                if (this.IntentHashHex != null)
                 {
-                    hashCode = (hashCode * 59) + this.LedgerState.GetHashCode();
+                    hashCode = (hashCode * 59) + this.IntentHashHex.GetHashCode();
                 }
-                if (this.Transaction != null)
+                if (this.AtStateIdentifier != null)
                 {
-                    hashCode = (hashCode * 59) + this.Transaction.GetHashCode();
+                    hashCode = (hashCode * 59) + this.AtStateIdentifier.GetHashCode();
                 }
                 return hashCode;
             }

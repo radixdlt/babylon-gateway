@@ -63,19 +63,18 @@
  */
 
 using FluentValidation;
+using RadixDlt.NetworkGateway.Abstractions;
 using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
-internal class TransactionStatusRequestValidator : AbstractValidator<GatewayModel.TransactionStatusRequest>
+internal class TransactionIntentLookupRequestValidator : AbstractValidator<GatewayModel.TransactionIntentLookupRequest>
 {
-    public TransactionStatusRequestValidator(
-        TransactionLookupIdentifierValidator transactionLookupIdentifierValidator,
-        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public TransactionIntentLookupRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        RuleFor(x => x.TransactionIdentifier)
+        RuleFor(x => x.IntentHashHex)
             .NotNull()
-            .SetValidator(transactionLookupIdentifierValidator);
+            .Hex(NetworkGatewayConstants.Transaction.IdentifierByteLength);
 
         RuleFor(x => x.AtStateIdentifier)
             .SetValidator(partialLedgerStateIdentifierValidator);

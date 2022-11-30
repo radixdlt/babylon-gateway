@@ -71,7 +71,7 @@ internal class TransactionSubmitRequestValidator : AbstractValidator<GatewayMode
 {
     public TransactionSubmitRequestValidator()
     {
-        RuleFor(x => x.NotarizedTransaction)
+        RuleFor(x => x.NotarizedTransactionHex)
             .NotEmpty()
             .Hex();
     }
