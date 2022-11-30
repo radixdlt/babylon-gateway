@@ -228,8 +228,8 @@ internal class LedgerExtenderService : ILedgerExtenderService
     {
         // TODO further improvements:
         // - queries with WHERE xxx = ANY(<list of 12345 ids>) are probably not very performant
+        // - replace with proper Activity at some point
 
-        // TODO replace with proper Activity at some point
         var rowsInserted = 0;
         var rowsUpdated = 0;
         var dbReadDuration = TimeSpan.Zero;
