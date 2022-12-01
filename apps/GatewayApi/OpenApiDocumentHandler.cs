@@ -71,6 +71,7 @@ using RadixDlt.NetworkGateway.GatewayApi;
 using RadixDlt.NetworkGateway.GatewayApi.Handlers;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using RadixDlt.NetworkGateway.GatewayApiSdk.Model;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -85,10 +86,7 @@ public static class OpenApiDocumentHandler
 {
     public static async Task Handle([FromServices] INetworkConfigurationProvider networkConfigurationProvider, [FromServices] ITransactionHandler transactionHandler, HttpContext context, CancellationToken token = default)
     {
-        var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
-        var sampleResourceAddress = wellKnownAddresses.Xrd;
-        var sampleComponentAddress = wellKnownAddresses.Faucet;
-        var sampleTransaction = (await transactionHandler.Recent(new TransactionRecentRequest(limit: 1), token)).Items.FirstOrDefault();
+        var placeholderReplacements = await GetPlaceholderReplacements(networkConfigurationProvider, transactionHandler, token);
 
         var assembly = typeof(GatewayApiBuilder).Assembly;
         var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.gateway-api-schema.yaml");
@@ -111,15 +109,51 @@ public static class OpenApiDocumentHandler
 
         var response = textWriter.ToString();
 
-        response = response
-            .Replace("<entity-address>", sampleResourceAddress)
-            .Replace("<component-entity-address>", sampleComponentAddress);
-
-        if (sampleTransaction != null)
-        {
-            response = response.Replace("<transaction-payload-hash>", sampleTransaction.PayloadHashHex);
-        }
+        response = OptionalReplace(response, "<entity-address>", placeholderReplacements.ResourceAddress);
+        response = OptionalReplace(response, "<component-entity-address>", placeholderReplacements.ComponentAddress);
+        response = OptionalReplace(response, "<transaction-payload-hash>", placeholderReplacements.TransactionPayloadHex);
 
         await context.Response.WriteAsync(response, Encoding.UTF8, token);
+    }
+
+    private static string OptionalReplace(string inputString, string pattern, string? replacement)
+    {
+        return replacement == null ? inputString : inputString.Replace(pattern, replacement);
+    }
+
+    private class PlaceholderReplacements
+    {
+        public string? ResourceAddress { get; set; }
+
+        public string? ComponentAddress { get; set; }
+
+        public string? TransactionPayloadHex { get; set; }
+    }
+
+    private static async Task<PlaceholderReplacements> GetPlaceholderReplacements(INetworkConfigurationProvider networkConfigurationProvider, ITransactionHandler transactionHandler, CancellationToken token)
+    {
+        var placeholderReplacements = new PlaceholderReplacements();
+        try
+        {
+            var wellKnownAddresses = networkConfigurationProvider.GetWellKnownAddresses();
+            placeholderReplacements.ResourceAddress = wellKnownAddresses.Xrd;
+            placeholderReplacements.ComponentAddress = wellKnownAddresses.Faucet;
+        }
+        catch (Exception)
+        {
+            // EG not synced up exception: Ignored
+        }
+
+        try
+        {
+            var sampleTransaction = (await transactionHandler.Recent(new TransactionRecentRequest(limit: 1), token)).Items.FirstOrDefault();
+            placeholderReplacements.TransactionPayloadHex = sampleTransaction?.PayloadHashHex;
+        }
+        catch (Exception)
+        {
+            // EG not synced up exception: Ignored
+        }
+
+        return placeholderReplacements;
     }
 }
