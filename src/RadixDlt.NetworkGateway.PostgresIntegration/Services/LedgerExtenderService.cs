@@ -388,9 +388,9 @@ SELECT
                     var sid = newSubstate.SubstateId;
                     var sd = newSubstate.SubstateData.ActualInstance;
 
-                    if (sd is CoreModel.GlobalSubstate globalData)
+                    if (sd is CoreModel.GlobalAddressSubstate globalAddress)
                     {
-                        var target = globalData.TargetEntity;
+                        var target = globalAddress.TargetEntity;
                         var te = referencedEntities.GetOrAdd(target.TargetEntityIdHex, _ => new ReferencedEntity(target.TargetEntityIdHex, target.TargetEntityType, stateVersion));
 
                         te.Globalize(target.GlobalAddressHex);
@@ -441,21 +441,16 @@ SELECT
                     {
                         newEpoch = epochManager.Epoch;
 
-                        // TODO this is just some dirty hack to ease-up integration process while CoreApi is still missing round support
+                        // TODO dummy placeholder
                         newRoundInEpoch = 0;
                         newRoundTimestamp = _clock.UtcNow;
                     }
 
-                    // TODO implement roundInEpoch the same way once CoreApi expose round/roundInEpoch
-                    // if (operation.IsCreateOf<RoundData>(out var newRoundData))
+                    // if (sd is CoreModel.ClockCurrentMinuteSubstate clock)
                     // {
-                    //     newRoundInEpoch = newRoundData.Round;
-                    //
-                    //     // NB - the first round of the ledger has Timestamp 0 for some reason. Let's ignore it and use the prev timestamp
-                    //     if (newRoundData.Timestamp != 0)
-                    //     {
-                    //         newRoundTimestamp = DateTime.FromUnixTimeMilliseconds(newRoundData.Timestamp);
-                    //     }
+                    //     newRoundInEpoch ??= 0;
+                    //     newRoundInEpoch += 1;
+                    //     newRoundTimestamp = DateTimeOffset.FromUnixTimeMilliseconds(clock.TimestampMsRoundedDownToMinute).UtcDateTime;
                     // }
 
                     if (sd is CoreModel.ResourceManagerSubstate resourceManager)
@@ -474,14 +469,14 @@ SELECT
                             fungibleResourceManagerDivisibility[sid.EntityIdHex] = resourceManager.FungibleDivisibility;
                         }
 
-                        resourceManagerEntityRawAuthRules[sid.EntityIdHex] = resourceManager.AuthRules.ToJson();
+                        // TODO went missing?
+                        // resourceManagerEntityRawAuthRules[sid.EntityIdHex] = resourceManager.AuthRules.ToJson();
                     }
 
                     if (sd is CoreModel.ComponentInfoSubstate componentInfo)
                     {
                         knownGlobalAddressesToLoad.Add(componentInfo.PackageAddress);
                         componentToGlobalPackage[sid.EntityIdHex] = (componentInfo.PackageAddress, componentInfo.BlueprintName);
-                        componentEntityRawAccessRulesLayers[sid.EntityIdHex] = JsonConvert.SerializeObject(componentInfo.AccessRulesLayers);
                     }
 
                     if (sd is CoreModel.ComponentStateSubstate componentState)
@@ -489,9 +484,14 @@ SELECT
                         componentEntityRawState[sid.EntityIdHex] = componentState.DataStruct.StructData.ToJson();
                     }
 
-                    if (sd is CoreModel.PackageSubstate package)
+                    if (sd is CoreModel.AccessRulesChainSubstate accessRulesChain)
                     {
-                        packageCode[sid.EntityIdHex] = package.CodeHex.ConvertFromHex();
+                        componentEntityRawAccessRulesLayers[sid.EntityIdHex] = JsonConvert.SerializeObject(accessRulesChain.Chain);
+                    }
+
+                    if (sd is CoreModel.PackageInfoSubstate packageInfo)
+                    {
+                        packageCode[sid.EntityIdHex] = packageInfo.CodeHex.ConvertFromHex();
                     }
                 }
 
@@ -846,7 +846,7 @@ WHERE id IN(
                     var sid = newSubstate.SubstateId;
                     var sd = newSubstate.SubstateData.ActualInstance;
 
-                    if (sd is CoreModel.GlobalSubstate)
+                    if (sd is CoreModel.GlobalAddressSubstate)
                     {
                         // we do not want to store GlobalEntities as they bring no value from NG perspective
 
@@ -855,10 +855,13 @@ WHERE id IN(
 
                     var re = referencedEntities.Get(sid.EntityIdHex);
 
+                    if (sd is CoreModel.MetadataSubstate metadata)
+                    {
+                        metadataChanges.Add(new MetadataChange(re, metadata.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
+                    }
+
                     if (sd is CoreModel.ResourceManagerSubstate resourceManager)
                     {
-                        metadataChanges.Add(new MetadataChange(re, resourceManager.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value), stateVersion));
-
                         var totalSupply = TokenAmount.FromDecimalString(resourceManager.TotalSupply);
 
                         if (resourceManager.ResourceType == CoreModel.ResourceType.Fungible)
@@ -899,9 +902,9 @@ WHERE id IN(
                         }
                     }
 
-                    if (sd is CoreModel.NonFungibleSubstate nonFungible)
+                    if (sd is CoreModel.NonFungibleStoreEntrySubstate nonFungibleStoreEntry)
                     {
-                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, nonFungible.NonFungibleIdHex.ConvertFromHex(), nonFungible.IsDeleted, nonFungible.NonFungibleData, stateVersion));
+                        nonFungibleIdStoreChanges.Add(new NonFungibleIdChange(re, nonFungibleStoreEntry.NonFungibleIdHex.ConvertFromHex(), nonFungibleStoreEntry.IsDeleted, nonFungibleStoreEntry.NonFungibleData, stateVersion));
                     }
                 }
             }

@@ -100,8 +100,8 @@ internal static class TransactionMapping
         ledgerTransaction.RoundInEpoch = summary.RoundInEpoch;
         ledgerTransaction.IsStartOfEpoch = summary.IsStartOfEpoch;
         ledgerTransaction.IsStartOfRound = summary.IsStartOfRound;
-        ledgerTransaction.FeePaid = TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdBurned);
-        ledgerTransaction.TipPaid = TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTipped);
+        ledgerTransaction.FeePaid = TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalExecutionCost);
+        ledgerTransaction.TipPaid = TokenAmount.FromDecimalString(committedTransaction.Receipt.FeeSummary.XrdTotalTipped);
         ledgerTransaction.RoundTimestamp = summary.RoundTimestamp;
         ledgerTransaction.CreatedTimestamp = summary.CreatedTimestamp;
         ledgerTransaction.NormalizedRoundTimestamp = summary.NormalizedRoundTimestamp;
