@@ -297,7 +297,7 @@ WHERE nfd.id IN(
             },
             cancellationToken: token);
 
-        long? totalCount = null;
+        long? totalCount = 0;
 
         var items = (await _dbContext.Database.GetDbConnection().QueryAsync<NonFungibleIdsViewModel>(cd)).ToList()
             .Select(vm =>
