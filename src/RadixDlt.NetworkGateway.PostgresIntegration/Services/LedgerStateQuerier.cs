@@ -129,6 +129,8 @@ internal class LedgerStateQuerier : ILedgerStateQuerier
             new GatewayModel.GatewayInformationResponseAllOfWellKnownAddresses(
                 wellKnownAddresses.AccountPackage,
                 wellKnownAddresses.Faucet,
+                wellKnownAddresses.EpochManager,
+                wellKnownAddresses.Clock,
                 wellKnownAddresses.EcdsaSecp256k1,
                 wellKnownAddresses.EddsaEd25519,
                 wellKnownAddresses.Xrd

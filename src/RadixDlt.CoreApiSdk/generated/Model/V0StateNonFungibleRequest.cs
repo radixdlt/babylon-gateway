@@ -104,8 +104,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="V0StateNonFungibleRequest" /> class.
         /// </summary>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource&#39;s global address (required).</param>
-        /// <param name="nonFungibleIdHex">The hex-encoded non-fungible id (required).</param>
-        public V0StateNonFungibleRequest(string resourceAddress = default(string), string nonFungibleIdHex = default(string))
+        /// <param name="nonFungibleId">The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address.  (required).</param>
+        public V0StateNonFungibleRequest(string resourceAddress = default(string), string nonFungibleId = default(string))
         {
             // to ensure "resourceAddress" is required (not null)
             if (resourceAddress == null)
@@ -113,12 +113,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for V0StateNonFungibleRequest and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            // to ensure "nonFungibleIdHex" is required (not null)
-            if (nonFungibleIdHex == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleIdHex is a required property for V0StateNonFungibleRequest and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for V0StateNonFungibleRequest and cannot be null");
             }
-            this.NonFungibleIdHex = nonFungibleIdHex;
+            this.NonFungibleId = nonFungibleId;
         }
 
         /// <summary>
@@ -129,11 +129,11 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The hex-encoded non-fungible id
+        /// The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address. 
         /// </summary>
-        /// <value>The hex-encoded non-fungible id</value>
-        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleIdHex { get; set; }
+        /// <value>The simple string representation of the non-fungible id. For string id types, this is simply the string itself; for integer types, this is the integer as a decimal; and for the bytes id type, this is the lower case hex representation. A non-fungible resource has a fixed &#x60;NonFungibleType&#x60;, so this representation uniquely identifies this non-fungible under the given resource address. </value>
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public string NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -144,7 +144,7 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class V0StateNonFungibleRequest {\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -186,9 +186,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
-                    (this.NonFungibleIdHex != null &&
-                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -205,9 +205,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.NonFungibleIdHex != null)
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 return hashCode;
             }

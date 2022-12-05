@@ -21,11 +21,6 @@ tags:
   - name: Non-Fungible
     description: TBD
 paths:
-
-  #
-  # /gateway/* Requests & Responses
-  #
-
   "/gateway/information":
     post:
       operationId: GatewayInformation
@@ -40,10 +35,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GatewayInformationResponse"
-
-  #
-  # /transaction/* Requests & Responses
-  #
 
   "/transaction/construction":
     post:
@@ -177,10 +168,6 @@ paths:
                 $ref: "#/components/schemas/TransactionStatusResponse"
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
-
-  #
-  # /gateway/* Requests & Responses
-  #
 
   /entity/overview:
     post:
@@ -344,10 +331,6 @@ paths:
         "4XX":
           $ref: "#/components/responses/ErrorResponse"
 
-  #
-  # /non-fungible/* Requests & Responses
-  #
-
   /non-fungible/ids:
     post:
       operationId: NonFungibleIds
@@ -450,6 +433,7 @@ components:
           description: |
             The round timestamp of the consensus round when this transaction was committed to ledger. This is not guaranteed to be strictly increasing, as it is computed as an average across the validator set. If this is significantly behind the current timestamp, the Network Gateway is likely reporting out-dated information, or the network has stalled.
           type: string
+          # TODO add format: date-time once OAS generator get fixed support for required value-types
         epoch:
           description: The epoch number of the ledger at this state version.
           type: integer
@@ -676,6 +660,8 @@ components:
               required:
                 - account_package
                 - faucet
+                - epoch_manager
+                - clock
                 - ecdsa_secp256k1
                 - eddsa_ed25519
                 - xrd
@@ -684,6 +670,10 @@ components:
                   $ref: "#/components/schemas/EntityAddress"
                 faucet:
                   $ref: "#/components/schemas/ComponentAddress"
+                epoch_manager:
+                  $ref: "#/components/schemas/EntityAddress"
+                clock:
+                  $ref: "#/components/schemas/EntityAddress"
                 ecdsa_secp256k1:
                   $ref: "#/components/schemas/ResourceAddress"
                 eddsa_ed25519:
@@ -1304,16 +1294,11 @@ components:
         mapping:
           EntityNotFoundError: "#/components/schemas/EntityNotFoundError"
           InvalidEntityError: "#/components/schemas/InvalidEntityError"
-
-          #
-          # TODO Not categorized/cleaned yet
-          #
           NotSyncedUpError: "#/components/schemas/NotSyncedUpError"
           InvalidRequestError: "#/components/schemas/InvalidRequestError"
           InvalidTransactionError: "#/components/schemas/InvalidTransactionError"
           TransactionNotFoundError: "#/components/schemas/TransactionNotFoundError"
           InternalServerError: "#/components/schemas/InternalServerError"
-
     EntityNotFoundError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1332,10 +1317,6 @@ components:
           properties:
             address:
               $ref: "#/components/schemas/EntityAddress"
-
-    #
-    # TODO Not categorized/cleaned yet
-    #
     NotSyncedUpError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1361,25 +1342,26 @@ components:
         - $ref: "#/components/schemas/GatewayError"
         - type: object
           required:
-            - validation_errors
+            - validation_errors  # ??
           properties:
             validation_errors:
               description: One or more validation errors which occurred when validating the request.
               type: array
               items:
                 $ref: "#/components/schemas/ValidationErrorsAtPath"
-    ValidationErrorsAtPath:
-      type: object
-      required:
-        - path
-        - errors
-      properties:
-        path:
-          type: string
-        errors:
-          type: array
-          items:
-            type: string
+    InvalidTransactionError: # ??
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+    TransactionNotFoundError:
+      allOf:
+        - $ref: "#/components/schemas/GatewayError"
+        - type: object
+          required:
+            - transaction_not_found
+          properties:
+            transaction_not_found:
+              $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdentifier"
     InternalServerError:
       allOf:
         - $ref: "#/components/schemas/GatewayError"
@@ -1394,26 +1376,15 @@ components:
             cause:
               description: Gives a human readable message - likely just a trace ID for reporting the error.
               type: string
-    InvalidTransactionError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-    TransactionNotFoundError:
-      allOf:
-        - $ref: "#/components/schemas/GatewayError"
-        - type: object
-          required:
-            - transaction_not_found
-          properties:
-            transaction_not_found:
-              $ref: "#/components/schemas/TransactionCommittedDetailsRequestIdenti\
-                    fier"
-
-
-    TokenIdentifier:
+    ValidationErrorsAtPath:
       type: object
       required:
-        - rri
+        - path
+        - errors
       properties:
-        rri:
-          description: The radix resource identifier of the token.
+        path:
           type: string
+        errors:
+          type: array
+          items:
+            type: string

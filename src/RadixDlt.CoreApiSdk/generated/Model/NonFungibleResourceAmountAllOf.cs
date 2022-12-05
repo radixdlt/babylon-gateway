@@ -103,22 +103,22 @@ namespace RadixDlt.CoreApiSdk.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="NonFungibleResourceAmountAllOf" /> class.
         /// </summary>
-        /// <param name="nonFungibleIdsHex">nonFungibleIdsHex (required).</param>
-        public NonFungibleResourceAmountAllOf(List<string> nonFungibleIdsHex = default(List<string>))
+        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
+        public NonFungibleResourceAmountAllOf(List<NonFungibleId> nonFungibleIds = default(List<NonFungibleId>))
         {
-            // to ensure "nonFungibleIdsHex" is required (not null)
-            if (nonFungibleIdsHex == null)
+            // to ensure "nonFungibleIds" is required (not null)
+            if (nonFungibleIds == null)
             {
-                throw new ArgumentNullException("nonFungibleIdsHex is a required property for NonFungibleResourceAmountAllOf and cannot be null");
+                throw new ArgumentNullException("nonFungibleIds is a required property for NonFungibleResourceAmountAllOf and cannot be null");
             }
-            this.NonFungibleIdsHex = nonFungibleIdsHex;
+            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIdsHex
+        /// Gets or Sets NonFungibleIds
         /// </summary>
-        [DataMember(Name = "non_fungible_ids_hex", IsRequired = true, EmitDefaultValue = true)]
-        public List<string> NonFungibleIdsHex { get; set; }
+        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
+        public List<NonFungibleId> NonFungibleIds { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -128,7 +128,7 @@ namespace RadixDlt.CoreApiSdk.Model
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleResourceAmountAllOf {\n");
-            sb.Append("  NonFungibleIdsHex: ").Append(NonFungibleIdsHex).Append("\n");
+            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -165,10 +165,10 @@ namespace RadixDlt.CoreApiSdk.Model
             }
             return 
                 (
-                    this.NonFungibleIdsHex == input.NonFungibleIdsHex ||
-                    this.NonFungibleIdsHex != null &&
-                    input.NonFungibleIdsHex != null &&
-                    this.NonFungibleIdsHex.SequenceEqual(input.NonFungibleIdsHex)
+                    this.NonFungibleIds == input.NonFungibleIds ||
+                    this.NonFungibleIds != null &&
+                    input.NonFungibleIds != null &&
+                    this.NonFungibleIds.SequenceEqual(input.NonFungibleIds)
                 );
         }
 
@@ -181,9 +181,9 @@ namespace RadixDlt.CoreApiSdk.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                if (this.NonFungibleIdsHex != null)
+                if (this.NonFungibleIds != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdsHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
                 }
                 return hashCode;
             }

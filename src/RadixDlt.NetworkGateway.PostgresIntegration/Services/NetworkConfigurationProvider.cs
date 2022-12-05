@@ -180,6 +180,8 @@ internal class NetworkConfigurationProvider : INetworkConfigurationProvider
             WellKnownAddresses = new WellKnownAddresses(
                 AccountPackage: networkConfiguration.WellKnownAddresses.AccountPackage,
                 Faucet: networkConfiguration.WellKnownAddresses.Faucet,
+                EpochManager: networkConfiguration.WellKnownAddresses.EpochManager,
+                Clock: networkConfiguration.WellKnownAddresses.Clock,
                 EcdsaSecp256k1: networkConfiguration.WellKnownAddresses.EcdsaSecp256k1,
                 EddsaEd25519: networkConfiguration.WellKnownAddresses.EddsaEd25519,
                 Xrd: networkConfiguration.WellKnownAddresses.Xrd

@@ -105,10 +105,12 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// </summary>
         /// <param name="accountPackage">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="faucet">The Bech32m-encoded human readable version of the component (normal, account, system) global address. (required).</param>
+        /// <param name="epochManager">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
+        /// <param name="clock">The Bech32m-encoded human readable version of the entity&#39;s global address. (required).</param>
         /// <param name="ecdsaSecp256k1">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
         /// <param name="eddsaEd25519">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
         /// <param name="xrd">The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address. (required).</param>
-        public GatewayInformationResponseAllOfWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
+        public GatewayInformationResponseAllOfWellKnownAddresses(string accountPackage = default(string), string faucet = default(string), string epochManager = default(string), string clock = default(string), string ecdsaSecp256k1 = default(string), string eddsaEd25519 = default(string), string xrd = default(string))
         {
             // to ensure "accountPackage" is required (not null)
             if (accountPackage == null)
@@ -122,6 +124,18 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 throw new ArgumentNullException("faucet is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
             }
             this.Faucet = faucet;
+            // to ensure "epochManager" is required (not null)
+            if (epochManager == null)
+            {
+                throw new ArgumentNullException("epochManager is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
+            }
+            this.EpochManager = epochManager;
+            // to ensure "clock" is required (not null)
+            if (clock == null)
+            {
+                throw new ArgumentNullException("clock is a required property for GatewayInformationResponseAllOfWellKnownAddresses and cannot be null");
+            }
+            this.Clock = clock;
             // to ensure "ecdsaSecp256k1" is required (not null)
             if (ecdsaSecp256k1 == null)
             {
@@ -157,6 +171,20 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public string Faucet { get; set; }
 
         /// <summary>
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "epoch_manager", IsRequired = true, EmitDefaultValue = true)]
+        public string EpochManager { get; set; }
+
+        /// <summary>
+        /// The Bech32m-encoded human readable version of the entity&#39;s global address.
+        /// </summary>
+        /// <value>The Bech32m-encoded human readable version of the entity&#39;s global address.</value>
+        [DataMember(Name = "clock", IsRequired = true, EmitDefaultValue = true)]
+        public string Clock { get; set; }
+
+        /// <summary>
         /// The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.
         /// </summary>
         /// <value>The Bech32m-encoded human readable version of the resource (fungible, non-fungible) global address.</value>
@@ -187,6 +215,8 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("class GatewayInformationResponseAllOfWellKnownAddresses {\n");
             sb.Append("  AccountPackage: ").Append(AccountPackage).Append("\n");
             sb.Append("  Faucet: ").Append(Faucet).Append("\n");
+            sb.Append("  EpochManager: ").Append(EpochManager).Append("\n");
+            sb.Append("  Clock: ").Append(Clock).Append("\n");
             sb.Append("  EcdsaSecp256k1: ").Append(EcdsaSecp256k1).Append("\n");
             sb.Append("  EddsaEd25519: ").Append(EddsaEd25519).Append("\n");
             sb.Append("  Xrd: ").Append(Xrd).Append("\n");
@@ -236,6 +266,16 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     this.Faucet.Equals(input.Faucet))
                 ) && 
                 (
+                    this.EpochManager == input.EpochManager ||
+                    (this.EpochManager != null &&
+                    this.EpochManager.Equals(input.EpochManager))
+                ) && 
+                (
+                    this.Clock == input.Clock ||
+                    (this.Clock != null &&
+                    this.Clock.Equals(input.Clock))
+                ) && 
+                (
                     this.EcdsaSecp256k1 == input.EcdsaSecp256k1 ||
                     (this.EcdsaSecp256k1 != null &&
                     this.EcdsaSecp256k1.Equals(input.EcdsaSecp256k1))
@@ -268,6 +308,14 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 if (this.Faucet != null)
                 {
                     hashCode = (hashCode * 59) + this.Faucet.GetHashCode();
+                }
+                if (this.EpochManager != null)
+                {
+                    hashCode = (hashCode * 59) + this.EpochManager.GetHashCode();
+                }
+                if (this.Clock != null)
+                {
+                    hashCode = (hashCode * 59) + this.Clock.GetHashCode();
                 }
                 if (this.EcdsaSecp256k1 != null)
                 {

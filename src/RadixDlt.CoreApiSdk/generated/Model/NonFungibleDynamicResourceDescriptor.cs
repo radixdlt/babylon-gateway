@@ -111,8 +111,8 @@ namespace RadixDlt.CoreApiSdk.Model
         /// </summary>
         /// <param name="type">type (required).</param>
         /// <param name="resourceAddress">The Bech32m-encoded human readable version of the resource address (required).</param>
-        /// <param name="nonFungibleIdHex">The hex-encoded bytes of a non-fungible id (required).</param>
-        public NonFungibleDynamicResourceDescriptor(DynamicResourceDescriptorType type = default(DynamicResourceDescriptorType), string resourceAddress = default(string), string nonFungibleIdHex = default(string))
+        /// <param name="nonFungibleId">nonFungibleId (required).</param>
+        public NonFungibleDynamicResourceDescriptor(DynamicResourceDescriptorType type = default(DynamicResourceDescriptorType), string resourceAddress = default(string), NonFungibleId nonFungibleId = default(NonFungibleId))
         {
             this.Type = type;
             // to ensure "resourceAddress" is required (not null)
@@ -121,12 +121,12 @@ namespace RadixDlt.CoreApiSdk.Model
                 throw new ArgumentNullException("resourceAddress is a required property for NonFungibleDynamicResourceDescriptor and cannot be null");
             }
             this.ResourceAddress = resourceAddress;
-            // to ensure "nonFungibleIdHex" is required (not null)
-            if (nonFungibleIdHex == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleIdHex is a required property for NonFungibleDynamicResourceDescriptor and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleDynamicResourceDescriptor and cannot be null");
             }
-            this.NonFungibleIdHex = nonFungibleIdHex;
+            this.NonFungibleId = nonFungibleId;
         }
 
         /// <summary>
@@ -137,11 +137,10 @@ namespace RadixDlt.CoreApiSdk.Model
         public string ResourceAddress { get; set; }
 
         /// <summary>
-        /// The hex-encoded bytes of a non-fungible id
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        /// <value>The hex-encoded bytes of a non-fungible id</value>
-        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleIdHex { get; set; }
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleId NonFungibleId { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -153,7 +152,7 @@ namespace RadixDlt.CoreApiSdk.Model
             sb.Append("class NonFungibleDynamicResourceDescriptor {\n");
             sb.Append("  Type: ").Append(Type).Append("\n");
             sb.Append("  ResourceAddress: ").Append(ResourceAddress).Append("\n");
-            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -199,9 +198,9 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.ResourceAddress.Equals(input.ResourceAddress))
                 ) && 
                 (
-                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
-                    (this.NonFungibleIdHex != null &&
-                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 );
         }
 
@@ -219,9 +218,9 @@ namespace RadixDlt.CoreApiSdk.Model
                 {
                     hashCode = (hashCode * 59) + this.ResourceAddress.GetHashCode();
                 }
-                if (this.NonFungibleIdHex != null)
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
                 return hashCode;
             }

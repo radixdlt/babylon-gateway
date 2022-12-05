@@ -110,40 +110,39 @@ namespace RadixDlt.CoreApiSdk.Model
         /// Initializes a new instance of the <see cref="NonFungibleStoreEntrySubstate" /> class.
         /// </summary>
         /// <param name="substateType">substateType (required).</param>
-        /// <param name="nonFungibleIdHex">The hex-encoded bytes of its non-fungible id (required).</param>
-        /// <param name="isDeleted">isDeleted (required).</param>
+        /// <param name="nonFungibleId">nonFungibleId (required).</param>
         /// <param name="nonFungibleData">nonFungibleData.</param>
-        public NonFungibleStoreEntrySubstate(SubstateType substateType = default(SubstateType), string nonFungibleIdHex = default(string), bool isDeleted = default(bool), NonFungibleData nonFungibleData = default(NonFungibleData))
+        /// <param name="isDeleted">isDeleted (required).</param>
+        public NonFungibleStoreEntrySubstate(SubstateType substateType = default(SubstateType), NonFungibleId nonFungibleId = default(NonFungibleId), NonFungibleData nonFungibleData = default(NonFungibleData), bool isDeleted = default(bool))
         {
             this.SubstateType = substateType;
-            // to ensure "nonFungibleIdHex" is required (not null)
-            if (nonFungibleIdHex == null)
+            // to ensure "nonFungibleId" is required (not null)
+            if (nonFungibleId == null)
             {
-                throw new ArgumentNullException("nonFungibleIdHex is a required property for NonFungibleStoreEntrySubstate and cannot be null");
+                throw new ArgumentNullException("nonFungibleId is a required property for NonFungibleStoreEntrySubstate and cannot be null");
             }
-            this.NonFungibleIdHex = nonFungibleIdHex;
+            this.NonFungibleId = nonFungibleId;
             this.IsDeleted = isDeleted;
             this.NonFungibleData = nonFungibleData;
         }
 
         /// <summary>
-        /// The hex-encoded bytes of its non-fungible id
+        /// Gets or Sets NonFungibleId
         /// </summary>
-        /// <value>The hex-encoded bytes of its non-fungible id</value>
-        [DataMember(Name = "non_fungible_id_hex", IsRequired = true, EmitDefaultValue = true)]
-        public string NonFungibleIdHex { get; set; }
-
-        /// <summary>
-        /// Gets or Sets IsDeleted
-        /// </summary>
-        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
-        public bool IsDeleted { get; set; }
+        [DataMember(Name = "non_fungible_id", IsRequired = true, EmitDefaultValue = true)]
+        public NonFungibleId NonFungibleId { get; set; }
 
         /// <summary>
         /// Gets or Sets NonFungibleData
         /// </summary>
         [DataMember(Name = "non_fungible_data", EmitDefaultValue = true)]
         public NonFungibleData NonFungibleData { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsDeleted
+        /// </summary>
+        [DataMember(Name = "is_deleted", IsRequired = true, EmitDefaultValue = true)]
+        public bool IsDeleted { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -154,9 +153,9 @@ namespace RadixDlt.CoreApiSdk.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class NonFungibleStoreEntrySubstate {\n");
             sb.Append("  SubstateType: ").Append(SubstateType).Append("\n");
-            sb.Append("  NonFungibleIdHex: ").Append(NonFungibleIdHex).Append("\n");
-            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
+            sb.Append("  NonFungibleId: ").Append(NonFungibleId).Append("\n");
             sb.Append("  NonFungibleData: ").Append(NonFungibleData).Append("\n");
+            sb.Append("  IsDeleted: ").Append(IsDeleted).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -197,18 +196,18 @@ namespace RadixDlt.CoreApiSdk.Model
                     this.SubstateType.Equals(input.SubstateType)
                 ) && 
                 (
-                    this.NonFungibleIdHex == input.NonFungibleIdHex ||
-                    (this.NonFungibleIdHex != null &&
-                    this.NonFungibleIdHex.Equals(input.NonFungibleIdHex))
-                ) && 
-                (
-                    this.IsDeleted == input.IsDeleted ||
-                    this.IsDeleted.Equals(input.IsDeleted)
+                    this.NonFungibleId == input.NonFungibleId ||
+                    (this.NonFungibleId != null &&
+                    this.NonFungibleId.Equals(input.NonFungibleId))
                 ) && 
                 (
                     this.NonFungibleData == input.NonFungibleData ||
                     (this.NonFungibleData != null &&
                     this.NonFungibleData.Equals(input.NonFungibleData))
+                ) && 
+                (
+                    this.IsDeleted == input.IsDeleted ||
+                    this.IsDeleted.Equals(input.IsDeleted)
                 );
         }
 
@@ -222,15 +221,15 @@ namespace RadixDlt.CoreApiSdk.Model
             {
                 int hashCode = 41;
                 hashCode = (hashCode * 59) + this.SubstateType.GetHashCode();
-                if (this.NonFungibleIdHex != null)
+                if (this.NonFungibleId != null)
                 {
-                    hashCode = (hashCode * 59) + this.NonFungibleIdHex.GetHashCode();
+                    hashCode = (hashCode * 59) + this.NonFungibleId.GetHashCode();
                 }
-                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 if (this.NonFungibleData != null)
                 {
                     hashCode = (hashCode * 59) + this.NonFungibleData.GetHashCode();
                 }
+                hashCode = (hashCode * 59) + this.IsDeleted.GetHashCode();
                 return hashCode;
             }
         }
