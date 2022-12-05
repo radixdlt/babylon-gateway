@@ -119,8 +119,7 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
         /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
         /// <param name="nonFungibleIdType">nonFungibleIdType (required).</param>
-        /// <param name="nonFungibleIds">nonFungibleIds (required).</param>
-        public EntityDetailsResponseNonFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType), EntityDetailsResponseNonFungibleResourceDetailsIds nonFungibleIds = default(EntityDetailsResponseNonFungibleResourceDetailsIds))
+        public EntityDetailsResponseNonFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), NonFungibleIdType nonFungibleIdType = default(NonFungibleIdType))
         {
             this.Discriminator = discriminator;
             // to ensure "accessRulesChain" is required (not null)
@@ -136,12 +135,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             }
             this.VaultAccessRulesChain = vaultAccessRulesChain;
             this.NonFungibleIdType = nonFungibleIdType;
-            // to ensure "nonFungibleIds" is required (not null)
-            if (nonFungibleIds == null)
-            {
-                throw new ArgumentNullException("nonFungibleIds is a required property for EntityDetailsResponseNonFungibleResourceDetails and cannot be null");
-            }
-            this.NonFungibleIds = nonFungibleIds;
         }
 
         /// <summary>
@@ -157,12 +150,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public Object VaultAccessRulesChain { get; set; }
 
         /// <summary>
-        /// Gets or Sets NonFungibleIds
-        /// </summary>
-        [DataMember(Name = "non_fungible_ids", IsRequired = true, EmitDefaultValue = true)]
-        public EntityDetailsResponseNonFungibleResourceDetailsIds NonFungibleIds { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -174,7 +161,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
             sb.Append("  AccessRulesChain: ").Append(AccessRulesChain).Append("\n");
             sb.Append("  VaultAccessRulesChain: ").Append(VaultAccessRulesChain).Append("\n");
             sb.Append("  NonFungibleIdType: ").Append(NonFungibleIdType).Append("\n");
-            sb.Append("  NonFungibleIds: ").Append(NonFungibleIds).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -227,11 +213,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                 (
                     this.NonFungibleIdType == input.NonFungibleIdType ||
                     this.NonFungibleIdType.Equals(input.NonFungibleIdType)
-                ) && 
-                (
-                    this.NonFungibleIds == input.NonFungibleIds ||
-                    (this.NonFungibleIds != null &&
-                    this.NonFungibleIds.Equals(input.NonFungibleIds))
                 );
         }
 
@@ -254,10 +235,6 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
                     hashCode = (hashCode * 59) + this.VaultAccessRulesChain.GetHashCode();
                 }
                 hashCode = (hashCode * 59) + this.NonFungibleIdType.GetHashCode();
-                if (this.NonFungibleIds != null)
-                {
-                    hashCode = (hashCode * 59) + this.NonFungibleIds.GetHashCode();
-                }
                 return hashCode;
             }
         }

@@ -984,7 +984,6 @@ components:
         - access_rules_chain
         - vault_access_rules_chain
         - non_fungible_id_type
-        - non_fungible_ids
       properties:
         discriminator:
           $ref: "#/components/schemas/EntityDetailsResponseDetailsType"
@@ -994,32 +993,6 @@ components:
           type: object
         non_fungible_id_type:
           $ref: "#/components/schemas/NonFungibleIdType"
-        non_fungible_ids:
-          $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetailsIds"
-    EntityDetailsResponseNonFungibleResourceDetailsIds:
-      allOf:
-        - $ref: "#/components/schemas/ResultSetCursorMixin"
-        - type: object
-          required:
-            - items
-          properties:
-            items:
-              type: array
-              items:
-                $ref: "#/components/schemas/EntityDetailsResponseNonFungibleResourceDetailsIdsItem"
-    EntityDetailsResponseNonFungibleResourceDetailsIdsItem:
-      type: object
-      required:
-        - id
-      properties:
-        non_fungible_id_type:
-          $ref: "#/components/schemas/NonFungibleIdType"
-        non_fungible_id:
-          type: string
-        immutable_data_hex:
-          type: string
-        mutable_data_hex:
-          type: string
     EntityDetailsResponsePackageDetails:
       type: object
       required:

@@ -63,7 +63,6 @@
  */
 
 using RadixDlt.NetworkGateway.Abstractions.Addressing;
-using RadixDlt.NetworkGateway.Abstractions.Extensions;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,12 +75,12 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
     private const int DefaultPageLimit = 10; // TODO make it configurable
 
     private readonly ILedgerStateQuerier _ledgerStateQuerier;
-    private readonly INonFungibleStateQuerier _nonFungibleStateQuerier;
+    private readonly IEntityStateQuerier _entityStateQuerier;
 
-    public DefaultNonFungibleHandler(ILedgerStateQuerier ledgerStateQuerier, INonFungibleStateQuerier nonFungibleStateQuerier)
+    public DefaultNonFungibleHandler(ILedgerStateQuerier ledgerStateQuerier, IEntityStateQuerier entityStateQuerier)
     {
         _ledgerStateQuerier = ledgerStateQuerier;
-        _nonFungibleStateQuerier = nonFungibleStateQuerier;
+        _entityStateQuerier = entityStateQuerier;
     }
 
     public async Task<GatewayModel.NonFungibleIdsResponse> Ids(GatewayModel.NonFungibleIdsRequest request, CancellationToken token = default)
@@ -90,14 +89,13 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
         var cursor = GatewayModel.NonFungibleIdsRequestCursor.FromCursorString(request.Cursor);
-        var pageRequest = new INonFungibleStateQuerier.PageRequest(
+        var pageRequest = new IEntityStateQuerier.PageRequest(
             Address: address,
-            StateVersion: cursor?.StateVersion ?? ledgerState.StateVersion,
             Offset: cursor?.Offset ?? 0,
             Limit: request.Limit ?? DefaultPageLimit
         );
 
-        return await _nonFungibleStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);
+        return await _entityStateQuerier.NonFungibleIds(pageRequest, ledgerState, token);
     }
 
     public async Task<GatewayModel.NonFungibleDataResponse> Data(GatewayModel.NonFungibleDataRequest request, CancellationToken token = default)
@@ -105,6 +103,6 @@ internal class DefaultNonFungibleHandler : INonFungibleHandler
         var address = RadixAddressCodec.Decode(request.Address);
         var ledgerState = await _ledgerStateQuerier.GetValidLedgerStateForReadRequest(request.AtStateIdentifier, token);
 
-        return await _nonFungibleStateQuerier.NonFungibleIdData(address, request.NonFungibleId, ledgerState, token);
+        return await _entityStateQuerier.NonFungibleIdData(address, request.NonFungibleId, ledgerState, token);
     }
 }
