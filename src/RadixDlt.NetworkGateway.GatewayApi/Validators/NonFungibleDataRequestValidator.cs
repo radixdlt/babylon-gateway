@@ -63,6 +63,8 @@
  */
 
 using FluentValidation;
+using Microsoft.Extensions.Options;
+using RadixDlt.NetworkGateway.GatewayApi.Configuration;
 using RadixDlt.NetworkGateway.GatewayApi.Services;
 
 namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
@@ -71,7 +73,7 @@ using GatewayModel = RadixDlt.NetworkGateway.GatewayApiSdk.Model;
 
 internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.NonFungibleDataRequest>
 {
-    public NonFungibleDataRequestValidator(PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public NonFungibleDataRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
         RuleFor(x => x.Address)
             .NotEmpty()
@@ -86,7 +88,7 @@ internal class NonFungibleDataRequestValidator : AbstractValidator<GatewayModel.
         RuleFor(x => x.Cursor);
 
         RuleFor(x => x.Limit)
-            .GreaterThan(0);
-        // TODO .LessThanOrEqualTo(endpointOptions.MaxPageSize);
+            .GreaterThan(0)
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }

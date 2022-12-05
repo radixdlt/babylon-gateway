@@ -71,12 +71,8 @@ namespace RadixDlt.NetworkGateway.GatewayApi.Validators;
 
 internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayModel.TransactionRecentRequest>
 {
-    public RecentTransactionsRequestValidator(
-        IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot,
-        PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
+    public RecentTransactionsRequestValidator(IOptionsSnapshot<EndpointOptions> endpointOptionsSnapshot, PartialLedgerStateIdentifierValidator partialLedgerStateIdentifierValidator)
     {
-        var endpointOptions = endpointOptionsSnapshot.Value;
-
         RuleFor(x => x.AtStateIdentifier)
             .SetValidator(partialLedgerStateIdentifierValidator);
 
@@ -87,6 +83,6 @@ internal class RecentTransactionsRequestValidator : AbstractValidator<GatewayMod
 
         RuleFor(x => x.Limit)
             .GreaterThan(0)
-            .LessThanOrEqualTo(endpointOptions.MaxPageSize);
+            .LessThanOrEqualTo(endpointOptionsSnapshot.Value.MaxPageSize);
     }
 }
