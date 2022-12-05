@@ -127,6 +127,8 @@ internal class EntityStateQuerier : IEntityStateQuerier
         {
             case FungibleResourceManagerEntity frme:
             {
+                // TODO refactor so that we just just one query (reduce number of network roundtrips)
+
                 var supplyHistory = await _dbContext.FungibleResourceSupplyHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.ResourceEntityId == frme.Id)
                     .OrderByDescending(e => e.FromStateVersion)
@@ -142,16 +144,14 @@ internal class EntityStateQuerier : IEntityStateQuerier
                     .OrderByDescending(e => e.FromStateVersion)
                     .FirstAsync(token);
 
-                var tokenAddress = entity.BuildHrpGlobalAddress(_networkConfigurationProvider.GetHrpDefinition());
-
                 details = new GatewayModel.EntityDetailsResponseDetails(new GatewayModel.EntityDetailsResponseFungibleResourceDetails(
                     discriminator: GatewayModel.EntityDetailsResponseDetailsType.FungibleResource,
                     accessRulesChain: new JRaw(accessRulesChain.AccessRulesChain),
                     vaultAccessRulesChain: new JRaw(vaultAccessRulesChain.AccessRulesChain),
                     divisibility: frme.Divisibility,
-                    totalSupply: new GatewayModel.TokenAmount(supplyHistory.TotalSupply.ToString(), tokenAddress),
-                    totalMinted: new GatewayModel.TokenAmount(supplyHistory.TotalMinted.ToString(), tokenAddress),
-                    totalBurnt: new GatewayModel.TokenAmount(supplyHistory.TotalBurnt.ToString(), tokenAddress)));
+                    totalSupply: supplyHistory.TotalSupply.ToString(),
+                    totalMinted: supplyHistory.TotalMinted.ToString(),
+                    totalBurnt: supplyHistory.TotalBurnt.ToString()));
 
                 break;
             }
@@ -184,6 +184,8 @@ OFFSET @offset LIMIT @limit",
                         limit = DefaultResourceLimit,
                     },
                     cancellationToken: token));
+
+                // TODO refactor so that we just just one query (reduce number of network roundtrips)
 
                 var accessRulesChain = await _dbContext.EntityAccessRulesLayersHistory
                     .Where(e => e.FromStateVersion <= ledgerState.StateVersion && e.EntityId == nfrme.Id && e.Subtype == AccessRulesChainSubtype.None)

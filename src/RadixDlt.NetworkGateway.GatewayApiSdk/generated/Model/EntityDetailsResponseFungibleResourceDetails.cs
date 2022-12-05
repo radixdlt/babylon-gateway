@@ -113,10 +113,10 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         /// <param name="accessRulesChain">accessRulesChain (required).</param>
         /// <param name="vaultAccessRulesChain">vaultAccessRulesChain (required).</param>
         /// <param name="divisibility">divisibility (required).</param>
-        /// <param name="totalSupply">totalSupply (required).</param>
-        /// <param name="totalMinted">totalMinted (required).</param>
-        /// <param name="totalBurnt">totalBurnt (required).</param>
-        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), TokenAmount totalSupply = default(TokenAmount), TokenAmount totalMinted = default(TokenAmount), TokenAmount totalBurnt = default(TokenAmount))
+        /// <param name="totalSupply">The string-encoded decimal representing the amount (required).</param>
+        /// <param name="totalMinted">The string-encoded decimal representing the amount (required).</param>
+        /// <param name="totalBurnt">The string-encoded decimal representing the amount (required).</param>
+        public EntityDetailsResponseFungibleResourceDetails(EntityDetailsResponseDetailsType discriminator = default(EntityDetailsResponseDetailsType), Object accessRulesChain = default(Object), Object vaultAccessRulesChain = default(Object), int divisibility = default(int), string totalSupply = default(string), string totalMinted = default(string), string totalBurnt = default(string))
         {
             this.Discriminator = discriminator;
             // to ensure "accessRulesChain" is required (not null)
@@ -171,22 +171,25 @@ namespace RadixDlt.NetworkGateway.GatewayApiSdk.Model
         public int Divisibility { get; set; }
 
         /// <summary>
-        /// Gets or Sets TotalSupply
+        /// The string-encoded decimal representing the amount
         /// </summary>
+        /// <value>The string-encoded decimal representing the amount</value>
         [DataMember(Name = "total_supply", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount TotalSupply { get; set; }
+        public string TotalSupply { get; set; }
 
         /// <summary>
-        /// Gets or Sets TotalMinted
+        /// The string-encoded decimal representing the amount
         /// </summary>
+        /// <value>The string-encoded decimal representing the amount</value>
         [DataMember(Name = "total_minted", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount TotalMinted { get; set; }
+        public string TotalMinted { get; set; }
 
         /// <summary>
-        /// Gets or Sets TotalBurnt
+        /// The string-encoded decimal representing the amount
         /// </summary>
+        /// <value>The string-encoded decimal representing the amount</value>
         [DataMember(Name = "total_burnt", IsRequired = true, EmitDefaultValue = true)]
-        public TokenAmount TotalBurnt { get; set; }
+        public string TotalBurnt { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
